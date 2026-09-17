@@ -1,0 +1,17 @@
+#ourCustomers {
+  background-color: yellow;
+}
+/* Meie lemmik AQUA*/
+h4 {
+  background-color: red;
+  border-style: dashed;
+}
+
+.awesomePurple {
+  background-color: blueviolet !important;
+}
+
+.awesomeGreen {
+  background-color: green !important;
+  border-style: solid;
+}
