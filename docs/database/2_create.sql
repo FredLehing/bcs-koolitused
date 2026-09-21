@@ -5,8 +5,22 @@
 -- Table: category
 CREATE TABLE category (
                           id serial  NOT NULL,
-                          name varchar(255)  NOT NULL,
+                          created_at timestamp  NOT NULL,
+                          updated_at timestamp  NOT NULL,
+                          created_by int  NOT NULL,
                           CONSTRAINT category_pk PRIMARY KEY (id)
+);
+
+-- Table: category_translation
+CREATE TABLE category_translation (
+                                     id serial  NOT NULL,
+                                     category_id int  NOT NULL,
+                                     language_id int  NOT NULL,
+                                     name varchar(255)  NOT NULL,
+                                     created_at timestamp  NOT NULL,
+                                     updated_at timestamp  NOT NULL,
+                                     CONSTRAINT category_translation_pk PRIMARY KEY (id),
+                                     CONSTRAINT category_translation_uq UNIQUE (category_id, language_id)
 );
 
 -- Table: certificate_template
@@ -14,6 +28,9 @@ CREATE TABLE certificate_template (
                                       id serial  NOT NULL,
                                       course_id int  NOT NULL,
                                       status varchar(3)  NOT NULL,
+                                      created_at timestamp  NOT NULL,
+                                      updated_at timestamp  NOT NULL,
+                                      created_by int  NOT NULL,
                                       CONSTRAINT certificate_template_pk PRIMARY KEY (id)
 );
 
@@ -31,6 +48,9 @@ CREATE TABLE course (
                         end_date date  NOT NULL,
                         notes text  NULL,
                         meeting_link varchar(255)  NULL,
+                        created_at timestamp  NOT NULL,
+                        updated_at timestamp  NOT NULL,
+                        created_by int  NOT NULL,
                         CONSTRAINT course_session_pk PRIMARY KEY (id)
 );
 
@@ -68,13 +88,36 @@ CREATE TABLE feedback (
                           id serial  NOT NULL
 );
 
+-- Table: language
+CREATE TABLE language (
+                         id serial  NOT NULL,
+                         code varchar(2)  NOT NULL,
+                         name varchar(50)  NOT NULL,
+                         CONSTRAINT language_pk PRIMARY KEY (id),
+                         CONSTRAINT language_code_uq UNIQUE (code)
+);
+
 -- Table: lecturer
 CREATE TABLE lecturer (
                           id serial  NOT NULL,
                           full_name varchar(255)  NOT NULL,
-                          bio text  NOT NULL,
                           photo bytea  NOT NULL,
+                          created_at timestamp  NOT NULL,
+                          updated_at timestamp  NOT NULL,
+                          created_by int  NOT NULL,
                           CONSTRAINT lecturer_pk PRIMARY KEY (id)
+);
+
+-- Table: lecturer_translation
+CREATE TABLE lecturer_translation (
+                                     id serial  NOT NULL,
+                                     lecturer_id int  NOT NULL,
+                                     language_id int  NOT NULL,
+                                     bio text  NOT NULL,
+                                     created_at timestamp  NOT NULL,
+                                     updated_at timestamp  NOT NULL,
+                                     CONSTRAINT lecturer_translation_pk PRIMARY KEY (id),
+                                     CONSTRAINT lecturer_translation_uq UNIQUE (lecturer_id, language_id)
 );
 
 -- Table: location
@@ -83,6 +126,9 @@ CREATE TABLE location (
                           name varchar(255)  NOT NULL,
                           address text  NOT NULL,
                           is_online boolean  NOT NULL,
+                          created_at timestamp  NOT NULL,
+                          updated_at timestamp  NOT NULL,
+                          created_by int  NOT NULL,
                           CONSTRAINT location_pk PRIMARY KEY (id)
 );
 
@@ -99,9 +145,22 @@ CREATE TABLE newsletter (
 -- Table: option
 CREATE TABLE option (
                         id serial  NOT NULL,
-                        name varchar(20)  NOT NULL,
                         type varchar(2)  NOT NULL,
+                        created_at timestamp  NOT NULL,
+                        updated_at timestamp  NOT NULL,
                         CONSTRAINT option_pk PRIMARY KEY (id)
+);
+
+-- Table: option_translation
+CREATE TABLE option_translation (
+                                   id serial  NOT NULL,
+                                   option_id int  NOT NULL,
+                                   language_id int  NOT NULL,
+                                   name varchar(20)  NOT NULL,
+                                   created_at timestamp  NOT NULL,
+                                   updated_at timestamp  NOT NULL,
+                                   CONSTRAINT option_translation_pk PRIMARY KEY (id),
+                                   CONSTRAINT option_translation_uq UNIQUE (option_id, language_id)
 );
 
 -- Table: participant
@@ -110,6 +169,7 @@ CREATE TABLE participant (
                              user_id int  NOT NULL,
                              name varchar(255)  NOT NULL,
                              profile_id int  NOT NULL,
+                             created_at timestamp  NOT NULL,
                              CONSTRAINT participant_pk PRIMARY KEY (id)
 );
 
@@ -118,6 +178,7 @@ CREATE TABLE participant_certificate (
                                          id serial  NOT NULL,
                                          file bytea  NOT NULL,
                                          participant_id int  NOT NULL,
+                                         created_at timestamp  NOT NULL,
                                          CONSTRAINT participant_certificate_pk PRIMARY KEY (id)
 );
 
@@ -128,6 +189,8 @@ CREATE TABLE profile (
                          last_name varchar(255)  NOT NULL,
                          phone varchar(20)  NOT NULL,
                          email varchar(255)  NOT NULL,
+                         created_at timestamp  NOT NULL,
+                         updated_at timestamp  NOT NULL,
                          CONSTRAINT person_pk PRIMARY KEY (id)
 );
 
@@ -153,15 +216,25 @@ CREATE TABLE training (
                           default_lecturer_id int  NULL,
                           category_id int  NOT NULL,
                           location_id int  NOT NULL,
-                          title varchar(255)  NOT NULL,
-                          short_description varchar(255)  NOT NULL,
-                          description text  NOT NULL,
-                          language char(3)  NOT NULL,
                           status int  NOT NULL,
                           created_at timestamp  NOT NULL,
                           updated_at timestamp  NOT NULL,
                           order_only boolean  NOT NULL,
                           CONSTRAINT course_pk PRIMARY KEY (id)
+);
+
+-- Table: training_translation
+CREATE TABLE training_translation (
+                                     id serial  NOT NULL,
+                                     training_id int  NOT NULL,
+                                     language_id int  NOT NULL,
+                                     title varchar(255)  NOT NULL,
+                                     short_description varchar(255)  NOT NULL,
+                                     description text  NOT NULL,
+                                     created_at timestamp  NOT NULL,
+                                     updated_at timestamp  NOT NULL,
+                                     CONSTRAINT training_translation_pk PRIMARY KEY (id),
+                                     CONSTRAINT training_translation_uq UNIQUE (training_id, language_id)
 );
 
 -- Table: user
@@ -171,6 +244,7 @@ CREATE TABLE "user" (
                         email varchar(255)  NOT NULL,
                         password varchar(255)  NOT NULL,
                         status char(1)  NOT NULL,
+                        created_at timestamp  NOT NULL,
                         CONSTRAINT user_pk PRIMARY KEY (id)
 );
 
@@ -201,6 +275,30 @@ ALTER TABLE enquiry ADD CONSTRAINT application_training
             INITIALLY IMMEDIATE
 ;
 
+-- Reference: category_created_by (table: category)
+ALTER TABLE category ADD CONSTRAINT category_created_by
+    FOREIGN KEY (created_by)
+        REFERENCES "user" (id)
+        NOT DEFERRABLE
+            INITIALLY IMMEDIATE
+;
+
+-- Reference: category_translation_category (table: category_translation)
+ALTER TABLE category_translation ADD CONSTRAINT category_translation_category
+    FOREIGN KEY (category_id)
+        REFERENCES category (id)
+        NOT DEFERRABLE
+            INITIALLY IMMEDIATE
+;
+
+-- Reference: category_translation_language (table: category_translation)
+ALTER TABLE category_translation ADD CONSTRAINT category_translation_language
+    FOREIGN KEY (language_id)
+        REFERENCES language (id)
+        NOT DEFERRABLE
+            INITIALLY IMMEDIATE
+;
+
 -- Reference: certificate_participant (table: participant_certificate)
 ALTER TABLE participant_certificate ADD CONSTRAINT certificate_participant
     FOREIGN KEY (participant_id)
@@ -217,10 +315,26 @@ ALTER TABLE certificate_template ADD CONSTRAINT certificate_template_course
             INITIALLY IMMEDIATE
 ;
 
+-- Reference: certificate_template_created_by (table: certificate_template)
+ALTER TABLE certificate_template ADD CONSTRAINT certificate_template_created_by
+    FOREIGN KEY (created_by)
+        REFERENCES "user" (id)
+        NOT DEFERRABLE
+            INITIALLY IMMEDIATE
+;
+
 -- Reference: course_category (table: training)
 ALTER TABLE training ADD CONSTRAINT course_category
     FOREIGN KEY (category_id)
         REFERENCES category (id)
+        NOT DEFERRABLE
+            INITIALLY IMMEDIATE
+;
+
+-- Reference: course_created_by (table: course)
+ALTER TABLE course ADD CONSTRAINT course_created_by
+    FOREIGN KEY (created_by)
+        REFERENCES "user" (id)
         NOT DEFERRABLE
             INITIALLY IMMEDIATE
 ;
@@ -289,6 +403,54 @@ ALTER TABLE enquiry ADD CONSTRAINT enquiry_profile
             INITIALLY IMMEDIATE
 ;
 
+-- Reference: lecturer_created_by (table: lecturer)
+ALTER TABLE lecturer ADD CONSTRAINT lecturer_created_by
+    FOREIGN KEY (created_by)
+        REFERENCES "user" (id)
+        NOT DEFERRABLE
+            INITIALLY IMMEDIATE
+;
+
+-- Reference: lecturer_translation_language (table: lecturer_translation)
+ALTER TABLE lecturer_translation ADD CONSTRAINT lecturer_translation_language
+    FOREIGN KEY (language_id)
+        REFERENCES language (id)
+        NOT DEFERRABLE
+            INITIALLY IMMEDIATE
+;
+
+-- Reference: lecturer_translation_lecturer (table: lecturer_translation)
+ALTER TABLE lecturer_translation ADD CONSTRAINT lecturer_translation_lecturer
+    FOREIGN KEY (lecturer_id)
+        REFERENCES lecturer (id)
+        NOT DEFERRABLE
+            INITIALLY IMMEDIATE
+;
+
+-- Reference: location_created_by (table: location)
+ALTER TABLE location ADD CONSTRAINT location_created_by
+    FOREIGN KEY (created_by)
+        REFERENCES "user" (id)
+        NOT DEFERRABLE
+            INITIALLY IMMEDIATE
+;
+
+-- Reference: option_translation_language (table: option_translation)
+ALTER TABLE option_translation ADD CONSTRAINT option_translation_language
+    FOREIGN KEY (language_id)
+        REFERENCES language (id)
+        NOT DEFERRABLE
+            INITIALLY IMMEDIATE
+;
+
+-- Reference: option_translation_option (table: option_translation)
+ALTER TABLE option_translation ADD CONSTRAINT option_translation_option
+    FOREIGN KEY (option_id)
+        REFERENCES option (id)
+        NOT DEFERRABLE
+            INITIALLY IMMEDIATE
+;
+
 -- Reference: participant_profile (table: participant)
 ALTER TABLE participant ADD CONSTRAINT participant_profile
     FOREIGN KEY (profile_id)
@@ -309,6 +471,22 @@ ALTER TABLE participant ADD CONSTRAINT participant_user
 ALTER TABLE training ADD CONSTRAINT training_lecturer
     FOREIGN KEY (default_lecturer_id)
         REFERENCES lecturer (id)
+        NOT DEFERRABLE
+            INITIALLY IMMEDIATE
+;
+
+-- Reference: training_translation_language (table: training_translation)
+ALTER TABLE training_translation ADD CONSTRAINT training_translation_language
+    FOREIGN KEY (language_id)
+        REFERENCES language (id)
+        NOT DEFERRABLE
+            INITIALLY IMMEDIATE
+;
+
+-- Reference: training_translation_training (table: training_translation)
+ALTER TABLE training_translation ADD CONSTRAINT training_translation_training
+    FOREIGN KEY (training_id)
+        REFERENCES training (id)
         NOT DEFERRABLE
             INITIALLY IMMEDIATE
 ;
