@@ -1,0 +1,12 @@
+{
+  "userId": 1,
+  "roleName": "admin",
+  "systemLanguages": [
+    {
+      "code": "et"
+    },
+    {
+      "code": "en"
+    }
+  ]
+}
