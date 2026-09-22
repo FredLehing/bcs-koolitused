@@ -88,8 +88,9 @@ message: "<backend message väli>"
 ```
 
 **Reeglid:**
-- Iga plokk (`API:`, DTO+body paar, `API teenuse lisainfo:`, iga veajuhtum) on eraldatud tühja reaga.
+- Iga plokk (`API:`, `Query parameetrid:`, DTO+body paar, `API teenuse lisainfo:`, iga veajuhtum) on eraldatud tühja reaga.
 - `API` rida — meetod + path muster, nii nagu spec (`stoplight_io_openAPI.json`) ja Jira taskid juba defineerivad. Path muster peab täpselt vastama JSON-ile (nt path variable `{locationId}`, mitte query param). Konkreetsed väärtused paistavad juba `Request body`/`Response` näidetest, seega `API` rida ei vaja eraldi näidis-URL'i.
+- **`Query parameetrid:`** — kasutatakse siis, kui endpoint võtab vastu query parameetreid (nt otsingu/filtreerimise/lehitsemise jaoks). Paikneb vahetult `API:` rea järel, enne request/response DTO+body plokke. Iga parameeter eraldi real kujul `<parameetriNimi> — <lühikirjeldus, sh tüüp kui pole ilmne ja valikuline/kohustuslik>`. Selle ploki eesmärk on hoida parameetrite tehniline kirjeldus eraldi äriloogika märkustest, et `API teenuse lisainfo` jääks lühikeseks. Kui endpoint query parameetreid ei kasuta (nt lihtne POST/PUT body-ga), jäta plokk täielikult ära.
 - **DTO nimi käib alati vahetult vastava body ploki kohal**, mitte eraldi ühtse `DTO:` reana üleval:
     - Kui operatsioon võtab sisse request body, kirjuta `<RequestDtoClassName.java>` real vahetult enne `Request body:` plokki.
     - Response DTO nimi (`<ResponseDtoClassName.java>`) käib vahetult enne `Response (200):` plokki.
@@ -102,6 +103,7 @@ message: "<backend message väli>"
     - `message:` — backend `message` välja täpne sisu, nii nagu see JSON response'is tuleb
     - Mitme veajuhtumi vahel jäta üks tühi rida
     - Kui vigu pole, kirjuta `Veateated: —`
+- **Massiivid JSON näidetes** — kui request/response body sisaldab massiivi (array), näita näidises alati ainult **üks element**, isegi kui reaalsuses tagastatakse/saadetakse mitu. Eesmärk on hoida näide lühikese ja loetavana — struktuur (väljad) on ka ühe elemendi pealt selge. See kehtib nii tipptaseme massiivide (nt terve response on massiiv) kui pesastatud massiivide kohta (nt DTO sees olev alammassiiv).
 
 ### Näide — POST /api/login
 

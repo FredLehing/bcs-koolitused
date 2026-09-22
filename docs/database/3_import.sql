@@ -75,9 +75,25 @@ INSERT INTO participant (id, user_id, name, profile_id, created_at) VALUES
     (1, 2, 'Anna Saar', 1, '2026-09-05 09:00:00');
 
 -- Table: training
-INSERT INTO training (id, user_id, default_lecturer_id, category_id, location_id, status, created_at, updated_at, order_only) VALUES
-    (1, 1, 1, 1, 1, 1, '2026-08-01 09:00:00', '2026-08-01 09:00:00', false),
-    (2, 1, 2, 3, 2, 1, '2026-08-05 10:00:00', '2026-08-05 10:00:00', false);
+INSERT INTO training (id, user_id, default_lecturer_id, category_id, training_language_id, location_id, status, created_at, updated_at, is_order_only, is_promoted) VALUES
+    (1, 1, 1, 1, 1, 1, 1, '2026-08-01 09:00:00', '2026-08-01 09:00:00', false, true),
+    (2, 1, 2, 3, 1, 2, 1, '2026-08-05 10:00:00', '2026-08-05 10:00:00', false, false);
+
+-- Table: funding_type
+INSERT INTO funding_type (id, code, created_at, updated_at, created_by) VALUES
+    (1, 'JOB_CENTRE', '2026-07-15 09:00:00', '2026-07-15 09:00:00', 1),
+    (2, 'EU_FUNDED', '2026-07-15 09:00:00', '2026-07-15 09:00:00', 1);
+
+-- Table: funding_type_translation
+INSERT INTO funding_type_translation (id, funding_type_id, language_id, name, created_at, updated_at) VALUES
+    (1, 1, 1, 'Töötukassa', '2026-07-15 09:00:00', '2026-07-15 09:00:00'),
+    (2, 1, 2, 'Job Centre', '2026-07-15 09:00:00', '2026-07-15 09:00:00'),
+    (3, 2, 1, 'EL rahastus', '2026-07-15 09:00:00', '2026-07-15 09:00:00'),
+    (4, 2, 2, 'EU Funded', '2026-07-15 09:00:00', '2026-07-15 09:00:00');
+
+-- Table: training_funding_type
+INSERT INTO training_funding_type (id, training_id, funding_type_id) VALUES
+    (1, 1, 1);
 
 -- Table: training_translation
 INSERT INTO training_translation (id, training_id, language_id, title, short_description, description, created_at, updated_at) VALUES

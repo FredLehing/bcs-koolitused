@@ -88,6 +88,29 @@ CREATE TABLE feedback (
                           id serial  NOT NULL
 );
 
+-- Table: funding_type
+CREATE TABLE funding_type (
+                              id serial  NOT NULL,
+                              code varchar(50)  NOT NULL,
+                              created_at timestamp  NOT NULL,
+                              updated_at timestamp  NOT NULL,
+                              created_by int  NOT NULL,
+                              CONSTRAINT funding_type_pk PRIMARY KEY (id),
+                              CONSTRAINT funding_type_code_uq UNIQUE (code)
+);
+
+-- Table: funding_type_translation
+CREATE TABLE funding_type_translation (
+                                          id serial  NOT NULL,
+                                          funding_type_id int  NOT NULL,
+                                          language_id int  NOT NULL,
+                                          name varchar(255)  NOT NULL,
+                                          created_at timestamp  NOT NULL,
+                                          updated_at timestamp  NOT NULL,
+                                          CONSTRAINT funding_type_translation_pk PRIMARY KEY (id),
+                                          CONSTRAINT funding_type_translation_uq UNIQUE (funding_type_id, language_id)
+);
+
 -- Table: language
 CREATE TABLE language (
                          id serial  NOT NULL,
@@ -215,12 +238,23 @@ CREATE TABLE training (
                           user_id int  NOT NULL,
                           default_lecturer_id int  NULL,
                           category_id int  NOT NULL,
+                          training_language_id int  NOT NULL,
                           location_id int  NOT NULL,
                           status int  NOT NULL,
                           created_at timestamp  NOT NULL,
                           updated_at timestamp  NOT NULL,
-                          order_only boolean  NOT NULL,
+                          is_order_only boolean  NOT NULL,
+                          is_promoted boolean  NOT NULL,
                           CONSTRAINT course_pk PRIMARY KEY (id)
+);
+
+-- Table: training_funding_type
+CREATE TABLE training_funding_type (
+                                       id serial  NOT NULL,
+                                       training_id int  NOT NULL,
+                                       funding_type_id int  NOT NULL,
+                                       CONSTRAINT training_funding_type_pk PRIMARY KEY (id),
+                                       CONSTRAINT training_funding_type_uq UNIQUE (training_id, funding_type_id)
 );
 
 -- Table: training_translation
@@ -403,6 +437,30 @@ ALTER TABLE enquiry ADD CONSTRAINT enquiry_profile
             INITIALLY IMMEDIATE
 ;
 
+-- Reference: funding_type_created_by (table: funding_type)
+ALTER TABLE funding_type ADD CONSTRAINT funding_type_created_by
+    FOREIGN KEY (created_by)
+        REFERENCES "user" (id)
+        NOT DEFERRABLE
+            INITIALLY IMMEDIATE
+;
+
+-- Reference: funding_type_translation_funding_type (table: funding_type_translation)
+ALTER TABLE funding_type_translation ADD CONSTRAINT funding_type_translation_funding_type
+    FOREIGN KEY (funding_type_id)
+        REFERENCES funding_type (id)
+        NOT DEFERRABLE
+            INITIALLY IMMEDIATE
+;
+
+-- Reference: funding_type_translation_language (table: funding_type_translation)
+ALTER TABLE funding_type_translation ADD CONSTRAINT funding_type_translation_language
+    FOREIGN KEY (language_id)
+        REFERENCES language (id)
+        NOT DEFERRABLE
+            INITIALLY IMMEDIATE
+;
+
 -- Reference: lecturer_created_by (table: lecturer)
 ALTER TABLE lecturer ADD CONSTRAINT lecturer_created_by
     FOREIGN KEY (created_by)
@@ -463,6 +521,30 @@ ALTER TABLE participant ADD CONSTRAINT participant_profile
 ALTER TABLE participant ADD CONSTRAINT participant_user
     FOREIGN KEY (user_id)
         REFERENCES "user" (id)
+        NOT DEFERRABLE
+            INITIALLY IMMEDIATE
+;
+
+-- Reference: training_funding_type_funding_type (table: training_funding_type)
+ALTER TABLE training_funding_type ADD CONSTRAINT training_funding_type_funding_type
+    FOREIGN KEY (funding_type_id)
+        REFERENCES funding_type (id)
+        NOT DEFERRABLE
+            INITIALLY IMMEDIATE
+;
+
+-- Reference: training_funding_type_training (table: training_funding_type)
+ALTER TABLE training_funding_type ADD CONSTRAINT training_funding_type_training
+    FOREIGN KEY (training_id)
+        REFERENCES training (id)
+        NOT DEFERRABLE
+            INITIALLY IMMEDIATE
+;
+
+-- Reference: training_language (table: training)
+ALTER TABLE training ADD CONSTRAINT training_language
+    FOREIGN KEY (training_language_id)
+        REFERENCES language (id)
         NOT DEFERRABLE
             INITIALLY IMMEDIATE
 ;
