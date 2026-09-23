@@ -8,6 +8,7 @@ public interface UserMapper {
 
     @Mapping(source = "id", target = "userId")
     @Mapping(source = "role.name", target = "roleName")
+    @Mapping(ignore = true, target = "systemLanguages")
     LoginResponse toLoginResponse(User user);
 
 }
