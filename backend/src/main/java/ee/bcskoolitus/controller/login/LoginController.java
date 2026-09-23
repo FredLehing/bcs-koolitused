@@ -1,4 +1,4 @@
-package ee.bcskoolitus.controller;
+package ee.bcskoolitus.controller.login;
 
 import ee.bcskoolitus.controller.login.dto.LoginRequest;
 import ee.bcskoolitus.controller.login.dto.LoginResponse;
@@ -34,7 +34,6 @@ public class LoginController {
                     content = @Content( schema = @Schema(implementation = ApiError.class))
             )
     })
-
     public LoginResponse loginUser(@RequestBody LoginRequest loginRequest) {
         return loginService.loginUser(loginRequest);
     }
