@@ -47,6 +47,7 @@ export default {
   },
   methods: {
     login() {
+      this.errorMessage = ''
       if (this.email === '' || this.password === '') {
         this.errorMessage = 'Täida kõik väljad'
       }
