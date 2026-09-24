@@ -1,6 +1,6 @@
 <template>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3 mb-3">
-    <RouterLink class="navbar-brand" to="/">Minu Projekt</RouterLink>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-light px-3 mb-3">
+    <RouterLink class="navbar-brand" to="/"></RouterLink>
     <button
       class="navbar-toggler"
       type="button"
@@ -13,6 +13,7 @@
       <div class="navbar-nav">
         <RouterLink class="nav-link" to="/">Home</RouterLink>
         <RouterLink class="nav-link" to="/test">Test</RouterLink>
+        <RouterLink class="nav-link" to="/login">Logi Sisse</RouterLink>
       </div>
     </div>
   </nav>
