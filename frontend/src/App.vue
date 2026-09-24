@@ -1,5 +1,5 @@
 <template>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-blue px-3 mb-3">
+  <nav class="navbar navbar-expand-lg navbar-light bg-white px-3 mb-3">
     <img src="@/assets/bcs-koolitus.svg" alt="svg" height="68" class="navbar-brand" to="/" />
     <button
       class="navbar-toggler"
@@ -11,16 +11,19 @@
     </button>
     <div class="collapse navbar-collapse justify-content-center" id="navMenu">
       <div class="navbar-nav">
-        <RouterLink class="nav-link" to="/">Home</RouterLink>
-        <RouterLink class="nav-link" to="/test">Test</RouterLink>
-        <RouterLink class="nav-link" to="/login">Logi Sisse</RouterLink>
+
+        <a class="nav-link" href="#">Koolitused</a>
+        <a class="nav-link" href="#">Teenused</a>
+        <a class="nav-link" href="#">Ettevõttest</a>
+        <a class="nav-link" href="#">Blogi</a>
+        <a class="nav-link" href="#">Kontakt</a>
+        <a class="nav-link" href="#">Tagasiside</a>
       </div>
     </div>
   </nav>
+<RouterView />
 
-  <RouterView />
 </template>
 
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
 </script>
