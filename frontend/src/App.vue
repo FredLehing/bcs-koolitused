@@ -11,7 +11,7 @@
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navMenu">
-        <div class="navbar-nav mx-auto">
+        <div class="navbar-nav mx-auto bg-primary-subtle rounded-pill px-3">
           <a class="nav-link" href="#">Koolitused</a>
           <a class="nav-link" href="#">Teenused</a>
 
