@@ -54,7 +54,7 @@ Query parameetrid (kõik valikulised):
 | `limit` | Lehekülje suurus |
 | `page` | Lehekülje number, alates 0-st |
 | `trainingLang` | Filtreerib õppekeele järgi (`et`/`en`) |
-| `translationLang` | Määrab tõlgitud väljade keele (`et`/`en`) |
+| `contentLang` | Määrab tõlgitud väljade keele (`et`/`en`) |
 
 `TrainingSummaryDto.java` — response (200):
 

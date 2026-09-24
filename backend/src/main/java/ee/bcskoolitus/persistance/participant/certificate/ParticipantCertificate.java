@@ -1,5 +1,6 @@
-package ee.bcskoolitus.persistance.participant;
+package ee.bcskoolitus.persistance.participant.certificate;
 
+import ee.bcskoolitus.persistance.participant.Participant;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;

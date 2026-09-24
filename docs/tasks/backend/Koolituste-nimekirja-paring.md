@@ -17,7 +17,7 @@ Kõik parameetrid on query parameetrid ja valikulised:
 | `limit` | int, valikuline | Lehekülje suurus (nt HomeView kutsub `limit=3`-ga) |
 | `page` | int, valikuline | Lehekülje number, loendus algab 0-st |
 | `trainingLang` | String (`et`/`en`), valikuline | Filtreerib koolitused õppekeele järgi (`training.training_language_id`) |
-| `translationLang` | String (`et`/`en`), valikuline | Määrab tõlgitud väljade (`title`/`shortDescription`/`categoryName`/`fundingTypeName`) keele |
+| `contentLang` | String (`et`/`en`), valikuline | Määrab tõlgitud väljade (`title`/`shortDescription`/`categoryName`/`fundingTypeName`) keele |
 
 Teenusel puudub request body.
 
@@ -70,7 +70,7 @@ Väljade selgitused:
 - `isOrderOnly` — pärineb veerust `training.is_order_only`.
 - `isPromoted` — pärineb veerust `training.is_promoted`.
 - `fundingTypes` — koolitusele määratud rahastustüüpide loend (`training_funding_type` kaudu). Koolitusel võib olla null, üks või mitu rahastustüüpi (näide: koolitusel id=2 pole ühtegi rahastustüüpi, seega tühi list).
-- `title`, `shortDescription`, `categoryName`, `fundingTypeName` — tõlgitud väljad, mille keele määrab `translationLang` parameeter.
+- `title`, `shortDescription`, `categoryName`, `fundingTypeName` — tõlgitud väljad, mille keele määrab `contentLang` parameeter.
 
 **Väli `startDate` ei kuulu vastuse hulka** — vt "Avatud küsimused".
 
@@ -197,7 +197,7 @@ Näidisandmed: training_id=1 on seotud ainult funding_type_id=1 kirjega (`traini
 
 ### language
 
-Koodiga (`et`/`en`) määratud keeled, mida kasutavad nii `trainingLang` kui `translationLang` parameetrid.
+Koodiga (`et`/`en`) määratud keeled, mida kasutavad nii `trainingLang` kui `contentLang` parameetrid.
 
 ```sql
 CREATE TABLE language (
@@ -225,9 +225,9 @@ Olematu `categoryId`/`fundingTypeId`/`trainingLang` väärtuse korral ei ole teg
 ## Vastuvõtu kriteeriumid
 
 - [ ] Endpoint `GET /api/trainings` on olemas ja tagastab `TrainingSummaryDto` struktuuriga vastuse
-- [ ] Kõik loetletud query parameetrid (`categoryId`, `fundingTypeId`, `limit`, `page`, `trainingLang`, `translationLang`) on valikulised ja toimivad kirjeldatud viisil
+- [ ] Kõik loetletud query parameetrid (`categoryId`, `fundingTypeId`, `limit`, `page`, `trainingLang`, `contentLang`) on valikulised ja toimivad kirjeldatud viisil
 - [ ] `page`/`totalPages`/`totalElements` kajastavad korrektselt kogu (filtreeritud) tulemushulka, mitte ainult tagastatud lehte
-- [ ] `title`, `shortDescription`, `categoryName`, `fundingTypeName` väljad on tõlgitud `translationLang` parameetri järgi
+- [ ] `title`, `shortDescription`, `categoryName`, `fundingTypeName` väljad on tõlgitud `contentLang` parameetri järgi
 - [ ] Koolitus, millel pole ühtegi rahastustüüpi, tagastab `fundingTypes` väljana tühja listi (mitte `null` ega viga)
 - [ ] Filtreerimine `categoryId`, `fundingTypeId` ja `trainingLang` järgi annab korrektse alamhulga andmebaasi näidisandmete põhjal
 - [ ] Kirjeldatud veaolukorrad (400 vigase parameetri korral, 500 ootamatu vea korral) on käsitletud

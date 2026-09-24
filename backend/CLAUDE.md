@@ -82,7 +82,7 @@ Tõlgitav sisu (nt kategooria nimi, koolituse pealkiri/kirjeldus, lektori CV) ho
 `training` tabelil on lisaks eraldi `training_language_id` veerg (viide `language` tabelile) — see väljendab koolituse **õppekeelt** (millises keeles koolitust läbi viiakse), mitte tõlget. See on äriatribuut, mitte tõlke valik, ja ei tohi segi minna tõlketabelite `language_id`-ga.
 
 **Keele valik API-s** — keel tuleb sisse alati **request query parameetrina**, mitte `Accept-Language` HTTP headerina ega path muutujana (valik tehtud teadlikult, kuna osa teenuseid keelt üldse ei puuduta — parameeter lisatakse ainult neisse endpointidesse, mis seda vajavad). Kaks eraldi, mitte omavahel segatavat parameetrit:
-- `translationLang` (nt `?translationLang=et`) — määrab, millises keeles tõlgitud tekstiväljad (nt `title`, `shortDescription`, `categoryName`) vastuses tagastatakse (loetakse vastavast `*_translation` tabelist).
+- `contentLang` (nt `?translationLang=et`) — määrab, millises keeles tõlgitud tekstiväljad (nt `title`, `shortDescription`, `categoryName`) vastuses tagastatakse (loetakse vastavast `*_translation` tabelist).
 - `trainingLang` (nt `?trainingLang=et`) — filtreerib koolitusi nende õppekeele järgi (`training.training_language_id`).
 
 Näide selle mustri rakendusest: vt `docs/balsamic/notes/HomeView-markmed.md` (`GET /api/trainings`, `GET /api/categories`).

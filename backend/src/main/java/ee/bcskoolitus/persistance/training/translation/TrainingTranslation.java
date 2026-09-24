@@ -1,6 +1,7 @@
-package ee.bcskoolitus.persistance.training;
+package ee.bcskoolitus.persistance.training.translation;
 
 import ee.bcskoolitus.persistance.language.Language;
+import ee.bcskoolitus.persistance.training.Training;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;

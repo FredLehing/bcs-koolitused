@@ -1,4 +1,4 @@
-package ee.bcskoolitus.persistance.certificate;
+package ee.bcskoolitus.persistance.certificatetemplate;
 
 import ee.bcskoolitus.persistance.user.User;
 import jakarta.persistence.*;

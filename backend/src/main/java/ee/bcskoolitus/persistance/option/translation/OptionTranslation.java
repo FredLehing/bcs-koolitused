@@ -1,5 +1,7 @@
-package ee.bcskoolitus.persistance.course;
+package ee.bcskoolitus.persistance.option.translation;
 
+import ee.bcskoolitus.persistance.language.Language;
+import ee.bcskoolitus.persistance.option.Option;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -11,8 +13,8 @@ import java.time.Instant;
 @Getter
 @Setter
 @Entity
-@Table(name = "course_participant", schema = "bcs_koolitused")
-public class CourseParticipant {
+@Table(name = "option_translation", schema = "bcs_koolitused")
+public class OptionTranslation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -20,25 +22,18 @@ public class CourseParticipant {
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "course_id", nullable = false)
-    private Course course;
+    @JoinColumn(name = "option_id", nullable = false)
+    private Option option;
 
     @NotNull
-    @Column(name = "notes", nullable = false, length = Integer.MAX_VALUE)
-    private String notes;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "language_id", nullable = false)
+    private Language language;
 
+    @Size(max = 20)
     @NotNull
-    @Column(name = "has_paid", nullable = false)
-    private Boolean hasPaid;
-
-    @NotNull
-    @Column(name = "requires_laptop", nullable = false)
-    private Boolean requiresLaptop;
-
-    @Size(max = 3)
-    @NotNull
-    @Column(name = "status", nullable = false, length = 3)
-    private String status;
+    @Column(name = "name", nullable = false, length = 20)
+    private String name;
 
     @NotNull
     @Column(name = "created_at", nullable = false)
