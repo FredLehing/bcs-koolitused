@@ -123,7 +123,7 @@ training   →   Page<Training>  →   mapper + metainfo   →   TrainingSummary
  tabel          (entity'd)         kokku panemine             (ainult DTO-d)
 ```
 
-Taski `docs/tasks/backend/Koolituste-nimekirja-paring.md` järgi peab vastus välja nägema nii:
+Taski `docs/tasks/backend/GET-api-trainings.md` järgi peab vastus välja nägema nii:
 
 ```json
 {

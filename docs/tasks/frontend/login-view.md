@@ -4,9 +4,9 @@
 
 **Roll:** Public/Admin/Participant (pole sisse logitud)
 
-**Vaste balsamic mockupis:** "BCS disain" (Balsamiq Cloud), vaade "LoginView", lehekülg 1/1 (vt lisatud pilt `Kasutaja-sisselogimine.png`)
+**Vaste mockupis:** "BCS disain" (Balsamiq Cloud), vaade "LoginView", lehekülg 1/1 (vt pilt `LoginView.png`)
 
-![Mockup](./Kasutaja-sisselogimine.png)
+![Mockup](../../mock-wireframe/pdf-images/LoginView.png)
 
 > **Märkus:** mockupi "Vaate märkmete" väljal `Frontend rada` on kirjas failitee `bcs-koolitus/frontend/src/views/home/LoginView.vue`, mitte Vue router'i rada. Route `/login` on tuletatud wireframe'i brauseri aadressiribalt (`https://bcskoolitus.ee/login`). Faili asukoht (`views/home/` alamkaust) on toodud jaotises "Komponendid ja failistruktuur".
 
@@ -16,7 +16,7 @@ Kasutaja, kes pole sisse logitud, avab päises nupu "Logi sisse" kaudu sisselogi
 
 Selle taski skoobist jäävad välja:
 - **Päis ja jalus** (menüü: BCS logo, Koolitused, Teenused, Ettevõtte → Lektorid, Blogi, Kontakt, Tagaside; nupud "Võta ühendust", "Logi sisse", "Registreeri"; jaluses Facebooki link, aadress "BCS Koolitus AS, Aia 7, Tallinn" ja lingid õiguslikele lehtedele). Need on kogu rakenduse ühised elemendid (`App.vue`/`navigation/`), mitte LoginView osa.
-- **Otsinguriba koos kategooriatega ja sektsioon "Kliendid meist osa"**. Need on nimetatud mockupi "Vaatega seotud lisainfos", kuid neid pole LoginView wireframe'il ning selle lehe API märkmetes pole `GET /api/trainings` ega `GET /api/categories` posti. Tõenäoliselt on see tekst kopeeritud HomeView märkmetest (vt `docs/balsamic/notes/HomeView-markmed.md`). **Täpsusta mockupis.**
+- **Otsinguriba koos kategooriatega ja sektsioon "Kliendid meist osa"**. Need on nimetatud mockupi "Vaatega seotud lisainfos", kuid neid pole LoginView wireframe'il ning selle lehe API märkmetes pole `GET /api/trainings` ega `GET /api/categories` posti. Tõenäoliselt on see tekst kopeeritud HomeView märkmetest (vt `docs/mock-wireframe/markmed/home-view-markmed.md`). **Täpsusta mockupis.**
 - **"Jäta mind meelde" ja "Unustasid salasõna?"**. Mockupil on need olemas, aga neil pole API märget ega käitumise kirjeldust (vt allpool).
 
 ## Kasutajaliidese elemendid
@@ -40,7 +40,7 @@ Selle taski skoobist jäävad välja:
    2. **Frontendi valideerimine:** kui Email või Parool on tühi, kuvatakse veateade "Täida kõik väljad" ja API kutset ei tehta. Backend tühje välju eraldi ei valideeri (`LoginRequest`-il pole `@NotNull`/`@NotBlank` annotatsioone), seega peab kontroll olema frontendis.
    3. Kui väljad on täidetud, saadetakse `POST /api/login` päring body'ga `{ email, password }`.
 3. **Edukas vastus (200):**
-   1. `userId`, `roleName` ja `systemLanguages` salvestatakse `sessionStorage`'isse. Sama muster on projekti märkmete näites (`docs/balsamic/notes/balsamiq-markmete-struktuur.md`). `systemLanguages` on massiiv, seega salvesta see `JSON.stringify` abil.
+   1. `userId`, `roleName` ja `systemLanguages` salvestatakse `sessionStorage`'isse. Sama muster on projekti märkmete näites (`docs/mock-wireframe/kokkulepped/mock-wireframe-markmete-struktuur.md`). `systemLanguages` on massiiv, seega salvesta see `JSON.stringify` abil.
    2. Kasutaja suunatakse avalehele `HomeView` (`/`, `homeRoute`), mis kuvatakse sisselogitud olekus. Suunamine on kõigi rollide jaoks sama.
    3. Päises peaks pärast sisselogimist nuppude "Logi sisse" ja "Registreeri" asemel olema sisselogitud kasutaja olek. See on päise/navigatsiooni teema ega kuulu selle taski skoopi (vt HomeView märkmed: "sisselogitud kasutajale peidetud").
 4. **Veavastus 403 `INCORRECT_CREDENTIALS`:** vormi kohal kuvatakse backendi vastuse `message` väli ("Vale email või parool"). Sisestatud e-mail jääb väljale alles.
@@ -100,7 +100,7 @@ Veavastuse kuju (`ApiError.java`):
 
 ## Komponendid ja failistruktuur
 
-Järgib `docs/frontend/projekti-struktuur.md` ja `docs/frontend/vue-komponendi-struktuur.md` konventsioone (Options API, `.then()/.catch()/.finally()` muster, `handle`-meetodid).
+Järgib `docs/structure/frontend-projekti-struktuur.md` ja `docs/structure/frontend-vue-komponendi-struktuur.md` konventsioone (Options API, `.then()/.catch()/.finally()` muster, `handle`-meetodid).
 
 | Fail | Staatus | Kirjeldus |
 |---|---|---|
