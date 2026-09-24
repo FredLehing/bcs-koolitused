@@ -105,7 +105,7 @@ public void meetodiNimi(SisendTüüp parameetriNimi) {
 
 ### Mida teha?
 
-Nüüd liigud service meetodisse. Sisse tulevad kuus valikulist parameetrit. Neist neli (`categoryId`, `fundingTypeId`, `trainingLang` ja `translationLang`) mõjutavad seda, **milliseid ridu** ja **mis keeles** pärida. Ülejäänud kaks (`limit` ja `page`) mõjutavad seda, **mitu rida ja millise lehe** saad tagasi.
+Nüüd liigud service meetodisse. Sisse tulevad kuus valikulist parameetrit. Neist neli (`categoryId`, `fundingTypeId`, `trainingLang` ja `contentLang`) mõjutavad seda, **milliseid ridu** ja **mis keeles** pärida. Ülejäänud kaks (`limit` ja `page`) mõjutavad seda, **mitu rida ja millise lehe** saad tagasi.
 
 ### Leheküljestamine
 
@@ -204,7 +204,7 @@ Täida kõik väljad. Seda, mis ei tule otse entiteedist, märgi `ignore = true`
 TagastatavDtoTüüp toDtoKlassiNimi(EntiteetTüüp entiteet);
 ```
 
-> **Mõtle:** Millised koolituse DTO väljad saad otse `training` entiteedist (ka seoste kaudu)? Millised sõltuvad `translationLang`-ist ja vajavad eraldi päringut?
+> **Mõtle:** Millised koolituse DTO väljad saad otse `training` entiteedist (ka seoste kaudu)? Millised sõltuvad `contentLang`-ist ja vajavad eraldi päringut?
 
 > **Väljad, mida entiteet ei kata** (`ignore = true`), täida service meetodis pärast mappimist. Iga täiendava päringu puhul kehtib sama muster: kas on olemas valmis meetod, kas tulemus võib puududa (`Optional`) ja **pane tulemus kohe muutujasse**.
 

@@ -1,6 +1,7 @@
-package ee.bcskoolitus.persistance.training;
+package ee.bcskoolitus.persistance.training.fundingtype;
 
-import ee.bcskoolitus.persistance.funding.FundingType;
+import ee.bcskoolitus.persistance.fundingtype.FundingType;
+import ee.bcskoolitus.persistance.training.Training;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;

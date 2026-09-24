@@ -1,8 +1,10 @@
-package ee.bcskoolitus.persistance.lecturer;
+package ee.bcskoolitus.persistance.fundingtype.translation;
 
+import ee.bcskoolitus.persistance.fundingtype.FundingType;
 import ee.bcskoolitus.persistance.language.Language;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,8 +13,8 @@ import java.time.Instant;
 @Getter
 @Setter
 @Entity
-@Table(name = "lecturer_translation", schema = "bcs_koolitused")
-public class LecturerTranslation {
+@Table(name = "funding_type_translation", schema = "bcs_koolitused")
+public class FundingTypeTranslation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -20,17 +22,18 @@ public class LecturerTranslation {
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "lecturer_id", nullable = false)
-    private Lecturer lecturer;
+    @JoinColumn(name = "funding_type_id", nullable = false)
+    private FundingType fundingType;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "language_id", nullable = false)
     private Language language;
 
+    @Size(max = 255)
     @NotNull
-    @Column(name = "bio", nullable = false, length = Integer.MAX_VALUE)
-    private String bio;
+    @Column(name = "name", nullable = false)
+    private String name;
 
     @NotNull
     @Column(name = "created_at", nullable = false)

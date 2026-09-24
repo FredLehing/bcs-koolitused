@@ -1,5 +1,6 @@
 package ee.bcskoolitus.controller.training;
 
+import ee.bcskoolitus.controller.training.dto.TrainingSummaryDto;
 import ee.bcskoolitus.infrastructure.error.ApiError;
 import ee.bcskoolitus.service.TrainingService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,14 +32,12 @@ public class TrainingController {
                     content = @Content( schema = @Schema(implementation = ApiError.class))
             )
     })
-    public void getTrainings(@RequestParam(required = false) Integer categoryId,
-                             @RequestParam(required = false) Integer fundingTypeId,
-                             @RequestParam(defaultValue = "5") Integer limit,
-                             @RequestParam(defaultValue = "0") Integer page,
-                             @RequestParam(required = false) String trainingLang,
-                             @RequestParam(required = false) String translationLang) {
-        trainingService.getTrainings(categoryId, fundingTypeId, limit, page, trainingLang,translationLang);
-
-
+    public TrainingSummaryDto findFilteredTrainings(@RequestParam Integer categoryId,
+                                      @RequestParam Integer fundingTypeId,
+                                      @RequestParam Integer limit,
+                                      @RequestParam Integer page,
+                                      @RequestParam String trainingLang,
+                                      @RequestParam String contentLang) {
+        return trainingService.findFilteredTrainings(categoryId, fundingTypeId, limit, page, trainingLang, contentLang);
     }
 }

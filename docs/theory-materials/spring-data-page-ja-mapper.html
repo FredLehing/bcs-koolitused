@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leheküljestamine Spring Data JPA-s: Page&lt;T&gt; ja MapStruct mapper – Algajatele</title>
+<style>
+:root {
+  --bg: #fafaf8;
+  --surface: #ffffff;
+  --text: #1f2328;
+  --muted: #59636e;
+  --border: #d8dee4;
+  --accent: #0b6bcb;
+  --code-bg: #f3f4f6;
+  --pre-bg: #1e2430;
+  --pre-text: #e6edf3;
+  --quote-bg: #fff8e5;
+  --quote-border: #d4a72c;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1216;
+    --surface: #161b22;
+    --text: #e6edf3;
+    --muted: #9da7b3;
+    --border: #30363d;
+    --accent: #58a6ff;
+    --code-bg: #262c36;
+    --pre-bg: #0b0e13;
+    --pre-text: #e6edf3;
+    --quote-bg: #2a2410;
+    --quote-border: #bb8009;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1216; --surface: #161b22; --text: #e6edf3; --muted: #9da7b3;
+  --border: #30363d; --accent: #58a6ff; --code-bg: #262c36; --pre-bg: #0b0e13;
+  --pre-text: #e6edf3; --quote-bg: #2a2410; --quote-border: #bb8009;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+main { max-width: 820px; margin: 0 auto; padding: 40px 16px 80px; }
+h1 { font-size: 2rem; line-height: 1.25; margin: 0 0 24px; }
+h2 { font-size: 1.45rem; margin: 48px 0 12px; padding-top: 8px; border-top: 1px solid var(--border); }
+h3 { font-size: 1.15rem; margin: 32px 0 8px; }
+p, li { max-width: 72ch; }
+a { color: var(--accent); }
+hr { display: none; }
+code {
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  font-size: 0.9em;
+  background: var(--code-bg);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
+pre {
+  background: var(--pre-bg);
+  color: var(--pre-text);
+  padding: 16px;
+  border-radius: 8px;
+  overflow-x: auto;
+  line-height: 1.5;
+}
+pre code { background: none; padding: 0; font-size: 0.85rem; color: inherit; }
+blockquote {
+  margin: 16px 0;
+  padding: 10px 16px;
+  background: var(--quote-bg);
+  border-left: 4px solid var(--quote-border);
+  border-radius: 0 6px 6px 0;
+}
+blockquote p { margin: 0; }
+.table-wrap { overflow-x: auto; margin: 16px 0; }
+table { border-collapse: collapse; width: 100%; background: var(--surface); font-size: 0.95rem; }
+th, td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; vertical-align: top; }
+th { background: var(--code-bg); }
+.toc {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 20px;
+  margin-bottom: 24px;
+}
+.toc-title { font-weight: 600; margin: 0 0 4px; }
+.toc ol { margin: 0; padding-left: 20px; }
+
+</style>
+</head>
+<body>
+<main>
+<h1>Leheküljestamine Spring Data JPA-s: <code>Page&lt;T&gt;</code> ja MapStruct mapper – Algajatele</h1>
+<nav class="toc"><p class="toc-title">Sisukord</p><ol><li><a href="#sissejuhatus">Sissejuhatus</a></li><li><a href="#1-pageable--küsimus-andmebaasile">1. <code>Pageable</code> — küsimus andmebaasile</a></li><li><a href="#2-paget--vastus-koos-lisainfoga">2. <code>Page&lt;T&gt;</code> — vastus koos lisainfoga</a></li><li><a href="#3-miks-pagetraining-ei-tohi-otse-controllerist-välja-minna">3. Miks <code>Page&lt;Training&gt;</code> ei tohi otse controllerist välja minna?</a></li><li><a href="#4-dto-d-vastuse-jaoks">4. DTO-d vastuse jaoks</a></li><li><a href="#5-mapper--entityd-dto-deks">5. Mapper — entity'd DTO-deks</a></li><li><a href="#6-kõik-kokku-teenuses">6. Kõik kokku teenuses</a></li><li><a href="#7-aga-tõlgitud-väljad-title-categoryname-fundingtypes">7. Aga tõlgitud väljad (<code>title</code>, <code>categoryName</code>, <code>fundingTypes</code>)?</a></li><li><a href="#kokkuvõte">Kokkuvõte</a></li><li><a href="#järgmised-sammud">Järgmised sammud</a></li></ol></nav>
+<h2 id="sissejuhatus">Sissejuhatus</h2>
+<p>Kujuta ette, et andmebaasis on 5000 koolitust. Kui frontend küsib "anna mulle koolitused", ei ole mõistlik kõiki 5000 korraga tagasi saata. See oleks aeglane ja kasutaja näeb ekraanil niikuinii ainult mõnda korraga.</p>
+<p>Selle asemel jagatakse tulemus <strong>lehekülgedeks</strong> (inglise keeles *pagination*). Frontend küsib näiteks: "anna mulle <strong>lehekülg 0</strong>, kus on <strong>3 koolitust</strong>". Backend tagastab need 3 koolitust ja ütleb lisaks, <strong>mitu lehekülge ja mitu kirjet kokku</strong> on, et frontend saaks joonistada lehitsemise nupud.</p>
+<p><strong>Päriselu analoogia — raamat:</strong></p>
+<pre><code>📖 Raamat = kõik koolitused andmebaasis (nt 7 tükki)
+📄 Lehekülg = üks &quot;tükk&quot; raamatust (nt 3 koolitust)
+
+  Lehekülg 0        Lehekülg 1        Lehekülg 2
+┌────────────┐   ┌────────────┐   ┌────────────┐
+│ Koolitus 1 │   │ Koolitus 4 │   │ Koolitus 7 │
+│ Koolitus 2 │   │ Koolitus 5 │   │            │
+│ Koolitus 3 │   │ Koolitus 6 │   │            │
+└────────────┘   └────────────┘   └────────────┘
+
+Kokku: 7 kirjet (totalElements), 3 lehekülge (totalPages)</code></pre>
+<blockquote><p>⚠️ <strong>Leheküljed loetakse alates 0-st</strong>, mitte 1-st. Esimene lehekülg on <code>page = 0</code>.</p></blockquote>
+<p>Spring Data annab leheküljestamiseks kolm tööriista:</p>
+<div class="table-wrap"><table><thead><tr><th>Tööriist</th><th>Mis see on</th><th>Analoogia</th></tr></thead><tbody><tr><td><code>Pageable</code></td><td><strong>Küsimus</strong>: millist lehte ja mitu kirjet lehel tahan?</td><td>"Anna mulle raamatust lk 2, 3 rida lehel"</td></tr><tr><td><code>PageRequest</code></td><td>Klass, millega <code>Pageable</code> luuakse</td><td>Raamatukogu tellimisleht, mille täidad</td></tr><tr><td><code>Page&lt;T&gt;</code></td><td><strong>Vastus</strong>: see leht + info kogu raamatu kohta</td><td>Paljundatud lehekülg + märkus "raamatus on kokku 3 lk"</td></tr></tbody></table></div>
+<hr>
+<h2 id="1-pageable--küsimus-andmebaasile">1. <code>Pageable</code> — küsimus andmebaasile</h2>
+<p><code>Pageable</code> on objekt, mis ütleb repositoryle, <strong>millist lehte</strong> ja <strong>mitu kirjet lehel</strong> tahame. Selle loome <code>PageRequest.of(...)</code> abil:</p>
+<pre class="lang-java"><code>// page = mitmes lehekülg (algab 0-st), limit = mitu kirjet ühel lehel
+Pageable pageable = PageRequest.of(page, limit);
+
+// Näide: PageRequest.of(0, 3) → &quot;esimene leht, 3 kirjet&quot;
+// Näide: PageRequest.of(1, 3) → &quot;teine leht, 3 kirjet&quot; (kirjed 4–6)</code></pre>
+<p>Seejärel anname <code>Pageable</code> repository meetodile <strong>viimase parameetrina</strong> kaasa:</p>
+<pre class="lang-java"><code>public interface TrainingRepository extends JpaRepository&lt;Training, Integer&gt; {
+
+    @Query(&quot;&quot;&quot;
+            select t from Training t
+            where (:categoryId = 0 or t.category.id = :categoryId)
+            order by t.id asc&quot;&quot;&quot;)
+    Page&lt;Training&gt; findFilteredTrainingsBy(Integer categoryId, Pageable pageable);
+    //  ↑ tagastab Page, mitte List                              ↑ Pageable on viimane
+}</code></pre>
+<p><strong>Mis kulisside taga juhtub?</strong> Spring teeb andmebaasi <strong>kaks päringut</strong>:</p>
+<pre><code>1) Andmete päring (ainult üks leht):
+   SELECT ... FROM training WHERE ... ORDER BY id LIMIT 3 OFFSET 0;
+
+2) Loenduspäring (kõik sobivad kirjed kokku):
+   SELECT count(*) FROM training WHERE ...;</code></pre>
+<p>Esimene päring toob ainult selle lehe kirjed, teine päring loendab, mitu kirjet kokku filtrile vastab. Just tänu teisele päringule teab <code>Page</code>, mitu lehekülge kokku on.</p>
+<blockquote><p>💡 <code>LIMIT 3</code> = "maksimaalselt 3 rida", <code>OFFSET 3</code> = "jäta 3 esimest vahele". Leht 1 (3 kirjega) on seega <code>LIMIT 3 OFFSET 3</code>.</p></blockquote>
+<hr>
+<h2 id="2-paget--vastus-koos-lisainfoga">2. <code>Page&lt;T&gt;</code> — vastus koos lisainfoga</h2>
+<p><code>Page&lt;Training&gt;</code> on nagu <strong>karp</strong>, milles on:</p>
+<ul><li>selle lehe kirjed (<code>List&lt;Training&gt;</code>)</li><li>metainfo kogu tulemuse kohta</li></ul>
+<pre><code>Page&lt;Training&gt;
+┌──────────────────────────────────────────┐
+│ getContent()       → [Training, Training] │  ← selle lehe kirjed (List)
+│ getNumber()        → 0                    │  ← mitmes lehekülg see on
+│ getSize()          → 3                    │  ← küsitud lehe suurus (limit)
+│ getTotalElements() → 7                    │  ← kõik filtrile vastavad kirjed kokku
+│ getTotalPages()    → 3                    │  ← mitu lehekülge kokku
+│ hasNext()          → true                 │  ← kas järgmine leht on olemas
+└──────────────────────────────────────────┘</code></pre>
+<p>Kasutamine teenuses:</p>
+<pre class="lang-java"><code>Pageable pageable = PageRequest.of(page, limit);
+Page&lt;Training&gt; filteredTrainingPage = trainingRepository.findFilteredTrainingsBy(categoryId, pageable);
+
+List&lt;Training&gt; trainings = filteredTrainingPage.getContent();       // selle lehe koolitused
+int currentPage = filteredTrainingPage.getNumber();                 // nt 0
+int totalPages = filteredTrainingPage.getTotalPages();              // nt 3
+long totalElements = filteredTrainingPage.getTotalElements();       // nt 7 (NB! tüüp on long)</code></pre>
+<blockquote><p>⚠️ <code>Page&lt;T&gt;</code> on <strong>generic</strong> tüüp: <code>&lt;T&gt;</code> asemele kirjutatakse, mis tüüpi asjad lehel on. <code>Page&lt;Training&gt;</code> = leht Training entity'tega, <code>Page&lt;String&gt;</code> = leht stringidega jne. Sama idee nagu <code>List&lt;Training&gt;</code>.</p></blockquote>
+<hr>
+<h2 id="3-miks-pagetraining-ei-tohi-otse-controllerist-välja-minna">3. Miks <code>Page&lt;Training&gt;</code> ei tohi otse controllerist välja minna?</h2>
+<p>Projekti reegel (vt <code>backend/CLAUDE.md</code>): <strong>controller näeb ainult DTO-sid, mitte entity'sid.</strong> <code>Page&lt;Training&gt;</code> sisaldab <code>Training</code> entity'sid, seega see tuleb enne vastuse saatmist ümber teha DTO-ks.</p>
+<p>Lisaks: kui <code>Page</code> objekti otse JSON-iks teha, tuleb vastusesse palju üleliigset infot (<code>pageable</code>, <code>sort</code>, <code>first</code>, <code>last</code> jne) ja Spring hoiatab, et see JSON-kuju ei ole stabiilne. Seega teeme <strong>oma vastuse DTO</strong>, kus on ainult vajalik:</p>
+<pre><code>Andmebaas        Repository         Service                       Controller → JSON
+─────────        ──────────         ───────                       ─────────────────
+training   →   Page&lt;Training&gt;  →   mapper + metainfo   →   TrainingSummaryDto
+ tabel          (entity&#x27;d)         kokku panemine             (ainult DTO-d)</code></pre>
+<p>Taski <code>docs/tasks/backend/Koolituste-nimekirja-paring.md</code> järgi peab vastus välja nägema nii:</p>
+<pre class="lang-json"><code>{
+  &quot;page&quot;: 0,
+  &quot;totalPages&quot;: 1,
+  &quot;totalElements&quot;: 2,
+  &quot;trainingSummaries&quot;: [
+    { &quot;trainingId&quot;: 1, &quot;title&quot;: &quot;Java algkursus&quot;, &quot;categoryId&quot;: 1, &quot;isOrderOnly&quot;: false, &quot;isPromoted&quot;: true, ... }
+  ]
+}</code></pre>
+<p>Näeme, et JSON koosneb kahest osast:</p>
+<ol><li><strong>Metainfo</strong> (<code>page</code>, <code>totalPages</code>, <code>totalElements</code>) → tuleb <code>Page</code> objekti meetoditest</li><li><strong>Kirjete list</strong> (<code>trainingSummaries</code>) → tuleb <code>getContent()</code>-st, <strong>mapperi abil DTO-deks tehtuna</strong></li></ol>
+<hr>
+<h2 id="4-dto-d-vastuse-jaoks">4. DTO-d vastuse jaoks</h2>
+<p>Vaja on <strong>kahte</strong> DTO klassi: üks ühe koolituse jaoks ja teine terve vastuse (lehe) jaoks.</p>
+<pre class="lang-java"><code>// Üks koolitus nimekirjas (üks element &quot;trainingSummaries&quot; massiivis).
+// NB! Klassi nimi on siin näitena — pane nimi vastavalt oma projekti kokkuleppele.
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class TrainingSummaryItemDto {
+    private Integer trainingId;
+    private String title;
+    private String shortDescription;
+    private Integer categoryId;
+    private String categoryName;
+    private Boolean isOrderOnly;
+    private Boolean isPromoted;
+    private List&lt;FundingTypeDto&gt; fundingTypes;
+}</code></pre>
+<pre class="lang-java"><code>// Terve vastus: metainfo + selle lehe koolitused.
+// Lihtväljad (page, totalPages, totalElements) on listist ETTEPOOL — projekti reegel.
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class TrainingSummaryDto {
+    private Integer page;
+    private Integer totalPages;
+    private Long totalElements;          // Long, sest Page.getTotalElements() tagastab long
+    private List&lt;TrainingSummaryItemDto&gt; trainingSummaries;
+}</code></pre>
+<hr>
+<h2 id="5-mapper--entityd-dto-deks">5. Mapper — entity'd DTO-deks</h2>
+<p>MapStruct mapper on <strong>tõlk</strong>: sa kirjeldad, milline entity väli läheb millisesse DTO välja, ja MapStruct genereerib ise koodi (kausta <code>src/main/generated/</code>).</p>
+<p><strong>Analoogia:</strong> mapper on nagu kolimisfirma nimekiri — "köögikapp (entity <code>id</code>) → uue korteri kööki (DTO <code>trainingId</code>)". Kui nimi on mõlemas kohas sama, ei pea midagi kirjutama, MapStruct saab ise aru.</p>
+<pre class="lang-java"><code>@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING)
+public interface TrainingMapper {
+
+    // Üks Training → üks TrainingSummaryItemDto
+    @Mapping(source = &quot;id&quot;, target = &quot;trainingId&quot;)            // erinev nimi → peab ütlema
+    @Mapping(source = &quot;category.id&quot;, target = &quot;categoryId&quot;)   // punkt = &quot;mine seose sisse&quot;
+    @Mapping(source = &quot;isOrderOnly&quot;, target = &quot;isOrderOnly&quot;)
+    @Mapping(source = &quot;isPromoted&quot;, target = &quot;isPromoted&quot;)
+    TrainingSummaryItemDto toTrainingSummaryItemDto(Training training);
+
+    // List&lt;Training&gt; → List&lt;TrainingSummaryItemDto&gt;
+    // Selle keha pole vaja kirjutada: MapStruct kasutab iga elemendi jaoks ülemist meetodit
+    List&lt;TrainingSummaryItemDto&gt; toTrainingSummaryItemDtos(List&lt;Training&gt; trainings);
+}</code></pre>
+<p>Selgitused:</p>
+<ul><li><code>source</code> = väli <strong>entity's</strong> (kust võtame), <code>target</code> = väli <strong>DTO-s</strong> (kuhu paneme).</li><li><code>category.id</code> — <code>Training</code>-il on väli <code>category</code> (tüüpi <code>Category</code>), ja selle sees on <code>id</code>. Punkt tähendab "mine objekti sisse".</li><li><code>unmappedTargetPolicy = ReportingPolicy.IGNORE</code> — kui DTO-s on välju, mida mapper ei täida (nt <code>title</code>), ei anta viga, need jäävad <code>null</code>-iks.</li><li><code>componentModel = SPRING</code> — mapper on Springi bean, seega saab selle teenusesse <code>private final TrainingMapper trainingMapper;</code> kaudu sisse süstida.</li></ul>
+<blockquote><p>⚠️ Mapper <strong>ei tea midagi <code>Page</code>-ist</strong>. Mapperile anname ainult <code>List&lt;Training&gt;</code> (ehk <code>page.getContent()</code>). Metainfo paneme teenuses ise kokku.</p></blockquote>
+<hr>
+<h2 id="6-kõik-kokku-teenuses">6. Kõik kokku teenuses</h2>
+<pre class="lang-java"><code>@Service
+@RequiredArgsConstructor
+public class TrainingService {
+
+    private final TrainingRepository trainingRepository;
+    private final TrainingMapper trainingMapper;
+
+    public TrainingSummaryDto findFilteredTrainings(Integer categoryId, Integer limit, Integer page) {
+        // 1. Küsimus: millist lehte tahame
+        Pageable pageable = PageRequest.of(page, limit);
+
+        // 2. Repository tagastab lehe entity&#x27;tega + metainfo
+        Page&lt;Training&gt; filteredTrainingPage = trainingRepository.findFilteredTrainingsBy(categoryId, pageable);
+
+        // 3. Mapper teeb selle lehe entity&#x27;d DTO-deks
+        List&lt;TrainingSummaryItemDto&gt; trainingSummaryItemDtos =
+                trainingMapper.toTrainingSummaryItemDtos(filteredTrainingPage.getContent());
+
+        // 4. Paneme vastuse kokku: metainfo Page&#x27;ist + DTO list mapperist
+        TrainingSummaryDto trainingSummaryDto = new TrainingSummaryDto();
+        trainingSummaryDto.setPage(filteredTrainingPage.getNumber());
+        trainingSummaryDto.setTotalPages(filteredTrainingPage.getTotalPages());
+        trainingSummaryDto.setTotalElements(filteredTrainingPage.getTotalElements());
+        trainingSummaryDto.setTrainingSummaries(trainingSummaryItemDtos);
+        return trainingSummaryDto;
+    }
+}</code></pre>
+<p>Voog pildina:</p>
+<pre><code>PageRequest.of(0, 3)
+        │
+        ▼
+trainingRepository.findFilteredTrainingsBy(...)
+        │
+        ▼
+Page&lt;Training&gt; ─────────────┬──────────────────────────────┐
+                            │                              │
+               getContent() │                              │ getNumber()
+                            ▼                              │ getTotalPages()
+                  List&lt;Training&gt;                           │ getTotalElements()
+                            │                              │
+          trainingMapper.toTrainingSummaryItemDtos(...)    │
+                            │                              │
+                            ▼                              ▼
+              List&lt;TrainingSummaryItemDto&gt;        page, totalPages, totalElements
+                            │                              │
+                            └──────────────┬───────────────┘
+                                           ▼
+                                 TrainingSummaryDto  → controller → JSON</code></pre>
+<h3 id="alternatiiv-pagemap">Alternatiiv: <code>Page.map(...)</code></h3>
+<p><code>Page</code>-il on ka meetod <code>map</code>, mis teeb <strong>uue lehe</strong>, kus iga element on teisendatud, aga metainfo jääb samaks:</p>
+<pre class="lang-java"><code>Page&lt;TrainingSummaryItemDto&gt; dtoPage = filteredTrainingPage.map(trainingMapper::toTrainingSummaryItemDto);
+// dtoPage.getContent() on nüüd DTO-de list, getTotalPages() jne on samad nagu enne</code></pre>
+<p><code>trainingMapper::toTrainingSummaryItemDto</code> on *meetodiviide* — lühem viis kirjutada <code>training -&gt; trainingMapper.toTrainingSummaryItemDto(training)</code>. Mõlemad variandid on korrektsed; ülal toodud samm-sammuline variant on algajale lihtsamini loetav.</p>
+<hr>
+<h2 id="7-aga-tõlgitud-väljad-title-categoryname-fundingtypes">7. Aga tõlgitud väljad (<code>title</code>, <code>categoryName</code>, <code>fundingTypes</code>)?</h2>
+<p><code>Training</code> entity's <strong>ei ole</strong> <code>title</code>-t ega <code>shortDescription</code>-it — need on tabelis <code>training_translation</code> (vt <code>backend/CLAUDE.md</code> jaotist "Mitmekeelsus"). Seega mapper <code>Training → TrainingSummaryItemDto</code> jätab need väljad <code>null</code>-iks.</p>
+<p>Tavaline lahendus:</p>
+<ol><li>Too <code>Page&lt;Training&gt;</code> abil <strong>selle lehe</strong> koolituste id-d.</li><li>Küsi nende id-de kohta tõlked (nt <code>training_summary</code> vaatest <code>translationLang</code> järgi) eraldi päringuga.</li><li>Täida DTO-de puuduvad väljad teenuses <code>handle...</code> meetodis (projekti reegel: tingimuslik loogika + DTO muutmine → <code>handle</code>-prefiks).</li></ol>
+<p>Oluline mõte: <strong>leheküljestamine tehakse <code>training</code> tabeli peal</strong> (üks rida = üks koolitus), et <code>totalElements</code> loeks koolitusi, mitte tõlke- või rahastustüübi ridu.</p>
+<hr>
+<h2 id="kokkuvõte">Kokkuvõte</h2>
+<div class="table-wrap"><table><thead><tr><th>Mõiste</th><th>Tähendus</th></tr></thead><tbody><tr><td>Pagination / leheküljestamine</td><td>Suure tulemuse jagamine väiksemateks lehtedeks</td></tr><tr><td><code>Pageable</code></td><td>"Küsimus": milline leht (<code>page</code>) ja mitu kirjet (<code>limit</code>)</td></tr><tr><td><code>PageRequest.of(page, limit)</code></td><td>Loob <code>Pageable</code> objekti; <code>page</code> algab 0-st</td></tr><tr><td><code>Page&lt;T&gt;</code></td><td>"Vastus": selle lehe kirjed + metainfo kogu tulemuse kohta</td></tr><tr><td><code>getContent()</code></td><td>Selle lehe kirjed <code>List&lt;T&gt;</code>-na — seda anname mapperile</td></tr><tr><td><code>getNumber()</code> / <code>getTotalPages()</code> / <code>getTotalElements()</code></td><td>Praegune leht / lehti kokku / kirjeid kokku (<code>long</code>)</td></tr><tr><td>Loenduspäring</td><td>Spring teeb automaatselt <code>count(*)</code> päringu, et teada kogusummat</td></tr><tr><td>MapStruct mapper</td><td>Tõlgib entity'd DTO-deks; ei tea <code>Page</code>-ist midagi, töötab listiga</td></tr><tr><td><code>Page.map(...)</code></td><td>Teeb lehe elemendid ümber, metainfo jääb alles</td></tr><tr><td>Vastuse DTO</td><td>Oma klass (<code>page</code>, <code>totalPages</code>, <code>totalElements</code>, list) — <code>Page</code>-i ei saadeta otse välja</td></tr></tbody></table></div>
+<hr>
+<h2 id="järgmised-sammud">Järgmised sammud</h2>
+<ol><li><strong>Kirjuta <code>TrainingMapper</code></strong> ja proovi <code>page.getContent()</code> DTO-deks teha.</li><li><strong>Loo vastuse DTO-d</strong> (<code>TrainingSummaryDto</code> + ühe koolituse DTO) taski JSON-i põhjal.</li><li><strong>Lisa sorteerimine</strong>: <code>PageRequest.of(page, limit, Sort.by(&quot;id&quot;))</code> — uuri <code>Sort</code> klassi.</li><li><strong>Proovi Swaggeris</strong> (<code>/swagger-ui.html</code>) erinevate <code>page</code> ja <code>limit</code> väärtustega ning vaata P6Spy logist, millised <code>LIMIT</code>/<code>OFFSET</code> ja <code>count(*)</code> päringud tehakse.</li><li>Edasijõudnutele: uuri <strong>N+1 probleemi</strong> — mis juhtub, kui mapper loeb <code>LAZY</code> seoseid (nt <code>training.category</code>) iga elemendi jaoks eraldi.</li></ol>
+</main>
+</body>
+</html>

@@ -1,5 +1,6 @@
-package ee.bcskoolitus.persistance.option;
+package ee.bcskoolitus.persistance.category.translation;
 
+import ee.bcskoolitus.persistance.category.Category;
 import ee.bcskoolitus.persistance.language.Language;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -12,8 +13,8 @@ import java.time.Instant;
 @Getter
 @Setter
 @Entity
-@Table(name = "option_translation", schema = "bcs_koolitused")
-public class OptionTranslation {
+@Table(name = "category_translation", schema = "bcs_koolitused")
+public class CategoryTranslation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -21,17 +22,17 @@ public class OptionTranslation {
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "option_id", nullable = false)
-    private Option option;
+    @JoinColumn(name = "category_id", nullable = false)
+    private Category category;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "language_id", nullable = false)
     private Language language;
 
-    @Size(max = 20)
+    @Size(max = 255)
     @NotNull
-    @Column(name = "name", nullable = false, length = 20)
+    @Column(name = "name", nullable = false)
     private String name;
 
     @NotNull

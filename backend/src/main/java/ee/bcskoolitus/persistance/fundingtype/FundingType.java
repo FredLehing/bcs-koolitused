@@ -1,4 +1,4 @@
-package ee.bcskoolitus.persistance.funding;
+package ee.bcskoolitus.persistance.fundingtype;
 
 import ee.bcskoolitus.persistance.user.User;
 import jakarta.persistence.*;
