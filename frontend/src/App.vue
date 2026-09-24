@@ -24,7 +24,7 @@
         <div>
           <a class="btn btn-outline-secondary btn-sm me-3" href="#">Võta ühendust</a>
           <RouterLink class="btn btn-outline-secondary btn-sm me-3" to="/login"
-            >Logi sisse</RouterLink
+          >Logi sisse</RouterLink
           >
           <a class="btn btn-outline-secondary btn-sm" href="#">Registreeri</a>
         </div>
