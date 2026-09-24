@@ -9,21 +9,25 @@
     >
       <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="collapse navbar-collapse justify-content-center" id="navMenu">
-      <div class="navbar-nav">
-
+    <div class="collapse navbar-collapse" id="navMenu">
+      <div class="navbar-nav mx-auto">
         <a class="nav-link" href="#">Koolitused</a>
         <a class="nav-link" href="#">Teenused</a>
+
         <a class="nav-link" href="#">Ettevõttest</a>
         <a class="nav-link" href="#">Blogi</a>
         <a class="nav-link" href="#">Kontakt</a>
         <a class="nav-link" href="#">Tagasiside</a>
       </div>
+
+      <div>
+        <a class="btn btn-outline-secondary btn-sm me-3" href="#">Võta ühendust</a>
+        <RouterLink class="btn btn-outline-secondary btn-sm me-3" to="/login">Logi sisse</RouterLink>
+        <a class="btn btn-outline-secondary btn-sm" href="#">Registreeri</a>
+      </div>
     </div>
   </nav>
-<RouterView />
-
+  <RouterView />
 </template>
 
-<script setup>
-</script>
+<script setup></script>
