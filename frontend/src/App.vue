@@ -1,6 +1,6 @@
 <template>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-light px-3 mb-3">
-    <RouterLink class="navbar-brand" to="/"></RouterLink>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-blue px-3 mb-3">
+    <img src="@/assets/bcs-koolitus.svg" alt="svg" height="68" class="navbar-brand" to="/" />
     <button
       class="navbar-toggler"
       type="button"
