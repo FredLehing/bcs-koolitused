@@ -1,5 +1,6 @@
 <script>
 import LoginService from '@/api-services/LoginService.js'
+import NavigationService from '@/services/NavigationService.js'
 
 export default {
   name: 'LoginView',
@@ -17,10 +18,19 @@ export default {
         this.errorMessage = 'Täida kõik väljad'
       } else {
         LoginService.sendLoginRequest(this.email, this.password)
-          .then(response => this.handleLoginResponse(response.data))
-          .catch()
+          .then((response) => this.handleLoginResponse(response.data))
+          .catch((error) => this.handleLoginError(error))
           .finally()
       }
+    },
+    handleLoginResponse(loginResponse) {
+      sessionStorage.setItem('userId', loginResponse.userId)
+      sessionStorage.setItem('roleName', loginResponse.roleName)
+      NavigationService.navigateToHomeView()
+    },
+
+    handleLoginError(loginError) {
+      this.errorMessage = loginError.response.data.message
     },
   },
 }
