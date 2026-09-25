@@ -69,7 +69,7 @@ Query parameetrid (kõik valikulised):
       "shortDescription": "Java programmeerimise alused algajatele.",
       "categoryId": 1,
       "categoryName": "Programmeerimine",
-      "isOrderOnly": false,
+      "isOrderable": true,
       "isPromoted": true,
       "fundingTypes": [
         {

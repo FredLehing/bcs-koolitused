@@ -1,4 +1,4 @@
-# HomeView.vue — märkmed
+# TrainingsView.vue — märkmed
 
 ## Vaate märkmed
 
@@ -16,10 +16,18 @@ Mõlemad API kutsed käivitatakse vaate avanemisel, mitte kasutaja tegevuse peal
 ## API märkmed — GET /api/trainings
 
 ```text
-API: GET /api/trainings?categoryId={categoryId}&fundingTypeId={fundingTypeId}&limit={limit}&page={page}&trainingLang={trainingLang}&contentLang={contentLang}
+API: GET /api/trainings
 
-TrainingSummaryDto.java
+Query parameetrid:
+categoryId: Integer — kategooria filter, 0 = kõik
+fundingTypeId: Integer — rahastustüübi filter, 0 = kõik
+limit: Integer — koolituste arv lehel
+page: Integer — lehekülje number, algab 0-st
+trainingLang: String — õppekeele filter ("et"/"en")
+contentLang: String — tõlgitud väljade keel ("et"/"en")
+
 Response (200):
+TrainingSummaryDto.java
 {
   "totalPages": 1,
   "totalElements": 2,
@@ -30,7 +38,7 @@ Response (200):
       "shortDescription": "Java programmeerimise alused algajatele.",
       "categoryId": 1,
       "categoryName": "Programmeerimine",
-      "isOrderOnly": false,
+      "isOrderable": true,
       "isPromoted": true,
       "fundingTypes": [
         {
@@ -45,7 +53,7 @@ Response (200):
 }
 
 API teenuse lisainfo:
-Kõik query parameetrid on valikulised: categoryId, fundingTypeId ja trainingLang ("et"/"en") filtreerivad, limit ja page (algab 0-st) leheküljestavad, contentLang ("et"/"en") määrab tõlgitud väljade (title, shortDescription, categoryName, fundingTypeName) keele. HomeView kutsub limit=3-ga.
+HomeView kutsub: categoryId=0&fundingTypeId=0&limit=3&page=0&trainingLang=et&contentLang=et
 totalPages ja totalElements kirjeldavad kogu filtreeritud tulemushulka. fundingTypes võib olla tühi list (training_funding_type kaudu).
 
 Veateated: —
@@ -54,10 +62,13 @@ Veateated: —
 ## API märkmed — GET /api/categories
 
 ```text
-API: GET /api/categories?contentLang={contentLang}
+API: GET /api/categories
 
-CategoryDto.java
+Query parameetrid:
+contentLang: String — categoryName keel ("et"/"en") (valikuline)
+
 Response (200):
+CategoryDto.java
 [
   {
     "categoryId": 1,
@@ -67,7 +78,7 @@ Response (200):
 ]
 
 API teenuse lisainfo:
-Tagastab kõik süsteemis olevad kategooriad (category_translation kaudu tõlgitud). contentLang ("et"/"en") on valikuline ja määrab categoryName keele.
+Tagastab kõik süsteemis olevad kategooriad (category_translation kaudu tõlgitud).
 
 Veateated: —
 ```

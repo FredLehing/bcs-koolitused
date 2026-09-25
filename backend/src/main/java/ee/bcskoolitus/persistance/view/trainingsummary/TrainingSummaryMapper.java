@@ -14,7 +14,7 @@ public interface TrainingSummaryMapper {
     @Mapping(source = "shortDescription", target = "shortDescription")
     @Mapping(source = "categoryId", target = "categoryId")
     @Mapping(source = "categoryName", target = "categoryName")
-    @Mapping(source = "training.isOrderOnly", target = "isOrderOnly")
+    @Mapping(source = "training.isOrderable", target = "isOrderable")
     @Mapping(source = "training.isPromoted", target = "isPromoted")
     @Mapping(target = "fundingTypes", ignore = true)
     TrainingSummaryItemDto toTrainingSummaryItemDto(TrainingSummary trainingSummary);

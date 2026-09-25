@@ -85,7 +85,7 @@ Tõlgitav sisu (nt kategooria nimi, koolituse pealkiri/kirjeldus, lektori CV) ho
 - `contentLang` (nt `?translationLang=et`) — määrab, millises keeles tõlgitud tekstiväljad (nt `title`, `shortDescription`, `categoryName`) vastuses tagastatakse (loetakse vastavast `*_translation` tabelist).
 - `trainingLang` (nt `?trainingLang=et`) — filtreerib koolitusi nende õppekeele järgi (`training.training_language_id`).
 
-Näide selle mustri rakendusest: vt `docs/mock-wireframe/markmed/home-view-markmed.md` (`GET /api/trainings`, `GET /api/categories`).
+Näide selle mustri rakendusest: vt `docs/mock-wireframe/markmed/trainings-view-markmed.md` (`GET /api/trainings`, `GET /api/categories`).
 
 ### REST API
 
