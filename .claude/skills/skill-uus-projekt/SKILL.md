@@ -37,6 +37,8 @@ See nimi läheb root kausta nimeks. Kausta nimeks kasuta sisendit, teisendades s
 
 Pärast kasutajalt nime saamist uuenda ka `README.md` esimene rida (pealkiri `# ...`) uue projekti nimega, kuna see peab kausta nimega vastavuses olema.
 
+Samuti vaheta ära andmebaasi skeema nimi. Skeema nimi on projekti nimi lower snake_case kujul (nt "Meie uus projekt" → `meie_uus_projekt`). Loe praegune skeema nimi failist `docs/database/1_reset_database.sql` (toorikus `minu_projekt`) ja asenda see uuega kõikjal, kus seda mainitakse — vähemalt `docs/database/1_reset_database.sql` ja `backend/CLAUDE.md` (otsi nt `rg -n "minu_projekt"`).
+
 ## 4. Backend package name
 
 Loe kõigepealt praegune package tee otse failidest (nt `grep -rn "^package " backend/src/main/java | head -1` või `find backend/src/main/java -name "*Application.java"`) — ära eelda kindlat nime, kuna see sõltub sellest, mis nimega toorik varem seadistati.

@@ -73,7 +73,7 @@ Igal domeenialal on oma alampakk `controller/`-is koos DTOdega, teenusklass ja p
 
 **SQL logimine** — P6Spy on seadistatud (`spy.properties`), nii et täielik parameetritega SQL kuvatakse konsoolis. Selle saab keelata, lülitades `application.properties`-is tagasi kommenteeritud tavaliste PostgreSQL seadetele.
 
-**DTO väljade järjekord** — kui vastuse DTO-l on nii lihtväljad (nt `page`, `totalPages`, `totalElements`) kui massiiv/kollektsioon-väli (nt `content`), paigutatakse lihtväljad massiivi/kollektsioon-väljast (deklaratsioonis ja JSON näidetes) ettepoole. See kehtib nii DTO klassides kui `docs/tasks/backend/` ja `docs/balsamic/notes/` failide JSON näidetes.
+**DTO väljade järjekord** — kui vastuse DTO-l on nii lihtväljad (nt `page`, `totalPages`, `totalElements`) kui massiiv/kollektsioon-väli (nt `content`), paigutatakse lihtväljad massiivi/kollektsioon-väljast (deklaratsioonis ja JSON näidetes) ettepoole. See kehtib nii DTO klassides kui `docs/tasks/backend/` ja `docs/mock-wireframe/markmed/` failide JSON näidetes.
 
 ### Mitmekeelsus (i18n)
 
@@ -82,10 +82,10 @@ Tõlgitav sisu (nt kategooria nimi, koolituse pealkiri/kirjeldus, lektori CV) ho
 `training` tabelil on lisaks eraldi `training_language_id` veerg (viide `language` tabelile) — see väljendab koolituse **õppekeelt** (millises keeles koolitust läbi viiakse), mitte tõlget. See on äriatribuut, mitte tõlke valik, ja ei tohi segi minna tõlketabelite `language_id`-ga.
 
 **Keele valik API-s** — keel tuleb sisse alati **request query parameetrina**, mitte `Accept-Language` HTTP headerina ega path muutujana (valik tehtud teadlikult, kuna osa teenuseid keelt üldse ei puuduta — parameeter lisatakse ainult neisse endpointidesse, mis seda vajavad). Kaks eraldi, mitte omavahel segatavat parameetrit:
-- `translationLang` (nt `?translationLang=et`) — määrab, millises keeles tõlgitud tekstiväljad (nt `title`, `shortDescription`, `categoryName`) vastuses tagastatakse (loetakse vastavast `*_translation` tabelist).
+- `contentLang` (nt `?translationLang=et`) — määrab, millises keeles tõlgitud tekstiväljad (nt `title`, `shortDescription`, `categoryName`) vastuses tagastatakse (loetakse vastavast `*_translation` tabelist).
 - `trainingLang` (nt `?trainingLang=et`) — filtreerib koolitusi nende õppekeele järgi (`training.training_language_id`).
 
-Näide selle mustri rakendusest: vt `docs/balsamic/notes/HomeView-markmed.md` (`GET /api/trainings`, `GET /api/categories`).
+Näide selle mustri rakendusest: vt `docs/mock-wireframe/markmed/home-view-markmed.md` (`GET /api/trainings`, `GET /api/categories`).
 
 ### REST API
 

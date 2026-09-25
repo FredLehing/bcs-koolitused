@@ -1,6 +1,6 @@
 ---
 name: skill-loo-backed-taski-implementatsiooni-plaan
-description: Loo backend taski MD failile implementatsiooni plaan — uuri taski, olemasolevat koodibaasi (controller/service/persistence), backend/CLAUDE.md konventsioone ja docs/backend/projekti-struktuur.md. Kasuta, kui kasutaja tahab implementatsiooniplaani, tehnilist plaani, taski lahenduskäiku backend taskile, või mainib "implementatsiooni plaan", "kuidas seda taski lahendada", "tee plaan backend taskile".
+description: Loo backend taski MD failile implementatsiooni plaan — uuri taski, olemasolevat koodibaasi (controller/service/persistence), backend/CLAUDE.md konventsioone ja docs/structure/backend-projekti-struktuur.md. Kasuta, kui kasutaja tahab implementatsiooniplaani, tehnilist plaani, taski lahenduskäiku backend taskile, või mainib "implementatsiooni plaan", "kuidas seda taski lahendada", "tee plaan backend taskile".
 ---
 
 # Loo backend taski implementatsiooni plaan
@@ -32,7 +32,7 @@ Loe `backend/CLAUDE.md` läbi (kihtide struktuur, nimetamiskonventsioonid, veak�
 
 ### 4. Jälgi projekti struktuuri juhist
 
-Loe `docs/backend/projekti-struktuur.md` läbi. Uute failide asukoht ja nimetamine peab järgima seal kirjeldatud struktuuri (nt `controller/<ressurss>/`, `controller/<ressurss>/dto/`, `controller/common/dto/`, `persistence/<entiteet>/`, `service/`).
+Loe `docs/structure/backend-projekti-struktuur.md` läbi. Uute failide asukoht ja nimetamine peab järgima seal kirjeldatud struktuuri (nt `controller/<ressurss>/`, `controller/<ressurss>/dto/`, `controller/common/dto/`, `persistence/<entiteet>/`, `service/`).
 
 **Jagatud DTO-d** — kui plaanitav response/request DTO on (või hakkab olema) kasutusel rohkem kui ühe ressursi kontrolleris/mapperis/service'is, ei kuulu see ühegi üksiku ressursi `dto/` paketti, vaid paketti `controller/common/dto/` (vt backend/CLAUDE.md reeglit "Jagatud DTO-d"). Kontrolli olemasoleva DTO puhul alati, kas seda kasutab juba mõni teine ressurss (Grep DTO nime järgi) — kui jah, ja see asub veel ressursipõhises paketis, tuleks plaan sisaldada selle ümbertõstmist paketti `controller/common/dto/`.
 
@@ -48,7 +48,7 @@ Enne kui eeldad, et midagi tuleb nullist luua, kontrolli, mis on juba olemas:
 - **Otsi controller/endpoint** — kas REST endpoint juba eksisteerib mõnes kontrolleris, või on kontroller täiesti loomata?
 - **Otsi olemasolevad testid** — kas mõni test juba katab sarnast funktsionaalsust, mida saab eeskujuks võtta?
 
-Kasuta Grep/Glob tööriistu ja otsi nii taski URL-i (nt `api/<ressurss>`), DTO nimesid, entiteedi nime kui tabeli nime järgi. Ära eelda kohe, et kõik tuleb kirjutada nullist — sageli on osa keti lülidest (entiteet, repository, mapper) juba olemas mõne muu funktsionaalsuse käigus ja puudub ainult üks kiht (tavaliselt controller ja/või vastav service meetod).
+Kasuta Grep/Glob tööriistu ja otsi nii taski URL-i (nt `api/roles`), DTO nimesid, entiteedi nime kui tabeli nime järgi. Ära eelda kohe, et kõik tuleb kirjutada nullist — sageli on osa keti lülidest (entiteet, repository, mapper) juba olemas mõne muu funktsionaalsuse käigus ja puudub ainult üks kiht (tavaliselt controller ja/või vastav service meetod).
 
 Vaata ka sarnaste, juba valmis teenuste eeskuju (nt kui on olemas mõni analoogne `GET` nimekirja-teenus, mille kontroller/service/mapper on täielikult valmis) — implementatsiooniplaan peaks järgima sama mustrit.
 
@@ -72,7 +72,7 @@ Struktuur (järgi täpselt):
 ## Sammud
 
 <Nummerdatud sammud, igaühe juures:>
-1. **<Tegevus>** — fail: `<täielik path uuele/muudetavale failile, vastavalt docs/backend/projekti-struktuur.md struktuurile>`
+1. **<Tegevus>** — fail: `<täielik path uuele/muudetavale failile, vastavalt docs/structure/backend-projekti-struktuur.md struktuurile>`
    - <Mida täpselt sinna kirjutada/muuta, viidates backend/CLAUDE.md konventsioonidele (nimetamine, kihi vastutus, veakäsitlus jne)>
    - <Koodinäide või meetodi signatuur, kui aitab selgust luua>
 
@@ -93,13 +93,13 @@ Struktuur (järgi täpselt):
 
 ### 7. Kontrolli vastuolusid taski ja koodibaasi vahel
 
-Kui taskis kirjeldatud URL, DTO väljad, tabelinimi vms ei klapi täpselt olemasoleva koodiga (nt task nõuab `/api/atm/transaction-types`, aga koodibaasis/CLAUDE.md-s on juba dokumenteeritud teine tee samale funktsionaalsusele), too see selgelt esile plaani "Avatud küsimused" sektsioonis — ära vaikimisi ise otsustada, kumb on õige.
+Kui taskis kirjeldatud URL, DTO väljad, tabelinimi vms ei klapi täpselt olemasoleva koodiga (nt task nõuab `/api/roles`, aga koodibaasis/CLAUDE.md-s on juba dokumenteeritud teine tee samale funktsionaalsusele), too see selgelt esile plaani "Avatud küsimused" sektsioonis — ära vaikimisi ise otsustada, kumb on õige.
 
 ### 8. Salvesta fail
 
 Salvesta implementatsiooniplaan **samasse kausta**, kus asub target taski fail, **sama failinimega**, millele on lisatud postfiks `-IMPLEMENTATSIOON` enne `.md` laiendit.
 
-Näide: task `docs/tasks/backend/Tehingutuupide-nimekirja-paring.md` → plaan `docs/tasks/backend/Tehingutuupide-nimekirja-paring-IMPLEMENTATSIOON.md`.
+Näide: task `docs/tasks/backend/GET-api-roles.md` → plaan `docs/tasks/backend/GET-api-roles-IMPLEMENTATSIOON.md`.
 
 ### 9. Teavita kasutajat
 
@@ -114,4 +114,4 @@ Näita:
 - Ära hakka koodi kirjutama ega faile looma/muutma — see skill toodab ainult plaani MD faili.
 - Ära oleta koodibaasi seisu — kontrolli alati Grep/Glob/Read tööriistadega, mis päriselt olemas on.
 - Järgi rangelt backend/CLAUDE.md konventsioone (nimetamine, kihtide vastutus, veakäsitlus).
-- Järgi rangelt docs/backend/projekti-struktuur.md failide paigutust.
+- Järgi rangelt docs/structure/backend-projekti-struktuur.md failide paigutust.
