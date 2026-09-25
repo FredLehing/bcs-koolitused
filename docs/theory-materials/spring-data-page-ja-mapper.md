@@ -131,7 +131,7 @@ Taski `docs/tasks/backend/GET-api-trainings.md` järgi peab vastus välja nägem
   "totalPages": 1,
   "totalElements": 2,
   "trainingSummaries": [
-    { "trainingId": 1, "title": "Java algkursus", "categoryId": 1, "isOrderOnly": false, "isPromoted": true, ... }
+    { "trainingId": 1, "title": "Java algkursus", "categoryId": 1, "isOrderable": true, "isPromoted": true, ... }
   ]
 }
 ```
@@ -158,7 +158,7 @@ public class TrainingSummaryItemDto {
     private String shortDescription;
     private Integer categoryId;
     private String categoryName;
-    private Boolean isOrderOnly;
+    private Boolean isOrderable;
     private Boolean isPromoted;
     private List<FundingTypeDto> fundingTypes;
 }
@@ -193,7 +193,7 @@ public interface TrainingMapper {
     // Üks Training → üks TrainingSummaryItemDto
     @Mapping(source = "id", target = "trainingId")            // erinev nimi → peab ütlema
     @Mapping(source = "category.id", target = "categoryId")   // punkt = "mine seose sisse"
-    @Mapping(source = "isOrderOnly", target = "isOrderOnly")
+    @Mapping(source = "isOrderable", target = "isOrderable")
     @Mapping(source = "isPromoted", target = "isPromoted")
     TrainingSummaryItemDto toTrainingSummaryItemDto(Training training);
 

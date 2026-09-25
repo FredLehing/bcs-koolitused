@@ -176,7 +176,7 @@ training   →   Page&lt;Training&gt;  →   mapper + metainfo   →   TrainingS
   &quot;totalPages&quot;: 1,
   &quot;totalElements&quot;: 2,
   &quot;trainingSummaries&quot;: [
-    { &quot;trainingId&quot;: 1, &quot;title&quot;: &quot;Java algkursus&quot;, &quot;categoryId&quot;: 1, &quot;isOrderOnly&quot;: false, &quot;isPromoted&quot;: true, ... }
+    { &quot;trainingId&quot;: 1, &quot;title&quot;: &quot;Java algkursus&quot;, &quot;categoryId&quot;: 1, &quot;isOrderable&quot;: true, &quot;isPromoted&quot;: true, ... }
   ]
 }</code></pre>
 <p>Näeme, et JSON koosneb kahest osast:</p>
@@ -195,7 +195,7 @@ public class TrainingSummaryItemDto {
     private String shortDescription;
     private Integer categoryId;
     private String categoryName;
-    private Boolean isOrderOnly;
+    private Boolean isOrderable;
     private Boolean isPromoted;
     private List&lt;FundingTypeDto&gt; fundingTypes;
 }</code></pre>
@@ -220,7 +220,7 @@ public interface TrainingMapper {
     // Üks Training → üks TrainingSummaryItemDto
     @Mapping(source = &quot;id&quot;, target = &quot;trainingId&quot;)            // erinev nimi → peab ütlema
     @Mapping(source = &quot;category.id&quot;, target = &quot;categoryId&quot;)   // punkt = &quot;mine seose sisse&quot;
-    @Mapping(source = &quot;isOrderOnly&quot;, target = &quot;isOrderOnly&quot;)
+    @Mapping(source = &quot;isOrderable&quot;, target = &quot;isOrderable&quot;)
     @Mapping(source = &quot;isPromoted&quot;, target = &quot;isPromoted&quot;)
     TrainingSummaryItemDto toTrainingSummaryItemDto(Training training);
 

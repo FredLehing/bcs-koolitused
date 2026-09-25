@@ -1,6 +1,6 @@
 # Koolituste nimekirja päring
 
-**Teenus:** `GET /api/trainings?categoryId={categoryId}&fundingTypeId={fundingTypeId}&limit={limit}&page={page}&trainingLang={trainingLang}&contentLang={contentLang}`
+**Teenus:** `GET /api/trainings?categoryId={categoryId}&fundingTypeId={fundingTypeId}&limit={limit}&page={page}&trainingLanguageId={trainingLanguageId}&contentLang={contentLang}`
 
 **Kasutav vaade:** `TrainingsView.vue` (`/trainings`), mockupis lehekülg 1/1
 
@@ -8,16 +8,16 @@
 
 ## Sisend
 
-Kõik parameetrid on query parameetrid ja valikulised:
+Kõik parameetrid on query parameetrid ja kohustuslikud (`@RequestParam` ilma `required = false`-ta). Filtrit "kõik" väljendatakse väärtusega `0`, mitte parameetri ärajätmisega:
 
 | Parameeter | Tüüp | Kirjeldus |
 |---|---|---|
-| `categoryId` | int, valikuline | Filtreerib koolitused kategooria järgi (`training.category_id`) |
-| `fundingTypeId` | int, valikuline | Filtreerib koolitused rahastustüübi järgi (`training_funding_type` kaudu) |
-| `limit` | int, valikuline | Lehekülje suurus (nt HomeView kutsub `limit=3`-ga) |
-| `page` | int, valikuline | Lehekülje number, loendus algab 0-st |
-| `trainingLang` | String (`et`/`en`), valikuline | Filtreerib koolitused õppekeele järgi (`training.training_language_id`) |
-| `contentLang` | String (`et`/`en`), valikuline | Määrab tõlgitud väljade (`title`/`shortDescription`/`categoryName`/`fundingTypeName`) keele |
+| `categoryId` | Integer | Filtreerib koolitused kategooria järgi (`training.category_id`); `0` = kõik kategooriad |
+| `fundingTypeId` | Integer | Filtreerib koolitused rahastustüübi järgi (`training_funding_type` kaudu); `0` = kõik rahastustüübid |
+| `limit` | Integer | Lehekülje suurus (nt HomeView kutsub `limit=3`-ga) |
+| `page` | Integer | Lehekülje number, loendus algab 0-st |
+| `trainingLanguageId` | Integer | Filtreerib koolitused õppekeele järgi (`training.training_language_id`); `0` = kõik keeled |
+| `contentLang` | String (`et`/`en`) | Määrab tõlgitud väljade (`title`/`shortDescription`/`categoryName`/`fundingTypeName`) keele |
 
 Teenusel puudub request body.
 
@@ -40,7 +40,7 @@ Mockupi API URL-is sisaldus lisaks ka `sort={sort}` parameeter, kuid see on task
       "shortDescription": "Java programmeerimise alused algajatele.",
       "categoryId": 1,
       "categoryName": "Programmeerimine",
-      "isOrderOnly": false,
+      "isOrderable": true,
       "isPromoted": true,
       "fundingTypes": [
         {
@@ -55,7 +55,7 @@ Mockupi API URL-is sisaldus lisaks ka `sort={sort}` parameeter, kuid see on task
       "shortDescription": "Sissejuhatus IT-projektijuhtimisse.",
       "categoryId": 3,
       "categoryName": "Juhtimine",
-      "isOrderOnly": false,
+      "isOrderable": false,
       "isPromoted": false,
       "fundingTypes": []
     }
@@ -66,12 +66,14 @@ Mockupi API URL-is sisaldus lisaks ka `sort={sort}` parameeter, kuid see on task
 Väljade selgitused:
 
 - `totalPages`, `totalElements` — leheküljestamise metaandmed (kogu tulemushulga ja lehitsemise jaoks), mitte ainult tagastatava lehe kohta.
-- `isOrderOnly` — pärineb veerust `training.is_order_only`.
+- `isOrderable` — pärineb veerust `training.is_orderable`.
 - `isPromoted` — pärineb veerust `training.is_promoted`.
 - `fundingTypes` — koolitusele määratud rahastustüüpide loend (`training_funding_type` kaudu). Koolitusel võib olla null, üks või mitu rahastustüüpi (näide: koolitusel id=2 pole ühtegi rahastustüüpi, seega tühi list).
 - `title`, `shortDescription`, `categoryName`, `fundingTypeName` — tõlgitud väljad, mille keele määrab `contentLang` parameeter.
 
 **Väli `startDate` ei kuulu vastuse hulka** — vt "Avatud küsimused".
+
+**Sorteerimine:** `trainingSummaries` list on fikseeritud järjekorras — esmalt esile tõstetud koolitused (`isPromoted = true`), seejärel `title` järgi tähestikuliselt (`order by ts.training.isPromoted desc, ts.title`). Kasutaja sorteerimist valida ei saa (`sort` parameetrit pole).
 
 ## Eesmärk
 
@@ -83,7 +85,7 @@ Vt `docs/database/2_create.sql`.
 
 ### training
 
-Koolituse põhikirje — sisaldab kategooria, õppekeele, asukoha ja staatuse viiteid ning `is_order_only`/`is_promoted` lippe.
+Koolituse põhikirje — sisaldab kategooria, õppekeele, asukoha ja staatuse viiteid ning `is_orderable`/`is_promoted` lippe.
 
 ```sql
 CREATE TABLE training (
@@ -96,7 +98,7 @@ CREATE TABLE training (
                           status int  NOT NULL,
                           created_at timestamp  NOT NULL,
                           updated_at timestamp  NOT NULL,
-                          is_order_only boolean  NOT NULL,
+                          is_orderable boolean  NOT NULL,
                           is_promoted boolean  NOT NULL,
                           CONSTRAINT course_pk PRIMARY KEY (id)
 );
@@ -104,9 +106,9 @@ CREATE TABLE training (
 
 Näidisandmed (`docs/database/3_import.sql`):
 
-| id | category_id | training_language_id | is_order_only | is_promoted |
+| id | category_id | training_language_id | is_orderable | is_promoted |
 |---|---|---|---|---|
-| 1 | 1 | 1 (et) | false | true |
+| 1 | 1 | 1 (et) | true | true |
 | 2 | 3 | 1 (et) | false | false |
 
 ### training_translation
@@ -196,7 +198,7 @@ Näidisandmed: training_id=1 on seotud ainult funding_type_id=1 kirjega (`traini
 
 ### language
 
-Koodiga (`et`/`en`) määratud keeled, mida kasutavad nii `trainingLang` kui `contentLang` parameetrid.
+Keeled: `trainingLanguageId` viitab `language.id` väärtusele, `contentLang` kasutab `language.code` väärtust (`et`/`en`).
 
 ```sql
 CREATE TABLE language (
@@ -219,20 +221,21 @@ Näidisandmed: id=1 → code `et`, id=2 → code `en`.
 | Ootamatu serveri viga | 500 Internal Server Error | Standardne `ApiError` vastus |
 | Vigane query parameeter (nt `page`/`limit`/`categoryId`/`fundingTypeId` ei ole number) | 400 Bad Request | Standardne `ApiError` vastus |
 
-Olematu `categoryId`/`fundingTypeId`/`trainingLang` väärtuse korral ei ole tegu veaolukorraga — tulemuseks on lihtsalt tühi `trainingSummaries` list.
+Olematu `categoryId`/`fundingTypeId`/`trainingLanguageId`/`contentLang` väärtuse korral ei ole tegu veaolukorraga — tulemuseks on lihtsalt tühi `trainingSummaries` list.
 
 ## Vastuvõtu kriteeriumid
 
 - [ ] Endpoint `GET /api/trainings` on olemas ja tagastab `TrainingSummaryDto` struktuuriga vastuse
-- [ ] Kõik loetletud query parameetrid (`categoryId`, `fundingTypeId`, `limit`, `page`, `trainingLang`, `contentLang`) on valikulised ja toimivad kirjeldatud viisil
+- [ ] Kõik loetletud query parameetrid (`categoryId`, `fundingTypeId`, `limit`, `page`, `trainingLanguageId`, `contentLang`) on kohustuslikud ja toimivad kirjeldatud viisil (`categoryId=0`/`fundingTypeId=0`/`trainingLanguageId=0` tagastab kõik)
 - [ ] `totalPages`/`totalElements` kajastavad korrektselt kogu (filtreeritud) tulemushulka, mitte ainult tagastatud lehte
 - [ ] `title`, `shortDescription`, `categoryName`, `fundingTypeName` väljad on tõlgitud `contentLang` parameetri järgi
+- [ ] Tulemus on sorteeritud: `isPromoted = true` koolitused eespool, seejärel `title` järgi tähestikuliselt
 - [ ] Koolitus, millel pole ühtegi rahastustüüpi, tagastab `fundingTypes` väljana tühja listi (mitte `null` ega viga)
-- [ ] Filtreerimine `categoryId`, `fundingTypeId` ja `trainingLang` järgi annab korrektse alamhulga andmebaasi näidisandmete põhjal
+- [ ] Filtreerimine `categoryId`, `fundingTypeId` ja `trainingLanguageId` järgi annab korrektse alamhulga andmebaasi näidisandmete põhjal
 - [ ] Kirjeldatud veaolukorrad (400 vigase parameetri korral, 500 ootamatu vea korral) on käsitletud
 - [ ] Automaattestid katavad õnnestunud päringu, filtreerimise ja tühja tulemuse juhtumid
 
 ## Avatud küsimused
 
-1. **`sort` parameeter** — mockupi API URL-is (`&sort={sort}`) esineb sort-parameeter, kuid "Query parameetrid" loetelu ei kirjelda seda üldse ning vasakpoolne kollane kontekstikast ütleb selgelt "Sorteerimist pole". Kasutaja otsusel on see task koostatud **ilma** sorteerimiseta — `sort` parameetrit ei implementeerita. Kui sorteerimine on siiski vajalik, tuleb mockup enne täpsustada (millised väärtused, milline vaikekäitumine).
-2. **`startDate` väli** — "API teenuse lisainfo" tekst kirjeldab välja, mis pärineb koolitusele lähimalt eelseisvalt `course` kirjelt ja võib olla `null`, kui eelseisvaid kursuseid pole (nt `is_order_only` koolitusel). See väli aga JSON response näidisesse ei jõudnud. Kasutaja otsusel on `startDate` **jäetud response'ist välja** — vastus järgib täpselt kuvatud JSON näidist. Kui väli on siiski vajalik, tuleb täpsustada ka selle sortimisreegel `null` väärtuste jaoks (lisainfo tekst mainib, et see on hetkel defineerimata).
+1. **`sort` parameeter** — mockupi API URL-is (`&sort={sort}`) esineb sort-parameeter, kuid "Query parameetrid" loetelu ei kirjelda seda üldse ning vasakpoolne kollane kontekstikast ütleb selgelt "Sorteerimist pole". Kasutaja otsusel on see task koostatud **ilma** kasutaja valitava sorteerimiseta — `sort` parameetrit ei implementeerita, vastus on fikseeritud järjekorras (vt "Väljund" → "Sorteerimine"). Kui sorteerimine on siiski vajalik, tuleb mockup enne täpsustada (millised väärtused, milline vaikekäitumine).
+2. **`startDate` väli** — "API teenuse lisainfo" tekst kirjeldab välja, mis pärineb koolitusele lähimalt eelseisvalt `course` kirjelt ja võib olla `null`, kui eelseisvaid kursuseid pole (nt koolitusel, mida saab ainult tellida). See väli aga JSON response näidisesse ei jõudnud. Kasutaja otsusel on `startDate` **jäetud response'ist välja** — vastus järgib täpselt kuvatud JSON näidist. Kui väli on siiski vajalik, tuleb täpsustada ka selle sortimisreegel `null` väärtuste jaoks (lisainfo tekst mainib, et see on hetkel defineerimata).

@@ -105,7 +105,7 @@ public void meetodiNimi(SisendTüüp parameetriNimi) {
 
 ### Mida teha?
 
-Nüüd liigud service meetodisse. Sisse tulevad kuus valikulist parameetrit. Neist neli (`categoryId`, `fundingTypeId`, `trainingLang` ja `contentLang`) mõjutavad seda, **milliseid ridu** ja **mis keeles** pärida. Ülejäänud kaks (`limit` ja `page`) mõjutavad seda, **mitu rida ja millise lehe** saad tagasi.
+Nüüd liigud service meetodisse. Sisse tulevad kuus valikulist parameetrit. Neist neli (`categoryId`, `fundingTypeId`, `trainingLanguageId` ja `contentLang`) mõjutavad seda, **milliseid ridu** ja **mis keeles** pärida. Ülejäänud kaks (`limit` ja `page`) mõjutavad seda, **mitu rida ja millise lehe** saad tagasi.
 
 ### Leheküljestamine
 
@@ -239,7 +239,7 @@ Selles taskis on vaja vähemalt kahte kohandatud päringut:
 
 Siin näen õpilasi kõige sagedamini komistamas. Mõtle järgmistele küsimustele:
 - Kuidas kirjutada JPQL tingimus, mis kehtib **ainult siis**, kui parameeter ei ole `null`, ja muidu ei piira midagi?
-- `trainingLang` tuleb sisse **koodina** (`et`/`en`), aga `training` tabelis on `training_language_id`. Kuidas jõuad seose kaudu `language.code` väljani?
+- `trainingLanguageId` tuleb sisse ID-na, `0` tähendab "kõik keeled". Kuidas kirjutada tingimus nii, et `0` korral see ei piira midagi (vaata, kuidas `categoryId` sama asja teeb)?
 - `fundingTypeId` filter käib liitetabeli `training_funding_type` kaudu. Kuidas kontrollida, et koolitusel **on olemas** vastav rahastustüüp, ilma et koolitused tulemuses dubleeruksid?
 
 ### Uue meetodi loomine JPA Buddy abil

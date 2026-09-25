@@ -265,7 +265,7 @@ CREATE TABLE training
     status               int       NOT NULL,
     created_at           timestamp NOT NULL,
     updated_at           timestamp NOT NULL,
-    is_order_only        boolean   NOT NULL,
+    is_orderable         boolean   NOT NULL,
     is_promoted          boolean   NOT NULL,
     CONSTRAINT course_pk PRIMARY KEY (id)
 );

@@ -59,8 +59,8 @@ public class Training {
     private Instant updatedAt;
 
     @NotNull
-    @Column(name = "is_order_only", nullable = false)
-    private Boolean isOrderOnly;
+    @Column(name = "is_orderable", nullable = false)
+    private Boolean isOrderable;
 
     @NotNull
     @Column(name = "is_promoted", nullable = false)

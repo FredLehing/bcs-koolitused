@@ -135,7 +135,7 @@ Näide objekti sees oleva listi puhul:
 
 ## 8. Koosta sisu struktuuridokumendi järgi
 
-Järgi täpselt `docs/mock-wireframe/kokkulepped/mock-wireframe-markmete-struktuur.md` struktuuri ja reegleid vastava märkmete tüübi jaoks (Vaate märkmed või API märkmed) — väljade järjekord, tühjade ridade paigutus, `—` kasutamine kui lisainfot pole, DTO nime paiknemine vahetult body ploki kohal, veateadete kolmerealine formaat jne.
+Järgi täpselt `docs/mock-wireframe/kokkulepped/mock-wireframe-markmete-struktuur.md` struktuuri ja reegleid vastava märkmete tüübi jaoks (Vaate märkmed või API märkmed) — väljade järjekord, tühjade ridade paigutus, `—` kasutamine kui lisainfot pole, DTO nime paiknemine vahetult body pealkirja (`Request body:`/`Response (200):`) all, veateadete kolmerealine formaat jne.
 
 Kui koostad mitut API märget sama vaate jaoks, koosta iga API kutse kohta eraldi plokk.
 
