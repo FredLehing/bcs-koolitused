@@ -21,7 +21,7 @@ Mockupi "Vaatega seotud lisainfo" mainis lisaks ka sortimist ja kalendris kuupä
 | Otsinguväli | Tekstisisend | Vabateksti otsing (nt "AI-Arendaja"), täidetakse enne "Otsi" nupule vajutamist |
 | "Otsi" nupp | Nupp | Käivitab uue `GET /api/trainings` päringu kehtiva otsingusõna ja filtritega |
 | Kategooria valik | Dropdown (select) | Väärtused vastavad `category` kirjetele (nt AI, Tarkvaraarendus, Andmebaasid, Graafika); valikul tehakse uus päring `categoryId`-ga |
-| Keel valik | Dropdown (select) | Väärtused Eesti/Inglise; valikul tehakse uus päring `trainingLang`-iga |
+| Keel valik | Dropdown (select) | Väärtused `GET /api/languages` teenusest, vaikimisi valimata (`trainingLanguageId=0`); valikul tehakse uus päring `trainingLanguageId`-ga |
 | Koolituse kaart (`TrainingCard.vue`) | Korduv element | Kuvab koolituse pealkirja, keele märgist (nt "Eesti"), lühikirjeldust, kategooria/rahastustüübi silte ja "Vaata lähemalt" nuppu; kui `isPromoted` on `true`, kuvatakse lisaks täht-ikoon |
 | "Vaata lähemalt" nupp | Nupp | Suunab kasutaja `CourseView` vaatele, kandes kaasa valitud koolituse `trainingId` |
 | Lehekülje navigatsioon (Eelmine / leheküljenumbrid / Järgmine) | Navigatsioon | Liigub `trainingSummaries` lehtede vahel (`page` parameeter) |
@@ -53,7 +53,7 @@ Query parameetrid (kõik valikulised):
 | `fundingTypeId` | Filtreerib rahastustüübi järgi |
 | `limit` | Lehekülje suurus |
 | `page` | Lehekülje number, alates 0-st |
-| `trainingLang` | Filtreerib õppekeele järgi (`et`/`en`) |
+| `trainingLanguageId` | Filtreerib õppekeele järgi (`language.id`), `0` = kõik |
 | `contentLang` | Määrab tõlgitud väljade keele (`et`/`en`) |
 
 `TrainingSummaryDto.java` — response (200):

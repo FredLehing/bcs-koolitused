@@ -36,8 +36,8 @@ public class TrainingController {
                                       @RequestParam Integer fundingTypeId,
                                       @RequestParam Integer limit,
                                       @RequestParam Integer page,
-                                      @RequestParam String trainingLang,
+                                      @RequestParam Integer trainingLanguageId,
                                       @RequestParam String contentLang) {
-        return trainingService.findFilteredTrainings(categoryId, fundingTypeId, limit, page, trainingLang, contentLang);
+        return trainingService.findFilteredTrainings(categoryId, fundingTypeId, limit, page, trainingLanguageId, contentLang);
     }
 }

@@ -3,14 +3,14 @@
 ## Vaate märkmed
 
 ```text
-Roll: Kõik rollid (külastajale kuvatakse "Logi sisse" ja "Registreeri" nupud, sisselogitud kasutajale peidetud)
-Failinimi: HomeView.vue
-Frontend rada: /
+Roll: Kõik rollid (sh külastajad, sisselogimist ei nõuta)
+Failinimi: TrainingsView.vue
+Frontend rada: /trainings
 
 Vaatega seotud lisainfo:
-Nupule "Võta ühendust" vajutades avatakse ApplicationFormView vaade, nupule "Logi sisse" vajutades LoginView vaade ja nupule "Registreeri" vajutades RegisterView vaade (kõik ilma API kutseta).
-Sektsioonis "Peagi algavad koolitused" kuvatakse kolm koolitust (GET /api/trainings, limit=3). Kategooriate loend (GET /api/categories) kuvatakse otsingu juures. Otsinguriba viib teisele vaatele, mida selles taskis ei defineerita.
-Mõlemad API kutsed käivitatakse vaate avanemisel, mitte kasutaja tegevuse peale.
+Vaate avanemisel tehakse päringud GET /api/trainings, GET /api/categories, GET /api/funding-types ja GET /api/languages (viimased kolm filtrite valikute jaoks); contentLang väärtus võetakse localStorage'ist (vaikimisi "et"), koolituse keele filter on vaikimisi valimata (trainingLanguageId=0). Koolituse keele, kategooria või rahastuse filtri muutmisel tehakse uus päring vastavate query parameetritega ja page lähtestatakse 0-ks. Eelmine/Järgmine ja leheküljenumbrid muudavad page väärtust.
+Koolituse kaardil (TrainingCard.vue) kuvatakse "Tellitav" märgis, kui isOrderable = true, ja täht-ikoon, kui isPromoted = true.
+Nupule "Vaata lähemalt" vajutades suunatakse kasutaja TrainingView vaatele (/training?trainingId={id}).
 ```
 
 ## API märkmed — GET /api/trainings
@@ -23,7 +23,7 @@ categoryId: Integer — kategooria filter, 0 = kõik
 fundingTypeId: Integer — rahastustüübi filter, 0 = kõik
 limit: Integer — koolituste arv lehel
 page: Integer — lehekülje number, algab 0-st
-trainingLang: String — õppekeele filter ("et"/"en")
+trainingLanguageId: Integer — õppekeele filter, 0 = kõik
 contentLang: String — tõlgitud väljade keel ("et"/"en")
 
 Response (200):
@@ -53,7 +53,7 @@ TrainingSummaryDto.java
 }
 
 API teenuse lisainfo:
-HomeView kutsub: categoryId=0&fundingTypeId=0&limit=3&page=0&trainingLang=et&contentLang=et
+Tulemus on sorteeritud: esile tõstetud koolitused (isPromoted = true) eespool, seejärel title järgi tähestikuliselt.
 totalPages ja totalElements kirjeldavad kogu filtreeritud tulemushulka. fundingTypes võib olla tühi list (training_funding_type kaudu).
 
 Veateated: —
@@ -65,7 +65,7 @@ Veateated: —
 API: GET /api/categories
 
 Query parameetrid:
-contentLang: String — categoryName keel ("et"/"en") (valikuline)
+contentLang: String — categoryName keel ("et"/"en")
 
 Response (200):
 CategoryDto.java
@@ -78,7 +78,53 @@ CategoryDto.java
 ]
 
 API teenuse lisainfo:
-Tagastab kõik süsteemis olevad kategooriad (category_translation kaudu tõlgitud).
+Tagastab kõik süsteemis olevad kategooriad contentLang keeles (category_translation kaudu). TrainingsView kasutab neid "Koolituse kategooria" filtri valikutena.
+
+Veateated: —
+```
+
+## API märkmed — GET /api/funding-types
+
+```text
+API: GET /api/funding-types
+
+Query parameetrid:
+contentLang: String — fundingTypeName keel ("et"/"en")
+
+Response (200):
+FundingTypeDto.java
+[
+  {
+    "fundingTypeId": 1,
+    "fundingTypeName": "Töötukassa"
+  },
+  ...
+]
+
+API teenuse lisainfo:
+Tagastab kõik süsteemis olevad rahastustüübid contentLang keeles (funding_type_translation kaudu). TrainingsView kasutab neid "Rahastus" filtri valikutena. FundingTypeDto on sama, mida kasutab GET /api/trainings vastuse fundingTypes list.
+
+Veateated: —
+```
+
+## API märkmed — GET /api/languages
+
+```text
+API: GET /api/languages
+
+Response (200):
+SystemLanguageDto.java
+[
+  {
+    "languageId": 1,
+    "languageCode": "et",
+    "languageName": "Eesti"
+  },
+  ...
+]
+
+API teenuse lisainfo:
+Tagastab kõik süsteemis olevad keeled (language tabel). TrainingsView kasutab neid "Koolituse keel" filtri valikutena (languageId → trainingLanguageId). languageName ei ole tõlgitud, seega contentLang parameetrit pole.
 
 Veateated: —
 ```
