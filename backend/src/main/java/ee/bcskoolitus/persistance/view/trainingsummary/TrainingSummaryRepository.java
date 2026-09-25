@@ -17,5 +17,4 @@ public interface TrainingSummaryRepository extends JpaRepository<TrainingSummary
             order by ts.training.isPromoted desc , ts.title""")
     Page<TrainingSummary> findFilteredTrainingSummariesBy(Integer categoryId, Integer fundingTypeId, String trainingLang, String contentLang, Pageable pageable);
 
-
 }
