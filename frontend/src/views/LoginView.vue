@@ -1,3 +1,31 @@
+<script>
+import LoginService from '@/api-services/LoginService.js'
+
+export default {
+  name: 'LoginView',
+  data() {
+    return {
+      email: '',
+      password: '',
+      errorMessage: '',
+    }
+  },
+  methods: {
+    login() {
+      this.errorMessage = ''
+      if (this.email === '' || this.password === '') {
+        this.errorMessage = 'Täida kõik väljad'
+      } else {
+        LoginService.sendLoginRequest(this.email, this.password)
+          .then(response => this.handleLoginResponse(response.data))
+          .catch()
+          .finally()
+      }
+    },
+  },
+}
+</script>
+
 <template>
   <div class="container flex-grow-1 d-flex flex-column justify-content-center">
     <div class="row">
@@ -42,24 +70,3 @@
     </div>
   </div>
 </template>
-
-<script>
-export default {
-  name: 'LoginView',
-  data() {
-    return {
-      email: '',
-      password: '',
-      errorMessage: '',
-    }
-  },
-  methods: {
-    login() {
-      this.errorMessage = ''
-      if (this.email === '' || this.password === '') {
-        this.errorMessage = 'Täida kõik väljad'
-      }
-    },
-  },
-}
-</script>

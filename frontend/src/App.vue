@@ -14,8 +14,12 @@
         <div class="navbar-nav gap-4 mx-auto bg-primary bg-opacity-50 rounded-pill px-3">
           <a class="nav-link" href="#">Koolitused</a>
           <a class="nav-link" href="#">Teenused</a>
-          <div>
-            <a class="dropdown" href="#">Ettevõttest</a>
+
+          <div class="dropdown">
+            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Ettevõttest </a>
+            <div class="dropdown-menu bg-primary bg-opacity-50">
+              <a class="nav-link" href="#">Lektorid</a>
+            </div>
           </div>
 
           <a class="nav-link" href="#">Blogi</a>
@@ -34,24 +38,10 @@
 
     <RouterView />
 
-    <footer class="mt-auto">
-      <div class="container">
-        <div class="row">
-          <div class="col-6">
-            <div><PhFacebookLogo /> Leia meid Facebookist</div>
-            <div><PhMapPin /> BCS Koolitus AS, Aia 7, Tallinn</div>
-          </div>
-
-          <div class="col-6 text-end">
-            <div>Privaatsus-ja kasutustingimused</div>
-            <div>Õppekorraldus-ja ostutingimused</div>
-          </div>
-        </div>
-      </div>
-    </footer>
+    <FooterComponent />
   </div>
 </template>
 
 <script setup>
-import { PhFacebookLogo, PhMapPin } from '@phosphor-icons/vue'
+import FooterComponent from '@/components/FooterComponent.vue'
 </script>
