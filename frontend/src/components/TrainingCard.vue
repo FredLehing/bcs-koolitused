@@ -16,11 +16,13 @@ export default {
   <div class="card mb-4">
     <h5 class="card-header">
       {{ training.title }}
-      <span class="fi" :class="trainingLanguageFlag"></span>
     </h5>
-    <div class="card-body">
+    <div class="card-body d-flex justify-content-between">
       <p class="card-text">{{ training.shortDescription }}</p>
-      <a href="#" class="btn btn-primary">Vaata lähemalt</a>
+      <div>
+        <span class="fi" :class="trainingLanguageFlag"></span>
+        <a href="#" class="btn btn-primary">Vaata lähemalt</a>
+      </div>
     </div>
   </div>
 </template>
