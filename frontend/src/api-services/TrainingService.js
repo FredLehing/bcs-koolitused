@@ -2,14 +2,14 @@ import axios from 'axios'
 
 
 export default {
-  sendGetTrainingsRequest(categoryId, fundingTypeId, limit, page, trainingLang, contentLang) {
+  sendGetTrainingsRequest(categoryId, fundingTypeId, limit, page, trainingLanguageId, contentLang) {
     return axios.get('/api/trainings', {
       params: {
         categoryId: categoryId,
         fundingTypeId: fundingTypeId,
         limit: limit,
         page: page,
-        trainingLang: trainingLang,
+        trainingLanguageId: trainingLanguageId,
         contentLang: contentLang,
       },
     })

@@ -12,7 +12,7 @@ export default {
       fundingTypeId: 0,
       limit: 3,
       page: 0,
-      trainingLang: 'et',
+      trainingLanguageId: 0,
       contentLang: 'et',
       totalPages: 0,
       trainingSummaries: [],
@@ -25,7 +25,7 @@ export default {
         this.fundingTypeId,
         this.limit,
         this.page,
-        this.trainingLang,
+        this.trainingLanguageId,
         this.contentLang,
       )
         .then((response) => this.handleGetTrainings(response))
@@ -45,6 +45,10 @@ export default {
 
 <template>
   <div class="container">
-    <TrainingCard v-for="training in trainingSummaries" :key="training.trainingId" :training="training"/>
+    <TrainingCard
+      v-for="training in trainingSummaries"
+      :key="training.trainingId"
+      :training="training"
+    />
   </div>
 </template>
