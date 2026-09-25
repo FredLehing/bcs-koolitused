@@ -1,5 +1,6 @@
 <script>
 import TrainingService from '@/api-services/TrainingService.js'
+import NavigationService from "@/services/NavigationService.js";
 
 export default {
   name: 'TrainingsView',
@@ -26,7 +27,7 @@ export default {
         this.contentLang,
       )
         .then((response) => this.handleGetTrainings(response))
-        .catch()
+        .catch(() => NavigationService.navigateToErrorView())
         .finally()
     },
     handleGetTrainings(response) {
@@ -42,9 +43,9 @@ export default {
 
 <template>
   <div class="container">
-    <h4> Koolitused on nüüd siin</h4>
-    <div v-for="training in trainingSummaries" :key="training.trainingId" >
-      {{training.title}}
+    <h4>Koolitused on nüüd siin</h4>
+    <div v-for="training in trainingSummaries" :key="training.trainingId">
+      {{ training.title }}
     </div>
   </div>
 </template>
