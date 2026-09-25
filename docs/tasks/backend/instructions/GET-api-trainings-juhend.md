@@ -1,6 +1,6 @@
 # Juhend: GET /api/trainings
 
-**Taski fail:** `Koolituste-nimekirja-paring.md`
+**Taski fail:** `GET-api-trainings.md`
 **Kontroller:** `TrainingController.java` (uus, alampaketti `controller/training/`)
 **Implementeerimise voog:** RestController → Service → Repository → Service → Mapper → RestController
 
@@ -157,7 +157,7 @@ Kontrolli, kas DTO-d on juba olemas:
 
 > **Mõtle:** Kas mõni neist DTO-dest võiks tulevikus minna ka teiste kontrollerite kasutusse? Näiteks rahastustüübi `id` + `name` paar. Kui jah, siis kuulub see backend/CLAUDE.md järgi paketti `controller/common/dto/`.
 
-> **Väljade järjekord:** Välimises DTO-s tulevad lihtväljad (`page`, `totalPages`, `totalElements`) **enne** listi-välja. Nii nõuab backend/CLAUDE.md.
+> **Väljade järjekord:** Välimises DTO-s tulevad lihtväljad (`totalPages`, `totalElements`) **enne** listi-välja. Nii nõuab backend/CLAUDE.md.
 
 > **Mitme allikaga DTO:** Kuna väljad tulevad mitmest entiteedist, ei piisa JPA Buddy ühe entiteedi generaatorist. Loo DTO-de struktuur taskifaili JSON näidise järgi. JPA Buddy abil (paremklõps entiteedil → New → DTO, **Flat** struktuur) võid teha alustuseks põhja ja selle siis käsitsi korda teha.
 
@@ -340,7 +340,7 @@ private void kontrolliMidagiHelper(VäljaTüüp väljaNimi) {
 - [ ] Repository meetoditel on `@Query` annotatsioon Named parameters stiilis
 - [ ] Mapperil on `@Mapper(componentModel = "spring")`
 - [ ] Kõik `@Mapping` annotatsioonid on täidetud: igal target-väljal on kas `source` või `ignore = true`
-- [ ] `page`, `totalPages` ja `totalElements` kajastavad kogu filtreeritud hulka
+- [ ] `totalPages` ja `totalElements` kajastavad kogu filtreeritud hulka
 - [ ] Koolitusel ilma rahastustüüpideta on `fundingTypes` tühi list
 - [ ] Meetodite järjekord: `public` enne `private`-t, järjestatud väljakutsumise hierarhia järgi
 - [ ] Kood kompileerub ja endpoint on Swagger UI-s nähtav

@@ -1,10 +1,10 @@
 # Koolituste nimekirja päring
 
-**Teenus:** `GET /api/trainings?categoryId={categoryId}&fundingTypeId={fundingTypeId}&limit={limit}&page={page}&trainingLang={trainingLang}&translationLang={translationLang}`
+**Teenus:** `GET /api/trainings?categoryId={categoryId}&fundingTypeId={fundingTypeId}&limit={limit}&page={page}&trainingLang={trainingLang}&contentLang={contentLang}`
 
-**Vaste balsamic mockupis:** TrainingsView, lehekülg 1/1 (vt lisatud pilt `Koolituste-nimekirja-paring.png`)
+**Kasutav vaade:** `TrainingsView.vue` (`/trainings`), mockupis lehekülg 1/1
 
-![Mockup](./Koolituste-nimekirja-paring.png)
+![Mockup](../../mock-wireframe/pdf-images/TrainingsView.png)
 
 ## Sisend
 
@@ -31,7 +31,6 @@ Mockupi API URL-is sisaldus lisaks ka `sort={sort}` parameeter, kuid see on task
 
 ```json
 {
-  "page": 0,
   "totalPages": 1,
   "totalElements": 2,
   "trainingSummaries": [
@@ -66,7 +65,7 @@ Mockupi API URL-is sisaldus lisaks ka `sort={sort}` parameeter, kuid see on task
 
 Väljade selgitused:
 
-- `page`, `totalPages`, `totalElements` — leheküljestamise metaandmed (kogu tulemushulga ja lehitsemise jaoks), mitte ainult tagastatava lehe kohta.
+- `totalPages`, `totalElements` — leheküljestamise metaandmed (kogu tulemushulga ja lehitsemise jaoks), mitte ainult tagastatava lehe kohta.
 - `isOrderOnly` — pärineb veerust `training.is_order_only`.
 - `isPromoted` — pärineb veerust `training.is_promoted`.
 - `fundingTypes` — koolitusele määratud rahastustüüpide loend (`training_funding_type` kaudu). Koolitusel võib olla null, üks või mitu rahastustüüpi (näide: koolitusel id=2 pole ühtegi rahastustüüpi, seega tühi list).
@@ -226,7 +225,7 @@ Olematu `categoryId`/`fundingTypeId`/`trainingLang` väärtuse korral ei ole teg
 
 - [ ] Endpoint `GET /api/trainings` on olemas ja tagastab `TrainingSummaryDto` struktuuriga vastuse
 - [ ] Kõik loetletud query parameetrid (`categoryId`, `fundingTypeId`, `limit`, `page`, `trainingLang`, `contentLang`) on valikulised ja toimivad kirjeldatud viisil
-- [ ] `page`/`totalPages`/`totalElements` kajastavad korrektselt kogu (filtreeritud) tulemushulka, mitte ainult tagastatud lehte
+- [ ] `totalPages`/`totalElements` kajastavad korrektselt kogu (filtreeritud) tulemushulka, mitte ainult tagastatud lehte
 - [ ] `title`, `shortDescription`, `categoryName`, `fundingTypeName` väljad on tõlgitud `contentLang` parameetri järgi
 - [ ] Koolitus, millel pole ühtegi rahastustüüpi, tagastab `fundingTypes` väljana tühja listi (mitte `null` ega viga)
 - [ ] Filtreerimine `categoryId`, `fundingTypeId` ja `trainingLang` järgi annab korrektse alamhulga andmebaasi näidisandmete põhjal

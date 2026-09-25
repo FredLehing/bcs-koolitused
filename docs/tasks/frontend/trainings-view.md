@@ -4,15 +4,15 @@
 
 **Roll:** Kõik rollid (sh külastajad, sisselogimist ei nõuta)
 
-**Vaste balsamic mockupis:** "TrainingsView", lehekülg 1/1 (vt lisatud pilt `Koolituste-sirvimine-ja-filtreerimine.png`)
+**Vaste mockupis:** "TrainingsView", lehekülg 1/1 (vt pilt `TrainingsView.png`)
 
-![Mockup](./Koolituste-sirvimine-ja-filtreerimine.png)
+![Mockup](../../mock-wireframe/pdf-images/TrainingsView.png)
 
 ## Kasutajavoog
 
 Kasutaja avab avalikult ligipääsetava koolituste nimekirja vaate (sisselogimist ei nõuta). Vaates kuvatakse leheküljestatud koolituste kaardid koos otsingu, kategooria- ja keelefiltriga. Otsingusõna sisestamisel ja "Otsi" nupule vajutamisel, samuti kategooria või keele filtri muutmisel, tehakse uus `GET /api/trainings` päring vastavate query parameetritega ning tulemus värskendatakse. Iga koolituse kaardi "Vaata lähemalt" nupule vajutades suunatakse kasutaja `CourseView` vaatele valitud koolituse kohta. Lehekülgede vahel liigutakse "Eelmine"/"Järgmine" nuppude ja otseste leheküljenumbrite abil.
 
-Mockupi "Vaatega seotud lisainfo" mainis lisaks ka sortimist ja kalendris kuupäeva muutmist, kuid kuna kumbki pole wireframe'il tegelikult nähtav ega backend kontraktis olemas (vt `docs/tasks/backend/Koolituste-nimekirja-paring.md` "Avatud küsimused"), on need sellest taskist teadlikult välja jäetud.
+Mockupi "Vaatega seotud lisainfo" mainis lisaks ka sortimist ja kalendris kuupäeva muutmist, kuid kuna kumbki pole wireframe'il tegelikult nähtav ega backend kontraktis olemas (vt `docs/tasks/backend/GET-api-trainings.md` "Avatud küsimused"), on need sellest taskist teadlikult välja jäetud.
 
 ## Kasutajaliidese elemendid
 
@@ -43,7 +43,7 @@ Wireframe'il nähtav ülemine peamenüü (Koolitused, Teenused, Ettevõttest ▾
 
 ### `GET /api/trainings`
 
-**Backend task:** vt `docs/tasks/backend/Koolituste-nimekirja-paring.md` (backend realisatsiooni veel ei ole — `backend/src/main/java` alt ei leitud selle URL-iga kontrollerit, ainuke olemasolev on `LoginController.java`).
+**Backend task:** vt `docs/tasks/backend/GET-api-trainings.md` (backend on olemas: `TrainingController.java` meetod `findFilteredTrainings`, vastus `TrainingSummaryDto.java`).
 
 Query parameetrid (kõik valikulised):
 
@@ -60,7 +60,6 @@ Query parameetrid (kõik valikulised):
 
 ```json
 {
-  "page": 0,
   "totalPages": 1,
   "totalElements": 2,
   "trainingSummaries": [
@@ -90,7 +89,7 @@ Query parameetrid (kõik valikulised):
 | 400 Bad Request | — (pole hetkel defineeritud) | — | Suunatakse üldisele veavaatele (`NavigationService.navigateToErrorView()`) |
 | 500 Internal Server Error | — (pole hetkel defineeritud) | — | Suunatakse üldisele veavaatele (`NavigationService.navigateToErrorView()`) |
 
-**Lahtine ots — otsinguväli:** Wireframe'il on otsinguväli ("Otsi" nupuga) ja "Vaatega seotud lisainfo" tekst viitab, et otsingusõna muutmisel tehakse uus `GET /api/trainings` päring — aga backend taski (`docs/tasks/backend/Koolituste-nimekirja-paring.md`) query parameetrite loetelus **ei ole ühtegi otsingusõna/pealkirja-põhist parameetrit** (nt `search`/`keyword`/`title`). See task kirjeldab otsinguvälja kui UI elementi, aga selle täpne query parameeter tuleb backend taski täiendades kokku leppida (soovitavalt `skill-loo-backend-task` või käsitsi backend taski muutmisega), enne kui otsingufunktsionaalsus reaalselt juhtmestada saab.
+**Lahtine ots — otsinguväli:** Wireframe'il on otsinguväli ("Otsi" nupuga) ja "Vaatega seotud lisainfo" tekst viitab, et otsingusõna muutmisel tehakse uus `GET /api/trainings` päring — aga backend taski (`docs/tasks/backend/GET-api-trainings.md`) query parameetrite loetelus **ei ole ühtegi otsingusõna/pealkirja-põhist parameetrit** (nt `search`/`keyword`/`title`). See task kirjeldab otsinguvälja kui UI elementi, aga selle täpne query parameeter tuleb backend taski täiendades kokku leppida (soovitavalt `skill-loo-backend-task` või käsitsi backend taski muutmisega), enne kui otsingufunktsionaalsus reaalselt juhtmestada saab.
 
 ## Komponendid ja failistruktuur
 
