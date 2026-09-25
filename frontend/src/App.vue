@@ -11,20 +11,21 @@
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navMenu">
-        <div class="navbar-nav mx-auto bg-primary-subtle rounded-pill px-3">
+        <div class="navbar-nav gap-4 mx-auto bg-primary bg-opacity-50 rounded-pill px-3">
           <a class="nav-link" href="#">Koolitused</a>
           <a class="nav-link" href="#">Teenused</a>
+          <div>
+            <a class="dropdown" href="#">Ettevõttest</a>
+          </div>
 
-          <a class="nav-link" href="#">Ettevõttest</a>
           <a class="nav-link" href="#">Blogi</a>
           <a class="nav-link" href="#">Kontakt</a>
           <a class="nav-link" href="#">Tagasiside</a>
         </div>
 
         <div>
-          <a class="btn btn-outline-secondary btn-sm me-3" href="#">Võta ühendust</a>
           <RouterLink class="btn btn-outline-secondary btn-sm me-3" to="/login"
-          >Logi sisse</RouterLink
+            >Logi sisse</RouterLink
           >
           <a class="btn btn-outline-secondary btn-sm" href="#">Registreeri</a>
         </div>
@@ -37,8 +38,8 @@
       <div class="container">
         <div class="row">
           <div class="col-6">
-            <div><PhFacebookLogo/> Leia meid Facebookist</div>
-            <div><PhMapPin/> BCS Koolitus AS, Aia 7, Tallinn</div>
+            <div><PhFacebookLogo /> Leia meid Facebookist</div>
+            <div><PhMapPin /> BCS Koolitus AS, Aia 7, Tallinn</div>
           </div>
 
           <div class="col-6 text-end">
