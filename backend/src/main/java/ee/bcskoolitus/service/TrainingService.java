@@ -27,9 +27,9 @@ public class TrainingService {
     private final FundingTypeTranslationRepository fundingTypeTranslationRepository;
     private final FundingTypeTranslationMapper fundingTypeTranslationMapper;
 
-    public TrainingSummaryDto findFilteredTrainings(Integer categoryId, Integer fundingTypeId, Integer limit, Integer page, String trainingLang, String contentLang) {
+    public TrainingSummaryDto findFilteredTrainings(Integer categoryId, Integer fundingTypeId, Integer limit, Integer page, Integer trainingLanguageId, String contentLang) {
         Pageable pageable = PageRequest.of(page, limit);
-        Page<TrainingSummary> filteredTrainingSummaryPage = trainingSummaryRepository.findFilteredTrainingSummariesBy(categoryId, fundingTypeId, trainingLang, contentLang, pageable);
+        Page<TrainingSummary> filteredTrainingSummaryPage = trainingSummaryRepository.findFilteredTrainingSummariesBy(categoryId, fundingTypeId, trainingLanguageId, contentLang, pageable);
         List<TrainingSummaryItemDto> trainingSummaryItemDtos = findAndCreateTrainingSummaryItemDtos(contentLang, filteredTrainingSummaryPage);
         return createTrainingSummaryDto(filteredTrainingSummaryPage, trainingSummaryItemDtos);
     }

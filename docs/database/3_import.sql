@@ -75,8 +75,8 @@ INSERT INTO participant (id, user_id, name, profile_id, created_at) VALUES
     (1, 2, 'Anna Saar', 1, '2026-09-05 09:00:00');
 
 -- Table: training
-INSERT INTO training (id, user_id, default_lecturer_id, category_id, training_language_id, location_id, status, created_at, updated_at, is_order_only, is_promoted) VALUES
-    (1, 1, 1, 1, 1, 1, 1, '2026-08-01 09:00:00', '2026-08-01 09:00:00', false, true),
+INSERT INTO training (id, user_id, default_lecturer_id, category_id, training_language_id, location_id, status, created_at, updated_at, is_orderable, is_promoted) VALUES
+    (1, 1, 1, 1, 1, 1, 1, '2026-08-01 09:00:00', '2026-08-01 09:00:00', true, true),
     (2, 1, 2, 3, 1, 2, 1, '2026-08-05 10:00:00', '2026-08-05 10:00:00', false, false);
 
 -- Table: funding_type

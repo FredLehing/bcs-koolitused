@@ -62,14 +62,18 @@ Nupule "Tagasi" vajutades suunatakse kasutaja tagasi /entities lehele (ilma API 
 ```text
 API: <METOOD> <path>
 
-<RequestDtoClassName.java>
+Query parameetrid:
+<nimi>: <tüüp> — <väga lühike selgitus>
+<nimi>: <tüüp> — <väga lühike selgitus>
+
 Request body:
+<RequestDtoClassName.java>
 {
   ...päris JSON näidis...
 }
 
-<ResponseDtoClassName.java>
 Response (200):
+<ResponseDtoClassName.java>
 {
   ...päris JSON näidis...
 }
@@ -88,13 +92,19 @@ message: "<backend message väli>"
 ```
 
 **Reeglid:**
-- Iga plokk (`API:`, DTO+body paar, `API teenuse lisainfo:`, iga veajuhtum) on eraldatud tühja reaga.
-- `API` rida — meetod + path muster, nii nagu see on (või saab olema) backend controller'is; uue teenuse path tuletatakse URL-ide kokkuleppe järgi (vt jaotis 3). Path muster peab täpselt vastama backendi mustrile (nt path variable `{entityId}`, mitte query param). Konkreetsed väärtused paistavad juba `Request body`/`Response` näidetest, seega `API` rida ei vaja eraldi näidis-URL'i.
-- **DTO nimi käib alati vahetult vastava body ploki kohal**, mitte eraldi ühtse `DTO:` reana üleval:
-    - Kui operatsioon võtab sisse request body, kirjuta `<RequestDtoClassName.java>` real vahetult enne `Request body:` plokki.
-    - Response DTO nimi (`<ResponseDtoClassName.java>`) käib vahetult enne `Response (200):` plokki.
-    - Kui operatsioonil pole request body't (nt lihtne GET/DELETE), jäta `Request body` osa täielikult ära ja alusta otse response DTO-st.
-    - Kui operatsioonil pole response body't (nt POST/PUT/DELETE, mis tagastab tühja 200), kirjuta `Response (200): NONE` ilma DTO nimeta selle kohal.
+- Iga plokk (`API:`, `Query parameetrid:`, DTO+body paar, `API teenuse lisainfo:`, iga veajuhtum) on eraldatud tühja reaga.
+- `API` rida — meetod + path muster, nii nagu see on (või saab olema) backend controller'is; uue teenuse path tuletatakse URL-ide kokkuleppe järgi (vt jaotis 3). Path muster peab täpselt vastama backendi mustrile (nt path variable `{entityId}`, mitte query param). Konkreetsed väärtused paistavad juba `Request body`/`Response` näidetest, seega `API` rida ei vaja eraldi näidis-URL'i. Query parameetreid `API` reale ei kirjutata (nt `API: GET /api/trainings`) — need käivad `Query parameetrid` sektsiooni.
+- `Query parameetrid` — tuleb kohe `API` rea järel (ühe tühja reaga eraldatult). Iga parameeter oma real kujul `<nimi>: <tüüp> — <selgitus>`:
+    - `tüüp` — Java tüüp nagu controlleris (nt `Integer`, `String`)
+    - `selgitus` — paar sõna, sh eriväärtused (nt `0 = kõik`)
+    - Parameetrid on vaikimisi kohustuslikud; valikulise parameetri selgituse lõppu lisa `(valikuline)`
+    - Kui teenusel query parameetreid pole, jäta sektsioon täielikult ära (nagu `Request body`)
+    - Path variable'id (`{entityId}`) jäävad `API` rea path'i mustrisse ega kordu siin
+- **DTO nimi käib alati vahetult vastava body pealkirja all**, enne JSON näidist — mitte eraldi ühtse `DTO:` reana üleval:
+    - Kui operatsioon võtab sisse request body, kirjuta `<RequestDtoClassName.java>` vahetult `Request body:` rea järele.
+    - Response DTO nimi (`<ResponseDtoClassName.java>`) käib vahetult `Response (200):` rea järele.
+    - Kui operatsioonil pole request body't (nt lihtne GET/DELETE), jäta `Request body` osa täielikult ära ja alusta otse `Response (200):` plokist.
+    - Kui operatsioonil pole response body't (nt POST/PUT/DELETE, mis tagastab tühja 200), kirjuta `Response (200): NONE` ilma DTO nimeta.
 - **JSON massiivide (array) reegel:** Kui JSON näidises on massiiv (juurtasemel või objekti sees), pannakse näidisesse **ainult üks element**, mille järel on koma ja järgmisel real `...` (kolm punkti), mis viitab sellele, et elemente võib olla rohkem.
 - `API teenuse lisainfo` — lühike (1–3 rida) vabas vormis märkus teenuse käitumise kohta, mis pole väljanimedest endist ilmne. Näiteks: filtri erikäitumine (`parentId=0` tagastab kõik), valikulised väljad (`imageData` võib olla tühi string), soft delete, vms. Kui teenusel pole midagi sellist lisada, jäta väärtuseks `—`.
 - `Veateated` — iga veajuhtum on eraldi kolmerealine plokk, alati sama kolme võtmega samas järjekorras:
@@ -109,15 +119,15 @@ message: "<backend message väli>"
 ```text
 API: POST /api/login
 
-LoginRequestDto.java
 Request body:
+LoginRequestDto.java
 {
   "username": "admin",
   "password": "123"
 }
 
-LoginResponseDto.java
 Response (200):
+LoginResponseDto.java
 {
   "userId": 1,
   "roleName": "admin"
@@ -137,8 +147,8 @@ message: "Vale kasutajanimi või parool"
 ```text
 API: POST /api/entity
 
-EntityCreateRequestDto.java
 Request body:
+EntityCreateRequestDto.java
 {
   "parentId": 2,
   "entityName": "Näidisolem",
@@ -211,7 +221,7 @@ Konkreetse objekti ID antakse vaatele query stringis: `/entity?entityId={id}`.
 | Mida teenus teeb | Tee |
 |---|---|
 | tagastab nimekirja | `GET /api/entities` |
-| tagastab filtreeritud nimekirja | `GET /api/entities?parentId=2` |
+| tagastab filtreeritud nimekirja | `GET /api/entities` + query parameeter `parentId` |
 | tagastab ühe objekti | `GET /api/entity/{entityId}` |
 | loob ühe objekti | `POST /api/entity` |
 | muudab ühte objekti | `PUT /api/entity/{entityId}` |

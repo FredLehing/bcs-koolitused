@@ -18,7 +18,7 @@ public class TrainingSummaryItemDto implements Serializable {
     private String shortDescription;
     private Integer categoryId;
     private String categoryName;
-    private Boolean isOrderOnly;
+    private Boolean isOrderable;
     private Boolean isPromoted;
     private List<FundingTypeDto> fundingTypes;
 }
