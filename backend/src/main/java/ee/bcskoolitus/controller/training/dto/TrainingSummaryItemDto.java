@@ -13,6 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 public class TrainingSummaryItemDto implements Serializable {
     private Long trainingId;
+    private String trainingLanguageCode;
     private String title;
     private String shortDescription;
     private Integer categoryId;

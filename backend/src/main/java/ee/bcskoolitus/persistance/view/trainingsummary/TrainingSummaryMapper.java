@@ -9,6 +9,7 @@ import java.util.List;
 public interface TrainingSummaryMapper {
 
     @Mapping(source = "training.id", target = "trainingId")
+    @Mapping(source = "trainingLanguageCode", target = "trainingLanguageCode")
     @Mapping(source = "title", target = "title")
     @Mapping(source = "shortDescription", target = "shortDescription")
     @Mapping(source = "categoryId", target = "categoryId")
