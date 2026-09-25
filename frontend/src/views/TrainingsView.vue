@@ -45,7 +45,6 @@ export default {
 
 <template>
   <div class="container">
-    <h4>Koolitused on nüüd siin</h4>
     <TrainingCard v-for="training in trainingSummaries" :key="training.trainingId" :training="training"/>
   </div>
 </template>

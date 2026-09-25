@@ -11,6 +11,9 @@ import router from './router'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.js'
 
+// Lipuikoonid (flag-icons)
+import 'flag-icons/css/flag-icons.min.css'
+
 // Extra imports
 // leafleti css kujindused
 import "leaflet/dist/leaflet.css";
