@@ -1,9 +1,11 @@
 <script>
 import TrainingService from '@/api-services/TrainingService.js'
-import NavigationService from "@/services/NavigationService.js";
+import NavigationService from '@/services/NavigationService.js'
+import TrainingCard from '@/components/TrainingCard.vue'
 
 export default {
   name: 'TrainingsView',
+  components: { TrainingCard },
   data() {
     return {
       categoryId: 0,
@@ -44,8 +46,6 @@ export default {
 <template>
   <div class="container">
     <h4>Koolitused on nüüd siin</h4>
-    <div v-for="training in trainingSummaries" :key="training.trainingId">
-      {{ training.title }}
-    </div>
+    <TrainingCard v-for="training in trainingSummaries" :key="training.trainingId" :training="training"/>
   </div>
 </template>
