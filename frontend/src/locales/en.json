@@ -27,7 +27,13 @@
   },
 
   "login": {
-    "title": "Log In"
+    "title": "Log-in",
+    "email": "Email",
+    "password": "Password",
+    "rememberMe": "Remember me",
+    "logIn": "Log-in",
+    "forgotPassword": "Forgot Password",
+    "errorMessage": "Fill all fields""
   },
   "trainingForm": {
     "title": {

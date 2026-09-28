@@ -26,7 +26,13 @@
     "home": "Avalehele"
   },
   "login": {
-    "title": "Sisselogimine"
+    "title": "Sisselogimine",
+    "email": "Email",
+    "password": "Parool",
+    "rememberMe": "Jäta mind meelde",
+    "logIn": "Logi sisse",
+    "forgotPassword": "Unustasid salasõna",
+    "errorMessage": "Täida kõik väljad"
   },
   "trainingForm": {
     "title": {

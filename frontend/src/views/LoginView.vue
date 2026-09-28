@@ -42,7 +42,7 @@ export default {
       <div class="col-6"></div>
 
       <div class="col-6 text-center">
-        <h1>Sisselogimine</h1>
+        <h1>{{ $t('login.title') }}</h1>
         <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
 
         <div class="form-floating mb-3 w-75 mx-auto">
@@ -63,18 +63,22 @@ export default {
             id="floatingPassword"
             placeholder="Parool"
           />
-          <label for="floatingPassword">Parool</label>
+          <label for="floatingPassword">{{ $t('login.password') }}</label>
         </div>
 
         <div class="form-check mb-3 d-inline-block">
           <input type="checkbox" class="form-check-input" id="rememberMe" />
-          <label class="form-check-label" for="rememberMe">Jäta mind meelde</label>
+          <label class="form-check-label" for="rememberMe">{{
+            $t('login.rememberMe')
+          }}</label>
         </div>
         <div></div>
-        <button @click="login" type="button" class="btn btn-primary">Logi sisse</button>
+        <button @click="login" type="button" class="btn btn-primary">
+          {{ $t('login.logIn') }}
+        </button>
 
         <div class="mt-2">
-          <a href="#">Unustasid salasõna?</a>
+          <a href="#">{{ $t('login.forgotPassword') }}</a>
         </div>
       </div>
     </div>
