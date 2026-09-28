@@ -1,5 +1,7 @@
 <script>
 import { PhShootingStar } from '@phosphor-icons/vue'
+import { mapState } from 'pinia'
+import { useLanguageStore } from '@/stores/languageStore.js'
 
 export default {
   name: 'TrainingCard',
@@ -8,9 +10,7 @@ export default {
     training: Object,
   },
   computed: {
-    trainingLanguageFlag() {
-      return this.training.trainingLanguageCode === 'et' ? 'fi-ee' : 'fi-gb'
-    },
+    ...mapState(useLanguageStore, ['getFlagClass']),
   },
 }
 </script>
@@ -35,7 +35,7 @@ export default {
         </div>
       </div>
       <div class="d-flex align-items-center flex-column gap-3 fs-5">
-        <span class="fi fs-3" :class="trainingLanguageFlag"></span>
+        <span class="fi fs-3" :class="getFlagClass(training.trainingLanguageCode)"></span>
         <span v-if="training.isOrderable" class="badge text-bg-success">Tellitav</span>
         <RouterLink to="/training" class="btn btn-primary">Vaata lähemalt</RouterLink>
       </div>

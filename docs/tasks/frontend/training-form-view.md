@@ -32,12 +32,12 @@ Toimumiskorrad (`course` tabel, kuupäevad, hind) ei kuulu selle vaate skoopi �
 |---|---|---|
 | Pealkiri | Tekst | `new-training`: "Lisa uus koolitus"; `update`: "Muuda koolitust"; `new-translation`: "Lisa koolituse tõlge" |
 | Staatuse märgis | Badge | "Mustand" (`status = "U"`) või "Publitseeritud" (`"P"`); ainult `update` ja `new-translation` |
-| Tõlgete lipukesed | Nupud (`TranslationFlags`) | Store'i `contentLanguages` iga keele kohta lipp (`flag-icons`); tõlge olemas → värviline, puudub → hall; avatud tõlke lipp raamiga. Ainult `update` ja `new-translation` |
-| Kategooria | Rippmenüü | `GET /api/categories`, avatud tõlke keeles; kohustuslik |
+| Tõlgete lipukesed | Nupud (`TranslationFlags`) | Store'i `supportedLanguages` iga keele kohta lipp (`flag-icons`); tõlge olemas → värviline, puudub → hall; avatud tõlke lipp raamiga. Ainult `update` ja `new-translation` |
+| Kategooria | Rippmenüü | `GET /api/categories`, kasutajaliidese keeles; kohustuslik |
 | Koolituse keel | Rippmenüü | `GET /api/languages`; õppekeel (`trainingLanguageId`), mitte tõlke keel; kohustuslik |
 | Toimumiskoht | Rippmenüü | `GET /api/locations`; kohustuslik |
 | Vaikimisi lektor | Tekst + nupp "Vali lektor" | Avab lektori modali; võib jääda tühjaks ("— lektor puudub —") |
-| Rahastus | Checkboxid | `GET /api/funding-types`, avatud tõlke keeles; võib jääda tühjaks |
+| Rahastus | Checkboxid | `GET /api/funding-types`, kasutajaliidese keeles; võib jääda tühjaks |
 | Tellitav / Esile tõstetud | Switchid | `isOrderable` / `isPromoted` |
 | "Tee AI tõlge" | Nupp + tooltip (`title`) | `new-translation` ja mitte-põhikeele `update`; tooltip: tõlge tehakse salvestatud põhikeele tekstist, mitte vormist, ja tulemus salvestub alles salvestusnupuga |
 | Pealkiri, Lühikirjeldus | Tekstiväljad (max 255) | Kohustuslikud |
@@ -55,9 +55,10 @@ Koolituse andmete sektsioon on tõlke sektsiooni kohal (vertikaalne paigutus), o
 0. **Rollikontroll.** Kui kasutaja pole admin (`sessionStorage` `roleName`), suunatakse ta `NotAuthorizedView`-le ja andmeid ei laadita.
 1. **Oleku tuvastamine.** `beforeMount` ja `$route.query` jälgija (`watch`) kutsuvad `loadView()`, mis loeb query parameetrid ja määrab `state`: `trainingId` puudub → `new-training`; `trainingTranslationId` olemas → `update`; muidu → `new-translation`. Iga `router.replace` laadib andmed uuesti — erandeid pole.
 2. **Laadimine.** Alati `GET /api/locations` ja `GET /api/languages`; pärast keelte saabumist oleku andmed (keelte nimekirja on vaja `languageId` ↔ `languageCode` teisenduseks):
-   - `new-training`: tühi vorm, rippmenüüd põhikeeles (`mainLanguageCode` store'ist).
-   - `update`: koolitus, tõlgete nimekiri, avatud tõlge; rippmenüüd tõlke keeles.
-   - `new-translation`: koolitus, tõlgete nimekiri → põhikeele tõlge (`isMainLanguage`) eeltäitmiseks; rippmenüüd sihtkeeles.
+   - Kõigis olekutes: kategooriad ja rahastustüübid kasutajaliidese keeles (`languageStore.contentLang`); keele vahetamisel navbaris laaditakse ainult need uuesti (`watch: contentLang`), vormi sisu jääb alles.
+   - `new-training`: tühi vorm, tõlke keel = põhikeel (`mainLanguageCode`).
+   - `update`: koolitus, tõlgete nimekiri, avatud tõlge.
+   - `new-translation`: koolitus, tõlgete nimekiri → põhikeele tõlge (`isMainLanguage`) eeltäitmiseks.
 3. **Valideerimine enne salvestust** (esimene viga kuvatakse `AlertDanger`-is, API kutset ei tehta): "Vali kategooria", "Vali koolituse keel", "Vali toimumiskoht" (mitte olekus `new-translation`), "Lisa pealkiri", "Lisa lühikirjeldus", "Lisa kirjeldus".
 4. **"Lisa"** → `POST /api/training` (`userId` sessionStorage'ist) → eduteade → `router.replace({ trainingId, trainingTranslationId })` → olek `update`.
 5. **"Salvesta"** → `PUT /api/training/{trainingId}` (koolituse väljad + avatud tõlge) → eduteade.
@@ -69,7 +70,7 @@ Koolituse andmete sektsioon on tõlke sektsiooni kohal (vertikaalne paigutus), o
 
 ## API kutsed
 
-Kõik kutsed on failides `frontend/src/api-services/`. **Mock-vastuseid kasutavad kõik uued kutsed, välja arvatud need, mille backend on valmis** (vt "Mock-vastused" allpool). Päris kutsele vahetatud: `GET /api/locations`, `GET /api/lecturers`.
+Kõik kutsed on failides `frontend/src/api-services/`. **Mock-vastuseid kasutavad kõik uued kutsed, välja arvatud need, mille backend on valmis** (vt "Mock-vastused" allpool). Päris kutsele vahetatud: `GET /api/languages`, `GET /api/locations`, `GET /api/lecturers`.
 
 | Teenus | Meetod `api-services`-is | Backend task | Etapp |
 |---|---|---|---|
@@ -194,7 +195,7 @@ Kood on loodud (mustri eeskuju: Options API, `handle`-meetodid, props/emits `eve
 | `components/common/TranslationFlags.vue` | Tõlgete lipukesed |
 | `components/common/AlertDanger.vue`, `AlertSuccess.vue` | Teated |
 | `components/modals/BaseModal.vue`, `ConfirmModal.vue`, `LecturerSelectModal.vue` | Modalid |
-| `stores/languageStore.js` | Pinia store: `contentLanguages` (`languageCode`, `isMainLanguage`, `languageFlag`), getter `mainLanguageCode` |
+| `stores/languageStore.js` | Pinia store: `supportedLanguages` (`languageCode`, `isMainLanguage`, `flagClass`), getter `mainLanguageCode` |
 | `services/SessionStorageService.js` | `getUserId()`, `userIsAdmin()` |
 | `services/NavigationService.js` | + `replaceTrainingFormView(query)`, `navigateToLoginView()`, `navigateToNotAuthorizedView()` |
 | `router/index.js` | + rajad `/training-form` (`trainingFormRoute`) ja `/not-authorized` (`notAuthorizedRoute`) |
@@ -215,7 +216,7 @@ Kood on loodud (mustri eeskuju: Options API, `handle`-meetodid, props/emits `eve
 - [ ] `/training-form` avab oleku `new-training`, `?trainingId&trainingTranslationId` oleku `update`, `?trainingId&languageId` oleku `new-translation`
 - [ ] Pealkiri, nupud, staatuse märgis ja lipukesed vastavad olekule (vt elementide tabel)
 - [ ] Iga `router.replace` järel laaditakse andmed uuesti; brauseri "Tagasi" ei vii tagasi tühja lisamise vormi juurde
-- [ ] Rippmenüüd laaditakse avatud tõlke keeles (`new-training`: põhikeeles)
+- [ ] Rippmenüüd laaditakse kasutajaliidese keeles ja uuenevad navbari keelevahetusel ilma vormi sisu kaotamata
 - [ ] Valideerimine takistab puudulikku salvestust ja kuvab esimese vea
 - [ ] "Lisa" loob koolituse ja liigub olekusse `update`; "Salvesta" salvestab koolituse ja avatud tõlke
 - [ ] Hall lipp avab `new-translation` põhikeele tekstiga eeltäidetult; "Lisa tõlge" salvestab ja liigub olekusse `update`, lipp muutub värviliseks

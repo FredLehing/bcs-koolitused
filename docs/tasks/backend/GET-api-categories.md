@@ -47,7 +47,7 @@ Väljade selgitused:
 
 ## Eesmärk
 
-Teenust kasutab kaks vaadet: `TrainingFormView` (roll Admin) laeb kategooriad "Kategooria" rippmenüü valikuteks uue koolituse lisamise vormil, päring tehakse vormi avatud tõlke keelega (base põhikeeles `et`); `TrainingsView` (kõik rollid, sh külastajad) laeb kategooriad "Koolituse kategooria" filtri valikuteks, kasutades `localStorage`-ist võetud `contentLang` väärtust. Mõlemal juhul on tegu staatilise valikute nimekirjaga, mida kuvatakse kasutajale kategooria valimiseks/filtreerimiseks.
+Teenust kasutab kaks vaadet: `TrainingFormView` (roll Admin) laeb kategooriad "Kategooria" rippmenüü valikuteks uue koolituse lisamise vormil, päring tehakse kasutajaliidese keelega (Pinia `languageStore.contentLang`, vahetub navbaris); `TrainingsView` (kõik rollid, sh külastajad) laeb kategooriad "Koolituse kategooria" filtri valikuteks, kasutades `localStorage`-ist võetud `contentLang` väärtust. Mõlemal juhul on tegu staatilise valikute nimekirjaga, mida kuvatakse kasutajale kategooria valimiseks/filtreerimiseks.
 
 ## Seotud andmebaasi tabelid
 

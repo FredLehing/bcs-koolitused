@@ -91,7 +91,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(useLanguageStore, ['contentLanguages', 'mainLanguageCode']),
+    ...mapState(useLanguageStore, ['contentLang', 'supportedLanguages', 'mainLanguageCode']),
 
     pageTitle() {
       if (this.state === STATE_NEW_TRAINING) {
@@ -159,6 +159,12 @@ export default {
     '$route.query'() {
       this.loadView()
     },
+
+    // Kasutajaliidese keele vahetus (navbar) → laadi rippmenüüde tõlgitud väärtused uuesti.
+    // Vormi sisu (koolituse andmed, tõlke tekst) jääb puutumata.
+    contentLang() {
+      this.getDropdowns()
+    },
   },
   methods: {
     loadView() {
@@ -167,6 +173,7 @@ export default {
       this.targetLanguageId = Number(this.$route.query.languageId ?? 0)
       this.state = this.resolveState()
       this.getLocations()
+      this.getDropdowns()
       this.getLanguages()
     },
 
@@ -196,7 +203,6 @@ export default {
       this.trainingTranslations = []
       this.translation.languageCode = this.mainLanguageCode
       this.savedTranslationTexts = this.getTranslationTexts()
-      this.getDropdownsInLanguage(this.mainLanguageCode)
     },
 
     loadUpdateState() {
@@ -210,7 +216,6 @@ export default {
     handleGetUpdateTranslationResponse(translation) {
       this.translation = translation
       this.savedTranslationTexts = this.getTranslationTexts()
-      this.getDropdownsInLanguage(translation.languageCode)
     },
 
     loadNewTranslationState() {
@@ -221,7 +226,6 @@ export default {
       this.translation.languageId = this.targetLanguageId
       this.translation.languageCode = targetLanguage ? targetLanguage.languageCode : ''
       this.getTraining()
-      this.getDropdownsInLanguage(this.translation.languageCode)
       TrainingService.sendGetTrainingTranslationsRequest(this.trainingId)
         .then((response) => this.handleGetNewTranslationTrainingTranslationsResponse(response.data))
         .catch(() => NavigationService.navigateToErrorView())
@@ -264,11 +268,12 @@ export default {
         .catch(() => NavigationService.navigateToErrorView())
     },
 
-    getDropdownsInLanguage(languageCode) {
-      CategoryService.sendGetCategoriesRequest(languageCode)
+    // Kategooriad ja rahastustüübid kasutajaliidese keeles (store'i contentLang)
+    getDropdowns() {
+      CategoryService.sendGetCategoriesRequest(this.contentLang)
         .then((response) => (this.categories = response.data))
         .catch(() => NavigationService.navigateToErrorView())
-      FundingTypeService.sendGetFundingTypesRequest(languageCode)
+      FundingTypeService.sendGetFundingTypesRequest(this.contentLang)
         .then((response) => (this.fundingTypes = response.data))
         .catch(() => NavigationService.navigateToErrorView())
     },
@@ -623,7 +628,7 @@ export default {
           <TranslationFlags
             v-if="!isNewTraining"
             class="ms-auto"
-            :content-languages="contentLanguages"
+            :supported-languages="supportedLanguages"
             :training-translations="trainingTranslations"
             :current-language-code="translation.languageCode"
             @event-translation-flag-clicked="handleTranslationFlagClicked"

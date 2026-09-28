@@ -10,7 +10,7 @@ Failinimi: TrainingFormView.vue
 Frontend rada: /training-form
 
 Vaatega seotud lisainfo:
-state: "new-training" — URL-is query parameetreid pole. Pealkiri "Lisa uus koolitus". Vorm on tühi; tõlke väljad (pealkiri, lühikirjeldus, kirjeldus) täidetakse põhikeeles (et) ja rippmenüüd laaditakse põhikeeles. Lipukesi ja staatuse nuppe pole.
+state: "new-training" — URL-is query parameetreid pole. Pealkiri "Lisa uus koolitus". Vorm on tühi; tõlke väljad (pealkiri, lühikirjeldus, kirjeldus) täidetakse põhikeeles (et); rippmenüüd (kategooriad, rahastustüübid) laaditakse kasutajaliidese keeles (store'i contentLang) ja laaditakse keele vahetamisel navbaris uuesti — vormi sisu jääb alles. Lipukesi ja staatuse nuppe pole.
 Vaikimisi lektor valitakse "Vali lektor" modalist otsinguga (võib jääda tühjaks). Rahastustüübid on checkboxid, "Tellitav" ja "Esile tõstetud" switchid.
 Nupp "Lisa" → POST /api/training (userId localStorage'ist). Backend loob koolituse staatusega "U" koos põhikeele tõlkega. Vastuse trainingId ja trainingTranslationId järgi tehakse router.replace → state "update".
 ```
@@ -77,7 +77,7 @@ CategoryDto.java
 ]
 
 API teenuse lisainfo:
-Tagastab kõik kategooriad contentLang keeles (category_translation kaudu). TrainingFormView kutsub avatud tõlke keelega.
+Tagastab kõik kategooriad contentLang keeles (category_translation kaudu). TrainingFormView kutsub kasutajaliidese keelega (store'i contentLang) ja kutsub uuesti, kui keel navbaris vahetub.
 
 Veateated: —
 ```

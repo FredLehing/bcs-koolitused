@@ -44,18 +44,20 @@
           </div>
 
           <div class="d-flex align-items-center gap-3">
-            <!-- Keelevalik: keeled tulevad store'ist (contentLanguages) -->
+            <!-- Keelevalik: keeled tulevad store'ist (supportedLanguages) -->
             <div class="d-flex align-items-center gap-1">
               <button
-                v-for="contentLanguage in languageStore.contentLanguages"
-                :key="contentLanguage.languageCode"
-                @click="changeLocale(contentLanguage.languageCode)"
-                :class="{ 'border-primary': locale === contentLanguage.languageCode }"
-                :title="contentLanguage.languageCode.toUpperCase()"
+                v-for="supportedLanguage in languageStore.supportedLanguages"
+                :key="supportedLanguage.languageCode"
+                @click="languageStore.setContentLang(supportedLanguage.languageCode)"
+                :class="{
+                  'border-primary': languageStore.contentLang === supportedLanguage.languageCode,
+                }"
+                :title="supportedLanguage.languageCode.toUpperCase()"
                 class="btn btn-sm btn-light border"
                 type="button"
               >
-                <span class="fi" :class="contentLanguage.languageFlag"></span>
+                <span class="fi" :class="supportedLanguage.flagClass"></span>
               </button>
             </div>
             <RouterLink class="btn btn-outline-secondary btn-sm" to="/login">
@@ -76,25 +78,13 @@
 <script setup>
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { useI18n } from 'vue-i18n'
 import FooterComponent from '@/components/FooterComponent.vue'
 import SessionStorageService from '@/services/SessionStorageService.js'
 import { useLanguageStore } from '@/stores/languageStore.js'
-import { LOCALE_STORAGE_KEY } from '@/i18n.js'
 
 const route = useRoute()
-const { locale } = useI18n()
 const languageStore = useLanguageStore()
 
 // sessionStorage ei ole reaktiivne — kontroll tehakse uuesti iga marsruudi muutusel (nt pärast sisselogimist)
 const userIsAdmin = computed(() => route.fullPath !== '' && SessionStorageService.userIsAdmin())
-
-function changeLocale(languageCode) {
-  locale.value = languageCode
-  try {
-    localStorage.setItem(LOCALE_STORAGE_KEY, languageCode)
-  } catch {
-    // localStorage võib olla keelatud — keel kehtib siis ainult selle seansi ajal
-  }
-}
 </script>

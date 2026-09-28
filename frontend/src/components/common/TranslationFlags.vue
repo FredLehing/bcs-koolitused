@@ -2,7 +2,7 @@
 export default {
   name: 'TranslationFlags',
   props: {
-    contentLanguages: Array,
+    supportedLanguages: Array,
     trainingTranslations: Array,
     currentLanguageCode: String,
   },
@@ -26,19 +26,19 @@ export default {
 <template>
   <div class="d-flex gap-2 align-items-center">
     <button
-      v-for="contentLanguage in contentLanguages"
-      :key="contentLanguage.languageCode"
-      @click="$emit('event-translation-flag-clicked', contentLanguage.languageCode)"
-      :title="flagTitle(contentLanguage.languageCode)"
+      v-for="supportedLanguage in supportedLanguages"
+      :key="supportedLanguage.languageCode"
+      @click="$emit('event-translation-flag-clicked', supportedLanguage.languageCode)"
+      :title="flagTitle(supportedLanguage.languageCode)"
       :class="{
-        'translation-missing': !translationExists(contentLanguage.languageCode),
-        'border-primary': contentLanguage.languageCode === currentLanguageCode,
+        'translation-missing': !translationExists(supportedLanguage.languageCode),
+        'border-primary': supportedLanguage.languageCode === currentLanguageCode,
       }"
       class="btn btn-sm btn-light border"
       type="button"
     >
-      <span class="fi" :class="contentLanguage.languageFlag"></span>
-      {{ contentLanguage.languageCode }}
+      <span class="fi" :class="supportedLanguage.flagClass"></span>
+      {{ supportedLanguage.languageCode }}
     </button>
   </div>
 </template>
