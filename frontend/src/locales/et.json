@@ -1,0 +1,109 @@
+{
+  "common": {
+    "close": "Sulge"
+  },
+  "navbar": {
+    "trainings": "Koolitused",
+    "services": "Teenused",
+    "company": "Ettevõttest",
+    "lecturers": "Lektorid",
+    "blog": "Blogi",
+    "contact": "Kontakt",
+    "feedback": "Tagasiside",
+    "admin": "Admin",
+    "addTraining": "Lisa uus koolitus",
+    "login": "Logi sisse",
+    "register": "Registreeri"
+  },
+  "error": {
+    "message": "Midagi läks valesti, proovi hiljem uuesti!",
+    "backToTrainings": "Tagasi koolituste juurde"
+  },
+  "notAuthorized": {
+    "title": "Ligipääs keelatud",
+    "message": "Selle lehe vaatamiseks pead olema administraatorina sisse logitud.",
+    "login": "Logi sisse",
+    "home": "Avalehele"
+  },
+  "trainingForm": {
+    "title": {
+      "newTraining": "Lisa uus koolitus",
+      "update": "Muuda koolitust",
+      "newTranslation": "Lisa koolituse tõlge"
+    },
+    "status": {
+      "published": "Publitseeritud",
+      "unpublished": "Mustand"
+    },
+    "data": {
+      "legend": "Koolituse andmed",
+      "category": "Kategooria",
+      "trainingLanguage": "Koolituse keel",
+      "location": "Toimumiskoht",
+      "defaultLecturer": "Vaikimisi lektor",
+      "noLecturer": "— lektor puudub —",
+      "selectLecturer": "Vali lektor",
+      "funding": "Rahastus",
+      "orderable": "Tellitav",
+      "promoted": "Esile tõstetud",
+      "selectCategory": "-- Vali kategooria --",
+      "selectLanguage": "-- Vali keel --",
+      "selectLocation": "-- Vali toimumiskoht --"
+    },
+    "translation": {
+      "legend": "Tõlge: {language}",
+      "title": "Pealkiri",
+      "shortDescription": "Lühikirjeldus",
+      "description": "Kirjeldus",
+      "aiButton": "Tee AI tõlge",
+      "aiLoading": "Tõlgin…",
+      "aiTooltip": "Tõlge tehakse salvestatud põhikeele ({mainLanguage}) tekstist, mitte vormi sisust. Tulemus kuvatakse ainult vormis — see salvestub alles siis, kui vajutad „{saveButton}“."
+    },
+    "buttons": {
+      "add": "Lisa",
+      "save": "Salvesta",
+      "addTranslation": "Lisa tõlge",
+      "publish": "Publitseeri",
+      "unpublish": "Liiguta mustandisse"
+    },
+    "flags": {
+      "open": "Ava {language} tõlge",
+      "add": "Lisa {language} tõlge"
+    },
+    "lecturerModal": {
+      "title": "Vali lektor",
+      "searchPlaceholder": "Otsi nime järgi",
+      "search": "Otsi",
+      "notFound": "Ühtegi lektorit ei leitud.",
+      "noLecturer": "Lektor puudub"
+    },
+    "statusModal": {
+      "publishTitle": "Publitseeri koolitus",
+      "publishMessage": "Kas soovid koolituse publitseerida? See muutub avalikult nähtavaks.",
+      "unpublishTitle": "Liiguta mustandisse",
+      "unpublishMessage": "Kas soovid koolituse mustandisse liigutada? See kaob avalikust nimekirjast."
+    },
+    "aiModal": {
+      "title": "Asenda tekst AI tõlkega?",
+      "message": "Vormis on salvestamata muudatusi. AI tõlge kirjutab pealkirja, lühikirjelduse ja kirjelduse üle.",
+      "confirm": "Asenda"
+    },
+    "validation": {
+      "selectCategory": "Vali kategooria",
+      "selectTrainingLanguage": "Vali koolituse keel",
+      "selectLocation": "Vali toimumiskoht",
+      "addTitle": "Lisa pealkiri",
+      "addShortDescription": "Lisa lühikirjeldus",
+      "addDescription": "Lisa kirjeldus",
+      "languageNotInSystem": "Keelt \"{language}\" ei ole süsteemis"
+    },
+    "messages": {
+      "trainingAdded": "Koolitus \"{title}\" on lisatud mustandina",
+      "saved": "Muudatused on salvestatud",
+      "translationAdded": "Tõlge ({language}) on lisatud",
+      "published": "Koolitus on publitseeritud",
+      "unpublished": "Koolitus on liigutatud mustandisse",
+      "aiDone": "AI tõlge on vormis — kontrolli teksti ja salvesta"
+    }
+  }
+}

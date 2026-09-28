@@ -177,7 +177,7 @@ Kaks esimest rida on mockupi märkmetest (`Veateated`). Ülejäänud 404 read tu
 - [ ] Kõik kolm tabelit salvestatakse ühes transaktsioonis — vea korral ei jää andmebaasi poolikuid ridu
 - [ ] Olematu `categoryId` / `locationId` / `trainingLanguageId` / `defaultLecturerId` / `fundingTypeId` / `userId` → 404 `PRIMARY_KEY_NOT_FOUND` õige väljanimega
 - [ ] Puuduv kohustuslik väli või liiga pikk `title` / `shortDescription` → 400 `INCORRECT_INPUT`
-- [ ] Koolituse staatus kasutab `TrainingStatus` enumit, mitte `ApiStatus`-t
+- [ ] Selle taski käigus luuakse `TrainingStatus` enum (`UNPUBLISHED("U")`, `PUBLISHED("P")`) baaspaketti; koolituse staatus kasutab seda, mitte `ApiStatus`-t
 - [ ] Teenusel on automaattestid
 
 ## Avatud küsimused

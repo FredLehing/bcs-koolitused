@@ -7,6 +7,10 @@ export default {
       default: 0,
     },
     locations: Array,
+    firstOptionLabel: {
+      type: String,
+      default: '',
+    },
     isDisabled: {
       type: Boolean,
       default: false,
@@ -23,7 +27,7 @@ export default {
     :disabled="isDisabled"
     class="form-select"
   >
-    <option :value="0">-- Vali toimumiskoht --</option>
+    <option :value="0">{{ firstOptionLabel }}</option>
     <option v-for="location in locations" :key="location.locationId" :value="location.locationId">
       {{ location.locationName }}
     </option>

@@ -32,37 +32,40 @@ export default {
 
 <template>
   <fieldset class="border rounded p-3 mb-4">
-    <legend class="float-none w-auto px-2 fs-5">Koolituse andmed</legend>
+    <legend class="float-none w-auto px-2 fs-5">{{ $t('trainingForm.data.legend') }}</legend>
     <div class="row g-3 text-start">
       <div class="col-md-4">
-        <label class="form-label">Kategooria</label>
+        <label class="form-label">{{ $t('trainingForm.data.category') }}</label>
         <CategoriesDropdown
           :category-id="training.categoryId"
           :categories="categories"
+          :first-option-label="$t('trainingForm.data.selectCategory')"
           :is-disabled="isDisabled"
           @event-new-category-selected="$emit('event-new-category-selected', $event)"
         />
       </div>
       <div class="col-md-4">
-        <label class="form-label">Koolituse keel</label>
+        <label class="form-label">{{ $t('trainingForm.data.trainingLanguage') }}</label>
         <LanguagesDropdown
           :language-id="training.trainingLanguageId"
           :languages="languages"
+          :first-option-label="$t('trainingForm.data.selectLanguage')"
           :is-disabled="isDisabled"
           @event-new-language-selected="$emit('event-new-training-language-selected', $event)"
         />
       </div>
       <div class="col-md-4">
-        <label class="form-label">Toimumiskoht</label>
+        <label class="form-label">{{ $t('trainingForm.data.location') }}</label>
         <LocationsDropdown
           :location-id="training.locationId"
           :locations="locations"
+          :first-option-label="$t('trainingForm.data.selectLocation')"
           :is-disabled="isDisabled"
           @event-new-location-selected="$emit('event-new-location-selected', $event)"
         />
       </div>
       <div class="col-12">
-        <label class="form-label fw-bold">Rahastus</label>
+        <label class="form-label fw-bold">{{ $t('trainingForm.data.funding') }}</label>
         <FundingTypesCheckbox
           :funding-types="fundingTypes"
           :selected-funding-type-ids="training.fundingTypeIds"
@@ -83,7 +86,9 @@ export default {
             type="checkbox"
             role="switch"
           />
-          <label class="form-check-label" for="isOrderable">Tellitav</label>
+          <label class="form-check-label" for="isOrderable">{{
+            $t('trainingForm.data.orderable')
+          }}</label>
         </div>
         <div class="form-check form-switch">
           <input
@@ -95,14 +100,16 @@ export default {
             type="checkbox"
             role="switch"
           />
-          <label class="form-check-label" for="isPromoted">Esile tõstetud</label>
+          <label class="form-check-label" for="isPromoted">{{
+            $t('trainingForm.data.promoted')
+          }}</label>
         </div>
       </div>
       <div class="col-md-6">
-        <label class="form-label fw-bold">Vaikimisi lektor</label>
+        <label class="form-label fw-bold">{{ $t('trainingForm.data.defaultLecturer') }}</label>
         <div class="input-group">
           <input
-            :value="training.defaultLecturerName ?? '— lektor puudub —'"
+            :value="training.defaultLecturerName ?? $t('trainingForm.data.noLecturer')"
             class="form-control"
             type="text"
             readonly
@@ -113,7 +120,7 @@ export default {
             class="btn btn-outline-secondary"
             type="button"
           >
-            Vali lektor
+            {{ $t('trainingForm.data.selectLecturer') }}
           </button>
         </div>
       </div>

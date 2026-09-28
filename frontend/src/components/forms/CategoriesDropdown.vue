@@ -9,7 +9,7 @@ export default {
     categories: Array,
     firstOptionLabel: {
       type: String,
-      default: '-- Vali kategooria --',
+      default: '',
     },
     isDisabled: {
       type: Boolean,

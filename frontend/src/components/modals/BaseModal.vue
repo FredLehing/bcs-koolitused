@@ -32,7 +32,9 @@ export default {
           </div>
           <div class="modal-footer">
             <slot name="buttons"></slot>
-            <button type="button" class="btn btn-secondary" @click="close">Sulge</button>
+            <button type="button" class="btn btn-secondary" @click="close">
+              {{ $t('common.close') }}
+            </button>
           </div>
         </div>
       </div>

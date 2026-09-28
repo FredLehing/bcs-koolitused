@@ -19,7 +19,7 @@ export default {
 
 <template>
   <BaseModal :is-open="isOpen" @event-modal-closed="$emit('event-modal-closed')">
-    <template #title>Vali lektor</template>
+    <template #title>{{ $t('trainingForm.lecturerModal.title') }}</template>
     <template #body>
       <div class="input-group mb-3">
         <input
@@ -27,14 +27,14 @@ export default {
           @keyup.enter="$emit('event-lecturer-search', search)"
           type="text"
           class="form-control"
-          placeholder="Otsi nime järgi"
+          :placeholder="$t('trainingForm.lecturerModal.searchPlaceholder')"
         />
         <button
           @click="$emit('event-lecturer-search', search)"
           class="btn btn-outline-secondary"
           type="button"
         >
-          Otsi
+          {{ $t('trainingForm.lecturerModal.search') }}
         </button>
       </div>
       <div class="list-group">
@@ -48,7 +48,9 @@ export default {
           {{ lecturer.lecturerName }}
         </button>
       </div>
-      <p v-if="lecturers.length === 0" class="text-muted mb-0">Ühtegi lektorit ei leitud.</p>
+      <p v-if="lecturers.length === 0" class="text-muted mb-0">
+        {{ $t('trainingForm.lecturerModal.notFound') }}
+      </p>
     </template>
     <template #buttons>
       <button
@@ -56,7 +58,7 @@ export default {
         class="btn btn-outline-danger"
         @click="$emit('event-lecturer-selected', null)"
       >
-        Lektor puudub
+        {{ $t('trainingForm.lecturerModal.noLecturer') }}
       </button>
     </template>
   </BaseModal>

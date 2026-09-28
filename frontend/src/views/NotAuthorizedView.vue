@@ -20,12 +20,14 @@ export default {
 <template>
   <div class="container text-center">
     <PhProhibit class="text-danger mb-3" :size="64" />
-    <h1>Ligipääs keelatud</h1>
-    <p>Selle lehe vaatamiseks pead olema administraatorina sisse logitud.</p>
+    <h1>{{ $t('notAuthorized.title') }}</h1>
+    <p>{{ $t('notAuthorized.message') }}</p>
     <div class="d-flex justify-content-center gap-3 mt-3">
-      <button @click="pushToLoginView" type="button" class="btn btn-primary">Logi sisse</button>
+      <button @click="pushToLoginView" type="button" class="btn btn-primary">
+        {{ $t('notAuthorized.login') }}
+      </button>
       <button @click="pushToHomeView" type="button" class="btn btn-outline-secondary">
-        Avalehele
+        {{ $t('notAuthorized.home') }}
       </button>
     </div>
   </div>

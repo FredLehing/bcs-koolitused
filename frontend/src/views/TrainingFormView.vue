@@ -79,6 +79,11 @@ export default {
       // Viimati laaditud/salvestatud tõlketekstid — salvestamata muudatuste tuvastamiseks
       savedTranslationTexts: '',
 
+      errorResponse: {
+        message: '',
+        errorCode: '',
+      },
+
       isLecturerModalOpen: false,
       isStatusModalOpen: false,
       isAiConfirmModalOpen: false,
@@ -90,11 +95,11 @@ export default {
 
     pageTitle() {
       if (this.state === STATE_NEW_TRAINING) {
-        return 'Lisa uus koolitus'
+        return this.$t('trainingForm.title.newTraining')
       } else if (this.state === STATE_NEW_TRANSLATION) {
-        return 'Lisa koolituse tõlge'
+        return this.$t('trainingForm.title.newTranslation')
       }
-      return 'Muuda koolitust'
+      return this.$t('trainingForm.title.update')
     },
 
     isNewTraining() {
@@ -128,24 +133,25 @@ export default {
     },
 
     aiTooltip() {
-      const saveButton = this.isNewTranslation ? 'Lisa tõlge' : 'Salvesta'
-      return (
-        'Tõlge tehakse salvestatud põhikeele (' +
-        this.mainLanguageCode +
-        ') tekstist, mitte vormi sisust. Tulemus kuvatakse ainult vormis — see salvestub alles siis, kui vajutad „' +
-        saveButton +
-        '“.'
-      )
+      const saveButton = this.isNewTranslation
+        ? this.$t('trainingForm.buttons.addTranslation')
+        : this.$t('trainingForm.buttons.save')
+      return this.$t('trainingForm.translation.aiTooltip', {
+        mainLanguage: this.mainLanguageCode,
+        saveButton: saveButton,
+      })
     },
 
     statusModalTitle() {
-      return this.isPublished ? 'Liiguta mustandisse' : 'Publitseeri koolitus'
+      return this.isPublished
+        ? this.$t('trainingForm.statusModal.unpublishTitle')
+        : this.$t('trainingForm.statusModal.publishTitle')
     },
 
     statusModalMessage() {
       return this.isPublished
-        ? 'Kas soovid koolituse mustandisse liigutada? See kaob avalikust nimekirjast.'
-        : 'Kas soovid koolituse publitseerida? See muutub avalikult nähtavaks.'
+        ? this.$t('trainingForm.statusModal.unpublishMessage')
+        : this.$t('trainingForm.statusModal.publishMessage')
     },
   },
   watch: {
@@ -310,7 +316,9 @@ export default {
     },
 
     handleAddTrainingResponse(trainingCreateResponse) {
-      this.successMessage = 'Koolitus "' + this.translation.title + '" on lisatud mustandina'
+      this.successMessage = this.$t('trainingForm.messages.trainingAdded', {
+        title: this.translation.title,
+      })
       NavigationService.replaceTrainingFormView({
         trainingId: trainingCreateResponse.trainingId,
         trainingTranslationId: trainingCreateResponse.trainingTranslationId,
@@ -348,7 +356,7 @@ export default {
     },
 
     handleUpdateTrainingResponse() {
-      this.successMessage = 'Muudatused on salvestatud'
+      this.successMessage = this.$t('trainingForm.messages.saved')
       this.savedTranslationTexts = this.getTranslationTexts()
     },
 
@@ -371,7 +379,9 @@ export default {
     },
 
     handleAddTrainingTranslationResponse(trainingTranslationCreateResponse) {
-      this.successMessage = 'Tõlge (' + this.translation.languageCode + ') on lisatud'
+      this.successMessage = this.$t('trainingForm.messages.translationAdded', {
+        language: this.translation.languageCode,
+      })
       NavigationService.replaceTrainingFormView({
         trainingId: this.trainingId,
         trainingTranslationId: trainingTranslationCreateResponse.trainingTranslationId,
@@ -408,7 +418,9 @@ export default {
           languageId: language.languageId,
         })
       } else {
-        this.errorMessage = 'Keelt "' + languageCode + '" ei ole süsteemis'
+        this.errorMessage = this.$t('trainingForm.validation.languageNotInSystem', {
+          language: languageCode,
+        })
       }
     },
 
@@ -427,8 +439,8 @@ export default {
 
     handleChangeTrainingStatusResponse() {
       this.successMessage = this.isPublished
-        ? 'Koolitus on liigutatud mustandisse'
-        : 'Koolitus on publitseeritud'
+        ? this.$t('trainingForm.messages.unpublished')
+        : this.$t('trainingForm.messages.published')
       this.getTraining()
     },
 
@@ -467,7 +479,7 @@ export default {
       this.isAiLoading = true
       TrainingService.sendGetAiTranslationRequest(this.trainingId, this.translation.languageId)
         .then((response) => this.handleGetAiTranslationResponse(response.data))
-        .catch(() => NavigationService.navigateToErrorView())
+        .catch((error) => this.handleGetAiTranslationError(error))
         .finally(() => (this.isAiLoading = false))
     },
 
@@ -476,7 +488,23 @@ export default {
       this.translation.title = aiTranslation.title
       this.translation.shortDescription = aiTranslation.shortDescription
       this.translation.description = aiTranslation.description
-      this.successMessage = 'AI tõlge on vormis — kontrolli teksti ja salvesta'
+      this.successMessage = this.$t('trainingForm.messages.aiDone')
+    },
+
+    // AI teenuse teadaolevad vead kuvatakse vormis — admini sisestatud tekst jääb alles
+    handleGetAiTranslationError(error) {
+      const statusCode = error.response?.status
+      this.errorResponse = error.response?.data ?? { message: '', errorCode: '' }
+
+      if (
+        (statusCode === 503 && this.errorResponse.errorCode === 'AI_SERVICE_UNAVAILABLE') ||
+        (statusCode === 403 && this.errorResponse.errorCode === 'MAIN_LANGUAGE_NOT_TRANSLATABLE') ||
+        (statusCode === 404 && this.errorResponse.errorCode === 'MAIN_TRANSLATION_NOT_FOUND')
+      ) {
+        this.errorMessage = this.errorResponse.message
+      } else {
+        NavigationService.navigateToErrorView()
+      }
     },
 
     translationHasUnsavedChanges() {
@@ -506,11 +534,11 @@ export default {
 
     checkTrainingDataForErrors() {
       if (this.training.categoryId === 0) {
-        this.errorMessage = 'Vali kategooria'
+        this.errorMessage = this.$t('trainingForm.validation.selectCategory')
       } else if (this.training.trainingLanguageId === 0) {
-        this.errorMessage = 'Vali koolituse keel'
+        this.errorMessage = this.$t('trainingForm.validation.selectTrainingLanguage')
       } else if (this.training.locationId === 0) {
-        this.errorMessage = 'Vali toimumiskoht'
+        this.errorMessage = this.$t('trainingForm.validation.selectLocation')
       }
     },
 
@@ -519,11 +547,11 @@ export default {
         return
       }
       if (this.translation.title.trim() === '') {
-        this.errorMessage = 'Lisa pealkiri'
+        this.errorMessage = this.$t('trainingForm.validation.addTitle')
       } else if (this.translation.shortDescription.trim() === '') {
-        this.errorMessage = 'Lisa lühikirjeldus'
+        this.errorMessage = this.$t('trainingForm.validation.addShortDescription')
       } else if (this.translation.description.trim() === '') {
-        this.errorMessage = 'Lisa kirjeldus'
+        this.errorMessage = this.$t('trainingForm.validation.addDescription')
       }
     },
 
@@ -586,7 +614,11 @@ export default {
             class="badge"
             :class="isPublished ? 'text-bg-success' : 'text-bg-secondary'"
           >
-            {{ isPublished ? 'Publitseeritud' : 'Mustand' }}
+            {{
+              isPublished
+                ? $t('trainingForm.status.published')
+                : $t('trainingForm.status.unpublished')
+            }}
           </span>
           <TranslationFlags
             v-if="!isNewTraining"
@@ -628,10 +660,10 @@ export default {
 
         <div class="d-flex flex-wrap gap-3 mb-5">
           <button v-if="isNewTraining" @click="addTraining" class="btn btn-success" type="button">
-            Lisa
+            {{ $t('trainingForm.buttons.add') }}
           </button>
           <button v-if="isUpdate" @click="updateTraining" class="btn btn-success" type="button">
-            Salvesta
+            {{ $t('trainingForm.buttons.save') }}
           </button>
           <button
             v-if="isNewTranslation"
@@ -639,7 +671,7 @@ export default {
             class="btn btn-success"
             type="button"
           >
-            Lisa tõlge
+            {{ $t('trainingForm.buttons.addTranslation') }}
           </button>
           <button
             v-if="!isNewTraining"
@@ -647,7 +679,11 @@ export default {
             class="btn btn-outline-primary"
             type="button"
           >
-            {{ isPublished ? 'Liiguta mustandisse' : 'Publitseeri' }}
+            {{
+              isPublished
+                ? $t('trainingForm.buttons.unpublish')
+                : $t('trainingForm.buttons.publish')
+            }}
           </button>
         </div>
       </div>
@@ -672,9 +708,9 @@ export default {
 
     <ConfirmModal
       :is-open="isAiConfirmModalOpen"
-      title="Asenda tekst AI tõlkega?"
-      message="Vormis on salvestamata muudatusi. AI tõlge kirjutab pealkirja, lühikirjelduse ja kirjelduse üle."
-      confirm-label="Asenda"
+      :title="$t('trainingForm.aiModal.title')"
+      :message="$t('trainingForm.aiModal.message')"
+      :confirm-label="$t('trainingForm.aiModal.confirm')"
       @event-confirmed="getAiTranslation"
       @event-modal-closed="isAiConfirmModalOpen = false"
     />
