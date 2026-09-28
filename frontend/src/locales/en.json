@@ -27,13 +27,18 @@
   },
 
   "login": {
-    "title": "Log-in",
     "email": "Email",
     "password": "Password",
-    "rememberMe": "Remember me",
-    "logIn": "Log-in",
-    "forgotPassword": "Forgot Password",
-    "errorMessage": "Fill all fields"
+    "rememberMe": "Remember Me",
+    "logIn": "LOGIN",
+    "forgotPassword": "Forgot Password?",
+    "errorMessage": "Please fill in all required fields"
+  },
+
+  "footer": {
+    "facebook": "Find us on Facebook",
+    "privacy": "Privacy Policy and Terms of Use",
+    "studyTerms": "Study Regulations and Terms of Purchase"
   },
   "trainingForm": {
     "title": {

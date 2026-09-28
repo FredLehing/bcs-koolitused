@@ -26,13 +26,17 @@
     "home": "Avalehele"
   },
   "login": {
-    "title": "Sisselogimine",
     "email": "Email",
     "password": "Parool",
     "rememberMe": "Jäta mind meelde",
     "logIn": "Logi sisse",
-    "forgotPassword": "Unustasid salasõna",
+    "forgotPassword": "Unustasid salasõna?",
     "errorMessage": "Täida kõik väljad"
+  },
+  "footer": {
+    "facebook": "Leia meid Facebookist",
+    "privacy": "Privaatsus- ja kasutustingimused",
+    "studyTerms": "Õppekorraldus- ja ostutingimused"
   },
   "trainingForm": {
     "title": {
