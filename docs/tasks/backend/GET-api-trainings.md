@@ -95,7 +95,7 @@ CREATE TABLE training (
                           category_id int  NOT NULL,
                           training_language_id int  NOT NULL,
                           location_id int  NOT NULL,
-                          status int  NOT NULL,
+                          status varchar(1)  NOT NULL,
                           created_at timestamp  NOT NULL,
                           updated_at timestamp  NOT NULL,
                           is_orderable boolean  NOT NULL,

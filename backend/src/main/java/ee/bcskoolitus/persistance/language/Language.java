@@ -26,5 +26,9 @@ public class Language {
     @Column(name = "name", nullable = false, length = 50)
     private String name;
 
+    @NotNull
+    @Column(name = "is_main_language", nullable = false)
+    private Boolean isMainLanguage;
+
 
 }

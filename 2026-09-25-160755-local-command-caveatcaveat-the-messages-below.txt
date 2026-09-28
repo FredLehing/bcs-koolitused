@@ -1,0 +1,2727 @@
+ ▐▛███▛█   Claude Code v2.1.281
+▝▜██████▀  Opus 5.5 · Claude Pro
+  ▝▝ ▝▝    /mnt/c/Users/rain/IdeaProjects/bcs-koolitused
+
+  Get to finished work sooner with Opus 5.5. Switch anytime with /model.
+
+❯ /reload-skills                                                                
+  ⎿  Reloaded skills: 48 skills available (no changes)
+
+❯ /reload-plugins                                                               
+  ⎿  Reloaded: 0 plugins · 0 skills · 6 agents · 0 hooks · 0 plugin MCP servers · 0 plugin LSP servers
+
+❯ /skill-uus-mockup-markmed docs/mock-wireframe/markmed/home-view-markmed.md    
+vaata üle                                                                       
+
+  Listed 1 directory (ctrl+o to expand)
+
+● Kontrollin nüüd koodi, andmebaasi ja backend taski vastu.
+
+  Listed 1 directory, ran 2 shell commands (ctrl+o to expand)
+
+● Vaatasin docs/mock-wireframe/markmed/home-view-markmed.md läbi ja võrdlesin
+  seda struktuuridokumendi, backendi koodi (TrainingController, TrainingService,
+  TrainingSummaryRepository, RestExceptionHandler), backend taski
+  GET-api-trainings.md ja 3_import.sql failiga. Faili ma veel ei muutnud.
+
+  🔴 Sisulised vead (märkmed ei klapi koodiga)
+
+  1. GET /api/trainings: "Kõik query parameetrid on valikulised" on vale.
+  TrainingController.java kasutab @RequestParam ilma required = false-ta, seega
+  on kõik 6 parameetrit kohustuslikud. Kui mõni puudub, vastab Spring 400-ga.
+  Kood käitub nii:
+  - categoryId=0 või fundingTypeId=0 tähendab "kõik" (TrainingSummaryRepository
+    päring :categoryId = 0 or ...).
+  - trainingLang ja contentLang filtreerivad täpse vaste järgi. Väärtust "kõik
+    keeled" pole, seega trainingLang=et puhul ingliskeelseid koolitusi ei tule.
+  - limit ja page peavad olemas olema (PageRequest.of(page, limit)).
+
+  Sama viga on ka backend taskis GET-api-trainings.md. Mockup, task ja kood
+  peavad olema sünkis, seega tuleb otsustada, kumb on õige: kood (parameetrid
+  kohustuslikud) või task (valikulised).
+
+  2. "Peagi algavad koolitused" ei vasta sellele, mida teenus teeb.
+  Päring sorteerib order by ts.training.id asc ja startDate välja vastuses pole.
+  limit=3 annab seega kolm kõige väiksema ID-ga koolitust, mitte kõige varem
+  algavaid. Taskis on startDate ja sort "Avatud küsimuste" all, nii et
+  teadlikult pooleli jäetud asi. Märkmes tasuks see välja tuua, muidu jääb
+  mulje, et sortimine alguskuupäeva järgi töötab.
+
+  🟡 Täpsustamist vajavad kohad
+
+  3. GET /api/categories: contentLang on märgitud valikuliseks, aga
+  /api/trainings juures on sama parameeter koodis kohustuslik. Endpointi ennast
+  veel pole, nii et see on planeerimise otsus. Soovitan kasutada sama reeglit
+  mõlemas.
+
+  4. Vaatega seotud lisainfo:
+  - "Otsinguriba viib teisele vaatele, mida selles taskis ei defineerita": märge
+    ei ole task. Soovitan kirjutada otse, kuhu otsing viib, nt
+    TrainingsView.vue (/trainings), mis on juba olemas.
+  - Vaadete nimed ei järgi nimetamise kokkulepet (jaotis 3):
+    - ApplicationFormView: andmebaasis on tabel enquiry, seega tuleks nimeks
+      EnquiryFormView.vue (/enquiry-form).
+    - RegisterView: tegu on vormiga, mis lisab uue kasutaja, seega reegli järgi
+      UserFormView.vue või sarnane.
+
+    Kinnita, milliseid nimesid kasutada.
+  - "(GET /api/trainings, limit=3)": kuna kõik parameetrid on kohustuslikud,
+    tasub kirja panna terve kutse, nt
+    categoryId=0&fundingTypeId=0&limit=3&page=0&trainingLang=et&contentLang=et.
+
+  5. HomeView mockup-pilti pole. docs/mock-wireframe/pdf-images/ kaustas on
+  ainult LoginView.png ja TrainingsView.png. Seetõttu ei saanud ma kontrollida
+  nuppe, kategooriate loendit ega "Peagi algavad" sektsiooni mockupi vastu.
+
+  ✅ Korras
+
+  - Struktuur, väljade järjekord, tühjad read, — kasutus ja DTO nimi body kohal
+    vastavad struktuuridokumendile.
+  - TrainingSummaryDto ja TrainingSummaryItemDto väljad klapivad koodiga
+    täpselt.
+  - JSON näidised on võetud 3_import.sql failist (Java algkursus,
+    Programmeerimine, Töötukassa). Massiivides on üks element ja ...,
+    ID-väljadel on subjekti nimi.
+  - Veateated: — on mõlemas märkmes õige. TrainingService ei viska ühtegi
+    kohandatud erindit. @ApiResponse 400 kirjeldus tuleb Springi vaikimisi
+    käsitlusest, millel errorCode puudub.
+  - CategoryDto.java sobib stiililt kokku FundingTypeDto-ga
+    (controller/common/dto/).
+
+  Kas parandan faili? Minu ettepanek on:
+  - kirjutada punkt 1 koodi järgi ümber (parameetrid kohustuslikud, 0 = kõik);
+  - lisada punkt 2 märkusena;
+  - asendada punktis 4 "taskis" sõna TrainingsView.vue viitega.
+
+  Enne seda ütle, milliseid nimesid kasutada punktis 4 ja kas /api/categories
+  puhul on contentLang kohustuslik (punkt 3). Kas ka backend task
+  GET-api-trainings.md tuleks punkti 1 osas samamoodi parandada?
+
+✻ Crunched for 1m 6s · done 8:27 AM
+
+❯ keskendume API märkmed — GET /api/trainings                                   
+  queriy params osa just                                                        
+
+● Keskendun GET /api/trainings query parameetritele. Koodis käituvad need nii
+  (TrainingController + TrainingSummaryRepository):
+
+  ┌───────────────┬──────────────┬───────────────────────────────────────────┐
+  │  Parameeter   │ Kohustuslik? │             Käitumine koodis              │
+  ├───────────────┼──────────────┼───────────────────────────────────────────┤
+  │ categoryId    │ jah          │ 0 = kõik kategooriad, muu väärtus         │
+  │               │              │ filtreerib                                │
+  ├───────────────┼──────────────┼───────────────────────────────────────────┤
+  │ fundingTypeId │ jah          │ 0 = kõik rahastustüübid, muu väärtus      │
+  │               │              │ filtreerib                                │
+  ├───────────────┼──────────────┼───────────────────────────────────────────┤
+  │ limit         │ jah          │ lehekülje suurus (PageRequest.of(page,    │
+  │               │              │ limit))                                   │
+  ├───────────────┼──────────────┼───────────────────────────────────────────┤
+  │ page          │ jah          │ lehekülje number, algab 0-st              │
+  ├───────────────┼──────────────┼───────────────────────────────────────────┤
+  │ trainingLang  │ jah          │ täpne vaste (et/en), väärtust "kõik       │
+  │               │              │ keeled" pole                              │
+  ├───────────────┼──────────────┼───────────────────────────────────────────┤
+  │ contentLang   │ jah          │ täpne vaste (et/en), määrab tõlgitud      │
+  │               │              │ väljade keele                             │
+  └───────────────┴──────────────┴───────────────────────────────────────────┘
+
+  Kui mõni parameeter puudub, vastab Spring 400-ga, aga ilma meie errorCode-ta.
+  Seega jääb Veateated: — õigeks. Tundmatu keelekoodi korral (nt
+  trainingLang=xx) tuleb tühi list, viga ei tule.
+
+  Ettepanek API teenuse lisainfo asemele (API: rida ja JSON jäävad samaks):
+
+  API teenuse lisainfo:
+  Kõik query parameetrid on kohustuslikud. categoryId=0 ja fundingTypeId=0
+  tähendavad "kõik" (filtrit ei rakendata). trainingLang ("et"/"en") filtreerib
+  õppekeele järgi, contentLang ("et"/"en") määrab tõlgitud väljade (title,
+  shortDescription, categoryName, fundingTypeName) keele. limit ja page (algab
+  0-st) leheküljestavad.
+  HomeView kutsub:
+  categoryId=0&fundingTypeId=0&limit=3&page=0&trainingLang=et&contentLang=et
+  totalPages ja totalElements kirjeldavad kogu filtreeritud tulemushulka.
+  fundingTypes võib olla tühi list.
+
+  Enne faili kirjutamist on vaja kahte otsust:
+
+  1. Kumb on õige? Kood (kõik parameetrid kohustuslikud, 0 = kõik) või backend
+     task (kõik valikulised)? Mina soovitan koodi, sest kood on tõde. Kui aga
+     tahate, et parameetrid oleksid valikulised, tuleb muuta koodi, mitte
+     märget.
+  2. Mis trainingLang väärtusega HomeView kutsub? Kuna "kõik keeled" valikut
+     pole, näitab trainingLang=et ainult eestikeelseid koolitusi. Kas see sobib
+     avalehe jaoks, või peaks lisama näiteks trainingLang jaoks väärtuse "kõik"?
+     See nõuaks koodimuudatust.
+
+  Kui kinnitad, kirjutan ettepaneku faili sisse.
+
+✻ Worked for 16s · done 11:02 AM
+
+❯ Kas märkmete struktur ütleb midagi et kuidas neid sildil kajastada            
+
+● Otsest reeglit ei ole. Struktuuridokument ei määra, kuidas query parameetreid
+  sildil näidata. Kaudseid viiteid on kolm, aga need ei ole omavahel päris
+  kooskõlas.
+
+  Mida dokument ütleb:
+
+  1. API rea reegel (jaotis 2): rida on "meetod + path muster, nii nagu see on
+     backend controller'is". Näidis-URL-i rida ei vaja, sest "konkreetsed
+     väärtused paistavad juba Request body/Response näidetest". Samas on näitena
+     toodud ainult path variable {entityId}, query parameetrite kohta seal
+     midagi pole.
+  2. URL-ide kokkulepe (jaotis 3): "nimekirja filtrid query parameetritena".
+     Tabelis on näide GET /api/entities?parentId=2, mis kasutab konkreetset 
+     väärtust, mitte {parentId} mustrit. See läheb vastuollu punktiga 1, mille
+     järgi näidisväärtusi API real ei kasutata.
+  3. API teenuse lisainfo (jaotis 2): näitena on toodud "filtri erikäitumine
+     (parentId=0 tagastab kõik)". Filtrite eriväärtuste selgitus käib seega
+     lisainfo alla.
+
+  Mida dokument ei ütle:
+
+  - Kas query parameetrid kirjutatakse API reale {mustrina}, näidisväärtusega
+    või üldse mitte.
+  - Kuidas märkida, kas parameeter on kohustuslik või valikuline.
+  - Kuhu panna konkreetse vaate kutse näide. GET-il pole request body't, seega
+    reeglis mainitud "väärtused paistavad body näidetest" siin ei kehti.
+  - Kuidas käituda, kui parameetreid on palju (meil 6). API rida läheb siis väga
+    pikaks.
+
+  Praegune märge on need lüngad täitnud omal moel: kõik parameetrid on API real
+  {mustrina} ning selgitused ja HomeView kutse on lisainfos.
+
+  Kas soovid, et pakuksin struktuuridokumenti välja query parameetrite reegli?
+  Üks võimalus oleks eraldi Query parameetrid: plokk API rea järel, kus iga
+  parameeter on oma real koos märkega kohustuslik/valikuline. Või jätame
+  struktuuri samaks ja parandame ainult selle märkme sisu?
+
+✻ Baked for 14s · done 11:03 AM
+
+❯ Pigem see osa, et lisainfo alla ei paneks, vaid oleks eraldi sektsioon        
+  (Query/Request parameetrid, mis võiks tulla kohe peale API: URL osa.          
+  Võiks olla nimi, tüüp, väga lühike selgitus                                   
+
+● Teen ettepaneku lisada struktuuridokumenti eraldi Query parameetrid:
+  sektsioon. Nimeks soovitan "Query", mitte "Request", sest "Request" läheks
+  segamini Request body: plokiga. Path variable'id ({entityId}) jäävad endiselt
+  API reale, sest need on osa path'i mustrist.
+
+  1. Muudatus struktuuridokumendis (mock-wireframe-markmete-struktuur.md, jaotis
+  2)
+
+  Struktuuri plokki lisandub API rea järele:
+
+  API: <METOOD> <path>
+
+  Query parameetrid:
+  <nimi>: <tüüp> — <väga lühike selgitus>
+  <nimi>: <tüüp> — <väga lühike selgitus>
+
+  <RequestDtoClassName.java>
+  Request body:
+  ...
+
+  Reeglitesse lisandub:
+  - Query parameetrid tuleb kohe API rea järel, eraldatuna ühe tühja reaga. Iga
+    parameeter on oma real kujul nimi: tüüp — selgitus. Tüüp on Java tüüp nagu
+    controlleris (Integer, String). Selgitus on paar sõna, sh eriväärtused (nt 0
+    = kõik).
+  - Parameetrid on vaikimisi kohustuslikud. Valikulise parameetri selgituse
+    lõppu lisatakse (valikuline).
+  - Kui teenusel query parameetreid pole, jäetakse sektsioon täielikult ära,
+    samamoodi nagu Request body.
+  - Query parameetreid ei kirjutata API reale. Rida jääb kujule GET 
+    /api/trainings.
+
+  2. Tulemus GET /api/trainings märkmes
+
+  API: GET /api/trainings
+
+  Query parameetrid:
+  categoryId: Integer — kategooria filter, 0 = kõik
+  fundingTypeId: Integer — rahastustüübi filter, 0 = kõik
+  limit: Integer — koolituste arv lehel
+  page: Integer — lehekülje number, algab 0-st
+  trainingLang: String — õppekeele filter ("et"/"en")
+  contentLang: String — tõlgitud väljade keel ("et"/"en")
+
+  TrainingSummaryDto.java
+  Response (200):
+  ...
+
+  API teenuse lisainfo:
+  HomeView kutsub:
+  categoryId=0&fundingTypeId=0&limit=3&page=0&trainingLang=et&contentLang=et
+  totalPages ja totalElements kirjeldavad kogu filtreeritud tulemushulka.
+  fundingTypes võib olla tühi list.
+
+  Lisainfo jääb selle muudatusega palju lühemaks.
+
+  Sellega kaasneb ka üks kõrvalmõju. Jaotise 3 tabelis on read GET 
+  /api/entities?parentId=2 ja GET /api/entity/{entityId}/related-types. Esimene
+  läheks uue reegliga vastuollu, seega muudaksin selle rea kujule GET 
+  /api/entities + query parameeter parentId.
+
+  Kas teen need muudatused (struktuuridokument ja home-view märge)? Ja kas GET 
+  /api/categories märkme contentLang tõstan samuti uude sektsiooni?
+
+✻ Worked for 20s · done 11:05 AM
+
+❯ jah, tee muudatused, ka categories märkmes                                    
+
+● Bash(python3 - <<'EOF'
+      p='docs/mock-wireframe/kokkulepped/mock-wireframe-markmete-struktuur.md'…)
+  ⎿  65:Query parameetrid:
+     95:- Iga plokk (`API:`, `Query parameetrid:`, DTO+body paar, `API teen
+     use lisainfo:`, iga veajuhtum) on eraldatud tühja reaga.
+     … +12 lines (ctrl+o to expand)
+  ⎿  1 file changed (binary, mode only or too large to show)
+
+● Nüüd märkmete fail:
+
+● Bash(python3 - <<'EOF'
+      p='docs/mock-wireframe/markmed/home-view-markmed.md'…)
+  ⎿  ## API märkmed — GET /api/trainings
+
+     ```text
+     … +47 lines (ctrl+o to expand)
+  ⎿  Updated docs/mock-wireframe/markmed/home-view-markmed.md (+84 -73)
+       1 -# HomeView.vue — märkmed                                       
+       2 -                                                               
+       3 -## Vaate märkmed                                               
+       4 -                                                               
+       5 -```text                                                        
+       6 -Roll: Kõik rollid (külastajale kuvatakse "Logi sisse" ja "Regis
+         -treeri" nupud, sisselogitud kasutajale peidetud)               
+       7 -Failinimi: HomeView.vue                                        
+       8 -Frontend rada: /                                               
+       9 -                                                               
+      10 -Vaatega seotud lisainfo:                                       
+      11 -Nupule "Võta ühendust" vajutades avatakse ApplicationFormView v
+         -aade, nupule "Logi sisse" vajutades LoginView vaade ja nupule "
+         -Registreeri" vajutades RegisterView vaade (kõik ilma API kutset
+         -a).                                                            
+      12 -Sektsioonis "Peagi algavad koolitused" kuvatakse kolm koolitust
+         - (GET /api/trainings, limit=3). Kategooriate loend (GET /api/ca
+         -tegories) kuvatakse otsingu juures. Otsinguriba viib teisele va
+         -atele, mida selles taskis ei defineerita.                      
+      13 -Mõlemad API kutsed käivitatakse vaate avanemisel, mitte kasutaj
+         -a tegevuse peale.                                              
+      14 -```                                                            
+      15 -                                                               
+      16 -## API märkmed — GET /api/trainings                            
+      17 -                                                               
+      18 -```text                                                        
+      19 -API: GET /api/trainings?categoryId={categoryId}&fundingTypeId={
+         -fundingTypeId}&limit={limit}&page={page}&trainingLang={training
+         -Lang}&contentLang={contentLang}                                
+      20 -                                                               
+      21 -TrainingSummaryDto.java                                        
+      22 -Response (200):                                                
+      23 -{                                                              
+      24 -  "totalPages": 1,                                             
+      25 -  "totalElements": 2,                                          
+      26 -  "trainingSummaries": [                                       
+      27 -    {                                                          
+      28 -      "trainingId": 1,                                         
+      29 -      "title": "Java algkursus",                               
+      30 -      "shortDescription": "Java programmeerimise alused algajat
+         -ele.",                                                         
+      31 -      "categoryId": 1,                                         
+      32 -      "categoryName": "Programmeerimine",                      
+      33 -      "isOrderOnly": false,                                    
+      34 -      "isPromoted": true,                                      
+      35 -      "fundingTypes": [                                        
+      36 -        {                                                      
+      37 -          "fundingTypeId": 1,                                  
+      38 -          "fundingTypeName": "Töötukassa"                      
+      39 -        },                                                     
+      40 -        ...                                                    
+     … 117 more lines (ctrl+o to expand)
+
+● Mõlemad failid on muudetud.
+
+  Struktuuridokument
+  (docs/mock-wireframe/kokkulepped/mock-wireframe-markmete-struktuur.md):
+  - API märkmete struktuuris on nüüd API rea järel uus Query parameetrid:
+    sektsioon, kus iga parameeter on kujul <nimi>: <tüüp> — <selgitus>.
+  - Uued reeglid:
+    - tüüp on Java tüüp nagu controlleris;
+    - parameetrid on vaikimisi kohustuslikud, valikulise parameetri selgituse
+      lõppu lisatakse (valikuline);
+    - kui query parameetreid pole, jäetakse sektsioon ära;
+    - path variable'id jäävad API reale;
+    - query parameetreid API reale ei kirjutata.
+  - Jaotise 3 tabelis on GET /api/entities?parentId=2 asemel nüüd GET 
+    /api/entities + query parameeter parentId.
+
+  Märkmed (docs/mock-wireframe/markmed/home-view-markmed.md):
+  - GET /api/trainings: API rida on nüüd lihtsalt GET /api/trainings. Kõik 6
+    parameetrit on uues sektsioonis koodi järgi kohustuslikena, categoryId ja
+    fundingTypeId juures on märge 0 = kõik. Lisainfosse jäid HomeView konkreetne
+    kutse ja vastuse selgitus.
+  - GET /api/categories: contentLang on tõstetud uude sektsiooni ja lisainfost
+    eemaldatud.
+
+  Lahtised küsimused:
+  - /api/categories contentLang: jätsin selle valikuliseks, nagu märkmes oli.
+    /api/trainings juures on sama parameeter aga kohustuslik. Kui tahad, et
+    mõlemad käituksid ühtemoodi, eemaldan (valikuline).
+  - HomeView kutse trainingLang=et: see näitab avalehel ainult eestikeelseid
+    koolitusi. See otsus on endiselt lahti.
+  - Backend task docs/tasks/backend/GET-api-trainings.md: seal on parameetrid
+    endiselt kirjas valikulistena, nii et task ja kood ei ole sünkis. Kas
+    parandan ka selle?
+
+✻ Baked for 39s · done 11:06 AM
+
+❯ jah, paranda ka backend task                                                  
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Bash(python3 - <<'EOF'
+      p='docs/tasks/backend/GET-api-trainings.md'…)
+  ⎿  ## Sisend
+
+     Kõik parameetrid on query parameetrid ja kohustuslikud (`@RequestParam
+     … +17 lines (ctrl+o to expand)
+  ⎿  1 file changed (binary, mode only or too large to show)
+
+● Parandasin backend taski docs/tasks/backend/GET-api-trainings.md, nüüd vastab
+  see koodile.
+
+  - Sisendi sissejuhatus: kõik parameetrid on nüüd kirjas kohustuslikena. Juurde
+    tuli selgitus, et filtrit "kõik" antakse väärtusega 0, mitte parameetri
+    ärajätmisega.
+  - Parameetrite tabel:
+    - "valikuline" on eemaldatud;
+    - tüübid on muudetud Java tüüpideks (Integer), nagu controlleris;
+    - categoryId ja fundingTypeId juures on nüüd 0 = kõik;
+    - trainingLang juures on märge, et väärtust "kõik keeled" pole.
+  - Kontrollnimekiri: punkt ütleb nüüd, et parameetrid on kohustuslikud ja
+    categoryId=0/fundingTypeId=0 tagastab kõik.
+
+  Taski alguses on **Teenus:** real endiselt ?categoryId={categoryId}&...
+  muster. Selle jätsin alles, sest taski formaat on märkmete omast eraldi ja uus
+  Query parameetrid reegel kehtib ainult märkmete kohta. Kui tahad, et ka
+  taskis oleks ainult path, muudan selle ära.
+
+  Mockupi märge, backend task ja kood on nüüd query parameetrite osas omavahel
+  kooskõlas. Lahti on veel kaks küsimust eelmisest sammust:
+  - kas /api/categories contentLang jääb valikuliseks;
+  - kas HomeView kutsub trainingLang=et-ga.
+
+✻ Brewed for 24s · done 11:07 AM
+
+❯ need võiksid olla ka vahetuses                                                
+  TrainingSummaryDto.java                                                       
+  Response (200):                                                               
+                                                                                
+  ->                                                                            
+   Response (200):                                                              
+  TrainingSummaryDto.java                                                       
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+● Vahetan järjekorra nii Response kui Request body puhul, et reegel oleks ühtne:
+
+● Bash(python3 - <<'EOF'
+      import re…)
+  ⎿  docs/mock-wireframe/kokkulepped/mock-wireframe-markmete-struktuur.md 5
+     docs/mock-wireframe/markmed/home-view-markmed.md 2
+     docs/mock-wireframe/kokkulepped/mock-wireframe-markmete-struktuur.md:6
+     … +28 lines (ctrl+o to expand)
+  ⎿  Updated .claude/skills/skill-uus-mockup-markmed/SKILL.md (+197 -197)
+        1 ----                                                           
+        2 -name: skill-uus-mockup-markmed                                
+        3 -description: Koosta mockup'i (wireframe'i, nt Balsamiq) vaate 
+          -juurde käivad märkmed — Vaate märkmed või API märkmed — ja sal
+          -vesta need vaate märkmete faili docs/mock-wireframe/markmed/ k
+          -austas. Kasuta, kui kasutaja tahab luua või uuendada vaate mär
+          -kmeid, API märkmeid, mockupi märkmeid (ka kui ta ütleb "mockup
+          -i silt" või "balsamic silt").                                 
+        4 ----                                                           
+        5 -                                                              
+        6 -# Loo mockupi märkmed                                         
+        7 -                                                              
+        8 -**Taust:** Seda skilli kasutavad õpilased oma tiimiprojekti **
+          -planeerimisfaasis** — pärast seda, kui nad on toorikprojektist
+          - loonud oma projekti (vt `skill-uus-projekt`), aga **enne** ku
+          -i domeeni `controller`/`service` klasse on kirjutatud. Sel het
+          -kel on olemas ainult toorikprojekti baasstruktuur (sh `infrast
+          -ructure/` kaust) ja andmebaasi skeem/näidisandmed — äriloogika
+          - kood tuleb alles hiljem. Nende märkmete täpsus kandub otse ed
+          -asi: need on üks kolmest omavahel sünkis peetavast allikast (m
+          -ockup, backend task, backend kood — vt struktuuridokumendi kok
+          -kuvõtet) ning on hiljem sisendiks task-failide (`skill-loo-bac
+          -kend-task`) ja koodi kirjutamise (`skill-rain-ai-backend`) faa
+          -sile.                                                         
+        9 -                                                              
+       10 -Eesmärk: panna olemasolevatest andmetest (andmebaasi skeem, nä
+          -idisandmed, kasutaja antud info) kokku mockupi vaate juurde kä
+          -ivad märkmed — kas **Vaate märkmed** või **API märkmed** — täp
+          -selt struktuuris, mis on kokku lepitud failis `docs/mock-wiref
+          -rame/kokkulepped/mock-wireframe-markmete-struktuur.md`.       
+       11 -                                                              
+       12 -**Terminid** (kasuta neid järjekindlalt ka kasutajaga suheldes
+          -):                                                            
+       13 -- **Vaate märkmed** ja **API märkmed** — kaks märkmete tüüpi (
+          -nagu struktuuridokumendis).                                   
+       14 -- **märge** — üks konkreetne märkmete plokk (nt "üks API märge
+          -" = ühe backend kutse API märkmed).                           
+       15 -- **kast** — mockupi kollane/valge kast, kuhu märkme tekst cop
+          -y-pastitakse.                                                 
+       16 -- **vaate märkmete fail** — `docs/mock-wireframe/markmed/<vaat
+          -e-nimi>-markmed.md`, kus on kõik ühe vaate märkmed.           
+       17 -                                                              
+       18 -## 1. Uuri kõigepealt struktuuridokumenti                     
+       19 -                                                              
+       20 -Loe alati **enne** sisu koostamist läbi `docs/mock-wireframe/k
+          -okkulepped/mock-wireframe-markmete-struktuur.md`. See defineer
+          -ib mõlema märkmete tüübi täpse struktuuri, väljad ja reeglid. 
+          -Ära tugine mällu jäänud struktuurile ega varasemale näitele — 
+          -loe fail iga kord uuesti, sest struktuur võib olla vahepeal mu
+          -utunud.                                                       
+       21 -                                                              
+       22 -## 2. Küsi kasutajalt, mida ta soovib                         
+       23 -                                                              
+       24 -Kui pole juba selge, küsi kasutajalt:                         
+       25 -                                                              
+       26 -1. Kas soovitakse koostada **uut** märget või **uuendada/täien
+          -dada** olemasolevat.                                          
+       27 -2. Kumb märkmete tüüp — Vaate märkmed (üks vaate kohta) või AP
+          -I märkmed (üks backend kutse kohta). Kui vaade teeb mitu API k
+          -utset, tuleta kasutajale meelde, et iga kutse kohta tuleb eral
+          -di API märge (ja mockupis eraldi kast).                       
+       28 -3. **Millise vaate juurde märge käib** (nt `HomeView.vue`) — k
+          -õik ühe vaate märkmed hoitakse vaate märkmete failis (vt samm 
+          -10), seega ka üksiku API märkme puhul peab vaade olema teada. 
+          -Kui sama API kutset kasutab mitu vaadet, lisatakse API märge i
+          -ga sellise vaate märkmete faili.                              
+       29 -                                                              
+       30 -Kui tegemist on uuendamisega, küsi kasutajalt (kui pole juba a
+          -ntud), mille põhjal olemasolevat märget leida/täiendada — kasu
+          -taja võib anda:                                               
+       31 -- olemasoleva `.md` faili path'i `docs/mock-wireframe/markmed/
+          -` kaustas,                                                    
+       32 -- vabatekstina kirjelduse/muudatuse, mida tuleb arvesse võtta,
+       33 -- screenshoti/pildi konkreetsest mockupi vaatest.             
+       34 -                                                              
+       35 -Kõiki neid sisendvorme tuleb aktsepteerida — kui kasutaja anna
+          -b screenshoti, loe sellelt olemasolev tekst välja samamoodi na
+          -gu uue märkme koostamisel lähtematerjali loetakse.            
+       36 -                                                              
+       37 -## 3. Küsi sisu kohta — peata ja oota vastust                 
+       38 -                                                              
+       39 -Pärast sammu 2 **peata alati** ja küsi kasutajalt märkmete sis
+          -u kohta, vastavalt valitud tüübile. Kasutaja võib vastata vaba
+          -s vormis, failide path'idena (nt DTO, controller, task) või mo
+          -ckupi screenshotina — kõik vormid sobivad. Ütle kasutajale, et
+          - kui ta mõnda asja ei tea, pakud selle ise andmebaasi ja koodi
+          - põhjal välja (samm 4).                                       
+       40 -                                                              
+     … 354 more lines (ctrl+o to expand)
+  ⎿  Updated
+     docs/mock-wireframe/kokkulepped/mock-wireframe-markmete-struktuur.md
+     (+8 -8)
+      66  <nimi>: <tüüp> — <väga lühike selgitus>
+      67  <nimi>: <tüüp> — <väga lühike selgitus>
+      68  
+      69 -<RequestDtoClassName.java>                                     
+      69  Request body:
+      70 +<RequestDtoClassName.java>                                     
+      71  {
+      72    ...päris JSON näidis...
+      73  }
+      74  
+      75 -<ResponseDtoClassName.java>                                    
+      75  Response (200):
+      76 +<ResponseDtoClassName.java>                                    
+      77  {
+      78    ...päris JSON näidis...
+      79  }
+     ...
+      100      - Parameetrid on vaikimisi kohustuslikud; valikulise param
+           eetri selgituse lõppu lisa `(valikuline)`
+      101      - Kui teenusel query parameetreid pole, jäta sektsioon täi
+           elikult ära (nagu `Request body`)
+      102      - Path variable'id (`{entityId}`) jäävad `API` rea path'i 
+           mustrisse ega kordu siin
+      103 -- **DTO nimi käib alati vahetult vastava body ploki kohal**, m
+          -itte eraldi ühtse `DTO:` reana üleval:                        
+      104 -    - Kui operatsioon võtab sisse request body, kirjuta `<Requ
+          -estDtoClassName.java>` real vahetult enne `Request body:` plok
+          -ki.                                                           
+      105 -    - Response DTO nimi (`<ResponseDtoClassName.java>`) käib v
+          -ahetult enne `Response (200):` plokki.                        
+      103 +- **DTO nimi käib alati vahetult vastava body pealkirja all**,
+          + enne JSON näidist — mitte eraldi ühtse `DTO:` reana üleval:  
+      104 +    - Kui operatsioon võtab sisse request body, kirjuta `<Requ
+          +estDtoClassName.java>` vahetult `Request body:` rea järele.   
+      105 +    - Response DTO nimi (`<ResponseDtoClassName.java>`) käib v
+          +ahetult `Response (200):` rea järele.                         
+      106      - Kui operatsioonil pole request body't (nt lihtne GET/DEL
+           ETE), jäta `Request body` osa täielikult ära ja alusta otse re
+           sponse DTO-st.
+      107      - Kui operatsioonil pole response body't (nt POST/PUT/DELE
+           TE, mis tagastab tühja 200), kirjuta `Response (200): NONE` il
+           ma DTO nimeta selle kohal.
+      108  - **JSON massiivide (array) reegel:** Kui JSON näidises on mas
+           siiv (juurtasemel või objekti sees), pannakse näidisesse **ain
+           ult üks element**, mille järel on koma ja järgmisel real `...`
+            (kolm punkti), mis viitab sellele, et elemente võib olla rohk
+           em.
+     ...
+      119  ```text
+      120  API: POST /api/login
+      121  
+      122 -LoginRequestDto.java                                          
+      122  Request body:
+      123 +LoginRequestDto.java                                          
+      124  {
+      125    "username": "admin",
+      126    "password": "123"
+      127  }
+      128  
+      129 -LoginResponseDto.java                                         
+     … 14 more lines (ctrl+o to expand)
+  ⎿  Updated docs/mock-wireframe/markmed/home-view-markmed.md (+2 -2)
+      26  trainingLang: String — õppekeele filter ("et"/"en")
+      27  contentLang: String — tõlgitud väljade keel ("et"/"en")
+      28  
+      29 -TrainingSummaryDto.java                                        
+      29  Response (200):
+      30 +TrainingSummaryDto.java                                        
+      31  {
+      32    "totalPages": 1,
+      33    "totalElements": 2,
+     ...
+      67  Query parameetrid:
+      68  contentLang: String — categoryName keel ("et"/"en") (valikuline
+          )
+      69  
+      70 -CategoryDto.java                                               
+      70  Response (200):
+      71 +CategoryDto.java                                               
+      72  [
+      73    {
+      74      "categoryId": 1,
+● Kaks alumist punkti viitavad veel vanale järjekorrale, parandan needki:
+
+● Bash(sed -i 's/ja alusta otse response DTO-st\./ja alusta otse `Response
+      (200):` plokist./; s/kirjuta `Response (200): NONE` ilma DTO nimeta selle
+      kohal\./kirjuta `R…)
+  ⎿      - Kui operatsioonil pole request body't (nt lihtne GET/DELETE), jä
+     ta `Request body` osa täielikult ära ja alusta otse `Response (200):`
+     plokist.
+     … +2 lines (ctrl+o to expand)
+  ⎿  Updated
+     docs/mock-wireframe/kokkulepped/mock-wireframe-markmete-struktuur.md
+     (+2 -2)
+      103  - **DTO nimi käib alati vahetult vastava body pealkirja all**,
+            enne JSON näidist — mitte eraldi ühtse `DTO:` reana üleval:
+      104      - Kui operatsioon võtab sisse request body, kirjuta `<Requ
+           estDtoClassName.java>` vahetult `Request body:` rea järele.
+      105      - Response DTO nimi (`<ResponseDtoClassName.java>`) käib v
+           ahetult `Response (200):` rea järele.
+      106 -    - Kui operatsioonil pole request body't (nt lihtne GET/DEL
+          -ETE), jäta `Request body` osa täielikult ära ja alusta otse re
+          -sponse DTO-st.                                                
+      107 -    - Kui operatsioonil pole response body't (nt POST/PUT/DELE
+          -TE, mis tagastab tühja 200), kirjuta `Response (200): NONE` il
+          -ma DTO nimeta selle kohal.                                    
+      106 +    - Kui operatsioonil pole request body't (nt lihtne GET/DEL
+          +ETE), jäta `Request body` osa täielikult ära ja alusta otse `R
+          +esponse (200):` plokist.                                      
+      107 +    - Kui operatsioonil pole response body't (nt POST/PUT/DELE
+          +TE, mis tagastab tühja 200), kirjuta `Response (200): NONE` il
+          +ma DTO nimeta.                                                
+      108  - **JSON massiivide (array) reegel:** Kui JSON näidises on mas
+           siiv (juurtasemel või objekti sees), pannakse näidisesse **ain
+           ult üks element**, mille järel on koma ja järgmisel real `...`
+            (kolm punkti), mis viitab sellele, et elemente võib olla rohk
+           em.
+      109  - `API teenuse lisainfo` — lühike (1–3 rida) vabas vormis märk
+           us teenuse käitumise kohta, mis pole väljanimedest endist ilmn
+           e. Näiteks: filtri erikäitumine (`parentId=0` tagastab kõik), 
+           valikulised väljad (`imageData` võib olla tühi string), soft d
+           elete, vms. Kui teenusel pole midagi sellist lisada, jäta väär
+           tuseks `—`.
+      110  - `Veateated` — iga veajuhtum on eraldi kolmerealine plokk, al
+           ati sama kolme võtmega samas järjekorras:
+  ⎿  1 skill available
+
+● Järjekord on nüüd vahetatud: kõigepealt tuleb pealkiri (Response (200): või
+  Request body:), selle all DTO nimi ja siis JSON. Reegel peab olema ühtne,
+  seega vahetasin järjekorra ka Request body puhul, mitte ainult Response puhul.
+
+  Response (200):
+  TrainingSummaryDto.java
+  {
+    ...
+  }
+
+  Muudetud failid:
+  - docs/mock-wireframe/kokkulepped/mock-wireframe-markmete-struktuur.md: uue
+    järjekorraga on nüüd struktuuri plokk, 4 näidet (LoginRequestDto,
+    LoginResponseDto, EntityCreateRequestDto) ja DTO nime reegel. Parandasin ka
+    kaks punkti, mis viitasid veel vanale järjekorrale:
+    - "alusta otse Response (200): plokist";
+    - "Response (200): NONE ilma DTO nimeta".
+  - docs/mock-wireframe/markmed/home-view-markmed.md: järjekord on vahetatud
+    mõlemas API märkmes (TrainingSummaryDto.java, CategoryDto.java).
+  - .claude/skills/skill-uus-mockup-markmed/SKILL.md: sammus 8 oli kirjas "DTO
+    nime paiknemine vahetult body ploki kohal". Nüüd on seal "vahetult body
+    pealkirja all", et skill ei annaks vana juhist.
+
+  Backend ja frontend taske see muudatus ei puuduta, sest neis on oma formaat.
+
+✻ Cogitated for 33s · done 11:08 AM
+
+❯ Võtame nüüd ette selle vaate märkmed                                          
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Vaatasin praeguse Vaate märkme üle ja võrdlesin seda struktuuridokumendi ja
+  olemasoleva koodiga. HomeView.vue on praegu toorikust jäänud testvaade
+  (TestComponent), seega kood siin midagi ei kinnita. HomeView mockupi pilti ega
+  PDF-i ka ei ole: pdf/ kaustas on ainult LoginView.pdf ja TrainingsView.pdf.
+
+  Praegune märge:
+
+  Roll: Kõik rollid (külastajale kuvatakse "Logi sisse" ja "Registreeri" nupud,
+  sisselogitud kasutajale peidetud)
+  Failinimi: HomeView.vue
+  Frontend rada: /
+
+  Vaatega seotud lisainfo:
+  Nupule "Võta ühendust" vajutades avatakse ApplicationFormView vaade, nupule
+  "Logi sisse" vajutades LoginView vaade ja nupule "Registreeri" vajutades
+  RegisterView vaade (kõik ilma API kutseta).
+  Sektsioonis "Peagi algavad koolitused" kuvatakse kolm koolitust (GET
+  /api/trainings, limit=3). Kategooriate loend (GET /api/categories) kuvatakse
+  otsingu juures. Otsinguriba viib teisele vaatele, mida selles taskis ei
+  defineerita.
+  Mõlemad API kutsed käivitatakse vaate avanemisel, mitte kasutaja tegevuse
+  peale.
+
+  Roll, Failinimi ja Frontend rada on korras. Lisainfo osas on mul mõned
+  küsimused, soovitus on iga küsimuse juures:
+
+  1. Mockup: kas saad anda HomeView screenshoti või PDF-i? Ilma selleta ei saa
+     ma nuppe ega sektsioone kontrollida.
+  2. Vaadete nimed (URL-ide kokkulepe, jaotis 3):
+     - "Võta ühendust" → ApplicationFormView. Päring salvestub tabelisse
+       enquiry, seega soovitan nimeks EnquiryFormView.vue (/enquiry-form).
+     - "Registreeri" → RegisterView. Tegu on vormiga, mis loob uue kasutaja,
+       seega soovitan UserFormView.vue (/user-form).
+  3. Otsinguriba: mõtlesin, et see viib TrainingsView.vue (/trainings) vaatele.
+     Kas nii on õige? Backendis pole praegu otsingusõna parameetrit, seega kas
+     viiakse lihtsalt /trainings lehele?
+  4. Kategooriate loend: mis juhtub, kui kategooriale klikkida? Minu soovitus:
+     suunatakse /trainings?categoryId={id}.
+  5. Koolituse kaart "Peagi algavad" sektsioonis: kas kaardil on "Vaata
+     lähemalt" nupp ja kuhu see viib? TrainingsView task suunab CourseView
+     vaatele. Nimetamise reegli järgi (tabel training) oleks nimi
+     TrainingView.vue (/training?trainingId={id}).
+  6. Sisselogitud kasutaja: kas admin või customer näeb avalehel veel midagi
+     erinevat? Kui ei, jääb Roll rida praegusele kujule.
+  7. trainingLang: varasemast on see küsimus lahti. Kas avaleht näitab ainult
+     eestikeelseid koolitusi (trainingLang=et)?
+
+  Vasta vabas vormis, ja kui mõnda asja ei tea, pakun selle ise välja. Kui
+  vastused on käes, koostan uue lisainfo, mis mahub 1–4 reale.
+
+✻ Crunched for 26s · done 11:17 AM
+
+❯ Tegelikult need docs/mock-wireframe/markmed/home-view-markmed.md on hoopis    
+  TrainingsView märkmed. Nimeta hetkel lihtsalt ümber                           
+
+● Bash(ls docs/mock-wireframe/markmed/ && (git ls-files --error-unmatch
+      docs/mock-wireframe/markmed/home-view-markmed.md >/dev/null 2>&1 && git mv
+      docs/mock-wireframe/…)
+  ⎿  home-view-markmed.md
+     # TrainingsView.vue — märkmed
+     trainings-view-markmed.md
+     … +5 lines (ctrl+o to expand)
+  ⎿  Deleted docs/mock-wireframe/markmed/home-view-markmed.md (+0 -84)
+       1 -# HomeView.vue — märkmed                                       
+       2 -                                                               
+       3 -## Vaate märkmed                                               
+       4 -                                                               
+       5 -```text                                                        
+       6 -Roll: Kõik rollid (külastajale kuvatakse "Logi sisse" ja "Regis
+         -treeri" nupud, sisselogitud kasutajale peidetud)               
+       7 -Failinimi: HomeView.vue                                        
+       8 -Frontend rada: /                                               
+       9 -                                                               
+      10 -Vaatega seotud lisainfo:                                       
+      11 -Nupule "Võta ühendust" vajutades avatakse ApplicationFormView v
+         -aade, nupule "Logi sisse" vajutades LoginView vaade ja nupule "
+         -Registreeri" vajutades RegisterView vaade (kõik ilma API kutset
+         -a).                                                            
+      12 -Sektsioonis "Peagi algavad koolitused" kuvatakse kolm koolitust
+         - (GET /api/trainings, limit=3). Kategooriate loend (GET /api/ca
+         -tegories) kuvatakse otsingu juures. Otsinguriba viib teisele va
+         -atele, mida selles taskis ei defineerita.                      
+      13 -Mõlemad API kutsed käivitatakse vaate avanemisel, mitte kasutaj
+         -a tegevuse peale.                                              
+      14 -```                                                            
+      15 -                                                               
+      16 -## API märkmed — GET /api/trainings                            
+      17 -                                                               
+      18 -```text                                                        
+      19 -API: GET /api/trainings                                        
+      20 -                                                               
+      21 -Query parameetrid:                                             
+      22 -categoryId: Integer — kategooria filter, 0 = kõik              
+      23 -fundingTypeId: Integer — rahastustüübi filter, 0 = kõik        
+      24 -limit: Integer — koolituste arv lehel                          
+      25 -page: Integer — lehekülje number, algab 0-st                   
+      26 -trainingLang: String — õppekeele filter ("et"/"en")            
+      27 -contentLang: String — tõlgitud väljade keel ("et"/"en")        
+      28 -                                                               
+      29 -Response (200):                                                
+      30 -TrainingSummaryDto.java                                        
+      31 -{                                                              
+      32 -  "totalPages": 1,                                             
+      33 -  "totalElements": 2,                                          
+      34 -  "trainingSummaries": [                                       
+      35 -    {                                                          
+      36 -      "trainingId": 1,                                         
+      37 -      "title": "Java algkursus",                               
+      38 -      "shortDescription": "Java programmeerimise alused algajat
+         -ele.",                                                         
+      39 -      "categoryId": 1,                                         
+      40 -      "categoryName": "Programmeerimine",                      
+     … 44 more lines (ctrl+o to expand)
+  ⎿  Created docs/mock-wireframe/markmed/trainings-view-markmed.md (+84 -0)
+       1 +# TrainingsView.vue — märkmed                                  
+       2 +                                                               
+       3 +## Vaate märkmed                                               
+       4 +                                                               
+       5 +```text                                                        
+       6 +Roll: Kõik rollid (külastajale kuvatakse "Logi sisse" ja "Regis
+         +treeri" nupud, sisselogitud kasutajale peidetud)               
+       7 +Failinimi: HomeView.vue                                        
+       8 +Frontend rada: /                                               
+       9 +                                                               
+      10 +Vaatega seotud lisainfo:                                       
+      11 +Nupule "Võta ühendust" vajutades avatakse ApplicationFormView v
+         +aade, nupule "Logi sisse" vajutades LoginView vaade ja nupule "
+         +Registreeri" vajutades RegisterView vaade (kõik ilma API kutset
+         +a).                                                            
+      12 +Sektsioonis "Peagi algavad koolitused" kuvatakse kolm koolitust
+         + (GET /api/trainings, limit=3). Kategooriate loend (GET /api/ca
+         +tegories) kuvatakse otsingu juures. Otsinguriba viib teisele va
+         +atele, mida selles taskis ei defineerita.                      
+      13 +Mõlemad API kutsed käivitatakse vaate avanemisel, mitte kasutaj
+         +a tegevuse peale.                                              
+      14 +```                                                            
+      15 +                                                               
+      16 +## API märkmed — GET /api/trainings                            
+      17 +                                                               
+      18 +```text                                                        
+      19 +API: GET /api/trainings                                        
+      20 +                                                               
+      21 +Query parameetrid:                                             
+      22 +categoryId: Integer — kategooria filter, 0 = kõik              
+      23 +fundingTypeId: Integer — rahastustüübi filter, 0 = kõik        
+      24 +limit: Integer — koolituste arv lehel                          
+      25 +page: Integer — lehekülje number, algab 0-st                   
+      26 +trainingLang: String — õppekeele filter ("et"/"en")            
+      27 +contentLang: String — tõlgitud väljade keel ("et"/"en")        
+      28 +                                                               
+      29 +Response (200):                                                
+      30 +TrainingSummaryDto.java                                        
+      31 +{                                                              
+      32 +  "totalPages": 1,                                             
+      33 +  "totalElements": 2,                                          
+      34 +  "trainingSummaries": [                                       
+      35 +    {                                                          
+      36 +      "trainingId": 1,                                         
+      37 +      "title": "Java algkursus",                               
+      38 +      "shortDescription": "Java programmeerimise alused algajat
+         +ele.",                                                         
+      39 +      "categoryId": 1,                                         
+      40 +      "categoryName": "Programmeerimine",                      
+     … 44 more lines (ctrl+o to expand)
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+● Bash(sed -i '88s#docs/mock-wireframe/markmed/home-view-markmed.md#docs/mock-wi
+      reframe/markmed/trainings-view-markmed.md#' backend/CLAUDE.md && sed -n
+      88p backend/CLA…)
+  ⎿  Näide selle mustri rakendusest: vt `docs/mock-wireframe/markmed/traini
+     ngs-view-markmed.md` (`GET /api/trainings`, `GET /api/categories`).
+  ⎿  Updated backend/CLAUDE.md (+1 -1)
+      85  - `contentLang` (nt `?translationLang=et`) — määrab, millises k
+          eeles tõlgitud tekstiväljad (nt `title`, `shortDescription`, `c
+          ategoryName`) vastuses tagastatakse (loetakse vastavast `*_tran
+          slation` tabelist).
+      86  - `trainingLang` (nt `?trainingLang=et`) — filtreerib koolitusi
+           nende õppekeele järgi (`training.training_language_id`).
+      87  
+      88 -Näide selle mustri rakendusest: vt `docs/mock-wireframe/markmed
+         -/home-view-markmed.md` (`GET /api/trainings`, `GET /api/categor
+         -ies`).                                                         
+      88 +Näide selle mustri rakendusest: vt `docs/mock-wireframe/markmed
+         +/trainings-view-markmed.md` (`GET /api/trainings`, `GET /api/ca
+         +tegories`).                                                    
+      89  
+      90  ### REST API
+      91  
+
+● Nimetasin faili home-view-markmed.md ümber
+  docs/mock-wireframe/markmed/trainings-view-markmed.md-ks. Faili esimene rida
+  on nüüd # TrainingsView.vue — märkmed.
+
+  Vanale nimele viitas veel kaks kohta:
+  - backend/CLAUDE.md:88: siin oli viide päris failile, mida kasutati näitena.
+    Muutsin selle uue nime peale.
+  - docs/tasks/frontend/login-view.md:19: siin on kirjas oletus, et LoginView
+    märkmete tekst "on tõenäoliselt kopeeritud HomeView märkmetest", ja viide
+    vanale failinimele. Seda ma ei muutnud. Nüüd tundub, et tekst pärineb hoopis
+    TrainingsView märkmetest, nii et muudan selle lause, kui soovid.
+
+  Faili sisu on veel HomeView kohta. Vaate märkmes on Failinimi: HomeView.vue ja
+  Frontend rada: /, lisainfo kirjeldab avalehe nuppe ja lisainfos on lause
+  "HomeView kutsub...". API märkmed klapivad TrainingsView'ga, aga need kohad
+  vajavad parandamist, kui vaate märkmed käsile võtame.
+
+  CLAUDE.md ja skillides on home-view-markmed.md mainitud ainult failinime
+  näitena, seega neid ma ei muutnud.
+
+✻ Brewed for 28s · done 11:20 AM
+
+❯ docs/mock-wireframe/pdf/BCS.pdf lehekülg 4                                    
+
+  Read 1 file, ran 1 shell command (ctrl+o to expand)
+
+● Lehekülg 4 on TrainingsView ja selle Vaate märge on mockupis juba uuendatud:
+  Failinimi: TrainingsView.vue ja Frontend rada: /trainings. API märkmete kast
+  klapib juba meie uue Query parameetrid struktuuriga. Võrdlesin kasti sisu
+  wireframe'i, vasakpoolse kollase kasti ja koodiga ning leidsin mõned
+  vastuolud.
+
+  Mockupi praegune Vaate märge:
+  Roll: Kõik rollid (sh külastajad, sisselogimist ei nõuta)
+  Failinimi: TrainingsView.vue
+  Frontend rada: /trainings
+  Vaatega seotud lisainfo:
+  Avalik vaade, sisselogimist ei nõuta. Nupule "Vaata lähemalt" vajutades
+  suunatakse kasutaja CourseView vaatele (valitud koolituse kohta). Otsingusõna,
+  sortimise, kategooria/keele filtri või kalendris kuupäeva muutmisel tehakse
+  uus GET /api/trainings päring vastavate query parameetritega.
+
+  Mida kastis muuta:
+  1. Vormistus: enne Vaatega seotud lisainfo: rida puudub tühi rida, mida
+     struktuur nõuab. Lause "Avalik vaade, sisselogimist ei nõuta" kordab Roll
+     rida ja on üleliigne.
+  2. Sortimine ja kalender: vasak kast ütleb "Sorteerimist pole" ja kalendrit
+     wireframe'il ei ole. Ka API-s pole nende jaoks parameetreid. Need tuleks
+     lisainfost eemaldada, sama otsuse tegi ka frontend task.
+  3. Otsingusõna: "Otsi" nupp on olemas, aga GET /api/trainings ei võta
+     otsingusõna parameetrit. See lahtine ots on juba kirjas ka frontend taskis.
+  4. Rahastus ja "Tellitav koolitus" lüliti: lisainfo ei maini kumbagi.
+     - Rahastuse filtri jaoks on API-s fundingTypeId.
+     - Lüliti "Tellitav koolitus" jaoks parameeter puudub, vaja oleks näiteks
+       isOrderOnly.
+  5. CourseView: URL-ide kokkuleppe järgi (tabel training) oleks koolituse
+     detailvaate nimi TrainingView.vue (/training?trainingId={id}). CourseView
+     oleks õige ainult siis, kui avatakse konkreetne toimumiskord (tabel
+     course).
+  6. Kategooriate dropdown: mockupis puudub GET /api/categories API märkmete
+     kast, kuigi md-failis on see märge olemas. Kui dropdown'i väärtused tulevad
+     backendist, peaks mockupi juurde tulema ka see kast.
+  7. API märke lisainfo: seal on "HomeView kutsub: …limit=3…". See on HomeView
+     kutse, mitte TrainingsView oma. Wireframe'il on kaardid ja leheküljestus,
+     aga limit väärtust mockup ei näita.
+
+  Ettepanek uueks Vaate märkmeks (eeldusel, et punktides 2–5 on minu soovitused
+  õiged):
+  Roll: Kõik rollid (sh külastajad, sisselogimist ei nõuta)
+  Failinimi: TrainingsView.vue
+  Frontend rada: /trainings
+
+  Vaatega seotud lisainfo:
+  Vaate avanemisel tehakse GET /api/trainings päring (categoryId=0,
+  fundingTypeId=0, page=0). Keele, kategooria või rahastuse filtri muutmisel
+  tehakse uus päring vastavate query parameetritega ja page lähtestatakse 0-ks.
+  Eelmine/Järgmine ja leheküljenumbrid muudavad page väärtust.
+  Nupule "Vaata lähemalt" vajutades suunatakse kasutaja TrainingView vaatele
+  (/training?trainingId={id}).
+
+  Enne faili kirjutamist on vaja otsustada:
+  - a) Kas detailvaade on TrainingView või CourseView?
+  - b) Otsingusõna ja lüliti "Tellitav koolitus": kas jätame need praegu välja,
+    või lisame backendisse uued parameetrid (nt searchText, isOrderOnly)?
+  - c) Kas kategooriate dropdown tuleb GET /api/categories-st (jätame märke
+    alles ja lisame mockupi kasti) või on väärtused fikseeritud? Sama küsimus
+    kehtib rahastuse raadionuppude kohta. Nende jaoks oleks vaja GET 
+    /api/funding-types märget.
+  - d) Mis limit ja trainingLang väärtusega TrainingsView esimese päringu teeb?
+    Nende järgi parandan ka API märke lisainfo.
+
+✻ Sautéed for 40s · done 2:48 PM
+
+❯ tee uus pilt docs/mock-wireframe/pdf-images/TrainingsView.png                 
+   Kalendrit ei ole, ega tule selles vaates, sest training_translation          
+  ja training all kuupäevasi pole, see on tabeli course ja vaate                
+  CoursesView.vue teema                                                         
+                                                                                
+  Lüliti "Tellitav koolitus" jaoks parameeter puudub, vaja oleks näiteks        
+  isOrderOnly. - selle osa tahaks teha übmer, ei taha filtrit aga äri           
+  loogiliselt, peaks see hoopis kuvama, et see on ka tellitav koolitus (ei      
+  eelda meiepoolset piltegia koolitust kalendris. training.is_order_only see    
+  veeru nimi peaks siis vist muutma, mis on sul selles osas mõtted              
+                                                                                
+  3. Otsingusõna: "Otsi" nupp on olemas, aga GET /api/trainings ei võta         
+  otsingusõna parameetrit. -> sellega tegeleme hiljem                           
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Bash(pdftoppm -f 4 -l 4 -png -r 150 -singlefile
+      docs/mock-wireframe/pdf/BCS.pdf
+      docs/mock-wireframe/pdf-images/TrainingsView && file
+      docs/mock-wireframe/pdf-images/T…)
+  ⎿  docs/mock-wireframe/pdf-images/TrainingsView.png: PNG image data, 2481
+      x 1754, 8-bit/color RGB, non-interlaced
+     total 764
+     … +4 lines (ctrl+o to expand)
+  ⎿  1 file changed (binary, mode only or too large to show)
+
+● Uus pilt on tehtud: docs/mock-wireframe/pdf-images/TrainingsView.png on nüüd
+  BCS.pdf lehekülg 4 (2481×1754, 150 dpi). Vana, 5484×3228 pikslit suur pilt
+  kirjutati üle, aga see on gitis olemas.
+
+  Kalendri jätan TrainingsView märkmetest välja: see kuulub course tabeli ja
+  CoursesView.vue juurde. Otsingusõnaga tegeleme hiljem.
+
+  is_order_only: minu mõtted
+
+  Praegune nimi ütleb teist asja, kui sa mõtled. "Order only" tähendab eesti
+  keeles "ainult tellimisel", ehk koolitust ei saa kalendrist valida. Sina
+  mõtled, et koolitust saab lisaks ka tellida, näiteks ettevõttele või grupile
+  eraldi. Nimi tuleks seega muuta.
+
+  Soovitus: is_orderable → isOrderable
+  - Tähendus: "koolitust saab tellida eraldi (ettevõttele/grupile)". See ei ütle
+    midagi kalendris olevate kursuste kohta.
+  - Kaardil kuvatakse "Tellitav" märgis, kui väärtus on true, nagu mockupis juba
+    on.
+  - Olukorda "ainult tellimisel" pole vaja eraldi veeruga hoida. Selle saab
+    tuletada sellest, et koolitusel pole eelseisvaid course kirjeid, ja see on
+    juba CoursesView teema.
+  - isOrderable sobib kokku kõrval oleva isPromoted väljaga: mõlemad on lihtsad
+    omaduse-lipud.
+
+  Filtri eemaldamisel on veel üks pluss: GET /api/trainings ei vaja uut
+  parameetrit, muutub ainult välja nimi.
+
+  Muutmist vajavad kohad:
+
+  ┌───────────────────────────────────────────────────────┬─────────────────┐
+  │                          Kus                          │   Mis muutub    │
+  ├───────────────────────────────────────────────────────┼─────────────────┤
+  │                                                       │ veerg           │
+  │ docs/database/2_create.sql                            │ is_order_only → │
+  │                                                       │  is_orderable   │
+  ├───────────────────────────────────────────────────────┼─────────────────┤
+  │ docs/database/3_import.sql                            │ INSERT veeru    │
+  │                                                       │ nimi            │
+  ├───────────────────────────────────────────────────────┼─────────────────┤
+  │ Training.java                                         │ @Column ja väli │
+  │                                                       │  isOrderable    │
+  ├───────────────────────────────────────────────────────┼─────────────────┤
+  │ TrainingSummaryItemDto.java,                          │ väli ja mapping │
+  │ TrainingSummaryMapper.java                            │                 │
+  ├───────────────────────────────────────────────────────┼─────────────────┤
+  │ trainings-view-markmed.md, GET-api-trainings.md,      │ JSON näidised   │
+  │ trainings-view.md                                     │ ja kirjeldused  │
+  ├───────────────────────────────────────────────────────┼─────────────────┤
+  │ docs/theory-materials/spring-data-page-ja-mapper.md   │ näidiskood      │
+  └───────────────────────────────────────────────────────┴─────────────────┘
+
+  Andmebaasi pead lokaalselt uuesti looma (1_reset → 2_create → 3_import).
+
+  Mockupis teed ise (Balsamiq):
+  - eemalda lüliti "Tellitav koolitus";
+  - muuda API kasti JSON-is "isOrderOnly" → "isOrderable".
+
+  Kaks küsimust enne muutmist:
+  1. Kas is_orderable sobib, või eelistad muud nime?
+  2. Näidisandmetes on mõlemal koolitusel is_order_only = false, seega
+     "Tellitav" märgist ei näe praegu kuskil. Kas panen koolitusele 1 väärtuseks
+     true, et märgis oleks testimisel näha?
+
+✻ Cooked for 47s · done 3:07 PM
+
+❯ is_orderable sobib, pane koolitusele 1 true                                   
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Bash(python3 - <<'EOF'
+      import re…)
+  ⎿  docs/database/2_create.sql muudetud
+     docs/database/3_import.sql muudetud
+     backend/src/main/java/ee/bcskoolitus/persistance/training/Training.jav
+     … +42 lines (ctrl+o to expand)
+  ⎿  Updated backend/src/main/java/ee/bcskoolitus/controller/training/dto/T
+     rainingSummaryItemDto.java (+24 -24)
+       1 -package ee.bcskoolitus.controller.training.dto;                
+       2 -                                                               
+       3 -import ee.bcskoolitus.controller.common.dto.FundingTypeDto;    
+       4 -import lombok.AllArgsConstructor;                              
+       5 -import lombok.Data;                                            
+       6 -import lombok.NoArgsConstructor;                               
+       7 -                                                               
+       8 -import java.io.Serializable;                                   
+       9 -import java.util.List;                                         
+      10 -                                                               
+      11 -@Data                                                          
+      12 -@AllArgsConstructor                                            
+      13 -@NoArgsConstructor                                             
+      14 -public class TrainingSummaryItemDto implements Serializable {  
+      15 -    private Long trainingId;                                   
+      16 -    private String trainingLanguageCode;                       
+      17 -    private String title;                                      
+      18 -    private String shortDescription;                           
+      19 -    private Integer categoryId;                                
+      20 -    private String categoryName;                               
+      21 -    private Boolean isOrderOnly;                               
+      22 -    private Boolean isPromoted;                                
+      23 -    private List<FundingTypeDto> fundingTypes;                 
+      24 -}                                                              
+       1 +package ee.bcskoolitus.controller.training.dto;                
+       2 +                                                               
+       3 +import ee.bcskoolitus.controller.common.dto.FundingTypeDto;    
+       4 +import lombok.AllArgsConstructor;                              
+       5 +import lombok.Data;                                            
+       6 +import lombok.NoArgsConstructor;                               
+       7 +                                                               
+       8 +import java.io.Serializable;                                   
+       9 +import java.util.List;                                         
+      10 +                                                               
+      11 +@Data                                                          
+      12 +@AllArgsConstructor                                            
+      13 +@NoArgsConstructor                                             
+      14 +public class TrainingSummaryItemDto implements Serializable {  
+      15 +    private Long trainingId;                                   
+      16 +    private String trainingLanguageCode;                       
+     … 8 more lines (ctrl+o to expand)
+  ⎿  Updated backend/src/main/java/ee/bcskoolitus/persistance/training/Trai
+     ning.java (+69 -69)
+       1 -package ee.bcskoolitus.persistance.training;                   
+       2 -                                                               
+       3 -import ee.bcskoolitus.persistance.category.Category;           
+       4 -import ee.bcskoolitus.persistance.lecturer.Lecturer;           
+       5 -import ee.bcskoolitus.persistance.location.Location;           
+       6 -import ee.bcskoolitus.persistance.language.Language;           
+       7 -import ee.bcskoolitus.persistance.user.User;                   
+       8 -import jakarta.persistence.*;                                  
+       9 -import jakarta.validation.constraints.NotNull;                 
+      10 -import lombok.Getter;                                          
+      11 -import lombok.Setter;                                          
+      12 -                                                               
+      13 -import java.time.Instant;                                      
+      14 -                                                               
+      15 -@Getter                                                        
+      16 -@Setter                                                        
+      17 -@Entity                                                        
+      18 -@Table(name = "training", schema = "bcs_koolitused")           
+      19 -public class Training {                                        
+      20 -    @Id                                                        
+      21 -    @GeneratedValue(strategy = GenerationType.IDENTITY)        
+      22 -    @Column(name = "id", nullable = false)                     
+      23 -    private Integer id;                                        
+      24 -                                                               
+      25 -    @NotNull                                                   
+      26 -    @ManyToOne(fetch = FetchType.LAZY, optional = false)       
+      27 -    @JoinColumn(name = "user_id", nullable = false)            
+      28 -    private User user;                                         
+      29 -                                                               
+      30 -    @ManyToOne(fetch = FetchType.LAZY)                         
+      31 -    @JoinColumn(name = "default_lecturer_id")                  
+      32 -    private Lecturer defaultLecturer;                          
+      33 -                                                               
+      34 -    @NotNull                                                   
+      35 -    @ManyToOne(fetch = FetchType.LAZY, optional = false)       
+      36 -    @JoinColumn(name = "category_id", nullable = false)        
+      37 -    private Category category;                                 
+      38 -                                                               
+      39 -    @NotNull                                                   
+      40 -    @ManyToOne(fetch = FetchType.LAZY, optional = false)       
+     … 99 more lines (ctrl+o to expand)
+  ⎿  Updated backend/src/main/java/ee/bcskoolitus/persistance/view/training
+     summary/TrainingSummaryMapper.java (+24 -24)
+       1 -package ee.bcskoolitus.persistance.view.trainingsummary;       
+       2 -                                                               
+       3 -import ee.bcskoolitus.controller.training.dto.TrainingSummaryIt
+         -emDto;                                                         
+       4 -import org.mapstruct.*;                                        
+       5 -                                                               
+       6 -import java.util.List;                                         
+       7 -                                                               
+       8 -@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componen
+         -tModel = MappingConstants.ComponentModel.SPRING)               
+       9 -public interface TrainingSummaryMapper {                       
+      10 -                                                               
+      11 -    @Mapping(source = "training.id", target = "trainingId")    
+      12 -    @Mapping(source = "trainingLanguageCode", target = "trainin
+         -gLanguageCode")                                                
+      13 -    @Mapping(source = "title", target = "title")               
+      14 -    @Mapping(source = "shortDescription", target = "shortDescri
+         -ption")                                                        
+      15 -    @Mapping(source = "categoryId", target = "categoryId")     
+      16 -    @Mapping(source = "categoryName", target = "categoryName") 
+      17 -    @Mapping(source = "training.isOrderOnly", target = "isOrder
+         -Only")                                                         
+      18 -    @Mapping(source = "training.isPromoted", target = "isPromot
+         -ed")                                                           
+      19 -    @Mapping(target = "fundingTypes", ignore = true)           
+      20 -    TrainingSummaryItemDto toTrainingSummaryItemDto(TrainingSum
+         -mary trainingSummary);                                         
+      21 -                                                               
+      22 -    List<TrainingSummaryItemDto> toTrainingSummaryItemDtos(List
+         -<TrainingSummary> trainingSummaries);                          
+      23 -                                                               
+      24 -}                                                              
+       1 +package ee.bcskoolitus.persistance.view.trainingsummary;       
+       2 +                                                               
+       3 +import ee.bcskoolitus.controller.training.dto.TrainingSummaryIt
+         +emDto;                                                         
+       4 +import org.mapstruct.*;                                        
+       5 +                                                               
+       6 +import java.util.List;                                         
+       7 +                                                               
+       8 +@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componen
+         +tModel = MappingConstants.ComponentModel.SPRING)               
+       9 +public interface TrainingSummaryMapper {                       
+      10 +                                                               
+      11 +    @Mapping(source = "training.id", target = "trainingId")    
+      12 +    @Mapping(source = "trainingLanguageCode", target = "trainin
+         +gLanguageCode")                                                
+      13 +    @Mapping(source = "title", target = "title")               
+      14 +    @Mapping(source = "shortDescription", target = "shortDescri
+         +ption")                                                        
+      15 +    @Mapping(source = "categoryId", target = "categoryId")     
+      16 +    @Mapping(source = "categoryName", target = "categoryName") 
+     … 8 more lines (ctrl+o to expand)
+  ⎿  Updated docs/database/3_import.sql (+160 -160)
+        1 --- Näidisandmed arenduse ja testimise jaoks                   
+        2 --- Käivitatakse pärast 1_reset_database.sql ja 2_create.sql sk
+          -ripte                                                         
+        3 -                                                              
+        4 --- Table: role                                                
+        5 -INSERT INTO role (id, name) VALUES                            
+        6 -    (1, 'admin'),                                             
+        7 -    (2, 'participant');                                       
+        8 -                                                              
+        9 --- Table: user                                                
+       10 -INSERT INTO "user" (id, role_id, email, password, status, crea
+          -ted_at) VALUES                                                
+       11 -    (1, 1, 'admin@vali-it.ee', 'parool123', 'A', '2026-01-01 0
+          -0:00:00'),                                                    
+       12 -    (2, 2, 'kasutaja@vali-it.ee', 'parool123', 'A', '2026-09-0
+          -5 09:00:00');                                                 
+       13 -                                                              
+       14 --- Table: language                                            
+       15 -INSERT INTO language (id, code, name) VALUES                  
+       16 -    (1, 'et', 'Eesti'),                                       
+       17 -    (2, 'en', 'English');                                     
+       18 -                                                              
+       19 --- Table: category                                            
+       20 -INSERT INTO category (id, created_at, updated_at, created_by) 
+          -VALUES                                                        
+       21 -    (1, '2026-07-15 09:00:00', '2026-07-15 09:00:00', 1),     
+       22 -    (2, '2026-07-15 09:00:00', '2026-07-15 09:00:00', 1),     
+       23 -    (3, '2026-07-15 09:00:00', '2026-07-15 09:00:00', 1);     
+       24 -                                                              
+       25 --- Table: category_translation                                
+       26 -INSERT INTO category_translation (id, category_id, language_id
+          -, name, created_at, updated_at) VALUES                        
+       27 -    (1, 1, 1, 'Programmeerimine', '2026-07-15 09:00:00', '2026
+          --07-15 09:00:00'),                                            
+       28 -    (2, 1, 2, 'Programming', '2026-07-15 09:00:00', '2026-07-1
+          -5 09:00:00'),                                                 
+       29 -    (3, 2, 1, 'Disain', '2026-07-15 09:00:00', '2026-07-15 09:
+          -00:00'),                                                      
+       30 -    (4, 2, 2, 'Design', '2026-07-15 09:00:00', '2026-07-15 09:
+          -00:00'),                                                      
+       31 -    (5, 3, 1, 'Juhtimine', '2026-07-15 09:00:00', '2026-07-15 
+          -09:00:00'),                                                   
+       32 -    (6, 3, 2, 'Management', '2026-07-15 09:00:00', '2026-07-15
+          - 09:00:00');                                                  
+       33 -                                                              
+       34 --- Table: location                                            
+       35 -INSERT INTO location (id, name, address, is_online, created_at
+          -, updated_at, created_by) VALUES                              
+       36 -    (1, 'Tallinna õppekeskus', 'Sõpruse pst 145, Tallinn', fal
+          -se, '2026-07-15 09:00:00', '2026-07-15 09:00:00', 1),         
+       37 -    (2, 'Veebiõpe', 'Veebipõhine koolitus (Zoom)', true, '2026
+          --07-15 09:00:00', '2026-07-15 09:00:00', 1);                  
+       38 -                                                              
+       39 --- Table: lecturer                                            
+       40 -INSERT INTO lecturer (id, full_name, photo, created_at, update
+          -d_at, created_by) VALUES                                      
+     … 280 more lines (ctrl+o to expand)
+  ⎿  Updated docs/mock-wireframe/markmed/trainings-view-markmed.md (+1 -1)
+      38        "shortDescription": "Java programmeerimise alused algajat
+          ele.",
+      39        "categoryId": 1,
+      40        "categoryName": "Programmeerimine",
+      41 -      "isOrderOnly": false,                                    
+      41 +      "isOrderable": true,                                     
+      42        "isPromoted": true,
+      43        "fundingTypes": [
+      44          {
+  ⎿  … 5 more files changed
+
+● Bash(sed -i 's/^    is_orderable        boolean/    is_orderable
+      boolean/' docs/database/2_create.sql && sed -n 266,269p
+      docs/database/2_create.sql && sed -n…)
+  ⎿      created_at           timestamp NOT NULL,
+         updated_at           timestamp NOT NULL,
+         is_orderable         boolean   NOT NULL,
+     … +27 lines (ctrl+o to expand)
+  ⎿  Updated docs/database/2_create.sql (+1 -1)
+      265      status               int       NOT NULL,
+      266      created_at           timestamp NOT NULL,
+      267      updated_at           timestamp NOT NULL,
+      268 -    is_orderable        boolean   NOT NULL,                   
+      268 +    is_orderable         boolean   NOT NULL,                  
+      269      is_promoted          boolean   NOT NULL,
+      270      CONSTRAINT course_pk PRIMARY KEY (id)
+      271  );
+
+● Taski rida 238 viitas vana tähendusele ("ainult tellimisel" koolitusel pole
+  kursusi), parandan selle:
+
+● Bash(sed -i '238s/(nt `is_orderable` koolitusel)/(nt koolitusel, mida saab
+      ainult tellida)/' docs/tasks/backend/GET-api-trainings.md && grep -c
+      "ainult tellida" docs…)
+  ⎿  1
+     exit: 0
+  ⎿  Updated docs/tasks/backend/GET-api-trainings.md (+1 -1)
+      235  ## Avatud küsimused
+      236  
+      237  1. **`sort` parameeter** — mockupi API URL-is (`&sort={sort}`)
+            esineb sort-parameeter, kuid "Query parameetrid" loetelu ei k
+           irjelda seda üldse ning vasakpoolne kollane kontekstikast ütle
+           b selgelt "Sorteerimist pole". Kasutaja otsusel on see task ko
+           ostatud **ilma** sorteerimiseta — `sort` parameetrit ei implem
+           enteerita. Kui sorteerimine on siiski vajalik, tuleb mockup en
+           ne täpsustada (millised väärtused, milline vaikekäitumine).
+      238 -2. **`startDate` väli** — "API teenuse lisainfo" tekst kirjeld
+          -ab välja, mis pärineb koolitusele lähimalt eelseisvalt `course
+          -` kirjelt ja võib olla `null`, kui eelseisvaid kursuseid pole 
+          -(nt `is_orderable` koolitusel). See väli aga JSON response näi
+          -disesse ei jõudnud. Kasutaja otsusel on `startDate` **jäetud r
+          -esponse'ist välja** — vastus järgib täpselt kuvatud JSON näidi
+          -st. Kui väli on siiski vajalik, tuleb täpsustada ka selle sort
+          -imisreegel `null` väärtuste jaoks (lisainfo tekst mainib, et s
+          -ee on hetkel defineerimata).                                  
+      238 +2. **`startDate` väli** — "API teenuse lisainfo" tekst kirjeld
+          +ab välja, mis pärineb koolitusele lähimalt eelseisvalt `course
+          +` kirjelt ja võib olla `null`, kui eelseisvaid kursuseid pole 
+          +(nt koolitusel, mida saab ainult tellida). See väli aga JSON r
+          +esponse näidisesse ei jõudnud. Kasutaja otsusel on `startDate`
+          + **jäetud response'ist välja** — vastus järgib täpselt kuvatud
+          + JSON näidist. Kui väli on siiski vajalik, tuleb täpsustada ka
+          + selle sortimisreegel `null` väärtuste jaoks (lisainfo tekst m
+          +ainib, et see on hetkel defineerimata).                       
+  ⎿  (timeout 5m)
+
+● Veerg is_order_only on nüüd kõikjal is_orderable ja koolitusel 1 on väärtus
+  true. Backend kompileerub (./gradlew compileJava), teste ja rakendust ma ei
+  käivitanud.
+
+  Andmebaas ja kood:
+  - 2_create.sql: veerg on is_orderable boolean NOT NULL. Andmebaasi vaadet
+    training_summary see ei puuduta, sest vaade seda veergu ei kasuta.
+  - 3_import.sql: veeru nimi on muudetud ja koolitusel 1 on väärtus true
+    (koolitusel 2 jääb false).
+  - Training.java, TrainingSummaryItemDto.java ja TrainingSummaryMapper.java
+    kasutavad nüüd välja isOrderable.
+
+  Dokumendid:
+  - trainings-view-markmed.md, GET-api-trainings.md ja trainings-view.md: välja
+    nimi on muudetud ja koolituse 1 JSON näidistes on "isOrderable": true.
+  - GET-api-trainings.md näidisandmete tabelis on koolitusel 1 samuti true.
+  - GET-api-trainings.md avatud küsimuses oli viide "(nt is_order_only
+    koolitusel)", mis tähendas vana mõtet, et koolitust saab ainult tellida.
+    Asendasin selle tekstiga "(nt koolitusel, mida saab ainult tellida)".
+  - Õppematerjalis spring-data-page-ja-mapper (.md ja .html) on näidiskood
+    uuendatud.
+
+  Sul endal on vaja teha:
+  1. Loo andmebaas lokaalselt uuesti: 1_reset_database.sql → 2_create.sql →
+     3_import.sql. Seni ütleb backend käivitades, et veergu is_orderable pole.
+  2. Balsamiqis eemalda filtrite juurest lüliti "Tellitav koolitus" ja muuda API
+     kasti JSON-is "isOrderOnly": false → "isOrderable": true. Seejärel
+     ekspordi PDF ja tee pilt uuesti.
+
+  Märkasin veel, et keegi on vahepeal muutnud TrainingSummaryRepository
+  sorteerimist, nüüd on see order by ts.training.isPromoted desc, ts.title. Kui
+  vaate märkmed ette võtame, tuleb see API märkme lisainfos kirja panna, sest
+  esile tõstetud koolitused tulevad nüüd esimesena.
+
+✻ Crunched for 1m 17s · done 3:10 PM
+
+❯ teeme korda  TrainingsView.vue — märkmed - > Vaate märkmed                      ⎿  1 skill available
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Bash(python3 - <<'EOF'
+      p='docs/mock-wireframe/markmed/trainings-view-markmed.md'…)
+  ⎿  # TrainingsView.vue — märkmed
+
+     ## Vaate märkmed
+     … +18 lines (ctrl+o to expand)
+  ⎿  Updated docs/mock-wireframe/markmed/trainings-view-markmed.md (+84 
+     -84)
+       1 -# TrainingsView.vue — märkmed                                  
+       2 -                                                               
+       3 -## Vaate märkmed                                               
+       4 -                                                               
+       5 -```text                                                        
+       6 -Roll: Kõik rollid (külastajale kuvatakse "Logi sisse" ja "Regis
+         -treeri" nupud, sisselogitud kasutajale peidetud)               
+       7 -Failinimi: HomeView.vue                                        
+       8 -Frontend rada: /                                               
+       9 -                                                               
+      10 -Vaatega seotud lisainfo:                                       
+      11 -Nupule "Võta ühendust" vajutades avatakse ApplicationFormView v
+         -aade, nupule "Logi sisse" vajutades LoginView vaade ja nupule "
+         -Registreeri" vajutades RegisterView vaade (kõik ilma API kutset
+         -a).                                                            
+      12 -Sektsioonis "Peagi algavad koolitused" kuvatakse kolm koolitust
+         - (GET /api/trainings, limit=3). Kategooriate loend (GET /api/ca
+         -tegories) kuvatakse otsingu juures. Otsinguriba viib teisele va
+         -atele, mida selles taskis ei defineerita.                      
+      13 -Mõlemad API kutsed käivitatakse vaate avanemisel, mitte kasutaj
+         -a tegevuse peale.                                              
+      14 -```                                                            
+      15 -                                                               
+      16 -## API märkmed — GET /api/trainings                            
+      17 -                                                               
+      18 -```text                                                        
+      19 -API: GET /api/trainings                                        
+      20 -                                                               
+      21 -Query parameetrid:                                             
+      22 -categoryId: Integer — kategooria filter, 0 = kõik              
+      23 -fundingTypeId: Integer — rahastustüübi filter, 0 = kõik        
+      24 -limit: Integer — koolituste arv lehel                          
+      25 -page: Integer — lehekülje number, algab 0-st                   
+      26 -trainingLang: String — õppekeele filter ("et"/"en")            
+      27 -contentLang: String — tõlgitud väljade keel ("et"/"en")        
+      28 -                                                               
+      29 -Response (200):                                                
+      30 -TrainingSummaryDto.java                                        
+      31 -{                                                              
+      32 -  "totalPages": 1,                                             
+      33 -  "totalElements": 2,                                          
+      34 -  "trainingSummaries": [                                       
+      35 -    {                                                          
+      36 -      "trainingId": 1,                                         
+      37 -      "title": "Java algkursus",                               
+      38 -      "shortDescription": "Java programmeerimise alused algajat
+         -ele.",                                                         
+      39 -      "categoryId": 1,                                         
+      40 -      "categoryName": "Programmeerimine",                      
+     … 128 more lines (ctrl+o to expand)
+
+● Asendasin trainings-view-markmed.md failis Vaate märkme, mis oli seni HomeView
+  kohta, TrainingsView sisuga mockupi lehekülje 4 põhjal. Balsamiqi kasti jaoks
+  copy-paste tekst:
+
+  Roll: Kõik rollid (sh külastajad, sisselogimist ei nõuta)
+  Failinimi: TrainingsView.vue
+  Frontend rada: /trainings
+
+  Vaatega seotud lisainfo:
+  Vaate avanemisel tehakse GET /api/trainings päring. Koolituse keele,
+  kategooria või rahastuse filtri muutmisel tehakse uus päring vastavate query
+  parameetritega ja page lähtestatakse 0-ks. Eelmine/Järgmine ja
+  leheküljenumbrid muudavad page väärtust.
+  Koolituse kaardil (TrainingCard.vue) kuvatakse "Tellitav" märgis, kui
+  isOrderable = true, ja täht-ikoon, kui isPromoted = true.
+  Nupule "Vaata lähemalt" vajutades suunatakse kasutaja TrainingView vaatele
+  (/training?trainingId={id}).
+
+  Võrreldes mockupi praeguse kastiga:
+  - Lisasin tühja rea enne Vaatega seotud lisainfo: rida, nagu struktuur nõuab.
+  - Eemaldasin lause "Avalik vaade, sisselogimist ei nõuta", sest Roll rida
+    ütleb sama.
+  - Eemaldasin sortimise ja kalendri: sortimist mockupis pole ja kalender on
+    CoursesView teema. Otsingusõna jätsin samuti välja, sellega tegeleme hiljem.
+  - Lisasin rahastuse filtri, leheküljestuse ning märgise "Tellitav" ja
+    täht-ikooni kuvamise reegli.
+
+  Palun kinnita kolm asja:
+  1. TrainingView või CourseView: mockupis on CourseView, aga mina kirjutasin
+     nimetamise reegli järgi TrainingView (tabel training, üks objekt → ainsus).
+     Kui "Vaata lähemalt" peab avama konkreetse toimumiskorra, on õige
+     CourseView. Siis parandan märke.
+  2. Keelefilter: trainingLang on kohustuslik ja väärtust "kõik keeled" API-s
+     pole. Seega peab vaade avanema mõne keelega, nt et. Kas nii sobib?
+  3. Filtrite väärtused: kas kategooriate dropdown ja rahastuse raadionupud
+     saavad väärtused backendist (GET /api/categories ja GET /api/funding-types)
+     või on need fikseeritud? Sellest sõltub, kas GET /api/categories API märge
+     jääb alles ja kas tuleb lisada rahastustüüpide märge.
+
+  Lisaks on API märkme lisainfos veel HomeView rida "HomeView kutsub: …limit=3…"
+  ja sorteerimise muudatus (isPromoted esimesena) on kirja panemata. Need
+  parandame API märkme juures.
+
+✻ Sautéed for 38s · done 3:16 PM
+
+❯ TrainingView sobib, keeleks et, väärtus saadakse local storagest              
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+● Bash(python3 - <<'EOF'
+      p='docs/mock-wireframe/markmed/trainings-view-markmed.md'…)
+  ⎿  ```text
+     Roll: Kõik rollid (sh külastajad, sisselogimist ei nõuta)
+     Failinimi: TrainingsView.vue
+     … +13 lines (ctrl+o to expand)
+  ⎿  Updated docs/mock-wireframe/markmed/trainings-view-markmed.md (+1 -1)
+       8  Frontend rada: /trainings
+       9  
+      10  Vaatega seotud lisainfo:
+      11 -Vaate avanemisel tehakse GET /api/trainings päring. Koolituse k
+         -eele, kategooria või rahastuse filtri muutmisel tehakse uus pär
+         -ing vastavate query parameetritega ja page lähtestatakse 0-ks. 
+         -Eelmine/Järgmine ja leheküljenumbrid muudavad page väärtust.   
+      11 +Vaate avanemisel tehakse GET /api/trainings päring; trainingLan
+         +g ja contentLang väärtus võetakse localStorage'ist (vaikimisi "
+         +et"). Koolituse keele, kategooria või rahastuse filtri muutmise
+         +l tehakse uus päring vastavate query parameetritega ja page läh
+         +testatakse 0-ks. Eelmine/Järgmine ja leheküljenumbrid muudavad 
+         +page väärtust.                                                 
+      12  Koolituse kaardil (TrainingCard.vue) kuvatakse "Tellitav" märgi
+          s, kui isOrderable = true, ja täht-ikoon, kui isPromoted = true
+          .
+      13  Nupule "Vaata lähemalt" vajutades suunatakse kasutaja TrainingV
+          iew vaatele (/training?trainingId={id}).
+      14  ```
+
+● Lisasin märkesse keele info. TrainingView jääb nii, nagu oli. Copy-paste tekst
+  Balsamiqi jaoks:
+
+  Roll: Kõik rollid (sh külastajad, sisselogimist ei nõuta)
+  Failinimi: TrainingsView.vue
+  Frontend rada: /trainings
+
+  Vaatega seotud lisainfo:
+  Vaate avanemisel tehakse GET /api/trainings päring; trainingLang ja
+  contentLang väärtus võetakse localStorage'ist (vaikimisi "et"). Koolituse
+  keele, kategooria või rahastuse filtri muutmisel tehakse uus päring vastavate
+  query parameetritega ja page lähtestatakse 0-ks. Eelmine/Järgmine ja
+  leheküljenumbrid muudavad page väärtust.
+  Koolituse kaardil (TrainingCard.vue) kuvatakse "Tellitav" märgis, kui
+  isOrderable = true, ja täht-ikoon, kui isPromoted = true.
+  Nupule "Vaata lähemalt" vajutades suunatakse kasutaja TrainingView vaatele
+  (/training?trainingId={id}).
+
+  Eeldasin, et localStorage'ist tulevad mõlemad keeled: nii trainingLang
+  (koolituse keele filter) kui contentLang (sisu keel). Kui mõtlesid ainult ühte
+  neist, ütle, siis parandan. Näiteks võib olla, et contentLang tuleb
+  localStorage'ist ja trainingLang alustab alati väärtusega et. Praegu ei loe
+  frontend localStorage'ist ühtegi keelt, seega on see veel ehitamata.
+
+  Lahti on veel üks küsimus: kas kategooriate ja rahastuse filtrid saavad
+  väärtused backendist (GET /api/categories ja GET /api/funding-types) või on
+  need fikseeritud?
+
+✻ Brewed for 23s · done 3:19 PM
+
+❯ võetakse backendist, tee categories ja funding-types märkmed                  
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Bash(python3 - <<'EOF'
+      p='docs/mock-wireframe/markmed/trainings-view-markmed.md'…)
+  ⎿  Vaatega seotud lisainfo:
+     Vaate avanemisel tehakse päringud GET /api/trainings, GET /api/categor
+     ies ja GET /api/funding-types (viimased kaks filtrite valikute jaoks);
+     … +8 lines (ctrl+o to expand)
+  ⎿  Updated docs/mock-wireframe/markmed/trainings-view-markmed.md (+27 -3)
+       8  Frontend rada: /trainings
+       9  
+      10  Vaatega seotud lisainfo:
+      11 -Vaate avanemisel tehakse GET /api/trainings päring; trainingLan
+         -g ja contentLang väärtus võetakse localStorage'ist (vaikimisi "
+         -et"). Koolituse keele, kategooria või rahastuse filtri muutmise
+         -l tehakse uus päring vastavate query parameetritega ja page läh
+         -testatakse 0-ks. Eelmine/Järgmine ja leheküljenumbrid muudavad 
+         -page väärtust.                                                 
+      11 +Vaate avanemisel tehakse päringud GET /api/trainings, GET /api/
+         +categories ja GET /api/funding-types (viimased kaks filtrite va
+         +likute jaoks); trainingLang ja contentLang väärtus võetakse loc
+         +alStorage'ist (vaikimisi "et"). Koolituse keele, kategooria või
+         + rahastuse filtri muutmisel tehakse uus päring vastavate query 
+         +parameetritega ja page lähtestatakse 0-ks. Eelmine/Järgmine ja 
+         +leheküljenumbrid muudavad page väärtust.                       
+      12  Koolituse kaardil (TrainingCard.vue) kuvatakse "Tellitav" märgi
+          s, kui isOrderable = true, ja täht-ikoon, kui isPromoted = true
+          .
+      13  Nupule "Vaata lähemalt" vajutades suunatakse kasutaja TrainingV
+          iew vaatele (/training?trainingId={id}).
+      14  ```
+     ...
+      65  API: GET /api/categories
+      66  
+      67  Query parameetrid:
+      68 -contentLang: String — categoryName keel ("et"/"en") (valikuline
+         -)                                                              
+      68 +contentLang: String — categoryName keel ("et"/"en")            
+      69  
+      70  Response (200):
+      71  CategoryDto.java
+     ...
+       78  ]
+       79  
+       80  API teenuse lisainfo:
+       81 -Tagastab kõik süsteemis olevad kategooriad (category_translati
+          -on kaudu tõlgitud).                                           
+       81 +Tagastab kõik süsteemis olevad kategooriad contentLang keeles 
+          +(category_translation kaudu). TrainingsView kasutab neid "Kool
+          +ituse kategooria" filtri valikutena.                          
+       82 +                                                              
+       83 +Veateated: —                                                  
+       84 +```                                                           
+       85 +                                                              
+       86 +## API märkmed — GET /api/funding-types                       
+       87 +                                                              
+       88 +```text                                                       
+       89 +API: GET /api/funding-types                                   
+       90 +                                                              
+       91 +Query parameetrid:                                            
+       92 +contentLang: String — fundingTypeName keel ("et"/"en")        
+       93 +                                                              
+       94 +Response (200):                                               
+       95 +FundingTypeDto.java                                           
+       96 +[                                                             
+       97 +  {                                                           
+       98 +    "fundingTypeId": 1,                                       
+       99 +    "fundingTypeName": "Töötukassa"                           
+      100 +  },                                                          
+     … 8 more lines (ctrl+o to expand)
+
+● Lisasin API märkmed docs/mock-wireframe/markmed/trainings-view-markmed.md
+  faili. Balsamiqi kastide jaoks copy-paste tekstid:
+
+  GET /api/categories (uuendatud)
+  API: GET /api/categories
+
+  Query parameetrid:
+  contentLang: String — categoryName keel ("et"/"en")
+
+  Response (200):
+  CategoryDto.java
+  [
+    {
+      "categoryId": 1,
+      "categoryName": "Programmeerimine"
+    },
+    ...
+  ]
+
+  API teenuse lisainfo:
+  Tagastab kõik süsteemis olevad kategooriad contentLang keeles
+  (category_translation kaudu). TrainingsView kasutab neid "Koolituse
+  kategooria" filtri valikutena.
+
+  Veateated: —
+
+  GET /api/funding-types (uus)
+  API: GET /api/funding-types
+
+  Query parameetrid:
+  contentLang: String — fundingTypeName keel ("et"/"en")
+
+  Response (200):
+  FundingTypeDto.java
+  [
+    {
+      "fundingTypeId": 1,
+      "fundingTypeName": "Töötukassa"
+    },
+    ...
+  ]
+
+  API teenuse lisainfo:
+  Tagastab kõik süsteemis olevad rahastustüübid contentLang keeles
+  (funding_type_translation kaudu). TrainingsView kasutab neid "Rahastus" filtri
+  valikutena. FundingTypeDto on sama, mida kasutab GET /api/trainings vastuse
+  fundingTypes list.
+
+  Veateated: —
+
+  Mis ja miks:
+  - contentLang on nüüd kohustuslik mõlemas märkmes. Kategooriate märkmes oli
+    see enne valikuline. Vaade saadab keele niikuinii alati localStorage'ist, ja
+    nii käituvad kõik kolm teenust samamoodi nagu /api/trainings.
+  - FundingTypeDto.java on koodis juba olemas (controller/common/dto/), seega
+    kasutasin seda. Selle väljad on fundingTypeId ja fundingTypeName.
+    CategoryDto.java tuleb alles luua, sinna sobib sama kaust.
+  - Näidisandmed on võetud 3_import.sql failist: kategooriad on
+    Programmeerimine, Disain ja Juhtimine, rahastustüübid Töötukassa ja EL
+    rahastus. Mockupis on teised nimed (AI, Tarkvaraarendus… ja EU-rahastus,
+    Pilet). Kui need on õiged, tuleb lisada andmed 3_import.sql faili.
+  - Veateated: —, sest need on lihtsad nimekirjapäringud ilma kohandatud
+    erinditeta, nagu /api/trainings. Kontrollereid /api/categories ja
+    /api/funding-types jaoks koodis veel pole.
+  - Vaate märkmes ütleb esimene lause nüüd, et vaate avanemisel tehakse kolm
+    päringut: /api/trainings, /api/categories ja /api/funding-types. Uuenda see
+    ka mockupi kastis.
+
+  Mockupi jaoks: lisa GET /api/categories ja GET /api/funding-types jaoks kaks
+  uut API märkmete kasti.
+
+  GET /api/trainings märkmes on veel parandamata HomeView rida ja sorteerimine
+  (isPromoted esimesena, siis title). Kas teeme selle järgmisena?
+
+✻ Sautéed for 38s · done 3:20 PM
+
+❯ jah, paranda trainings API märge                                              
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Bash(python3 - <<'EOF'
+      p='docs/mock-wireframe/markmed/trainings-view-markmed.md'…)
+  ⎿  ## API märkmed — GET /api/trainings
+
+     ```text
+     … +42 lines (ctrl+o to expand)
+  ⎿  Updated docs/mock-wireframe/markmed/trainings-view-markmed.md (+1 -1)
+      53  }
+      54  
+      55  API teenuse lisainfo:
+      56 -HomeView kutsub: categoryId=0&fundingTypeId=0&limit=3&page=0&tr
+         -ainingLang=et&contentLang=et                                   
+      56 +Tulemus on sorteeritud: esile tõstetud koolitused (isPromoted =
+         + true) eespool, seejärel title järgi tähestikuliselt.          
+      57  totalPages ja totalElements kirjeldavad kogu filtreeritud tulem
+          ushulka. fundingTypes võib olla tühi list (training_funding_typ
+          e kaudu).
+      58  
+      59  Veateated: —
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+● Parandasin GET /api/trainings märkme lisainfo. HomeView rida on eemaldatud ja
+  selle asemel on kirjas, kuidas tulemus on sorteeritud. Copy-paste tekst
+  mockupi kasti jaoks:
+
+  API teenuse lisainfo:
+  Tulemus on sorteeritud: esile tõstetud koolitused (isPromoted = true) eespool,
+  seejärel title järgi tähestikuliselt.
+  totalPages ja totalElements kirjeldavad kogu filtreeritud tulemushulka.
+  fundingTypes võib olla tühi list (training_funding_type kaudu).
+
+  Sorteerimine on võetud koodist: TrainingSummaryRepository päring lõpeb order 
+  by ts.training.isPromoted desc, ts.title. limit väärtust ma lisainfosse ei
+  kirjutanud. See, millega vaade teenust kutsub, kuulub Vaate märkmesse, ja
+  mockup seda väärtust ei näita.
+
+  Mockupi kastis tuleb muuta ka JSON-i väli: "isOrderOnly": false →
+  "isOrderable": true. Muu API märkme osa (API rida, query parameetrid,
+  response) on juba sama mis mockupis.
+
+  Backend task GET-api-trainings.md ei maini sorteerimist praegu kuskil. Seal on
+  ainult avatud küsimus sort parameetri kohta, mida kasutaja ei saa valida. Kas
+  lisan taski kirjelduse, et vastus on sorteeritud isPromoted ja title järgi,
+  et task ja kood oleksid sünkis?
+
+✻ Cooked for 28s · done 3:20 PM
+
+❯ jah, lisa sorteerimine backend taski                                          
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Bash(python3 - <<'EOF'
+      p='docs/tasks/backend/GET-api-trainings.md'…)
+  ⎿  76:**Sorteerimine:** `trainingSummaries` list on fikseeritud järjekorr
+     as — esmalt esile tõstetud koolitused (`isPromoted = true`), seejärel
+     `title` järgi tähestikuliselt (`o
+     … +5 lines (ctrl+o to expand)
+  ⎿  1 file changed (binary, mode only or too large to show)
+
+● Lisasin sorteerimise backend taski docs/tasks/backend/GET-api-trainings.md
+  kolme kohta:
+
+  - Väljund: uus lõik "Sorteerimine". Selle järgi on trainingSummaries alati
+    samas järjekorras: esmalt isPromoted = true koolitused, siis title järgi
+    tähestikuliselt. Juures on viide koodis olevale order by reale ja märge, et
+    sort parameetrit pole.
+  - Vastuvõtu kriteeriumid: uus punkt, et tulemus peab olema nii sorteeritud.
+  - Avatud küsimus 1: varem oli kirjas, et task on "ilma sorteerimiseta". Nüüd
+    ütleb see täpsemalt, et kasutaja ei saa sorteerimist valida, aga vastusel on
+    kindel järjekord.
+
+  Nüüd kirjeldavad mockupi märge, backend task ja kood sorteerimist ühtemoodi.
+
+  Märkasin taskis veel ühe vea. Veaolukordade tabeli järgi tuleb vigase query
+  parameetri korral 400 koos "standardse ApiError vastusega".
+  RestExceptionHandler teeb ApiError vastuse 400 korral aga ainult
+  MethodArgumentNotValidException puhul. Kui parameeter puudub või on vale
+  tüüpi, vastab Spring oma vaikimisi kujul, kus errorCode välja pole. Kas
+  parandan ka selle?
+
+✻ Sautéed for 22s · done 3:21 PM
+
+❯ contentLang väärtus võetakse localStorage'ist (vaikimisi "et").               
+  trainingLang on vaikimis valimata                                             
+
+● Bash(python3 - <<'EOF'
+      p='docs/mock-wireframe/markmed/trainings-view-markmed.md'…)
+  ⎿  Vaatega seotud lisainfo:
+     Vaate avanemisel tehakse päringud GET /api/trainings, GET /api/categor
+     ies ja GET /api/funding-types (viimased kaks filtrite valikute jaoks);
+     … +5 lines (ctrl+o to expand)
+  ⎿  Updated docs/mock-wireframe/markmed/trainings-view-markmed.md (+1 -1)
+       8  Frontend rada: /trainings
+       9  
+      10  Vaatega seotud lisainfo:
+      11 -Vaate avanemisel tehakse päringud GET /api/trainings, GET /api/
+         -categories ja GET /api/funding-types (viimased kaks filtrite va
+         -likute jaoks); trainingLang ja contentLang väärtus võetakse loc
+         -alStorage'ist (vaikimisi "et"). Koolituse keele, kategooria või
+         - rahastuse filtri muutmisel tehakse uus päring vastavate query 
+         -parameetritega ja page lähtestatakse 0-ks. Eelmine/Järgmine ja 
+         -leheküljenumbrid muudavad page väärtust.                       
+      11 +Vaate avanemisel tehakse päringud GET /api/trainings, GET /api/
+         +categories ja GET /api/funding-types (viimased kaks filtrite va
+         +likute jaoks); contentLang väärtus võetakse localStorage'ist (v
+         +aikimisi "et"), koolituse keele filter (trainingLang) on vaikim
+         +isi valimata. Koolituse keele, kategooria või rahastuse filtri 
+         +muutmisel tehakse uus päring vastavate query parameetritega ja 
+         +page lähtestatakse 0-ks. Eelmine/Järgmine ja leheküljenumbrid m
+         +uudavad page väärtust.                                         
+      12  Koolituse kaardil (TrainingCard.vue) kuvatakse "Tellitav" märgi
+          s, kui isOrderable = true, ja täht-ikoon, kui isPromoted = true
+          .
+      13  Nupule "Vaata lähemalt" vajutades suunatakse kasutaja TrainingV
+          iew vaatele (/training?trainingId={id}).
+      14  ```
+
+● Vaate märge on parandatud:
+
+  Vaatega seotud lisainfo:
+  Vaate avanemisel tehakse päringud GET /api/trainings, GET /api/categories ja
+  GET /api/funding-types (viimased kaks filtrite valikute jaoks); contentLang
+  väärtus võetakse localStorage'ist (vaikimisi "et"), koolituse keele filter
+  (trainingLang) on vaikimisi valimata. Koolituse keele, kategooria või
+  rahastuse filtri muutmisel tehakse uus päring vastavate query parameetritega
+  ja page lähtestatakse 0-ks. Eelmine/Järgmine ja leheküljenumbrid muudavad page
+  väärtust.
+  Koolituse kaardil (TrainingCard.vue) kuvatakse "Tellitav" märgis, kui
+  isOrderable = true, ja täht-ikoon, kui isPromoted = true.
+  Nupule "Vaata lähemalt" vajutades suunatakse kasutaja TrainingView vaatele
+  (/training?trainingId={id}).
+
+  Backend ei toeta praegu valimata keelefiltrit. trainingLang on koodis
+  kohustuslik ja päring otsib täpset vastet (ts.trainingLanguageCode = 
+  :trainingLang). Väärtust "kõik keeled" ei ole, seega vaade ei saa avanemisel
+  päringut teha.
+
+  Lahendada saab kahel viisil:
+
+  1. (Soovitan) Asendada trainingLang: String parameetriga trainingLanguageId: 
+     Integer, kus 0 tähendab "kõik". See käitub täpselt nagu categoryId ja
+     fundingTypeId, nii et kõik filtrid töötavad ühtemoodi. Vaates
+     training_summary on veerg training_language_id juba olemas. Keelte dropdown
+     saaks siis väärtused GET /api/languages teenusest, sama moodi nagu
+     kategooriad ja rahastustüübid.
+  2. Jätta nimeks trainingLang: String, aga muuta see valikuliseks (required = 
+     false). Kui parameetrit pole, tulevad kõik keeled. Muudatus on väiksem, aga
+     siis on see ainus valikuline parameeter ja "kõik" tähendab siin parameetri
+     puudumist, mitte 0.
+
+  Mõlemal juhul muutuvad TrainingController, TrainingService,
+  TrainingSummaryRepository, API märge ja backend task. Esimese variandi korral
+  tuleb lisaks teha GET /api/languages märge. Kumba teeme?
+
+✻ Sautéed for 20s · done 3:23 PM
+
+❯ esimene variant, trainingLanguageId                                           
+
+  Searched for 1 pattern, ran 1 shell command (ctrl+o to expand)
+
+● Muudan esmalt koodi:
+
+● Bash(python3 - <<'EOF'
+      B='backend/src/main/java/ee/bcskoolitus/'…)  ⎿  exit=0
+  ⎿  Updated backend/src/main/java/ee/bcskoolitus/controller/training/Train
+     ingController.java (+43 -43)
+       1 -package ee.bcskoolitus.controller.training;                    
+       2 -                                                               
+       3 -import ee.bcskoolitus.controller.training.dto.TrainingSummaryDt
+         -o;                                                             
+       4 -import ee.bcskoolitus.infrastructure.error.ApiError;           
+       5 -import ee.bcskoolitus.service.TrainingService;                 
+       6 -import io.swagger.v3.oas.annotations.Operation;                
+       7 -import io.swagger.v3.oas.annotations.media.Content;            
+       8 -import io.swagger.v3.oas.annotations.media.Schema;             
+       9 -import io.swagger.v3.oas.annotations.responses.ApiResponse;    
+      10 -import io.swagger.v3.oas.annotations.responses.ApiResponses;   
+      11 -import lombok.RequiredArgsConstructor;                         
+      12 -import org.springframework.web.bind.annotation.GetMapping;     
+      13 -import org.springframework.web.bind.annotation.RequestMapping; 
+      14 -import org.springframework.web.bind.annotation.RequestParam;   
+      15 -import org.springframework.web.bind.annotation.RestController; 
+      16 -                                                               
+      17 -@RestController                                                
+      18 -@RequiredArgsConstructor                                       
+      19 -@RequestMapping("/api")                                        
+      20 -public class TrainingController {                              
+      21 -    private final TrainingService trainingService;             
+      22 -                                                               
+      23 -    @GetMapping("/trainings")                                  
+      24 -    @Operation(summary = "Tagastab koolituste nimekirja koos le
+         -heküljestamiseks vajaliku metainfoga")                         
+      25 -    @ApiResponses( value = {                                   
+      26 -            @ApiResponse(                                      
+      27 -                    responseCode = "200", description = "OK"   
+      28 -            ),                                                 
+      29 -            @ApiResponse(                                      
+      30 -                    responseCode = "400",                      
+      31 -                    description = "Integer väljale lisatakse St
+         -ring, mis põhjustab veateate",                                 
+      32 -                    content = @Content( schema = @Schema(implem
+         -entation = ApiError.class))                                    
+      33 -            )                                                  
+      34 -    })                                                         
+      35 -    public TrainingSummaryDto findFilteredTrainings(@RequestPar
+         -am Integer categoryId,                                         
+      36 -                                      @RequestParam Integer fun
+         -dingTypeId,                                                    
+      37 -                                      @RequestParam Integer lim
+         -it,                                                            
+      38 -                                      @RequestParam Integer pag
+         -e,                                                             
+      39 -                                      @RequestParam String trai
+         -ningLang,                                                      
+      40 -                                      @RequestParam String cont
+         -entLang) {                                                     
+     … 46 more lines (ctrl+o to expand)
+  ⎿  Updated backend/src/main/java/ee/bcskoolitus/persistance/view/training
+     summary/TrainingSummaryRepository.java (+21 -21)
+       1 -package ee.bcskoolitus.persistance.view.trainingsummary;       
+       2 -                                                               
+       3 -import org.springframework.data.domain.Page;                   
+       4 -import org.springframework.data.domain.Pageable;               
+       5 -import org.springframework.data.jpa.repository.JpaRepository;  
+       6 -import org.springframework.data.jpa.repository.Query;          
+       7 -                                                               
+       8 -public interface TrainingSummaryRepository extends JpaRepositor
+         -y<TrainingSummary, Long> {                                     
+       9 -    @Query("""                                                 
+      10 -            select ts from TrainingSummary ts                  
+      11 -            where (:categoryId = 0 or ts.categoryId = :category
+         -Id)                                                            
+      12 -            and (:fundingTypeId = 0 or exists (                
+      13 -                        select tft from TrainingFundingType tft
+      14 -                        where tft.training = ts.training and tf
+         -t.fundingType.id = :fundingTypeId))                            
+      15 -            and ts.trainingLanguageCode = :trainingLang        
+      16 -            and ts.translationLanguageCode = :contentLang      
+      17 -            order by ts.training.isPromoted desc , ts.title""")
+      18 -    Page<TrainingSummary> findFilteredTrainingSummariesBy(Integ
+         -er categoryId, Integer fundingTypeId, String trainingLang, Stri
+         -ng contentLang, Pageable pageable);                            
+      19 -                                                               
+      20 -                                                               
+      21 -}                                                              
+       1 +package ee.bcskoolitus.persistance.view.trainingsummary;       
+       2 +                                                               
+       3 +import org.springframework.data.domain.Page;                   
+       4 +import org.springframework.data.domain.Pageable;               
+       5 +import org.springframework.data.jpa.repository.JpaRepository;  
+       6 +import org.springframework.data.jpa.repository.Query;          
+       7 +                                                               
+       8 +public interface TrainingSummaryRepository extends JpaRepositor
+         +y<TrainingSummary, Long> {                                     
+       9 +    @Query("""                                                 
+      10 +            select ts from TrainingSummary ts                  
+      11 +            where (:categoryId = 0 or ts.categoryId = :category
+         +Id)                                                            
+      12 +            and (:fundingTypeId = 0 or exists (                
+      13 +                        select tft from TrainingFundingType tft
+      14 +                        where tft.training = ts.training and tf
+         +t.fundingType.id = :fundingTypeId))                            
+      15 +            and (:trainingLanguageId = 0 or ts.trainingLanguage
+         +Id = :trainingLanguageId)                                      
+      16 +            and ts.translationLanguageCode = :contentLang      
+      17 +            order by ts.training.isPromoted desc , ts.title""")
+      18 +    Page<TrainingSummary> findFilteredTrainingSummariesBy(Integ
+         +er categoryId, Integer fundingTypeId, Integer trainingLanguageI
+         +d, String contentLang, Pageable pageable);                     
+      19 +                                                               
+     … 2 more lines (ctrl+o to expand)
+  ⎿  Updated
+     backend/src/main/java/ee/bcskoolitus/service/TrainingService.java (+59
+     -59)
+       1 -package ee.bcskoolitus.service;                                
+       2 -                                                               
+       3 -import ee.bcskoolitus.controller.common.dto.FundingTypeDto;    
+       4 -import ee.bcskoolitus.controller.training.dto.TrainingSummaryDt
+         -o;                                                             
+       5 -import ee.bcskoolitus.controller.training.dto.TrainingSummaryIt
+         -emDto;                                                         
+       6 -import ee.bcskoolitus.persistance.fundingtype.translation.Fundi
+         -ngTypeTranslation;                                             
+       7 -import ee.bcskoolitus.persistance.fundingtype.translation.Fundi
+         -ngTypeTranslationMapper;                                       
+       8 -import ee.bcskoolitus.persistance.fundingtype.translation.Fundi
+         -ngTypeTranslationRepository;                                   
+       9 -import ee.bcskoolitus.persistance.view.trainingsummary.Training
+         -Summary;                                                       
+      10 -import ee.bcskoolitus.persistance.view.trainingsummary.Training
+         -SummaryMapper;                                                 
+      11 -import ee.bcskoolitus.persistance.view.trainingsummary.Training
+         -SummaryRepository;                                             
+      12 -import lombok.RequiredArgsConstructor;                         
+      13 -import org.jspecify.annotations.NonNull;                       
+      14 -import org.springframework.data.domain.Page;                   
+      15 -import org.springframework.data.domain.PageRequest;            
+      16 -import org.springframework.data.domain.Pageable;               
+      17 -import org.springframework.stereotype.Service;                 
+      18 -                                                               
+      19 -import java.util.List;                                         
+      20 -                                                               
+      21 -@Service                                                       
+      22 -@RequiredArgsConstructor                                       
+      23 -public class TrainingService {                                 
+      24 -                                                               
+      25 -    private final TrainingSummaryRepository trainingSummaryRepo
+         -sitory;                                                        
+      26 -    private final TrainingSummaryMapper trainingSummaryMapper; 
+      27 -    private final FundingTypeTranslationRepository fundingTypeT
+         -ranslationRepository;                                          
+      28 -    private final FundingTypeTranslationMapper fundingTypeTrans
+         -lationMapper;                                                  
+      29 -                                                               
+      30 -    public TrainingSummaryDto findFilteredTrainings(Integer cat
+         -egoryId, Integer fundingTypeId, Integer limit, Integer page, St
+         -ring trainingLang, String contentLang) {                       
+      31 -        Pageable pageable = PageRequest.of(page, limit);       
+      32 -        Page<TrainingSummary> filteredTrainingSummaryPage = tra
+         -iningSummaryRepository.findFilteredTrainingSummariesBy(category
+         -Id, fundingTypeId, trainingLang, contentLang, pageable);       
+      33 -        List<TrainingSummaryItemDto> trainingSummaryItemDtos = 
+         -findAndCreateTrainingSummaryItemDtos(contentLang, filteredTrain
+         -ingSummaryPage);                                               
+      34 -        return createTrainingSummaryDto(filteredTrainingSummary
+         -Page, trainingSummaryItemDtos);                                
+      35 -    }                                                          
+      36 -                                                               
+      37 -    private @NonNull List<TrainingSummaryItemDto> findAndCreate
+         -TrainingSummaryItemDtos(String contentLang, Page<TrainingSummar
+         -y> filteredTrainingSummaryPage) {                              
+      38 -        List<TrainingSummaryItemDto> trainingSummaryItemDtos = 
+         -trainingSummaryMapper.toTrainingSummaryItemDtos(filteredTrainin
+         -gSummaryPage.getContent());                                    
+      39 -        for (TrainingSummaryItemDto trainingSummaryItemDto : tr
+         -ainingSummaryItemDtos) {                                       
+      40 -            handleAddFundingTypes(trainingSummaryItemDto, conte
+         -ntLang);                                                       
+     … 78 more lines (ctrl+o to expand)
+  ⎿  (timeout 5m)
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Nüüd dokumendid:
+
+● Bash(python3 - <<'EOF'
+      def edit(p, pairs):…)
+  ⎿  Updated backend/CLAUDE.md (+94 -94)
+       1 -# CLAUDE.md                                                    
+       2 -                                                               
+       3 -See fail annab juhiseid Claude Code'ile (claude.ai/code) selles
+         - repositooriumis töötamiseks.                                  
+       4 -                                                               
+       5 -**Keel:** Kõik uued kanded sellesse faili kirjutatakse eesti ke
+         -eles.                                                          
+       6 -                                                               
+       7 -## Käsud                                                       
+       8 -                                                               
+       9 -```bash                                                        
+      10 -# Ehitamine                                                    
+      11 -./gradlew build                                                
+      12 -                                                               
+      13 -# Käivitamine (nõuab lokaalset PostgreSQL-i)                   
+      14 -./gradlew bootRun                                              
+      15 -                                                               
+      16 -# Testide käivitamine                                          
+      17 -./gradlew test                                                 
+      18 -                                                               
+      19 -# Ühe testiklassi käivitamine                                  
+      20 -./gradlew test --tests "ee.minuprojekt.MinuprojektApplicationTe
+         -sts"                                                           
+      21 -                                                               
+      22 -# Ainult kompileerimine (käivitab ka MapStructi annotatsiooni t
+         -öötluse)                                                       
+      23 -./gradlew compileJava                                          
+      24 -```                                                            
+      25 -                                                               
+      26 -## Andmebaasi seadistamine                                     
+      27 -                                                               
+      28 -PostgreSQL peab töötama `localhost`-is järgmiste seadetega:    
+      29 -- Andmebaas: `vali_it`                                         
+      30 -- Kasutajanimi: `postgres`                                     
+      31 -- Parool: `student123`                                         
+      32 -- Mugav DB url: `jdbc:postgresql://localhost:5432/vali_it`     
+      33 -                                                               
+      34 -Käivita skriptid järjekorras kaustast `docs/database`:         
+      35 -1. `1_reset_database.sql` — kustutab ja loob uuesti `minu_proje
+         -kt` skeema                                                     
+      36 -2. `2_create.sql` — loob kõik tabelid                          
+      37 -3. `3_import.sql` — lisab algandmed                            
+      38 -                                                               
+      39 -Kõik tabelid asuvad `minu_projekt` skeemas.                    
+      40 -                                                               
+     … 148 more lines (ctrl+o to expand)
+  ⎿  Updated docs/mock-wireframe/markmed/trainings-view-markmed.md (+24 -2)
+       8  Frontend rada: /trainings
+       9  
+      10  Vaatega seotud lisainfo:
+      11 -Vaate avanemisel tehakse päringud GET /api/trainings, GET /api/
+         -categories ja GET /api/funding-types (viimased kaks filtrite va
+         -likute jaoks); contentLang väärtus võetakse localStorage'ist (v
+         -aikimisi "et"), koolituse keele filter (trainingLang) on vaikim
+         -isi valimata. Koolituse keele, kategooria või rahastuse filtri 
+         -muutmisel tehakse uus päring vastavate query parameetritega ja 
+         -page lähtestatakse 0-ks. Eelmine/Järgmine ja leheküljenumbrid m
+         -uudavad page väärtust.                                         
+      11 +Vaate avanemisel tehakse päringud GET /api/trainings, GET /api/
+         +categories, GET /api/funding-types ja GET /api/languages (viima
+         +sed kolm filtrite valikute jaoks); contentLang väärtus võetakse
+         + localStorage'ist (vaikimisi "et"), koolituse keele filter on v
+         +aikimisi valimata (trainingLanguageId=0). Koolituse keele, kate
+         +gooria või rahastuse filtri muutmisel tehakse uus päring vastav
+         +ate query parameetritega ja page lähtestatakse 0-ks. Eelmine/Jä
+         +rgmine ja leheküljenumbrid muudavad page väärtust.             
+      12  Koolituse kaardil (TrainingCard.vue) kuvatakse "Tellitav" märgi
+          s, kui isOrderable = true, ja täht-ikoon, kui isPromoted = true
+          .
+      13  Nupule "Vaata lähemalt" vajutades suunatakse kasutaja TrainingV
+          iew vaatele (/training?trainingId={id}).
+      14  ```
+     ...
+      23  fundingTypeId: Integer — rahastustüübi filter, 0 = kõik
+      24  limit: Integer — koolituste arv lehel
+      25  page: Integer — lehekülje number, algab 0-st
+      26 -trainingLang: String — õppekeele filter ("et"/"en")            
+      26 +trainingLanguageId: Integer — õppekeele filter, 0 = kõik       
+      27  contentLang: String — tõlgitud väljade keel ("et"/"en")
+      28  
+      29  Response (200):
+     ...
+      106  
+      107  Veateated: —
+      108  ```
+      109 +                                                              
+      110 +## API märkmed — GET /api/languages                           
+      111 +                                                              
+      112 +```text                                                       
+      113 +API: GET /api/languages                                       
+      114 +                                                              
+      115 +Response (200):                                               
+      116 +SystemLanguageDto.java                                        
+      117 +[                                                             
+      118 +  {                                                           
+      119 +    "languageId": 1,                                          
+      120 +    "languageCode": "et",                                     
+      121 +    "languageName": "Eesti"                                   
+      122 +  },                                                          
+      123 +  ...                                                         
+      124 +]                                                             
+      125 +                                                              
+      126 +API teenuse lisainfo:                                         
+      127 +Tagastab kõik süsteemis olevad keeled (language tabel). Traini
+          +ngsView kasutab neid "Koolituse keel" filtri valikutena (langu
+          +ageId → trainingLanguageId). languageName ei ole tõlgitud, see
+          +ga contentLang parameetrit pole.                              
+      128 +                                                              
+      129 +Veateated: —                                                  
+     … 1 more lines (ctrl+o to expand)
+  ⎿  Updated docs/tasks/backend/GET-api-trainings.md (+6 -6)
+      1  # Koolituste nimekirja päring
+      2  
+      3 -**Teenus:** `GET /api/trainings?categoryId={categoryId}&fundingT
+        -ypeId={fundingTypeId}&limit={limit}&page={page}&trainingLang={tr
+        -ainingLang}&contentLang={contentLang}`                          
+      3 +**Teenus:** `GET /api/trainings?categoryId={categoryId}&fundingT
+        +ypeId={fundingTypeId}&limit={limit}&page={page}&trainingLanguage
+        +Id={trainingLanguageId}&contentLang={contentLang}`              
+      4  
+      5  **Kasutav vaade:** `TrainingsView.vue` (`/trainings`), mockupis 
+         lehekülg 1/1
+      6  
+     ...
+      16  | `fundingTypeId` | Integer | Filtreerib koolitused rahastustüü
+          bi järgi (`training_funding_type` kaudu); `0` = kõik rahastustü
+          übid |
+      17  | `limit` | Integer | Lehekülje suurus (nt HomeView kutsub `lim
+          it=3`-ga) |
+      18  | `page` | Integer | Lehekülje number, loendus algab 0-st |
+      19 -| `trainingLang` | String (`et`/`en`) | Filtreerib koolitused õ
+         -ppekeele järgi (`training.training_language_id`); väärtust "kõi
+         -k keeled" pole |                                               
+      19 +| `trainingLanguageId` | Integer | Filtreerib koolitused õppeke
+         +ele järgi (`training.training_language_id`); `0` = kõik keeled 
+         +|                                                              
+      20  | `contentLang` | String (`et`/`en`) | Määrab tõlgitud väljade 
+          (`title`/`shortDescription`/`categoryName`/`fundingTypeName`) k
+          eele |
+      21  
+      22  Teenusel puudub request body.
+     ...
+      198  
+      199  ### language
+      200  
+      201 -Koodiga (`et`/`en`) määratud keeled, mida kasutavad nii `train
+          -ingLang` kui `contentLang` parameetrid.                       
+      201 +Keeled: `trainingLanguageId` viitab `language.id` väärtusele, 
+          +`contentLang` kasutab `language.code` väärtust (`et`/`en`).   
+      202  
+      203  ```sql
+      204  CREATE TABLE language (
+     ...
+      221  | Ootamatu serveri viga | 500 Internal Server Error | Standard
+           ne `ApiError` vastus |
+      222  | Vigane query parameeter (nt `page`/`limit`/`categoryId`/`fun
+           dingTypeId` ei ole number) | 400 Bad Request | Standardne `Api
+           Error` vastus |
+      223  
+      224 -Olematu `categoryId`/`fundingTypeId`/`trainingLang` väärtuse k
+          -orral ei ole tegu veaolukorraga — tulemuseks on lihtsalt tühi 
+          -`trainingSummaries` list.                                     
+      224 +Olematu `categoryId`/`fundingTypeId`/`trainingLanguageId`/`con
+          +tentLang` väärtuse korral ei ole tegu veaolukorraga — tulemuse
+          +ks on lihtsalt tühi `trainingSummaries` list.                 
+      225  
+      226  ## Vastuvõtu kriteeriumid
+      227  
+      228  - [ ] Endpoint `GET /api/trainings` on olemas ja tagastab `Tra
+           iningSummaryDto` struktuuriga vastuse
+      229 -- [ ] Kõik loetletud query parameetrid (`categoryId`, `funding
+          -TypeId`, `limit`, `page`, `trainingLang`, `contentLang`) on ko
+          -hustuslikud ja toimivad kirjeldatud viisil (`categoryId=0`/`fu
+          -ndingTypeId=0` tagastab kõik)                                 
+      229 +- [ ] Kõik loetletud query parameetrid (`categoryId`, `funding
+          +TypeId`, `limit`, `page`, `trainingLanguageId`, `contentLang`)
+          + on kohustuslikud ja toimivad kirjeldatud viisil (`categoryId=
+          +0`/`fundingTypeId=0`/`trainingLanguageId=0` tagastab kõik)    
+      230  - [ ] `totalPages`/`totalElements` kajastavad korrektselt kogu
+            (filtreeritud) tulemushulka, mitte ainult tagastatud lehte
+      231  - [ ] `title`, `shortDescription`, `categoryName`, `fundingTyp
+           eName` väljad on tõlgitud `contentLang` parameetri järgi
+      232  - [ ] Tulemus on sorteeritud: `isPromoted = true` koolitused e
+           espool, seejärel `title` järgi tähestikuliselt
+      233  - [ ] Koolitus, millel pole ühtegi rahastustüüpi, tagastab `fu
+           ndingTypes` väljana tühja listi (mitte `null` ega viga)
+      234 -- [ ] Filtreerimine `categoryId`, `fundingTypeId` ja `training
+          -Lang` järgi annab korrektse alamhulga andmebaasi näidisandmete
+          - põhjal                                                       
+      234 +- [ ] Filtreerimine `categoryId`, `fundingTypeId` ja `training
+          +LanguageId` järgi annab korrektse alamhulga andmebaasi näidisa
+          +ndmete põhjal                                                 
+     … 3 more lines (ctrl+o to expand)
+  ⎿  Updated docs/tasks/frontend/trainings-view.md (+113 -113)
+        1 -# Koolituste sirvimine ja filtreerimine                       
+        2 -                                                              
+        3 -**Vaade:** `TrainingsView.vue`, route `/trainings`            
+        4 -                                                              
+        5 -**Roll:** Kõik rollid (sh külastajad, sisselogimist ei nõuta) 
+        6 -                                                              
+        7 -**Vaste mockupis:** "TrainingsView", lehekülg 1/1 (vt pilt `Tr
+          -ainingsView.png`)                                             
+        8 -                                                              
+        9 -![Mockup](../../mock-wireframe/pdf-images/TrainingsView.png)  
+       10 -                                                              
+       11 -## Kasutajavoog                                               
+       12 -                                                              
+       13 -Kasutaja avab avalikult ligipääsetava koolituste nimekirja vaa
+          -te (sisselogimist ei nõuta). Vaates kuvatakse leheküljestatud 
+          -koolituste kaardid koos otsingu, kategooria- ja keelefiltriga.
+          - Otsingusõna sisestamisel ja "Otsi" nupule vajutamisel, samuti
+          - kategooria või keele filtri muutmisel, tehakse uus `GET /api/
+          -trainings` päring vastavate query parameetritega ning tulemus 
+          -värskendatakse. Iga koolituse kaardi "Vaata lähemalt" nupule v
+          -ajutades suunatakse kasutaja `CourseView` vaatele valitud kool
+          -ituse kohta. Lehekülgede vahel liigutakse "Eelmine"/"Järgmine"
+          - nuppude ja otseste leheküljenumbrite abil.                   
+       14 -                                                              
+       15 -Mockupi "Vaatega seotud lisainfo" mainis lisaks ka sortimist j
+          -a kalendris kuupäeva muutmist, kuid kuna kumbki pole wireframe
+          -'il tegelikult nähtav ega backend kontraktis olemas (vt `docs/
+          -tasks/backend/GET-api-trainings.md` "Avatud küsimused"), on ne
+          -ed sellest taskist teadlikult välja jäetud.                   
+       16 -                                                              
+       17 -## Kasutajaliidese elemendid                                  
+       18 -                                                              
+       19 -| Element | Tüüp | Kirjeldus/käitumine |                      
+       20 -|---|---|---|                                                 
+       21 -| Otsinguväli | Tekstisisend | Vabateksti otsing (nt "AI-Arend
+          -aja"), täidetakse enne "Otsi" nupule vajutamist |             
+       22 -| "Otsi" nupp | Nupp | Käivitab uue `GET /api/trainings` pärin
+          -gu kehtiva otsingusõna ja filtritega |                        
+       23 -| Kategooria valik | Dropdown (select) | Väärtused vastavad `c
+          -ategory` kirjetele (nt AI, Tarkvaraarendus, Andmebaasid, Graaf
+          -ika); valikul tehakse uus päring `categoryId`-ga |            
+       24 -| Keel valik | Dropdown (select) | Väärtused Eesti/Inglise; va
+          -likul tehakse uus päring `trainingLang`-iga |                 
+       25 -| Koolituse kaart (`TrainingCard.vue`) | Korduv element | Kuva
+          -b koolituse pealkirja, keele märgist (nt "Eesti"), lühikirjeld
+          -ust, kategooria/rahastustüübi silte ja "Vaata lähemalt" nuppu;
+          - kui `isPromoted` on `true`, kuvatakse lisaks täht-ikoon |    
+       26 -| "Vaata lähemalt" nupp | Nupp | Suunab kasutaja `CourseView` 
+          -vaatele, kandes kaasa valitud koolituse `trainingId` |        
+       27 -| Lehekülje navigatsioon (Eelmine / leheküljenumbrid / Järgmin
+          -e) | Navigatsioon | Liigub `trainingSummaries` lehtede vahel (
+          -`page` parameeter) |                                          
+       28 -                                                              
+       29 -Wireframe'il nähtav ülemine peamenüü (Koolitused, Teenused, Et
+          -tevõttest ▾ Lektorid, Blogi, Kontakt, Tagasiside, "Võta ühendu
+          -st") kuulub tõenäoliselt jagatud lehepäise/navigatsiooni kompo
+          -nendi (`frontend/src/navigation/`) alla, mitte `TrainingsView.
+          -vue` enda skoopi — see task ei kata peamenüü implementeerimist
+          -.                                                             
+       30 -                                                              
+       31 -## Käitumine ja valideerimine                                 
+       32 -                                                              
+       33 -1. Vaate avanemisel (`beforeMount`) tehakse esialgne `GET /api
+          -/trainings` päring ilma filtriteta (va vaikimisi leheküljestus
+          -), et kuvada esimene koolituste lehekülg.                     
+       34 -2. Kasutaja sisestab otsingusõna ja vajutab "Otsi" nupule, või
+          - muudab kategooria/keele filtrit → tehakse uus `GET /api/train
+          -ings` päring, mis asendab senise koolituste nimekirja ja lähte
+          -stab lehekülje (`page=0`).                                    
+       35 -3. Kui tulemuseks on tühi `trainingSummaries` list, kuvatakse 
+          -kasutajale sõbralik "Tulemusi ei leitud" teade (mitte viga — t
+          -ühi tulemus on backend kontrakti järgi normaalne, mitte veaolu
+          -kord).                                                        
+       36 -4. Lehekülje navigatsiooni nuppudel (Eelmine/Järgmine/lehekülj
+          -enumber) tehakse uus `GET /api/trainings` päring sama otsingu/
+          -filtritega, aga muudetud `page` väärtusega.                   
+       37 -5. "Vaata lähemalt" nupule vajutades suunatakse kasutaja `Cour
+          -seView` vaatele valitud koolituse `trainingId`-ga (täpne route
+          - muster sõltub `CourseView` taskist, mida veel pole loodud).  
+       38 -6. Ootamatu vea korral (backend tagastab 400 või 500, vt "API 
+          -kutsed" allpool) suunatakse kasutaja üldisele veavaatele, kuna
+          - teenusel pole hetkel ühtegi kasutajale kuvatavat spetsiifilis
+          -t `errorCode`-i defineeritud.                                 
+       39 -                                                              
+       40 -**Frontendipoolset sisendvalideerimist otsinguväljal ei ole** 
+          -— tühja otsingusõnaga "Otsi" nupule vajutamine on lubatud (tag
+          -astab filtreerimata nimekirja).                               
+     … 186 more lines (ctrl+o to expand)
+  ⎿  … 1 more file changed
+
+● trainingLang on nüüd kõikjal trainingLanguageId ja 0 tähendab "kõik keeled".
+  Backend kompileerub, teste projektis ei ole ja rakendust ma ei käivitanud.
+
+  Kood:
+  - TrainingController: @RequestParam String trainingLang → @RequestParam 
+    Integer trainingLanguageId.
+  - TrainingService: meetodi signatuur on muudetud.
+  - TrainingSummaryRepository: ts.trainingLanguageCode = :trainingLang →
+    (:trainingLanguageId = 0 or ts.trainingLanguageId = :trainingLanguageId).
+    Tingimus on sama mustriga nagu categoryId puhul. Veerg training_language_id
+    on vaates training_summary juba olemas.
+
+  Märkmed (trainings-view-markmed.md), copy-paste mockupi jaoks:
+
+  Vaate märkme lisainfo esimene lause:
+  Vaate avanemisel tehakse päringud GET /api/trainings, GET /api/categories, GET
+  /api/funding-types ja GET /api/languages (viimased kolm filtrite valikute
+  jaoks); contentLang väärtus võetakse localStorage'ist (vaikimisi "et"),
+  koolituse keele filter on vaikimisi valimata (trainingLanguageId=0). Koolituse
+  keele, kategooria või rahastuse filtri muutmisel tehakse uus päring vastavate
+  query parameetritega ja page lähtestatakse 0-ks. Eelmine/Järgmine ja
+  leheküljenumbrid muudavad page väärtust.
+
+  GET /api/trainings query parameetrite rida:
+  trainingLanguageId: Integer — õppekeele filter, 0 = kõik
+
+  Uus API märge:
+  API: GET /api/languages
+
+  Response (200):
+  SystemLanguageDto.java
+  [
+    {
+      "languageId": 1,
+      "languageCode": "et",
+      "languageName": "Eesti"
+    },
+    ...
+  ]
+
+  API teenuse lisainfo:
+  Tagastab kõik süsteemis olevad keeled (language tabel). TrainingsView kasutab
+  neid "Koolituse keel" filtri valikutena (languageId → trainingLanguageId).
+  languageName ei ole tõlgitud, seega contentLang parameetrit pole.
+
+  Veateated: —
+
+  SystemLanguageDto (languageId, languageCode, languageName) ja LanguageMapper
+  on koodis juba olemas, sest login kasutab neid. Seega saab /api/languages
+  teenus need kohe kasutusse võtta. Tabelis language on keelte nimed ainult ühes
+  keeles ("Eesti", "English"), seepärast contentLang parameetrit siin pole.
+
+  Muud dokumendid:
+  - docs/tasks/backend/GET-api-trainings.md: uuendatud on Teenus rida,
+    parameetrite tabel, language tabeli kirjeldus, veaolukorrad ja vastuvõtu
+    kriteeriumid.
+  - docs/tasks/frontend/trainings-view.md: keele dropdown saab nüüd väärtused
+    /api/languages teenusest ja on vaikimisi valimata. Muudetud on ka
+    parameetrite tabel.
+  - backend/CLAUDE.md: trainingLanguageId kirjeldus on uuendatud. Parandasin
+    seal ka vana kirjavea: contentLang näitena oli ?translationLang=et.
+  - docs/tasks/backend/instructions/GET-api-trainings-juhend.md: parameetri nimi
+    ja üks vihje on muudetud.
+
+  Juhend on muus osas vananenud. GET-api-trainings-juhend.md räägib endiselt
+  "kuuest valikulisest parameetrist" ja null kontrollist, aga kood kasutab
+  kohustuslikke parameetreid ja väärtust 0. Seda ma rohkem ei muutnud. Kas teeme
+  selle korda?
+
+  Mockupi jaoks tee ise: lisa GET /api/languages jaoks uus API kast ning uuenda
+  Vaate märkme kasti ja /api/trainings kasti.
+
+✻ Baked for 1m 18s · done 3:27 PM
+
+❯ uuenda pdfilt pilti                                                           
+  ⎿  1 skill available
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Bash(pdftoppm -f 4 -l 4 -png -r 150 -singlefile
+      docs/mock-wireframe/pdf/BCS.pdf
+      docs/mock-wireframe/pdf-images/TrainingsView && file
+      docs/mock-wireframe/pdf-images/T…)
+  ⎿  docs/mock-wireframe/pdf-images/TrainingsView.png: PNG image data, 2481
+      x 1754, 8-bit/color RGB, non-interlaced
+  ⎿  1 file changed (binary, mode only or too large to show)
+
+  Read 1 file (ctrl+o to expand)
+
+● Uuendasin pildi docs/mock-wireframe/pdf-images/TrainingsView.png uue BCS.pdf
+  lehekülje 4 põhjal. TrainingsView on endiselt leheküljel 4, suurus on
+  2481×1754.
+
+  Võrdlesin pilti trainings-view-markmed.md failiga. Suurem osa klapib: Vaate
+  märge, /api/trainings ja /api/languages kastid on failiga samad. Lüliti
+  "Tellitav koolitus" on eemaldatud ja kaartidel on alles märgis "Tellitav".
+
+  Kahes kastis on vigu:
+
+  1. GET /api/funding-types kast ulatub üle lehe alumise serva. PDF-is katkeb
+     tekst pärast rida "Tagastab kõik süsteemis olevad rahastustüübid
+     contentLang keeles". Lisainfo lõpp ja Veateated: — jäävad välja. Tee kast
+     suuremaks või tõsta see kõrgemale.
+  2. GET /api/categories kastis puuduvad tühjad read plokkide vahel. Query 
+     parameetrid:, Response (200):, API teenuse lisainfo: ja Veateated: algavad
+     kõik kohe eelmise ploki järel. Struktuuri järgi peab iga ploki vahel olema
+     üks tühi rida, nagu funding-types ja languages kastides juba on.
+
+  Lisaks kaks väiksemat asja wireframe'il:
+  - Rahastuse raadionupud: kõige esimene, "Töötukassa", on valitud ja nuppu
+    "Kõik" pole. Vaate märkme järgi peaks filter aga alguses olema valimata
+    (fundingTypeId=0). Lisa kas valik "Kõik" või näita, et ükski nupp pole
+    valitud.
+  - Kategooriate ja rahastustüüpide nimed: mockupis on AI, Tarkvaraarendus… ning
+    EU-rahastus ja Pilet. Andmebaasi näidisandmetes on Programmeerimine, Disain
+    ja Juhtimine ning Töötukassa ja EL rahastus. Kui mockupi nimed on õiged,
+    tuleb need lisada 3_import.sql faili.
+
+  Kui oled Balsamiqis kastid parandanud ja PDF-i uuesti eksportinud, tee pilt
+  uuesti.
+
+✻ Brewed for 30s · done 3:36 PM
+
+❯ ma tahaks nüüd teha täiestu uue vaate TrainingFormView                        
+  Teeme ühe plaani faili kus planeerime, et millne see vaade võiks välja näha.  
+  Eesmärk on pärast on pärast selle plaani faili pealt genereerida käsk         
+  balsamic AI-le, et ta selle vaat  genereerida vastavalt meie plaanile         
+  (vähendame oma kästiööd).                                                     
+                                                                                
+  Vormi vaade võiks olla siis visuaalis juba täidetud kujul kindlate andmetega. 
+  Võiksime ka selle vaate märkmed valmis genereerida.                           
+  Vaja on mõelda, et kuidas mingeid asju lisatakse (näiteksrahastustüübid       
+  (switchboxid, või chekboxid), lektorite valik (Äkki modal koos searchiga),    
+  content keel rippmenüü, vaikimisi vaikimisi et)                               
+                                                                                
+  eeskuju võib võtta docs/mock-wireframe/pdf/BCS.pdf leht 7, CourseFormView.vue 
+                                                                                
+  Kuidfas ülesandest aru saad, kas sul on küsimusi                              
+  ⎿  1 skill available
+
+  Read 1 file, ran 3 shell commands (ctrl+o to expand)
+
+● Vaatasin BCS.pdf lehekülge 7 (CourseFormView) ja andmebaasi tabeleid training,
+  training_translation, training_funding_type, lecturer ja location. Kirjeldan,
+  kuidas ülesandest aru sain, ja panen kirja küsimused, milleta plaani teha ei
+  saa.
+
+  Kuidas ülesandest aru saan
+
+  Plaanime uue vaate TrainingFormView.vue. Admin saab sellega lisada uue
+  koolituse või muuta olemasolevat. Kuna kokkuleppe järgi on lisamine ja
+  muutmine sama vorm, on rada /training-form ja muutmisel
+  /training-form?trainingId={id}.
+
+  Kõik läheb ühte plaanifaili, kus on:
+  1. Vaate kirjeldus: paigutus, vormiväljad, iga välja sisestusviis ja nupud.
+     Wireframe näitab juba täidetud vormi päris näidisandmetega 3_import.sql
+     failist (nt koolitus 1 "Java algkursus").
+  2. Märkmed: Vaate märge ja kõik API märkmed struktuuridokumendi järgi, ehk
+     valmis tekstid mockupi kastidesse.
+  3. Balsamiq AI käsk: plaanist genereeritud prompt, mis joonistab selle vaate.
+
+  Andmebaasi põhjal oleksid vormi väljad ja minu esialgsed ettepanekud
+  sisestusviisi kohta sellised:
+
+  Väli: Pealkiri, lühikirjeldus, kirjeldus
+  Tabel: training_translation
+  Sisestusviis: tekstiväljad + richtext; kuvatakse sisukeele rippmenüüs valitud
+  keeles (vaikimisi et)
+  ────────────────────────────────────────
+  Väli: Kategooria
+  Tabel: training.category_id
+  Sisestusviis: rippmenüü (GET /api/categories)
+  ────────────────────────────────────────
+  Väli: Koolituse keel
+  Tabel: training.training_language_id
+  Sisestusviis: rippmenüü (GET /api/languages)
+  ────────────────────────────────────────
+  Väli: Toimumiskoht
+  Tabel: training.location_id
+  Sisestusviis: rippmenüü (GET /api/locations, uus)
+  ────────────────────────────────────────
+  Väli: Vaikimisi lektor
+  Tabel: training.default_lecturer_id (võib olla tühi)
+  Sisestusviis: "Vali lektor" nupp → modal otsingu ja lektorite nimekirjaga
+  ────────────────────────────────────────
+  Väli: Rahastustüübid
+  Tabel: training_funding_type (mitu)
+  Sisestusviis: checkboxid (GET /api/funding-types)
+  ────────────────────────────────────────
+  Väli: Tellitav / Esile tõstetud
+  Tabel: is_orderable, is_promoted
+  Sisestusviis: switchid
+  ────────────────────────────────────────
+  Väli: Staatus
+  Tabel: training.status
+  Sisestusviis: ? (vt küsimus 3)
+
+  user_id vormis ei ole, backend võtab selle sisselogitud adminilt.
+
+  Küsimused
+
+  1. Kas vaade puudutab ainult training tabelit? CourseFormView (lk 7) kasutab
+     segamini training ja course välju (kuupäevad, hind, päevade arv). Soovitan,
+     et TrainingFormView käsitleks ainult koolitust ennast. Toimumiskorrad
+     jääksid course tabeli ja CourseFormView teemaks, samamoodi nagu kalendriga
+     TrainingsView puhul.
+  2. Kuidas sisukeele rippmenüü töötab? Soovitan järgmist: rippmenüü vahetab,
+     mis keeles pealkirja, lühikirjeldust ja kirjeldust parajasti näidatakse ja
+     muudetakse. Salvestamisel saadetakse kõik tõlked ühe päringuga
+     (translations[] massiivina, nagu lk 7 näites). Teine võimalus oleks
+     salvestada iga keel eraldi.
+  3. Mida tähendab training.status? See on int tüüpi, näidisandmetes on väärtus
+     1. Kas see eristab mustandit ja avaldatud koolitust? Soovitan kaht nuppu
+     nagu CourseFormView-s, "Salvesta mustand" ja "Avalda", ning vormis eraldi
+     staatuse välja mitte teha. Selleks pean aga teadma, mis väärtused status
+     võib saada.
+  4. Lektori modal: kas selles saab ainult olemasolevat lektorit otsida ja
+     valida? Soovitan nii teha ja uue lektori lisamine jätta eraldi vaatesse.
+     Kas valiku saab ka tühjaks jätta, ehk "lektor puudub"? Andmebaasis on
+     default_lecturer_id NULL lubatud.
+  5. Mida wireframe näitab? Soovitan ühte täidetud muutmise varianti, kus on
+     koolitus 1 andmed. Lisamise variant kirjeldatakse ainult Vaate märkmes. Lk
+     7 on kaks varianti ühel lehel, kas soovid ka siin mõlemat?
+  6. Kus plaanifail asub ja mis keeles on Balsamiq AI käsk? Minu ettepanek on
+     fail docs/mock-wireframe/plaanid/training-form-view-plaan.md. Balsamiq AI
+     käsu kirjutaksin inglise keeles, sest AI saab siis paremini aru, aga UI
+     tekstid oleksid eesti keeles. Kas sobib?
+
+✻ Crunched for 55s · done 3:50 PM
+
+❯ ainult training, soovitused sobivad, status = "D" (draft), peaks olema        
+  varchar(1) aga selle lisab süsteem,                                           
+                                                                                
+  Kui lehele saabuda konkreetse id-ga Query param, siis on edit olukord.        
+  Kui on edit olukord siis kuvatakse ka lipukesi, keeltes, mille tõlked on      
+  olemas                                                                        
+                                                                                
+  Tõlked,                                                                       
+  tee selle vaaate koostamiseks ka plaan ja märkmed                             
+  Tõlked ükshaaval, eraldi vorm TrainingTranslationFormView, id järgi saadakse  
+  info, esialgu täidetakse  ära "et" infoga, kasutaja saab seal valida keele,   
+  rippmenüüd jne tuuajs eautomaatselt  uuesti vastavas keeles ära.              
+                                                                                
+  plaanid siia kausta -> docs/mock-wireframe/loo-mock-vaade                     
+                                                                                
+  kudias aru said, kas on veel küsmusi                                          
+
+● Sain aru nii. Kirjutan selle plaanide aluseks, kaks punkti vajavad veel sinu
+  kinnitust.
+
+  Kuidas aru sain
+
+  Kaks vaadet, kummagi jaoks oma plaan ja märkmed. Mõlemad plaanid lähevad
+  kausta docs/mock-wireframe/loo-mock-vaade/.
+
+  1. TrainingFormView.vue (Admin, /training-form)
+  - Käsitleb ainult training tabelit: kategooria, koolituse keel, toimumiskoht,
+    vaikimisi lektor (modal otsinguga, lektor võib ka puududa), rahastustüübid
+    (checkboxid), tellitav ja esile tõstetud (switchid).
+  - Pealkirja ja kirjelduse välju siin ei ole. Need on tõlke vormis.
+  - Rippmenüüde nimed (kategooriad jm) tulevad keeles, mis on localStorage'is
+    contentLang väärtuseks (vaikimisi et).
+  - Ilma trainingId-ta avatuna on see lisamise vorm. Kui ?trainingId={id} on
+    antud, on see muutmise vorm: andmed eeltäidetakse ja kuvatakse lipukesed
+    nende keelte kohta, mille tõlge on olemas.
+  - status väärtuse paneb süsteem ("D" = mustand), vormis seda välja ei ole.
+  - Wireframe näitab ühte täidetud muutmise varianti koolitus 1 andmetega.
+
+  2. TrainingTranslationFormView.vue (Admin,
+  /training-translation-form?trainingId={id})
+  - Ühe keele tõlge korraga: pealkiri, lühikirjeldus, kirjeldus (richtext).
+  - Avaneb et tõlkega. Kui kasutaja valib keele rippmenüüst, laaditakse sisu
+    uuesti selles keeles.
+
+  Balsamiq AI käsk on inglise keeles, UI tekstid eesti keeles.
+
+  Küsimused
+
+  1. Kuidas uus koolitus tõlke saab? training_translation väljad on
+     kohustuslikud. TrainingsView näitab ainult neid koolitusi, millel on tõlge
+     olemas. Seega jääb pärast TrainingFormView-s "Lisa" vajutamist koolitus
+     ilma pealkirjata. Soovitan, et pärast salvestamist suunatakse kasutaja kohe
+     TrainingTranslationFormView?trainingId={uus id} vaatele et tõlget lisama.
+     Mustandi staatus "D" hoiab koolitust seni avalikult nähtamatuna. Kas sobib?
+  2. Lipukesed ja tõlkevormi avamine: soovitan, et lipule klikkimine avab
+     tõlkevormi selles keeles. Lisaks oleks nupp "Tõlked", mis avab et tõlke.
+     Kui valitud keeles tõlget veel pole, on tõlkevorm tühi ja salvestamine loob
+     uue tõlke (POST). Kui tõlge on olemas, muudab salvestamine seda (PUT). Kas
+     nii?
+  3. "rippmenüüd jne tuuakse automaatselt uuesti vastavas keeles": kas mõtlesid
+     seda, et tõlkevormis keele vahetamisel laaditakse selle keele tõlge? Või on
+     tõlkevormis veel mõni rippmenüü, näiteks kategooria nimi kirjutuskaitstud
+     infona, mis peab samuti keelt vahetama?
+  4. training.status: praegu on see int ja näidisandmetes on väärtus 1.
+     - Kas muudan kohe 2_create.sql, 3_import.sql ja Training.java failis tüübi
+       varchar(1)-ks?
+     - Mis väärtus tuleb olemasolevatele näidiskoolitustele? Soovitan "A"
+       (aktiivne/avaldatud).
+     - Kas mustandi avaldamine ("D" → "A") kuulub nende vaadete skoopi või jääb
+       hilisemaks?
+
+  Kui vastused on käes, kirjutan mõlemad plaanid. Lisan uue kausta kirjelduse ka
+  CLAUDE.md docs/ struktuuri jaotisesse.
+
+✻ Brewed for 35s · done 4:01 PM
+
+❯ - Pealkirja ja kirjelduse välju siin ei ole. Need on tõlke vormis. -> On      
+  ikka, lihtsalt esimese postisuse saab eesti keeles teha. Esimene tõlge ongi   
+  eesi keeles, if that makes sense. Kas nii ei saa?                             
+
+● Jah, saab, ja see on isegi parem lahendus. Kuna esimene tõlge tehakse kohe
+  koos koolitusega, kaob küsimus 1 ära. Koolitus ei jää hetkekski pealkirjata
+  ning TrainingsView näitab seda kohe, kui staatus seda lubab.
+
+  Uuendatud arusaam:
+
+  TrainingFormView.vue
+  - Vormis on training tabeli väljad ja eestikeelne tõlge: pealkiri,
+    lühikirjeldus ja kirjeldus (richtext).
+  - Lisamisel (POST /api/training) luuakse ühe päringuga training rida ja selle
+    et tõlge (training_translation, language_id = 1).
+  - Muutmisel (?trainingId={id}) eeltäidetakse ka eestikeelsed tekstid.
+    Lipukesed näitavad, mis keeltes tõlge on olemas.
+
+  TrainingTranslationFormView.vue
+  - Siin lisatakse ja muudetakse teisi tõlkeid ükshaaval.
+
+  Täpsustamist vajab üks asi. Kas muutmise vormis saab eestikeelseid tekste
+  endiselt muuta TrainingFormView-s ja salvestus (PUT 
+  /api/training/{trainingId}) uuendab ka et tõlget? Või muudetakse pärast
+  loomist kõiki tõlkeid, sh eestikeelset, ainult TrainingTranslationFormView-s?
+  Soovitan esimest varianti: eestikeelsed tekstid on alati TrainingFormView-s ja
+  tõlkevorm on teiste keelte jaoks. Nii ei ole sama teksti muutmiseks kahte
+  kohta.
+
+  Lahti on veel eelmise vastuse küsimused 2–4:
+  - 2. Kas lipule klikkimine avab tõlkevormi selles keeles? Kui tõlget pole,
+    loob salvestamine uue tõlke (POST), kui on, siis muudab olemasolevat (PUT).
+  - 3. Mida tähendas "rippmenüüd jne tuuakse uuesti vastavas keeles" tõlkevormi
+    puhul?
+  - 4. Kas muudan status tüübi varchar(1)-ks kohe, mis väärtuse saavad
+    olemasolevad näidiskoolitused (soovitan "A") ja kas avaldamine kuulub nende
+    vaadete skoopi?
+
+✻ Cogitated for 12s · done 4:04 PM
+
+❯ aga teeks nii, et edit olukorras saabume sinna training_translation.id-ga? ja 
+  konkreetset tõlget saab muuta, täita?                                         
+
+● Olemasoleva tõlke muutmiseks training_translation.id sobib. Uue tõlke
+  täitmiseks see aga ei tööta, sest enne tõlke loomist pole seda id-d veel
+  olemas. Kui koolitusel on ainult et tõlge ja admin tahab lisada en tõlget,
+  pole midagi, mille järgi vormi avada.
+
+  Soovitan avada vormi trainingId + languageId järgi. See katab mõlemad
+  olukorrad ühtemoodi:
+
+  ┌──────────────────────────────────────────┬───────────────────────────────┐
+  │                   URL                    │            Olukord            │
+  ├──────────────────────────────────────────┼───────────────────────────────┤
+  │ /training-form                           │ uus koolitus, esimene tõlge   │
+  │                                          │ on alati et                   │
+  ├──────────────────────────────────────────┼───────────────────────────────┤
+  │                                          │ koolitus 1, olemasolev et     │
+  │ /training-form?trainingId=1&languageId=1 │ tõlge on eeltäidetud ja       │
+  │                                          │ muudetav                      │
+  ├──────────────────────────────────────────┼───────────────────────────────┤
+  │                                          │ koolitus 1, en tõlget veel    │
+  │ /training-form?trainingId=1&languageId=2 │ pole: koolituse väljad on     │
+  │                                          │ täidetud, tekstiväljad tühjad │
+  │                                          │  ja salvestamine loob tõlke   │
+  └──────────────────────────────────────────┴───────────────────────────────┘
+
+  Sellel lahendusel on veel mõned plussid:
+  - Eraldi TrainingTranslationFormView-d pole vaja. Kõik käib ühes vormis.
+    Koolituse väljad (kategooria, lektor jne) on kõigis keeltes samad, tekstid
+    on valitud keeles.
+  - Lipukesed on navigeerimine. Lipule klikkides avaneb
+    ?trainingId=1&languageId={id}. Olemasoleva tõlkega lipp on värviline, puuduv
+    hall.
+  - Rippmenüüde keel tuleb URL-ist. Kui avad en tõlke, tulevad ka kategooriate,
+    rahastustüüpide jm nimed inglise keeles. Arvan, et just seda sa enne
+    mõtlesid.
+  - API jääb lihtsaks:
+    - GET /api/training/{trainingId}?languageId={id} tagastab koolituse välja ja
+      selle keele tõlke. Kui tõlget pole, on tekstiväljad tühjad.
+    - PUT /api/training/{trainingId} salvestab koolituse väljad ja selle keele
+      tõlke. Tõlge luuakse, kui seda veel pole, või muudetakse olemasolevat.
+    - POST /api/training loob uue koolituse koos et tõlkega.
+
+  Kas teeme nii, ühe vormiga ja ilma eraldi TrainingTranslationFormView-ta? Kui
+  jah, on lahti veel ainult status küsimus:
+  - Kas muudan tüübi kohe varchar(1)-ks (2_create.sql, 3_import.sql,
+    Training.java)?
+  - Kas olemasolevad näidiskoolitused saavad väärtuse "A"?
+  - Kas avaldamine ("D" → "A") jääb nende vaadete skoopist välja?
+
+✻ Cooked for 19s · done 4:06 PM

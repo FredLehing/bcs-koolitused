@@ -123,12 +123,16 @@ CREATE TABLE funding_type_translation
 -- Table: language
 CREATE TABLE language
 (
-    id   serial      NOT NULL,
-    code varchar(2)  NOT NULL,
-    name varchar(50) NOT NULL,
+    id               serial      NOT NULL,
+    code             varchar(2)  NOT NULL,
+    name             varchar(50) NOT NULL,
+    is_main_language boolean     NOT NULL,
     CONSTRAINT language_pk PRIMARY KEY (id),
     CONSTRAINT language_code_uq UNIQUE (code)
 );
+
+-- Põhikeel saab olla ainult üks
+CREATE UNIQUE INDEX language_main_language_uq ON language (is_main_language) WHERE is_main_language;
 
 -- Table: lecturer
 CREATE TABLE lecturer
@@ -262,7 +266,7 @@ CREATE TABLE training
     category_id          int       NOT NULL,
     training_language_id int       NOT NULL,
     location_id          int       NOT NULL,
-    status               int       NOT NULL,
+    status               varchar(1) NOT NULL,
     created_at           timestamp NOT NULL,
     updated_at           timestamp NOT NULL,
     is_orderable         boolean   NOT NULL,

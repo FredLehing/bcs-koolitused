@@ -7,6 +7,7 @@ import ee.bcskoolitus.persistance.language.Language;
 import ee.bcskoolitus.persistance.user.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -46,9 +47,10 @@ public class Training {
     @JoinColumn(name = "location_id", nullable = false)
     private Location location;
 
+    @Size(max = 1)
     @NotNull
-    @Column(name = "status", nullable = false)
-    private Integer status;
+    @Column(name = "status", nullable = false, length = 1)
+    private String status;
 
     @NotNull
     @Column(name = "created_at", nullable = false)

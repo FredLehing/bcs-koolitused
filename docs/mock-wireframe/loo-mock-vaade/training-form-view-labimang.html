@@ -1,0 +1,1017 @@
+claude/reesu<meta charset="utf-8">
+<title>TrainingFormView läbimäng</title>
+<meta name="description" content="TrainingFormView.vue olekud, URL-id, API päringud ja mockupi märkmed interaktiivse läbimänguna.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --board: #e9ecef;
+  --board-dots: #d3d8de;
+  --panel: #ffffff;
+  --ink: #23272e;
+  --ink-soft: #5b6470;
+  --line: #b9c0c9;
+  --sketch: #3b4048;
+  --field: #ffffff;
+  --field-off: #eef0f3;
+  --accent: #2f6fde;
+  --accent-soft: #dce7fb;
+  --note: #f2c94c;
+  --note-edge: #d9ad2b;
+  --note-ink: #2e2505;
+  --get: #1f7a5c;
+  --post: #2f6fde;
+  --put: #a56200;
+  --ok: #1f7a5c;
+  --warn-bg: #fff4d6;
+  --shadow: 0 1px 2px rgba(20, 30, 45, .08), 0 4px 14px rgba(20, 30, 45, .06);
+  --font-ui: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-sketch: "Balsamiq Sans", "Comic Sans MS", "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --board: #15181d;
+    --board-dots: #242931;
+    --panel: #1d2127;
+    --ink: #e6e9ee;
+    --ink-soft: #9aa4b2;
+    --line: #3a414b;
+    --sketch: #c9ced6;
+    --field: #252a31;
+    --field-off: #1a1e23;
+    --accent: #7aa5f5;
+    --accent-soft: #22324f;
+    --get: #5cc59e;
+    --post: #7aa5f5;
+    --put: #e0a24a;
+    --ok: #5cc59e;
+    --warn-bg: #3a3218;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --board: #15181d;
+  --board-dots: #242931;
+  --panel: #1d2127;
+  --ink: #e6e9ee;
+  --ink-soft: #9aa4b2;
+  --line: #3a414b;
+  --sketch: #c9ced6;
+  --field: #252a31;
+  --field-off: #1a1e23;
+  --accent: #7aa5f5;
+  --accent-soft: #22324f;
+  --get: #5cc59e;
+  --post: #7aa5f5;
+  --put: #e0a24a;
+  --ok: #5cc59e;
+  --warn-bg: #3a3218;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.3);
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background-color: var(--board);
+  background-image: radial-gradient(var(--board-dots) 1px, transparent 1px);
+  background-size: 18px 18px;
+  color: var(--ink);
+  font: 15px/1.5 var(--font-ui);
+}
+.page { max-width: 1320px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 64px; display: grid; gap: 28px; }
+h1, h2, h3 { text-wrap: balance; margin: 0; line-height: 1.2; }
+h1 { font-size: 1.7rem; font-weight: 600; }
+h2 { font-size: 1.15rem; font-weight: 600; }
+h3 { font-size: .8rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft); }
+code, .mono { font-family: var(--font-mono); font-size: .88em; }
+button { font: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Päis */
+.intro { display: grid; gap: 10px; }
+.intro p { margin: 0; max-width: 72ch; color: var(--ink-soft); }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.tbtn {
+  border: 1px solid var(--line); background: var(--panel); color: var(--ink);
+  padding: 6px 12px; border-radius: 6px; cursor: pointer;
+}
+.tbtn:hover { border-color: var(--accent); }
+.tbtn[data-mode] { display: inline-grid; gap: 1px; text-align: left; }
+.tbtn .tstate { font-family: var(--font-mono); font-size: .74rem; color: var(--ink-soft); }
+
+/* Olekute riba */
+.states { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.state {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+  padding: 10px 12px; display: grid; gap: 4px; box-shadow: var(--shadow);
+}
+.state .tag { font-weight: 600; }
+.state .url { font-family: var(--font-mono); font-size: .78rem; color: var(--ink-soft); overflow-wrap: anywhere; }
+.state .btns { font-size: .82rem; color: var(--ink-soft); }
+.state.is-active { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 2px var(--accent), var(--shadow); }
+.state.is-active.changed { animation: statepulse 1s ease-out; }
+@keyframes statepulse { 0% { transform: scale(1.03); } 100% { transform: scale(1); } }
+.tbtn[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 1px var(--accent); }
+.state.is-active .tag::after { content: "  ← praegu"; color: var(--accent); font-weight: 500; font-size: .85em; }
+
+/* Põhiala */
+.main { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+
+/* Brauseri wireframe */
+.browser {
+  background: var(--panel); border: 2px solid var(--sketch); border-radius: 10px;
+  font-family: var(--font-sketch); box-shadow: var(--shadow); overflow: hidden;
+}
+.chrome { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-bottom: 2px solid var(--sketch); background: var(--field-off); }
+.chrome .dots { display: flex; gap: 5px; }
+.chrome .dots span { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--sketch); }
+.urlbar {
+  flex: 1; min-width: 0; border: 1.5px solid var(--sketch); border-radius: 14px; padding: 3px 12px;
+  font-family: var(--font-mono); font-size: .8rem; background: var(--field);
+  white-space: nowrap; overflow-x: auto;
+}
+.urlbar.flash { animation: flash 1.2s ease-out; }
+@keyframes flash { 0% { background: var(--note); color: var(--note-ink); } 100% { background: var(--field); } }
+.sitenav { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; padding: 8px 14px; border-bottom: 1.5px dashed var(--line); font-size: .85rem; }
+.sitenav .logo { width: 44px; height: 24px; border: 1.5px solid var(--sketch); position: relative; }
+.sitenav .logo::before, .sitenav .logo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top right, transparent calc(50% - .75px), var(--sketch) 50%, transparent calc(50% + .75px)); }
+.sitenav .logo::after { transform: scaleX(-1); }
+.sitenav .out { margin-left: auto; border: 1.5px solid var(--sketch); border-radius: 10px; padding: 0 8px; font-size: .78rem; }
+
+.form { padding: 16px 18px 20px; display: grid; gap: 16px; }
+.formhead { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
+.formhead h2 { font-family: var(--font-sketch); font-size: 1.35rem; font-weight: 700; }
+.badge { border: 1.5px solid var(--sketch); border-radius: 10px; padding: 0 8px; font-size: .78rem; }
+.badge.draft { background: var(--field-off); }
+.badge.pub { background: var(--ok); color: #fff; border-color: var(--ok); }
+.flags { display: flex; gap: 8px; margin-left: auto; align-items: center; }
+.flag { border: 0; padding: 0; background: none; cursor: pointer; display: grid; justify-items: center; gap: 2px; font-size: .7rem; color: var(--ink-soft); font-family: var(--font-sketch); }
+.flag svg { width: 34px; height: 22px; border: 1.5px solid var(--sketch); display: block; }
+.flag.missing svg { filter: grayscale(1); opacity: .4; }
+.flag.current svg { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.cols { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.cols fieldset.data { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); align-items: start; }
+fieldset { border: 1.5px solid var(--sketch); border-radius: 8px; margin: 0; padding: 10px 12px 12px; display: grid; gap: 10px; min-width: 0; }
+legend { padding: 0 6px; font-weight: 700; font-size: .9rem; }
+.fld { display: grid; gap: 3px; }
+.lbl { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: .82rem; }
+.api-pin {
+  font-family: var(--font-mono); font-size: .66rem; background: var(--note); color: var(--note-ink);
+  border: 0; border-radius: 3px; padding: 0 5px; cursor: pointer; line-height: 1.6;
+}
+.api-pin:hover { outline: 1.5px solid var(--note-edge); }
+input[type="text"], select, textarea, .search {
+  width: 100%; font-family: var(--font-sketch); font-size: .9rem; color: var(--ink);
+  background: var(--field); border: 1.5px solid var(--sketch); border-radius: 5px; padding: 4px 8px;
+}
+input:disabled, select:disabled, textarea:disabled { background: var(--field-off); color: var(--ink-soft); border-style: dashed; }
+textarea { min-height: 88px; resize: vertical; }
+#f-desc { min-height: 150px; }
+.rt { border: 1.5px solid var(--sketch); border-radius: 5px; overflow: hidden; }
+.rt .rtbar { display: flex; gap: 10px; padding: 2px 8px; border-bottom: 1.5px solid var(--sketch); font-size: .8rem; background: var(--field-off); }
+.rt textarea { border: 0; border-radius: 0; }
+.checks { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: .88rem; }
+.checks label, .switch { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+.switch input { appearance: none; width: 34px; height: 18px; border: 1.5px solid var(--sketch); border-radius: 10px; position: relative; background: var(--field); cursor: pointer; margin: 0; }
+.switch input::after { content: ""; position: absolute; top: 2px; left: 2px; width: 11px; height: 11px; border-radius: 50%; background: var(--sketch); transition: transform .15s; }
+.switch input:checked { background: var(--accent-soft); }
+.switch input:checked::after { transform: translateX(16px); background: var(--accent); }
+.switch input:disabled { opacity: .5; }
+.lect { display: flex; gap: 8px; align-items: center; }
+.lect .name { flex: 1; min-width: 0; border: 1.5px dashed var(--line); border-radius: 5px; padding: 3px 8px; font-size: .9rem; }
+.sbtn {
+  font-family: var(--font-sketch); font-size: .9rem; border: 1.5px solid var(--sketch); border-radius: 12px;
+  background: var(--field); color: var(--ink); padding: 3px 14px; cursor: pointer; box-shadow: 1.5px 1.5px 0 var(--sketch);
+}
+.sbtn:hover:not(:disabled) { background: var(--accent-soft); }
+.sbtn:active:not(:disabled) { transform: translate(1px, 1px); box-shadow: .5px .5px 0 var(--sketch); }
+.sbtn.primary { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: 1.5px 1.5px 0 var(--sketch); }
+.sbtn:disabled { opacity: .45; cursor: not-allowed; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.hint { font-size: .8rem; color: var(--ink-soft); }
+.err { color: #c0392b; font-size: .8rem; }
+.ai-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.tip { position: relative; display: inline-flex; }
+.tip [role="tooltip"] {
+  position: absolute; left: 0; top: calc(100% + 8px); z-index: 5; width: min(300px, 70vw);
+  background: var(--ink); color: var(--panel); font: .78rem/1.4 var(--font-ui); padding: 8px 10px; border-radius: 6px;
+  opacity: 0; visibility: hidden; transition: opacity .12s; pointer-events: none;
+}
+.tip [role="tooltip"]::before { content: ""; position: absolute; left: 18px; top: -5px; width: 10px; height: 10px; background: var(--ink); transform: rotate(45deg); }
+.tip:hover [role="tooltip"], .tip:focus-within [role="tooltip"] { opacity: 1; visibility: visible; }
+.sbtn.ai { border-style: dashed; }
+.linkish { background: none; border: 0; color: var(--accent); text-decoration: underline; cursor: pointer; padding: 0; font-family: var(--font-sketch); font-size: .8rem; }
+
+/* Parem veerg */
+.side { display: grid; gap: 18px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; box-shadow: var(--shadow); display: grid; gap: 10px; }
+.kv { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 12px; font-size: .88rem; }
+.kv dt { color: var(--ink-soft); }
+.store { display: grid; gap: 4px; }
+.store .sub { font-family: var(--font-mono); font-size: .78rem; color: var(--ink-soft); }
+.store pre { margin: 0; font: .74rem/1.4 var(--font-mono); background: var(--field-off); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; max-height: 220px; overflow: auto; }
+.kv dd { margin: 0; font-family: var(--font-mono); font-size: .82rem; overflow-wrap: anywhere; }
+
+.note {
+  background: var(--note); color: var(--note-ink); border-radius: 2px;
+  box-shadow: 0 1px 0 var(--note-edge), 0 6px 16px rgba(80, 60, 0, .18);
+  padding: 12px 14px 14px; display: grid; gap: 8px; min-width: 0; position: relative;
+}
+.note.flash { animation: noteflash 1.4s ease-out; }
+@keyframes noteflash { 0%, 30% { box-shadow: 0 0 0 4px var(--accent), 0 6px 16px rgba(80,60,0,.18); } 100% { box-shadow: 0 1px 0 var(--note-edge), 0 6px 16px rgba(80,60,0,.18); } }
+.note-head { display: flex; align-items: center; gap: 8px; }
+.note-head strong { font-size: .82rem; font-weight: 600; letter-spacing: .03em; text-transform: uppercase; }
+.note-head .copy { margin-left: auto; font: 500 .75rem var(--font-ui); background: rgba(255,255,255,.55); color: var(--note-ink); border: 1px solid var(--note-edge); border-radius: 4px; padding: 1px 8px; cursor: pointer; }
+.note-head .copy:hover { background: #fff; }
+#view-note-title { text-transform: none; letter-spacing: 0; }
+.note pre { margin: 0; font: .78rem/1.45 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+.note .draft-tag { font-size: .72rem; background: rgba(255,255,255,.55); border-radius: 3px; padding: 0 6px; }
+
+/* Päringute logi */
+.log { display: grid; gap: 6px; }
+.log-step { font-size: .85rem; color: var(--ink-soft); }
+.log-group { font-size: .74rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft); margin-top: 6px; }
+.req .when { display: block; font-size: .74rem; color: var(--ink-soft); }
+.req .main { display: grid; gap: 1px; flex: 1; min-width: 0; }
+.req.done { border-color: var(--ok); }
+.req .ran { font: 600 .68rem var(--font-ui); color: var(--ok); border: 1px solid var(--ok); border-radius: 10px; padding: 0 6px; flex: none; }
+.req.idle .method { opacity: .75; }
+.req { border: 1px solid var(--line); border-radius: 6px; background: var(--field); overflow: hidden; }
+.req > button {
+  width: 100%; display: flex; gap: 8px; align-items: center; text-align: left;
+  background: none; border: 0; color: var(--ink); padding: 6px 10px; cursor: pointer;
+}
+.req > button:hover { background: var(--field-off); }
+.method { font: 600 .7rem var(--font-mono); padding: 1px 6px; border-radius: 3px; color: #fff; flex: none; }
+.m-GET { background: var(--get); } .m-POST { background: var(--post); } .m-PUT { background: var(--put); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .method { color: #111; } }
+:root[data-theme="dark"] .method { color: #111; }
+.req .path { font-family: var(--font-mono); font-size: .78rem; overflow-wrap: anywhere; flex: 1; min-width: 0; }
+.req .code { font-family: var(--font-mono); font-size: .75rem; color: var(--ok); flex: none; }
+.req .body { border-top: 1px dashed var(--line); padding: 8px 10px; display: grid; gap: 6px; }
+.req .body pre { margin: 0; font: .75rem/1.4 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; max-height: 260px; overflow: auto; }
+.req .body .sub { font-size: .75rem; color: var(--ink-soft); }
+.empty { font-size: .88rem; color: var(--ink-soft); }
+
+/* Märkmete ruudustik */
+.notes-section { display: grid; gap: 14px; }
+.notes-section > p { margin: 0; color: var(--ink-soft); max-width: 72ch; }
+.notes-grid { columns: 3 340px; column-gap: 18px; }
+.notes-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+#notes-title code { font-size: .85em; }
+.notes-grid .note { break-inside: avoid; margin-bottom: 18px; }
+
+/* Modal */
+.overlay { position: fixed; inset: 0; background: rgba(15, 20, 28, .45); display: grid; place-items: center; padding: 16px; z-index: 20; }
+.modal { background: var(--panel); color: var(--ink); border: 2px solid var(--sketch); border-radius: 10px; width: min(440px, 100%); padding: 16px 18px; display: grid; gap: 12px; font-family: var(--font-sketch); box-shadow: 4px 4px 0 var(--sketch); }
+.modal h2 { font-family: var(--font-sketch); font-weight: 700; }
+.modal .row { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+.lect-list { display: grid; gap: 6px; max-height: 240px; overflow: auto; }
+.lect-item { display: flex; align-items: center; gap: 10px; border: 1.5px solid var(--sketch); border-radius: 6px; padding: 6px 8px; background: var(--field); cursor: pointer; text-align: left; font: inherit; color: var(--ink); }
+.lect-item:hover { background: var(--accent-soft); }
+.lect-item .ph { width: 28px; height: 28px; border: 1.5px solid var(--sketch); border-radius: 50%; flex: none; background: var(--field-off); }
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--panel); padding: 8px 16px; border-radius: 6px; font-size: .9rem; z-index: 30; }
+
+@media (max-width: 1040px) { .main { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 640px) {
+  .states { grid-template-columns: minmax(0, 1fr); }
+  .cols { grid-template-columns: minmax(0, 1fr); }
+  .flags { margin-left: 0; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+
+<div class="page">
+  <header class="intro">
+    <h1>TrainingFormView.vue — läbimäng</h1>
+    <p>Vajuta vormi nuppe ja lipukesi nagu päris vaates. URL, backendi päringud ja olek muutuvad kaasa. Kollased kastid on mockupi märkmed samas vormingus nagu <code>skill-uus-mockup-markmed</code> — neid saab otse Balsamiqi kopeerida.</p>
+    <p>Keeled: <code>et</code>, <code>en</code> ja <code>ru</code> (store'i <code>contentLanguages</code>). Näidisandmed: koolitus 1 „Java algkursus“ on andmebaasist (<code>3_import.sql</code>), sellel on et ja en tõlge — vene lipp on hall. <strong>Vene keel on ainult mockupis</strong>: andmebaasis (<code>3_import.sql</code>) seda pole, venekeelsed kategooriad ja rahastustüübid on näidised. „Power BI edasijõudnutele“ on mockupi lk 7 põhjal uus koolitus, mis saab ID <code>3</code>. DTO-de väljad on <strong>ettepanek</strong> — need kinnitatakse plaanifailis.</p>
+    <div class="toolbar">
+      <button class="tbtn" id="btn-a" type="button" data-mode="A"><span>A. Alusta uue koolitusega</span><span class="tstate">state: "new-training"</span></button>
+      <button class="tbtn" id="btn-b" type="button" data-mode="B"><span>B. Muuda koolitust (Java algkursus)</span><span class="tstate">state: "update"</span></button>
+      <button class="tbtn" id="btn-c" type="button" data-mode="C"><span>C. Lisa tõlge (Java algkursus „ru“)</span><span class="tstate">state: "new-translation"</span></button>
+    </div>
+  </header>
+
+  <section class="states" aria-label="Vaate olekud" id="states"></section>
+
+  <div class="main">
+    <div class="browser" aria-label="TrainingFormView wireframe">
+      <div class="chrome">
+        <div class="dots" aria-hidden="true"><span></span><span></span><span></span></div>
+        <div class="urlbar" id="urlbar"></div>
+      </div>
+      <div class="sitenav" aria-hidden="true">
+        <span class="logo"></span><span>Koolitused</span><span>Teenused</span><span>Ettevõttest</span><span>Blogi</span><span>Kontakt</span>
+        <span class="out">Logi välja</span>
+      </div>
+      <form class="form" id="form" novalidate></form>
+    </div>
+
+    <aside class="side">
+      <div class="card">
+        <h3>Store (frontend)</h3>
+        <div class="store"><span class="sub">contentLanguages</span><pre id="store"></pre></div>
+        <h3>Praegune olek</h3>
+        <dl class="kv" id="statekv"></dl>
+      </div>
+      <div class="card">
+        <h3 id="log-title">Võimalikud päringud</h3>
+        <div class="log" id="log"></div>
+      </div>
+      <div class="note" id="note-view">
+        <div class="note-head"><strong id="view-note-title">Vaate märkmed</strong><button class="copy" type="button" data-copy="view">Kopeeri</button></div>
+        <pre id="view-note-text"></pre>
+      </div>
+    </aside>
+  </div>
+
+  <section class="notes-section">
+    <div class="notes-head">
+      <h2 id="notes-title">API märkmed</h2>
+      <button class="tbtn" id="btn-all-notes" type="button" aria-pressed="false">Näita kõiki vaate API märkmeid</button>
+    </div>
+    <p id="notes-desc">Iga backendi kutse kohta üks kast. Vajuta vormis kollasele sildile või logis päringule, et hüpata vastava märkme juurde.</p>
+    <div class="notes-grid" id="notes"></div>
+  </section>
+</div>
+
+<div id="modal-root"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- Andmebaasi näidisandmed (3_import.sql) ---------- */
+  var LANGUAGES = [
+    { languageId: 1, languageCode: "et", languageName: "Eesti" },
+    { languageId: 2, languageCode: "en", languageName: "English" },
+    { languageId: 3, languageCode: "ru", languageName: "Русский" }
+  ];
+  var CATEGORIES = { 1: { et: "Programmeerimine", en: "Programming", ru: "Программирование" }, 2: { et: "Disain", en: "Design", ru: "Дизайн" }, 3: { et: "Juhtimine", en: "Management", ru: "Управление" } };
+  var FUNDING = { 1: { et: "Töötukassa", en: "Job Centre", ru: "Касса по безработице" }, 2: { et: "EL rahastus", en: "EU Funded", ru: "Финансирование ЕС" } };
+  var LOCATIONS = { 1: "BCS Koolitus", 2: "Veebiõpe", 3: "Hübriidõpe" };
+  var LECTURERS = [ { lecturerId: 1, lecturerName: "Mari Tamm" }, { lecturerId: 2, lecturerName: "Jaan Kask" } ];
+  // frontendi store: contentLanguages (hard coded)
+  var CONTENT_LANGUAGES = [
+    { languageCode: "et", isMainLanguage: true, languageFlag: "@/assets/flags/et-flag.png", languageI18n: "@/locales/et.json" },
+    { languageCode: "en", isMainLanguage: false, languageFlag: "@/assets/flags/en-flag.png", languageI18n: "@/locales/en.json" },
+    { languageCode: "ru", isMainLanguage: false, languageFlag: "@/assets/flags/ru-flag.png", languageI18n: "@/locales/ru.json" }
+  ];
+  var MAIN_LANGUAGE_ID = 1; // language.is_main_language = true
+
+  var AI_RESULTS = {
+    "Java algkursus": {
+      en: { title: "Java Basics", shortDescription: "Fundamentals of Java programming for beginners.", description: "The course covers Java syntax, object-oriented programming, and basic data structures." },
+      ru: { title: "Базовый курс Java", shortDescription: "Основы программирования на Java для начинающих.", description: "На курсе изучаются синтаксис Java, объектно-ориентированное программирование и основные структуры данных." }
+    },
+    "Power BI edasijõudnutele": {
+      en: { title: "Power BI for Advanced Users", shortDescription: "Data models, DAX and interactive reports.", description: "The course builds a data model in Power BI, writes DAX formulas and creates interactive reports." },
+      ru: { title: "Power BI для продвинутых", shortDescription: "Модели данных, DAX и интерактивные отчёты.", description: "На курсе в Power BI создаётся модель данных, пишутся формулы DAX и создаются интерактивные отчёты." }
+    }
+  };
+  var NEW_ET = { title: "Power BI edasijõudnutele", shortDescription: "Andmemudelid, DAX ja interaktiivsed aruanded.", description: "Kursusel ehitatakse Power BI-s andmemudel, kirjutatakse DAX-valemeid ja luuakse interaktiivseid aruandeid." };
+
+  function freshDb() {
+    return {
+      trainings: {
+        1: { trainingId: 1, categoryId: 1, trainingLanguageId: 1, locationId: 1, defaultLecturerId: 1, isOrderable: true, isPromoted: true, status: "P", fundingTypeIds: [1] }
+      },
+      translations: {
+        1: { trainingTranslationId: 1, trainingId: 1, languageId: 1, title: "Java algkursus", shortDescription: "Java programmeerimise alused algajatele.", description: "Kursusel õpitakse Java süntaksit, objektorienteeritud programmeerimist ja põhilisi andmestruktuure." },
+        2: { trainingTranslationId: 2, trainingId: 1, languageId: 2, title: "Java Basics", shortDescription: "Fundamentals of Java programming for beginners.", description: "The course covers Java syntax, object-oriented programming, and basic data structures." }
+      },
+      nextTrainingId: 3,
+      nextTranslationId: 5
+    };
+  }
+
+  var db = freshDb();
+  var st = null;         // vaate olek
+  var logSteps = [];     // viimase sammu päringud
+  var logTitle = "";
+  var openReq = -1;
+
+  function lang(id) { return LANGUAGES.filter(function (l) { return l.languageId === id; })[0]; }
+  function langByCode(c) { return LANGUAGES.filter(function (l) { return l.languageCode === c; })[0]; }
+  function lecturerName(id) { var l = LECTURERS.filter(function (x) { return x.lecturerId === id; })[0]; return l ? l.lecturerName : null; }
+  function translationsOf(trainingId) {
+    return Object.keys(db.translations).map(function (k) { return db.translations[k]; })
+      .filter(function (t) { return t.trainingId === trainingId; })
+      .map(function (t) { return { trainingTranslationId: t.trainingTranslationId, languageId: t.languageId, languageCode: lang(t.languageId).languageCode, isMainLanguage: t.languageId === MAIN_LANGUAGE_ID }; });
+  }
+  function j(o) { return JSON.stringify(o, null, 2); }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c]; }); }
+
+  /* ---------- Päringute logi ---------- */
+  function call(method, path, req, res, code) {
+    logSteps.push({ method: method, path: path, req: req, res: res, code: code || 200 });
+  }
+  function startStep(title) { logSteps = []; logTitle = title; openReq = -1; }
+
+  function loadDropdowns(code) {
+    call("GET", "/api/languages", null, LANGUAGES);
+    call("GET", "/api/locations", null, Object.keys(LOCATIONS).map(function (k) { return { locationId: +k, locationName: LOCATIONS[k] }; }));
+    call("GET", "/api/categories?contentLang=" + code, null, Object.keys(CATEGORIES).map(function (k) { return { categoryId: +k, categoryName: CATEGORIES[k][code] }; }));
+    call("GET", "/api/funding-types?contentLang=" + code, null, Object.keys(FUNDING).map(function (k) { return { fundingTypeId: +k, fundingTypeName: FUNDING[k][code] }; }));
+  }
+  function trainingDto(t) {
+    return { trainingId: t.trainingId, categoryId: t.categoryId, trainingLanguageId: t.trainingLanguageId, locationId: t.locationId, defaultLecturerId: t.defaultLecturerId, defaultLecturerName: lecturerName(t.defaultLecturerId), isOrderable: t.isOrderable, isPromoted: t.isPromoted, status: t.status, fundingTypeIds: t.fundingTypeIds.slice() };
+  }
+
+  /* ---------- Navigeerimine: router.replace + laadimine ---------- */
+  function navigate(query, stepTitle, keepLog) {
+    if (!keepLog) startStep(stepTitle);
+    var q = query || {};
+    var url = "/training-form";
+    var parts = [];
+    if (q.trainingId) parts.push("trainingId=" + q.trainingId);
+    if (q.trainingTranslationId) parts.push("trainingTranslationId=" + q.trainingTranslationId);
+    if (q.languageId) parts.push("languageId=" + q.languageId);
+    if (parts.length) url += "?" + parts.join("&");
+
+    if (!q.trainingId) {
+      loadDropdowns("et");
+      st = { mode: "A", url: url, langCode: "et", status: null, trainingId: null, translations: [],
+        form: { categoryId: 1, trainingLanguageId: 1, locationId: 2, defaultLecturerId: 1, isOrderable: true, isPromoted: false, fundingTypeIds: [1, 2], title: NEW_ET.title, shortDescription: NEW_ET.shortDescription, description: NEW_ET.description } };
+    } else {
+      var t = db.trainings[q.trainingId];
+      var tdto = trainingDto(t);
+      var list = translationsOf(t.trainingId);
+      var code, tr = null, src = null;
+      if (q.trainingTranslationId) {
+        tr = db.translations[q.trainingTranslationId];
+        code = lang(tr.languageId).languageCode;
+      } else {
+        code = lang(q.languageId).languageCode;
+        var mainItem = list.filter(function (x) { return x.isMainLanguage; })[0];
+        if (mainItem) src = db.translations[mainItem.trainingTranslationId];
+      }
+      call("GET", "/api/languages", null, LANGUAGES);
+      call("GET", "/api/locations", null, Object.keys(LOCATIONS).map(function (k) { return { locationId: +k, locationName: LOCATIONS[k] }; }));
+      call("GET", "/api/training/" + t.trainingId, null, tdto);
+      if (tr) call("GET", "/api/training-translation/" + tr.trainingTranslationId, null, { trainingTranslationId: tr.trainingTranslationId, trainingId: tr.trainingId, languageId: tr.languageId, languageCode: code, title: tr.title, shortDescription: tr.shortDescription, description: tr.description });
+      call("GET", "/api/training/" + t.trainingId + "/training-translations", null, list);
+      if (src) call("GET", "/api/training-translation/" + src.trainingTranslationId, null, { trainingTranslationId: src.trainingTranslationId, trainingId: src.trainingId, languageId: src.languageId, languageCode: lang(src.languageId).languageCode, title: src.title, shortDescription: src.shortDescription, description: src.description });
+      call("GET", "/api/categories?contentLang=" + code, null, Object.keys(CATEGORIES).map(function (k) { return { categoryId: +k, categoryName: CATEGORIES[k][code] }; }));
+      call("GET", "/api/funding-types?contentLang=" + code, null, Object.keys(FUNDING).map(function (k) { return { fundingTypeId: +k, fundingTypeName: FUNDING[k][code] }; }));
+      st = { mode: tr ? "B" : "C", url: url, langCode: code, status: t.status, trainingId: t.trainingId,
+        trainingTranslationId: tr ? tr.trainingTranslationId : null, languageId: tr ? tr.languageId : q.languageId, translations: list,
+        form: { categoryId: t.categoryId, trainingLanguageId: t.trainingLanguageId, locationId: t.locationId, defaultLecturerId: t.defaultLecturerId, isOrderable: t.isOrderable, isPromoted: t.isPromoted, fundingTypeIds: t.fundingTypeIds.slice(),
+          title: (tr || src || {}).title || "", shortDescription: (tr || src || {}).shortDescription || "", description: (tr || src || {}).description || "" } };
+    }
+    st.loaded = textsOf(st.form);
+    renderAll(true);
+  }
+
+  /* ---------- Tegevused ---------- */
+  function doCreate() {
+    var f = st.form;
+    if (!f.title.trim()) { st.error = "Täida pealkiri"; renderForm(); return; }
+    startStep("„Lisa“ → POST, siis router.replace");
+    var userId = 1; // localStorage'ist
+    var req = { userId: userId, categoryId: f.categoryId, trainingLanguageId: f.trainingLanguageId, locationId: f.locationId, defaultLecturerId: f.defaultLecturerId, isOrderable: f.isOrderable, isPromoted: f.isPromoted, fundingTypeIds: f.fundingTypeIds.slice(), title: f.title, shortDescription: f.shortDescription, description: f.description };
+    var tid = db.nextTrainingId++, trid = db.nextTranslationId++;
+    db.trainings[tid] = { trainingId: tid, categoryId: f.categoryId, trainingLanguageId: f.trainingLanguageId, locationId: f.locationId, defaultLecturerId: f.defaultLecturerId, isOrderable: f.isOrderable, isPromoted: f.isPromoted, status: "U", fundingTypeIds: f.fundingTypeIds.slice() };
+    db.translations[trid] = { trainingTranslationId: trid, trainingId: tid, languageId: 1, title: f.title, shortDescription: f.shortDescription, description: f.description };
+    call("POST", "/api/training", req, { trainingId: tid, trainingTranslationId: trid });
+    navigate({ trainingId: tid, trainingTranslationId: trid }, null, true);
+    toast("Koolitus lisatud (mustand)");
+  }
+  function doAddTranslation() {
+    var f = st.form;
+    if (!f.title.trim()) { st.error = "Täida pealkiri"; renderForm(); return; }
+    startStep("„Lisa tõlge“ → POST, siis router.replace");
+    var trid = db.nextTranslationId++;
+    db.translations[trid] = { trainingTranslationId: trid, trainingId: st.trainingId, languageId: st.languageId, title: f.title, shortDescription: f.shortDescription, description: f.description };
+    call("POST", "/api/training/" + st.trainingId + "/training-translation", { languageId: st.languageId, title: f.title, shortDescription: f.shortDescription, description: f.description }, { trainingTranslationId: trid });
+    navigate({ trainingId: st.trainingId, trainingTranslationId: trid }, null, true);
+    toast("Tõlge lisatud");
+  }
+  function doSave() {
+    var f = st.form;
+    if (!f.title.trim()) { st.error = "Täida pealkiri"; renderForm(); return; }
+    startStep("„Salvesta“ → PUT");
+    var t = db.trainings[st.trainingId];
+    ["categoryId", "trainingLanguageId", "locationId", "defaultLecturerId", "isOrderable", "isPromoted"].forEach(function (k) { t[k] = f[k]; });
+    t.fundingTypeIds = f.fundingTypeIds.slice();
+    var tr = db.translations[st.trainingTranslationId];
+    tr.title = f.title; tr.shortDescription = f.shortDescription; tr.description = f.description;
+    call("PUT", "/api/training/" + st.trainingId, { categoryId: f.categoryId, trainingLanguageId: f.trainingLanguageId, locationId: f.locationId, defaultLecturerId: f.defaultLecturerId, isOrderable: f.isOrderable, isPromoted: f.isPromoted, fundingTypeIds: f.fundingTypeIds.slice(), trainingTranslationId: tr.trainingTranslationId, title: f.title, shortDescription: f.shortDescription, description: f.description }, null);
+    st.error = null;
+    st.loaded = textsOf(f);
+    renderAll(false);
+    toast("Salvestatud");
+  }
+  function textsOf(f) { return f.title + "\u0000" + f.shortDescription + "\u0000" + f.description; }
+  function doAiTranslate() {
+    if (textsOf(st.form) !== st.loaded) {
+      confirmModal("Asenda tekst AI tõlkega?", "Vormis on salvestamata muudatusi. AI tõlge kirjutab pealkirja, lühikirjelduse ja kirjelduse üle.", "Asenda", runAi);
+    } else {
+      runAi();
+    }
+  }
+  function runAi() {
+    startStep("„Tee AI tõlge“ → GET ai-translation (midagi ei salvestata)");
+    var main = st.translations.filter(function (x) { return x.isMainLanguage; })[0];
+    var srcTr = main ? db.translations[main.trainingTranslationId] : null;
+    var targetId = langByCode(st.langCode).languageId;
+    var known = srcTr && AI_RESULTS[srcTr.title] && AI_RESULTS[srcTr.title][st.langCode];
+    var res = known || { title: "[AI " + st.langCode + "] " + srcTr.title, shortDescription: "[AI " + st.langCode + "] " + srcTr.shortDescription, description: "[AI " + st.langCode + "] " + srcTr.description };
+    st.aiLoading = true; renderForm();
+    setTimeout(function () {
+      call("GET", "/api/training/" + st.trainingId + "/ai-translation?languageId=" + targetId, null, res);
+      st.aiLoading = false;
+      st.form.title = res.title; st.form.shortDescription = res.shortDescription; st.form.description = res.description; st.error = null;
+      renderForm(); renderLog();
+      toast("AI tõlge vormis — kontrolli ja salvesta");
+    }, 1200);
+  }
+  function doStatus() {
+    var toP = st.status === "U";
+    confirmModal(toP ? "Publitseeri koolitus" : "Liiguta mustandisse",
+      toP ? "Kas soovid koolituse publitseerida? See muutub avalikult nähtavaks." : "Kas soovid koolituse mustandisse liigutada? See kaob avalikust nimekirjast.",
+      toP ? "Publitseeri" : "Liiguta mustandisse",
+      function () {
+        startStep(toP ? "„Publitseeri“ → kinnitus → PUT publish" : "„Liiguta mustandisse“ → kinnitus → PUT unpublish");
+        var t = db.trainings[st.trainingId];
+        t.status = toP ? "P" : "U";
+        call("PUT", "/api/training/" + st.trainingId + (toP ? "/publish" : "/unpublish"), null, null);
+        call("GET", "/api/training/" + st.trainingId, null, trainingDto(t));
+        st.status = t.status;
+        renderAll(false);
+        toast(toP ? "Publitseeritud" : "Liigutatud mustandisse");
+      });
+  }
+  function flagClick(code) {
+    if (st.mode === "A") return;
+    var have = st.translations.filter(function (x) { return x.languageCode === code; })[0];
+    if (have) {
+      if (have.trainingTranslationId === st.trainingTranslationId) return;
+      navigate({ trainingId: st.trainingId, trainingTranslationId: have.trainingTranslationId }, "Klikk värvilisel lipul „" + code + "“ → router.replace");
+    } else {
+      if (st.mode === "C" && st.langCode === code) return;
+      navigate({ trainingId: st.trainingId, languageId: langByCode(code).languageId }, "Klikk hallil lipul „" + code + "“ → router.replace");
+    }
+  }
+
+  /* ---------- Modaalid ---------- */
+  var modalRoot = document.getElementById("modal-root");
+  function closeModal() { modalRoot.innerHTML = ""; }
+  function confirmModal(title, text, okLabel, onOk) {
+    modalRoot.innerHTML = '<div class="overlay" role="dialog" aria-modal="true" aria-labelledby="m-title"><div class="modal"><h2 id="m-title">' + esc(title) + '</h2><p style="margin:0">' + esc(text) + '</p><div class="row"><button class="sbtn" type="button" id="m-no">Katkesta</button><button class="sbtn primary" type="button" id="m-yes">' + esc(okLabel) + '</button></div></div></div>';
+    document.getElementById("m-no").onclick = closeModal;
+    document.getElementById("m-yes").onclick = function () { closeModal(); onOk(); };
+    document.getElementById("m-yes").focus();
+  }
+  function lecturerModal() {
+    modalRoot.innerHTML = '<div class="overlay" role="dialog" aria-modal="true" aria-labelledby="l-title"><div class="modal"><h2 id="l-title">Vali lektor</h2><input class="search" id="l-search" type="text" placeholder="Otsi nime järgi…" autocomplete="off"><div class="lect-list" id="l-list"></div><div class="row"><button class="sbtn" type="button" id="l-none">Lektor puudub</button><button class="sbtn" type="button" id="l-close">Sulge</button></div></div></div>';
+    var input = document.getElementById("l-search");
+    var timer = null;
+    function search() {
+      var s = input.value.trim();
+      var found = LECTURERS.filter(function (l) { return l.lecturerName.toLowerCase().indexOf(s.toLowerCase()) !== -1; });
+      startStep("Lektori otsing modalis");
+      call("GET", "/api/lecturers?search=" + encodeURIComponent(s), null, found.map(function (l) { return { lecturerId: l.lecturerId, lecturerName: l.lecturerName, lecturerPhoto: "BASE64-image-data" }; }));
+      renderLog();
+      document.getElementById("l-list").innerHTML = found.length ? found.map(function (l) {
+        return '<button class="lect-item" type="button" data-id="' + l.lecturerId + '"><span class="ph" aria-hidden="true"></span>' + esc(l.lecturerName) + '</button>';
+      }).join("") : '<p class="empty" style="margin:0">Ühtegi lektorit ei leitud.</p>';
+    }
+    input.oninput = function () { clearTimeout(timer); timer = setTimeout(search, 250); };
+    document.getElementById("l-list").onclick = function (e) {
+      var b = e.target.closest(".lect-item"); if (!b) return;
+      st.form.defaultLecturerId = +b.dataset.id; closeModal(); renderForm();
+    };
+    document.getElementById("l-none").onclick = function () { st.form.defaultLecturerId = null; closeModal(); renderForm(); };
+    document.getElementById("l-close").onclick = closeModal;
+    search();
+    input.focus();
+  }
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeModal(); });
+
+  var toastTimer = null;
+  function toast(msg) {
+    var old = document.querySelector(".toast"); if (old) old.remove();
+    var el = document.createElement("div"); el.className = "toast"; el.setAttribute("role", "status"); el.textContent = msg;
+    document.body.appendChild(el);
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { el.remove(); }, 2200);
+  }
+
+  /* ---------- Lipud ---------- */
+  var FLAG_SVG = {
+    et: '<svg viewBox="0 0 33 21" aria-hidden="true"><rect width="33" height="7" fill="#0072ce"/><rect y="7" width="33" height="7" fill="#000"/><rect y="14" width="33" height="7" fill="#fff"/></svg>',
+    ru: '<svg viewBox="0 0 33 21" aria-hidden="true"><rect width="33" height="7" fill="#fff"/><rect y="7" width="33" height="7" fill="#0039a6"/><rect y="14" width="33" height="7" fill="#d52b1e"/></svg>',
+    en: '<svg viewBox="0 0 60 30" aria-hidden="true"><rect width="60" height="30" fill="#012169"/><path d="M0,0 60,30M60,0 0,30" stroke="#fff" stroke-width="6"/><path d="M0,0 60,30M60,0 0,30" stroke="#c8102e" stroke-width="2.5"/><path d="M30,0v30M0,15h60" stroke="#fff" stroke-width="10"/><path d="M30,0v30M0,15h60" stroke="#c8102e" stroke-width="6"/></svg>'
+  };
+
+  /* ---------- Renderdamine ---------- */
+  // vaate muutuja "state" väärtused
+  var STATE_VALUES = { A: "new-training", B: "update", C: "new-translation" };
+  var STATES = [
+    { mode: "A", tag: "A. Uus koolitus", url: "/training-form", btns: "Nupp: „Lisa“ · tõlge alati et" },
+    { mode: "B", tag: "B. Muutmine", url: "?trainingId={id}&trainingTranslationId={id}", btns: "Nupp: „Salvesta“ · lipud · staatuse nupp" },
+    { mode: "C", tag: "C. Uus tõlge", url: "?trainingId={id}&languageId={id}", btns: "Nupp: „Lisa tõlge“ · tekstid eeltäidetud et tõlkega · koolituse väljad lukus" }
+  ];
+  var lastMode = null;
+  function renderStates() {
+    var changed = lastMode !== st.mode; lastMode = st.mode;
+    Array.prototype.forEach.call(document.querySelectorAll(".tbtn[data-mode]"), function (b) { b.setAttribute("aria-pressed", String(b.dataset.mode === st.mode)); });
+    document.getElementById("states").innerHTML = STATES.map(function (s) {
+      return '<div class="state' + (st.mode === s.mode ? " is-active" + (changed ? " changed" : "") : "") + '"><span class="tag">' + s.tag + '</span><span class="url">state: "' + STATE_VALUES[s.mode] + '"</span><span class="url">' + esc(s.url) + '</span><span class="btns">' + s.btns + '</span></div>';
+    }).join("");
+  }
+
+  function pin(noteId, label) { return '<button type="button" class="api-pin" data-note="' + noteId + '">' + esc(label) + '</button>'; }
+
+  function renderForm() {
+    var f = st.form, lockT = st.mode === "C", code = st.langCode;
+    var head = st.mode === "A" ? "Lisa uus koolitus" : st.mode === "C" ? "Lisa koolituse tõlge" : "Muuda koolitust";
+    var badge = st.status ? '<span class="badge ' + (st.status === "P" ? "pub" : "draft") + '">' + (st.status === "P" ? "Publitseeritud" : "Mustand") + '</span>' : "";
+    var flags = "";
+    if (st.mode !== "A") {
+      flags = '<div class="flags">' + CONTENT_LANGUAGES.map(function (cl) {
+        var c = cl.languageCode;
+        var have = st.translations.some(function (x) { return x.languageCode === c; });
+        var cur = c === code;
+        return '<button type="button" class="flag' + (have ? "" : " missing") + (cur ? " current" : "") + '" data-flag="' + c + '" aria-label="' + c + (have ? " tõlge olemas" : " tõlge puudub") + '">' + FLAG_SVG[c] + '<span>' + c + (have ? "" : " +") + '</span></button>';
+      }).join("") + pin("n-translations", "GET …/training-translations") + '</div>';
+    }
+    function opts(map, sel, textFn) {
+      return Object.keys(map).map(function (k) { return '<option value="' + k + '"' + (+k === sel ? " selected" : "") + '>' + esc(textFn(k)) + '</option>'; }).join("");
+    }
+    var catOpts = opts(CATEGORIES, f.categoryId, function (k) { return CATEGORIES[k][code]; });
+    var langOpts = LANGUAGES.map(function (l) { return '<option value="' + l.languageId + '"' + (l.languageId === f.trainingLanguageId ? " selected" : "") + '>' + l.languageName + '</option>'; }).join("");
+    var locOpts = opts(LOCATIONS, f.locationId, function (k) { return LOCATIONS[k]; });
+    var fund = Object.keys(FUNDING).map(function (k) {
+      return '<label><input type="checkbox" data-fund="' + k + '"' + (f.fundingTypeIds.indexOf(+k) !== -1 ? " checked" : "") + (lockT ? " disabled" : "") + '> ' + esc(FUNDING[k][code]) + '</label>';
+    }).join("");
+    var dis = lockT ? " disabled" : "";
+    var langName = lang(langByCode(code).languageId).languageName;
+
+    var primary = st.mode === "A" ? '<button type="button" class="sbtn primary" id="b-create">Lisa</button>'
+      : st.mode === "C" ? '<button type="button" class="sbtn primary" id="b-addtr">Lisa tõlge</button>'
+      : '<button type="button" class="sbtn primary" id="b-save">Salvesta</button>';
+    var primaryPin = st.mode === "A" ? pin("n-post-training", "POST /api/training") : st.mode === "C" ? pin("n-post-translation", "POST …/training-translation") : pin("n-put-training", "PUT /api/training/{id}");
+    var statusBtn = st.mode === "A" ? "" : '<button type="button" class="sbtn" id="b-status">' + (st.status === "U" ? "Publitseeri" : "Liiguta mustandisse") + '</button>' + (st.status === "U" ? pin("n-put-publish", "PUT …/publish") : pin("n-put-unpublish", "PUT …/unpublish"));
+    var mainCode = lang(MAIN_LANGUAGE_ID).languageCode;
+    var showAi = st.mode === "C" || (st.mode === "B" && code !== mainCode);
+    var aiBtn = showAi ? '<div class="ai-row"><span class="tip"><button type="button" class="sbtn ai" id="b-ai" aria-describedby="ai-tip"' + (st.aiLoading ? " disabled" : "") + '>' + (st.aiLoading ? "Tõlgin…" : "Tee AI tõlge") + '</button><span role="tooltip" id="ai-tip">Tõlge tehakse salvestatud põhikeele (' + mainCode + ') tekstist, mitte vormi sisust. Tulemus kuvatakse ainult vormis — see salvestub alles siis, kui vajutad „' + (st.mode === "C" ? "Lisa tõlge" : "Salvesta") + '“.</span></span>' + pin("n-ai-translation", "GET …/ai-translation") + '</div>' : "";
+    var fill = st.mode === "C" ? '<span class="hint">Eeltäidetud eestikeelse tõlkega — tõlgi tekstid ' + { et: "eesti", en: "inglise", ru: "vene" }[code] + ' keelde. ' + pin("n-get-translation", "GET /api/training-translation/{et id}") + '</span>' : "";
+
+    document.getElementById("form").innerHTML =
+      '<div class="formhead"><h2>' + head + '</h2>' + badge + flags + '</div>' +
+      '<div class="cols">' +
+        '<fieldset class="data"><legend>Koolituse andmed' + (st.mode !== "A" ? " " + pin("n-get-training", "GET /api/training/{id}") : "") + '</legend>' +
+          '<div class="fld"><span class="lbl">Kategooria ' + pin("n-categories", "GET /api/categories") + '</span><select id="f-cat"' + dis + '>' + catOpts + '</select></div>' +
+          '<div class="fld"><span class="lbl">Koolituse keel ' + pin("n-languages", "GET /api/languages") + '</span><select id="f-lang"' + dis + '>' + langOpts + '</select></div>' +
+          '<div class="fld"><span class="lbl">Toimumiskoht ' + pin("n-locations", "GET /api/locations") + '</span><select id="f-loc"' + dis + '>' + locOpts + '</select></div>' +
+          '<div class="fld"><span class="lbl">Vaikimisi lektor ' + pin("n-lecturers", "GET /api/lecturers") + '</span><div class="lect"><span class="name">' + esc(lecturerName(f.defaultLecturerId) || "— lektor puudub —") + '</span><button type="button" class="sbtn" id="b-lect"' + dis + '>Vali lektor</button></div></div>' +
+          '<div class="fld"><span class="lbl">Rahastus ' + pin("n-funding", "GET /api/funding-types") + '</span><div class="checks">' + fund + '</div></div>' +
+          '<div class="checks"><label class="switch"><input type="checkbox" id="f-ord"' + (f.isOrderable ? " checked" : "") + dis + '> Tellitav</label><label class="switch"><input type="checkbox" id="f-promo"' + (f.isPromoted ? " checked" : "") + dis + '> Esile tõstetud</label></div>' +
+        '</fieldset>' +
+        '<fieldset><legend>Tõlge: ' + esc(langName) + ' (' + code + ')</legend>' +
+          aiBtn +
+          '<div class="fld"><span class="lbl">Pealkiri' + (st.mode === "B" ? " " + pin("n-get-translation", "GET /api/training-translation/{id}") : "") + '</span><input type="text" id="f-title" value="' + esc(f.title) + '" placeholder="Pealkiri ' + code + ' keeles"></div>' +
+          '<div class="fld"><span class="lbl">Lühikirjeldus</span><input type="text" id="f-short" value="' + esc(f.shortDescription) + '"></div>' +
+          '<div class="fld"><span class="lbl">Kirjeldus (richtext)</span><div class="rt"><div class="rtbar" aria-hidden="true"><b>B</b><i>I</i><span>• loend</span><span>link</span></div><textarea id="f-desc">' + esc(f.description) + '</textarea></div></div>' +
+          (st.error ? '<span class="err">' + esc(st.error) + '</span>' : "") + fill +
+        '</fieldset>' +
+      '</div>' +
+      '<div class="actions">' + primary + primaryPin + statusBtn + '</div>';
+  }
+
+  function renderStateKv() {
+    var rows = [
+      ["Olek", { A: "A. Uus koolitus", B: "B. Muutmine", C: "C. Uus tõlge" }[st.mode]],
+      ["state", '"' + STATE_VALUES[st.mode] + '"'],
+      ["URL", st.url],
+      ["trainingId", st.trainingId || "—"],
+      ["trainingTranslationId", st.trainingTranslationId || "—"],
+      ["languageId", st.mode === "C" ? st.languageId : "—"],
+      ["contentLang", st.langCode],
+      ["status", st.status ? st.status + (st.status === "U" ? " (mustand)" : " (publitseeritud)") : "— (määrab backend: U)"],
+      ["userId", "1 (localStorage)"]
+    ];
+    document.getElementById("store").textContent = j(CONTENT_LANGUAGES);
+    document.getElementById("statekv").innerHTML = rows.map(function (r) { return "<dt>" + r[0] + "</dt><dd>" + esc(r[1]) + "</dd>"; }).join("");
+  }
+
+  function noteFor(method, path) {
+    var p = path.split("?")[0];
+    if (method === "GET" && p === "/api/languages") return "n-languages";
+    if (method === "GET" && p === "/api/locations") return "n-locations";
+    if (method === "GET" && p === "/api/categories") return "n-categories";
+    if (method === "GET" && p === "/api/funding-types") return "n-funding";
+    if (method === "GET" && p === "/api/lecturers") return "n-lecturers";
+    if (method === "GET" && /\/ai-translation$/.test(p)) return "n-ai-translation";
+    if (method === "GET" && /\/training-translations$/.test(p)) return "n-translations";
+    if (method === "GET" && /^\/api\/training-translation\//.test(p)) return "n-get-translation";
+    if (method === "GET" && /^\/api\/training\/\d+$/.test(p)) return "n-get-training";
+    if (method === "POST" && p === "/api/training") return "n-post-training";
+    if (method === "POST") return "n-post-translation";
+    if (method === "PUT" && /\/publish$/.test(p)) return "n-put-publish";
+    if (method === "PUT" && /\/unpublish$/.test(p)) return "n-put-unpublish";
+    if (method === "PUT") return "n-put-training";
+    return null;
+  }
+
+  // Iga olekuga seotud päringud: laadimine (vaate avamisel / router.replace järel) ja tegevused (nupud)
+  var STATE_REQUESTS = {
+    A: {
+      load: [
+        { m: "GET", p: "/api/languages", note: "n-languages", when: "\"Koolituse keel\" rippmenüü" },
+        { m: "GET", p: "/api/locations", note: "n-locations", when: "\"Toimumiskoht\" rippmenüü" },
+        { m: "GET", p: "/api/categories?contentLang=et", note: "n-categories", when: "kategooriad põhikeeles" },
+        { m: "GET", p: "/api/funding-types?contentLang=et", note: "n-funding", when: "rahastustüübid põhikeeles" }
+      ],
+      actions: [
+        { m: "GET", p: "/api/lecturers?search={otsingusõna}", note: "n-lecturers", when: "\"Vali lektor\" modalis otsides" },
+        { m: "POST", p: "/api/training", note: "n-post-training", when: "\"Lisa\" → router.replace olekusse update" }
+      ]
+    },
+    B: {
+      load: [
+        { m: "GET", p: "/api/languages", note: "n-languages", when: "\"Koolituse keel\" rippmenüü" },
+        { m: "GET", p: "/api/locations", note: "n-locations", when: "\"Toimumiskoht\" rippmenüü" },
+        { m: "GET", p: "/api/training/{trainingId}", note: "n-get-training", when: "koolituse väljad" },
+        { m: "GET", p: "/api/training-translation/{trainingTranslationId}", note: "n-get-translation", when: "avatud tõlge" },
+        { m: "GET", p: "/api/training/{trainingId}/training-translations", note: "n-translations", when: "lipukesed" },
+        { m: "GET", p: "/api/categories?contentLang={tõlke keel}", note: "n-categories", when: "kategooriad tõlke keeles" },
+        { m: "GET", p: "/api/funding-types?contentLang={tõlke keel}", note: "n-funding", when: "rahastustüübid tõlke keeles" }
+      ],
+      actions: [
+        { m: "GET", p: "/api/lecturers?search={otsingusõna}", note: "n-lecturers", when: "\"Vali lektor\" modalis otsides" },
+        { m: "PUT", p: "/api/training/{trainingId}", note: "n-put-training", when: "\"Salvesta\"" },
+        { m: "GET", p: "/api/training/{trainingId}/ai-translation?languageId={id}", note: "n-ai-translation", when: "\"Tee AI tõlge\" (ainult mitte-põhikeele tõlkel)" },
+        { m: "PUT", p: "/api/training/{trainingId}/publish", note: "n-put-publish", when: "\"Publitseeri\" (status U) → kinnitus" },
+        { m: "PUT", p: "/api/training/{trainingId}/unpublish", note: "n-put-unpublish", when: "\"Liiguta mustandisse\" (status P) → kinnitus" }
+      ]
+    },
+    C: {
+      load: [
+        { m: "GET", p: "/api/languages", note: "n-languages", when: "\"Koolituse keel\" rippmenüü" },
+        { m: "GET", p: "/api/locations", note: "n-locations", when: "\"Toimumiskoht\" rippmenüü" },
+        { m: "GET", p: "/api/training/{trainingId}", note: "n-get-training", when: "koolituse väljad (lukus)" },
+        { m: "GET", p: "/api/training/{trainingId}/training-translations", note: "n-translations", when: "lipukesed, põhikeele tõlke leidmine" },
+        { m: "GET", p: "/api/training-translation/{põhikeele tõlke id}", note: "n-get-translation", when: "tekstide eeltäitmine põhikeelest" },
+        { m: "GET", p: "/api/categories?contentLang={tõlke keel}", note: "n-categories", when: "kategooriad tõlke keeles" },
+        { m: "GET", p: "/api/funding-types?contentLang={tõlke keel}", note: "n-funding", when: "rahastustüübid tõlke keeles" }
+      ],
+      actions: [
+        { m: "GET", p: "/api/training/{trainingId}/ai-translation?languageId={id}", note: "n-ai-translation", when: "\"Tee AI tõlge\"" },
+        { m: "POST", p: "/api/training/{trainingId}/training-translation", note: "n-post-translation", when: "\"Lisa tõlge\" → router.replace olekusse update" },
+        { m: "PUT", p: "/api/training/{trainingId}/publish", note: "n-put-publish", when: "\"Publitseeri\" (status U) → kinnitus" },
+        { m: "PUT", p: "/api/training/{trainingId}/unpublish", note: "n-put-unpublish", when: "\"Liiguta mustandisse\" (status P) → kinnitus" }
+      ]
+    }
+  };
+
+  function renderLog() {
+    document.getElementById("log-title").textContent = 'state: "' + STATE_VALUES[st.mode] + '" — võimalikud päringud';
+    var el = document.getElementById("log");
+    var defs = STATE_REQUESTS[st.mode];
+    var used = {};
+    function row(d, key) {
+      var idx = -1;
+      logSteps.forEach(function (r, i) { if (idx === -1 && !used[i] && noteFor(r.method, r.path) === d.note) idx = i; });
+      if (idx !== -1) used[idx] = true;
+      return item(d.m, d.p, d.when, d.note, idx);
+    }
+    function item(m, p, when, note, idx) {
+      var ran = idx !== -1;
+      var open = ran && idx === openReq;
+      var body = "";
+      if (open) {
+        var r = logSteps[idx];
+        body = '<div class="body"><span class="sub">Tegelik päring: <code>' + esc(r.method + " " + r.path) + '</code></span>' +
+          (r.req ? '<span class="sub">Request body</span><pre>' + esc(j(r.req)) + '</pre>' : "") +
+          '<span class="sub">Response (' + r.code + ')' + (r.res === null ? ": NONE" : "") + '</span>' + (r.res !== null ? '<pre>' + esc(j(r.res)) + '</pre>' : "") +
+          '<button type="button" class="linkish" data-note="' + note + '">Ava API märge</button></div>';
+      }
+      var attr = ran ? 'data-req="' + idx + '" aria-expanded="' + open + '"' : 'data-note="' + note + '" title="Ava API märge"';
+      return '<div class="req ' + (ran ? "done" : "idle") + '"><button type="button" ' + attr + '><span class="method m-' + m + '">' + m + '</span><span class="main"><span class="path">' + esc(p) + '</span><span class="when">' + esc(when) + '</span></span>' + (ran ? '<span class="ran">käivitati</span>' : "") + '</button>' + body + '</div>';
+    }
+    var html = '<div class="log-group">Laadimine (vaate avamisel ja iga router.replace järel)</div>' + defs.load.map(row).join("") +
+      '<div class="log-group">Tegevused (nuppude peale)</div>' + defs.actions.map(row).join("");
+    var other = [];
+    logSteps.forEach(function (r, i) { if (!used[i]) other.push(item(r.method, r.path, "eelmises olekus, enne router.replace'i", noteFor(r.method, r.path), i)); });
+    if (other.length) html += '<div class="log-group">Samm algas eelmises olekus</div>' + other.join("");
+    if (logTitle) html += '<div class="log-step">Viimane samm: ' + esc(logTitle) + ' — rohelisega märgitud päringud käivitati.</div>';
+    el.innerHTML = html;
+  }
+
+  function renderUrl(flash) {
+    var u = document.getElementById("urlbar");
+    u.textContent = "https://bcskoolitus.ee" + st.url;
+    if (flash) { u.classList.remove("flash"); void u.offsetWidth; u.classList.add("flash"); }
+  }
+
+  function renderAll(flashUrl) {
+    renderStates(); renderUrl(flashUrl); renderForm(); renderStateKv(); renderLog(); renderViewNote(); renderNotes();
+  }
+  function renderViewNote() {
+    document.getElementById("view-note-title").textContent = 'Vaate märkmed — state: "' + STATE_VALUES[st.mode] + '"';
+    document.getElementById("view-note-text").textContent = viewNote();
+  }
+
+  /* ---------- Sündmused ---------- */
+  var formEl = document.getElementById("form");
+  formEl.addEventListener("input", function (e) {
+    var id = e.target.id, f = st.form;
+    if (id === "f-title") { f.title = e.target.value; st.error = null; }
+    else if (id === "f-short") f.shortDescription = e.target.value;
+    else if (id === "f-desc") f.description = e.target.value;
+  });
+  formEl.addEventListener("change", function (e) {
+    var t = e.target, f = st.form;
+    if (t.id === "f-cat") f.categoryId = +t.value;
+    else if (t.id === "f-lang") f.trainingLanguageId = +t.value;
+    else if (t.id === "f-loc") f.locationId = +t.value;
+    else if (t.id === "f-ord") f.isOrderable = t.checked;
+    else if (t.id === "f-promo") f.isPromoted = t.checked;
+    else if (t.dataset.fund) {
+      var k = +t.dataset.fund;
+      f.fundingTypeIds = f.fundingTypeIds.filter(function (x) { return x !== k; });
+      if (t.checked) f.fundingTypeIds.push(k);
+      f.fundingTypeIds.sort();
+    }
+  });
+  formEl.addEventListener("submit", function (e) { e.preventDefault(); });
+  formEl.addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.note) { goNote(b.dataset.note); return; }
+    if (b.dataset.flag) { flagClick(b.dataset.flag); return; }
+    if (b.id === "b-create") doCreate();
+    else if (b.id === "b-addtr") doAddTranslation();
+    else if (b.id === "b-save") doSave();
+    else if (b.id === "b-status") doStatus();
+    else if (b.id === "b-lect") lecturerModal();
+    else if (b.id === "b-ai") doAiTranslate();
+  });
+  document.getElementById("log").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.note) { goNote(b.dataset.note); return; }
+    var i = +b.dataset.req; openReq = openReq === i ? -1 : i; renderLog();
+  });
+  document.getElementById("btn-a").onclick = function () { navigate(null, "Kiirnupp A: /training-form"); };
+  document.getElementById("btn-b").onclick = function () { navigate({ trainingId: 1, trainingTranslationId: 1 }, "Kiirnupp B: Java algkursus (et) muutmine"); };
+  document.getElementById("btn-c").onclick = function () { navigate({ trainingId: 1, languageId: 3 }, "Kiirnupp C: Java algkursusele ru tõlke lisamine"); };
+
+  function goNote(id) {
+    var n = document.getElementById(id);
+    if (!n && !showAllNotes) { showAllNotes = true; renderNotes(); n = document.getElementById(id); }
+    if (!n) return;
+    n.scrollIntoView({ behavior: "smooth", block: "center" });
+    n.classList.remove("flash"); void n.offsetWidth; n.classList.add("flash");
+  }
+
+  /* ---------- Märkmete tekstid (struktuuridokumendi vorming) ---------- */
+  // Vaate märkmed oleku kaupa (samad tekstid nagu markmed/training-form-view-state-*-markmed.md failides)
+  var VIEW_NOTES = {
+      "A": "Roll: Admin\nFailinimi: TrainingFormView.vue\nFrontend rada: /training-form\n\nVaatega seotud lisainfo:\nstate: \"new-training\" — URL-is query parameetreid pole. Pealkiri \"Lisa uus koolitus\". Vorm on tühi; tõlke väljad (pealkiri, lühikirjeldus, kirjeldus) täidetakse põhikeeles (et) ja rippmenüüd laaditakse põhikeeles. Lipukesi ja staatuse nuppe pole.\nVaikimisi lektor valitakse \"Vali lektor\" modalist otsinguga (võib jääda tühjaks). Rahastustüübid on checkboxid, \"Tellitav\" ja \"Esile tõstetud\" switchid.\nNupp \"Lisa\" → POST /api/training (userId localStorage'ist). Backend loob koolituse staatusega \"U\" koos põhikeele tõlkega. Vastuse trainingId ja trainingTranslationId järgi tehakse router.replace → state \"update\".",
+      "B": "Roll: Admin\nFailinimi: TrainingFormView.vue\nFrontend rada: /training-form?trainingId={id}&trainingTranslationId={id}\n\nVaatega seotud lisainfo:\nstate: \"update\" — URL-is trainingId ja trainingTranslationId. Pealkiri \"Muuda koolitust\" koos staatuse märgisega (Mustand / Publitseeritud). Vorm on eeltäidetud, rippmenüüd laaditakse avatud tõlke keeles. Iga router.replace järel laaditakse andmed uuesti.\nLipukesed: tõlge olemas → värviline lipp (klikk avab selle tõlke), tõlge puudub → hall lipp (klikk → state \"new-translation\").\n\"Salvesta\" → PUT /api/training/{trainingId} (koolituse väljad + avatud tõlge ühes transaktsioonis). \"Tee AI tõlge\" on ainult mitte-põhikeele tõlkel: täidab vaid vormi, ei salvesta.\nstatus \"U\" → nupp \"Publitseeri\", status \"P\" → nupp \"Liiguta mustandisse\"; mõlemal kinnituse modal (PUT /api/training/{trainingId}/publish või /unpublish).",
+      "C": "Roll: Admin\nFailinimi: TrainingFormView.vue\nFrontend rada: /training-form?trainingId={id}&languageId={id}\n\nVaatega seotud lisainfo:\nstate: \"new-translation\" — URL-is trainingId ja languageId (keel, mille tõlge puudub). Pealkiri \"Lisa koolituse tõlge\". Koolituse väljad on kirjutuskaitstud, rippmenüüd laaditakse sihtkeeles.\nTõlke väljad eeltäidetakse salvestatud põhikeele (et) tõlkega, mida admin tõlgib. \"Tee AI tõlge\" tõlgib salvestatud põhikeele teksti ja täidab ainult vormi; salvestamata muudatuste korral küsitakse enne kinnitust.\n\"Lisa tõlge\" → POST /api/training/{trainingId}/training-translation. Vastuse trainingTranslationId järgi tehakse router.replace → state \"update\".\nStaatuse nupp (\"Publitseeri\" / \"Liiguta mustandisse\") nagu state \"update\" puhul."
+  };
+  function viewNote() { return VIEW_NOTES[st.mode]; }
+
+  var PK = function (field) { return "HTTP: 404\nerrorCode: PRIMARY_KEY_NOT_FOUND\nmessage: \"Ei leidnud primary keyd '" + field + "' väärtusega: 123\""; };
+
+  var NOTES = [
+    { id: "n-languages", title: "GET /api/languages", text: [
+      "API: GET /api/languages", "",
+      "Response (200):", "TrainingLanguageDto.java", "[", "  {", "    \"languageId\": 1,", "    \"languageCode\": \"et\",", "    \"languageName\": \"Eesti\"", "  },", "  ...", "]", "",
+      "API teenuse lisainfo:", "Tagastab kõik süsteemi keeled (language tabel). TrainingFormView kasutab neid \"Koolituse keel\" rippmenüüs ja languageId ↔ languageCode teisendamiseks. languageName ei ole tõlgitud.", "",
+      "Veateated: —"] },
+    { id: "n-locations", title: "GET /api/locations", draft: true, text: [
+      "API: GET /api/locations", "",
+      "Response (200):", "LocationDto.java", "[", "  {", "    \"locationId\": 1,", "    \"locationName\": \"BCS Koolitus\"", "  },", "  ...", "]", "",
+      "API teenuse lisainfo:", "Tagastab kõik toimumiskohad \"Toimumiskoht\" rippmenüü jaoks. location.name ei ole tõlgitud, seega contentLang parameetrit pole.", "",
+      "Veateated: —"] },
+    { id: "n-categories", title: "GET /api/categories", text: [
+      "API: GET /api/categories", "",
+      "Query parameetrid:", "contentLang: String — categoryName keel (\"et\"/\"en\"/\"ru\")", "",
+      "Response (200):", "CategoryDto.java", "[", "  {", "    \"categoryId\": 1,", "    \"categoryName\": \"Programmeerimine\"", "  },", "  ...", "]", "",
+      "API teenuse lisainfo:", "Tagastab kõik kategooriad contentLang keeles (category_translation kaudu). TrainingFormView kutsub avatud tõlke keelega.", "",
+      "Veateated: —"] },
+    { id: "n-funding", title: "GET /api/funding-types", text: [
+      "API: GET /api/funding-types", "",
+      "Query parameetrid:", "contentLang: String — fundingTypeName keel (\"et\"/\"en\"/\"ru\")", "",
+      "Response (200):", "FundingTypeDto.java", "[", "  {", "    \"fundingTypeId\": 1,", "    \"fundingTypeName\": \"Töötukassa\"", "  },", "  ...", "]", "",
+      "API teenuse lisainfo:", "Tagastab kõik rahastustüübid contentLang keeles (funding_type_translation kaudu). TrainingFormView kuvab need checkboxidena.", "",
+      "Veateated: —"] },
+    { id: "n-lecturers", title: "GET /api/lecturers", draft: true, text: [
+      "API: GET /api/lecturers", "",
+      "Query parameetrid:", "search: String — otsingusõna lektori nimest, tühi = kõik", "",
+      "Response (200):", "LecturerDto.java", "[", "  {", "    \"lecturerId\": 1,", "    \"lecturerName\": \"Mari Tamm\",", "    \"lecturerPhoto\": \"BASE64-image-data\"", "  },", "  ...", "]", "",
+      "API teenuse lisainfo:", "Tagastab lektorid, kelle nimi (lecturer.full_name) sisaldab otsingusõna, tõstutundetult. Kasutatakse \"Vali lektor\" modalis.", "",
+      "Veateated: —"] },
+    { id: "n-get-training", title: "GET /api/training/{trainingId}", draft: true, text: [
+      "API: GET /api/training/{trainingId}", "",
+      "Response (200):", "TrainingDto.java", "{", "  \"trainingId\": 1,", "  \"categoryId\": 1,", "  \"trainingLanguageId\": 1,", "  \"locationId\": 1,", "  \"defaultLecturerId\": 1,", "  \"defaultLecturerName\": \"Mari Tamm\",", "  \"isOrderable\": true,", "  \"isPromoted\": true,", "  \"status\": \"P\",", "  \"fundingTypeIds\": [", "    1,", "    ...", "  ]", "}", "",
+      "API teenuse lisainfo:", "Koolituse väljad ilma tõlketa. defaultLecturerId ja defaultLecturerName võivad olla null. status: \"U\" = mustand (unpublished), \"P\" = publitseeritud.", "",
+      "Veateated:", PK("trainingId")] },
+    { id: "n-get-translation", title: "GET /api/training-translation/{id}", draft: true, text: [
+      "API: GET /api/training-translation/{trainingTranslationId}", "",
+      "Response (200):", "TrainingTranslationDto.java", "{", "  \"trainingTranslationId\": 1,", "  \"trainingId\": 1,", "  \"languageId\": 1,", "  \"languageCode\": \"et\",", "  \"title\": \"Java algkursus\",", "  \"shortDescription\": \"Java programmeerimise alused algajatele.\",", "  \"description\": \"Kursusel õpitakse Java süntaksit, objektorienteeritud programmeerimist ja põhilisi andmestruktuure.\"", "}", "",
+      "API teenuse lisainfo:", "Ühe tõlke andmed. Olekus B laaditakse avatud tõlge ja selle languageCode järgi valitakse rippmenüüde contentLang. Olekus C laaditakse et tõlge, millega uue tõlke väljad eeltäidetakse.", "",
+      "Veateated:", PK("trainingTranslationId")] },
+    { id: "n-translations", title: "GET /api/training/{id}/training-translations", draft: true, text: [
+      "API: GET /api/training/{trainingId}/training-translations", "",
+      "Response (200):", "TrainingTranslationItemDto.java", "[", "  {", "    \"trainingTranslationId\": 1,", "    \"languageId\": 1,", "    \"languageCode\": \"et\",", "    \"isMainLanguage\": true", "  },", "  ...", "]", "",
+      "API teenuse lisainfo:", "Koolituse olemasolevad tõlked. Frontend võrdleb languageCode väärtusi store'i contentLanguages massiiviga: tõlge olemas → värviline lipp, puudub → hall lipp. isMainLanguage tuleb language.is_main_language veerust; põhikeele tõlkega eeltäidetakse uue tõlke vorm.", "",
+      "Veateated:", PK("trainingId")] },
+    { id: "n-ai-translation", title: "GET /api/training/{id}/ai-translation", draft: true, text: [
+      "API: GET /api/training/{trainingId}/ai-translation", "",
+      "Query parameetrid:", "languageId: Integer — sihtkeel, kuhu tõlgitakse", "",
+      "Response (200):", "AiTranslationDto.java", "{", "  \"title\": \"Power BI for Advanced Users\",", "  \"shortDescription\": \"Data models, DAX and interactive reports.\",", "  \"description\": \"The course builds a data model in Power BI, writes DAX formulas and creates interactive reports.\"", "}", "",
+      "API teenuse lisainfo:", "Tõlgib alati andmebaasi salvestatud põhikeele (language.is_main_language = true) tõlke AI abil sihtkeelde — vormi sisu ei kasutata. Andmebaasi midagi ei salvestata. description HTML-märgendid säilitatakse. Vastusel päis Cache-Control: no-store.", "",
+      "Veateated:", PK("trainingId"), "", PK("languageId"), "",
+      "HTTP: 403\nerrorCode: MAIN_LANGUAGE_NOT_TRANSLATABLE\nmessage: \"Põhikeelde ei saa AI tõlget teha\"", "",
+      "HTTP: 404\nerrorCode: MAIN_TRANSLATION_NOT_FOUND\nmessage: \"Koolitusel puudub põhikeele tõlge\"", "",
+      "HTTP: 503\nerrorCode: AI_SERVICE_UNAVAILABLE\nmessage: \"AI tõlketeenus ei ole hetkel kättesaadav\""] },
+    { id: "n-post-training", title: "POST /api/training", draft: true, text: [
+      "API: POST /api/training", "",
+      "Request body:", "TrainingCreateRequestDto.java", "{", "  \"userId\": 1,", "  \"categoryId\": 1,", "  \"trainingLanguageId\": 1,", "  \"locationId\": 2,", "  \"defaultLecturerId\": 1,", "  \"isOrderable\": true,", "  \"isPromoted\": false,", "  \"fundingTypeIds\": [", "    1,", "    ...", "  ],", "  \"title\": \"Power BI edasijõudnutele\",", "  \"shortDescription\": \"Andmemudelid, DAX ja interaktiivsed aruanded.\",", "  \"description\": \"Kursusel ehitatakse Power BI-s andmemudel, kirjutatakse DAX-valemeid ja luuakse interaktiivseid aruandeid.\"", "}", "",
+      "Response (200):", "TrainingCreateResponseDto.java", "{", "  \"trainingId\": 3,", "  \"trainingTranslationId\": 5", "}", "",
+      "API teenuse lisainfo:", "Loob training rea (status = \"U\", määrab backend), training_funding_type read ja et tõlke (language_id = 1) ühes transaktsioonis. defaultLecturerId võib olla null. Sama PRIMARY_KEY_NOT_FOUND muster kehtib ka trainingLanguageId, defaultLecturerId ja fundingTypeIds väljadele.", "",
+      "Veateated:", PK("categoryId"), "", PK("locationId")] },
+    { id: "n-post-translation", title: "POST /api/training/{id}/training-translation", draft: true, text: [
+      "API: POST /api/training/{trainingId}/training-translation", "",
+      "Request body:", "TrainingTranslationCreateRequestDto.java", "{", "  \"languageId\": 2,", "  \"title\": \"Power BI for Advanced Users\",", "  \"shortDescription\": \"Data models, DAX and interactive reports.\",", "  \"description\": \"The course builds a data model in Power BI, writes DAX formulas and creates interactive reports.\"", "}", "",
+      "Response (200):", "TrainingTranslationCreateResponseDto.java", "{", "  \"trainingTranslationId\": 6", "}", "",
+      "API teenuse lisainfo:", "Lisab koolitusele uue keele tõlke. Ühes keeles saab koolitusel olla ainult üks tõlge (training_translation_uq).", "",
+      "Veateated:", PK("trainingId"), "", PK("languageId"), "", "HTTP: 403\nerrorCode: TRANSLATION_EXISTS\nmessage: \"Selles keeles tõlge on juba olemas\""] },
+    { id: "n-put-training", title: "PUT /api/training/{trainingId}", draft: true, text: [
+      "API: PUT /api/training/{trainingId}", "",
+      "Request body:", "TrainingUpdateRequestDto.java", "{", "  \"categoryId\": 1,", "  \"trainingLanguageId\": 1,", "  \"locationId\": 1,", "  \"defaultLecturerId\": 1,", "  \"isOrderable\": true,", "  \"isPromoted\": true,", "  \"fundingTypeIds\": [", "    1,", "    ...", "  ],", "  \"trainingTranslationId\": 1,", "  \"title\": \"Java algkursus\",", "  \"shortDescription\": \"Java programmeerimise alused algajatele.\",", "  \"description\": \"Kursusel õpitakse Java süntaksit, objektorienteeritud programmeerimist ja põhilisi andmestruktuure.\"", "}", "",
+      "Response (200): NONE", "",
+      "API teenuse lisainfo:", "Salvestab koolituse väljad ja trainingTranslationId tõlke ühes transaktsioonis. training_funding_type read kirjutatakse fundingTypeIds järgi üle.", "",
+      "Veateated:", PK("trainingId"), "", PK("trainingTranslationId")] },
+    { id: "n-put-publish", title: "PUT /api/training/{id}/publish", text: [
+      "API: PUT /api/training/{trainingId}/publish", "",
+      "Response (200): NONE", "",
+      "API teenuse lisainfo:", "Tegevusteenus (erand URL-ide kokkuleppest): määrab training.status = \"P\" (publitseeritud). Request body puudub. Juba publitseeritud koolituse korral midagi ei muutu. Frontend kutsub pärast kinnituse modalit.", "",
+      "Veateated:", PK("trainingId")] },
+    { id: "n-put-unpublish", title: "PUT /api/training/{id}/unpublish", text: [
+      "API: PUT /api/training/{trainingId}/unpublish", "",
+      "Response (200): NONE", "",
+      "API teenuse lisainfo:", "Tegevusteenus (erand URL-ide kokkuleppest): määrab training.status = \"U\" (mustand). Request body puudub. Juba mustandis koolituse korral midagi ei muutu. Frontend kutsub pärast kinnituse modalit.", "",
+      "Veateated:", PK("trainingId")] }
+  ];
+  NOTES.forEach(function (n) { n.text = n.text.join("\n"); });
+
+  // Olekupõhine lisainfo (sama nagu markmed/training-form-view-state-*-markmed.md failides)
+  var GET_TRANSLATION_INFO = {
+    B: "Laadib avatud tõlke (URL-i trainingTranslationId). Vastuse languageCode järgi valitakse rippmenüüde contentLang.",
+    C: "Laadib koolituse salvestatud põhikeele tõlke (training-translations vastusest isMainLanguage = true), millega eeltäidetakse uue tõlke väljad. Vastuse languageCode on põhikeel (et), rippmenüüd laaditakse siiski sihtkeeles."
+  };
+  var showAllNotes = false;
+  function stateNoteIds() {
+    var ids = [];
+    STATE_REQUESTS[st.mode].load.concat(STATE_REQUESTS[st.mode].actions).forEach(function (x) { if (ids.indexOf(x.note) === -1) ids.push(x.note); });
+    return ids;
+  }
+  function noteText(n) {
+    if (!showAllNotes && n.id === "n-get-translation" && GET_TRANSLATION_INFO[st.mode]) {
+      return n.text.split("\n").map(function (l) { return l.indexOf("Ühe tõlke andmed.") === 0 ? GET_TRANSLATION_INFO[st.mode] : l; }).join("\n");
+    }
+    return n.text;
+  }
+  function renderNotes() {
+    var ids = stateNoteIds();
+    var list = showAllNotes ? NOTES : ids.map(function (id) { return NOTES.filter(function (n) { return n.id === id; })[0]; });
+    document.getElementById("notes-title").innerHTML = showAllNotes ? "API märkmed — kõik vaate märkmed (" + NOTES.length + ")" : 'API märkmed — <code>state: "' + STATE_VALUES[st.mode] + '"</code> (' + list.length + ")";
+    var btn = document.getElementById("btn-all-notes");
+    btn.textContent = showAllNotes ? "Näita ainult selle oleku märkmeid" : "Näita kõiki vaate API märkmeid (" + NOTES.length + ")";
+    btn.setAttribute("aria-pressed", String(showAllNotes));
+    document.getElementById("notes").innerHTML = list.map(function (n) {
+      return '<article class="note" id="' + n.id + '"><div class="note-head"><strong>' + esc(n.title) + '</strong>' + (n.draft ? '<span class="draft-tag">ettepanek</span>' : "") + '<button class="copy" type="button" data-copy="' + n.id + '">Kopeeri</button></div><pre>' + esc(noteText(n)) + '</pre></article>';
+    }).join("");
+  }
+  document.getElementById("btn-all-notes").onclick = function () { showAllNotes = !showAllNotes; renderNotes(); };
+
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-copy]"); if (!b) return;
+    var key = b.dataset.copy;
+    var text = key === "view" ? viewNote() : noteText(NOTES.filter(function (n) { return n.id === key; })[0]);
+    var done = function () { b.textContent = "Kopeeritud"; setTimeout(function () { b.textContent = "Kopeeri"; }, 1400); };
+    try {
+      navigator.clipboard.writeText(text).then(done, function () { selectPre(b); });
+    } catch (err) { selectPre(b); }
+  });
+  function selectPre(b) {
+    var pre = b.closest(".note").querySelector("pre");
+    var r = document.createRange(); r.selectNodeContents(pre);
+    var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+    b.textContent = "Vajuta Ctrl+C";
+  }
+
+  navigate(null, "Vaate avamine: /training-form");
+})();
+</script>

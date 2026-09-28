@@ -227,6 +227,9 @@ Konkreetse objekti ID antakse vaatele query stringis: `/entity?entityId={id}`.
 | muudab ühte objekti | `PUT /api/entity/{entityId}` |
 | kustutab ühe objekti | `DELETE /api/entity/{entityId}` |
 | tagastab ühe objekti alamnimekirja | `GET /api/entity/{entityId}/related-types` |
+| muudab ühe objekti olekut (tegevus) | `PUT /api/entity/{entityId}/publish` |
+
+**Erand — tegevusteenused.** Kui teenus muudab objekti olekut kindlale väärtusele (nt avaldab või peidab), tehakse see tegevusteenusena: path'i lõppu tuleb tegevust kirjeldav **tegusõna** ja teenusel pole request body't ega DTO-d, sest backend teab ise, mis väärtus panna. Iga olekumuutus on eraldi teenus (nt `PUT /api/training/{trainingId}/publish` ja `PUT /api/training/{trainingId}/unpublish`). Meetod on `PUT`, sest olemasolevat objekti muudetakse ja korduv kutse annab sama tulemuse. Tegevusteenust ei kasutata tavaliste väljade muutmiseks — selleks on `PUT /api/entity/{entityId}` koos body'ga. Olekut ei saadeta query parameetri ega path variable'ina (`?status=P`, `/status/P`).
 
 Kui API tee pole veel koodis ega backend taskis olemas, tuletatakse see selle kokkuleppe järgi ja pakutakse kasutajale koos põhjendusega (nt "tagastab ühe objekti → ainsus") kinnitamiseks välja.
 

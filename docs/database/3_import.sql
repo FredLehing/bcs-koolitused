@@ -12,9 +12,9 @@ INSERT INTO "user" (id, role_id, email, password, status, created_at) VALUES
     (2, 2, 'kasutaja@vali-it.ee', 'parool123', 'A', '2026-09-05 09:00:00');
 
 -- Table: language
-INSERT INTO language (id, code, name) VALUES
-    (1, 'et', 'Eesti'),
-    (2, 'en', 'English');
+INSERT INTO language (id, code, name, is_main_language) VALUES
+    (1, 'et', 'Eesti', true),
+    (2, 'en', 'English', false);
 
 -- Table: category
 INSERT INTO category (id, created_at, updated_at, created_by) VALUES
@@ -33,8 +33,9 @@ INSERT INTO category_translation (id, category_id, language_id, name, created_at
 
 -- Table: location
 INSERT INTO location (id, name, address, is_online, created_at, updated_at, created_by) VALUES
-    (1, 'Tallinna õppekeskus', 'Sõpruse pst 145, Tallinn', false, '2026-07-15 09:00:00', '2026-07-15 09:00:00', 1),
-    (2, 'Veebiõpe', 'Veebipõhine koolitus (Zoom)', true, '2026-07-15 09:00:00', '2026-07-15 09:00:00', 1);
+    (1, 'BCS Koolitus', 'Aia tn 7, Tallinn', false, '2026-07-15 09:00:00', '2026-07-15 09:00:00', 1),
+    (2, 'Veebiõpe', 'Veebipõhine koolitus (nt. Zoom, Teams)', true, '2026-07-15 09:00:00', '2026-07-15 09:00:00', 1),
+    (3, 'Hübriidõpe', 'Koha peal + veebiõpe', true, '2026-07-15 09:00:00', '2026-07-15 09:00:00', 1);
 
 -- Table: lecturer
 INSERT INTO lecturer (id, full_name, photo, created_at, updated_at, created_by) VALUES
@@ -76,8 +77,8 @@ INSERT INTO participant (id, user_id, name, profile_id, created_at) VALUES
 
 -- Table: training
 INSERT INTO training (id, user_id, default_lecturer_id, category_id, training_language_id, location_id, status, created_at, updated_at, is_orderable, is_promoted) VALUES
-    (1, 1, 1, 1, 1, 1, 1, '2026-08-01 09:00:00', '2026-08-01 09:00:00', true, true),
-    (2, 1, 2, 3, 1, 2, 1, '2026-08-05 10:00:00', '2026-08-05 10:00:00', false, false);
+    (1, 1, 1, 1, 1, 1, 'P', '2026-08-01 09:00:00', '2026-08-01 09:00:00', true, true),
+    (2, 1, 2, 3, 1, 2, 'P', '2026-08-05 10:00:00', '2026-08-05 10:00:00', false, false);
 
 -- Table: funding_type
 INSERT INTO funding_type (id, code, created_at, updated_at, created_by) VALUES
