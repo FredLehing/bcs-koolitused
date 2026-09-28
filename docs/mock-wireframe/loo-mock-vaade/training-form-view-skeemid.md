@@ -266,7 +266,7 @@ sequenceDiagram
 
 | Teenus | Kasutus | Request | Response |
 |---|---|---|---|
-| `GET /api/languages` | "Koolituse keel" rippmenüü, `languageId` ↔ `languageCode` | — | `TrainingLanguageDto[]` |
+| `GET /api/languages` | "Koolituse keel" rippmenüü, `languageId` ↔ `languageCode` | — | `SystemLanguageDto[]` |
 | `GET /api/categories?contentLang=` | kategooria rippmenüü | — | `CategoryDto[]` |
 | `GET /api/funding-types?contentLang=` | rahastustüüpide checkboxid | — | `FundingTypeDto[]` |
 | `GET /api/locations` | toimumiskoha rippmenüü | — | täpsustamisel |

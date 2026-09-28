@@ -22,7 +22,7 @@ status "U" → nupp "Publitseeri", status "P" → nupp "Liiguta mustandisse"; m�
 API: GET /api/languages
 
 Response (200):
-TrainingLanguageDto.java
+SystemLanguageDto.java
 [
   {
     "languageId": 1,

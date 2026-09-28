@@ -21,7 +21,7 @@ Nupp "Lisa" → POST /api/training (userId localStorage'ist). Backend loob kooli
 API: GET /api/languages
 
 Response (200):
-TrainingLanguageDto.java
+SystemLanguageDto.java
 [
   {
     "languageId": 1,

@@ -22,7 +22,7 @@ Staatuse nupp ("Publitseeri" / "Liiguta mustandisse") nagu state "update" puhul.
 API: GET /api/languages
 
 Response (200):
-TrainingLanguageDto.java
+SystemLanguageDto.java
 [
   {
     "languageId": 1,
