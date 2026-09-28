@@ -1,4 +1,4 @@
-<script>
+  <script>
 import { PhProhibit } from '@phosphor-icons/vue'
 import NavigationService from '@/services/NavigationService.js'
 
