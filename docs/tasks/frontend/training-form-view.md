@@ -65,11 +65,11 @@ Koolituse andmete sektsioon on tõlke sektsiooni kohal (vertikaalne paigutus), o
 7. **"Lisa tõlge"** → `POST /api/training/{trainingId}/training-translation` → eduteade → `router.replace` olekusse `update`.
 8. **Staatus** → kinnituse modal → `PUT .../publish` või `.../unpublish` → `GET /api/training/{trainingId}` (uus staatus) → nupp vahetub.
 9. **"Tee AI tõlge"** → kui vormi tekst erineb viimati laaditust/salvestatust, küsitakse kinnitust → `GET .../ai-translation?languageId=` (nupp on laadimise ajal keelatud, "Tõlgin…") → tulemus ainult vormi, andmebaasi ei salvestata.
-10. **Vead.** Kõik API vead suunavad praegu `ErrorView`-le (`NavigationService.navigateToErrorView()`); backendi veakoodide eraldi kuvamine lisatakse, kui päris teenused on valmis.
+10. **Vead.** AI tõlke teadaolevad vead (`503 AI_SERVICE_UNAVAILABLE`, `403 MAIN_LANGUAGE_NOT_TRANSLATABLE`, `404 MAIN_TRANSLATION_NOT_FOUND`) kuvatakse vormis `AlertDanger`-iga (backendi `message`), vormi sisu jääb alles. Muud API vead suunavad `ErrorView`-le; ülejäänud backendi veakoodide eraldi kuvamine lisatakse koos päris teenustega.
 
 ## API kutsed
 
-Kõik kutsed on failides `frontend/src/api-services/`. **Praegu kasutavad kõik uued kutsed mock-vastuseid** (vt "Mock-vastused" allpool).
+Kõik kutsed on failides `frontend/src/api-services/`. **Mock-vastuseid kasutavad kõik uued kutsed, välja arvatud need, mille backend on valmis** (vt "Mock-vastused" allpool). Päris kutsele vahetatud: `GET /api/locations`.
 
 | Teenus | Meetod `api-services`-is | Backend task | Etapp |
 |---|---|---|---|
@@ -79,14 +79,14 @@ Kõik kutsed on failides `frontend/src/api-services/`. **Praegu kasutavad kõik 
 | `GET /api/locations` | `LocationService.sendGetLocationsRequest()` | `GET-api-locations.md` | 1 |
 | `GET /api/lecturers?search=` | `LecturerService.sendGetLecturersRequest(search)` | `GET-api-lecturers.md` | 1 |
 | `POST /api/training` | `TrainingService.sendPostTrainingRequest(request)` | `POST-api-training.md` | 1 |
-| `GET /api/training/{trainingId}` | `TrainingService.sendGetTrainingRequest(trainingId)` | loomata | 3 |
-| `GET /api/training/{trainingId}/training-translations` | `TrainingService.sendGetTrainingTranslationsRequest(trainingId)` | loomata | 3 |
-| `GET /api/training-translation/{trainingTranslationId}` | `TrainingTranslationService.sendGetTrainingTranslationRequest(id)` | loomata | 3 |
-| `PUT /api/training/{trainingId}` | `TrainingService.sendPutTrainingRequest(trainingId, request)` | loomata | 3 |
-| `PUT /api/training/{trainingId}/publish` | `TrainingService.sendPutTrainingPublishRequest(trainingId)` | loomata | 3 |
-| `PUT /api/training/{trainingId}/unpublish` | `TrainingService.sendPutTrainingUnpublishRequest(trainingId)` | loomata | 3 |
-| `POST /api/training/{trainingId}/training-translation` | `TrainingService.sendPostTrainingTranslationRequest(trainingId, request)` | loomata | 3 |
-| `GET /api/training/{trainingId}/ai-translation?languageId=` | `TrainingService.sendGetAiTranslationRequest(trainingId, languageId)` | loomata | 3 |
+| `GET /api/training/{trainingId}` | `TrainingService.sendGetTrainingRequest(trainingId)` | `GET-api-training-trainingId.md` | 3 |
+| `GET /api/training/{trainingId}/training-translations` | `TrainingService.sendGetTrainingTranslationsRequest(trainingId)` | `GET-api-training-trainingId-training-translations.md` | 3 |
+| `GET /api/training-translation/{trainingTranslationId}` | `TrainingTranslationService.sendGetTrainingTranslationRequest(id)` | `GET-api-training-translation-trainingTranslationId.md` | 3 |
+| `PUT /api/training/{trainingId}` | `TrainingService.sendPutTrainingRequest(trainingId, request)` | `PUT-api-training-trainingId.md` | 3 |
+| `PUT /api/training/{trainingId}/publish` | `TrainingService.sendPutTrainingPublishRequest(trainingId)` | `PUT-api-training-trainingId-publish.md` | 3 |
+| `PUT /api/training/{trainingId}/unpublish` | `TrainingService.sendPutTrainingUnpublishRequest(trainingId)` | `PUT-api-training-trainingId-unpublish.md` | 3 |
+| `POST /api/training/{trainingId}/training-translation` | `TrainingService.sendPostTrainingTranslationRequest(trainingId, request)` | `POST-api-training-trainingId-training-translation.md` | 3 |
+| `GET /api/training/{trainingId}/ai-translation?languageId=` | `TrainingService.sendGetAiTranslationRequest(trainingId, languageId)` | `GET-api-training-trainingId-ai-translation.md` | 3 |
 
 Täpsed request/response JSON näidised ja DTO nimed on märkmete failides (vt tabel taski alguses) ja 1. etapi backend taskides — neid siin ei dubleerita. Olulisemad kujud:
 
@@ -223,4 +223,5 @@ Kood on loodud (mustri eeskuju: Options API, `handle`-meetodid, props/emits `eve
 - [ ] "Publitseeri" / "Liiguta mustandisse" küsib kinnitust ja vahetab staatuse
 - [ ] Lektori modal otsib nime järgi ja lubab valida "Lektor puudub"
 - [ ] "Tee AI tõlge" on nähtav ainult `new-translation` ja mitte-põhikeele `update` olekus, tooltip selgitab käitumist, salvestamata muudatuste korral küsitakse kinnitust, tulemus ei salvestu automaatselt
+- [ ] AI teenuse 503/403/404 teadaolev viga kuvatakse vormis, sisestatud tekst ei kao
 - [ ] Kogu voog töötab mock-vastustega; iga teenuse saab eraldi päris kutse vastu vahetada ilma vaate koodi muutmata

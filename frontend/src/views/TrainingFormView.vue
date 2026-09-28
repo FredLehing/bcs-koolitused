@@ -79,6 +79,11 @@ export default {
       // Viimati laaditud/salvestatud tõlketekstid — salvestamata muudatuste tuvastamiseks
       savedTranslationTexts: '',
 
+      errorResponse: {
+        message: '',
+        errorCode: '',
+      },
+
       isLecturerModalOpen: false,
       isStatusModalOpen: false,
       isAiConfirmModalOpen: false,
@@ -467,7 +472,7 @@ export default {
       this.isAiLoading = true
       TrainingService.sendGetAiTranslationRequest(this.trainingId, this.translation.languageId)
         .then((response) => this.handleGetAiTranslationResponse(response.data))
-        .catch(() => NavigationService.navigateToErrorView())
+        .catch((error) => this.handleGetAiTranslationError(error))
         .finally(() => (this.isAiLoading = false))
     },
 
@@ -477,6 +482,22 @@ export default {
       this.translation.shortDescription = aiTranslation.shortDescription
       this.translation.description = aiTranslation.description
       this.successMessage = 'AI tõlge on vormis — kontrolli teksti ja salvesta'
+    },
+
+    // AI teenuse teadaolevad vead kuvatakse vormis — admini sisestatud tekst jääb alles
+    handleGetAiTranslationError(error) {
+      const statusCode = error.response?.status
+      this.errorResponse = error.response?.data ?? { message: '', errorCode: '' }
+
+      if (
+        (statusCode === 503 && this.errorResponse.errorCode === 'AI_SERVICE_UNAVAILABLE') ||
+        (statusCode === 403 && this.errorResponse.errorCode === 'MAIN_LANGUAGE_NOT_TRANSLATABLE') ||
+        (statusCode === 404 && this.errorResponse.errorCode === 'MAIN_TRANSLATION_NOT_FOUND')
+      ) {
+        this.errorMessage = this.errorResponse.message
+      } else {
+        NavigationService.navigateToErrorView()
+      }
     },
 
     translationHasUnsavedChanges() {
