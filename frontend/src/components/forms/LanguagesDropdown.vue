@@ -9,7 +9,7 @@ export default {
     languages: Array,
     firstOptionLabel: {
       type: String,
-      default: '-- Vali keel --',
+      default: '',
     },
     isDisabled: {
       type: Boolean,

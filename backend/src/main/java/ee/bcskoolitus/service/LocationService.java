@@ -1,6 +1,7 @@
 package ee.bcskoolitus.service;
 
 import ee.bcskoolitus.controller.location.dto.LocationDto;
+import ee.bcskoolitus.infrastructure.exception.PrimaryKeyNotFoundException;
 import ee.bcskoolitus.persistance.location.Location;
 import ee.bcskoolitus.persistance.location.LocationMapper;
 import ee.bcskoolitus.persistance.location.LocationRepository;
@@ -19,5 +20,10 @@ public class LocationService {
     public List<LocationDto> findAllLocations() {
         List<Location> locations = locationRepository.findAllLocationsOrderedById();
         return locationMapper.toLocationDtos(locations);
+    }
+
+    public Location getValidLocationBy(Integer locationId) {
+        return locationRepository.findById(locationId)
+                .orElseThrow(() -> new PrimaryKeyNotFoundException("locationId", locationId));
     }
 }

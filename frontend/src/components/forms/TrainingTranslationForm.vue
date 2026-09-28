@@ -25,7 +25,9 @@ export default {
 
 <template>
   <fieldset class="border rounded p-3 mb-4">
-    <legend class="float-none w-auto px-2 fs-5">Tõlge: {{ languageName }}</legend>
+    <legend class="float-none w-auto px-2 fs-5">
+      {{ $t('trainingForm.translation.legend', { language: languageName }) }}
+    </legend>
     <div class="text-start">
       <div v-if="showAiButton" class="mb-3">
         <button
@@ -36,11 +38,15 @@ export default {
           type="button"
         >
           <span v-if="isAiLoading" class="spinner-border spinner-border-sm me-1"></span>
-          {{ isAiLoading ? 'Tõlgin…' : 'Tee AI tõlge' }}
+          {{
+            isAiLoading
+              ? $t('trainingForm.translation.aiLoading')
+              : $t('trainingForm.translation.aiButton')
+          }}
         </button>
       </div>
       <div class="mb-3">
-        <label class="form-label" for="title">Pealkiri</label>
+        <label class="form-label" for="title">{{ $t('trainingForm.translation.title') }}</label>
         <input
           :value="translation.title"
           @input="$emit('event-new-title-input', $event.target.value)"
@@ -51,7 +57,9 @@ export default {
         />
       </div>
       <div class="mb-3">
-        <label class="form-label" for="shortDescription">Lühikirjeldus</label>
+        <label class="form-label" for="shortDescription">{{
+          $t('trainingForm.translation.shortDescription')
+        }}</label>
         <input
           :value="translation.shortDescription"
           @input="$emit('event-new-short-description-input', $event.target.value)"
@@ -63,7 +71,9 @@ export default {
       </div>
       <div>
         <!-- TODO: richtext editor (praegu tavaline textarea) -->
-        <label class="form-label" for="description">Kirjeldus</label>
+        <label class="form-label" for="description">{{
+          $t('trainingForm.translation.description')
+        }}</label>
         <textarea
           :value="translation.description"
           @input="$emit('event-new-description-input', $event.target.value)"

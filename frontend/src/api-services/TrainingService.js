@@ -17,6 +17,9 @@ export default {
   },
 
   // Backend task: docs/tasks/backend/POST-api-training.md
+  // NB! Backend on valmis, aga vaheta see koos GET /api/training/{id}, .../training-translations ja
+  // GET /api/training-translation/{id} kutsetega (3. etapp) — "Lisa" järel laaditakse uus koolitus nende kaudu,
+  // mock-andmebaasis päris andmebaasi koolitust pole.
   sendPostTrainingRequest(trainingCreateRequest) {
     // MOCK — vaheta päris kutse vastu, kui teenus on valmis:
     // return axios.post('/api/training', trainingCreateRequest)

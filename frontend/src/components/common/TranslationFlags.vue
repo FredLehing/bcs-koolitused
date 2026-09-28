@@ -16,8 +16,8 @@ export default {
 
     flagTitle(languageCode) {
       return this.translationExists(languageCode)
-        ? 'Ava ' + languageCode + ' tõlge'
-        : 'Lisa ' + languageCode + ' tõlge'
+        ? this.$t('trainingForm.flags.open', { language: languageCode })
+        : this.$t('trainingForm.flags.add', { language: languageCode })
     },
   },
 }

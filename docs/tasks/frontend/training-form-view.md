@@ -69,7 +69,7 @@ Koolituse andmete sektsioon on tõlke sektsiooni kohal (vertikaalne paigutus), o
 
 ## API kutsed
 
-Kõik kutsed on failides `frontend/src/api-services/`. **Mock-vastuseid kasutavad kõik uued kutsed, välja arvatud need, mille backend on valmis** (vt "Mock-vastused" allpool). Päris kutsele vahetatud: `GET /api/locations`.
+Kõik kutsed on failides `frontend/src/api-services/`. **Mock-vastuseid kasutavad kõik uued kutsed, välja arvatud need, mille backend on valmis** (vt "Mock-vastused" allpool). Päris kutsele vahetatud: `GET /api/locations`, `GET /api/lecturers`.
 
 | Teenus | Meetod `api-services`-is | Backend task | Etapp |
 |---|---|---|---|

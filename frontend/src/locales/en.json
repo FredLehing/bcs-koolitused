@@ -1,0 +1,109 @@
+{
+  "common": {
+    "close": "Close"
+  },
+  "navbar": {
+    "trainings": "Trainings",
+    "services": "Services",
+    "company": "Company",
+    "lecturers": "Lecturers",
+    "blog": "Blog",
+    "contact": "Contact",
+    "feedback": "Feedback",
+    "admin": "Admin",
+    "addTraining": "Add new training",
+    "login": "Log in",
+    "register": "Register"
+  },
+  "error": {
+    "message": "Something went wrong, please try again later!",
+    "backToTrainings": "Back to trainings"
+  },
+  "notAuthorized": {
+    "title": "Access denied",
+    "message": "You must be logged in as an administrator to view this page.",
+    "login": "Log in",
+    "home": "Home"
+  },
+  "trainingForm": {
+    "title": {
+      "newTraining": "Add new training",
+      "update": "Edit training",
+      "newTranslation": "Add training translation"
+    },
+    "status": {
+      "published": "Published",
+      "unpublished": "Draft"
+    },
+    "data": {
+      "legend": "Training details",
+      "category": "Category",
+      "trainingLanguage": "Training language",
+      "location": "Location",
+      "defaultLecturer": "Default lecturer",
+      "noLecturer": "— no lecturer —",
+      "selectLecturer": "Select lecturer",
+      "funding": "Funding",
+      "orderable": "Orderable",
+      "promoted": "Promoted",
+      "selectCategory": "-- Select category --",
+      "selectLanguage": "-- Select language --",
+      "selectLocation": "-- Select location --"
+    },
+    "translation": {
+      "legend": "Translation: {language}",
+      "title": "Title",
+      "shortDescription": "Short description",
+      "description": "Description",
+      "aiButton": "AI translate",
+      "aiLoading": "Translating…",
+      "aiTooltip": "The translation is made from the saved main language ({mainLanguage}) text, not from the form. The result is only shown in the form — it is saved only when you press \"{saveButton}\"."
+    },
+    "buttons": {
+      "add": "Add",
+      "save": "Save",
+      "addTranslation": "Add translation",
+      "publish": "Publish",
+      "unpublish": "Move to draft"
+    },
+    "flags": {
+      "open": "Open {language} translation",
+      "add": "Add {language} translation"
+    },
+    "lecturerModal": {
+      "title": "Select lecturer",
+      "searchPlaceholder": "Search by name",
+      "search": "Search",
+      "notFound": "No lecturers found.",
+      "noLecturer": "No lecturer"
+    },
+    "statusModal": {
+      "publishTitle": "Publish training",
+      "publishMessage": "Do you want to publish the training? It will become publicly visible.",
+      "unpublishTitle": "Move to draft",
+      "unpublishMessage": "Do you want to move the training to draft? It will be removed from the public list."
+    },
+    "aiModal": {
+      "title": "Replace text with AI translation?",
+      "message": "The form has unsaved changes. The AI translation will overwrite the title, short description and description.",
+      "confirm": "Replace"
+    },
+    "validation": {
+      "selectCategory": "Select a category",
+      "selectTrainingLanguage": "Select a training language",
+      "selectLocation": "Select a location",
+      "addTitle": "Add a title",
+      "addShortDescription": "Add a short description",
+      "addDescription": "Add a description",
+      "languageNotInSystem": "Language \"{language}\" is not in the system"
+    },
+    "messages": {
+      "trainingAdded": "Training \"{title}\" has been added as a draft",
+      "saved": "Changes have been saved",
+      "translationAdded": "Translation ({language}) has been added",
+      "published": "The training has been published",
+      "unpublished": "The training has been moved to draft",
+      "aiDone": "The AI translation is in the form — check the text and save"
+    }
+  }
+}
