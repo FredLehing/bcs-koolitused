@@ -25,7 +25,7 @@ Järjekord lihtsamast keerulisemani. 1.1–1.4 on lihtsad nimekirjad ja neid saa
 
 | # | Teenus | Taskifail | Keerukus | Märkus |
 |---|---|---|---|---|
-| 1.1 | `GET /api/languages` | `GET-api-languages.md` | lihtne | `LanguageRepository` ja `LanguageMapper` on olemas; vastus `TrainingLanguageDto` |
+| 1.1 | `GET /api/languages` | `GET-api-languages.md` | lihtne | `LanguageRepository` ja `LanguageMapper` on olemas; vastus `SystemLanguageDto` |
 | 1.2 | `GET /api/categories?contentLang=` | `GET-api-categories.md` | lihtne | `category_translation` kaudu |
 | 1.3 | `GET /api/funding-types?contentLang=` | `GET-api-funding-types.md` | lihtne | `FundingTypeDto` on olemas |
 | 1.4 | `GET /api/locations` | `GET-api-locations.md` | lihtne | tõlkimata, `contentLang` puudub |

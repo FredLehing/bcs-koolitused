@@ -38,6 +38,20 @@ Claude Code terminal jookseb WSL2 Ubuntu sees, mitte Windowsi peal — Windowsi 
 
 Docker **puudub** WSL-i seest natiivselt (projekti kokkulepe) — ainult Windows Docker Desktopi kaudu, kui õpilane on selle käsitsi sisse lülitanud.
 
+## Sub-agentide kasutamine
+
+Kui ülesanne on suur ja jaguneb sõltumatuteks osadeks (nt mitu eraldi backend taski, laiaulatuslik koodiotsing), kaalu tavaliste sub-agentide kasutamist (mitte fork — fork kasutab alati sama mudelit). Väikesed, omavahel tihedalt seotud või ainult vestluse kontekstist sõltuvad tööd tee ise.
+
+**Enne sub-agentide käivitamist peatu ja küsi kasutajalt kinnitust.** Näita:
+1. millisteks alamülesanneteks töö jagatakse ja mis järjekorras (mis käib paralleelselt, mis järjestikku);
+2. iga agendi ülesande lühikokkuvõtet ja milliseid faile ta aluseks võtab — agent vestlust ei näe, seega otsused peavad olema failides või ülesande tekstis;
+3. soovitatud mudelit koos põhjendusega:
+   - **Haiku** — failide otsimine, koodi uurimine, lihtsad mehaanilised muudatused;
+   - **Sonnet** — tavaline kood olemasoleva mustri järgi (nt lihtne nimekirjateenus);
+   - **Opus** — keerukas loogika (transaktsioonid, mitu tabelit, veakäsitlus, välised teenused, arhitektuur).
+
+Käivita agendid alles pärast kasutaja kinnitust. Paralleelsed agendid ei tohi muuta samu faile. Enne kasutajale raporteerimist vaata agentide tulemus üle (kompileerimine, testid) ja anna kasutajale lühike kokkuvõte.
+
 ## docs/ kausta struktuur
 
 - `docs/theory-materials/` — algajasõbralikud õppematerjalid (Java, Spring, Vue, HTML/CSS teemadel), iga teema kohta nii `.md` kui vastav `.html`

@@ -9,7 +9,8 @@ INSERT INTO role (id, name) VALUES
 -- Table: user
 INSERT INTO "user" (id, role_id, email, password, status, created_at) VALUES
     (1, 1, 'admin@vali-it.ee', 'parool123', 'A', '2026-01-01 00:00:00'),
-    (2, 2, 'kasutaja@vali-it.ee', 'parool123', 'A', '2026-09-05 09:00:00');
+    (2, 2, 'kasutaja@vali-it.ee', 'parool123', 'A', '2026-09-05 09:00:00'),
+    (3, 1, 'admin', '123', 'A', '2026-09-28 00:00:00'); -- lihtne testkonto (admin)
 
 -- Table: language
 INSERT INTO language (id, code, name, is_main_language) VALUES
@@ -141,6 +142,8 @@ SELECT setval(pg_get_serial_sequence('"user"', 'id'), (SELECT MAX(id) FROM "user
 SELECT setval(pg_get_serial_sequence('language', 'id'), (SELECT MAX(id) FROM language));
 SELECT setval(pg_get_serial_sequence('category', 'id'), (SELECT MAX(id) FROM category));
 SELECT setval(pg_get_serial_sequence('category_translation', 'id'), (SELECT MAX(id) FROM category_translation));
+SELECT setval(pg_get_serial_sequence('funding_type', 'id'), (SELECT MAX(id) FROM funding_type));
+SELECT setval(pg_get_serial_sequence('funding_type_translation', 'id'), (SELECT MAX(id) FROM funding_type_translation));
 SELECT setval(pg_get_serial_sequence('location', 'id'), (SELECT MAX(id) FROM location));
 SELECT setval(pg_get_serial_sequence('lecturer', 'id'), (SELECT MAX(id) FROM lecturer));
 SELECT setval(pg_get_serial_sequence('lecturer_translation', 'id'), (SELECT MAX(id) FROM lecturer_translation));
@@ -151,6 +154,7 @@ SELECT setval(pg_get_serial_sequence('profile', 'id'), (SELECT MAX(id) FROM prof
 SELECT setval(pg_get_serial_sequence('participant', 'id'), (SELECT MAX(id) FROM participant));
 SELECT setval(pg_get_serial_sequence('training', 'id'), (SELECT MAX(id) FROM training));
 SELECT setval(pg_get_serial_sequence('training_translation', 'id'), (SELECT MAX(id) FROM training_translation));
+SELECT setval(pg_get_serial_sequence('training_funding_type', 'id'), (SELECT MAX(id) FROM training_funding_type));
 SELECT setval(pg_get_serial_sequence('course', 'id'), (SELECT MAX(id) FROM course));
 SELECT setval(pg_get_serial_sequence('course_participant', 'id'), (SELECT MAX(id) FROM course_participant));
 SELECT setval(pg_get_serial_sequence('enquiry', 'id'), (SELECT MAX(id) FROM enquiry));
