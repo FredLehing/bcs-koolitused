@@ -10,7 +10,7 @@ Failinimi: TrainingFormView.vue
 Frontend rada: /training-form?trainingId={id}&trainingTranslationId={id}
 
 Vaatega seotud lisainfo:
-state: "update" — URL-is trainingId ja trainingTranslationId. Pealkiri "Muuda koolitust" koos staatuse märgisega (Mustand / Publitseeritud). Vorm on eeltäidetud, rippmenüüd laaditakse avatud tõlke keeles. Iga router.replace järel laaditakse andmed uuesti.
+state: "update" — URL-is trainingId ja trainingTranslationId. Pealkiri "Muuda koolitust" koos staatuse märgisega (Mustand / Publitseeritud). Vorm on eeltäidetud; rippmenüüd (kategooriad, rahastustüübid) laaditakse kasutajaliidese keeles (store'i contentLang) ja laaditakse keele vahetamisel navbaris uuesti — vormi sisu jääb alles. Iga router.replace järel laaditakse andmed uuesti.
 Lipukesed: tõlge olemas → värviline lipp (klikk avab selle tõlke), tõlge puudub → hall lipp (klikk → state "new-translation").
 "Salvesta" → PUT /api/training/{trainingId} (koolituse väljad + avatud tõlge ühes transaktsioonis). "Tee AI tõlge" on ainult mitte-põhikeele tõlkel: täidab vaid vormi, ei salvesta.
 status "U" → nupp "Publitseeri", status "P" → nupp "Liiguta mustandisse"; mõlemal kinnituse modal (PUT /api/training/{trainingId}/publish või /unpublish).
@@ -109,7 +109,7 @@ TrainingTranslationDto.java
 }
 
 API teenuse lisainfo:
-Laadib avatud tõlke (URL-i trainingTranslationId). Vastuse languageCode järgi valitakse rippmenüüde contentLang.
+Laadib avatud tõlke (URL-i trainingTranslationId). languageCode näitab, mis keeles avatud tõlge on (tõlke vormi pealkiri, AI nupu nähtavus).
 
 Veateated:
 HTTP: 404
@@ -162,7 +162,7 @@ CategoryDto.java
 ]
 
 API teenuse lisainfo:
-Tagastab kõik kategooriad contentLang keeles (category_translation kaudu). TrainingFormView kutsub avatud tõlke keelega.
+Tagastab kõik kategooriad contentLang keeles (category_translation kaudu). TrainingFormView kutsub kasutajaliidese keelega (store'i contentLang) ja kutsub uuesti, kui keel navbaris vahetub.
 
 Veateated: —
 ```

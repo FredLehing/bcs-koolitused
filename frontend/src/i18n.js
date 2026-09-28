@@ -6,7 +6,7 @@ import en from '@/locales/en.json'
 export const LOCALE_STORAGE_KEY = 'contentLang'
 const SUPPORTED_LOCALES = ['et', 'en']
 
-function getSavedLocale() {
+export function getSavedLocale() {
   try {
     const savedLocale = localStorage.getItem(LOCALE_STORAGE_KEY)
     return SUPPORTED_LOCALES.includes(savedLocale) ? savedLocale : 'et'

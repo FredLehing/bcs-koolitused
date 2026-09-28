@@ -13,7 +13,7 @@ Selles failis on `TrainingFormView.vue` olekud ja andmevood skeemidena (Mermaid)
 - `status` (`varchar(1)`): `"U"` = mustand (unpublished, süsteem määrab loomisel), `"P"` = publitseeritud. Vormis staatuse välja pole — staatust muudetakse nuppudega "Publitseeri" / "Liiguta mustandisse" (teineteist välistavad, mõlemal kinnituse modal). Staatust muudavad tegevusteenused `PUT /api/training/{trainingId}/publish` ja `/unpublish` (ilma body ja DTO-ta, vt URL-ide kokkuleppe erand). Backendis kasutada eraldi `TrainingStatus` enumit (`UNPUBLISHED("U")`, `PUBLISHED("P")`). Mustandi täht on `"U"`, mitte `"D"`, sest olemasolevas `ApiStatus` enumis tähendab `"D"` kustutatud.
 - Pärast iga `router.replace`-i laaditakse vaate andmed uuesti (`$route.query` jälgija) — erandeid pole.
 - "Salvesta" teeb ühe `PUT /api/training/{trainingId}` päringu, mis salvestab koolituse väljad ja avatud tõlke ühes transaktsioonis.
-- Rippmenüüde väärtused tulevad backendist, `contentLang` = avatud tõlke keel.
+- Rippmenüüde väärtused tulevad backendist, `contentLang` = **kasutajaliidese keel** (Pinia `languageStore.contentLang`, valitakse navbaris). Keele vahetamisel laaditakse ainult rippmenüüd uuesti (`watch: contentLang`), vormi sisu jääb alles. Avatud tõlke keel on sellest sõltumatu.
 - `userId` võetakse localStorage'ist ja saadetakse `POST /api/training` body's.
 - Lektorite ja toimumiskohtade otsing/valik käib backendis (`GET /api/lecturers?search=`, `GET /api/locations`).
 - Põhikeel on määratud andmebaasis (`language.is_main_language`, praegu `et`) ja frontendi store'is (`contentLanguages[].isMainLanguage`). Uus koolitus luuakse põhikeele tõlkega ja uue tõlke vorm eeltäidetakse põhikeele tekstiga.
@@ -65,7 +65,7 @@ flowchart TD
     Start([beforeMount või $route.query muutus]) --> Common[GET /api/languages<br/>GET /api/locations]
     Common --> Q{Millised query<br/>parameetrid?}
 
-    Q -- puuduvad --> A[Olek A<br/>tõlke keel = et]
+    Q -- puuduvad --> A[Olek A<br/>tõlke keel = põhikeel]
     A --> DropA[GET /api/categories?contentLang=et<br/>GET /api/funding-types?contentLang=et]
 
     Q -- trainingId + languageId --> B[Olek C]
@@ -75,7 +75,7 @@ flowchart TD
 
     Q -- trainingId + trainingTranslationId --> C[Olek B]
     C --> LoadC[GET /api/training/trainingId<br/>GET /api/training-translation/trainingTranslationId<br/>GET /api/training/trainingId/training-translations]
-    LoadC --> DropC[GET /api/categories?contentLang=tõlke keel<br/>GET /api/funding-types?contentLang=tõlke keel]
+    LoadC --> DropC[GET /api/categories?contentLang=UI keel<br/>GET /api/funding-types?contentLang=UI keel]
 
     DropB --> Flags[Lipukesed: store contentLanguages<br/>vs training-translations vastus]
     DropC --> Flags
@@ -96,8 +96,8 @@ Iga oleku kõik võimalikud päringud. **Laadimine** käivitub vaate avamisel ja
 |---|---|---|
 | Laadimine | `GET /api/languages` | "Koolituse keel" rippmenüü |
 | Laadimine | `GET /api/locations` | "Toimumiskoht" rippmenüü |
-| Laadimine | `GET /api/categories?contentLang=et` | kategooriad põhikeeles |
-| Laadimine | `GET /api/funding-types?contentLang=et` | rahastustüübid põhikeeles |
+| Laadimine | `GET /api/categories?contentLang={UI keel}` | kategooriad kasutajaliidese keeles (ka keele vahetusel) |
+| Laadimine | `GET /api/funding-types?contentLang={UI keel}` | rahastustüübid kasutajaliidese keeles (ka keele vahetusel) |
 | Tegevus | `GET /api/lecturers?search={otsingusõna}` | "Vali lektor" modalis otsides |
 | Tegevus | `POST /api/training` | "Lisa" → `router.replace` olekusse `update` |
 
@@ -110,8 +110,8 @@ Iga oleku kõik võimalikud päringud. **Laadimine** käivitub vaate avamisel ja
 | Laadimine | `GET /api/training/{trainingId}` | koolituse väljad |
 | Laadimine | `GET /api/training-translation/{trainingTranslationId}` | avatud tõlge |
 | Laadimine | `GET /api/training/{trainingId}/training-translations` | lipukesed |
-| Laadimine | `GET /api/categories?contentLang={tõlke keel}` | kategooriad tõlke keeles |
-| Laadimine | `GET /api/funding-types?contentLang={tõlke keel}` | rahastustüübid tõlke keeles |
+| Laadimine | `GET /api/categories?contentLang={UI keel}` | kategooriad kasutajaliidese keeles (ka keele vahetusel) |
+| Laadimine | `GET /api/funding-types?contentLang={UI keel}` | rahastustüübid kasutajaliidese keeles (ka keele vahetusel) |
 | Tegevus | `GET /api/lecturers?search={otsingusõna}` | "Vali lektor" modalis otsides |
 | Tegevus | `PUT /api/training/{trainingId}` | "Salvesta" |
 | Tegevus | `GET /api/training/{trainingId}/ai-translation?languageId={id}` | "Tee AI tõlge" (ainult mitte-põhikeele tõlkel) |
@@ -129,8 +129,8 @@ Lipule klikkimine päringut ei tee — see teeb `router.replace`-i ja käivitab 
 | Laadimine | `GET /api/training/{trainingId}` | koolituse väljad (lukus) |
 | Laadimine | `GET /api/training/{trainingId}/training-translations` | lipukesed, põhikeele tõlke leidmine |
 | Laadimine | `GET /api/training-translation/{põhikeele tõlke id}` | tekstide eeltäitmine põhikeelest |
-| Laadimine | `GET /api/categories?contentLang={tõlke keel}` | kategooriad tõlke keeles |
-| Laadimine | `GET /api/funding-types?contentLang={tõlke keel}` | rahastustüübid tõlke keeles |
+| Laadimine | `GET /api/categories?contentLang={UI keel}` | kategooriad kasutajaliidese keeles (ka keele vahetusel) |
+| Laadimine | `GET /api/funding-types?contentLang={UI keel}` | rahastustüübid kasutajaliidese keeles (ka keele vahetusel) |
 | Tegevus | `GET /api/training/{trainingId}/ai-translation?languageId={id}` | "Tee AI tõlge" |
 | Tegevus | `POST /api/training/{trainingId}/training-translation` | "Lisa tõlge" → `router.replace` olekusse `update` |
 | Tegevus | `PUT /api/training/{trainingId}/publish` | "Publitseeri" (status `U`) → kinnitus |
@@ -227,7 +227,7 @@ sequenceDiagram
 
     Admin->>FE: klikib värvilisel en lipul
     FE->>FE: router.replace(?trainingId=3&trainingTranslationId=5)
-    Note over FE: laadimine (skeem 2, olek B), rippmenüüd en keeles
+    Note over FE: laadimine (skeem 2, olek B); rippmenüüd jäävad kasutajaliidese keelde
 ```
 
 ---

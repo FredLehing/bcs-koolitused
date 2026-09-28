@@ -363,6 +363,7 @@ textarea { min-height: 88px; resize: vertical; }
     { languageCode: "en", isMainLanguage: false, languageFlag: "@/assets/flags/en-flag.png", languageI18n: "@/locales/en.json" },
     { languageCode: "ru", isMainLanguage: false, languageFlag: "@/assets/flags/ru-flag.png", languageI18n: "@/locales/ru.json" }
   ];
+  var UI_LANG = "et"; // kasutajaliidese keel (päris rakenduses navbari keelevalik); rippmenüüd järgivad seda, mitte tõlke keelt
   var MAIN_LANGUAGE_ID = 1; // language.is_main_language = true
 
   var AI_RESULTS = {
@@ -417,8 +418,8 @@ textarea { min-height: 88px; resize: vertical; }
   function loadDropdowns(code) {
     call("GET", "/api/languages", null, LANGUAGES);
     call("GET", "/api/locations", null, Object.keys(LOCATIONS).map(function (k) { return { locationId: +k, locationName: LOCATIONS[k] }; }));
-    call("GET", "/api/categories?contentLang=" + code, null, Object.keys(CATEGORIES).map(function (k) { return { categoryId: +k, categoryName: CATEGORIES[k][code] }; }));
-    call("GET", "/api/funding-types?contentLang=" + code, null, Object.keys(FUNDING).map(function (k) { return { fundingTypeId: +k, fundingTypeName: FUNDING[k][code] }; }));
+    call("GET", "/api/categories?contentLang=" + UI_LANG, null, Object.keys(CATEGORIES).map(function (k) { return { categoryId: +k, categoryName: CATEGORIES[k][UI_LANG] }; }));
+    call("GET", "/api/funding-types?contentLang=" + UI_LANG, null, Object.keys(FUNDING).map(function (k) { return { fundingTypeId: +k, fundingTypeName: FUNDING[k][UI_LANG] }; }));
   }
   function trainingDto(t) {
     return { trainingId: t.trainingId, categoryId: t.categoryId, trainingLanguageId: t.trainingLanguageId, locationId: t.locationId, defaultLecturerId: t.defaultLecturerId, defaultLecturerName: lecturerName(t.defaultLecturerId), isOrderable: t.isOrderable, isPromoted: t.isPromoted, status: t.status, fundingTypeIds: t.fundingTypeIds.slice() };
@@ -458,8 +459,8 @@ textarea { min-height: 88px; resize: vertical; }
       if (tr) call("GET", "/api/training-translation/" + tr.trainingTranslationId, null, { trainingTranslationId: tr.trainingTranslationId, trainingId: tr.trainingId, languageId: tr.languageId, languageCode: code, title: tr.title, shortDescription: tr.shortDescription, description: tr.description });
       call("GET", "/api/training/" + t.trainingId + "/training-translations", null, list);
       if (src) call("GET", "/api/training-translation/" + src.trainingTranslationId, null, { trainingTranslationId: src.trainingTranslationId, trainingId: src.trainingId, languageId: src.languageId, languageCode: lang(src.languageId).languageCode, title: src.title, shortDescription: src.shortDescription, description: src.description });
-      call("GET", "/api/categories?contentLang=" + code, null, Object.keys(CATEGORIES).map(function (k) { return { categoryId: +k, categoryName: CATEGORIES[k][code] }; }));
-      call("GET", "/api/funding-types?contentLang=" + code, null, Object.keys(FUNDING).map(function (k) { return { fundingTypeId: +k, fundingTypeName: FUNDING[k][code] }; }));
+      call("GET", "/api/categories?contentLang=" + UI_LANG, null, Object.keys(CATEGORIES).map(function (k) { return { categoryId: +k, categoryName: CATEGORIES[k][UI_LANG] }; }));
+      call("GET", "/api/funding-types?contentLang=" + UI_LANG, null, Object.keys(FUNDING).map(function (k) { return { fundingTypeId: +k, fundingTypeName: FUNDING[k][UI_LANG] }; }));
       st = { mode: tr ? "B" : "C", url: url, langCode: code, status: t.status, trainingId: t.trainingId,
         trainingTranslationId: tr ? tr.trainingTranslationId : null, languageId: tr ? tr.languageId : q.languageId, translations: list,
         form: { categoryId: t.categoryId, trainingLanguageId: t.trainingLanguageId, locationId: t.locationId, defaultLecturerId: t.defaultLecturerId, isOrderable: t.isOrderable, isPromoted: t.isPromoted, fundingTypeIds: t.fundingTypeIds.slice(),
@@ -645,11 +646,11 @@ textarea { min-height: 88px; resize: vertical; }
     function opts(map, sel, textFn) {
       return Object.keys(map).map(function (k) { return '<option value="' + k + '"' + (+k === sel ? " selected" : "") + '>' + esc(textFn(k)) + '</option>'; }).join("");
     }
-    var catOpts = opts(CATEGORIES, f.categoryId, function (k) { return CATEGORIES[k][code]; });
+    var catOpts = opts(CATEGORIES, f.categoryId, function (k) { return CATEGORIES[k][UI_LANG]; });
     var langOpts = LANGUAGES.map(function (l) { return '<option value="' + l.languageId + '"' + (l.languageId === f.trainingLanguageId ? " selected" : "") + '>' + l.languageName + '</option>'; }).join("");
     var locOpts = opts(LOCATIONS, f.locationId, function (k) { return LOCATIONS[k]; });
     var fund = Object.keys(FUNDING).map(function (k) {
-      return '<label><input type="checkbox" data-fund="' + k + '"' + (f.fundingTypeIds.indexOf(+k) !== -1 ? " checked" : "") + (lockT ? " disabled" : "") + '> ' + esc(FUNDING[k][code]) + '</label>';
+      return '<label><input type="checkbox" data-fund="' + k + '"' + (f.fundingTypeIds.indexOf(+k) !== -1 ? " checked" : "") + (lockT ? " disabled" : "") + '> ' + esc(FUNDING[k][UI_LANG]) + '</label>';
     }).join("");
     var dis = lockT ? " disabled" : "";
     var langName = lang(langByCode(code).languageId).languageName;
@@ -727,8 +728,8 @@ textarea { min-height: 88px; resize: vertical; }
       load: [
         { m: "GET", p: "/api/languages", note: "n-languages", when: "\"Koolituse keel\" rippmenüü" },
         { m: "GET", p: "/api/locations", note: "n-locations", when: "\"Toimumiskoht\" rippmenüü" },
-        { m: "GET", p: "/api/categories?contentLang=et", note: "n-categories", when: "kategooriad põhikeeles" },
-        { m: "GET", p: "/api/funding-types?contentLang=et", note: "n-funding", when: "rahastustüübid põhikeeles" }
+        { m: "GET", p: "/api/categories?contentLang={UI keel}", note: "n-categories", when: "kategooriad kasutajaliidese keeles (ka keele vahetusel)" },
+        { m: "GET", p: "/api/funding-types?contentLang={UI keel}", note: "n-funding", when: "rahastustüübid kasutajaliidese keeles (ka keele vahetusel)" }
       ],
       actions: [
         { m: "GET", p: "/api/lecturers?search={otsingusõna}", note: "n-lecturers", when: "\"Vali lektor\" modalis otsides" },
@@ -742,8 +743,8 @@ textarea { min-height: 88px; resize: vertical; }
         { m: "GET", p: "/api/training/{trainingId}", note: "n-get-training", when: "koolituse väljad" },
         { m: "GET", p: "/api/training-translation/{trainingTranslationId}", note: "n-get-translation", when: "avatud tõlge" },
         { m: "GET", p: "/api/training/{trainingId}/training-translations", note: "n-translations", when: "lipukesed" },
-        { m: "GET", p: "/api/categories?contentLang={tõlke keel}", note: "n-categories", when: "kategooriad tõlke keeles" },
-        { m: "GET", p: "/api/funding-types?contentLang={tõlke keel}", note: "n-funding", when: "rahastustüübid tõlke keeles" }
+        { m: "GET", p: "/api/categories?contentLang={UI keel}", note: "n-categories", when: "kategooriad kasutajaliidese keeles (ka keele vahetusel)" },
+        { m: "GET", p: "/api/funding-types?contentLang={UI keel}", note: "n-funding", when: "rahastustüübid kasutajaliidese keeles (ka keele vahetusel)" }
       ],
       actions: [
         { m: "GET", p: "/api/lecturers?search={otsingusõna}", note: "n-lecturers", when: "\"Vali lektor\" modalis otsides" },
@@ -760,8 +761,8 @@ textarea { min-height: 88px; resize: vertical; }
         { m: "GET", p: "/api/training/{trainingId}", note: "n-get-training", when: "koolituse väljad (lukus)" },
         { m: "GET", p: "/api/training/{trainingId}/training-translations", note: "n-translations", when: "lipukesed, põhikeele tõlke leidmine" },
         { m: "GET", p: "/api/training-translation/{põhikeele tõlke id}", note: "n-get-translation", when: "tekstide eeltäitmine põhikeelest" },
-        { m: "GET", p: "/api/categories?contentLang={tõlke keel}", note: "n-categories", when: "kategooriad tõlke keeles" },
-        { m: "GET", p: "/api/funding-types?contentLang={tõlke keel}", note: "n-funding", when: "rahastustüübid tõlke keeles" }
+        { m: "GET", p: "/api/categories?contentLang={UI keel}", note: "n-categories", when: "kategooriad kasutajaliidese keeles (ka keele vahetusel)" },
+        { m: "GET", p: "/api/funding-types?contentLang={UI keel}", note: "n-funding", when: "rahastustüübid kasutajaliidese keeles (ka keele vahetusel)" }
       ],
       actions: [
         { m: "GET", p: "/api/training/{trainingId}/ai-translation?languageId={id}", note: "n-ai-translation", when: "\"Tee AI tõlge\"" },
@@ -874,9 +875,9 @@ textarea { min-height: 88px; resize: vertical; }
   /* ---------- Märkmete tekstid (struktuuridokumendi vorming) ---------- */
   // Vaate märkmed oleku kaupa (samad tekstid nagu markmed/training-form-view-state-*-markmed.md failides)
   var VIEW_NOTES = {
-      "A": "Roll: Admin\nFailinimi: TrainingFormView.vue\nFrontend rada: /training-form\n\nVaatega seotud lisainfo:\nstate: \"new-training\" — URL-is query parameetreid pole. Pealkiri \"Lisa uus koolitus\". Vorm on tühi; tõlke väljad (pealkiri, lühikirjeldus, kirjeldus) täidetakse põhikeeles (et) ja rippmenüüd laaditakse põhikeeles. Lipukesi ja staatuse nuppe pole.\nVaikimisi lektor valitakse \"Vali lektor\" modalist otsinguga (võib jääda tühjaks). Rahastustüübid on checkboxid, \"Tellitav\" ja \"Esile tõstetud\" switchid.\nNupp \"Lisa\" → POST /api/training (userId localStorage'ist). Backend loob koolituse staatusega \"U\" koos põhikeele tõlkega. Vastuse trainingId ja trainingTranslationId järgi tehakse router.replace → state \"update\".",
-      "B": "Roll: Admin\nFailinimi: TrainingFormView.vue\nFrontend rada: /training-form?trainingId={id}&trainingTranslationId={id}\n\nVaatega seotud lisainfo:\nstate: \"update\" — URL-is trainingId ja trainingTranslationId. Pealkiri \"Muuda koolitust\" koos staatuse märgisega (Mustand / Publitseeritud). Vorm on eeltäidetud, rippmenüüd laaditakse avatud tõlke keeles. Iga router.replace järel laaditakse andmed uuesti.\nLipukesed: tõlge olemas → värviline lipp (klikk avab selle tõlke), tõlge puudub → hall lipp (klikk → state \"new-translation\").\n\"Salvesta\" → PUT /api/training/{trainingId} (koolituse väljad + avatud tõlge ühes transaktsioonis). \"Tee AI tõlge\" on ainult mitte-põhikeele tõlkel: täidab vaid vormi, ei salvesta.\nstatus \"U\" → nupp \"Publitseeri\", status \"P\" → nupp \"Liiguta mustandisse\"; mõlemal kinnituse modal (PUT /api/training/{trainingId}/publish või /unpublish).",
-      "C": "Roll: Admin\nFailinimi: TrainingFormView.vue\nFrontend rada: /training-form?trainingId={id}&languageId={id}\n\nVaatega seotud lisainfo:\nstate: \"new-translation\" — URL-is trainingId ja languageId (keel, mille tõlge puudub). Pealkiri \"Lisa koolituse tõlge\". Koolituse väljad on kirjutuskaitstud, rippmenüüd laaditakse sihtkeeles.\nTõlke väljad eeltäidetakse salvestatud põhikeele (et) tõlkega, mida admin tõlgib. \"Tee AI tõlge\" tõlgib salvestatud põhikeele teksti ja täidab ainult vormi; salvestamata muudatuste korral küsitakse enne kinnitust.\n\"Lisa tõlge\" → POST /api/training/{trainingId}/training-translation. Vastuse trainingTranslationId järgi tehakse router.replace → state \"update\".\nStaatuse nupp (\"Publitseeri\" / \"Liiguta mustandisse\") nagu state \"update\" puhul."
+      "A": "Roll: Admin\nFailinimi: TrainingFormView.vue\nFrontend rada: /training-form\n\nVaatega seotud lisainfo:\nstate: \"new-training\" — URL-is query parameetreid pole. Pealkiri \"Lisa uus koolitus\". Vorm on tühi; tõlke väljad (pealkiri, lühikirjeldus, kirjeldus) täidetakse põhikeeles (et); rippmenüüd (kategooriad, rahastustüübid) laaditakse kasutajaliidese keeles (store'i contentLang) ja laaditakse keele vahetamisel navbaris uuesti — vormi sisu jääb alles. Lipukesi ja staatuse nuppe pole.\nVaikimisi lektor valitakse \"Vali lektor\" modalist otsinguga (võib jääda tühjaks). Rahastustüübid on checkboxid, \"Tellitav\" ja \"Esile tõstetud\" switchid.\nNupp \"Lisa\" → POST /api/training (userId localStorage'ist). Backend loob koolituse staatusega \"U\" koos põhikeele tõlkega. Vastuse trainingId ja trainingTranslationId järgi tehakse router.replace → state \"update\".",
+      "B": "Roll: Admin\nFailinimi: TrainingFormView.vue\nFrontend rada: /training-form?trainingId={id}&trainingTranslationId={id}\n\nVaatega seotud lisainfo:\nstate: \"update\" — URL-is trainingId ja trainingTranslationId. Pealkiri \"Muuda koolitust\" koos staatuse märgisega (Mustand / Publitseeritud). Vorm on eeltäidetud; rippmenüüd (kategooriad, rahastustüübid) laaditakse kasutajaliidese keeles (store'i contentLang) ja laaditakse keele vahetamisel navbaris uuesti — vormi sisu jääb alles. Iga router.replace järel laaditakse andmed uuesti.\nLipukesed: tõlge olemas → värviline lipp (klikk avab selle tõlke), tõlge puudub → hall lipp (klikk → state \"new-translation\").\n\"Salvesta\" → PUT /api/training/{trainingId} (koolituse väljad + avatud tõlge ühes transaktsioonis). \"Tee AI tõlge\" on ainult mitte-põhikeele tõlkel: täidab vaid vormi, ei salvesta.\nstatus \"U\" → nupp \"Publitseeri\", status \"P\" → nupp \"Liiguta mustandisse\"; mõlemal kinnituse modal (PUT /api/training/{trainingId}/publish või /unpublish).",
+      "C": "Roll: Admin\nFailinimi: TrainingFormView.vue\nFrontend rada: /training-form?trainingId={id}&languageId={id}\n\nVaatega seotud lisainfo:\nstate: \"new-translation\" — URL-is trainingId ja languageId (keel, mille tõlge puudub). Pealkiri \"Lisa koolituse tõlge\". Koolituse väljad on kirjutuskaitstud; rippmenüüd (kategooriad, rahastustüübid) laaditakse kasutajaliidese keeles (store'i contentLang) ja laaditakse keele vahetamisel navbaris uuesti — vormi sisu jääb alles.\nTõlke väljad eeltäidetakse salvestatud põhikeele (et) tõlkega, mida admin tõlgib. \"Tee AI tõlge\" tõlgib salvestatud põhikeele teksti ja täidab ainult vormi; salvestamata muudatuste korral küsitakse enne kinnitust.\n\"Lisa tõlge\" → POST /api/training/{trainingId}/training-translation. Vastuse trainingTranslationId järgi tehakse router.replace → state \"update\".\nStaatuse nupp (\"Publitseeri\" / \"Liiguta mustandisse\") nagu state \"update\" puhul."
   };
   function viewNote() { return VIEW_NOTES[st.mode]; }
 
@@ -897,7 +898,7 @@ textarea { min-height: 88px; resize: vertical; }
       "API: GET /api/categories", "",
       "Query parameetrid:", "contentLang: String — categoryName keel (\"et\"/\"en\"/\"ru\")", "",
       "Response (200):", "CategoryDto.java", "[", "  {", "    \"categoryId\": 1,", "    \"categoryName\": \"Programmeerimine\"", "  },", "  ...", "]", "",
-      "API teenuse lisainfo:", "Tagastab kõik kategooriad contentLang keeles (category_translation kaudu). TrainingFormView kutsub avatud tõlke keelega.", "",
+      "API teenuse lisainfo:", "Tagastab kõik kategooriad contentLang keeles (category_translation kaudu). TrainingFormView kutsub kasutajaliidese keelega (store'i contentLang) ja kutsub uuesti, kui keel navbaris vahetub.", "",
       "Veateated: —"] },
     { id: "n-funding", title: "GET /api/funding-types", text: [
       "API: GET /api/funding-types", "",
@@ -919,7 +920,7 @@ textarea { min-height: 88px; resize: vertical; }
     { id: "n-get-translation", title: "GET /api/training-translation/{id}", draft: true, text: [
       "API: GET /api/training-translation/{trainingTranslationId}", "",
       "Response (200):", "TrainingTranslationDto.java", "{", "  \"trainingTranslationId\": 1,", "  \"trainingId\": 1,", "  \"languageId\": 1,", "  \"languageCode\": \"et\",", "  \"title\": \"Java algkursus\",", "  \"shortDescription\": \"Java programmeerimise alused algajatele.\",", "  \"description\": \"Kursusel õpitakse Java süntaksit, objektorienteeritud programmeerimist ja põhilisi andmestruktuure.\"", "}", "",
-      "API teenuse lisainfo:", "Ühe tõlke andmed. Olekus B laaditakse avatud tõlge ja selle languageCode järgi valitakse rippmenüüde contentLang. Olekus C laaditakse et tõlge, millega uue tõlke väljad eeltäidetakse.", "",
+      "API teenuse lisainfo:", "Ühe tõlke andmed. Olekus B laaditakse avatud tõlge. Olekus C laaditakse et tõlge, millega uue tõlke väljad eeltäidetakse.", "",
       "Veateated:", PK("trainingTranslationId")] },
     { id: "n-translations", title: "GET /api/training/{id}/training-translations", draft: true, text: [
       "API: GET /api/training/{trainingId}/training-translations", "",
@@ -968,8 +969,8 @@ textarea { min-height: 88px; resize: vertical; }
 
   // Olekupõhine lisainfo (sama nagu markmed/training-form-view-state-*-markmed.md failides)
   var GET_TRANSLATION_INFO = {
-    B: "Laadib avatud tõlke (URL-i trainingTranslationId). Vastuse languageCode järgi valitakse rippmenüüde contentLang.",
-    C: "Laadib koolituse salvestatud põhikeele tõlke (training-translations vastusest isMainLanguage = true), millega eeltäidetakse uue tõlke väljad. Vastuse languageCode on põhikeel (et), rippmenüüd laaditakse siiski sihtkeeles."
+    B: "Laadib avatud tõlke (URL-i trainingTranslationId). languageCode näitab, mis keeles avatud tõlge on (tõlke vormi pealkiri, AI nupu nähtavus).",
+    C: "Laadib koolituse salvestatud põhikeele tõlke (training-translations vastusest isMainLanguage = true), millega eeltäidetakse uue tõlke väljad. Vastuse languageCode on põhikeel (et)."
   };
   var showAllNotes = false;
   function stateNoteIds() {
