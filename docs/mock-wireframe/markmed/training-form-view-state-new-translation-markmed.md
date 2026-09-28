@@ -109,7 +109,7 @@ TrainingTranslationItemDto.java
 ]
 
 API teenuse lisainfo:
-Koolituse olemasolevad tõlked. Frontend võrdleb languageCode väärtusi store'i contentLanguages massiiviga: tõlge olemas → värviline lipp, puudub → hall lipp. isMainLanguage tuleb language.is_main_language veerust; põhikeele tõlkega eeltäidetakse uue tõlke vorm.
+Koolituse olemasolevad tõlked. Frontend võrdleb languageCode väärtusi store'i supportedLanguages massiiviga: tõlge olemas → värviline lipp, puudub → hall lipp. isMainLanguage tuleb language.is_main_language veerust; põhikeele tõlkega eeltäidetakse uue tõlke vorm.
 
 Veateated:
 HTTP: 404

@@ -44,7 +44,7 @@ Järjekord lihtsamast keerulisemani. 1.1–1.4 on lihtsad nimekirjad ja neid saa
 
 Taskis kirjeldatakse terve vaade:
 - `state` tuletamine URL-ist (`new-training` / `update` / `new-translation`) ja `$route.query` jälgija, mis laadib andmed iga `router.replace`-i järel uuesti;
-- store'i `contentLanguages` (`isMainLanguage`), lipukesed, "Vali lektor" modal, kinnituse modal, AI tõlke nupp koos tooltip'iga;
+- store'i `supportedLanguages` (`isMainLanguage`), lipukesed, "Vali lektor" modal, kinnituse modal, AI tõlke nupp koos tooltip'iga;
 - iga oleku päringud (märkmete failidest).
 
 **Testitavus selles etapis:** olek `new-training` töötab päris backendiga. Olekute `update` ja `new-translation` UI ehitatakse valmis, aga päringud hakkavad tööle alles 3. etapi teenustega — seni saab kasutada märkmete JSON näidiseid.

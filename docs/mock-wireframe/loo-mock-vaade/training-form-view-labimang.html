@@ -290,7 +290,7 @@ textarea { min-height: 88px; resize: vertical; }
   <header class="intro">
     <h1>TrainingFormView.vue — läbimäng</h1>
     <p>Vajuta vormi nuppe ja lipukesi nagu päris vaates. URL, backendi päringud ja olek muutuvad kaasa. Kollased kastid on mockupi märkmed samas vormingus nagu <code>skill-uus-mockup-markmed</code> — neid saab otse Balsamiqi kopeerida.</p>
-    <p>Keeled: <code>et</code>, <code>en</code> ja <code>ru</code> (store'i <code>contentLanguages</code>). Näidisandmed: koolitus 1 „Java algkursus“ on andmebaasist (<code>3_import.sql</code>), sellel on et ja en tõlge — vene lipp on hall. <strong>Vene keel on ainult mockupis</strong>: andmebaasis (<code>3_import.sql</code>) seda pole, venekeelsed kategooriad ja rahastustüübid on näidised. „Power BI edasijõudnutele“ on mockupi lk 7 põhjal uus koolitus, mis saab ID <code>3</code>. DTO-de väljad on <strong>ettepanek</strong> — need kinnitatakse plaanifailis.</p>
+    <p>Keeled: <code>et</code>, <code>en</code> ja <code>ru</code> (store'i <code>supportedLanguages</code>). Näidisandmed: koolitus 1 „Java algkursus“ on andmebaasist (<code>3_import.sql</code>), sellel on et ja en tõlge — vene lipp on hall. <strong>Vene keel on ainult mockupis</strong>: andmebaasis (<code>3_import.sql</code>) seda pole, venekeelsed kategooriad ja rahastustüübid on näidised. „Power BI edasijõudnutele“ on mockupi lk 7 põhjal uus koolitus, mis saab ID <code>3</code>. DTO-de väljad on <strong>ettepanek</strong> — need kinnitatakse plaanifailis.</p>
     <div class="toolbar">
       <button class="tbtn" id="btn-a" type="button" data-mode="A"><span>A. Alusta uue koolitusega</span><span class="tstate">state: "new-training"</span></button>
       <button class="tbtn" id="btn-b" type="button" data-mode="B"><span>B. Muuda koolitust (Java algkursus)</span><span class="tstate">state: "update"</span></button>
@@ -316,7 +316,7 @@ textarea { min-height: 88px; resize: vertical; }
     <aside class="side">
       <div class="card">
         <h3>Store (frontend)</h3>
-        <div class="store"><span class="sub">contentLanguages</span><pre id="store"></pre></div>
+        <div class="store"><span class="sub">supportedLanguages</span><pre id="store"></pre></div>
         <h3>Praegune olek</h3>
         <dl class="kv" id="statekv"></dl>
       </div>
@@ -357,11 +357,11 @@ textarea { min-height: 88px; resize: vertical; }
   var FUNDING = { 1: { et: "Töötukassa", en: "Job Centre", ru: "Касса по безработице" }, 2: { et: "EL rahastus", en: "EU Funded", ru: "Финансирование ЕС" } };
   var LOCATIONS = { 1: "BCS Koolitus", 2: "Veebiõpe", 3: "Hübriidõpe" };
   var LECTURERS = [ { lecturerId: 1, lecturerName: "Mari Tamm" }, { lecturerId: 2, lecturerName: "Jaan Kask" } ];
-  // frontendi store: contentLanguages (hard coded)
-  var CONTENT_LANGUAGES = [
-    { languageCode: "et", isMainLanguage: true, languageFlag: "@/assets/flags/et-flag.png", languageI18n: "@/locales/et.json" },
-    { languageCode: "en", isMainLanguage: false, languageFlag: "@/assets/flags/en-flag.png", languageI18n: "@/locales/en.json" },
-    { languageCode: "ru", isMainLanguage: false, languageFlag: "@/assets/flags/ru-flag.png", languageI18n: "@/locales/ru.json" }
+  // frontendi store: supportedLanguages (hard coded)
+  var SUPPORTED_LANGUAGES = [
+    { languageCode: "et", isMainLanguage: true, flagClass: "fi-ee" },
+    { languageCode: "en", isMainLanguage: false, flagClass: "fi-gb" },
+    { languageCode: "ru", isMainLanguage: false, flagClass: "fi-ru" }
   ];
   var UI_LANG = "et"; // kasutajaliidese keel (päris rakenduses navbari keelevalik); rippmenüüd järgivad seda, mitte tõlke keelt
   var MAIN_LANGUAGE_ID = 1; // language.is_main_language = true
@@ -636,7 +636,7 @@ textarea { min-height: 88px; resize: vertical; }
     var badge = st.status ? '<span class="badge ' + (st.status === "P" ? "pub" : "draft") + '">' + (st.status === "P" ? "Publitseeritud" : "Mustand") + '</span>' : "";
     var flags = "";
     if (st.mode !== "A") {
-      flags = '<div class="flags">' + CONTENT_LANGUAGES.map(function (cl) {
+      flags = '<div class="flags">' + SUPPORTED_LANGUAGES.map(function (cl) {
         var c = cl.languageCode;
         var have = st.translations.some(function (x) { return x.languageCode === c; });
         var cur = c === code;
@@ -699,7 +699,7 @@ textarea { min-height: 88px; resize: vertical; }
       ["status", st.status ? st.status + (st.status === "U" ? " (mustand)" : " (publitseeritud)") : "— (määrab backend: U)"],
       ["userId", "1 (localStorage)"]
     ];
-    document.getElementById("store").textContent = j(CONTENT_LANGUAGES);
+    document.getElementById("store").textContent = j(SUPPORTED_LANGUAGES);
     document.getElementById("statekv").innerHTML = rows.map(function (r) { return "<dt>" + r[0] + "</dt><dd>" + esc(r[1]) + "</dd>"; }).join("");
   }
 
@@ -925,7 +925,7 @@ textarea { min-height: 88px; resize: vertical; }
     { id: "n-translations", title: "GET /api/training/{id}/training-translations", draft: true, text: [
       "API: GET /api/training/{trainingId}/training-translations", "",
       "Response (200):", "TrainingTranslationItemDto.java", "[", "  {", "    \"trainingTranslationId\": 1,", "    \"languageId\": 1,", "    \"languageCode\": \"et\",", "    \"isMainLanguage\": true", "  },", "  ...", "]", "",
-      "API teenuse lisainfo:", "Koolituse olemasolevad tõlked. Frontend võrdleb languageCode väärtusi store'i contentLanguages massiiviga: tõlge olemas → värviline lipp, puudub → hall lipp. isMainLanguage tuleb language.is_main_language veerust; põhikeele tõlkega eeltäidetakse uue tõlke vorm.", "",
+      "API teenuse lisainfo:", "Koolituse olemasolevad tõlked. Frontend võrdleb languageCode väärtusi store'i supportedLanguages massiiviga: tõlge olemas → värviline lipp, puudub → hall lipp. isMainLanguage tuleb language.is_main_language veerust; põhikeele tõlkega eeltäidetakse uue tõlke vorm.", "",
       "Veateated:", PK("trainingId")] },
     { id: "n-ai-translation", title: "GET /api/training/{id}/ai-translation", draft: true, text: [
       "API: GET /api/training/{trainingId}/ai-translation", "",

@@ -32,7 +32,7 @@ Toimumiskorrad (`course` tabel, kuupäevad, hind) ei kuulu selle vaate skoopi �
 |---|---|---|
 | Pealkiri | Tekst | `new-training`: "Lisa uus koolitus"; `update`: "Muuda koolitust"; `new-translation`: "Lisa koolituse tõlge" |
 | Staatuse märgis | Badge | "Mustand" (`status = "U"`) või "Publitseeritud" (`"P"`); ainult `update` ja `new-translation` |
-| Tõlgete lipukesed | Nupud (`TranslationFlags`) | Store'i `contentLanguages` iga keele kohta lipp (`flag-icons`); tõlge olemas → värviline, puudub → hall; avatud tõlke lipp raamiga. Ainult `update` ja `new-translation` |
+| Tõlgete lipukesed | Nupud (`TranslationFlags`) | Store'i `supportedLanguages` iga keele kohta lipp (`flag-icons`); tõlge olemas → värviline, puudub → hall; avatud tõlke lipp raamiga. Ainult `update` ja `new-translation` |
 | Kategooria | Rippmenüü | `GET /api/categories`, kasutajaliidese keeles; kohustuslik |
 | Koolituse keel | Rippmenüü | `GET /api/languages`; õppekeel (`trainingLanguageId`), mitte tõlke keel; kohustuslik |
 | Toimumiskoht | Rippmenüü | `GET /api/locations`; kohustuslik |
@@ -70,7 +70,7 @@ Koolituse andmete sektsioon on tõlke sektsiooni kohal (vertikaalne paigutus), o
 
 ## API kutsed
 
-Kõik kutsed on failides `frontend/src/api-services/`. **Mock-vastuseid kasutavad kõik uued kutsed, välja arvatud need, mille backend on valmis** (vt "Mock-vastused" allpool). Päris kutsele vahetatud: `GET /api/locations`, `GET /api/lecturers`.
+Kõik kutsed on failides `frontend/src/api-services/`. **Mock-vastuseid kasutavad kõik uued kutsed, välja arvatud need, mille backend on valmis** (vt "Mock-vastused" allpool). Päris kutsele vahetatud: `GET /api/languages`, `GET /api/locations`, `GET /api/lecturers`.
 
 | Teenus | Meetod `api-services`-is | Backend task | Etapp |
 |---|---|---|---|
@@ -195,7 +195,7 @@ Kood on loodud (mustri eeskuju: Options API, `handle`-meetodid, props/emits `eve
 | `components/common/TranslationFlags.vue` | Tõlgete lipukesed |
 | `components/common/AlertDanger.vue`, `AlertSuccess.vue` | Teated |
 | `components/modals/BaseModal.vue`, `ConfirmModal.vue`, `LecturerSelectModal.vue` | Modalid |
-| `stores/languageStore.js` | Pinia store: `contentLanguages` (`languageCode`, `isMainLanguage`, `languageFlag`), getter `mainLanguageCode` |
+| `stores/languageStore.js` | Pinia store: `supportedLanguages` (`languageCode`, `isMainLanguage`, `flagClass`), getter `mainLanguageCode` |
 | `services/SessionStorageService.js` | `getUserId()`, `userIsAdmin()` |
 | `services/NavigationService.js` | + `replaceTrainingFormView(query)`, `navigateToLoginView()`, `navigateToNotAuthorizedView()` |
 | `router/index.js` | + rajad `/training-form` (`trainingFormRoute`) ja `/not-authorized` (`notAuthorizedRoute`) |

@@ -48,7 +48,7 @@ Väljade selgitused:
 
 Tulemus on sorteeritud `language_id` järgi kasvavalt.
 
-Massiivis on ainult read, mille kohta on olemasolev `training_translation` kirje — puuduva tõlke jaoks rida ei tagastata (frontend tuletab puuduvad keeled, võrreldes vastust store'i `contentLanguages` massiiviga).
+Massiivis on ainult read, mille kohta on olemasolev `training_translation` kirje — puuduva tõlke jaoks rida ei tagastata (frontend tuletab puuduvad keeled, võrreldes vastust store'i `supportedLanguages` massiiviga).
 
 ## Eesmärk
 

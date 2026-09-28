@@ -16,9 +16,9 @@ Selles failis on `TrainingFormView.vue` olekud ja andmevood skeemidena (Mermaid)
 - Rippmenüüde väärtused tulevad backendist, `contentLang` = **kasutajaliidese keel** (Pinia `languageStore.contentLang`, valitakse navbaris). Keele vahetamisel laaditakse ainult rippmenüüd uuesti (`watch: contentLang`), vormi sisu jääb alles. Avatud tõlke keel on sellest sõltumatu.
 - `userId` võetakse localStorage'ist ja saadetakse `POST /api/training` body's.
 - Lektorite ja toimumiskohtade otsing/valik käib backendis (`GET /api/lecturers?search=`, `GET /api/locations`).
-- Põhikeel on määratud andmebaasis (`language.is_main_language`, praegu `et`) ja frontendi store'is (`contentLanguages[].isMainLanguage`). Uus koolitus luuakse põhikeele tõlkega ja uue tõlke vorm eeltäidetakse põhikeele tekstiga.
+- Põhikeel on määratud andmebaasis (`language.is_main_language`, praegu `et`) ja frontendi store'is (`supportedLanguages[].isMainLanguage`). Uus koolitus luuakse põhikeele tõlkega ja uue tõlke vorm eeltäidetakse põhikeele tekstiga.
 - "Tee AI tõlge" nupp on olekus C ja olekus B, kui avatud tõlge pole põhikeeles. Nupp kutsub `GET /api/training/{trainingId}/ai-translation?languageId={id}`, mis tõlgib alati **salvestatud põhikeele tõlke** (mitte vormi sisu) ja tagastab `AiTranslationDto` (`title`, `shortDescription`, `description`). Tulemus kuvatakse ainult vormis — andmebaasi läheb see alles "Lisa tõlge" / "Salvesta" nupuga. Kui vormis on salvestamata muudatusi, küsitakse enne üle kirjutamist kinnitust. Nupu tooltip selgitab seda kasutajale.
-- Olemasolevad tõlked kuvatakse lipukestena: frontendi store'i `contentLanguages` (`et`, `en`, `ru`) võrreldakse `GET /api/training/{trainingId}/training-translations` vastusega — tõlge olemas → värviline lipp, puudub → hall lipp.
+- Olemasolevad tõlked kuvatakse lipukestena: frontendi store'i `supportedLanguages` (`et`, `en`, `ru`) võrreldakse `GET /api/training/{trainingId}/training-translations` vastusega — tõlge olemas → värviline lipp, puudub → hall lipp.
 
 ---
 
@@ -77,7 +77,7 @@ flowchart TD
     C --> LoadC[GET /api/training/trainingId<br/>GET /api/training-translation/trainingTranslationId<br/>GET /api/training/trainingId/training-translations]
     LoadC --> DropC[GET /api/categories?contentLang=UI keel<br/>GET /api/funding-types?contentLang=UI keel]
 
-    DropB --> Flags[Lipukesed: store contentLanguages<br/>vs training-translations vastus]
+    DropB --> Flags[Lipukesed: store supportedLanguages<br/>vs training-translations vastus]
     DropC --> Flags
     Flags --> Status{status}
     Status -- U --> BtnP[näita nuppu Publitseeri]

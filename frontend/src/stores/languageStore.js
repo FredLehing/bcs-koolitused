@@ -3,7 +3,7 @@ import i18n, { getSavedLocale, LOCALE_STORAGE_KEY } from '@/i18n.js'
 
 // Süsteemi sisukeeled (tõlgete keeled), frontendis hard coded.
 // Peab ühtima andmebaasi language tabeliga (languageCode, is_main_language).
-// languageFlag on flag-icons klass (https://flagicons.lipis.dev/).
+// flagClass on flag-icons klass (https://flagicons.lipis.dev/).
 //
 // contentLang on kasutajaliidese keel ja ühtlasi keel, milles backendist küsitakse tõlgitud andmeid
 // (API parameeter contentLang). Keele vahetamine käib AINULT setContentLang() kaudu — see hoiab
@@ -12,14 +12,21 @@ import i18n, { getSavedLocale, LOCALE_STORAGE_KEY } from '@/i18n.js'
 export const useLanguageStore = defineStore('language', {
   state: () => ({
     contentLang: getSavedLocale(),
-    contentLanguages: [
-      { languageCode: 'et', isMainLanguage: true, languageFlag: 'fi-ee' },
-      { languageCode: 'en', isMainLanguage: false, languageFlag: 'fi-gb' },
+    supportedLanguages: [
+      { languageCode: 'et', isMainLanguage: true, flagClass: 'fi-ee' },
+      { languageCode: 'en', isMainLanguage: false, flagClass: 'fi-gb' },
     ],
   }),
   getters: {
     mainLanguageCode: (state) =>
-      state.contentLanguages.find((contentLanguage) => contentLanguage.isMainLanguage).languageCode,
+      state.supportedLanguages.find((supportedLanguage) => supportedLanguage.isMainLanguage)
+        .languageCode,
+
+    // Getter, mis tagastab funktsiooni — nii saab getterile argumendi anda: getFlagClass('et')
+    getFlagClass: (state) => (languageCode) =>
+      state.supportedLanguages.find(
+        (supportedLanguage) => supportedLanguage.languageCode === languageCode,
+      )?.flagClass ?? '',
   },
   actions: {
     setContentLang(languageCode) {

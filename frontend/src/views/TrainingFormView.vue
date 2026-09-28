@@ -91,7 +91,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(useLanguageStore, ['contentLang', 'contentLanguages', 'mainLanguageCode']),
+    ...mapState(useLanguageStore, ['contentLang', 'supportedLanguages', 'mainLanguageCode']),
 
     pageTitle() {
       if (this.state === STATE_NEW_TRAINING) {
@@ -628,7 +628,7 @@ export default {
           <TranslationFlags
             v-if="!isNewTraining"
             class="ms-auto"
-            :content-languages="contentLanguages"
+            :supported-languages="supportedLanguages"
             :training-translations="trainingTranslations"
             :current-language-code="translation.languageCode"
             @event-translation-flag-clicked="handleTranslationFlagClicked"

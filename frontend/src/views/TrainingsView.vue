@@ -1,4 +1,6 @@
 <script>
+import { mapState } from 'pinia'
+import { useLanguageStore } from '@/stores/languageStore.js'
 import TrainingService from '@/api-services/TrainingService.js'
 import NavigationService from '@/services/NavigationService.js'
 import TrainingCard from '@/components/TrainingCard.vue'
@@ -13,9 +15,8 @@ export default {
       limit: 3,
       page: 0,
       trainingLanguageId: 0,
-      contentLang: localStorage.getItem('contentLang'),
       totalPages: 0,
-      trainingSummaries: [
+      trainings: [
         {
           trainingId: 0,
           trainingLanguageCode: '',
@@ -35,6 +36,16 @@ export default {
       ],
     }
   },
+  computed: {
+    // Kasutajaliidese keel (navbaris valitud) — sellega küsitakse koolituste tõlgitud väljad
+    ...mapState(useLanguageStore, ['contentLang']),
+  },
+  watch: {
+    // Keele vahetus navbaris → laadi koolitused uues keeles (filtrid ja lehekülg jäävad alles)
+    contentLang() {
+      this.getTrainings()
+    },
+  },
   methods: {
     getTrainings() {
       TrainingService.sendGetTrainingsRequest(
@@ -45,13 +56,13 @@ export default {
         this.trainingLanguageId,
         this.contentLang,
       )
-        .then((response) => this.handleGetTrainings(response))
+        .then((response) => this.handleGetTrainingsResponse(response))
         .catch(() => NavigationService.navigateToErrorView())
         .finally()
     },
-    handleGetTrainings(response) {
+    handleGetTrainingsResponse(response) {
       this.totalPages = response.data.totalPages
-      this.trainingSummaries = response.data.trainingSummaries
+      this.trainings = response.data.trainingSummaries
     },
   },
   beforeMount() {
@@ -65,11 +76,11 @@ export default {
     <div class="row">
       <div class="col-2">Siin on filtrid</div>
       <div class="col-10">
-          <TrainingCard
-            v-for="training in trainingSummaries"
-            :key="training.trainingId"
-            :training="training"
-          />
+        <TrainingCard
+          v-for="training in trainings"
+          :key="training.trainingId"
+          :training="training"
+        />
       </div>
     </div>
   </div>

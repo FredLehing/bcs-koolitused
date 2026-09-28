@@ -44,20 +44,20 @@
           </div>
 
           <div class="d-flex align-items-center gap-3">
-            <!-- Keelevalik: keeled tulevad store'ist (contentLanguages) -->
+            <!-- Keelevalik: keeled tulevad store'ist (supportedLanguages) -->
             <div class="d-flex align-items-center gap-1">
               <button
-                v-for="contentLanguage in languageStore.contentLanguages"
-                :key="contentLanguage.languageCode"
-                @click="languageStore.setContentLang(contentLanguage.languageCode)"
+                v-for="supportedLanguage in languageStore.supportedLanguages"
+                :key="supportedLanguage.languageCode"
+                @click="languageStore.setContentLang(supportedLanguage.languageCode)"
                 :class="{
-                  'border-primary': languageStore.contentLang === contentLanguage.languageCode,
+                  'border-primary': languageStore.contentLang === supportedLanguage.languageCode,
                 }"
-                :title="contentLanguage.languageCode.toUpperCase()"
+                :title="supportedLanguage.languageCode.toUpperCase()"
                 class="btn btn-sm btn-light border"
                 type="button"
               >
-                <span class="fi" :class="contentLanguage.languageFlag"></span>
+                <span class="fi" :class="supportedLanguage.flagClass"></span>
               </button>
             </div>
             <RouterLink class="btn btn-outline-secondary btn-sm" to="/login">
