@@ -25,6 +25,15 @@
           <a class="nav-link" href="#">Blogi</a>
           <a class="nav-link" href="#">Kontakt</a>
           <a class="nav-link" href="#">Tagasiside</a>
+
+          <div v-if="userIsAdmin" class="dropdown">
+            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Admin </a>
+            <div class="dropdown-menu bg-primary bg-opacity-50">
+              <RouterLink class="nav-link" :to="{ name: 'trainingFormRoute' }"
+                >Lisa uus koolitus</RouterLink
+              >
+            </div>
+          </div>
         </div>
 
         <div>
@@ -43,5 +52,13 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import FooterComponent from '@/components/FooterComponent.vue'
+import SessionStorageService from '@/services/SessionStorageService.js'
+
+const route = useRoute()
+
+// sessionStorage ei ole reaktiivne — kontroll tehakse uuesti iga marsruudi muutusel (nt pärast sisselogimist)
+const userIsAdmin = computed(() => route.fullPath !== '' && SessionStorageService.userIsAdmin())
 </script>

@@ -4,6 +4,8 @@ import TestView from "@/views/TestView.vue";
 import LoginView from "@/views/LoginView.vue";
 import TrainingsView from '@/views/TrainingsView.vue'
 import ErrorView from '@/views/ErrorView.vue'
+import TrainingFormView from '@/views/TrainingFormView.vue'
+import NotAuthorizedView from '@/views/NotAuthorizedView.vue'
 
 
 const router = createRouter({
@@ -28,6 +30,16 @@ const router = createRouter({
       path: '/trainings',
       name: 'trainingsRoute',
       component: TrainingsView,
+    },
+    {
+      path: '/training-form',
+      name: 'trainingFormRoute',
+      component: TrainingFormView,
+    },
+    {
+      path: '/not-authorized',
+      name: 'notAuthorizedRoute',
+      component: NotAuthorizedView,
     },
     {
       path: '/error',

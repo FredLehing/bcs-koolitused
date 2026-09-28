@@ -9,7 +9,8 @@ INSERT INTO role (id, name) VALUES
 -- Table: user
 INSERT INTO "user" (id, role_id, email, password, status, created_at) VALUES
     (1, 1, 'admin@vali-it.ee', 'parool123', 'A', '2026-01-01 00:00:00'),
-    (2, 2, 'kasutaja@vali-it.ee', 'parool123', 'A', '2026-09-05 09:00:00');
+    (2, 2, 'kasutaja@vali-it.ee', 'parool123', 'A', '2026-09-05 09:00:00'),
+    (3, 1, 'admin', '123', 'A', '2026-09-28 00:00:00'); -- lihtne testkonto (admin)
 
 -- Table: language
 INSERT INTO language (id, code, name, is_main_language) VALUES

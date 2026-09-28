@@ -12,4 +12,17 @@ export default {
   navigateToHomeView() {
     router.push({ name: 'homeRoute' })
   },
+
+  navigateToLoginView() {
+    router.push({ name: 'loginRoute' })
+  },
+
+  navigateToNotAuthorizedView() {
+    router.push({ name: 'notAuthorizedRoute' })
+  },
+
+  // Vahetab TrainingFormView oleku (query parameetrid) ilma brauseri ajalukku uut kirjet lisamata
+  replaceTrainingFormView(query) {
+    router.replace({ name: 'trainingFormRoute', query: query })
+  },
 }
