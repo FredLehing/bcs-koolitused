@@ -1,6 +1,9 @@
 <script>
+import { PhShootingStar } from '@phosphor-icons/vue'
+
 export default {
   name: 'TrainingCard',
+  components: { PhShootingStar },
   props: {
     training: Object,
   },
@@ -13,9 +16,10 @@ export default {
 </script>
 
 <template>
-  <div class="card mb-4">
-    <h5 class="card-header fs-3">
+  <div class="card mb-4" :class="{ 'bg-warning-subtle': training.isPromoted }">
+    <h5 class="card-header fs-3 d-flex justify-content-between align-items-center">
       {{ training.title }}
+      <PhShootingStar v-if="training.isPromoted" :size="32" />
     </h5>
     <div class="card-body d-flex justify-content-between fs-5">
       <div>
@@ -33,7 +37,7 @@ export default {
       <div class="d-flex align-items-center flex-column gap-3 fs-5">
         <span class="fi fs-3" :class="trainingLanguageFlag"></span>
         <span v-if="training.isOrderable" class="badge text-bg-success">Tellitav</span>
-        <a href="#" class="btn btn-primary">Vaata lähemalt</a>
+        <RouterLink to="/training" class="btn btn-primary">Vaata lähemalt</RouterLink>
       </div>
     </div>
   </div>

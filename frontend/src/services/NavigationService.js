@@ -21,6 +21,10 @@ export default {
     router.push({ name: 'notAuthorizedRoute' })
   },
 
+  navigateToTrainingView() {
+    router.push({ name: 'trainingRoute' })
+  },
+
   // Vahetab TrainingFormView oleku (query parameetrid) ilma brauseri ajalukku uut kirjet lisamata
   replaceTrainingFormView(query) {
     router.replace({ name: 'trainingFormRoute', query: query })
