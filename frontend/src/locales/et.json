@@ -31,7 +31,8 @@
     "rememberMe": "Jäta mind meelde",
     "logIn": "Logi sisse",
     "forgotPassword": "Unustasid salasõna?",
-    "errorMessage": "Täida kõik väljad"
+    "errorMessage": "Täida kõik väljad",
+    "incorrectCredentials": "Vale email või parool"
   },
   "footer": {
     "facebook": "Leia meid Facebookist",

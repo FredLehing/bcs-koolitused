@@ -32,7 +32,8 @@
     "rememberMe": "Remember Me",
     "logIn": "LOGIN",
     "forgotPassword": "Forgot Password?",
-    "errorMessage": "Please fill in all required fields"
+    "errorMessage": "Please fill in all required fields",
+    "incorrectCredentials": "Incorrect email or password"
   },
 
   "footer": {

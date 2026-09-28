@@ -30,7 +30,11 @@ export default {
     },
 
     handleLoginError(loginError) {
-      this.errorMessage = loginError.response.data.message
+      if (loginError.response.data.errorCode === 'INCORRECT_CREDENTIALS') {
+        this.errorMessage = this.$t('login.incorrectCredentials')
+      } else {
+        this.errorMessage = loginError.response.data.message
+      }
     },
   },
 }
@@ -74,11 +78,7 @@ export default {
           </div>
         </div>
         <div></div>
-        <button
-          @click="login"
-          type="button"
-          class="btn btn-primary w-75 mx-auto text-uppercase"
-        >
+        <button @click="login" type="button" class="btn btn-primary w-75 mx-auto text-uppercase">
           {{ $t('login.logIn') }}
         </button>
       </div>
