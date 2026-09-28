@@ -15,7 +15,24 @@ export default {
       trainingLanguageId: 0,
       contentLang: 'et',
       totalPages: 0,
-      trainingSummaries: [],
+      trainingSummaries: [
+        {
+          trainingId: 0,
+          trainingLanguageCode: '',
+          title: '',
+          shortDescription: '',
+          categoryId: 0,
+          categoryName: '',
+          isOrderable: false,
+          isPromoted: false,
+          fundingTypes: [
+            {
+              fundingTypeId: 0,
+              fundingTypeName: '',
+            },
+          ],
+        },
+      ],
     }
   },
   methods: {
