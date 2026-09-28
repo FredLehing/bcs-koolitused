@@ -15,7 +15,7 @@ export default {
     login() {
       this.errorMessage = ''
       if (this.email === '' || this.password === '') {
-        this.errorMessage = 'Täida kõik väljad'
+        this.errorMessage = this.$t('login.errorMessage')
       } else {
         LoginService.sendLoginRequest(this.email, this.password)
           .then((response) => this.handleLoginResponse(response.data))
