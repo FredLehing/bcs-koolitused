@@ -62,10 +62,15 @@ export default {
 
 <template>
   <div class="container">
-    <TrainingCard
-      v-for="training in trainingSummaries"
-      :key="training.trainingId"
-      :training="training"
-    />
+    <div class="row">
+      <div class="col-2">Siin on filtrid</div>
+      <div class="col-10">
+          <TrainingCard
+            v-for="training in trainingSummaries"
+            :key="training.trainingId"
+            :training="training"
+          />
+      </div>
+    </div>
   </div>
 </template>
