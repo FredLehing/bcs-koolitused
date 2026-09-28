@@ -25,6 +25,9 @@
     "login": "Logi sisse",
     "home": "Avalehele"
   },
+  "login": {
+    "title": "Sisselogimine"
+  },
   "trainingForm": {
     "title": {
       "newTraining": "Lisa uus koolitus",

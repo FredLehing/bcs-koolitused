@@ -13,7 +13,7 @@ export default {
       limit: 3,
       page: 0,
       trainingLanguageId: 0,
-      contentLang: 'et',
+      contentLang: localStorage.getItem('contentLang'),
       totalPages: 0,
       trainingSummaries: [
         {
@@ -65,11 +65,11 @@ export default {
     <div class="row">
       <div class="col-2">Siin on filtrid</div>
       <div class="col-10">
-          <TrainingCard
-            v-for="training in trainingSummaries"
-            :key="training.trainingId"
-            :training="training"
-          />
+        <TrainingCard
+          v-for="training in trainingSummaries"
+          :key="training.trainingId"
+          :training="training"
+        />
       </div>
     </div>
   </div>

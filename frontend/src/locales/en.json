@@ -25,6 +25,10 @@
     "login": "Log in",
     "home": "Home"
   },
+
+  "login": {
+    "title": "Log In"
+  },
   "trainingForm": {
     "title": {
       "newTraining": "Add new training",
