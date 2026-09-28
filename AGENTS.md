@@ -6,3 +6,4 @@
 - Lähtu tegelikust töökeskkonnast. Ära eelda, et CLAUDE.md failis kirjeldatud Claude Code'i WSL-keskkond kehtib ka Codexi kohta.
 - GitHub on ainult lugemiseks. Ära käivita ühtegi GitHubi toimingut, mis muudab kohaliku repositooriumi olekut või GitHubi sisu, kui seda ei paluta.
 - Sealhulgas ära tee add, commit, push, pull, fetch, checkout, branch, merge, rebase ega reset toiminguid, kui seda ei paluta.
+- `CLAUDE.md` failides olevad Claude Code'i tööriista- või keskkonnaspetsiifilised juhised on informatiivsed. Rakenda neist projekti-, arhitektuuri-, koodi- ja dokumentatsioonireegleid, kuid kasuta Codexi tegelikku runtime'i ja saadaval olevaid tööriistu.
