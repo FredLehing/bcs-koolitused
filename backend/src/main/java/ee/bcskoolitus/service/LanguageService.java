@@ -1,11 +1,9 @@
 package ee.bcskoolitus.service;
 
 import ee.bcskoolitus.controller.common.dto.SystemLanguageDto;
-import ee.bcskoolitus.persistance.language.Language;
-import ee.bcskoolitus.persistance.language.LanguageMapper;
-import ee.bcskoolitus.persistance.language.LanguageRepository;
 import ee.bcskoolitus.infrastructure.exception.PrimaryKeyNotFoundException;
 import ee.bcskoolitus.persistance.language.Language;
+import ee.bcskoolitus.persistance.language.LanguageMapper;
 import ee.bcskoolitus.persistance.language.LanguageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
