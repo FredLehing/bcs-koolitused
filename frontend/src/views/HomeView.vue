@@ -3,12 +3,6 @@
     <div class="alert alert-primary" role="alert">See on koduvaade, see asub rajal (/)</div>
     <TestComponent />
   </div>
-
-  <div>
-    <gb-flag code="fr" size="small" />
-
-  </div>
-
 </template>
 
 <script>

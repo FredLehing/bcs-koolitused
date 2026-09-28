@@ -13,7 +13,7 @@ export default {
       limit: 3,
       page: 0,
       trainingLanguageId: 0,
-      contentLang: 'et',
+      contentLang: localStorage.getItem('contentLang'),
       totalPages: 0,
       trainingSummaries: [
         {
