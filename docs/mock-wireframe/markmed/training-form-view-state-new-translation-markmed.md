@@ -10,7 +10,7 @@ Failinimi: TrainingFormView.vue
 Frontend rada: /training-form?trainingId={id}&languageId={id}
 
 Vaatega seotud lisainfo:
-state: "new-translation" — URL-is trainingId ja languageId (keel, mille tõlge puudub). Pealkiri "Lisa koolituse tõlge". Koolituse väljad on kirjutuskaitstud, rippmenüüd laaditakse sihtkeeles.
+state: "new-translation" — URL-is trainingId ja languageId (keel, mille tõlge puudub). Pealkiri "Lisa koolituse tõlge". Koolituse väljad on kirjutuskaitstud; rippmenüüd (kategooriad, rahastustüübid) laaditakse kasutajaliidese keeles (store'i contentLang) ja laaditakse keele vahetamisel navbaris uuesti — vormi sisu jääb alles.
 Tõlke väljad eeltäidetakse salvestatud põhikeele (et) tõlkega, mida admin tõlgib. "Tee AI tõlge" tõlgib salvestatud põhikeele teksti ja täidab ainult vormi; salvestamata muudatuste korral küsitakse enne kinnitust.
 "Lisa tõlge" → POST /api/training/{trainingId}/training-translation. Vastuse trainingTranslationId järgi tehakse router.replace → state "update".
 Staatuse nupp ("Publitseeri" / "Liiguta mustandisse") nagu state "update" puhul.
@@ -109,7 +109,7 @@ TrainingTranslationItemDto.java
 ]
 
 API teenuse lisainfo:
-Koolituse olemasolevad tõlked. Frontend võrdleb languageCode väärtusi store'i contentLanguages massiiviga: tõlge olemas → värviline lipp, puudub → hall lipp. isMainLanguage tuleb language.is_main_language veerust; põhikeele tõlkega eeltäidetakse uue tõlke vorm.
+Koolituse olemasolevad tõlked. Frontend võrdleb languageCode väärtusi store'i supportedLanguages massiiviga: tõlge olemas → värviline lipp, puudub → hall lipp. isMainLanguage tuleb language.is_main_language veerust; põhikeele tõlkega eeltäidetakse uue tõlke vorm.
 
 Veateated:
 HTTP: 404
@@ -135,7 +135,7 @@ TrainingTranslationDto.java
 }
 
 API teenuse lisainfo:
-Laadib koolituse salvestatud põhikeele tõlke (training-translations vastusest isMainLanguage = true), millega eeltäidetakse uue tõlke väljad. Vastuse languageCode on põhikeel (et), rippmenüüd laaditakse siiski sihtkeeles.
+Laadib koolituse salvestatud põhikeele tõlke (training-translations vastusest isMainLanguage = true), millega eeltäidetakse uue tõlke väljad. Vastuse languageCode on põhikeel (et).
 
 Veateated:
 HTTP: 404
@@ -162,7 +162,7 @@ CategoryDto.java
 ]
 
 API teenuse lisainfo:
-Tagastab kõik kategooriad contentLang keeles (category_translation kaudu). TrainingFormView kutsub avatud tõlke keelega.
+Tagastab kõik kategooriad contentLang keeles (category_translation kaudu). TrainingFormView kutsub kasutajaliidese keelega (store'i contentLang) ja kutsub uuesti, kui keel navbaris vahetub.
 
 Veateated: —
 ```
