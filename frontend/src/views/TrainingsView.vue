@@ -64,6 +64,10 @@ export default {
       this.totalPages = response.data.totalPages
       this.trainings = response.data.trainingSummaries
     },
+    handlePageClick(pagination) {
+      this.page = pagination - 1
+      this.getTrainings()
+    },
   },
   beforeMount() {
     this.getTrainings()
@@ -81,6 +85,25 @@ export default {
           :key="training.trainingId"
           :training="training"
         />
+        <nav aria-label="...">
+          <ul class="pagination justify-content-center">
+            <li class="page-item"><a href="#" class="page-link" :class="{disabled: page === 0 }" @click.prevent="handlePageClick(page)">Eelmine</a></li>
+
+            <li
+              v-for="totalPage in totalPages"
+              :key="totalPage"
+              class="page-item"
+              :class="{ active: totalPage === page + 1 }"
+            >
+              <a class="page-link" href="#" @click.prevent="handlePageClick(totalPage)">{{totalPage}}</a>
+            </li>
+            <li class="page-item">
+              <a class="page-link" href="#" :class="{disabled: page === totalPages - 1}" @click.prevent="handlePageClick(page + 2)"
+                >Järgmine</a
+              >
+            </li>
+          </ul>
+        </nav>
       </div>
     </div>
   </div>
