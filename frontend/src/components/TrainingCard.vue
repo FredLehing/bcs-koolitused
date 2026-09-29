@@ -40,7 +40,10 @@ export default {
       <div class="d-flex align-items-center flex-column gap-3 fs-5">
         <div class="d-flex flex-column align-items-center">
           <small class="text-body-secondary fs-6">{{ $t('trainingCard.language') }}</small>
-          <span class="fi fs-3" :class="getFlagClass(training.trainingLanguageCode)"></span>
+          <span
+            class="fi fs-3 border border-secondary-subtle"
+            :class="getFlagClass(training.trainingLanguageCode)"
+          ></span>
         </div>
         <span v-if="training.isOrderable" class="badge text-bg-success">{{
           $t('trainingCard.orderable')
