@@ -1,4 +1,4 @@
-claude/reesu<meta charset="utf-8">
+<meta charset="utf-8">
 <title>TrainingFormView läbimäng</title>
 <meta name="description" content="TrainingFormView.vue olekud, URL-id, API päringud ja mockupi märkmed interaktiivse läbimänguna.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -290,11 +290,11 @@ textarea { min-height: 88px; resize: vertical; }
   <header class="intro">
     <h1>TrainingFormView.vue — läbimäng</h1>
     <p>Vajuta vormi nuppe ja lipukesi nagu päris vaates. URL, backendi päringud ja olek muutuvad kaasa. Kollased kastid on mockupi märkmed samas vormingus nagu <code>skill-uus-mockup-markmed</code> — neid saab otse Balsamiqi kopeerida.</p>
-    <p>Keeled: <code>et</code>, <code>en</code> ja <code>ru</code> (store'i <code>supportedLanguages</code>). Näidisandmed: koolitus 1 „Java algkursus“ on andmebaasist (<code>3_import.sql</code>), sellel on et ja en tõlge — vene lipp on hall. <strong>Vene keel on ainult mockupis</strong>: andmebaasis (<code>3_import.sql</code>) seda pole, venekeelsed kategooriad ja rahastustüübid on näidised. „Power BI edasijõudnutele“ on mockupi lk 7 põhjal uus koolitus, mis saab ID <code>3</code>. DTO-de väljad on <strong>ettepanek</strong> — need kinnitatakse plaanifailis.</p>
+    <p>Keeled tulevad päringust <code>GET /api/languages</code> (<code>language</code> tabel): <code>et</code> (põhikeel), <code>en</code> ja <code>ru</code>. Tõlkelipud on ainult keeltel, mille <code>requiresTranslation = true</code> (<code>et</code>, <code>en</code>). <code>ru</code> on ainult õppekeel („Koolituse keel“ rippmenüüs), sellesse koolituse sisu ei tõlgita. Näidisandmed: koolitus 1 „Java algkursus“ on andmebaasist (<code>3_import.sql</code>), sellel on et ja en tõlge. Koolitus 9 „Exceli algkursus“ (õppekeel ru, ainult et tõlge) on <strong>ainult läbimängu näidis</strong> olekule C. „Power BI edasijõudnutele“ on mockupi lk 7 põhjal uus koolitus, mis saab ID <code>10</code>. DTO-de väljad on <strong>ettepanek</strong> — need kinnitatakse plaanifailis.</p>
     <div class="toolbar">
       <button class="tbtn" id="btn-a" type="button" data-mode="A"><span>A. Alusta uue koolitusega</span><span class="tstate">state: "new-training"</span></button>
       <button class="tbtn" id="btn-b" type="button" data-mode="B"><span>B. Muuda koolitust (Java algkursus)</span><span class="tstate">state: "update"</span></button>
-      <button class="tbtn" id="btn-c" type="button" data-mode="C"><span>C. Lisa tõlge (Java algkursus „ru“)</span><span class="tstate">state: "new-translation"</span></button>
+      <button class="tbtn" id="btn-c" type="button" data-mode="C"><span>C. Lisa tõlge (Exceli algkursus „en“)</span><span class="tstate">state: "new-translation"</span></button>
     </div>
   </header>
 
@@ -315,8 +315,8 @@ textarea { min-height: 88px; resize: vertical; }
 
     <aside class="side">
       <div class="card">
-        <h3>Store (frontend)</h3>
-        <div class="store"><span class="sub">supportedLanguages</span><pre id="store"></pre></div>
+        <h3>Tõlkekeeled (frontend)</h3>
+        <div class="store"><span class="sub">GET /api/languages → requiresTranslation = true</span><pre id="store"></pre></div>
         <h3>Praegune olek</h3>
         <dl class="kv" id="statekv"></dl>
       </div>
@@ -349,31 +349,28 @@ textarea { min-height: 88px; resize: vertical; }
 
   /* ---------- Andmebaasi näidisandmed (3_import.sql) ---------- */
   var LANGUAGES = [
-    { languageId: 1, languageCode: "et", languageName: "Eesti" },
-    { languageId: 2, languageCode: "en", languageName: "English" },
-    { languageId: 3, languageCode: "ru", languageName: "Русский" }
+    { languageId: 1, languageCode: "et", languageName: "Eesti", isMainLanguage: true, requiresTranslation: true, flagIconCode: "fi-ee" },
+    { languageId: 2, languageCode: "en", languageName: "English", isMainLanguage: false, requiresTranslation: true, flagIconCode: "fi-gb" },
+    { languageId: 3, languageCode: "ru", languageName: "Русский", isMainLanguage: false, requiresTranslation: false, flagIconCode: "fi-ru" }
   ];
-  var CATEGORIES = { 1: { et: "Programmeerimine", en: "Programming", ru: "Программирование" }, 2: { et: "Disain", en: "Design", ru: "Дизайн" }, 3: { et: "Juhtimine", en: "Management", ru: "Управление" } };
-  var FUNDING = { 1: { et: "Töötukassa", en: "Job Centre", ru: "Касса по безработице" }, 2: { et: "EL rahastus", en: "EU Funded", ru: "Финансирование ЕС" } };
+  var CATEGORIES = { 1: { et: "Programmeerimine", en: "Programming" }, 2: { et: "Disain", en: "Design" }, 3: { et: "Juhtimine", en: "Management" } };
+  var FUNDING = { 1: { et: "Töötukassa", en: "Job Centre" }, 2: { et: "EL rahastus", en: "EU Funded" } };
   var LOCATIONS = { 1: "BCS Koolitus", 2: "Veebiõpe", 3: "Hübriidõpe" };
   var LECTURERS = [ { lecturerId: 1, lecturerName: "Mari Tamm" }, { lecturerId: 2, lecturerName: "Jaan Kask" } ];
-  // frontendi store: supportedLanguages (hard coded)
-  var SUPPORTED_LANGUAGES = [
-    { languageCode: "et", isMainLanguage: true, flagClass: "fi-ee" },
-    { languageCode: "en", isMainLanguage: false, flagClass: "fi-gb" },
-    { languageCode: "ru", isMainLanguage: false, flagClass: "fi-ru" }
-  ];
+  // TrainingFormView computed'id GET /api/languages vastusest (frontendis keeli kõvasti kirjas pole)
+  var TRANSLATION_LANGUAGES = LANGUAGES.filter(function (l) { return l.requiresTranslation; });
   var UI_LANG = "et"; // kasutajaliidese keel (päris rakenduses navbari keelevalik); rippmenüüd järgivad seda, mitte tõlke keelt
-  var MAIN_LANGUAGE_ID = 1; // language.is_main_language = true
+  var MAIN_LANGUAGE_ID = LANGUAGES.filter(function (l) { return l.isMainLanguage; })[0].languageId;
 
   var AI_RESULTS = {
     "Java algkursus": {
-      en: { title: "Java Basics", shortDescription: "Fundamentals of Java programming for beginners.", description: "The course covers Java syntax, object-oriented programming, and basic data structures." },
-      ru: { title: "Базовый курс Java", shortDescription: "Основы программирования на Java для начинающих.", description: "На курсе изучаются синтаксис Java, объектно-ориентированное программирование и основные структуры данных." }
+      en: { title: "Java Basics", shortDescription: "Fundamentals of Java programming for beginners.", description: "The course covers Java syntax, object-oriented programming, and basic data structures." }
+    },
+    "Exceli algkursus": {
+      en: { title: "Excel Basics", shortDescription: "Spreadsheets, formulas and charts for beginners.", description: "The course covers working with spreadsheets, basic formulas and creating charts." }
     },
     "Power BI edasijõudnutele": {
-      en: { title: "Power BI for Advanced Users", shortDescription: "Data models, DAX and interactive reports.", description: "The course builds a data model in Power BI, writes DAX formulas and creates interactive reports." },
-      ru: { title: "Power BI для продвинутых", shortDescription: "Модели данных, DAX и интерактивные отчёты.", description: "На курсе в Power BI создаётся модель данных, пишутся формулы DAX и создаются интерактивные отчёты." }
+      en: { title: "Power BI for Advanced Users", shortDescription: "Data models, DAX and interactive reports.", description: "The course builds a data model in Power BI, writes DAX formulas and creates interactive reports." }
     }
   };
   var NEW_ET = { title: "Power BI edasijõudnutele", shortDescription: "Andmemudelid, DAX ja interaktiivsed aruanded.", description: "Kursusel ehitatakse Power BI-s andmemudel, kirjutatakse DAX-valemeid ja luuakse interaktiivseid aruandeid." };
@@ -381,14 +378,17 @@ textarea { min-height: 88px; resize: vertical; }
   function freshDb() {
     return {
       trainings: {
-        1: { trainingId: 1, categoryId: 1, trainingLanguageId: 1, locationId: 1, defaultLecturerId: 1, isOrderable: true, isPromoted: true, status: "P", fundingTypeIds: [1] }
+        1: { trainingId: 1, categoryId: 1, trainingLanguageId: 1, locationId: 1, defaultLecturerId: 1, isOrderable: true, isPromoted: true, status: "P", fundingTypeIds: [1] },
+        // ainult läbimängu näidis: õppekeel ru (tõlget ei vaja), olemas ainult et tõlge
+        9: { trainingId: 9, categoryId: 1, trainingLanguageId: 3, locationId: 2, defaultLecturerId: 2, isOrderable: true, isPromoted: false, status: "U", fundingTypeIds: [] }
       },
       translations: {
         1: { trainingTranslationId: 1, trainingId: 1, languageId: 1, title: "Java algkursus", shortDescription: "Java programmeerimise alused algajatele.", description: "Kursusel õpitakse Java süntaksit, objektorienteeritud programmeerimist ja põhilisi andmestruktuure." },
-        2: { trainingTranslationId: 2, trainingId: 1, languageId: 2, title: "Java Basics", shortDescription: "Fundamentals of Java programming for beginners.", description: "The course covers Java syntax, object-oriented programming, and basic data structures." }
+        2: { trainingTranslationId: 2, trainingId: 1, languageId: 2, title: "Java Basics", shortDescription: "Fundamentals of Java programming for beginners.", description: "The course covers Java syntax, object-oriented programming, and basic data structures." },
+        17: { trainingTranslationId: 17, trainingId: 9, languageId: 1, title: "Exceli algkursus", shortDescription: "Tabelid, valemid ja diagrammid algajatele.", description: "Kursusel õpitakse töötama tabelitega, kasutama põhilisi valemeid ja looma diagramme." }
       },
-      nextTrainingId: 3,
-      nextTranslationId: 5
+      nextTrainingId: 10,
+      nextTranslationId: 18
     };
   }
 
@@ -605,10 +605,10 @@ textarea { min-height: 88px; resize: vertical; }
   }
 
   /* ---------- Lipud ---------- */
+  // võti = flagIconCode (GET /api/languages)
   var FLAG_SVG = {
-    et: '<svg viewBox="0 0 33 21" aria-hidden="true"><rect width="33" height="7" fill="#0072ce"/><rect y="7" width="33" height="7" fill="#000"/><rect y="14" width="33" height="7" fill="#fff"/></svg>',
-    ru: '<svg viewBox="0 0 33 21" aria-hidden="true"><rect width="33" height="7" fill="#fff"/><rect y="7" width="33" height="7" fill="#0039a6"/><rect y="14" width="33" height="7" fill="#d52b1e"/></svg>',
-    en: '<svg viewBox="0 0 60 30" aria-hidden="true"><rect width="60" height="30" fill="#012169"/><path d="M0,0 60,30M60,0 0,30" stroke="#fff" stroke-width="6"/><path d="M0,0 60,30M60,0 0,30" stroke="#c8102e" stroke-width="2.5"/><path d="M30,0v30M0,15h60" stroke="#fff" stroke-width="10"/><path d="M30,0v30M0,15h60" stroke="#c8102e" stroke-width="6"/></svg>'
+    "fi-ee": '<svg viewBox="0 0 33 21" aria-hidden="true"><rect width="33" height="7" fill="#0072ce"/><rect y="7" width="33" height="7" fill="#000"/><rect y="14" width="33" height="7" fill="#fff"/></svg>',
+    "fi-gb": '<svg viewBox="0 0 60 30" aria-hidden="true"><rect width="60" height="30" fill="#012169"/><path d="M0,0 60,30M60,0 0,30" stroke="#fff" stroke-width="6"/><path d="M0,0 60,30M60,0 0,30" stroke="#c8102e" stroke-width="2.5"/><path d="M30,0v30M0,15h60" stroke="#fff" stroke-width="10"/><path d="M30,0v30M0,15h60" stroke="#c8102e" stroke-width="6"/></svg>'
   };
 
   /* ---------- Renderdamine ---------- */
@@ -636,11 +636,11 @@ textarea { min-height: 88px; resize: vertical; }
     var badge = st.status ? '<span class="badge ' + (st.status === "P" ? "pub" : "draft") + '">' + (st.status === "P" ? "Publitseeritud" : "Mustand") + '</span>' : "";
     var flags = "";
     if (st.mode !== "A") {
-      flags = '<div class="flags">' + SUPPORTED_LANGUAGES.map(function (cl) {
+      flags = '<div class="flags">' + TRANSLATION_LANGUAGES.map(function (cl) {
         var c = cl.languageCode;
         var have = st.translations.some(function (x) { return x.languageCode === c; });
         var cur = c === code;
-        return '<button type="button" class="flag' + (have ? "" : " missing") + (cur ? " current" : "") + '" data-flag="' + c + '" aria-label="' + c + (have ? " tõlge olemas" : " tõlge puudub") + '">' + FLAG_SVG[c] + '<span>' + c + (have ? "" : " +") + '</span></button>';
+        return '<button type="button" class="flag' + (have ? "" : " missing") + (cur ? " current" : "") + '" data-flag="' + c + '" aria-label="' + c + (have ? " tõlge olemas" : " tõlge puudub") + '">' + FLAG_SVG[cl.flagIconCode] + '<span>' + c + (have ? "" : " +") + '</span></button>';
       }).join("") + pin("n-translations", "GET …/training-translations") + '</div>';
     }
     function opts(map, sel, textFn) {
@@ -663,7 +663,7 @@ textarea { min-height: 88px; resize: vertical; }
     var mainCode = lang(MAIN_LANGUAGE_ID).languageCode;
     var showAi = st.mode === "C" || (st.mode === "B" && code !== mainCode);
     var aiBtn = showAi ? '<div class="ai-row"><span class="tip"><button type="button" class="sbtn ai" id="b-ai" aria-describedby="ai-tip"' + (st.aiLoading ? " disabled" : "") + '>' + (st.aiLoading ? "Tõlgin…" : "Tee AI tõlge") + '</button><span role="tooltip" id="ai-tip">Tõlge tehakse salvestatud põhikeele (' + mainCode + ') tekstist, mitte vormi sisust. Tulemus kuvatakse ainult vormis — see salvestub alles siis, kui vajutad „' + (st.mode === "C" ? "Lisa tõlge" : "Salvesta") + '“.</span></span>' + pin("n-ai-translation", "GET …/ai-translation") + '</div>' : "";
-    var fill = st.mode === "C" ? '<span class="hint">Eeltäidetud eestikeelse tõlkega — tõlgi tekstid ' + { et: "eesti", en: "inglise", ru: "vene" }[code] + ' keelde. ' + pin("n-get-translation", "GET /api/training-translation/{et id}") + '</span>' : "";
+    var fill = st.mode === "C" ? '<span class="hint">Eeltäidetud eestikeelse tõlkega — tõlgi tekstid ' + { et: "eesti", en: "inglise" }[code] + ' keelde. ' + pin("n-get-translation", "GET /api/training-translation/{et id}") + '</span>' : "";
 
     document.getElementById("form").innerHTML =
       '<div class="formhead"><h2>' + head + '</h2>' + badge + flags + '</div>' +
@@ -699,7 +699,7 @@ textarea { min-height: 88px; resize: vertical; }
       ["status", st.status ? st.status + (st.status === "U" ? " (mustand)" : " (publitseeritud)") : "— (määrab backend: U)"],
       ["userId", "1 (localStorage)"]
     ];
-    document.getElementById("store").textContent = j(SUPPORTED_LANGUAGES);
+    document.getElementById("store").textContent = j(TRANSLATION_LANGUAGES);
     document.getElementById("statekv").innerHTML = rows.map(function (r) { return "<dt>" + r[0] + "</dt><dd>" + esc(r[1]) + "</dd>"; }).join("");
   }
 
@@ -862,7 +862,7 @@ textarea { min-height: 88px; resize: vertical; }
   });
   document.getElementById("btn-a").onclick = function () { navigate(null, "Kiirnupp A: /training-form"); };
   document.getElementById("btn-b").onclick = function () { navigate({ trainingId: 1, trainingTranslationId: 1 }, "Kiirnupp B: Java algkursus (et) muutmine"); };
-  document.getElementById("btn-c").onclick = function () { navigate({ trainingId: 1, languageId: 3 }, "Kiirnupp C: Java algkursusele ru tõlke lisamine"); };
+  document.getElementById("btn-c").onclick = function () { navigate({ trainingId: 9, languageId: 2 }, "Kiirnupp C: Exceli algkursusele en tõlke lisamine"); };
 
   function goNote(id) {
     var n = document.getElementById(id);
@@ -886,8 +886,8 @@ textarea { min-height: 88px; resize: vertical; }
   var NOTES = [
     { id: "n-languages", title: "GET /api/languages", text: [
       "API: GET /api/languages", "",
-      "Response (200):", "SystemLanguageDto.java", "[", "  {", "    \"languageId\": 1,", "    \"languageCode\": \"et\",", "    \"languageName\": \"Eesti\"", "  },", "  ...", "]", "",
-      "API teenuse lisainfo:", "Tagastab kõik süsteemi keeled (language tabel). TrainingFormView kasutab neid \"Koolituse keel\" rippmenüüs ja languageId ↔ languageCode teisendamiseks. languageName ei ole tõlgitud.", "",
+      "Response (200):", "SystemLanguageDto.java", "[", "  {", "    \"languageId\": 1,", "    \"languageCode\": \"et\",", "    \"languageName\": \"Eesti\",", "    \"isMainLanguage\": true,", "    \"requiresTranslation\": true,", "    \"flagIconCode\": \"fi-ee\"", "  },", "  ...", "]", "",
+      "API teenuse lisainfo:", "Tagastab kõik süsteemi keeled (language tabel). TrainingFormView kasutab neid \"Koolituse keel\" rippmenüüs ja languageId ↔ languageCode teisendamiseks. languageName ei ole tõlgitud. requiresTranslation = false tähendab õppekeelt, millesse koolituse sisu ei tõlgita (nt ru) — see keel on \"Koolituse keel\" valikutes, aga mitte tõlkelippudes. flagIconCode on flag-icons CSS klass (nt \"fi-ee\"). Tõlkelipud = keeled, mille requiresTranslation = true; põhikeel (mainLanguageCode) = keel, mille isMainLanguage = true — mõlemad arvutatakse selle vastuse põhjal, frontendis kõvasti kirjas ei ole.", "",
       "Veateated: —"] },
     { id: "n-locations", title: "GET /api/locations", draft: true, text: [
       "API: GET /api/locations", "",
@@ -896,13 +896,13 @@ textarea { min-height: 88px; resize: vertical; }
       "Veateated: —"] },
     { id: "n-categories", title: "GET /api/categories", text: [
       "API: GET /api/categories", "",
-      "Query parameetrid:", "contentLang: String — categoryName keel (\"et\"/\"en\"/\"ru\")", "",
+      "Query parameetrid:", "contentLang: String — categoryName keel (\"et\"/\"en\")", "",
       "Response (200):", "CategoryDto.java", "[", "  {", "    \"categoryId\": 1,", "    \"categoryName\": \"Programmeerimine\"", "  },", "  ...", "]", "",
       "API teenuse lisainfo:", "Tagastab kõik kategooriad contentLang keeles (category_translation kaudu). TrainingFormView kutsub kasutajaliidese keelega (store'i contentLang) ja kutsub uuesti, kui keel navbaris vahetub.", "",
       "Veateated: —"] },
     { id: "n-funding", title: "GET /api/funding-types", text: [
       "API: GET /api/funding-types", "",
-      "Query parameetrid:", "contentLang: String — fundingTypeName keel (\"et\"/\"en\"/\"ru\")", "",
+      "Query parameetrid:", "contentLang: String — fundingTypeName keel (\"et\"/\"en\")", "",
       "Response (200):", "FundingTypeDto.java", "[", "  {", "    \"fundingTypeId\": 1,", "    \"fundingTypeName\": \"Töötukassa\"", "  },", "  ...", "]", "",
       "API teenuse lisainfo:", "Tagastab kõik rahastustüübid contentLang keeles (funding_type_translation kaudu). TrainingFormView kuvab need checkboxidena.", "",
       "Veateated: —"] },
@@ -925,7 +925,7 @@ textarea { min-height: 88px; resize: vertical; }
     { id: "n-translations", title: "GET /api/training/{id}/training-translations", draft: true, text: [
       "API: GET /api/training/{trainingId}/training-translations", "",
       "Response (200):", "TrainingTranslationItemDto.java", "[", "  {", "    \"trainingTranslationId\": 1,", "    \"languageId\": 1,", "    \"languageCode\": \"et\",", "    \"isMainLanguage\": true", "  },", "  ...", "]", "",
-      "API teenuse lisainfo:", "Koolituse olemasolevad tõlked. Frontend võrdleb languageCode väärtusi store'i supportedLanguages massiiviga: tõlge olemas → värviline lipp, puudub → hall lipp. isMainLanguage tuleb language.is_main_language veerust; põhikeele tõlkega eeltäidetakse uue tõlke vorm.", "",
+      "API teenuse lisainfo:", "Koolituse olemasolevad tõlked. Frontend võrdleb languageCode väärtusi GET /api/languages tõlkekeeltega (requiresTranslation = true): tõlge olemas → värviline lipp, puudub → hall lipp. isMainLanguage tuleb language.is_main_language veerust; põhikeele tõlkega eeltäidetakse uue tõlke vorm.", "",
       "Veateated:", PK("trainingId")] },
     { id: "n-ai-translation", title: "GET /api/training/{id}/ai-translation", draft: true, text: [
       "API: GET /api/training/{trainingId}/ai-translation", "",

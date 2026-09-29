@@ -6,7 +6,8 @@ export default {
   },
 
   navigateToErrorView() {
-    router.push({ name: 'errorRoute' })
+    // todo: arenduse ajal välja kommenteeritud
+    // router.push({ name: 'errorRoute' })
   },
 
   navigateToHomeView() {

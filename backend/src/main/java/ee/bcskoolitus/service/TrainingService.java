@@ -31,7 +31,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
 import java.util.LinkedHashSet;
 import java.util.List;
 
@@ -114,9 +113,6 @@ public class TrainingService {
         training.setTrainingLanguage(languageService.getValidLanguageBy(trainingCreateRequestDto.getTrainingLanguageId(), "trainingLanguageId"));
         handleSetDefaultLecturer(training, trainingCreateRequestDto.getDefaultLecturerId());
         training.setStatus(TrainingStatus.UNPUBLISHED.getCode());
-        Instant now = Instant.now();
-        training.setCreatedAt(now);
-        training.setUpdatedAt(now);
         return training;
     }
 
@@ -140,8 +136,6 @@ public class TrainingService {
         TrainingTranslation trainingTranslation = trainingTranslationMapper.toTrainingTranslation(trainingCreateRequestDto);
         trainingTranslation.setTraining(training);
         trainingTranslation.setLanguage(languageService.getMainLanguage());
-        trainingTranslation.setCreatedAt(training.getCreatedAt());
-        trainingTranslation.setUpdatedAt(training.getCreatedAt());
         return trainingTranslation;
     }
 }

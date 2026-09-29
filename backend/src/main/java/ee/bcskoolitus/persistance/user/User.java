@@ -2,6 +2,8 @@ package ee.bcskoolitus.persistance.user;
 
 import ee.bcskoolitus.persistance.role.Role;
 import jakarta.persistence.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -12,6 +14,7 @@ import java.time.Instant;
 @Getter
 @Setter
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "\"user\"", schema = "bcs_koolitused")
 public class User {
     @Id
@@ -39,7 +42,8 @@ public class User {
     private String status;
 
     @NotNull
-    @Column(name = "created_at", nullable = false)
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
 

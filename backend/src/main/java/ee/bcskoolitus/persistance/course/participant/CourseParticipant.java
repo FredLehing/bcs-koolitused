@@ -2,6 +2,9 @@ package ee.bcskoolitus.persistance.course.participant;
 
 import ee.bcskoolitus.persistance.course.Course;
 import jakarta.persistence.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -12,6 +15,7 @@ import java.time.Instant;
 @Getter
 @Setter
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "course_participant", schema = "bcs_koolitused")
 public class CourseParticipant {
     @Id
@@ -42,10 +46,12 @@ public class CourseParticipant {
     private String status;
 
     @NotNull
-    @Column(name = "created_at", nullable = false)
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
     @NotNull
+    @LastModifiedDate
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 

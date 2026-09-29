@@ -2,6 +2,8 @@ package ee.bcskoolitus.persistance.participant.certificate;
 
 import ee.bcskoolitus.persistance.participant.Participant;
 import jakarta.persistence.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,6 +13,7 @@ import java.time.Instant;
 @Getter
 @Setter
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "participant_certificate", schema = "bcs_koolitused")
 public class ParticipantCertificate {
     @Id
@@ -28,7 +31,8 @@ public class ParticipantCertificate {
     private Participant participant;
 
     @NotNull
-    @Column(name = "created_at", nullable = false)
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
 
