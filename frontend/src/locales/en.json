@@ -36,6 +36,11 @@
     "incorrectCredentials": "Incorrect email or password"
   },
 
+  "trainingCard": {
+    "language": "Training language",
+    "orderable": "Orderable",
+    "viewDetails": "View details"
+  },
   "footer": {
     "facebook": "Find us on Facebook",
     "privacy": "Privacy Policy and Terms of Use",

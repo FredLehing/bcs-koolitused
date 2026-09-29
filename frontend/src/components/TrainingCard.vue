@@ -1,16 +1,19 @@
 <script>
-import { PhShootingStar } from '@phosphor-icons/vue'
+import { PhCurrencyEur, PhShootingStar } from '@phosphor-icons/vue'
 import { mapState } from 'pinia'
 import { useLanguageStore } from '@/stores/languageStore.js'
 
 export default {
   name: 'TrainingCard',
-  components: { PhShootingStar },
+  components: { PhCurrencyEur, PhShootingStar },
   props: {
     training: Object,
   },
   computed: {
     ...mapState(useLanguageStore, ['getFlagClass']),
+    fundingTypeNames() {
+      return (this.training.fundingTypes ?? []).map((f) => f.fundingTypeName).join(', ')
+    },
   },
 }
 </script>
@@ -25,19 +28,26 @@ export default {
       <div>
         <p class="card-text">{{ training.shortDescription }}</p>
         <span class="badge text-bg-primary">{{ training.categoryName }}</span>
-        <div class="mt-2 d-flex gap-2 fs-5">
+        <div v-if="fundingTypeNames" class="mt-2 d-flex align-items-center gap-1 fs-6 text-success">
           <span
-            v-for="fundingType in training.fundingTypes"
-            :key="fundingType.fundingTypeId"
-            class="badge text-bg-primary"
-            >{{ fundingType.fundingTypeName }}</span
+            class="d-inline-flex align-items-center justify-content-center rounded-circle bg-success text-white p-1"
           >
+            <PhCurrencyEur :size="14" weight="bold" />
+          </span>
+          <span>{{ fundingTypeNames }}</span>
         </div>
       </div>
       <div class="d-flex align-items-center flex-column gap-3 fs-5">
-        <span class="fi fs-3" :class="getFlagClass(training.trainingLanguageCode)"></span>
-        <span v-if="training.isOrderable" class="badge text-bg-success">Tellitav</span>
-        <RouterLink to="/training" class="btn btn-primary">Vaata lähemalt</RouterLink>
+        <div class="d-flex flex-column align-items-center">
+          <small class="text-body-secondary fs-6">{{ $t('trainingCard.language') }}</small>
+          <span class="fi fs-3" :class="getFlagClass(training.trainingLanguageCode)"></span>
+        </div>
+        <span v-if="training.isOrderable" class="badge text-bg-success">{{
+          $t('trainingCard.orderable')
+        }}</span>
+        <RouterLink to="/training" class="btn btn-primary">{{
+          $t('trainingCard.viewDetails')
+        }}</RouterLink>
       </div>
     </div>
   </div>

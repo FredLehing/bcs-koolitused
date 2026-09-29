@@ -34,6 +34,11 @@
     "errorMessage": "Täida kõik väljad",
     "incorrectCredentials": "Vale email või parool"
   },
+  "trainingCard": {
+    "language": "Koolituse keel",
+    "orderable": "Tellitav",
+    "viewDetails": "Vaata lähemalt"
+  },
   "footer": {
     "facebook": "Leia meid Facebookist",
     "privacy": "Privaatsus- ja kasutustingimused",
