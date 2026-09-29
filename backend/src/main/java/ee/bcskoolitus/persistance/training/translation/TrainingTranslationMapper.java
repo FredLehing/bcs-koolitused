@@ -1,6 +1,7 @@
 package ee.bcskoolitus.persistance.training.translation;
 
 import ee.bcskoolitus.controller.training.dto.TrainingCreateRequestDto;
+import ee.bcskoolitus.controller.training.dto.TrainingTranslationCreateRequestDto;
 import ee.bcskoolitus.controller.training.dto.TrainingTranslationItemDto;
 import ee.bcskoolitus.controller.training.dto.TrainingUpdateRequestDto;
 import ee.bcskoolitus.controller.trainingtranslation.dto.TrainingTranslationDto;
@@ -16,6 +17,12 @@ public interface TrainingTranslationMapper {
     @Mapping(source = "shortDescription", target = "shortDescription")
     @Mapping(source = "description", target = "description")
     TrainingTranslation toTrainingTranslation(TrainingCreateRequestDto trainingCreateRequestDto);
+
+    // Koolitus, keel ja ajatemplid määrab TrainingService; description puhastab TrainingService
+    @Mapping(source = "title", target = "title")
+    @Mapping(source = "shortDescription", target = "shortDescription")
+    @Mapping(source = "description", target = "description")
+    TrainingTranslation toTrainingTranslation(TrainingTranslationCreateRequestDto trainingTranslationCreateRequestDto);
 
     // Koolitus, keel ja ajatemplid ei muutu; description puhastab TrainingService
     @Mapping(source = "title", target = "title")

@@ -1,6 +1,7 @@
 package ee.bcskoolitus.service;
 
 import ee.bcskoolitus.TrainingStatus;
+import ee.bcskoolitus.infrastructure.exception.ForbiddenException;
 import ee.bcskoolitus.infrastructure.exception.PrimaryKeyNotFoundException;
 import ee.bcskoolitus.infrastructure.util.HtmlSanitizer;
 import ee.bcskoolitus.controller.common.dto.FundingTypeDto;
@@ -10,10 +11,13 @@ import ee.bcskoolitus.controller.training.dto.TrainingSummaryDto;
 import ee.bcskoolitus.controller.training.dto.TrainingSummaryItemDto;
 import ee.bcskoolitus.controller.training.dto.TrainingDto;
 import ee.bcskoolitus.controller.training.dto.TrainingTranslationItemDto;
+import ee.bcskoolitus.controller.training.dto.TrainingTranslationCreateRequestDto;
+import ee.bcskoolitus.controller.training.dto.TrainingTranslationCreateResponseDto;
 import ee.bcskoolitus.controller.training.dto.TrainingUpdateRequestDto;
 import ee.bcskoolitus.persistance.fundingtype.translation.FundingTypeTranslation;
 import ee.bcskoolitus.persistance.fundingtype.translation.FundingTypeTranslationMapper;
 import ee.bcskoolitus.persistance.fundingtype.translation.FundingTypeTranslationRepository;
+import ee.bcskoolitus.persistance.language.Language;
 import ee.bcskoolitus.persistance.training.Training;
 import ee.bcskoolitus.persistance.training.TrainingMapper;
 import ee.bcskoolitus.persistance.training.TrainingRepository;
@@ -38,6 +42,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.LinkedHashSet;
 import java.util.List;
+
+import static ee.bcskoolitus.Error.TRANSLATION_EXISTS;
 
 @Service
 @RequiredArgsConstructor
@@ -213,5 +219,31 @@ public class TrainingService {
     private void updateTrainingTranslationTexts(TrainingTranslation trainingTranslation, TrainingUpdateRequestDto trainingUpdateRequestDto) {
         trainingTranslationMapper.updateTrainingTranslation(trainingUpdateRequestDto, trainingTranslation);
         trainingTranslation.setDescription(HtmlSanitizer.sanitizeDescription(trainingUpdateRequestDto.getDescription()));
+    }
+
+    // Lisab koolitusele tõlke uude keelde; koolituse rida ega staatust ei muudeta
+    @Transactional
+    public TrainingTranslationCreateResponseDto addTrainingTranslation(Integer trainingId, TrainingTranslationCreateRequestDto trainingTranslationCreateRequestDto) {
+        Training training = getValidTrainingBy(trainingId);
+        Language language = languageService.getValidLanguageBy(trainingTranslationCreateRequestDto.getLanguageId(), "languageId");
+        validateTranslationDoesNotExist(trainingId, language.getId());
+        TrainingTranslation trainingTranslation = createTrainingTranslation(training, language, trainingTranslationCreateRequestDto);
+        trainingTranslationRepository.save(trainingTranslation);
+        return new TrainingTranslationCreateResponseDto(trainingTranslation.getId());
+    }
+
+    // Kontroll enne salvestamist — muidu annaks training_translation_uq andmebaasi vea (500)
+    private void validateTranslationDoesNotExist(Integer trainingId, Integer languageId) {
+        if (trainingTranslationRepository.existsByTraining_IdAndLanguage_Id(trainingId, languageId)) {
+            throw new ForbiddenException(TRANSLATION_EXISTS.getMessage(), TRANSLATION_EXISTS.name());
+        }
+    }
+
+    private TrainingTranslation createTrainingTranslation(Training training, Language language, TrainingTranslationCreateRequestDto trainingTranslationCreateRequestDto) {
+        TrainingTranslation trainingTranslation = trainingTranslationMapper.toTrainingTranslation(trainingTranslationCreateRequestDto);
+        trainingTranslation.setDescription(HtmlSanitizer.sanitizeDescription(trainingTranslationCreateRequestDto.getDescription()));
+        trainingTranslation.setTraining(training);
+        trainingTranslation.setLanguage(language);
+        return trainingTranslation;
     }
 }

@@ -43,9 +43,11 @@ export default {
         <span v-if="training.isOrderable" class="badge text-bg-success">{{
           $t('trainingCard.orderable')
         }}</span>
-        <RouterLink to="/training" class="btn btn-primary">{{
-          $t('trainingCard.viewDetails')
-        }}</RouterLink>
+        <RouterLink
+          :to="{ name: 'trainingRoute', query: { trainingId: training.trainingId } }"
+          class="btn btn-primary"
+          >{{ $t('trainingCard.viewDetails') }}</RouterLink
+        >
       </div>
     </div>
   </div>

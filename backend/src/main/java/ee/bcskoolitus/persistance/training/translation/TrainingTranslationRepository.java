@@ -10,6 +10,8 @@ public interface TrainingTranslationRepository extends JpaRepository<TrainingTra
 
     List<TrainingTranslation> findAllByTraining_IdOrderByLanguage_IdAsc(Integer trainingId);
 
+    boolean existsByTraining_IdAndLanguage_Id(Integer trainingId, Integer languageId);
+
     @Query("select tt from TrainingTranslation tt where tt.id = :trainingTranslationId and tt.training.id = :trainingId")
     Optional<TrainingTranslation> findTrainingTranslationBy(Integer trainingTranslationId, Integer trainingId);
 }

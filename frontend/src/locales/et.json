@@ -104,7 +104,8 @@
       "save": "Salvesta",
       "addTranslation": "Lisa tõlge",
       "publish": "Publitseeri",
-      "unpublish": "Liiguta mustandisse"
+      "unpublish": "Liiguta mustandisse",
+      "view": "Vaata"
     },
     "flags": {
       "open": "Ava {language} tõlge",
@@ -156,5 +157,16 @@
     "link": "Lisa link",
     "unlink": "Eemalda link",
     "linkPrompt": "Lingi aadress"
+  },
+  "trainingView": {
+    "legend": "Koolituse info",
+    "mainLanguageFallback": "Valitud keeles tõlge puudub — kuvatakse põhikeele tõlge.",
+    "sidebar": {
+      "trainingData": "Koolituse andmed",
+      "lecturer": "Koolitaja",
+      "upcomingCourses": "Järgmised koolitused",
+      "calendar": "Kalender",
+      "placeholder": "Sisu lisandub peagi."
+    }
   }
 }
