@@ -1,7 +1,10 @@
 package ee.bcskoolitus.persistance.training.translation;
 
 import ee.bcskoolitus.controller.training.dto.TrainingCreateRequestDto;
+import ee.bcskoolitus.controller.training.dto.TrainingTranslationItemDto;
 import org.mapstruct.*;
+
+import java.util.List;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING)
 public interface TrainingTranslationMapper {
@@ -12,4 +15,13 @@ public interface TrainingTranslationMapper {
     @Mapping(source = "description", target = "description")
     TrainingTranslation toTrainingTranslation(TrainingCreateRequestDto trainingCreateRequestDto);
 
+    @Mapping(source = "id", target = "trainingTranslationId")
+    @Mapping(source = "language.id", target = "languageId")
+    @Mapping(source = "language.code", target = "languageCode")
+    @Mapping(source = "language.isMainLanguage", target = "isMainLanguage")
+    TrainingTranslationItemDto toTrainingTranslationItemDto(TrainingTranslation trainingTranslation);
+
+    List<TrainingTranslationItemDto> toTrainingTranslationItemDtos(
+            List<TrainingTranslation> trainingTranslations
+    );
 }
