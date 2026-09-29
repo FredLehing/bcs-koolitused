@@ -3,8 +3,10 @@ package ee.bcskoolitus.controller.training;
 import ee.bcskoolitus.controller.training.dto.TrainingCreateRequestDto;
 import ee.bcskoolitus.controller.training.dto.TrainingCreateResponseDto;
 import ee.bcskoolitus.controller.training.dto.TrainingSummaryDto;
+import ee.bcskoolitus.controller.training.dto.TrainingTranslationItemDto;
 import ee.bcskoolitus.infrastructure.error.ApiError;
 import ee.bcskoolitus.service.TrainingService;
+import ee.bcskoolitus.controller.training.dto.TrainingDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -18,6 +20,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PathVariable;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -44,6 +49,19 @@ public class TrainingController {
                                       @RequestParam Integer trainingLanguageId,
                                       @RequestParam String contentLang) {
         return trainingService.findFilteredTrainings(categoryId, fundingTypeId, limit, page, trainingLanguageId, contentLang);
+    }
+
+    @GetMapping("/training/{trainingId}")
+    public TrainingDto getTraining(@PathVariable Integer trainingId) {
+        return trainingService.getTraining(trainingId);
+
+    }
+
+    @GetMapping("/training/{trainingId}/training-translations")
+    public List<TrainingTranslationItemDto> getTrainingTranslations(
+            @PathVariable Integer trainingId) {
+
+        return trainingService.getTrainingTranslations(trainingId);
     }
 
     @PostMapping("/training")

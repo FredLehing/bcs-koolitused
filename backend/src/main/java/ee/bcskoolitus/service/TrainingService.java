@@ -6,6 +6,7 @@ import ee.bcskoolitus.controller.training.dto.TrainingCreateRequestDto;
 import ee.bcskoolitus.controller.training.dto.TrainingCreateResponseDto;
 import ee.bcskoolitus.controller.training.dto.TrainingSummaryDto;
 import ee.bcskoolitus.controller.training.dto.TrainingSummaryItemDto;
+import ee.bcskoolitus.controller.training.dto.TrainingTranslationItemDto;
 import ee.bcskoolitus.persistance.fundingtype.translation.FundingTypeTranslation;
 import ee.bcskoolitus.persistance.fundingtype.translation.FundingTypeTranslationMapper;
 import ee.bcskoolitus.persistance.fundingtype.translation.FundingTypeTranslationRepository;
@@ -20,6 +21,8 @@ import ee.bcskoolitus.persistance.training.translation.TrainingTranslationReposi
 import ee.bcskoolitus.persistance.view.trainingsummary.TrainingSummary;
 import ee.bcskoolitus.persistance.view.trainingsummary.TrainingSummaryMapper;
 import ee.bcskoolitus.persistance.view.trainingsummary.TrainingSummaryRepository;
+import ee.bcskoolitus.controller.training.dto.TrainingDto;
+import ee.bcskoolitus.infrastructure.exception.PrimaryKeyNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
@@ -82,6 +85,40 @@ public class TrainingService {
         return trainingSummaryDto;
     }
 
+    public Training getValidTrainingBy(Integer trainingId) {
+        return trainingRepository.findById(trainingId)
+                .orElseThrow(() -> new PrimaryKeyNotFoundException("trainingId", trainingId));
+    }
+
+    @Transactional(readOnly = true)
+    public TrainingDto getTraining(Integer trainingId) {
+        Training training = getValidTrainingBy(trainingId);
+
+        TrainingDto trainingDto = trainingMapper.toTrainingDto(training);
+
+        List<Integer> fundingTypeIds = trainingFundingTypeRepository
+                .findAllByTraining_IdOrderByFundingType_IdAsc(trainingId)
+                .stream()
+                .map(trainingFundingType -> trainingFundingType.getFundingType().getId())
+                .toList();
+
+        trainingDto.setFundingTypeIds(fundingTypeIds);
+
+        return trainingDto;
+    }
+
+    @Transactional(readOnly = true)
+    public List<TrainingTranslationItemDto> getTrainingTranslations(Integer trainingId) {
+        getValidTrainingBy(trainingId);
+
+        List<TrainingTranslation> trainingTranslations =
+                trainingTranslationRepository
+                        .findAllByTraining_IdOrderByLanguage_IdAsc(trainingId);
+
+        return trainingTranslationMapper
+                .toTrainingTranslationItemDtos(trainingTranslations);
+    }
+
     // Loob koolituse (status U), rahastustüüpide seosed ja põhikeele tõlke ühes transaktsioonis
     @Transactional
     public TrainingCreateResponseDto addTraining(TrainingCreateRequestDto trainingCreateRequestDto) {
@@ -131,4 +168,5 @@ public class TrainingService {
         trainingTranslation.setUpdatedAt(training.getCreatedAt());
         return trainingTranslation;
     }
+
 }
