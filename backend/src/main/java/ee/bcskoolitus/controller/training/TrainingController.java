@@ -26,7 +26,8 @@ public class TrainingController {
     private final TrainingService trainingService;
 
     @GetMapping("/trainings")
-    @Operation(summary = "Tagastab koolituste nimekirja koos leheküljestamiseks vajaliku metainfoga")
+    @Operation(summary = "Tagastab koolituste nimekirja koos leheküljestamiseks vajaliku metainfoga",
+            description = "searchText: tühikutega eraldatud sõnad, millest iga peab esinema (contains, tõstutundetu) koolituse pealkirjas või lühikirjelduses. Tühi string = otsingut ei rakendata.")
     @ApiResponses( value = {
             @ApiResponse(
                     responseCode = "200", description = "OK"
@@ -42,8 +43,9 @@ public class TrainingController {
                                       @RequestParam Integer limit,
                                       @RequestParam Integer page,
                                       @RequestParam Integer trainingLanguageId,
-                                      @RequestParam String contentLang) {
-        return trainingService.findFilteredTrainings(categoryId, fundingTypeId, limit, page, trainingLanguageId, contentLang);
+                                      @RequestParam String contentLang,
+                                      @RequestParam String searchText) {
+        return trainingService.findFilteredTrainings(categoryId, fundingTypeId, limit, page, trainingLanguageId, contentLang, searchText);
     }
 
     @PostMapping("/training")

@@ -20,11 +20,14 @@ import ee.bcskoolitus.persistance.training.translation.TrainingTranslationReposi
 import ee.bcskoolitus.persistance.view.trainingsummary.TrainingSummary;
 import ee.bcskoolitus.persistance.view.trainingsummary.TrainingSummaryMapper;
 import ee.bcskoolitus.persistance.view.trainingsummary.TrainingSummaryRepository;
+import ee.bcskoolitus.persistance.view.trainingsummary.TrainingSummarySpecifications;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,11 +55,21 @@ public class TrainingService {
     private final LecturerService lecturerService;
     private final FundingTypeService fundingTypeService;
 
-    public TrainingSummaryDto findFilteredTrainings(Integer categoryId, Integer fundingTypeId, Integer limit, Integer page, Integer trainingLanguageId, String contentLang) {
-        Pageable pageable = PageRequest.of(page, limit);
-        Page<TrainingSummary> filteredTrainingSummaryPage = trainingSummaryRepository.findFilteredTrainingSummariesBy(categoryId, fundingTypeId, trainingLanguageId, contentLang, pageable);
+    public TrainingSummaryDto findFilteredTrainings(Integer categoryId, Integer fundingTypeId, Integer limit, Integer page, Integer trainingLanguageId, String contentLang, String searchText) {
+        Pageable pageable = PageRequest.of(page, limit, Sort.by(Sort.Order.desc("training.isPromoted"), Sort.Order.asc("title")));
+        Specification<TrainingSummary> trainingSummarySpecification = createTrainingSummarySpecification(categoryId, fundingTypeId, trainingLanguageId, contentLang, searchText);
+        Page<TrainingSummary> filteredTrainingSummaryPage = trainingSummaryRepository.findAll(trainingSummarySpecification, pageable);
         List<TrainingSummaryItemDto> trainingSummaryItemDtos = findAndCreateTrainingSummaryItemDtos(contentLang, filteredTrainingSummaryPage);
         return createTrainingSummaryDto(filteredTrainingSummaryPage, trainingSummaryItemDtos);
+    }
+
+    private static Specification<TrainingSummary> createTrainingSummarySpecification(Integer categoryId, Integer fundingTypeId, Integer trainingLanguageId, String contentLang, String searchText) {
+        return Specification.allOf(
+                TrainingSummarySpecifications.hasCategoryId(categoryId),
+                TrainingSummarySpecifications.hasFundingTypeId(fundingTypeId),
+                TrainingSummarySpecifications.hasTrainingLanguageId(trainingLanguageId),
+                TrainingSummarySpecifications.hasTranslationLanguageCode(contentLang),
+                TrainingSummarySpecifications.containsAllWords(searchText));
     }
 
     private @NonNull List<TrainingSummaryItemDto> findAndCreateTrainingSummaryItemDtos(String contentLang, Page<TrainingSummary> filteredTrainingSummaryPage) {
