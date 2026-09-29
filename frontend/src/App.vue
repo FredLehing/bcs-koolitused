@@ -44,30 +44,49 @@
           </div>
 
           <div class="d-flex align-items-center gap-3">
-            <!-- Keelevalik: keeled tulevad store'ist (supportedLanguages) -->
+            <!-- Keelevalik: kasutajaliidese keeled tulevad store'ist (uiLanguages) -->
             <div class="d-flex align-items-center gap-1">
               <button
-                v-for="supportedLanguage in languageStore.supportedLanguages"
-                :key="supportedLanguage.languageCode"
-                @click="languageStore.setContentLang(supportedLanguage.languageCode)"
+                v-for="uiLanguage in languageStore.uiLanguages"
+                :key="uiLanguage.languageCode"
+                @click="languageStore.setContentLang(uiLanguage.languageCode)"
                 :class="{
-                  'border-primary': languageStore.contentLang === supportedLanguage.languageCode,
+                  'border-primary': languageStore.contentLang === uiLanguage.languageCode,
                 }"
-                :title="supportedLanguage.languageCode.toUpperCase()"
+                :title="uiLanguage.languageCode.toUpperCase()"
                 class="btn btn-sm btn-light border"
                 type="button"
               >
-                <span class="fi" :class="supportedLanguage.flagClass"></span>
+                <FlagIcon :flag-icon-code="uiLanguage.flagIconCode" />
               </button>
             </div>
-            <RouterLink class="btn btn-outline-secondary btn-sm" to="/login">
+            <button
+              v-if="userIsLoggedIn"
+              @click="isLogoutModalOpen = true"
+              class="btn btn-outline-secondary btn-sm"
+              type="button"
+            >
+              {{ $t('navbar.logout') }}
+            </button>
+            <RouterLink v-else class="btn btn-outline-secondary btn-sm" to="/login">
               {{ $t('navbar.login') }}
             </RouterLink>
-            <a class="btn btn-outline-secondary btn-sm" href="#">{{ $t('navbar.register') }}</a>
+            <a v-if="!userIsLoggedIn" class="btn btn-outline-secondary btn-sm" href="#">{{
+              $t('navbar.register')
+            }}</a>
           </div>
         </div>
       </div>
     </nav>
+
+    <ConfirmModal
+      :is-open="isLogoutModalOpen"
+      :title="$t('navbar.logoutModal.title')"
+      :message="$t('navbar.logoutModal.message')"
+      :confirm-label="$t('navbar.logout')"
+      @event-confirmed="logout"
+      @event-modal-closed="isLogoutModalOpen = false"
+    />
 
     <RouterView />
 
@@ -76,15 +95,35 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import FooterComponent from '@/components/FooterComponent.vue'
+import ConfirmModal from '@/components/modals/ConfirmModal.vue'
+import FlagIcon from '@/components/common/FlagIcon.vue'
+import NavigationService from '@/services/NavigationService.js'
 import SessionStorageService from '@/services/SessionStorageService.js'
 import { useLanguageStore } from '@/stores/languageStore.js'
 
 const route = useRoute()
 const languageStore = useLanguageStore()
 
-// sessionStorage ei ole reaktiivne — kontroll tehakse uuesti iga marsruudi muutusel (nt pärast sisselogimist)
-const userIsAdmin = computed(() => route.fullPath !== '' && SessionStorageService.userIsAdmin())
+const userIsLoggedIn = ref(false)
+const userIsAdmin = ref(false)
+const isLogoutModalOpen = ref(false)
+
+// sessionStorage ei ole reaktiivne — seisund loetakse uuesti iga marsruudi muutusel
+// (nt pärast sisselogimist) ja väljalogimisel (avalehel olles marsruut ei pruugi muutuda)
+function refreshSessionState() {
+  userIsLoggedIn.value = SessionStorageService.userIsLoggedIn()
+  userIsAdmin.value = SessionStorageService.userIsAdmin()
+}
+
+watch(() => route.fullPath, refreshSessionState, { immediate: true })
+
+function logout() {
+  isLogoutModalOpen.value = false
+  SessionStorageService.clearSession()
+  refreshSessionState()
+  NavigationService.navigateToHomeView()
+}
 </script>

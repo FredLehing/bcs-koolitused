@@ -11,4 +11,7 @@ public class SystemLanguageDto {
     private Integer languageId;
     private String languageCode;
     private String languageName;
+    private Boolean isMainLanguage;
+    private Boolean requiresTranslation;
+    private String flagIconCode;
 }

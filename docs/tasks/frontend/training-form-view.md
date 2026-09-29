@@ -32,7 +32,7 @@ Toimumiskorrad (`course` tabel, kuupäevad, hind) ei kuulu selle vaate skoopi �
 |---|---|---|
 | Pealkiri | Tekst | `new-training`: "Lisa uus koolitus"; `update`: "Muuda koolitust"; `new-translation`: "Lisa koolituse tõlge" |
 | Staatuse märgis | Badge | "Mustand" (`status = "U"`) või "Publitseeritud" (`"P"`); ainult `update` ja `new-translation` |
-| Tõlgete lipukesed | Nupud (`TranslationFlags`) | Store'i `supportedLanguages` iga keele kohta lipp (`flag-icons`); tõlge olemas → värviline, puudub → hall; avatud tõlke lipp raamiga. Ainult `update` ja `new-translation` |
+| Tõlgete lipukesed | Nupud (`TranslationFlags`) | `GET /api/languages` iga tõlkekeele (`requiresTranslation = true`) kohta lipp (`flagIconCode`, `flag-icons`); tõlge olemas → värviline, puudub → hall; avatud tõlke lipp raamiga. Ainult `update` ja `new-translation` |
 | Kategooria | Rippmenüü | `GET /api/categories`, kasutajaliidese keeles; kohustuslik |
 | Koolituse keel | Rippmenüü | `GET /api/languages`; õppekeel (`trainingLanguageId`), mitte tõlke keel; kohustuslik |
 | Toimumiskoht | Rippmenüü | `GET /api/locations`; kohustuslik |
@@ -56,13 +56,13 @@ Koolituse andmete sektsioon on tõlke sektsiooni kohal (vertikaalne paigutus), o
 1. **Oleku tuvastamine.** `beforeMount` ja `$route.query` jälgija (`watch`) kutsuvad `loadView()`, mis loeb query parameetrid ja määrab `state`: `trainingId` puudub → `new-training`; `trainingTranslationId` olemas → `update`; muidu → `new-translation`. Iga `router.replace` laadib andmed uuesti — erandeid pole.
 2. **Laadimine.** Alati `GET /api/locations` ja `GET /api/languages`; pärast keelte saabumist oleku andmed (keelte nimekirja on vaja `languageId` ↔ `languageCode` teisenduseks):
    - Kõigis olekutes: kategooriad ja rahastustüübid kasutajaliidese keeles (`languageStore.contentLang`); keele vahetamisel navbaris laaditakse ainult need uuesti (`watch: contentLang`), vormi sisu jääb alles.
-   - `new-training`: tühi vorm, tõlke keel = põhikeel (`mainLanguageCode`).
+   - `new-training`: tühi vorm, tõlke keel = põhikeel (`mainLanguageCode` — computed, `GET /api/languages` vastusest `isMainLanguage = true`).
    - `update`: koolitus, tõlgete nimekiri, avatud tõlge.
    - `new-translation`: koolitus, tõlgete nimekiri → põhikeele tõlge (`isMainLanguage`) eeltäitmiseks.
 3. **Valideerimine enne salvestust** (esimene viga kuvatakse `AlertDanger`-is, API kutset ei tehta): "Vali kategooria", "Vali koolituse keel", "Vali toimumiskoht" (mitte olekus `new-translation`), "Lisa pealkiri", "Lisa lühikirjeldus", "Lisa kirjeldus".
 4. **"Lisa"** → `POST /api/training` (`userId` sessionStorage'ist) → eduteade → `router.replace({ trainingId, trainingTranslationId })` → olek `update`.
 5. **"Salvesta"** → `PUT /api/training/{trainingId}` (koolituse väljad + avatud tõlge) → eduteade.
-6. **Lipule klikk** → olemasolev tõlge: `router.replace({ trainingId, trainingTranslationId })`; puuduv: `router.replace({ trainingId, languageId })`. Kui store'i keelt pole `/api/languages` vastuses, kuvatakse viga.
+6. **Lipule klikk** → olemasolev tõlge: `router.replace({ trainingId, trainingTranslationId })`; puuduv: `router.replace({ trainingId, languageId })`.
 7. **"Lisa tõlge"** → `POST /api/training/{trainingId}/training-translation` → eduteade → `router.replace` olekusse `update`.
 8. **Staatus** → kinnituse modal → `PUT .../publish` või `.../unpublish` → `GET /api/training/{trainingId}` (uus staatus) → nupp vahetub.
 9. **"Tee AI tõlge"** → kui vormi tekst erineb viimati laaditust/salvestatust, küsitakse kinnitust → `GET .../ai-translation?languageId=` (nupp on laadimise ajal keelatud, "Tõlgin…") → tulemus ainult vormi, andmebaasi ei salvestata.
@@ -195,7 +195,7 @@ Kood on loodud (mustri eeskuju: Options API, `handle`-meetodid, props/emits `eve
 | `components/common/TranslationFlags.vue` | Tõlgete lipukesed |
 | `components/common/AlertDanger.vue`, `AlertSuccess.vue` | Teated |
 | `components/modals/BaseModal.vue`, `ConfirmModal.vue`, `LecturerSelectModal.vue` | Modalid |
-| `stores/languageStore.js` | Pinia store: `supportedLanguages` (`languageCode`, `isMainLanguage`, `flagClass`), getter `mainLanguageCode` |
+| `stores/languageStore.js` | Pinia store: `contentLang`, `uiLanguages` (navbari kasutajaliidese keeled, `i18n.js` `UI_LANGUAGES`) |
 | `services/SessionStorageService.js` | `getUserId()`, `userIsAdmin()` |
 | `services/NavigationService.js` | + `replaceTrainingFormView(query)`, `navigateToLoginView()`, `navigateToNotAuthorizedView()` |
 | `router/index.js` | + rajad `/training-form` (`trainingFormRoute`) ja `/not-authorized` (`notAuthorizedRoute`) |

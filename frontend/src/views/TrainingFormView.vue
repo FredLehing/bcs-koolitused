@@ -91,7 +91,17 @@ export default {
     }
   },
   computed: {
-    ...mapState(useLanguageStore, ['contentLang', 'supportedLanguages', 'mainLanguageCode']),
+    ...mapState(useLanguageStore, ['contentLang']),
+
+    // Keeled, millesse koolituse sisu tõlgitakse (lipukesed); õppekeeled nagu ru siia ei kuulu
+    translationLanguages() {
+      return this.languages.filter((language) => language.requiresTranslation)
+    },
+
+    mainLanguageCode() {
+      const mainLanguage = this.languages.find((language) => language.isMainLanguage)
+      return mainLanguage ? mainLanguage.languageCode : ''
+    },
 
     pageTitle() {
       if (this.state === STATE_NEW_TRAINING) {
@@ -395,13 +405,18 @@ export default {
 
     // ---------- Lipukesed ----------
 
-    handleTranslationFlagClicked(languageCode) {
-      if (this.isNewTraining || languageCode === this.translation.languageCode) {
+    // translationLanguage on GET /api/languages vastuse element, seega languageId on alati olemas
+    handleTranslationFlagClicked(translationLanguage) {
+      if (
+        this.isNewTraining ||
+        translationLanguage.languageCode === this.translation.languageCode
+      ) {
         return
       }
       this.resetMessages()
       const existingTranslation = this.trainingTranslations.find(
-        (trainingTranslation) => trainingTranslation.languageCode === languageCode,
+        (trainingTranslation) =>
+          trainingTranslation.languageCode === translationLanguage.languageCode,
       )
 
       if (existingTranslation) {
@@ -410,21 +425,9 @@ export default {
           trainingTranslationId: existingTranslation.trainingTranslationId,
         })
       } else {
-        this.openNewTranslation(languageCode)
-      }
-    },
-
-    openNewTranslation(languageCode) {
-      const language = this.languages.find((language) => language.languageCode === languageCode)
-
-      if (language) {
         NavigationService.replaceTrainingFormView({
           trainingId: this.trainingId,
-          languageId: language.languageId,
-        })
-      } else {
-        this.errorMessage = this.$t('trainingForm.validation.languageNotInSystem', {
-          language: languageCode,
+          languageId: translationLanguage.languageId,
         })
       }
     },
@@ -628,7 +631,7 @@ export default {
           <TranslationFlags
             v-if="!isNewTraining"
             class="ms-auto"
-            :supported-languages="supportedLanguages"
+            :translation-languages="translationLanguages"
             :training-translations="trainingTranslations"
             :current-language-code="translation.languageCode"
             @event-translation-flag-clicked="handleTranslationFlagClicked"

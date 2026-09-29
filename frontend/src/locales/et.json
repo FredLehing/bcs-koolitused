@@ -13,6 +13,11 @@
     "admin": "Admin",
     "addTraining": "Lisa uus koolitus",
     "login": "Logi sisse",
+    "logout": "Logi välja",
+    "logoutModal": {
+      "title": "Väljalogimine",
+      "message": "Kas soovid kindlasti välja logida?"
+    },
     "register": "Registreeri"
   },
   "error": {
@@ -126,8 +131,7 @@
       "selectLocation": "Vali toimumiskoht",
       "addTitle": "Lisa pealkiri",
       "addShortDescription": "Lisa lühikirjeldus",
-      "addDescription": "Lisa kirjeldus",
-      "languageNotInSystem": "Keelt \"{language}\" ei ole süsteemis"
+      "addDescription": "Lisa kirjeldus"
     },
     "messages": {
       "trainingAdded": "Koolitus \"{title}\" on lisatud mustandina",

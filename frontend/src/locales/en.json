@@ -13,6 +13,11 @@
     "admin": "Admin",
     "addTraining": "Add new training",
     "login": "Log in",
+    "logout": "Log out",
+    "logoutModal": {
+      "title": "Logging out",
+      "message": "Are you sure you want to log out?"
+    },
     "register": "Register"
   },
   "error": {
@@ -128,8 +133,7 @@
       "selectLocation": "Select a location",
       "addTitle": "Add a title",
       "addShortDescription": "Add a short description",
-      "addDescription": "Add a description",
-      "languageNotInSystem": "Language \"{language}\" is not in the system"
+      "addDescription": "Add a description"
     },
     "messages": {
       "trainingAdded": "Training \"{title}\" has been added as a draft",

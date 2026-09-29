@@ -23,12 +23,26 @@ Keele nimi (`language.name`) ei ole tõlgitud, seega erinevalt teenustest `GET /
   {
     "languageId": 1,
     "languageCode": "et",
-    "languageName": "Eesti"
+    "languageName": "Eesti",
+    "isMainLanguage": true,
+    "requiresTranslation": true,
+    "flagIconCode": "fi-ee"
   },
   {
     "languageId": 2,
     "languageCode": "en",
-    "languageName": "English"
+    "languageName": "English",
+    "isMainLanguage": false,
+    "requiresTranslation": true,
+    "flagIconCode": "fi-gb"
+  },
+  {
+    "languageId": 3,
+    "languageCode": "ru",
+    "languageName": "Русский",
+    "isMainLanguage": false,
+    "requiresTranslation": false,
+    "flagIconCode": "fi-ru"
   }
 ]
 ```
@@ -36,10 +50,13 @@ Keele nimi (`language.name`) ei ole tõlgitud, seega erinevalt teenustest `GET /
 | Väli | Allikas | Kirjeldus |
 |---|---|---|
 | `languageId` | `language.id` | Keele ID; frontend saadab selle `GET /api/trainings` päringus parameetrina `trainingLanguageId` |
-| `languageCode` | `language.code` | Kahetäheline keelekood (`et`/`en`) |
+| `languageCode` | `language.code` | Kahetäheline keelekood (`et`/`en`/`ru`) |
 | `languageName` | `language.name` | Keele nimi, mida kuvatakse filtri valikuna |
+| `isMainLanguage` | `language.is_main_language` | `true` — süsteemi põhikeel (ainult ühel keelel); frontend leiab selle järgi põhikeele |
+| `requiresTranslation` | `language.requires_translation` | `true` — keel, millesse koolituste sisu tõlgitakse (tõlkelipud); `false` — ainult õppekeel, tõlget ei vaja (nt `ru`) |
+| `flagIconCode` | `language.flag_icon_code` | [flag-icons](https://flagicons.lipis.dev/) CSS klass keele lipu kuvamiseks (nt `fi-ee`) |
 
-Mockupi näidises on üks element ja `...`. Siin on näidisesse kirjutatud mõlemad `3_import.sql` read. Veergu `is_main_language` vastuses ei tagastata.
+Mockupi näidises on üks element ja `...`. Siin on näidisesse kirjutatud kõik `3_import.sql` read.
 
 **Järjestus:** eesti keel on nimekirjas alati esimene. Eesti keel on süsteemi põhikeel (`is_main_language = true`), seega esimesena tuleb põhikeel ja selle järel ülejäänud keeled `id` järgi kasvavas järjekorras. Mockup järjestust ei määranud, see on hiljem kokku lepitud.
 
@@ -60,10 +77,12 @@ Süsteemi keeled. Tabelit kasutatakse ka tõlketabelites (`*_translation.languag
 ```sql
 CREATE TABLE language
 (
-    id               serial      NOT NULL,
-    code             varchar(2)  NOT NULL,
-    name             varchar(50) NOT NULL,
-    is_main_language boolean     NOT NULL,
+    id                   serial      NOT NULL,
+    code                 varchar(2)  NOT NULL,
+    name                 varchar(50) NOT NULL,
+    is_main_language     boolean     NOT NULL,
+    requires_translation boolean     NOT NULL,
+    flag_icon_code       varchar(10) NOT NULL,
     CONSTRAINT language_pk PRIMARY KEY (id),
     CONSTRAINT language_code_uq UNIQUE (code)
 );
@@ -71,10 +90,11 @@ CREATE TABLE language
 
 Näidisandmed (`3_import.sql`):
 
-| id | code | name | is_main_language |
-|---|---|---|---|
-| 1 | et | Eesti | true |
-| 2 | en | English | false |
+| id | code | name | is_main_language | requires_translation | flag_icon_code |
+|---|---|---|---|---|---|
+| 1 | et | Eesti | true | true | fi-ee |
+| 2 | en | English | false | true | fi-gb |
+| 3 | ru | Русский | false | false | fi-ru |
 
 ## Veaolukorrad
 

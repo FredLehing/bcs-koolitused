@@ -13,9 +13,10 @@ INSERT INTO "user" (id, role_id, email, password, status, created_at) VALUES
     (3, 1, 'admin', '123', 'A', '2026-09-28 00:00:00'); -- lihtne testkonto (admin)
 
 -- Table: language
-INSERT INTO language (id, code, name, is_main_language) VALUES
-    (1, 'et', 'Eesti', true),
-    (2, 'en', 'English', false);
+INSERT INTO language (id, code, name, is_main_language, requires_translation, flag_icon_code) VALUES
+    (1, 'et', 'Eesti', true, true, 'fi-ee'),
+    (2, 'en', 'English', false, true, 'fi-gb'),
+    (3, 'ru', 'Русский', false, false, 'fi-ru');
 
 -- Table: category
 INSERT INTO category (id, created_at, updated_at, created_by) VALUES

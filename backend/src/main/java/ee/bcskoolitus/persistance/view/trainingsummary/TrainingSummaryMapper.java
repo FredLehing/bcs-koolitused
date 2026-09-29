@@ -10,6 +10,7 @@ public interface TrainingSummaryMapper {
 
     @Mapping(source = "training.id", target = "trainingId")
     @Mapping(source = "trainingLanguageCode", target = "trainingLanguageCode")
+    @Mapping(source = "trainingLanguageFlagIconCode", target = "trainingLanguageFlagIconCode")
     @Mapping(source = "title", target = "title")
     @Mapping(source = "shortDescription", target = "shortDescription")
     @Mapping(source = "categoryId", target = "categoryId")

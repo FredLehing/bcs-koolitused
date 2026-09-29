@@ -36,6 +36,8 @@ TrainingSummaryDto.java
   "trainingSummaries": [
     {
       "trainingId": 1,
+      "trainingLanguageCode": "et",
+      "trainingLanguageFlagIconCode": "fi-ee",
       "title": "Java algkursus",
       "shortDescription": "Java programmeerimise alused algajatele.",
       "categoryId": 1,
@@ -56,7 +58,7 @@ TrainingSummaryDto.java
 
 API teenuse lisainfo:
 Tulemus on sorteeritud: esile tõstetud koolitused (isPromoted = true) eespool, seejärel title järgi tähestikuliselt.
-totalPages ja totalElements kirjeldavad kogu filtreeritud tulemushulka. fundingTypes võib olla tühi list (training_funding_type kaudu).
+totalPages ja totalElements kirjeldavad kogu filtreeritud tulemushulka. fundingTypes võib olla tühi list (training_funding_type kaudu). trainingLanguageCode ja trainingLanguageFlagIconCode on koolituse õppekeele (training.training_language_id → language.code / language.flag_icon_code) andmed; TrainingCard kuvab trainingLanguageFlagIconCode järgi õppekeele lipu.
 
 Veateated: —
 ```
@@ -120,13 +122,16 @@ SystemLanguageDto.java
   {
     "languageId": 1,
     "languageCode": "et",
-    "languageName": "Eesti"
+    "languageName": "Eesti",
+    "isMainLanguage": true,
+    "requiresTranslation": true,
+    "flagIconCode": "fi-ee"
   },
   ...
 ]
 
 API teenuse lisainfo:
-Tagastab kõik süsteemis olevad keeled (language tabel). TrainingsView kasutab neid "Koolituse keel" filtri valikutena (languageId → trainingLanguageId). languageName ei ole tõlgitud, seega contentLang parameetrit pole.
+Tagastab kõik süsteemis olevad keeled (language tabel). TrainingsView kasutab neid "Koolituse keel" filtri valikutena (languageId → trainingLanguageId). languageName ei ole tõlgitud, seega contentLang parameetrit pole. requiresTranslation = false tähendab õppekeelt, millesse koolituse sisu ei tõlgita (nt ru) — see keel on "Koolituse keel" valikutes, aga mitte tõlkelippudes. flagIconCode on flag-icons CSS klass (nt "fi-ee").
 
 Veateated: —
 ```

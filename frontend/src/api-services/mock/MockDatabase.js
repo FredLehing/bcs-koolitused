@@ -5,8 +5,30 @@
 // Kustuta see fail, kui kõik teenused kasutavad päris API kutseid.
 
 const languages = [
-  { languageId: 1, languageCode: 'et', languageName: 'Eesti', isMainLanguage: true },
-  { languageId: 2, languageCode: 'en', languageName: 'English', isMainLanguage: false },
+  {
+    languageId: 1,
+    languageCode: 'et',
+    languageName: 'Eesti',
+    isMainLanguage: true,
+    requiresTranslation: true,
+    flagIconCode: 'fi-ee',
+  },
+  {
+    languageId: 2,
+    languageCode: 'en',
+    languageName: 'English',
+    isMainLanguage: false,
+    requiresTranslation: true,
+    flagIconCode: 'fi-gb',
+  },
+  {
+    languageId: 3,
+    languageCode: 'ru',
+    languageName: 'Русский',
+    isMainLanguage: false,
+    requiresTranslation: false,
+    flagIconCode: 'fi-ru',
+  },
 ]
 
 const categories = [
@@ -121,6 +143,9 @@ export default {
       languageId: language.languageId,
       languageCode: language.languageCode,
       languageName: language.languageName,
+      isMainLanguage: language.isMainLanguage,
+      requiresTranslation: language.requiresTranslation,
+      flagIconCode: language.flagIconCode,
     }))
   },
 

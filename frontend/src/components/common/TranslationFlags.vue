@@ -1,8 +1,11 @@
 <script>
+import FlagIcon from '@/components/common/FlagIcon.vue'
+
 export default {
   name: 'TranslationFlags',
+  components: { FlagIcon },
   props: {
-    supportedLanguages: Array,
+    translationLanguages: Array,
     trainingTranslations: Array,
     currentLanguageCode: String,
   },
@@ -26,19 +29,19 @@ export default {
 <template>
   <div class="d-flex gap-2 align-items-center">
     <button
-      v-for="supportedLanguage in supportedLanguages"
-      :key="supportedLanguage.languageCode"
-      @click="$emit('event-translation-flag-clicked', supportedLanguage.languageCode)"
-      :title="flagTitle(supportedLanguage.languageCode)"
+      v-for="translationLanguage in translationLanguages"
+      :key="translationLanguage.languageCode"
+      @click="$emit('event-translation-flag-clicked', translationLanguage)"
+      :title="flagTitle(translationLanguage.languageCode)"
       :class="{
-        'translation-missing': !translationExists(supportedLanguage.languageCode),
-        'border-primary': supportedLanguage.languageCode === currentLanguageCode,
+        'translation-missing': !translationExists(translationLanguage.languageCode),
+        'border-primary': translationLanguage.languageCode === currentLanguageCode,
       }"
       class="btn btn-sm btn-light border"
       type="button"
     >
-      <span class="fi" :class="supportedLanguage.flagClass"></span>
-      {{ supportedLanguage.languageCode }}
+      <FlagIcon :flag-icon-code="translationLanguage.flagIconCode" />
+      {{ translationLanguage.languageCode }}
     </button>
   </div>
 </template>

@@ -30,5 +30,14 @@ public class Language {
     @Column(name = "is_main_language", nullable = false)
     private Boolean isMainLanguage;
 
+    @NotNull
+    @Column(name = "requires_translation", nullable = false)
+    private Boolean requiresTranslation;
+
+    @Size(max = 10)
+    @NotNull
+    @Column(name = "flag_icon_code", nullable = false, length = 10)
+    private String flagIconCode;
+
 
 }

@@ -14,6 +14,7 @@ import java.util.List;
 public class TrainingSummaryItemDto implements Serializable {
     private Long trainingId;
     private String trainingLanguageCode;
+    private String trainingLanguageFlagIconCode;
     private String title;
     private String shortDescription;
     private Integer categoryId;

@@ -1,16 +1,14 @@
 <script>
 import { PhCurrencyEur, PhShootingStar } from '@phosphor-icons/vue'
-import { mapState } from 'pinia'
-import { useLanguageStore } from '@/stores/languageStore.js'
+import FlagIcon from '@/components/common/FlagIcon.vue'
 
 export default {
   name: 'TrainingCard',
-  components: { PhCurrencyEur, PhShootingStar },
+  components: { FlagIcon, PhCurrencyEur, PhShootingStar },
   props: {
     training: Object,
   },
   computed: {
-    ...mapState(useLanguageStore, ['getFlagClass']),
     fundingTypeNames() {
       return (this.training.fundingTypes ?? []).map((f) => f.fundingTypeName).join(', ')
     },
@@ -40,10 +38,7 @@ export default {
       <div class="d-flex align-items-center flex-column gap-3 fs-5">
         <div class="d-flex flex-column align-items-center">
           <small class="text-body-secondary fs-6">{{ $t('trainingCard.language') }}</small>
-          <span
-            class="fi fs-3 border border-secondary-subtle"
-            :class="getFlagClass(training.trainingLanguageCode)"
-          ></span>
+          <FlagIcon :flag-icon-code="training.trainingLanguageFlagIconCode" class="fs-3" />
         </div>
         <span v-if="training.isOrderable" class="badge text-bg-success">{{
           $t('trainingCard.orderable')

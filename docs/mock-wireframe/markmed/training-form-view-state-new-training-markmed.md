@@ -26,13 +26,16 @@ SystemLanguageDto.java
   {
     "languageId": 1,
     "languageCode": "et",
-    "languageName": "Eesti"
+    "languageName": "Eesti",
+    "isMainLanguage": true,
+    "requiresTranslation": true,
+    "flagIconCode": "fi-ee"
   },
   ...
 ]
 
 API teenuse lisainfo:
-Tagastab kõik süsteemi keeled (language tabel). TrainingFormView kasutab neid "Koolituse keel" rippmenüüs ja languageId ↔ languageCode teisendamiseks. languageName ei ole tõlgitud.
+Tagastab kõik süsteemi keeled (language tabel). TrainingFormView kasutab neid "Koolituse keel" rippmenüüs ja languageId ↔ languageCode teisendamiseks. languageName ei ole tõlgitud. requiresTranslation = false tähendab õppekeelt, millesse koolituse sisu ei tõlgita (nt ru) — see keel on "Koolituse keel" valikutes, aga mitte tõlkelippudes. flagIconCode on flag-icons CSS klass (nt "fi-ee"). Tõlkelipud = keeled, mille requiresTranslation = true; põhikeel (mainLanguageCode) = keel, mille isMainLanguage = true — mõlemad arvutatakse selle vastuse põhjal, frontendis kõvasti kirjas ei ole.
 
 Veateated: —
 ```

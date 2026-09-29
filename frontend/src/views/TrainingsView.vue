@@ -26,6 +26,7 @@ export default {
         {
           trainingId: 0,
           trainingLanguageCode: '',
+          trainingLanguageFlagIconCode: '',
           title: '',
           shortDescription: '',
           categoryId: 0,

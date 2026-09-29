@@ -29,6 +29,9 @@ public class TrainingSummary {
     @Column(name = "training_language_code", nullable = false, length = 2)
     private String trainingLanguageCode;
 
+    @Column(name = "training_language_flag_icon_code", nullable = false, length = 10)
+    private String trainingLanguageFlagIconCode;
+
     @Column(name = "translation_language_id", nullable = false)
     private Integer translationLanguageId;
 
