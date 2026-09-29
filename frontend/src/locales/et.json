@@ -72,6 +72,9 @@
       "published": "Publitseeritud",
       "unpublished": "Mustand"
     },
+    "translations": {
+      "legend": "Koolituse tõlked"
+    },
     "data": {
       "legend": "Koolituse andmed",
       "category": "Kategooria",

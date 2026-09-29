@@ -74,6 +74,9 @@
       "published": "Published",
       "unpublished": "Draft"
     },
+    "translations": {
+      "legend": "Training translations"
+    },
     "data": {
       "legend": "Training details",
       "category": "Category",

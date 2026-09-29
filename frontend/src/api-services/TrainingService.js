@@ -44,9 +44,7 @@ export default {
 
   // Backend task: docs/tasks/backend/PUT-api-training-trainingId.md (3. etapp)
   sendPutTrainingRequest(trainingId, trainingUpdateRequest) {
-    // MOCK — vaheta päris kutse vastu, kui teenus on valmis:
-    // return axios.put(`/api/training/${trainingId}`, trainingUpdateRequest)
-    return mockResponse(MockDatabase.updateTraining(trainingId, trainingUpdateRequest))
+    return axios.put(`/api/training/${trainingId}`, trainingUpdateRequest)
   },
 
   // Backend task: docs/tasks/backend/PUT-api-training-trainingId-publish.md (3. etapp)

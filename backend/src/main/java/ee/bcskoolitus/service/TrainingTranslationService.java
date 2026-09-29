@@ -24,4 +24,10 @@ public class TrainingTranslationService {
         return trainingTranslationRepository.findById(trainingTranslationId)
                 .orElseThrow(() -> new PrimaryKeyNotFoundException("trainingTranslationId", trainingTranslationId));
     }
+
+    // Teisele koolitusele kuuluv tõlge käitub nagu olematu tõlge (404)
+    public TrainingTranslation getValidTrainingTranslationBy(Integer trainingTranslationId, Integer trainingId) {
+        return trainingTranslationRepository.findTrainingTranslationBy(trainingTranslationId, trainingId)
+                .orElseThrow(() -> new PrimaryKeyNotFoundException("trainingTranslationId", trainingTranslationId));
+    }
 }

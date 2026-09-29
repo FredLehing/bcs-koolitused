@@ -10,6 +10,7 @@ import ee.bcskoolitus.controller.training.dto.TrainingSummaryDto;
 import ee.bcskoolitus.controller.training.dto.TrainingSummaryItemDto;
 import ee.bcskoolitus.controller.training.dto.TrainingDto;
 import ee.bcskoolitus.controller.training.dto.TrainingTranslationItemDto;
+import ee.bcskoolitus.controller.training.dto.TrainingUpdateRequestDto;
 import ee.bcskoolitus.persistance.fundingtype.translation.FundingTypeTranslation;
 import ee.bcskoolitus.persistance.fundingtype.translation.FundingTypeTranslationMapper;
 import ee.bcskoolitus.persistance.fundingtype.translation.FundingTypeTranslationRepository;
@@ -57,6 +58,7 @@ public class TrainingService {
     private final LocationService locationService;
     private final LecturerService lecturerService;
     private final FundingTypeService fundingTypeService;
+    private final TrainingTranslationService trainingTranslationService;
 
     public TrainingSummaryDto findFilteredTrainings(Integer categoryId, Integer fundingTypeId, Integer limit, Integer page, Integer trainingLanguageId, String contentLang, String searchText) {
         Pageable pageable = PageRequest.of(page, limit, Sort.by(Sort.Order.desc("training.isPromoted"), Sort.Order.asc("title")));
@@ -154,9 +156,12 @@ public class TrainingService {
         return training;
     }
 
+    // null eemaldab lektori (muutmisel oluline — lisamisel on lektor niikuinii null)
     private void handleSetDefaultLecturer(Training training, Integer defaultLecturerId) {
         if (defaultLecturerId != null) {
             training.setDefaultLecturer(lecturerService.getValidLecturerBy(defaultLecturerId, "defaultLecturerId"));
+        } else {
+            training.setDefaultLecturer(null);
         }
     }
 
@@ -176,5 +181,37 @@ public class TrainingService {
         trainingTranslation.setTraining(training);
         trainingTranslation.setLanguage(languageService.getMainLanguage());
         return trainingTranslation;
+    }
+
+    // Muudab koolituse väljad, rahastustüübid (üle kirjutades) ja avatud tõlke ühes transaktsioonis.
+    // user, status ja created_at ei muutu; teiste keelte tõlkeid ei puudutata.
+    @Transactional
+    public void updateTraining(Integer trainingId, TrainingUpdateRequestDto trainingUpdateRequestDto) {
+        Training training = getValidTrainingBy(trainingId);
+        TrainingTranslation trainingTranslation = trainingTranslationService
+                .getValidTrainingTranslationBy(trainingUpdateRequestDto.getTrainingTranslationId(), trainingId);
+        updateTrainingData(training, trainingUpdateRequestDto);
+        trainingRepository.save(training);
+        replaceTrainingFundingTypes(training, trainingUpdateRequestDto.getFundingTypeIds());
+        updateTrainingTranslationTexts(trainingTranslation, trainingUpdateRequestDto);
+        trainingTranslationRepository.save(trainingTranslation);
+    }
+
+    private void updateTrainingData(Training training, TrainingUpdateRequestDto trainingUpdateRequestDto) {
+        trainingMapper.updateTraining(trainingUpdateRequestDto, training);
+        training.setCategory(categoryService.getValidCategoryBy(trainingUpdateRequestDto.getCategoryId()));
+        training.setTrainingLanguage(languageService.getValidLanguageBy(trainingUpdateRequestDto.getTrainingLanguageId(), "trainingLanguageId"));
+        training.setLocation(locationService.getValidLocationBy(trainingUpdateRequestDto.getLocationId()));
+        handleSetDefaultLecturer(training, trainingUpdateRequestDto.getDefaultLecturerId());
+    }
+
+    private void replaceTrainingFundingTypes(Training training, List<Integer> fundingTypeIds) {
+        trainingFundingTypeRepository.deleteTrainingFundingTypesBy(training.getId());
+        addTrainingFundingTypes(training, fundingTypeIds);
+    }
+
+    private void updateTrainingTranslationTexts(TrainingTranslation trainingTranslation, TrainingUpdateRequestDto trainingUpdateRequestDto) {
+        trainingTranslationMapper.updateTrainingTranslation(trainingUpdateRequestDto, trainingTranslation);
+        trainingTranslation.setDescription(HtmlSanitizer.sanitizeDescription(trainingUpdateRequestDto.getDescription()));
     }
 }

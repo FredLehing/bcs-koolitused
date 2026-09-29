@@ -628,15 +628,19 @@ export default {
                 : $t('trainingForm.status.unpublished')
             }}
           </span>
+        </div>
+
+        <fieldset v-if="!isNewTraining" class="border rounded p-3 mb-4">
+          <legend class="float-none w-auto px-2 fs-5">
+            {{ $t('trainingForm.translations.legend') }}
+          </legend>
           <TranslationFlags
-            v-if="!isNewTraining"
-            class="ms-auto"
             :translation-languages="translationLanguages"
             :training-translations="trainingTranslations"
             :current-language-code="translation.languageCode"
             @event-translation-flag-clicked="handleTranslationFlagClicked"
           />
-        </div>
+        </fieldset>
 
         <TrainingDataForm
           :training="training"
