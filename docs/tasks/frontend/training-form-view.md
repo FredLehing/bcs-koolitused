@@ -70,7 +70,9 @@ Koolituse andmete sektsioon on tõlke sektsiooni kohal (vertikaalne paigutus), o
 
 ## API kutsed
 
-Kõik kutsed on failides `frontend/src/api-services/`. **Mock-vastuseid kasutavad kõik uued kutsed, välja arvatud need, mille backend on valmis** (vt "Mock-vastused" allpool). Päris kutsele vahetatud: `GET /api/languages`, `GET /api/locations`, `GET /api/lecturers`.
+Kõik kutsed on failides `frontend/src/api-services/`. **Mock-vastuseid kasutavad kõik uued kutsed, välja arvatud need, mille backend on valmis** (vt "Mock-vastused" allpool). Päris kutsele vahetatud: `GET /api/languages`, `GET /api/locations`, `GET /api/lecturers`, `POST /api/training`, `GET /api/training/{trainingId}`, `GET /api/training/{trainingId}/training-translations`, `GET /api/training-translation/{trainingTranslationId}`.
+
+**NB! Segaolek:** koolitus luuakse ja laaditakse päris andmebaasist, kuid `PUT` (Salvesta), publish/unpublish, tõlke `POST` ja AI tõlge on veel mockid ning töötavad `MockDatabase` andmetega. Päris andmebaasis loodud koolituse puhul need nupud ei tööta (mockis pole sellist koolitust) ning koolituste 1–2 puhul lähevad muudatused ainult mocki. Vaheta need kutsed koos vastavate backend teenustega.
 
 | Teenus | Meetod `api-services`-is | Backend task | Etapp |
 |---|---|---|---|

@@ -141,5 +141,17 @@
       "unpublished": "Koolitus on liigutatud mustandisse",
       "aiDone": "AI tõlge on vormis — kontrolli teksti ja salvesta"
     }
+  },
+  "richTextEditor": {
+    "bold": "Paks",
+    "italic": "Kaldkiri",
+    "underline": "Allajoonitud",
+    "heading3": "Pealkiri",
+    "heading4": "Alapealkiri",
+    "bulletList": "Täpploend",
+    "orderedList": "Numberloend",
+    "link": "Lisa link",
+    "unlink": "Eemalda link",
+    "linkPrompt": "Lingi aadress"
   }
 }

@@ -85,8 +85,14 @@ const trainingTranslations = [
     languageId: 1,
     title: 'Java algkursus',
     shortDescription: 'Java programmeerimise alused algajatele.',
+    // Vormindatud (richtext editori) kirjeldus; koolitus 2 jääb lihttekstiks nagu 3_import.sql-is
     description:
-      'Kursusel õpitakse Java süntaksit, objektorienteeritud programmeerimist ja põhilisi andmestruktuure.',
+      '<p>Kursusel õpitakse <strong>Java süntaksit</strong>, <em>objektorienteeritud programmeerimist</em> ja põhilisi andmestruktuure.</p>' +
+      '<h4>Mida sa õpid?</h4>' +
+      '<ul><li><p>Muutujad, tingimuslaused ja tsüklid</p></li>' +
+      '<li><p>Klassid ja objektid</p><ul><li><p>pärilus</p></li><li><p>liidesed</p></li></ul></li>' +
+      '<li><p>Kollektsioonid: <strong>List</strong>, <strong>Set</strong>, <strong>Map</strong></p></li></ul>' +
+      '<p>Loe lisaks <a target="_blank" rel="noopener noreferrer nofollow" href="https://dev.java/learn/">Java ametlikust õppematerjalist</a>.</p>',
   },
   {
     trainingTranslationId: 2,
@@ -269,7 +275,8 @@ export default {
   },
 
   // GET /api/training/{trainingId}/ai-translation?languageId= → AiTranslationDto
-  // Päris teenus tõlgib AI abil; mock lisab põhikeele tekstile keele eesliite.
+  // Päris teenus tõlgib AI abil; mock lisab põhikeele pealkirjale ja lühikirjeldusele keele eesliite.
+  // description tagastatakse muutmata — HTML-i ette lisatud tekst jääks väljapoole <p>-d.
   getAiTranslation(trainingId, languageId) {
     const mainTranslation = trainingTranslations.find(
       (translation) =>
@@ -280,7 +287,7 @@ export default {
     return {
       title: prefix + mainTranslation.title,
       shortDescription: prefix + mainTranslation.shortDescription,
-      description: prefix + mainTranslation.description,
+      description: mainTranslation.description,
     }
   },
 }

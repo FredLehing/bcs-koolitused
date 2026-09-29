@@ -143,5 +143,17 @@
       "unpublished": "The training has been moved to draft",
       "aiDone": "The AI translation is in the form — check the text and save"
     }
+  },
+  "richTextEditor": {
+    "bold": "Bold",
+    "italic": "Italic",
+    "underline": "Underline",
+    "heading3": "Heading",
+    "heading4": "Subheading",
+    "bulletList": "Bullet list",
+    "orderedList": "Numbered list",
+    "link": "Add link",
+    "unlink": "Remove link",
+    "linkPrompt": "Link address"
   }
 }

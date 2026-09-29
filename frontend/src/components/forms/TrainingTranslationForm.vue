@@ -1,6 +1,9 @@
 <script>
+import RichTextEditor from '@/components/forms/RichTextEditor.vue'
+
 export default {
   name: 'TrainingTranslationForm',
+  components: { RichTextEditor },
   props: {
     translation: Object,
     languageName: String,
@@ -70,17 +73,14 @@ export default {
         />
       </div>
       <div>
-        <!-- TODO: richtext editor (praegu tavaline textarea) -->
-        <label class="form-label" for="description">{{
+        <label class="form-label" id="descriptionLabel">{{
           $t('trainingForm.translation.description')
         }}</label>
-        <textarea
-          :value="translation.description"
-          @input="$emit('event-new-description-input', $event.target.value)"
-          id="description"
-          class="form-control"
-          rows="6"
-        ></textarea>
+        <RichTextEditor
+          :html="translation.description"
+          @event-new-html-input="$emit('event-new-description-input', $event)"
+          label-id="descriptionLabel"
+        />
       </div>
     </div>
   </fieldset>

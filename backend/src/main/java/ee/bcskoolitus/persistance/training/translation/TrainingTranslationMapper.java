@@ -2,6 +2,7 @@ package ee.bcskoolitus.persistance.training.translation;
 
 import ee.bcskoolitus.controller.training.dto.TrainingCreateRequestDto;
 import ee.bcskoolitus.controller.training.dto.TrainingTranslationItemDto;
+import ee.bcskoolitus.controller.trainingtranslation.dto.TrainingTranslationDto;
 import org.mapstruct.*;
 
 import java.util.List;
@@ -24,4 +25,13 @@ public interface TrainingTranslationMapper {
     List<TrainingTranslationItemDto> toTrainingTranslationItemDtos(
             List<TrainingTranslation> trainingTranslations
     );
+
+    @Mapping(source = "id", target = "trainingTranslationId")
+    @Mapping(source = "training.id", target = "trainingId")
+    @Mapping(source = "language.id", target = "languageId")
+    @Mapping(source = "language.code", target = "languageCode")
+    @Mapping(source = "title", target = "title")
+    @Mapping(source = "shortDescription", target = "shortDescription")
+    @Mapping(source = "description", target = "description")
+    TrainingTranslationDto toTrainingTranslationDto(TrainingTranslation trainingTranslation);
 }

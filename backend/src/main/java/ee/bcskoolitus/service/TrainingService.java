@@ -2,6 +2,7 @@ package ee.bcskoolitus.service;
 
 import ee.bcskoolitus.TrainingStatus;
 import ee.bcskoolitus.infrastructure.exception.PrimaryKeyNotFoundException;
+import ee.bcskoolitus.infrastructure.util.HtmlSanitizer;
 import ee.bcskoolitus.controller.common.dto.FundingTypeDto;
 import ee.bcskoolitus.controller.training.dto.TrainingCreateRequestDto;
 import ee.bcskoolitus.controller.training.dto.TrainingCreateResponseDto;
@@ -171,6 +172,7 @@ public class TrainingService {
 
     private TrainingTranslation createMainLanguageTrainingTranslation(Training training, TrainingCreateRequestDto trainingCreateRequestDto) {
         TrainingTranslation trainingTranslation = trainingTranslationMapper.toTrainingTranslation(trainingCreateRequestDto);
+        trainingTranslation.setDescription(HtmlSanitizer.sanitizeDescription(trainingCreateRequestDto.getDescription()));
         trainingTranslation.setTraining(training);
         trainingTranslation.setLanguage(languageService.getMainLanguage());
         return trainingTranslation;
