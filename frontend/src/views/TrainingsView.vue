@@ -4,10 +4,12 @@ import { useLanguageStore } from '@/stores/languageStore.js'
 import TrainingService from '@/api-services/TrainingService.js'
 import NavigationService from '@/services/NavigationService.js'
 import TrainingCard from '@/components/TrainingCard.vue'
+import { PhQuestion, PhX } from '@phosphor-icons/vue'
+import { Tooltip } from 'bootstrap'
 
 export default {
   name: 'TrainingsView',
-  components: { TrainingCard },
+  components: { TrainingCard, PhQuestion, PhX },
   data() {
     return {
       categoryId: 0,
@@ -15,7 +17,11 @@ export default {
       limit: 3,
       page: 0,
       trainingLanguageId: 0,
+      // searchText = väljale sisestatud tekst, appliedSearchText = tekst, millega päring tehti
+      searchText: '',
+      appliedSearchText: '',
       totalPages: 0,
+      totalElements: 0,
       trainings: [
         {
           trainingId: 0,
@@ -44,6 +50,13 @@ export default {
     // Keele vahetus navbaris → laadi koolitused uues keeles (filtrid ja lehekülg jäävad alles)
     contentLang() {
       this.getTrainings()
+      this.$nextTick(() => this.updateSearchHelpTooltip())
+    },
+    // Väli tühjendati (käsitsi, × nupu või Esc-iga) → näita kohe kõiki koolitusi
+    searchText(newSearchText) {
+      if (newSearchText === '' && this.appliedSearchText !== '') {
+        this.handleSearchClick()
+      }
     },
   },
   methods: {
@@ -55,6 +68,7 @@ export default {
         this.page,
         this.trainingLanguageId,
         this.contentLang,
+        this.appliedSearchText,
       )
         .then((response) => this.handleGetTrainingsResponse(response))
         .catch(() => NavigationService.navigateToErrorView())
@@ -62,11 +76,35 @@ export default {
     },
     handleGetTrainingsResponse(response) {
       this.totalPages = response.data.totalPages
+      this.totalElements = response.data.totalElements
       this.trainings = response.data.trainingSummaries
+    },
+    handleSearchClick() {
+      this.appliedSearchText = this.searchText.trim()
+      this.page = 0
+      this.getTrainings()
+    },
+    handleClearSearch() {
+      this.searchText = ''
+      this.$refs.searchInput.focus()
+    },
+    // Bootstrap tooltip loeb teksti ainult loomisel, keele vahetusel tuleb see uuendada
+    updateSearchHelpTooltip() {
+      this.searchHelpTooltip.setContent({ '.tooltip-inner': this.$t('trainings.searchHelp') })
+    },
+    handlePageClick(pagination) {
+      this.page = pagination - 1
+      this.getTrainings()
     },
   },
   beforeMount() {
     this.getTrainings()
+  },
+  mounted() {
+    this.searchHelpTooltip = new Tooltip(this.$refs.searchHelp)
+  },
+  beforeUnmount() {
+    this.searchHelpTooltip.dispose()
   },
 }
 </script>
@@ -76,11 +114,91 @@ export default {
     <div class="row">
       <div class="col-2">Siin on filtrid</div>
       <div class="col-10">
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <div class="input-group">
+            <input
+              ref="searchInput"
+              v-model="searchText"
+              type="text"
+              class="form-control"
+              :placeholder="$t('trainings.searchPlaceholder')"
+              @keyup.enter="handleSearchClick"
+              @keyup.esc="handleClearSearch"
+            />
+            <button
+              v-if="searchText"
+              type="button"
+              class="btn btn-outline-secondary"
+              :title="$t('trainings.clearSearch')"
+              :aria-label="$t('trainings.clearSearch')"
+              @click="handleClearSearch"
+            >
+              <PhX :size="16" />
+            </button>
+            <button type="button" class="btn btn-primary" @click="handleSearchClick">
+              {{ $t('trainings.search') }}
+            </button>
+          </div>
+          <span
+            ref="searchHelp"
+            class="text-secondary"
+            role="img"
+            tabindex="0"
+            data-bs-toggle="tooltip"
+            data-bs-placement="left"
+            :data-bs-title="$t('trainings.searchHelp')"
+            :aria-label="$t('trainings.searchHelp')"
+          >
+            <PhQuestion :size="22" />
+          </span>
+        </div>
+        <p v-if="appliedSearchText" class="text-secondary mb-3">
+          {{ $t('trainings.searchResults', { query: appliedSearchText }) }}
+          <strong>{{ $t('trainings.resultCount', totalElements) }}</strong>
+          ·
+          <button type="button" class="btn btn-link p-0 align-baseline" @click="handleClearSearch">
+            {{ $t('trainings.cancelSearch') }}
+          </button>
+        </p>
         <TrainingCard
           v-for="training in trainings"
           :key="training.trainingId"
           :training="training"
         />
+        <div
+          v-if="trainings.length === 0"
+          class="text-center text-secondary border rounded py-4 px-3 mb-3"
+        >
+          <template v-if="appliedSearchText">
+            <p class="fw-semibold mb-1">
+              {{ $t('trainings.noSearchResults', { query: appliedSearchText }) }}
+            </p>
+            <p class="mb-3">{{ $t('trainings.noSearchResultsHint') }}</p>
+            <button type="button" class="btn btn-outline-primary" @click="handleClearSearch">
+              {{ $t('trainings.showAllTrainings') }}
+            </button>
+          </template>
+          <p v-else class="mb-0">{{ $t('trainings.noResults') }}</p>
+        </div>
+        <nav v-if="totalPages > 0" aria-label="...">
+          <ul class="pagination justify-content-center">
+            <li class="page-item"><a href="#" class="page-link" :class="{disabled: page === 0 }" @click.prevent="handlePageClick(page)">Eelmine</a></li>
+
+            <li
+              v-for="totalPage in totalPages"
+              :key="totalPage"
+              class="page-item"
+              :class="{ active: totalPage === page + 1 }"
+            >
+              <a class="page-link" href="#" @click.prevent="handlePageClick(totalPage)">{{totalPage}}</a>
+            </li>
+            <li class="page-item">
+              <a class="page-link" href="#" :class="{disabled: page === totalPages - 1}" @click.prevent="handlePageClick(page + 2)"
+                >Järgmine</a
+              >
+            </li>
+          </ul>
+        </nav>
       </div>
     </div>
   </div>

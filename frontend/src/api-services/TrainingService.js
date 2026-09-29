@@ -3,7 +3,15 @@ import { mockResponse } from '@/api-services/mock/mockResponse.js'
 import MockDatabase from '@/api-services/mock/MockDatabase.js'
 
 export default {
-  sendGetTrainingsRequest(categoryId, fundingTypeId, limit, page, trainingLanguageId, contentLang) {
+  sendGetTrainingsRequest(
+    categoryId,
+    fundingTypeId,
+    limit,
+    page,
+    trainingLanguageId,
+    contentLang,
+    searchText,
+  ) {
     return axios.get('/api/trainings', {
       params: {
         categoryId: categoryId,
@@ -12,6 +20,7 @@ export default {
         page: page,
         trainingLanguageId: trainingLanguageId,
         contentLang: contentLang,
+        searchText: searchText,
       },
     })
   },

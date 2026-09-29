@@ -15,7 +15,7 @@ export default {
     login() {
       this.errorMessage = ''
       if (this.email === '' || this.password === '') {
-        this.errorMessage = 'Täida kõik väljad'
+        this.errorMessage = this.$t('login.errorMessage')
       } else {
         LoginService.sendLoginRequest(this.email, this.password)
           .then((response) => this.handleLoginResponse(response.data))
@@ -30,7 +30,11 @@ export default {
     },
 
     handleLoginError(loginError) {
-      this.errorMessage = loginError.response.data.message
+      if (loginError.response.data.errorCode === 'INCORRECT_CREDENTIALS') {
+        this.errorMessage = this.$t('login.incorrectCredentials')
+      } else {
+        this.errorMessage = loginError.response.data.message
+      }
     },
   },
 }
@@ -42,7 +46,6 @@ export default {
       <div class="col-6"></div>
 
       <div class="col-6 text-center">
-        <h1>{{ $t('login.title') }}</h1>
         <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
 
         <div class="form-floating mb-3 w-75 mx-auto">
@@ -65,21 +68,19 @@ export default {
           />
           <label for="floatingPassword">{{ $t('login.password') }}</label>
         </div>
-
-        <div class="form-check mb-3 d-inline-block">
-          <input type="checkbox" class="form-check-input" id="rememberMe" />
-          <label class="form-check-label" for="rememberMe">{{
-            $t('login.rememberMe')
-          }}</label>
+        <div class="d-flex justify-content-between w-75 mx-auto">
+          <div class="form-check mb-3 d-inline-block">
+            <input type="checkbox" class="form-check-input" id="rememberMe" />
+            <label class="form-check-label" for="rememberMe">{{ $t('login.rememberMe') }}</label>
+          </div>
+          <div>
+            <a href="#">{{ $t('login.forgotPassword') }}</a>
+          </div>
         </div>
         <div></div>
-        <button @click="login" type="button" class="btn btn-primary">
+        <button @click="login" type="button" class="btn btn-primary w-75 mx-auto text-uppercase">
           {{ $t('login.logIn') }}
         </button>
-
-        <div class="mt-2">
-          <a href="#">{{ $t('login.forgotPassword') }}</a>
-        </div>
       </div>
     </div>
   </div>

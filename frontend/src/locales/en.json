@@ -27,13 +27,37 @@
   },
 
   "login": {
-    "title": "Log-in",
     "email": "Email",
     "password": "Password",
-    "rememberMe": "Remember me",
-    "logIn": "Log-in",
-    "forgotPassword": "Forgot Password",
-    "errorMessage": "Fill all fields"
+    "rememberMe": "Remember Me",
+    "logIn": "LOGIN",
+    "forgotPassword": "Forgot Password?",
+    "errorMessage": "Please fill in all required fields",
+    "incorrectCredentials": "Incorrect email or password"
+  },
+
+  "trainings": {
+    "searchPlaceholder": "Search trainings",
+    "search": "Search",
+    "clearSearch": "Clear search",
+    "searchResults": "Results for “{query}”:",
+    "resultCount": "{n} trainings | {n} training | {n} trainings",
+    "cancelSearch": "Clear search",
+    "noSearchResults": "No trainings found for “{query}”.",
+    "noSearchResultsHint": "Try fewer or different words. Word forms are not adjusted, so use the beginning of a word (e.g. “program” instead of “programming”).",
+    "showAllTrainings": "Show all trainings",
+    "noResults": "No trainings match the selected filters.",
+    "searchHelp": "Searches for the entered words in the training title and short description. For best results, enter a few words. Word forms are not adjusted."
+  },
+  "trainingCard": {
+    "language": "Training language",
+    "orderable": "Orderable",
+    "viewDetails": "View details"
+  },
+  "footer": {
+    "facebook": "Find us on Facebook",
+    "privacy": "Privacy Policy and Terms of Use",
+    "studyTerms": "Study Regulations and Terms of Purchase"
   },
   "trainingForm": {
     "title": {
