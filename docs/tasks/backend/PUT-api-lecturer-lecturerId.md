@@ -8,6 +8,8 @@
 
 Sama muster nagu `PUT-api-training-trainingId.md` (koolitus + avatud tõlge ühes päringus). Eeldab taske `lecturer-db-changes.md`, `lecturer-deleted-status.md` ja pildi kontrolli `POST-api-lecturer.md`-st.
 
+> **Uuendus (2026-09-30):** pildi semantika muutus: `photo` = **uus** pilt (Base64, normaliseeritakse) või `null` = **pilti ei muudeta**; uus väli **`isPhotoRemoved: Boolean`** (`true` → `lecturer_photo` rida kustutatakse, `photo` peab siis olema `null`). Salvestatud pilti frontend tagasi ei saada (muidu kodeeritaks see igal salvestamisel uuesti). Allpool olev "pilt saadetakse alati praegusel kujul" on vananenud.
+
 ## Sisend
 
 **Path variable:**

@@ -10,6 +10,8 @@
 
 Taustaks: märkmed `docs/mock-wireframe/markmed/lecturer-form-view-state-new-lecturer-markmed.md`, `…-state-update-markmed.md`, `…-state-new-translation-markmed.md`; otsused ja skeemid `docs/mock-wireframe/loo-mock-vaade/admin-lecturers-view/admin-lecturers-view-skeemid.md` (jaotised "Koolitaja vorm", 2–5). **Olekud ja tõlkeloogika on samad nagu `TrainingFormView`-l** (`training-form-view.md`) — kasuta seda eeskujuna.
 
+> **Uuendus (2026-09-30):** salvestatud pildi eelvaade tuleb pilditeenusest (`GET /api/lecturer/{lecturerId}` → `photoVersion`); `PUT`-is saadetakse `photo` ainult **uue** pildi korral (muidu `null`) ja eemaldamisel `isPhotoRemoved: true` (vt `PUT-api-lecturer-lecturerId.md`). Backend normaliseerib pildi (400×400 JPEG).
+
 ## Kasutajavoog
 
 Admin avab "Lisa uus koolitaja" (navbar või nimekiri), sisestab nime, soovi korral pildi ning põhikeele ametinimetuse, lühikirjelduse ja kirjelduse ja vajutab "Lisa". Vorm läheb muutmise olekusse, kus lipukestega saab avada olemasolevaid tõlkeid või lisada puuduva (halli lipu kaudu; väljad eeltäidetakse põhikeele tekstiga, soovi korral "Tee AI tõlge"). Muutmise olekus salvestab "Salvesta" nime, pildi ja avatud tõlke. Kiirnupp "Koolitajad" viib nimekirja.

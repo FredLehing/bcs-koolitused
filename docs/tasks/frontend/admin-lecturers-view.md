@@ -10,6 +10,8 @@
 
 Taustaks: märkmed `docs/mock-wireframe/markmed/admin-lecturers-view-markmed.md`, otsused ja skeemid `docs/mock-wireframe/loo-mock-vaade/admin-lecturers-view/admin-lecturers-view-skeemid.md`, tööde järjekord `admin-lecturers-view-toode-jarjekord.md` (samas kaustas). Vorm on eraldi taskis `lecturer-form-view.md`.
 
+> **Uuendus (2026-09-30):** "Koolitusi" ja "Tulevasi toimumiskordi" loetakse seostabelitest (`training_lecturer`, `course_lecturer`); näidisandmetes on prügikast keelatud Rain Tüüril, Merje Vaidel ja Meelis Teernil.
+
 ## Kasutajavoog
 
 Admin avab navbari menüüst "Admin" → "Koolitajad" tabeli, kus on vaikimisi kõik aktiivsed koolitajad nime järgi. Otsinguväli filtreerib nimekirja trükkimise ajal. Rea pliiatsiga avaneb koolitaja vorm, prügikastiga saab koolitaja kustutada (kui tal pole tulevasi toimumiskordi). Lüliti "Näita kustutatud" toob nähtavale kustutatud koolitajad, keda saab taastada. Pealkirja real on nupp "+ Lisa uus koolitaja".

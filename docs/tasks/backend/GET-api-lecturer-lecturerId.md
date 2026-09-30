@@ -8,6 +8,8 @@
 
 Eeldab taske `lecturer-db-changes.md` ja `lecturer-deleted-status.md` (`getValidActiveLecturerBy`).
 
+> **Uuendus (2026-09-30):** pilte ei tagastata Base64-na — `photo` / `photoContentType` asenduvad väljaga **`photoVersion`** (`lecturer_photo.updated_at` epoch-sekundites, `null` = pilti pole); pilt tuleb `GET-api-lecturer-lecturerId-photo.md` teenusest. Allpool olevad Base64-näited on vananenud. Näide: `{ "lecturerId": 1, "fullName": "Rain Tüür", "photoVersion": 1784095200 }`.
+
 ## Sisend
 
 **Path variable:**

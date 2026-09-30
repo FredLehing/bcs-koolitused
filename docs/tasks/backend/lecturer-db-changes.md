@@ -8,6 +8,8 @@
 
 Kõik teised koolitajate taskid sõltuvad sellest. Tee see esimesena.
 
+> **Uuendus (2026-09-30):** seed'i pilt on Rain Tüüri foto (`docs/mock-wireframe/lecturer-photos/rain-tuur.jpg`, JPEG, `content_type = 'image/jpeg'`) — SQL allpool on juba uuendatud. Seoste tabelid `training_lecturer` / `course_lecturer` tulevad taskiga `training-lecturers-multiple.md` (tee kohe selle järel).
+
 ## Sisend
 
 Teenuse sisendeid pole — task muudab andmebaasi skeemi, seed-andmeid ja entity'sid.

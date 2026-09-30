@@ -8,6 +8,8 @@
 
 Eeldab taski `lecturer-db-changes.md` (view `admin_lecturer_summary`, `lecturer_photo`, `lecturer.status`).
 
+> **Uuendus (2026-09-30):** `trainingCount` loetakse `training_lecturer` kaudu ja `upcomingCourseCount` `course_lecturer` kaudu (view SQL: `docs/mock-wireframe/loo-mock-vaade/admin-lecturers-view/admin-lecturers-view-skeemid.md`, jaotis 1). Näidisandmete arvud: Rain Tüür 4 / 2, Merje Vaide 3 / 1, Meelis Teern 3 / 1, Margus Sakk 2 / 0, teised 1 / 0, Virve Räni 0 / 0. Eeldab `training-lecturers-multiple.md`.
+
 ## Sisend
 
 **Query parameetrid:**

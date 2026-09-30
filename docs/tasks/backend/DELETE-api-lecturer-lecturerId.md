@@ -8,6 +8,8 @@
 
 Eeldab taski `lecturer-db-changes.md` (`lecturer.status`, `LecturerStatus`).
 
+> **Uuendus (2026-09-30):** tulevaste toimumiskordade kontroll käib `course_lecturer` kaudu (`course_lecturer.lecturer_id = :id` JOIN `course`). Näidisandmetes on keelatud Rain Tüür, Merje Vaide ja Meelis Teern. Eeldab `training-lecturers-multiple.md`.
+
 ## Sisend
 
 **Path variable:**

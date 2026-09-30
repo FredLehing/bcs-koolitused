@@ -12,6 +12,8 @@
 
 Otsus (`admin-lecturers-view-skeemid.md`, "Koolitaja kaart"): **komponent laeb andmed ise** `lecturerId` järgi — nii ei dubleeri kolm vaadet sama päringut.
 
+> **Uuendus (2026-09-30):** pilt tuleb pilditeenusest: `LecturerAvatar` propsid on `lecturerId`, `photoVersion`, `size`, `shape` (`<img src="{API}/lecturer/{lecturerId}/photo?v={photoVersion}">`, `null` → kohatäide) — mitte Base64. Koolitusel võib olla **mitu koolitajat** (`training-lecturers-multiple.md`): `/training` paremas veerus on jaotis "Koolitajad" ja iga `TrainingDto.lecturers` elemendi kohta üks `LecturerCard`. Admini kalender näitab koolitajaid ainult nimedena.
+
 ## Kasutajavoog
 
 Külastaja avab koolituse lehe `/training`. Parema veeru kohatäite "Koolitaja" asemel näeb ta koolituse vaikimisi koolitaja kaarti: ümar pilt, nimi, ametinimetus ja lühikirjeldus kasutajaliidese keeles. Kui koolitusel pole vaikimisi koolitajat või koolitaja on kustutatud, kaarti (ja jaotist "Koolitaja") ei kuvata.

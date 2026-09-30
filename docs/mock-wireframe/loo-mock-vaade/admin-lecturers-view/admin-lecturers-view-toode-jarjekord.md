@@ -1,5 +1,7 @@
 # Koolitajate haldus — tööde järjekord
 
+> **Uuendus (2026-09-30):** kogu katusharu tööde järjekord (sh mitu koolitajat, pilditeenus, kalender, avalik koolitajate leht) on failis `docs/mock-wireframe/loo-mock-vaade/toode-jarjekord.md`. See fail on esialgne versioon.
+
 `AdminLecturersView.vue`, `LecturerFormView.vue`, `LecturerCard.vue`.
 
 Järjekord: **andmebaas ja entity'd → nimekirja teenused → vormi teenused → koolitaja kaart → frontend (mockidega kohe alustatav) → AI tõlge**.

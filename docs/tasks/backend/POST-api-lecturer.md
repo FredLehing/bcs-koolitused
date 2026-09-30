@@ -8,6 +8,8 @@
 
 Sama muster nagu `POST-api-training.md` (koolitus luuakse koos põhikeele tõlkega). Eeldab taski `lecturer-db-changes.md`.
 
+> **Uuendus (2026-09-30):** pilt **normaliseeritakse** (ruut, 400×400, JPEG, EXIF eemaldatud; `content_type = 'image/jpeg'`) — ühine abiklass `GET-api-lecturer-lecturerId-photo.md`-s.
+
 ## Sisend
 
 **Request body:** `LecturerCreateRequestDto` (ettepanek).

@@ -10,6 +10,8 @@
 
 Taust: koolitajal tuleb soft delete (`lecturer.status = 'D'`, vt `lecturer-db-changes.md` ja `DELETE-api-lecturer-lecturerId.md`). Otsused: `docs/mock-wireframe/loo-mock-vaade/admin-lecturers-view/admin-lecturers-view-skeemid.md`, jaotis "Kustutatud koolitaja teistes teenustes".
 
+> **Uuendus (2026-09-30):** `defaultLecturerId` asendub `lecturerIds`-iga (`training-lecturers-multiple.md`): kontroll kehtib igale **uuele** ID-le listis; juba seotud kustutatud koolitaja võib jääda.
+
 ## Sisend
 
 Teenuste sisendid ei muutu.
