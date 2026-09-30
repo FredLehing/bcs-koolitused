@@ -106,8 +106,6 @@
       "add": "Add",
       "save": "Save",
       "addTranslation": "Add translation",
-      "publish": "Publish",
-      "unpublish": "Move to draft",
       "view": "View"
     },
     "flags": {
@@ -120,12 +118,6 @@
       "search": "Search",
       "notFound": "No lecturers found.",
       "noLecturer": "No lecturer"
-    },
-    "statusModal": {
-      "publishTitle": "Publish training",
-      "publishMessage": "Do you want to publish the training? It will become publicly visible.",
-      "unpublishTitle": "Move to draft",
-      "unpublishMessage": "Do you want to move the training to draft? It will be removed from the public list."
     },
     "aiModal": {
       "title": "Replace text with AI translation?",
@@ -170,6 +162,24 @@
       "upcomingCourses": "Upcoming courses",
       "calendar": "Calendar",
       "placeholder": "Content coming soon."
+    }
+  },
+  "trainingStatusButton": {
+    "buttons": {
+      "publish": "Publish",
+      "unpublish": "Move to draft",
+      "restore": "Restore"
+    },
+    "modal": {
+      "publishTitle": "Publish training",
+      "publishMessage": "Do you want to publish the training? It will become publicly visible.",
+      "publishMessageWithTitle": "Do you want to publish the training \"{title}\"? It will become publicly visible.",
+      "unpublishTitle": "Move to draft",
+      "unpublishMessage": "Do you want to move the training to draft? It will be removed from the public list.",
+      "unpublishMessageWithTitle": "Do you want to move the training \"{title}\" to draft? It will be removed from the public list.",
+      "restoreTitle": "Restore training",
+      "restoreMessage": "Do you want to restore the training? It will become a draft and is made public only after publishing.",
+      "restoreMessageWithTitle": "Do you want to restore the training \"{title}\"? It will become a draft and is made public only after publishing."
     }
   }
 }

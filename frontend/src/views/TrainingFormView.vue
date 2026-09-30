@@ -16,6 +16,7 @@ import TrainingDataForm from '@/components/forms/TrainingDataForm.vue'
 import TrainingTranslationForm from '@/components/forms/TrainingTranslationForm.vue'
 import LecturerSelectModal from '@/components/modals/LecturerSelectModal.vue'
 import ConfirmModal from '@/components/modals/ConfirmModal.vue'
+import TrainingStatusButton from '@/components/common/TrainingStatusButton.vue'
 
 // Vaate olekud (state) tuletatakse URL-i query parameetritest:
 //   new-training     /training-form
@@ -29,6 +30,7 @@ export default {
   name: 'TrainingFormView',
   components: {
     ConfirmModal,
+    TrainingStatusButton,
     LecturerSelectModal,
     TrainingTranslationForm,
     TrainingDataForm,
@@ -83,7 +85,6 @@ export default {
       },
 
       isLecturerModalOpen: false,
-      isStatusModalOpen: false,
       isAiConfirmModalOpen: false,
       isAiLoading: false,
     }
@@ -148,18 +149,6 @@ export default {
         mainLanguage: this.mainLanguageCode,
         saveButton: saveButton,
       })
-    },
-
-    statusModalTitle() {
-      return this.isPublished
-        ? this.$t('trainingForm.statusModal.unpublishTitle')
-        : this.$t('trainingForm.statusModal.publishTitle')
-    },
-
-    statusModalMessage() {
-      return this.isPublished
-        ? this.$t('trainingForm.statusModal.unpublishMessage')
-        : this.$t('trainingForm.statusModal.publishMessage')
     },
   },
   watch: {
@@ -432,21 +421,20 @@ export default {
 
     // ---------- Publitseeri / Liiguta mustandisse ----------
 
-    changeTrainingStatus() {
-      this.isStatusModalOpen = false
+    // API kutse teeb TrainingStatusButton ise; vaade näitab teadet ja laadib koolituse uuesti
+    handleChangeTrainingStatusResponse(newStatus) {
       this.resetMessages()
-      const request = this.isPublished
-        ? TrainingService.sendPutTrainingUnpublishRequest(this.trainingId)
-        : TrainingService.sendPutTrainingPublishRequest(this.trainingId)
-      request
-        .then(() => this.handleChangeTrainingStatusResponse())
-        .catch(() => NavigationService.navigateToErrorView())
+      this.successMessage =
+        newStatus === 'P'
+          ? this.$t('trainingForm.messages.published')
+          : this.$t('trainingForm.messages.unpublished')
+      this.getTraining()
     },
 
-    handleChangeTrainingStatusResponse() {
-      this.successMessage = this.isPublished
-        ? this.$t('trainingForm.messages.unpublished')
-        : this.$t('trainingForm.messages.published')
+    // 403 TRAINING_DELETED — koolitus kustutati vahepeal; uuesti laadimine suunab 404 korral veavaatele
+    handleChangeTrainingStatusError(message) {
+      this.resetMessages()
+      this.errorMessage = message
       this.getTraining()
     },
 
@@ -686,18 +674,13 @@ export default {
           >
             {{ $t('trainingForm.buttons.addTranslation') }}
           </button>
-          <button
-            v-if="!isNewTraining"
-            @click="isStatusModalOpen = true"
-            class="btn btn-outline-primary"
-            type="button"
-          >
-            {{
-              isPublished
-                ? $t('trainingForm.buttons.unpublish')
-                : $t('trainingForm.buttons.publish')
-            }}
-          </button>
+          <TrainingStatusButton
+            v-if="!isNewTraining && training.status !== ''"
+            :training-id="trainingId"
+            :status="training.status"
+            @event-status-changed="handleChangeTrainingStatusResponse"
+            @event-status-error="handleChangeTrainingStatusError"
+          />
           <button
             v-if="!isNewTraining"
             @click="navigateToTrainingView"
@@ -722,15 +705,6 @@ export default {
       @event-lecturer-search="searchLecturers"
       @event-lecturer-selected="handleLecturerSelected"
       @event-modal-closed="isLecturerModalOpen = false"
-    />
-
-    <ConfirmModal
-      :is-open="isStatusModalOpen"
-      :title="statusModalTitle"
-      :message="statusModalMessage"
-      :confirm-label="statusModalTitle"
-      @event-confirmed="changeTrainingStatus"
-      @event-modal-closed="isStatusModalOpen = false"
     />
 
     <ConfirmModal
