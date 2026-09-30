@@ -1,0 +1,729 @@
+<meta charset="utf-8">
+<title>Registreerumise läbimäng</title>
+<meta name="description" content="CourseRegistrationView.vue (toimumiskorrale registreerumine, ainult sisseloginud kasutajale) ja SignupView.vue (konto loomine): API päringud ja mockupi märkmed interaktiivse läbimänguna.">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Sama visuaalne keel nagu courses-view-labimang.html (CSS sealt) */
+:root {
+  --board: #e9ecef;
+  --board-dots: #d3d8de;
+  --panel: #ffffff;
+  --ink: #23272e;
+  --ink-soft: #5b6470;
+  --line: #b9c0c9;
+  --sketch: #3b4048;
+  --field: #ffffff;
+  --field-off: #eef0f3;
+  --accent: #2f6fde;
+  --accent-soft: #dce7fb;
+  --note: #f2c94c;
+  --note-edge: #d9ad2b;
+  --note-ink: #2e2505;
+  --get: #1f7a5c;
+  --post: #2f6fde;
+  --put: #a56200;
+  --del: #b83a3a;
+  --ok: #1f7a5c;
+  --bad: #c0392b;
+  --shadow: 0 1px 2px rgba(20, 30, 45, .08), 0 4px 14px rgba(20, 30, 45, .06);
+  --font-ui: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-sketch: "Balsamiq Sans", "Comic Sans MS", "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --board: #15181d; --board-dots: #242931; --panel: #1d2127; --ink: #e6e9ee; --ink-soft: #9aa4b2;
+    --line: #3a414b; --sketch: #c9ced6; --field: #252a31; --field-off: #1a1e23; --accent: #7aa5f5; --accent-soft: #22324f;
+    --get: #5cc59e; --post: #7aa5f5; --put: #e0a24a; --del: #ef7d7d; --ok: #5cc59e; --bad: #ef7d7d;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --board: #15181d; --board-dots: #242931; --panel: #1d2127; --ink: #e6e9ee; --ink-soft: #9aa4b2;
+  --line: #3a414b; --sketch: #c9ced6; --field: #252a31; --field-off: #1a1e23; --accent: #7aa5f5; --accent-soft: #22324f;
+  --get: #5cc59e; --post: #7aa5f5; --put: #e0a24a; --del: #ef7d7d; --ok: #5cc59e; --bad: #ef7d7d;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.3);
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background-color: var(--board);
+  background-image: radial-gradient(var(--board-dots) 1px, transparent 1px);
+  background-size: 18px 18px;
+  color: var(--ink);
+  font: 15px/1.5 var(--font-ui);
+}
+.page { max-width: 1320px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 64px; display: grid; gap: 28px; }
+h1, h2, h3 { text-wrap: balance; margin: 0; line-height: 1.2; }
+h1 { font-size: 1.7rem; font-weight: 600; }
+h2 { font-size: 1.15rem; font-weight: 600; }
+h3 { font-size: .8rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft); }
+code, .mono { font-family: var(--font-mono); font-size: .88em; }
+button { font: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Päis */
+.intro { display: grid; gap: 10px; }
+.intro p { margin: 0; max-width: 78ch; color: var(--ink-soft); }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.toolbar .sep { width: 1px; align-self: stretch; background: var(--line); margin-inline: 4px; }
+.toolbar .lbl-soft { font-size: .82rem; color: var(--ink-soft); }
+.tbtn { border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+.tbtn:hover { border-color: var(--accent); }
+.tbtn[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 1px var(--accent); }
+
+/* Brauseri wireframe */
+.browser { background: var(--panel); border: 2px solid var(--sketch); border-radius: 10px; font-family: var(--font-sketch); box-shadow: var(--shadow); overflow: hidden; min-width: 0; }
+.chrome { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-bottom: 2px solid var(--sketch); background: var(--field-off); }
+.chrome .dots { display: flex; gap: 5px; }
+.chrome .dots span { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--sketch); }
+.urlbar { flex: 1; min-width: 0; border: 1.5px solid var(--sketch); border-radius: 14px; padding: 3px 12px; font-family: var(--font-mono); font-size: .8rem; background: var(--field); white-space: nowrap; overflow-x: auto; }
+.sitenav { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; padding: 8px 14px; border-bottom: 1.5px dashed var(--line); font-size: .85rem; }
+.sitenav .logo { width: 44px; height: 24px; border: 1.5px solid var(--sketch); position: relative; }
+.sitenav .logo::before, .sitenav .logo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top right, transparent calc(50% - .75px), var(--sketch) 50%, transparent calc(50% + .75px)); }
+.sitenav .logo::after { transform: scaleX(-1); }
+.sitenav .cur { text-decoration: underline; text-underline-offset: 3px; }
+.sitenav .admin { position: relative; }
+.sitenav .admin > button { background: none; border: 1.5px solid transparent; border-radius: 6px; font: inherit; color: var(--ink); padding: 0 6px; cursor: pointer; }
+.sitenav .admin > button:hover, .sitenav .admin > button[aria-expanded="true"] { border-color: var(--sketch); }
+.sitenav .menu { position: absolute; top: calc(100% + 4px); left: 0; z-index: 6; background: var(--panel); border: 1.5px solid var(--sketch); border-radius: 6px; box-shadow: 3px 3px 0 var(--sketch); display: grid; min-width: 180px; padding: 4px; }
+.sitenav .menu button { background: none; border: 0; text-align: left; font: inherit; color: var(--ink); padding: 4px 8px; border-radius: 4px; cursor: pointer; white-space: nowrap; }
+.sitenav .menu button:hover { background: var(--accent-soft); }
+.sitenav .menu .cur { background: var(--accent-soft); font-weight: 700; }
+.viewhead { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; justify-content: space-between; }
+.sitenav .out { margin-left: auto; border: 1.5px solid var(--sketch); border-radius: 10px; padding: 0 8px; font-size: .78rem; }
+
+.view { padding: 16px 18px 20px; display: grid; gap: 14px; min-width: 0; }
+.view h2 { font-family: var(--font-sketch); font-size: 1.35rem; font-weight: 700; }
+.searchrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.searchrow input { flex: 1 1 260px; min-width: 0; }
+input[type="text"], select { font-family: var(--font-sketch); font-size: .9rem; color: var(--ink); background: var(--field); border: 1.5px solid var(--sketch); border-radius: 5px; padding: 4px 8px; }
+select { width: 100%; }
+.sbtn { font-family: var(--font-sketch); font-size: .9rem; border: 1.5px solid var(--sketch); border-radius: 12px; background: var(--field); color: var(--ink); padding: 3px 14px; cursor: pointer; box-shadow: 1.5px 1.5px 0 var(--sketch); white-space: nowrap; }
+.sbtn:hover:not(:disabled) { background: var(--accent-soft); }
+.sbtn:active:not(:disabled) { transform: translate(1px, 1px); box-shadow: .5px .5px 0 var(--sketch); }
+.sbtn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.sbtn.danger { background: var(--del); border-color: var(--del); color: #fff; }
+.sbtn.small { font-size: .78rem; padding: 1px 10px; }
+.sbtn:disabled { opacity: .45; cursor: not-allowed; }
+.api-pin { font-family: var(--font-mono); font-size: .66rem; background: var(--note); color: var(--note-ink); border: 0; border-radius: 3px; padding: 0 5px; cursor: pointer; line-height: 1.6; white-space: nowrap; }
+.api-pin:hover { outline: 1.5px solid var(--note-edge); }
+.pins { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+
+.tip { position: relative; display: inline-flex; }
+.tip .qmark { width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--sketch); background: var(--field); color: var(--ink); font: 700 .8rem var(--font-sketch); cursor: help; padding: 0; }
+.tip [role="tooltip"] { position: absolute; right: 0; top: calc(100% + 8px); z-index: 5; width: min(300px, 80vw); background: var(--ink); color: var(--panel); font: .78rem/1.4 var(--font-ui); padding: 8px 10px; border-radius: 6px; opacity: 0; visibility: hidden; transition: opacity .12s; pointer-events: none; }
+.tip:hover [role="tooltip"], .tip:focus-within [role="tooltip"] { opacity: 1; visibility: visible; }
+.togglerow { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+.linkish { background: none; border: 0; color: var(--accent); text-decoration: underline; cursor: pointer; padding: 0; font-family: var(--font-sketch); font-size: .9rem; }
+.linkish.small { font-size: .8rem; }
+.badge { border: 1.5px solid var(--sketch); border-radius: 10px; padding: 0 8px; font-size: .75rem; white-space: nowrap; }
+.badge.draft { background: var(--field-off); }
+.badge.pub { background: var(--ok); color: #fff; border-color: var(--ok); }
+.badge.active { background: var(--accent-soft); border-color: var(--accent); }
+.badge.deleted { background: var(--del); color: #fff; border-color: var(--del); }
+tr.is-deleted td { color: var(--ink-soft); }
+tr.is-deleted td .flag, tr.is-deleted td .settings { opacity: .55; }
+
+fieldset { border: 1.5px solid var(--sketch); border-radius: 8px; margin: 0; padding: 10px 12px 12px; display: grid; gap: 12px; min-width: 0; }
+legend { padding: 0 6px; font-weight: 700; font-size: .9rem; }
+.fgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px 14px; }
+.fld { display: grid; gap: 3px; min-width: 0; }
+.lbl { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: .82rem; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.hint { font-size: .8rem; color: var(--ink-soft); }
+
+/* Tabel */
+.tablewrap { overflow-x: auto; border: 1.5px solid var(--sketch); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: .84rem; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px dashed var(--line); vertical-align: middle; }
+thead th { background: var(--field-off); border-bottom: 1.5px solid var(--sketch); font-weight: 700; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr:hover td { background: color-mix(in srgb, var(--accent-soft) 45%, transparent); }
+td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.sorth { background: none; border: 0; padding: 0; font: inherit; font-weight: 700; color: var(--ink); cursor: pointer; display: inline-flex; gap: 4px; align-items: center; }
+.sorth:hover { color: var(--accent); }
+.sorth .arrow { font-size: .75rem; color: var(--accent); min-width: .8em; }
+.th-pin { display: inline-flex; gap: 4px; align-items: center; }
+.title-cell { min-width: 170px; }
+.fallback { display: block; font-size: .7rem; color: var(--ink-soft); }
+.settings { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; min-width: 120px; }
+.settings li { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.settings li::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex: none; }
+.settings .none { color: var(--ink-soft); }
+.settings .none::before { display: none; }
+.tr-ok { color: var(--ok); font-weight: 700; font-size: 1.05rem; }
+.tr-bad { color: var(--bad); font-weight: 700; font-size: 1.05rem; cursor: help; }
+.icons { display: flex; gap: 4px; }
+.ibtn { width: 28px; height: 26px; display: inline-grid; place-items: center; border: 1.5px solid var(--sketch); border-radius: 6px; background: var(--field); color: var(--ink); cursor: pointer; padding: 0; }
+.ibtn:hover { background: var(--accent-soft); }
+.ibtn.del:hover { background: color-mix(in srgb, var(--del) 20%, transparent); }
+.ibtn svg { width: 16px; height: 16px; }
+.flag svg { width: 26px; height: 17px; border: 1.5px solid var(--sketch); display: block; }
+.empty-row td { text-align: center; padding: 20px; color: var(--ink-soft); }
+
+.foot { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; }
+.total { font-size: .85rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.pager { display: flex; flex-wrap: wrap; gap: 0; }
+.pager button { font-family: var(--font-sketch); font-size: .85rem; border: 1.5px solid var(--sketch); margin-left: -1.5px; background: var(--field); color: var(--accent); padding: 2px 10px; cursor: pointer; }
+.pager button:first-child { border-radius: 6px 0 0 6px; margin-left: 0; }
+.pager button:last-child { border-radius: 0 6px 6px 0; }
+.pager button[aria-current="page"] { background: var(--accent); color: #fff; border-color: var(--sketch); }
+.pager button:disabled { color: var(--ink-soft); cursor: not-allowed; opacity: .6; }
+
+/* Alumine rida */
+.below { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; box-shadow: var(--shadow); display: grid; gap: 10px; min-width: 0; }
+.kv { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 12px; font-size: .86rem; margin: 0; }
+.kv dt { color: var(--ink-soft); }
+.kv dd { margin: 0; font-family: var(--font-mono); font-size: .8rem; overflow-wrap: anywhere; }
+
+.note { background: var(--note); color: var(--note-ink); border-radius: 2px; box-shadow: 0 1px 0 var(--note-edge), 0 6px 16px rgba(80, 60, 0, .18); padding: 12px 14px 14px; display: grid; gap: 8px; min-width: 0; }
+.note.flash { animation: noteflash 1.4s ease-out; }
+@keyframes noteflash { 0%, 30% { box-shadow: 0 0 0 4px var(--accent), 0 6px 16px rgba(80,60,0,.18); } 100% { box-shadow: 0 1px 0 var(--note-edge), 0 6px 16px rgba(80,60,0,.18); } }
+.note-head { display: flex; align-items: center; gap: 8px; }
+.note-head strong { font-size: .82rem; font-weight: 600; letter-spacing: .03em; }
+.note-head .copy { margin-left: auto; font: 500 .75rem var(--font-ui); background: rgba(255,255,255,.55); color: var(--note-ink); border: 1px solid var(--note-edge); border-radius: 4px; padding: 1px 8px; cursor: pointer; }
+.note-head .copy:hover { background: #fff; }
+.note pre { margin: 0; font: .78rem/1.45 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+.note .draft-tag { font-size: .72rem; background: rgba(255,255,255,.55); border-radius: 3px; padding: 0 6px; }
+
+.log { display: grid; gap: 6px; }
+.log-step { font-size: .85rem; color: var(--ink-soft); }
+.log-group { font-size: .74rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft); margin-top: 6px; }
+.req { border: 1px solid var(--line); border-radius: 6px; background: var(--field); overflow: hidden; }
+.req.done { border-color: var(--ok); }
+.req > button { width: 100%; display: flex; gap: 8px; align-items: center; text-align: left; background: none; border: 0; color: var(--ink); padding: 6px 10px; cursor: pointer; }
+.req > button:hover { background: var(--field-off); }
+.req .main { display: grid; gap: 1px; flex: 1; min-width: 0; }
+.req .when { display: block; font-size: .74rem; color: var(--ink-soft); }
+.req .ran { font: 600 .68rem var(--font-ui); color: var(--ok); border: 1px solid var(--ok); border-radius: 10px; padding: 0 6px; flex: none; }
+.req.idle .method { opacity: .75; }
+.method { font: 600 .7rem var(--font-mono); padding: 1px 6px; border-radius: 3px; color: #fff; flex: none; }
+.m-GET { background: var(--get); } .m-POST { background: var(--post); } .m-PUT { background: var(--put); } .m-DELETE { background: var(--del); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .method { color: #111; } }
+:root[data-theme="dark"] .method { color: #111; }
+.req .path { font-family: var(--font-mono); font-size: .76rem; overflow-wrap: anywhere; }
+.req .body { border-top: 1px dashed var(--line); padding: 8px 10px; display: grid; gap: 6px; }
+.req .body pre { margin: 0; font: .74rem/1.4 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; max-height: 280px; overflow: auto; }
+.req .body .sub { font-size: .75rem; color: var(--ink-soft); }
+.req .body .linkish { font-size: .8rem; justify-self: start; }
+
+.notes-section { display: grid; gap: 14px; }
+.notes-section > p { margin: 0; color: var(--ink-soft); max-width: 72ch; }
+.notes-grid { columns: 3 340px; column-gap: 18px; }
+.notes-grid .note { break-inside: avoid; margin-bottom: 18px; }
+
+.overlay { position: fixed; inset: 0; background: rgba(15, 20, 28, .45); display: grid; place-items: center; padding: 16px; z-index: 20; }
+.modal { background: var(--panel); color: var(--ink); border: 2px solid var(--sketch); border-radius: 10px; width: min(440px, 100%); padding: 16px 18px; display: grid; gap: 12px; font-family: var(--font-sketch); box-shadow: 4px 4px 0 var(--sketch); }
+.modal h2 { font-family: var(--font-sketch); font-weight: 700; }
+.modal .row { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--panel); padding: 8px 16px; border-radius: 6px; font-size: .9rem; z-index: 30; max-width: calc(100% - 32px); }
+
+@media (max-width: 1100px) { .below { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .below .note { grid-column: 1 / -1; } }
+@media (max-width: 700px) { .below { grid-template-columns: minmax(0, 1fr); } .page { padding-inline: 16px; } }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+/* TrainingsView lisad */
+.cols { display: grid; grid-template-columns: minmax(0, 200px) minmax(0, 1fr); gap: 18px; align-items: start; }
+.filters { display: grid; gap: 12px; border: 1.5px dashed var(--line); border-radius: 8px; padding: 10px; }
+.filters .todo { font-family: var(--font-ui); font-size: .7rem; background: var(--note); color: var(--note-ink); border-radius: 3px; padding: 1px 6px; justify-self: start; }
+.filters fieldset { gap: 4px; padding: 6px 8px 8px; }
+.filters label.radio { display: flex; gap: 6px; align-items: center; font-size: .85rem; cursor: pointer; }
+.searchrow { display: flex; gap: 8px; align-items: center; }
+.ig { display: flex; flex: 1; min-width: 0; }
+.ig input { flex: 1; min-width: 0; border-radius: 5px 0 0 5px; }
+.ig .x { border: 1.5px solid var(--sketch); border-left: 0; background: var(--field); color: var(--ink); padding: 0 8px; cursor: pointer; font-family: var(--font-sketch); }
+.ig .go { border: 1.5px solid var(--accent); background: var(--accent); color: #fff; border-radius: 0 5px 5px 0; padding: 0 14px; cursor: pointer; font-family: var(--font-sketch); }
+.results { font-size: .88rem; color: var(--ink-soft); margin: 0; }
+.results strong { color: var(--ink); }
+.tcards { display: grid; gap: 14px; }
+.tc { border: 1.5px solid var(--sketch); border-radius: 8px; background: var(--field); overflow: hidden; }
+.tc.promo { background: color-mix(in srgb, var(--note) 22%, var(--field)); }
+.tc-head { display: flex; gap: 10px; align-items: center; justify-content: space-between; padding: 8px 12px; border-bottom: 1.5px solid var(--sketch); font-size: 1.25rem; font-weight: 700; }
+.tc-head .icons { display: flex; gap: 6px; align-items: center; }
+.tc-head .star { font-size: 1.4rem; line-height: 1; }
+.tc-body { display: flex; gap: 14px; justify-content: space-between; padding: 10px 12px; }
+.tc-body .left { display: grid; gap: 6px; align-content: start; min-width: 0; }
+.tc-body .left p { margin: 0; }
+.tc-body .right { display: grid; gap: 8px; justify-items: center; align-content: start; flex: none; }
+.cat { border: 1.5px solid var(--sketch); border-radius: 6px; padding: 0 8px; justify-self: start; font-size: .85rem; background: var(--accent-soft); }
+.fund { display: flex; gap: 6px; align-items: center; color: var(--ok); font-size: .85rem; }
+.fund .eur { width: 18px; height: 18px; border-radius: 50%; background: var(--ok); color: #fff; display: inline-grid; place-items: center; font-size: .7rem; }
+.flagbox { display: grid; justify-items: center; font-size: .72rem; color: var(--ink-soft); }
+.flagbox svg { width: 34px; height: 22px; border: 1px solid var(--sketch); display: block; }
+.orderable { border: 1.5px solid var(--ok); color: var(--ok); border-radius: 8px; padding: 0 8px; font-size: .75rem; }
+.emptybox { border: 1.5px solid var(--line); border-radius: 8px; padding: 16px; text-align: center; display: grid; gap: 6px; justify-items: center; color: var(--ink-soft); }
+.emptybox strong { color: var(--ink); }
+.pager { justify-content: center; }
+.tip { position: relative; display: inline-flex; }
+@media (max-width: 760px) { .cols { grid-template-columns: minmax(0, 1fr); } .tc-body { flex-direction: column; } .tc-body .right { justify-items: start; } }
+.embed .sitenav { display: none; }
+/* CoursesView ja CourseView lisad */
+.modal.wide { width: min(600px, 100%); max-height: calc(100vh - 32px); overflow: auto; }
+.modal .ctx { font-size: .85rem; color: var(--ink-soft); margin: 0; }
+.modal .ctx strong { color: var(--ink); }
+.mgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 12px; }
+.mgrid .full { grid-column: 1 / -1; }
+.modal input[type="text"], .modal input[type="email"], .modal input[type="tel"] { font-family: var(--font-sketch); font-size: .9rem; color: var(--ink); background: var(--field); border: 1.5px solid var(--sketch); border-radius: 5px; padding: 4px 8px; width: 100%; }
+.modal textarea { font-family: var(--font-sketch); font-size: .9rem; color: var(--ink); background: var(--field); border: 1.5px solid var(--sketch); border-radius: 5px; padding: 6px 8px; width: 100%; min-height: 90px; resize: vertical; }
+.modal .counter { font-size: .75rem; color: var(--ink-soft); justify-self: end; }
+.modal .alert { border: 1.5px solid var(--del); background: color-mix(in srgb, var(--del) 14%, transparent); border-radius: 6px; padding: 6px 10px; font-size: .88rem; }
+.req-star { color: var(--del); }
+.ok-alert { border: 1.5px solid var(--ok); background: color-mix(in srgb, var(--ok) 14%, transparent); color: var(--ink); border-radius: 6px; padding: 6px 10px; font-size: .9rem; }
+@media (max-width: 560px) { .mgrid { grid-template-columns: minmax(0, 1fr); } }
+.cc-mid .star { font-size: 1.2rem; line-height: 1; color: var(--put); }
+.filters input[type="date"] { font-family: var(--font-sketch); font-size: .85rem; color: var(--ink); background: var(--field); border: 1.5px solid var(--sketch); border-radius: 5px; padding: 2px 4px; width: 100%; }
+.switch { display: inline-flex; gap: 8px; align-items: center; cursor: pointer; font-size: .88rem; }
+.switch input { appearance: none; width: 34px; height: 18px; border: 1.5px solid var(--sketch); border-radius: 10px; background: var(--field-off); position: relative; cursor: pointer; margin: 0; flex: none; }
+.switch input::after { content: ""; position: absolute; top: 2px; left: 2px; width: 11px; height: 11px; border-radius: 50%; background: var(--sketch); transition: left .12s; }
+.switch input:checked { background: var(--accent); border-color: var(--accent); }
+.switch input:checked::after { left: 18px; background: #fff; }
+.cc-body { display: grid; grid-template-columns: 110px minmax(0, 1fr) auto; gap: 14px; padding: 10px 12px; align-items: start; }
+.dateblock { border: 1.5px solid var(--sketch); border-radius: 8px; padding: 6px 4px; text-align: center; display: grid; gap: 2px; background: var(--panel); }
+.dateblock .d { font-weight: 700; font-size: 1rem; line-height: 1.2; }
+.dateblock .y { font-size: .75rem; color: var(--ink-soft); }
+.dateblock .len { font-size: .72rem; color: var(--ink-soft); border-top: 1px dashed var(--line); padding-top: 2px; }
+.cc-mid { display: grid; gap: 6px; min-width: 0; }
+.cc-mid h3 { font: 700 1.1rem var(--font-sketch); text-transform: none; letter-spacing: 0; color: var(--ink); margin: 0; display: flex; gap: 8px; align-items: center; }
+.cc-mid p { margin: 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.chip { border: 1.5px solid var(--line); border-radius: 10px; padding: 0 8px; font-size: .76rem; background: var(--field); }
+.lect { font-size: .82rem; color: var(--ink-soft); }
+.cc-right { display: grid; gap: 8px; justify-items: end; align-content: start; }
+.price { font-weight: 700; font-size: 1.15rem; }
+.badge { border: 1.5px solid var(--sketch); border-radius: 10px; padding: 0 8px; font-size: .75rem; white-space: nowrap; }
+.badge.full { background: color-mix(in srgb, var(--put) 22%, transparent); border-color: var(--put); }
+.badge.past { background: var(--field-off); border-color: var(--line); color: var(--ink-soft); }
+.clear-link { justify-self: start; }
+.pagecols { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+.pcard { border: 1.5px solid var(--sketch); border-radius: 8px; padding: 10px 12px 12px; display: grid; gap: 10px; background: var(--field); min-width: 0; }
+.pcard > .legend { font-weight: 700; font-size: 1rem; }
+.pcard .t1 { font-size: 1.4rem; font-weight: 700; display: flex; gap: 8px; align-items: center; justify-content: space-between; }
+.pcard .when { color: var(--ink-soft); }
+.dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 5px 14px; margin: 0; font-size: .88rem; }
+.dl dt { color: var(--ink-soft); }
+.dl dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.dl .flag svg, .dl dd svg { width: 26px; height: 17px; border: 1px solid var(--sketch); display: inline-block; vertical-align: middle; }
+.lcard { display: flex; gap: 10px; align-items: center; border: 1.5px dashed var(--line); border-radius: 8px; padding: 8px; }
+.lcard .ph { width: 48px; height: 48px; border-radius: 50%; border: 1.5px solid var(--sketch); display: grid; place-items: center; font-weight: 700; background: var(--accent-soft); flex: none; }
+.lcard .nm { font-weight: 700; }
+.lcard .tt { font-size: .8rem; color: var(--ink-soft); }
+.dates { border: 1.5px solid var(--sketch); border-radius: 8px; padding: 10px 12px 12px; display: grid; gap: 8px; background: var(--field); }
+.dates .legend { font-weight: 700; font-size: 1rem; }
+.datebtns { display: grid; gap: 4px; }
+.leftcol { display: grid; gap: 14px; min-width: 0; }
+.datebtn { font-family: var(--font-sketch); font-size: .9rem; background: none; border: 0; padding: 0; color: var(--accent); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; text-align: left; display: inline-flex; gap: 6px; align-items: center; justify-self: start; }
+.datebtn:hover { text-decoration-thickness: 2px; }
+.datebtn[aria-current="true"] { color: var(--ink); font-weight: 700; text-decoration: none; cursor: default; }
+.datebtn .badge { color: var(--ink); }
+.fallback-note { font-size: .82rem; color: var(--ink-soft); margin: 0; }
+.errbox { display: grid; gap: 10px; justify-items: start; padding: 20px 0; }
+.sitenav .kmenu { position: relative; }
+.sitenav .kmenu > button { background: none; border: 1.5px solid transparent; border-radius: 6px; font: inherit; color: var(--ink); padding: 0 6px; cursor: pointer; }
+.sitenav .kmenu > button:hover, .sitenav .kmenu > button[aria-expanded="true"] { border-color: var(--sketch); }
+.sitenav .kmenu .menu { position: absolute; top: calc(100% + 4px); left: 0; z-index: 6; background: var(--panel); border: 1.5px solid var(--sketch); border-radius: 6px; box-shadow: 3px 3px 0 var(--sketch); display: grid; min-width: 180px; padding: 4px; }
+.sitenav .kmenu .menu button { background: none; border: 0; text-align: left; font: inherit; color: var(--ink); padding: 4px 8px; border-radius: 4px; cursor: pointer; white-space: nowrap; }
+.sitenav .kmenu .menu button:hover { background: var(--accent-soft); }
+.sitenav .kmenu .menu .cur { background: var(--accent-soft); font-weight: 700; }
+@media (max-width: 760px) { .cc-body { grid-template-columns: minmax(0, 1fr); } .cc-right { justify-items: start; } .pagecols { grid-template-columns: minmax(0, 1fr); } }
+/* CourseRegistrationView ja SignupView lisad */
+.regcols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 18px; align-items: start; }
+.regform { display: grid; gap: 12px; }
+.regform input[type="text"], .regform input[type="email"], .regform input[type="tel"], .regform input[type="password"] { font-family: var(--font-sketch); font-size: .9rem; color: var(--ink); background: var(--field); border: 1.5px solid var(--sketch); border-radius: 5px; padding: 4px 8px; width: 100%; }
+.regform textarea { font-family: var(--font-sketch); font-size: .9rem; color: var(--ink); background: var(--field); border: 1.5px solid var(--sketch); border-radius: 5px; padding: 6px 8px; width: 100%; min-height: 80px; resize: vertical; }
+.checkrow { display: flex; gap: 8px; align-items: center; font-size: .9rem; }
+.narrow { max-width: 520px; }
+.alert { border: 1.5px solid var(--del); background: color-mix(in srgb, var(--del) 14%, transparent); color: var(--ink); border-radius: 6px; padding: 6px 10px; font-size: .88rem; }
+.infobox { border: 1.5px solid var(--accent); background: var(--accent-soft); border-radius: 6px; padding: 6px 10px; font-size: .88rem; }
+@media (max-width: 760px) { .regcols { grid-template-columns: minmax(0, 1fr); } }
+/* hidden-atribuut peab peitma ka elemendid, millel on oma display (nt .menu { display: grid }) */
+[hidden] { display: none !important; }
+</style>
+
+<div id="modal-root"></div>
+<div class="page">
+  <header class="intro">
+    <h1>Registreerumine ja konto loomine — läbimäng</h1>
+    <p>CourseRegistrationView.vue (<code>/course-registration?courseId=</code>, ainult sisseloginud kasutajale) ja SignupView.vue (<code>/signup?redirect=</code>, konto loomine). Kasutaja registreerib <strong>ainult iseennast</strong>: tal on üks osaleja (participant + profile), mille andmed täidavad vormi ette. Paremal all näed backendi päringuid; kollased kastid on mockupi märkmed.</p>
+    <p>Andmed: seed-kasutaja Anna Saar (userId 2, participant 1) on registreerunud toimumiskordadele 1 ja 3; toimumiskord 12 on täis. Uute teenuste DTO-d on <strong>ettepanek</strong>.</p>
+    <div class="toolbar">
+      <span class="lbl-soft">Kasutaja:</span>
+      <button class="tbtn" type="button" data-who="none">Pole sisse logitud</button>
+      <button class="tbtn" type="button" data-who="anna">Anna Saar (userId 2)</button>
+      <span class="sep" aria-hidden="true"></span>
+      <span class="lbl-soft">Ava:</span>
+      <button class="tbtn" type="button" data-open-reg="9">Registreerumine (9, vaba)</button>
+      <button class="tbtn" type="button" data-open-reg="1">(1, juba registreerunud)</button>
+      <button class="tbtn" type="button" data-open-reg="12">(12, täis)</button>
+      <button class="tbtn" type="button" id="btn-signup">Loo konto</button>
+    </div>
+  </header>
+
+  <div class="browser" aria-label="Wireframe">
+    <div class="chrome">
+      <div class="dots" aria-hidden="true"><span></span><span></span><span></span></div>
+      <div class="urlbar" id="urlbar"></div>
+    </div>
+    <nav class="sitenav" aria-label="Navbar (wireframe)">
+      <span class="logo" aria-hidden="true"></span><span>Koolitused ▾</span><span>Meie koolitajad</span><span>Teenused</span><span>Kontakt</span>
+      <span class="out" id="nav-right"></span>
+    </nav>
+    <div class="view" id="view"></div>
+  </div>
+
+  <div class="below">
+    <div class="card">
+      <h3>Vaate olek</h3>
+      <dl class="kv" id="statekv"></dl>
+    </div>
+    <div class="card">
+      <h3>Päringud</h3>
+      <div class="log" id="log"></div>
+    </div>
+    <div class="note" id="note-view">
+      <div class="note-head"><strong id="view-note-title">Vaate märkmed</strong><button class="copy" type="button" data-copy="view">Kopeeri</button></div>
+      <pre id="view-note-text"></pre>
+    </div>
+  </div>
+
+  <section class="notes-section">
+    <h2>API märkmed (<span id="notes-count"></span>)</h2>
+    <p>Iga backendi kutse kohta üks kast. Märge „olemas“ = teenus on koodis juba olemas.</p>
+    <div class="notes-grid" id="notes"></div>
+  </section>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- Prototüübi kest (../index.html): embed-režiim ja vaadete vaheline navigeerimine ---------- */
+  var SHELL_Q = new URLSearchParams(location.search);
+  var EMBED = SHELL_Q.get("embed") === "1" && window.parent !== window;
+  if (EMBED) document.documentElement.classList.add("embed");
+  function goRoute(path, standaloneMessage) {
+    if (EMBED) { window.parent.postMessage({ type: "bcs-navigate", path: path }, "*"); return; }
+    toast(standaloneMessage || "router.push → " + path);
+  }
+  // Konto loomise järel logitakse kohe sisse → kest vahetab rolli
+  function tellRole(role) { if (EMBED) window.parent.postMessage({ type: "bcs-set-role", role: role }, "*"); }
+
+  /* ---------- Märkmed (sama sisu failides markmed/course-registration-view-markmed.md ja signup-view-markmed.md) ---------- */
+  var VIEW_NOTES = {
+    reg: { title: "CourseRegistrationView.vue", text: [
+      "Roll: Kasutaja (sisse logitud, roll participant)",
+      "Failinimi: CourseRegistrationView.vue",
+      "Frontend rada: /course-registration?courseId={id}",
+      "",
+      "Vaatega seotud lisainfo:",
+      "Avaneb /course lehe nupust \"Registreeru\". Sisse logimata kasutaja suunatakse /login?redirect=/course-registration?courseId={id}; pärast sisselogimist (või konto loomist) tullakse siia tagasi. Admin → /not-authorized.",
+      "Pealkiri \"Registreerumine\". Vasakul kaart \"Toimumiskord\" (GET /api/course-summary/{courseId}): koolitus, toimumisaeg, päevi/tunde, hind, toimumisviis, koolitajad; link \"Tagasi toimumiskorra lehele\".",
+      "Paremal kaart \"Osaleja andmed\": Eesnimi*, Perekonnanimi*, E-post*, Telefon* — eeltäidetud kasutaja osaleja andmetest (GET /api/user/{userId}/participant; kui osalejat pole, ainult konto e-post); linnuke \"Vajan koolitusel sülearvutit\"; \"Lisainfo\" (valikuline, nt arve andmed). Muudetud andmed salvestatakse ka kasutaja profiili.",
+      "\"Registreeru\" → frontendi kontroll (kohustuslikud väljad, e-posti kuju) → POST /api/course/{courseId}/participant → /course?courseId={id} koos eduteatega \"Registreerumine õnnestus!\". \"Tühista\" → tagasi /course lehele.",
+      "Kui kasutaja on juba registreerunud (GET /api/course/{courseId}/participant-status → \"R\"), vormi ei näidata: \"Oled sellele toimumiskorrale juba registreerunud.\" Täis toimumiskorral: \"Kohad on täis — küsi lisainfot toimumiskorra lehelt.\" Olematu või mitteavalik toimumiskord → üldine veavaade."
+    ].join("\n") },
+    signup: { title: "SignupView.vue", text: [
+      "Roll: Kõik rollid (sisse logimata)",
+      "Failinimi: SignupView.vue",
+      "Frontend rada: /signup?redirect={rada}",
+      "",
+      "Vaatega seotud lisainfo:",
+      "Avaneb navbari nupust \"Loo konto\" ja login-lehe lingist \"Loo konto\" (redirect antakse edasi). Pealkiri \"Loo konto\".",
+      "Väljad: Eesnimi*, Perekonnanimi*, E-post*, Telefon*, Parool* (vähemalt 8 märki), Parool uuesti*. Frontendi kontroll: kohustuslikud väljad, e-posti kuju, parooli pikkus, paroolid ühtivad.",
+      "\"Loo konto\" → POST /api/user → vastus nagu sisselogimisel (userId, roleName) → sessionStorage → suunatakse redirect-rajale (nt /course-registration?courseId=9) või avalehele. E-post juba kasutusel → \"Selle e-posti aadressiga konto on juba olemas\" + link \"Logi sisse\".",
+      "All link \"Mul on juba konto — logi sisse\" → /login?redirect={rada}."
+    ].join("\n") }
+  };
+  var NF = function (k) { return "HTTP: 404\nerrorCode: PRIMARY_KEY_NOT_FOUND\nmessage: \"Ei leidnud primary keyd '" + k + "' väärtusega: 123\""; };
+  var NOTES = [
+    { id: "n-course", old: true, title: "GET /api/course-summary/{courseId}", text: "API: GET /api/course-summary/{courseId}\n\nQuery parameetrid:\ncontentLang: String — koolituse teksti keel (puudumisel põhikeel)\n\nResponse (200):\nCoursePageDto.java\n{\n  \"courseId\": 9,\n  \"trainingId\": 3,\n  \"trainingTranslationId\": 5,\n  \"isMainLanguageFallback\": false,\n  \"title\": \"Spring Boot veebiarendus\",\n  \"shortDescription\": \"REST API-de loomine Spring Booti abil.\",\n  \"description\": \"<p>…</p>\",\n  \"categoryName\": \"Programmeerimine\",\n  \"trainingLanguageFlagIconCode\": \"fi-ee\",\n  \"fundingTypes\": [ ... ],\n  \"startDate\": \"2026-10-12\",\n  \"endDate\": \"2026-10-15\",\n  \"isPast\": false,\n  \"numberOfDays\": 4,\n  \"numberOfAcademicHours\": 32,\n  \"price\": 560.0,\n  \"status\": \"O\",\n  \"isOnSite\": true,\n  \"isOnline\": false,\n  \"lecturers\": [ { \"lecturerId\": 1, \"lecturerName\": \"Rain Tüür\" } ],\n  \"upcomingCourses\": [\n    { \"courseId\": 1, \"startDate\": \"2026-10-05\", \"endDate\": \"2026-10-09\", \"status\": \"O\", \"isOnSite\": true, \"isOnline\": false },\n    { \"courseId\": 5, \"startDate\": \"2026-11-16\", \"endDate\": \"2026-11-20\", \"status\": \"F\", \"isOnSite\": false, \"isOnline\": true }\n  ]\n}\n\nAPI teenuse lisainfo:\nLeiab ainult toimumiskorra, mille status on \"O\" või \"F\" ja koolitus publitseeritud (\"P\"); muidu 404 (sama message nagu olematu ID korral). Möödunud toimumiskord leitakse (isPast = true). Tekst contentLang keeles, puudumisel põhikeeles (isMainLanguageFallback = true). lecturers course_lecturer sort_order järjekorras (võib olla tühi). upcomingCourses = sama koolituse kõik public_course_summary read (ka päritud toimumiskord ise, kui see on tulevane), alguse järgi — frontend tõstab praeguse esile.\n\nVeateated:\nHTTP: 404\nerrorCode: PRIMARY_KEY_NOT_FOUND\nmessage: \"Ei leidnud primary keyd 'courseId' väärtusega: 123\"" },
+    { id: "n-status", title: "GET /api/course/{courseId}/participant-status", text: "API: GET /api/course/{courseId}/participant-status\n\nQuery parameetrid:\nuserId: Integer — sisseloginud kasutaja (sessionStorage)\n\nResponse (200):\nCourseParticipantStatusDto.java\n{\n  \"status\": \"R\"\n}\n\nAPI teenuse lisainfo:\nKasutaja oma osaleja (participant.user_id = userId) course_participant rea staatus: \"R\" = registreerunud, \"C\" = loobunud, null = pole registreerunud (ka siis, kui kasutajal osalejat veel pole). Kutsutakse ainult sisseloginud kasutaja korral.\n\nVeateated:\nHTTP: 404\nerrorCode: PRIMARY_KEY_NOT_FOUND\nmessage: \"Ei leidnud primary keyd 'courseId' väärtusega: 123\" (sama 'userId' kohta)" },
+    { id: "n-my", title: "GET /api/user/{userId}/participant", text: [
+      "API: GET /api/user/{userId}/participant", "",
+      "Response (200):", "MyParticipantDto.java", "{", "  \"participantId\": 1,", "  \"firstName\": \"Anna\",", "  \"lastName\": \"Saar\",", "  \"email\": \"anna.saar@example.com\",", "  \"phone\": \"+37256789012\"", "}", "",
+      "API teenuse lisainfo:",
+      "Kasutaja oma osaleja (participant.user_id = userId) ja selle profiil. Kui osalejat veel pole (nt admini loodud konto), tagastatakse participantId = null, nimed ja telefon tühjad ning email = user.email.", "",
+      "Veateated:", NF("userId")].join("\n") },
+    { id: "n-register", title: "POST /api/course/{courseId}/participant", text: [
+      "API: POST /api/course/{courseId}/participant", "",
+      "Request body:", "CourseRegistrationRequest.java",
+      "{", "  \"userId\": 2,", "  \"firstName\": \"Anna\",", "  \"lastName\": \"Saar\",", "  \"email\": \"anna.saar@example.com\",", "  \"phone\": \"+37256789012\",", "  \"requiresLaptop\": true,", "  \"notes\": \"Arve ettevõttele: OÜ Näidis\"", "}", "",
+      "Response (200): NONE", "",
+      "API teenuse lisainfo:",
+      "Kasutaja registreerib iseennast. Backend leiab kasutaja osaleja (participant.user_id = userId); kui seda pole, loob profile + participant (name = eesnimi + perekonnanimi). Olemasoleva osaleja profiil ja nimi uuendatakse vormi andmetega.",
+      "course_participant: uus rida (status \"R\", has_paid = false, requires_laptop, notes — tühi → \"\"); kui samal osalejal on sellele toimumiskorrale \"C\" (loobunud) rida, muudetakse see tagasi \"R\"-iks.",
+      "Toimumiskord peab olema publitseeritud koolituse \"O\" toimumiskord ja algama täna või hiljem.", "",
+      "Veateated:",
+      "HTTP: 400 — valideerimise viga (@NotBlank, @Email, @Size)",
+      "HTTP: 403\nerrorCode: COURSE_FULL\nmessage: \"Toimumiskord on täis\"",
+      "HTTP: 403\nerrorCode: ALREADY_REGISTERED\nmessage: \"Oled sellele toimumiskorrale juba registreerunud\"",
+      "HTTP: 403\nerrorCode: REGISTRATION_CLOSED\nmessage: \"Registreerumine on lõppenud\" (toimumiskord on alanud või möödunud)",
+      NF("courseId") + " (ka mustand, tühistatud, kustutatud)", NF("userId")].join("\n") },
+    { id: "n-signup", title: "POST /api/user", text: [
+      "API: POST /api/user", "",
+      "Request body:", "SignupRequest.java",
+      "{", "  \"firstName\": \"Kati\",", "  \"lastName\": \"Karu\",", "  \"email\": \"kati.karu@example.com\",", "  \"phone\": \"+37255512300\",", "  \"password\": \"salasona1\"", "}", "",
+      "Response (200):", "LoginResponse.java (sama mis POST /api/login)", "{", "  \"userId\": 8,", "  \"roleName\": \"participant\"", "}", "",
+      "API teenuse lisainfo:",
+      "Avalik teenus. Loob \"user\" rea (role = participant, status = \"A\"), profile rea ja participant rea (user_id, name = eesnimi + perekonnanimi, profile_id) — kasutajal on kohe oma osaleja. Vastus on sama mis sisselogimisel, frontend logib kasutaja kohe sisse.",
+      "E-post on unikaalne (tõstutundetu). Parool salvestatakse praegu nagu olemasolevatel kasutajatel (projekti turvalisuse lahendus on eraldi teema).", "",
+      "Veateated:",
+      "HTTP: 400 — valideerimise viga (@NotBlank, @Email, @Size(min = 8) parool)",
+      "HTTP: 403\nerrorCode: EMAIL_TAKEN\nmessage: \"Selle e-posti aadressiga konto on juba olemas\""].join("\n") }
+  ];
+
+  /* ---------- Andmed ---------- */
+  var TODAY = "2026-10-01";
+  var COURSES = {
+    1: { title: "Java algkursus", start: "2026-10-05", end: "2026-10-09", days: 5, hours: 40, price: 490, st: "O", room: true, link: false, lect: "Rain Tüür, Meelis Teern" },
+    9: { title: "Spring Boot veebiarendus", start: "2026-10-12", end: "2026-10-15", days: 4, hours: 32, price: 560, st: "O", room: true, link: false, lect: "Rain Tüür" },
+    11: { title: "UX disaini alused", start: "2026-11-09", end: "2026-11-10", days: 2, hours: 16, price: 300, st: "O", room: true, link: true, lect: "Tarmo Kallas" },
+    12: { title: "Agiilne meeskonnajuhtimine", start: "2026-10-14", end: "2026-10-15", days: 2, hours: 16, price: 280, st: "F", room: true, link: false, lect: "Merje Vaide" },
+    2: { title: "Projektijuhtimise põhitõed", start: "2026-11-02", end: "2026-11-04", days: 3, hours: 24, price: 350, st: "O", room: false, link: true, lect: "Merje Vaide" },
+    10: { title: "Vue.js esmaspetsialist", start: "2026-10-26", end: "2026-10-28", days: 3, hours: 24, price: 420, st: "O", room: false, link: true, lect: "Meelis Teern" },
+    5: { title: "Java algkursus", start: "2026-11-16", end: "2026-11-20", days: 5, hours: 40, price: 520, st: "F", room: false, link: true, lect: "Rain Tüür" }
+  };
+  var USERS_TAKEN = ["admin@vali-it.ee", "kasutaja@vali-it.ee", "admin"];
+  function freshState() {
+    return {
+      user: SHELL_Q.get("role") === "user" || !EMBED ? { userId: 2, participant: { participantId: 1, firstName: "Anna", lastName: "Saar", email: "anna.saar@example.com", phone: "+37256789012" } } : null,
+      regs: { 1: "R", 3: "R" }
+    };
+  }
+  var st, ui, logSteps = [], logTitle = "", openReq = -1;
+
+  function j(o) { return JSON.stringify(o, null, 2); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c]; }); }
+  function dmy(iso) { var d = iso.split("-"); return d[2] + "/" + d[1] + "/" + d[0]; }
+  function call(method, path, res, req) { logSteps.push({ method: method, path: path, res: res, req: req }); }
+  function startStep(t) { logSteps = []; logTitle = t; openReq = -1; }
+  function attendance(c) { return c.room && c.link ? "Kohapeal ja veebis" : c.room ? "Kohapeal" : "Veebis"; }
+
+  /* ---------- Vaated ---------- */
+  function openReg(courseId, t) {
+    startStep(t);
+    ui = { route: "reg", courseId: courseId, error: "", form: null, blocked: null };
+    if (EMBED && SHELL_Q.get("role") === "admin" && !st.user) { ui.route = "guard"; ui.admin = true; renderAll(); return; }
+    if (!st.user) { ui.route = "guard"; renderAll(); return; }
+    var c = COURSES[courseId];
+    if (!c) { call("GET", "/api/course-summary/" + courseId + "?contentLang=et", { status: 404, errorCode: "PRIMARY_KEY_NOT_FOUND" }); ui.blocked = "missing"; renderAll(); return; }
+    call("GET", "/api/course-summary/" + courseId + "?contentLang=et", { courseId: courseId, title: c.title, startDate: c.start, endDate: c.end, numberOfDays: c.days, numberOfAcademicHours: c.hours, price: c.price, status: c.st, isOnSite: c.room, isOnline: c.link, lecturers: "…" });
+    var status = st.regs[courseId] || null;
+    call("GET", "/api/course/" + courseId + "/participant-status?userId=" + st.user.userId, { status: status });
+    if (status === "R") ui.blocked = "registered";
+    else if (c.st === "F") ui.blocked = "full";
+    else {
+      var p = st.user.participant;
+      call("GET", "/api/user/" + st.user.userId + "/participant", p);
+      ui.form = { firstName: p.firstName, lastName: p.lastName, email: p.email, phone: p.phone, requiresLaptop: false, notes: "" };
+    }
+    renderAll();
+  }
+  function openSignup(t, redirect) {
+    startStep(t);
+    ui = { route: "signup", redirect: redirect || "", error: "", taken: false, form: { firstName: "", lastName: "", email: "", phone: "", password: "", password2: "" } };
+    renderAll();
+  }
+  function submitReg() {
+    var f = ui.form;
+    ["firstName", "lastName", "email", "phone", "notes"].forEach(function (k) { f[k] = f[k].trim(); });
+    if (!f.firstName || !f.lastName || !f.email || !f.phone) ui.error = "Täida kõik kohustuslikud väljad";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email)) ui.error = "Kontrolli e-posti aadressi";
+    else ui.error = "";
+    if (ui.error) { renderView(); return; }
+    startStep("„Registreeru“ → POST /api/course/" + ui.courseId + "/participant");
+    call("POST", "/api/course/" + ui.courseId + "/participant", null, { userId: st.user.userId, firstName: f.firstName, lastName: f.lastName, email: f.email, phone: f.phone, requiresLaptop: f.requiresLaptop, notes: f.notes });
+    st.regs[ui.courseId] = "R";
+    st.user.participant = Object.assign({}, st.user.participant, { firstName: f.firstName, lastName: f.lastName, email: f.email, phone: f.phone });
+    renderLog();
+    goRoute("/course?courseId=" + ui.courseId + "&registered=1", "Registreerumine õnnestus → /course?courseId=" + ui.courseId + " (eduteade)");
+    if (!EMBED) { ui.blocked = "registered"; ui.form = null; ui.justRegistered = true; renderView(); renderKv(); }
+  }
+  function submitSignup() {
+    var f = ui.form;
+    ["firstName", "lastName", "email", "phone"].forEach(function (k) { f[k] = f[k].trim(); });
+    ui.taken = false;
+    if (!f.firstName || !f.lastName || !f.email || !f.phone || !f.password || !f.password2) ui.error = "Täida kõik kohustuslikud väljad";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email)) ui.error = "Kontrolli e-posti aadressi";
+    else if (f.password.length < 8) ui.error = "Parool peab olema vähemalt 8 märki";
+    else if (f.password !== f.password2) ui.error = "Paroolid ei ühti";
+    else ui.error = "";
+    if (ui.error) { renderView(); return; }
+    startStep("„Loo konto“ → POST /api/user");
+    var body = { firstName: f.firstName, lastName: f.lastName, email: f.email, phone: f.phone, password: "••••••••" };
+    if (USERS_TAKEN.indexOf(f.email.toLowerCase()) !== -1 || f.email.toLowerCase() === "anna.saar@example.com") {
+      call("POST", "/api/user", { status: 403, errorCode: "EMAIL_TAKEN", message: "Selle e-posti aadressiga konto on juba olemas" }, body);
+      ui.error = "Selle e-posti aadressiga konto on juba olemas"; ui.taken = true; renderAll(); return;
+    }
+    call("POST", "/api/user", { userId: 8, roleName: "participant" }, body);
+    USERS_TAKEN.push(f.email.toLowerCase());
+    st.user = { userId: 8, participant: { participantId: 6, firstName: f.firstName, lastName: f.lastName, email: f.email, phone: f.phone } };
+    tellRole("user");
+    var target = ui.redirect || "/";
+    renderLog();
+    goRoute(target, "Konto loodud, sisse logitud → " + target);
+    if (!EMBED) { var m = /courseId=(\d+)/.exec(target); if (m) openReg(+m[1], "Konto loodud → " + target); else renderAll(); }
+  }
+
+  var toastTimer = null;
+  function toast(msg) {
+    var old = document.querySelector(".toast"); if (old) old.remove();
+    var el = document.createElement("div"); el.className = "toast"; el.setAttribute("role", "status"); el.textContent = msg;
+    document.body.appendChild(el);
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { el.remove(); }, 2600);
+  }
+
+  /* ---------- Renderdamine ---------- */
+  function pin(noteId, label) { return '<button type="button" class="api-pin" data-note="' + noteId + '">' + esc(label) + '</button>'; }
+  function fld(id, key, label, type, required, extra) {
+    return '<div class="fld"><label class="lbl" for="' + id + '">' + label + (required ? ' <span class="req-star">*</span>' : "") + '</label><input type="' + type + '" id="' + id + '" data-f="' + key + '" value="' + esc(ui.form[key]) + '"' + (extra || "") + '></div>';
+  }
+  function renderReg() {
+    if (ui.route === "guard" && ui.admin) return '<div class="errbox"><h2 class="denied">Puudub õigus</h2><p class="hint">Admin ei registreeru toimumiskorrale — router suunab <code>/not-authorized</code>. Osalejaid näed /admin-course lehel.</p></div>';
+    if (ui.route === "guard") return '<div class="errbox"><h2>Registreerumine</h2><p class="hint">Pole sisse logitud — router suunab: <code>/login?redirect=/course-registration?courseId=' + ui.courseId + '</code>. Login-lehel on ka link „Loo konto“.</p><div class="actions"><button type="button" class="sbtn primary" id="b-login">Logi sisse</button><button type="button" class="sbtn" id="b-to-signup">Loo konto</button></div></div>';
+    if (ui.blocked === "missing") return '<div class="errbox"><h2>Midagi läks valesti</h2><p class="hint">Toimumiskorda ' + ui.courseId + ' ei leitud või see pole avalik — üldine veavaade.</p></div>';
+    var c = COURSES[ui.courseId];
+    var summary = '<div class="pcard"><span class="legend">Toimumiskord</span><div class="t1"><span>' + esc(c.title) + '</span></div><dl class="dl">' +
+      '<dt>Toimumisaeg</dt><dd>' + dmy(c.start) + ' – ' + dmy(c.end) + '</dd><dt>Päevi / tunde</dt><dd>' + c.days + ' / ' + c.hours + '</dd><dt>Hind</dt><dd>' + c.price + ' €</dd>' +
+      '<dt>Toimumisviis</dt><dd>' + attendance(c) + '</dd><dt>Koolitajad</dt><dd>' + esc(c.lect) + '</dd></dl>' +
+      '<button type="button" class="linkish" id="b-back" style="justify-self:start">Tagasi toimumiskorra lehele</button>' + '<div class="pins">' + pin("n-course", "GET /api/course-summary/{courseId}") + pin("n-status", "GET …/participant-status") + '</div></div>';
+    var right;
+    if (ui.blocked === "registered") right = '<div class="pcard"><span class="legend">Osaleja andmed</span><div class="ok-alert" role="status">' + (ui.justRegistered ? "Registreerumine õnnestus! " : "") + 'Oled sellele toimumiskorrale juba registreerunud.</div></div>';
+    else if (ui.blocked === "full") right = '<div class="pcard"><span class="legend">Osaleja andmed</span><div class="alert" role="alert">Kohad on täis — küsi lisainfot toimumiskorra lehelt.</div></div>';
+    else right = '<div class="pcard regform"><span class="legend">Osaleja andmed ' + pin("n-my", "GET /api/user/{userId}/participant") + '</span>' +
+      (ui.error ? '<div class="alert" role="alert">' + esc(ui.error) + '</div>' : "") +
+      '<div class="mgrid">' + fld("r-first", "firstName", "Eesnimi", "text", true) + fld("r-last", "lastName", "Perekonnanimi", "text", true) + fld("r-email", "email", "E-post", "email", true) + fld("r-phone", "phone", "Telefon", "tel", true) + '</div>' +
+      '<p class="hint" style="margin:0">Andmed on täidetud sinu profiilist; muudatused salvestatakse ka profiili.</p>' +
+      '<label class="checkrow"><input type="checkbox" id="r-laptop"' + (ui.form.requiresLaptop ? " checked" : "") + '> Vajan koolitusel sülearvutit</label>' +
+      '<div class="fld"><label class="lbl" for="r-notes">Lisainfo</label><textarea id="r-notes" data-f="notes" placeholder="Nt arve andmed või erisoovid">' + esc(ui.form.notes) + '</textarea></div>' +
+      '<div class="actions">' + pin("n-register", "POST /api/course/{courseId}/participant") + '<button type="button" class="sbtn" id="b-cancel">Tühista</button><button type="button" class="sbtn primary" id="b-submit">Registreeru</button></div></div>';
+    return '<h2>Registreerumine</h2><div class="regcols">' + summary + right + '</div>';
+  }
+  function renderSignup() {
+    return '<div class="narrow regform"><h2>Loo konto</h2>' +
+      (ui.redirect ? '<div class="infobox">Pärast konto loomist jätkad registreerumisega.</div>' : "") +
+      (ui.error ? '<div class="alert" role="alert">' + esc(ui.error) + (ui.taken ? ' — <button type="button" class="linkish small" id="b-login2">Logi sisse</button>' : "") + '</div>' : "") +
+      '<div class="mgrid">' + fld("s-first", "firstName", "Eesnimi", "text", true) + fld("s-last", "lastName", "Perekonnanimi", "text", true) + '</div>' +
+      fld("s-email", "email", "E-post", "email", true, ' autocomplete="email"') + fld("s-phone", "phone", "Telefon", "tel", true) +
+      '<div class="mgrid">' + fld("s-pw", "password", "Parool", "password", true, ' autocomplete="new-password"') + fld("s-pw2", "password2", "Parool uuesti", "password", true, ' autocomplete="new-password"') + '</div>' +
+      '<p class="hint" style="margin:0">Parool vähemalt 8 märki.</p>' +
+      '<div class="actions">' + pin("n-signup", "POST /api/user") + '<button type="button" class="sbtn primary" id="b-signup">Loo konto</button></div>' +
+      '<button type="button" class="linkish small" id="b-login3" style="justify-self:start">Mul on juba konto — logi sisse</button></div>';
+  }
+  function renderView() {
+    document.getElementById("view").innerHTML = ui.route === "signup" ? renderSignup() : renderReg();
+    document.getElementById("nav-right").textContent = st.user ? "Logi välja" : "Logi sisse · Loo konto";
+  }
+  function renderKv() {
+    var rows = [["route", ui.route === "signup" ? "SignupView" : "CourseRegistrationView"], ["userId (sessionStorage)", st.user ? String(st.user.userId) : "null"]];
+    if (ui.route === "signup") rows.push(["redirect", ui.redirect || "—"]);
+    else rows.push(["courseId", String(ui.courseId)], ["olek", ui.route === "guard" ? "suunatakse /login" : ui.blocked || "vorm"]);
+    document.getElementById("statekv").innerHTML = rows.map(function (r) { return "<dt>" + esc(r[0]) + "</dt><dd>" + esc(r[1]) + "</dd>"; }).join("");
+    document.getElementById("urlbar").textContent = "https://bcskoolitus.ee" + (ui.route === "signup" ? "/signup" + (ui.redirect ? "?redirect=" + encodeURIComponent(ui.redirect) : "") : "/course-registration?courseId=" + ui.courseId);
+  }
+  function noteFor(m, path) {
+    var p = path.split("?")[0];
+    if (p.indexOf("/api/course-summary/") === 0) return "n-course";
+    if (/participant-status$/.test(p)) return "n-status";
+    if (/^\/api\/user\/\d+\/participant$/.test(p)) return "n-my";
+    if (m === "POST" && p === "/api/user") return "n-signup";
+    return "n-register";
+  }
+  var REQUESTS = {
+    reg: [{ m: "GET", p: "/api/course-summary/{courseId}?contentLang={UI keel}", note: "n-course", when: "toimumiskorra kokkuvõte (olemas pärast /course tööd)" },
+      { m: "GET", p: "/api/course/{courseId}/participant-status?userId=", note: "n-status", when: "kas juba registreerunud" },
+      { m: "GET", p: "/api/user/{userId}/participant", note: "n-my", when: "vormi eeltäitmine" },
+      { m: "POST", p: "/api/course/{courseId}/participant", note: "n-register", when: "„Registreeru“" }],
+    signup: [{ m: "POST", p: "/api/user", note: "n-signup", when: "„Loo konto“" }]
+  };
+  function renderLog() {
+    var used = {};
+    function rowHtml(d) {
+      var idx = -1;
+      logSteps.forEach(function (r, i) { if (idx === -1 && !used[i] && noteFor(r.method, r.path) === d.note) idx = i; });
+      if (idx !== -1) used[idx] = true;
+      var ran = idx !== -1, open = ran && idx === openReq, body = "";
+      if (open) {
+        var r = logSteps[idx], isErr = r.res && r.res.errorCode;
+        body = '<div class="body"><span class="sub">Tegelik päring: <code>' + esc(r.method + " " + r.path) + '</code></span>' + (r.req ? '<span class="sub">Request body</span><pre>' + esc(j(r.req)) + '</pre>' : "") +
+          '<span class="sub">' + (isErr ? "Response (" + r.res.status + ")" : "Response (200)" + (r.res === null ? ": NONE" : "")) + '</span>' + (r.res !== null ? '<pre>' + esc(j(r.res)) + '</pre>' : "") +
+          '<button type="button" class="linkish" data-note="' + d.note + '">Ava API märge</button></div>';
+      }
+      var attr = ran ? 'data-req="' + idx + '" aria-expanded="' + open + '"' : 'data-note="' + d.note + '" title="Ava API märge"';
+      return '<div class="req ' + (ran ? "done" : "idle") + '"><button type="button" ' + attr + '><span class="method m-' + d.m + '">' + d.m + '</span><span class="main"><span class="path">' + esc(d.p) + '</span><span class="when">' + esc(d.when) + '</span></span>' + (ran ? '<span class="ran">käivitati</span>' : "") + '</button>' + body + '</div>';
+    }
+    var html = '<div class="log-group">Registreerumine (CourseRegistrationView)</div>' + REQUESTS.reg.map(rowHtml).join("") + '<div class="log-group">Konto loomine (SignupView)</div>' + REQUESTS.signup.map(rowHtml).join("");
+    if (logTitle) html += '<div class="log-step">Viimane samm: ' + esc(logTitle) + '. Rohelised päringud käivitati; klõpsa, et näha vastust.</div>';
+    document.getElementById("log").innerHTML = html;
+  }
+  function renderAll() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-who]"), function (b) { b.setAttribute("aria-pressed", String((b.dataset.who === "anna") === !!st.user)); });
+    renderView(); renderKv(); renderLog();
+    var vn = VIEW_NOTES[ui.route === "signup" ? "signup" : "reg"];
+    document.getElementById("view-note-title").textContent = "Vaate märkmed — " + vn.title;
+    document.getElementById("view-note-text").textContent = vn.text;
+  }
+
+  /* ---------- Sündmused ---------- */
+  var viewEl = document.getElementById("view");
+  viewEl.addEventListener("input", function (e) { if (e.target.dataset.f) ui.form[e.target.dataset.f] = e.target.value; });
+  viewEl.addEventListener("change", function (e) { if (e.target.id === "r-laptop") ui.form.requiresLaptop = e.target.checked; });
+  viewEl.addEventListener("keydown", function (e) { if (e.key === "Enter" && e.target.tagName === "INPUT" && ui.route === "signup") submitSignup(); });
+  viewEl.addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.note) { goNote(b.dataset.note); return; }
+    var loginPath = "/login?redirect=" + encodeURIComponent(ui.route === "signup" ? ui.redirect : "/course-registration?courseId=" + ui.courseId);
+    switch (b.id) {
+      case "b-submit": submitReg(); break;
+      case "b-cancel": case "b-back": goRoute("/course?courseId=" + ui.courseId); break;
+      case "b-signup": submitSignup(); break;
+      case "b-login": case "b-login2": case "b-login3": goRoute(loginPath); break;
+      case "b-to-signup": if (EMBED) goRoute("/signup?redirect=" + encodeURIComponent("/course-registration?courseId=" + ui.courseId)); else openSignup("Loo konto", "/course-registration?courseId=" + ui.courseId); break;
+    }
+  });
+  document.getElementById("log").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.note) { goNote(b.dataset.note); return; }
+    var i = +b.dataset.req; openReq = openReq === i ? -1 : i; renderLog();
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-who]"), function (b) { b.onclick = function () {
+    st.user = b.dataset.who === "none" ? null : { userId: 2, participant: { participantId: 1, firstName: "Anna", lastName: "Saar", email: "anna.saar@example.com", phone: "+37256789012" } };
+    if (ui.route === "signup") renderAll(); else openReg(ui.courseId, "Kasutaja vahetus");
+  }; });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-open-reg]"), function (b) { b.onclick = function () { openReg(+b.dataset.openReg, "/course-registration?courseId=" + b.dataset.openReg); }; });
+  document.getElementById("btn-signup").onclick = function () { openSignup("/signup?redirect=/course-registration?courseId=9", "/course-registration?courseId=9"); };
+
+  function goNote(id) {
+    var n = document.getElementById(id); if (!n) return;
+    n.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
+    n.classList.remove("flash"); void n.offsetWidth; n.classList.add("flash");
+  }
+  document.getElementById("notes-count").textContent = NOTES.length;
+  document.getElementById("notes").innerHTML = NOTES.map(function (n) {
+    return '<div class="note" id="' + n.id + '"><div class="note-head"><strong>' + esc(n.title) + '</strong><span class="draft-tag">' + (n.old ? "olemas" : "uus") + '</span><button class="copy" type="button" data-copy="' + n.id + '">Kopeeri</button></div><pre>' + esc(n.text) + '</pre></div>';
+  }).join("");
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-copy]"); if (!b) return;
+    var key = b.dataset.copy;
+    var text = key === "view" ? document.getElementById("view-note-text").textContent : NOTES.filter(function (n) { return n.id === key; })[0].text;
+    var done = function () { b.textContent = "Kopeeritud"; setTimeout(function () { b.textContent = "Kopeeri"; }, 1400); };
+    try { navigator.clipboard.writeText(text).then(done, function () { selectPre(b); }); } catch (err) { selectPre(b); }
+  });
+  function selectPre(b) {
+    var pre = b.closest(".note").querySelector("pre");
+    var r = document.createRange(); r.selectNodeContents(pre);
+    var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+  }
+
+  /* ---------- Algus (kestast: ?view=signup&redirect= või ?view=course-registration&courseId=) ---------- */
+  st = freshState();
+  if (SHELL_Q.get("view") === "signup") openSignup("/signup", SHELL_Q.get("redirect") || "");
+  else openReg(+SHELL_Q.get("courseId") || 9, "/course-registration?courseId=" + (+SHELL_Q.get("courseId") || 9));
+})();
+</script>
