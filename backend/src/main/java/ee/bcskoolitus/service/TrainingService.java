@@ -103,6 +103,7 @@ public class TrainingService {
                 TrainingSummarySpecifications.hasFundingTypeId(fundingTypeId),
                 TrainingSummarySpecifications.hasTrainingLanguageId(trainingLanguageId),
                 TrainingSummarySpecifications.hasTranslationLanguageCode(contentLang),
+                TrainingSummarySpecifications.hasStatus(TrainingStatus.PUBLISHED.getCode()),
                 TrainingSummarySpecifications.containsAllWords(searchText));
     }
 
@@ -179,14 +180,24 @@ public class TrainingService {
         return adminTrainingSummaryMapper.toTrainingTitleDtos(adminTrainingSummaries);
     }
 
+    // Leiab ka kustutatud koolituse — kasutavad delete, restore, publish ja unpublish
     public Training getValidTrainingBy(Integer trainingId) {
         return trainingRepository.findById(trainingId)
                 .orElseThrow(() -> new PrimaryKeyNotFoundException("trainingId", trainingId));
     }
 
+    // Kustutatud koolitus (status D) on nagu olematu → 404
+    public Training getValidActiveTrainingBy(Integer trainingId) {
+        Training training = getValidTrainingBy(trainingId);
+        if (TrainingStatus.DELETED.getCode().equals(training.getStatus())) {
+            throw new PrimaryKeyNotFoundException("trainingId", trainingId);
+        }
+        return training;
+    }
+
     @Transactional(readOnly = true)
     public TrainingDto getTraining(Integer trainingId) {
-        Training training = getValidTrainingBy(trainingId);
+        Training training = getValidActiveTrainingBy(trainingId);
 
         TrainingDto trainingDto = trainingMapper.toTrainingDto(training);
 
@@ -203,7 +214,7 @@ public class TrainingService {
 
     @Transactional(readOnly = true)
     public List<TrainingTranslationItemDto> getTrainingTranslations(Integer trainingId) {
-        getValidTrainingBy(trainingId);
+        getValidActiveTrainingBy(trainingId);
 
         List<TrainingTranslation> trainingTranslations =
                 trainingTranslationRepository
@@ -266,7 +277,7 @@ public class TrainingService {
     // user, status ja created_at ei muutu; teiste keelte tõlkeid ei puudutata.
     @Transactional
     public void updateTraining(Integer trainingId, TrainingUpdateRequestDto trainingUpdateRequestDto) {
-        Training training = getValidTrainingBy(trainingId);
+        Training training = getValidActiveTrainingBy(trainingId);
         TrainingTranslation trainingTranslation = trainingTranslationService
                 .getValidTrainingTranslationBy(trainingUpdateRequestDto.getTrainingTranslationId(), trainingId);
         updateTrainingData(training, trainingUpdateRequestDto);
@@ -297,7 +308,7 @@ public class TrainingService {
     // Lisab koolitusele tõlke uude keelde; koolituse rida ega staatust ei muudeta
     @Transactional
     public TrainingTranslationCreateResponseDto addTrainingTranslation(Integer trainingId, TrainingTranslationCreateRequestDto trainingTranslationCreateRequestDto) {
-        Training training = getValidTrainingBy(trainingId);
+        Training training = getValidActiveTrainingBy(trainingId);
         Language language = languageService.getValidLanguageBy(trainingTranslationCreateRequestDto.getLanguageId(), "languageId");
         validateTranslationDoesNotExist(trainingId, language.getId());
         TrainingTranslation trainingTranslation = createTrainingTranslation(training, language, trainingTranslationCreateRequestDto);

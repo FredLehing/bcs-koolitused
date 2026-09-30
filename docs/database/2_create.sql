@@ -666,7 +666,8 @@ SELECT row_number() OVER (ORDER BY tt.id)                      AS id,
        tt.title,
        tt.short_description,
        t.category_id,
-       ct.name                                                 AS category_name
+       ct.name                                                 AS category_name,
+       t.status
 FROM training_translation tt
          JOIN training t ON t.id = tt.training_id
          JOIN language trl ON trl.id = t.training_language_id

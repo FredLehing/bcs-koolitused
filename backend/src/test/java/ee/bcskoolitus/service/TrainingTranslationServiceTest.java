@@ -1,5 +1,6 @@
 package ee.bcskoolitus.service;
 
+import ee.bcskoolitus.TrainingStatus;
 import ee.bcskoolitus.controller.trainingtranslation.dto.TrainingTranslationDto;
 import ee.bcskoolitus.infrastructure.exception.PrimaryKeyNotFoundException;
 import ee.bcskoolitus.persistance.language.Language;
@@ -56,6 +57,18 @@ class TrainingTranslationServiceTest {
 
         assertEquals("Ei leidnud primary keyd 'trainingTranslationId' väärtusega: 123", exception.getMessage());
         assertEquals("PRIMARY_KEY_NOT_FOUND", exception.getErrorCode());
+    }
+
+    @Test
+    void getTrainingTranslation_deletedTraining_throwsPrimaryKeyNotFound() {
+        TrainingTranslation trainingTranslation = createTrainingTranslation();
+        trainingTranslation.getTraining().setStatus(TrainingStatus.DELETED.getCode());
+        when(trainingTranslationRepository.findById(1)).thenReturn(Optional.of(trainingTranslation));
+
+        PrimaryKeyNotFoundException exception = assertThrows(PrimaryKeyNotFoundException.class,
+                () -> trainingTranslationService.getTrainingTranslation(1));
+
+        assertEquals("Ei leidnud primary keyd 'trainingTranslationId' väärtusega: 1", exception.getMessage());
     }
 
     private TrainingTranslation createTrainingTranslation() {
