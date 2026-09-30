@@ -24,6 +24,10 @@ export default {
     router.push({ name: 'loginRoute' })
   },
 
+  navigateToTrainingFormView() {
+    router.push({ name: 'trainingFormRoute' })
+  },
+
   navigateToNotAuthorizedView() {
     router.push({ name: 'notAuthorizedRoute' })
   },
