@@ -585,6 +585,10 @@ export default {
       NavigationService.navigateToTrainingView(this.trainingId, this.trainingTranslationId)
     },
 
+    navigateToAdminTrainingsView() {
+      NavigationService.navigateToAdminTrainingsView()
+    },
+
     resetMessages() {
       this.successMessage = ''
       this.errorMessage = ''
@@ -688,6 +692,13 @@ export default {
             type="button"
           >
             {{ $t('trainingForm.buttons.view') }}
+          </button>
+          <button
+            @click="navigateToAdminTrainingsView"
+            class="btn btn-outline-secondary"
+            type="button"
+          >
+            {{ $t('navbar.manageTrainings') }}
           </button>
           <InlineAlerts
             :success-message="successMessage"
