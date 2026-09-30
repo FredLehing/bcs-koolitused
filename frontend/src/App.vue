@@ -14,7 +14,7 @@
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navMenu">
-          <div class="navbar-nav gap-4 mx-auto bg-primary bg-opacity-50 rounded-pill px-3">
+          <div class="navbar-nav gap-4 mx-auto bg-bcs-primary rounded-pill px-3">
             <RouterLink class="nav-link" to="/trainings">{{ $t('navbar.trainings') }}</RouterLink>
             <RouterLink class="nav-link" :to="{ name: 'lecturersRoute' }">
               {{ $t('navbar.ourLecturers') }}
@@ -31,7 +31,7 @@
               <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                 {{ $t('navbar.admin') }}
               </a>
-              <div class="dropdown-menu bg-primary bg-opacity-50">
+              <div class="dropdown-menu bg-bcs-primary">
                 <RouterLink class="nav-link" :to="{ name: 'trainingFormRoute' }">
                   {{ $t('navbar.addTraining') }}
                 </RouterLink>

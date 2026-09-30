@@ -10,6 +10,12 @@
 .navbar-glass .nav-link {
   font-weight: 600;
 }
+/* Läbipaistmatu vaste Bootstrapi bg-primary bg-opacity-50 värvile valgel taustal.
+   !important nagu Bootstrapi bg-* utiliitidel, sest main.css laetakse enne Bootstrapi
+   ja muidu kirjutab nt .dropdown-menu taustavärvi üle. */
+.bg-bcs-primary {
+  background-color: #86B7FE !important;
+}
 .footer-bcs{
   background-color: #86B7FE;
   color: #0b0e13;
