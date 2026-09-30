@@ -39,6 +39,10 @@ public class TrainingSummarySpecifications {
                 : cb.equal(root.get("trainingLanguageId"), trainingLanguageId);
     }
 
+    public static Specification<TrainingSummary> hasStatus(String status) {
+        return (root, query, cb) -> cb.equal(root.get("status"), status);
+    }
+
     public static Specification<TrainingSummary> hasTranslationLanguageCode(String contentLang) {
         return (root, query, cb) -> cb.equal(root.get("translationLanguageCode"), contentLang);
     }

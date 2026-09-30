@@ -50,5 +50,8 @@ public class TrainingSummary {
     @Column(name = "category_name")
     private String categoryName;
 
+    @Column(name = "status", nullable = false, length = 1)
+    private String status;
+
 
 }
