@@ -63,10 +63,9 @@ export default {
 
   // Backend task: docs/tasks/backend/POST-api-training-trainingId-training-translation.md (3. etapp)
   sendPostTrainingTranslationRequest(trainingId, trainingTranslationCreateRequest) {
-    // MOCK — vaheta päris kutse vastu, kui teenus on valmis:
-    // return axios.post(`/api/training/${trainingId}/training-translation`, trainingTranslationCreateRequest)
-    return mockResponse(
-      MockDatabase.addTrainingTranslation(trainingId, trainingTranslationCreateRequest),
+    return axios.post(
+      `/api/training/${trainingId}/training-translation`,
+      trainingTranslationCreateRequest,
     )
   },
 

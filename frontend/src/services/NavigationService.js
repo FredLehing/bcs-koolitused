@@ -22,8 +22,8 @@ export default {
     router.push({ name: 'notAuthorizedRoute' })
   },
 
-  navigateToTrainingView() {
-    router.push({ name: 'trainingRoute' })
+  navigateToTrainingView(trainingId) {
+    router.push({ name: 'trainingRoute', query: { trainingId: trainingId } })
   },
 
   // Vahetab TrainingFormView oleku (query parameetrid) ilma brauseri ajalukku uut kirjet lisamata

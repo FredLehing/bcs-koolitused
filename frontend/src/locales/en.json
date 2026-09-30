@@ -106,7 +106,8 @@
       "save": "Save",
       "addTranslation": "Add translation",
       "publish": "Publish",
-      "unpublish": "Move to draft"
+      "unpublish": "Move to draft",
+      "view": "View"
     },
     "flags": {
       "open": "Open {language} translation",
@@ -158,5 +159,16 @@
     "link": "Add link",
     "unlink": "Remove link",
     "linkPrompt": "Link address"
+  },
+  "trainingView": {
+    "legend": "Training information",
+    "mainLanguageFallback": "No translation in the selected language — showing the main language translation.",
+    "sidebar": {
+      "trainingData": "Training details",
+      "lecturer": "Trainer",
+      "upcomingCourses": "Upcoming courses",
+      "calendar": "Calendar",
+      "placeholder": "Content coming soon."
+    }
   }
 }

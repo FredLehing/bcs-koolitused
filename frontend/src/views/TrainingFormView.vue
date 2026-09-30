@@ -10,8 +10,7 @@ import LocationService from '@/api-services/LocationService.js'
 import LecturerService from '@/api-services/LecturerService.js'
 import NavigationService from '@/services/NavigationService.js'
 import SessionStorageService from '@/services/SessionStorageService.js'
-import AlertDanger from '@/components/common/AlertDanger.vue'
-import AlertSuccess from '@/components/common/AlertSuccess.vue'
+import InlineAlerts from '@/components/common/InlineAlerts.vue'
 import TranslationFlags from '@/components/common/TranslationFlags.vue'
 import TrainingDataForm from '@/components/forms/TrainingDataForm.vue'
 import TrainingTranslationForm from '@/components/forms/TrainingTranslationForm.vue'
@@ -34,8 +33,7 @@ export default {
     TrainingTranslationForm,
     TrainingDataForm,
     TranslationFlags,
-    AlertSuccess,
-    AlertDanger,
+    InlineAlerts,
   },
   data() {
     return {
@@ -593,6 +591,10 @@ export default {
       }
     },
 
+    navigateToTrainingView() {
+      NavigationService.navigateToTrainingView(this.trainingId)
+    },
+
     resetMessages() {
       this.successMessage = ''
       this.errorMessage = ''
@@ -612,9 +614,6 @@ export default {
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-lg-10">
-        <AlertSuccess :success-message="successMessage" />
-        <AlertDanger :error-message="errorMessage" />
-
         <div class="d-flex flex-wrap align-items-center gap-3 mb-4">
           <h1 class="mb-0">{{ pageTitle }}</h1>
           <span
@@ -670,7 +669,7 @@ export default {
           @event-ai-translation-clicked="handleAiTranslationClicked"
         />
 
-        <div class="d-flex flex-wrap gap-3 mb-5">
+        <div class="d-flex flex-wrap align-items-center gap-3 mb-5">
           <button v-if="isNewTraining" @click="addTraining" class="btn btn-success" type="button">
             {{ $t('trainingForm.buttons.add') }}
           </button>
@@ -697,6 +696,20 @@ export default {
                 : $t('trainingForm.buttons.publish')
             }}
           </button>
+          <button
+            v-if="!isNewTraining"
+            @click="navigateToTrainingView"
+            class="btn btn-outline-secondary"
+            type="button"
+          >
+            {{ $t('trainingForm.buttons.view') }}
+          </button>
+          <InlineAlerts
+            :success-message="successMessage"
+            :error-message="errorMessage"
+            @event-success-message-closed="successMessage = ''"
+            @event-error-message-closed="errorMessage = ''"
+          />
         </div>
       </div>
     </div>

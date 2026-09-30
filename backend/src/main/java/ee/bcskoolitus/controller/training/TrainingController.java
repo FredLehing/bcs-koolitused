@@ -4,6 +4,8 @@ import ee.bcskoolitus.controller.training.dto.TrainingCreateRequestDto;
 import ee.bcskoolitus.controller.training.dto.TrainingCreateResponseDto;
 import ee.bcskoolitus.controller.training.dto.TrainingDto;
 import ee.bcskoolitus.controller.training.dto.TrainingSummaryDto;
+import ee.bcskoolitus.controller.training.dto.TrainingTranslationCreateRequestDto;
+import ee.bcskoolitus.controller.training.dto.TrainingTranslationCreateResponseDto;
 import ee.bcskoolitus.controller.training.dto.TrainingTranslationItemDto;
 import ee.bcskoolitus.controller.training.dto.TrainingUpdateRequestDto;
 import ee.bcskoolitus.infrastructure.error.ApiError;
@@ -130,5 +132,31 @@ public class TrainingController {
     public void updateTraining(@PathVariable Integer trainingId,
                                @Valid @RequestBody TrainingUpdateRequestDto trainingUpdateRequestDto) {
         trainingService.updateTraining(trainingId, trainingUpdateRequestDto);
+    }
+
+    @PostMapping("/training/{trainingId}/training-translation")
+    @Operation(summary = "Lisab koolitusele tõlke uude keelde",
+            description = "Loob ühe training_translation rea. Koolituse andmeid ega staatust ei muudeta. Tagastab uue tõlke ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Olematu trainingId / languageId -> 'errorCode:' PRIMARY_KEY_NOT_FOUND",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Koolitusel on selles keeles tõlge juba olemas -> 'errorCode:' TRANSLATION_EXISTS",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Kohustuslik väli puudub, on liiga pikk või kirjeldus on tühi -> 'errorCode:' INCORRECT_INPUT",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            )
+    })
+    public TrainingTranslationCreateResponseDto addTrainingTranslation(@PathVariable Integer trainingId,
+                                                                       @Valid @RequestBody TrainingTranslationCreateRequestDto trainingTranslationCreateRequestDto) {
+        return trainingService.addTrainingTranslation(trainingId, trainingTranslationCreateRequestDto);
     }
 }
