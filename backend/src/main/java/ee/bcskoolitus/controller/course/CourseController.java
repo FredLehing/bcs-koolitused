@@ -1,0 +1,129 @@
+package ee.bcskoolitus.controller.course;
+
+import ee.bcskoolitus.controller.course.dto.CourseCreateRequestDto;
+import ee.bcskoolitus.controller.course.dto.CourseDto;
+import ee.bcskoolitus.controller.course.dto.CourseSummaryDto;
+import ee.bcskoolitus.controller.course.dto.CourseUpdateRequestDto;
+import ee.bcskoolitus.infrastructure.error.ApiError;
+import ee.bcskoolitus.service.CourseService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api")
+public class CourseController {
+    private final CourseService courseService;
+
+    @GetMapping("/training/{trainingId}/courses")
+    @Operation(summary = "Koolituse toimumiskorrad (kalender)",
+            description = "View course_summary. Kustutatud (D) toimumiskordi ei tagastata. includePast=false (vaikimisi) → ainult end_date >= täna. Järjestus: tulevased lähimast, siis möödunud hiliseimast. notes / meetingLink sisu ei tagastata.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Olematu või kustutatud trainingId -> 'errorCode:' PRIMARY_KEY_NOT_FOUND",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            )
+    })
+    public List<CourseSummaryDto> findTrainingCourses(@PathVariable Integer trainingId,
+                                                      @RequestParam(required = false, defaultValue = "false") Boolean includePast) {
+        return courseService.findTrainingCourses(trainingId, includePast);
+    }
+
+    @GetMapping("/course/{courseId}")
+    @Operation(summary = "Toimumiskorra andmed muutmise vormi jaoks",
+            description = "lecturers = course_lecturer sort_order järjekorras (võib olla tühi); roomId, notes ja meetingLink võivad olla null.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Olematu või kustutatud courseId -> 'errorCode:' PRIMARY_KEY_NOT_FOUND",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            )
+    })
+    public CourseDto getCourse(@PathVariable Integer courseId) {
+        return courseService.getCourse(courseId);
+    }
+
+    @PostMapping("/training/{trainingId}/course")
+    @Operation(summary = "Lisab koolitusele toimumiskorra",
+            description = "Loob course ja course_lecturer read (lecturerIds järjekorras) ühes transaktsioonis. Uus koolitaja peab olema aktiivne. Tühi notes / meetingLink → null.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Olematu või kustutatud trainingId / olematu roomId / userId / olematu või kustutatud lecturerId -> 'errorCode:' PRIMARY_KEY_NOT_FOUND",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "endDate on varasem kui startDate -> 'errorCode:' COURSE_END_BEFORE_START",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Kohustuslik väli puudub, numberOfDays / numberOfAcademicHours < 1, price < 0, status pole U/O/F/X, meetingLink liiga pikk või lecturerIds sisaldab korduvat ID-d -> 'errorCode:' INCORRECT_INPUT",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            )
+    })
+    public void addCourse(@PathVariable Integer trainingId, @Valid @RequestBody CourseCreateRequestDto courseCreateRequestDto) {
+        courseService.addCourse(trainingId, courseCreateRequestDto);
+    }
+
+    @PutMapping("/course/{courseId}")
+    @Operation(summary = "Muudab toimumiskorda",
+            description = "Muudab kõik väljad (ka staatuse). course_lecturer read kirjutatakse lecturerIds järgi üle; juba seotud kustutatud koolitaja võib jääda.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Olematu või kustutatud courseId / olematu roomId / olematu lecturerId või uus kustutatud lecturerId -> 'errorCode:' PRIMARY_KEY_NOT_FOUND",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "endDate on varasem kui startDate -> 'errorCode:' COURSE_END_BEFORE_START",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Kohustuslik väli puudub, numberOfDays / numberOfAcademicHours < 1, price < 0, status pole U/O/F/X, meetingLink liiga pikk või lecturerIds sisaldab korduvat ID-d -> 'errorCode:' INCORRECT_INPUT",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            )
+    })
+    public void updateCourse(@PathVariable Integer courseId, @Valid @RequestBody CourseUpdateRequestDto courseUpdateRequestDto) {
+        courseService.updateCourse(courseId, courseUpdateRequestDto);
+    }
+
+    @DeleteMapping("/course/{courseId}")
+    @Operation(summary = "Kustutab toimumiskorra (soft delete)",
+            description = "Määrab course.status = D. Osalejaid ja koolitajaid ei kustutata. Juba kustutatud toimumiskorra korral midagi ei muutu.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Olematu courseId -> 'errorCode:' PRIMARY_KEY_NOT_FOUND",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            )
+    })
+    public void deleteCourse(@PathVariable Integer courseId) {
+        courseService.deleteCourse(courseId);
+    }
+}

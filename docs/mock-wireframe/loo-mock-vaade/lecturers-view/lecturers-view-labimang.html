@@ -1,0 +1,561 @@
+<meta charset="utf-8">
+<title>Meie koolitajad</title>
+<meta name="description" content="LecturersView.vue (avalik koolitajate nimekiri) ja LecturerView.vue (koolitaja detailvaade): API päringud, pilditeenus ja mockupi märkmed interaktiivse läbimänguna.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Sama visuaalne keel nagu admin-trainings-view-labimang.html: täppidega tahvel, Balsamiqi-stiilis wireframe, kollased märkmed */
+:root {
+  --board: #e9ecef;
+  --board-dots: #d3d8de;
+  --panel: #ffffff;
+  --ink: #23272e;
+  --ink-soft: #5b6470;
+  --line: #b9c0c9;
+  --sketch: #3b4048;
+  --field: #ffffff;
+  --field-off: #eef0f3;
+  --accent: #2f6fde;
+  --accent-soft: #dce7fb;
+  --note: #f2c94c;
+  --note-edge: #d9ad2b;
+  --note-ink: #2e2505;
+  --get: #1f7a5c;
+  --post: #2f6fde;
+  --put: #a56200;
+  --del: #b83a3a;
+  --ok: #1f7a5c;
+  --bad: #c0392b;
+  --shadow: 0 1px 2px rgba(20, 30, 45, .08), 0 4px 14px rgba(20, 30, 45, .06);
+  --font-ui: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-sketch: "Balsamiq Sans", "Comic Sans MS", "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --board: #15181d; --board-dots: #242931; --panel: #1d2127; --ink: #e6e9ee; --ink-soft: #9aa4b2;
+    --line: #3a414b; --sketch: #c9ced6; --field: #252a31; --field-off: #1a1e23; --accent: #7aa5f5; --accent-soft: #22324f;
+    --get: #5cc59e; --post: #7aa5f5; --put: #e0a24a; --del: #ef7d7d; --ok: #5cc59e; --bad: #ef7d7d;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --board: #15181d; --board-dots: #242931; --panel: #1d2127; --ink: #e6e9ee; --ink-soft: #9aa4b2;
+  --line: #3a414b; --sketch: #c9ced6; --field: #252a31; --field-off: #1a1e23; --accent: #7aa5f5; --accent-soft: #22324f;
+  --get: #5cc59e; --post: #7aa5f5; --put: #e0a24a; --del: #ef7d7d; --ok: #5cc59e; --bad: #ef7d7d;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.3);
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background-color: var(--board);
+  background-image: radial-gradient(var(--board-dots) 1px, transparent 1px);
+  background-size: 18px 18px;
+  color: var(--ink);
+  font: 15px/1.5 var(--font-ui);
+}
+.page { max-width: 1320px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 64px; display: grid; gap: 28px; }
+h1, h2, h3 { text-wrap: balance; margin: 0; line-height: 1.2; }
+h1 { font-size: 1.7rem; font-weight: 600; }
+h2 { font-size: 1.15rem; font-weight: 600; }
+h3 { font-size: .8rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft); }
+code, .mono { font-family: var(--font-mono); font-size: .88em; }
+button { font: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Päis */
+.intro { display: grid; gap: 10px; }
+.intro p { margin: 0; max-width: 78ch; color: var(--ink-soft); }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.toolbar .sep { width: 1px; align-self: stretch; background: var(--line); margin-inline: 4px; }
+.toolbar .lbl-soft { font-size: .82rem; color: var(--ink-soft); }
+.tbtn { border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+.tbtn:hover { border-color: var(--accent); }
+.tbtn[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 1px var(--accent); }
+
+/* Brauseri wireframe */
+.browser { background: var(--panel); border: 2px solid var(--sketch); border-radius: 10px; font-family: var(--font-sketch); box-shadow: var(--shadow); overflow: hidden; min-width: 0; }
+.chrome { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-bottom: 2px solid var(--sketch); background: var(--field-off); }
+.chrome .dots { display: flex; gap: 5px; }
+.chrome .dots span { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--sketch); }
+.urlbar { flex: 1; min-width: 0; border: 1.5px solid var(--sketch); border-radius: 14px; padding: 3px 12px; font-family: var(--font-mono); font-size: .8rem; background: var(--field); white-space: nowrap; overflow-x: auto; }
+.sitenav { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; padding: 8px 14px; border-bottom: 1.5px dashed var(--line); font-size: .85rem; }
+.sitenav .logo { width: 44px; height: 24px; border: 1.5px solid var(--sketch); position: relative; }
+.sitenav .logo::before, .sitenav .logo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top right, transparent calc(50% - .75px), var(--sketch) 50%, transparent calc(50% + .75px)); }
+.sitenav .logo::after { transform: scaleX(-1); }
+.sitenav .cur { text-decoration: underline; text-underline-offset: 3px; }
+.sitenav .admin { position: relative; }
+.sitenav .admin > button { background: none; border: 1.5px solid transparent; border-radius: 6px; font: inherit; color: var(--ink); padding: 0 6px; cursor: pointer; }
+.sitenav .admin > button:hover, .sitenav .admin > button[aria-expanded="true"] { border-color: var(--sketch); }
+.sitenav .menu { position: absolute; top: calc(100% + 4px); left: 0; z-index: 6; background: var(--panel); border: 1.5px solid var(--sketch); border-radius: 6px; box-shadow: 3px 3px 0 var(--sketch); display: grid; min-width: 180px; padding: 4px; }
+.sitenav .menu button { background: none; border: 0; text-align: left; font: inherit; color: var(--ink); padding: 4px 8px; border-radius: 4px; cursor: pointer; white-space: nowrap; }
+.sitenav .menu button:hover { background: var(--accent-soft); }
+.sitenav .menu .cur { background: var(--accent-soft); font-weight: 700; }
+.viewhead { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; justify-content: space-between; }
+.sitenav .out { margin-left: auto; border: 1.5px solid var(--sketch); border-radius: 10px; padding: 0 8px; font-size: .78rem; }
+
+.view { padding: 16px 18px 20px; display: grid; gap: 14px; min-width: 0; }
+.view h2 { font-family: var(--font-sketch); font-size: 1.35rem; font-weight: 700; }
+.searchrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.searchrow input { flex: 1 1 260px; min-width: 0; }
+input[type="text"], select { font-family: var(--font-sketch); font-size: .9rem; color: var(--ink); background: var(--field); border: 1.5px solid var(--sketch); border-radius: 5px; padding: 4px 8px; }
+select { width: 100%; }
+.sbtn { font-family: var(--font-sketch); font-size: .9rem; border: 1.5px solid var(--sketch); border-radius: 12px; background: var(--field); color: var(--ink); padding: 3px 14px; cursor: pointer; box-shadow: 1.5px 1.5px 0 var(--sketch); white-space: nowrap; }
+.sbtn:hover:not(:disabled) { background: var(--accent-soft); }
+.sbtn:active:not(:disabled) { transform: translate(1px, 1px); box-shadow: .5px .5px 0 var(--sketch); }
+.sbtn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.sbtn.danger { background: var(--del); border-color: var(--del); color: #fff; }
+.sbtn.small { font-size: .78rem; padding: 1px 10px; }
+.sbtn:disabled { opacity: .45; cursor: not-allowed; }
+.api-pin { font-family: var(--font-mono); font-size: .66rem; background: var(--note); color: var(--note-ink); border: 0; border-radius: 3px; padding: 0 5px; cursor: pointer; line-height: 1.6; white-space: nowrap; }
+.api-pin:hover { outline: 1.5px solid var(--note-edge); }
+.pins { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+
+.tip { position: relative; display: inline-flex; }
+.tip .qmark { width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--sketch); background: var(--field); color: var(--ink); font: 700 .8rem var(--font-sketch); cursor: help; padding: 0; }
+.tip [role="tooltip"] { position: absolute; right: 0; top: calc(100% + 8px); z-index: 5; width: min(300px, 80vw); background: var(--ink); color: var(--panel); font: .78rem/1.4 var(--font-ui); padding: 8px 10px; border-radius: 6px; opacity: 0; visibility: hidden; transition: opacity .12s; pointer-events: none; }
+.tip:hover [role="tooltip"], .tip:focus-within [role="tooltip"] { opacity: 1; visibility: visible; }
+.togglerow { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+.linkish { background: none; border: 0; color: var(--accent); text-decoration: underline; cursor: pointer; padding: 0; font-family: var(--font-sketch); font-size: .9rem; }
+.linkish.small { font-size: .8rem; }
+.badge { border: 1.5px solid var(--sketch); border-radius: 10px; padding: 0 8px; font-size: .75rem; white-space: nowrap; }
+.badge.draft { background: var(--field-off); }
+.badge.pub { background: var(--ok); color: #fff; border-color: var(--ok); }
+.badge.active { background: var(--accent-soft); border-color: var(--accent); }
+.badge.deleted { background: var(--del); color: #fff; border-color: var(--del); }
+tr.is-deleted td { color: var(--ink-soft); }
+tr.is-deleted td .flag, tr.is-deleted td .settings { opacity: .55; }
+
+fieldset { border: 1.5px solid var(--sketch); border-radius: 8px; margin: 0; padding: 10px 12px 12px; display: grid; gap: 12px; min-width: 0; }
+legend { padding: 0 6px; font-weight: 700; font-size: .9rem; }
+.fgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px 14px; }
+.fld { display: grid; gap: 3px; min-width: 0; }
+.lbl { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: .82rem; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.hint { font-size: .8rem; color: var(--ink-soft); }
+
+/* Tabel */
+.tablewrap { overflow-x: auto; border: 1.5px solid var(--sketch); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: .84rem; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px dashed var(--line); vertical-align: middle; }
+thead th { background: var(--field-off); border-bottom: 1.5px solid var(--sketch); font-weight: 700; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr:hover td { background: color-mix(in srgb, var(--accent-soft) 45%, transparent); }
+td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.sorth { background: none; border: 0; padding: 0; font: inherit; font-weight: 700; color: var(--ink); cursor: pointer; display: inline-flex; gap: 4px; align-items: center; }
+.sorth:hover { color: var(--accent); }
+.sorth .arrow { font-size: .75rem; color: var(--accent); min-width: .8em; }
+.th-pin { display: inline-flex; gap: 4px; align-items: center; }
+.title-cell { min-width: 170px; }
+.fallback { display: block; font-size: .7rem; color: var(--ink-soft); }
+.settings { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; min-width: 120px; }
+.settings li { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.settings li::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex: none; }
+.settings .none { color: var(--ink-soft); }
+.settings .none::before { display: none; }
+.tr-ok { color: var(--ok); font-weight: 700; font-size: 1.05rem; }
+.tr-bad { color: var(--bad); font-weight: 700; font-size: 1.05rem; cursor: help; }
+.icons { display: flex; gap: 4px; }
+.ibtn { width: 28px; height: 26px; display: inline-grid; place-items: center; border: 1.5px solid var(--sketch); border-radius: 6px; background: var(--field); color: var(--ink); cursor: pointer; padding: 0; }
+.ibtn:hover { background: var(--accent-soft); }
+.ibtn.del:hover { background: color-mix(in srgb, var(--del) 20%, transparent); }
+.ibtn svg { width: 16px; height: 16px; }
+.flag svg { width: 26px; height: 17px; border: 1.5px solid var(--sketch); display: block; }
+.empty-row td { text-align: center; padding: 20px; color: var(--ink-soft); }
+
+.foot { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; }
+.total { font-size: .85rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.pager { display: flex; flex-wrap: wrap; gap: 0; }
+.pager button { font-family: var(--font-sketch); font-size: .85rem; border: 1.5px solid var(--sketch); margin-left: -1.5px; background: var(--field); color: var(--accent); padding: 2px 10px; cursor: pointer; }
+.pager button:first-child { border-radius: 6px 0 0 6px; margin-left: 0; }
+.pager button:last-child { border-radius: 0 6px 6px 0; }
+.pager button[aria-current="page"] { background: var(--accent); color: #fff; border-color: var(--sketch); }
+.pager button:disabled { color: var(--ink-soft); cursor: not-allowed; opacity: .6; }
+
+/* Alumine rida */
+.below { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; box-shadow: var(--shadow); display: grid; gap: 10px; min-width: 0; }
+.kv { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 12px; font-size: .86rem; margin: 0; }
+.kv dt { color: var(--ink-soft); }
+.kv dd { margin: 0; font-family: var(--font-mono); font-size: .8rem; overflow-wrap: anywhere; }
+
+.note { background: var(--note); color: var(--note-ink); border-radius: 2px; box-shadow: 0 1px 0 var(--note-edge), 0 6px 16px rgba(80, 60, 0, .18); padding: 12px 14px 14px; display: grid; gap: 8px; min-width: 0; }
+.note.flash { animation: noteflash 1.4s ease-out; }
+@keyframes noteflash { 0%, 30% { box-shadow: 0 0 0 4px var(--accent), 0 6px 16px rgba(80,60,0,.18); } 100% { box-shadow: 0 1px 0 var(--note-edge), 0 6px 16px rgba(80,60,0,.18); } }
+.note-head { display: flex; align-items: center; gap: 8px; }
+.note-head strong { font-size: .82rem; font-weight: 600; letter-spacing: .03em; }
+.note-head .copy { margin-left: auto; font: 500 .75rem var(--font-ui); background: rgba(255,255,255,.55); color: var(--note-ink); border: 1px solid var(--note-edge); border-radius: 4px; padding: 1px 8px; cursor: pointer; }
+.note-head .copy:hover { background: #fff; }
+.note pre { margin: 0; font: .78rem/1.45 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+.note .draft-tag { font-size: .72rem; background: rgba(255,255,255,.55); border-radius: 3px; padding: 0 6px; }
+
+.log { display: grid; gap: 6px; }
+.log-step { font-size: .85rem; color: var(--ink-soft); }
+.log-group { font-size: .74rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft); margin-top: 6px; }
+.req { border: 1px solid var(--line); border-radius: 6px; background: var(--field); overflow: hidden; }
+.req.done { border-color: var(--ok); }
+.req > button { width: 100%; display: flex; gap: 8px; align-items: center; text-align: left; background: none; border: 0; color: var(--ink); padding: 6px 10px; cursor: pointer; }
+.req > button:hover { background: var(--field-off); }
+.req .main { display: grid; gap: 1px; flex: 1; min-width: 0; }
+.req .when { display: block; font-size: .74rem; color: var(--ink-soft); }
+.req .ran { font: 600 .68rem var(--font-ui); color: var(--ok); border: 1px solid var(--ok); border-radius: 10px; padding: 0 6px; flex: none; }
+.req.idle .method { opacity: .75; }
+.method { font: 600 .7rem var(--font-mono); padding: 1px 6px; border-radius: 3px; color: #fff; flex: none; }
+.m-GET { background: var(--get); } .m-POST { background: var(--post); } .m-PUT { background: var(--put); } .m-DELETE { background: var(--del); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .method { color: #111; } }
+:root[data-theme="dark"] .method { color: #111; }
+.req .path { font-family: var(--font-mono); font-size: .76rem; overflow-wrap: anywhere; }
+.req .body { border-top: 1px dashed var(--line); padding: 8px 10px; display: grid; gap: 6px; }
+.req .body pre { margin: 0; font: .74rem/1.4 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; max-height: 280px; overflow: auto; }
+.req .body .sub { font-size: .75rem; color: var(--ink-soft); }
+.req .body .linkish { font-size: .8rem; justify-self: start; }
+
+.notes-section { display: grid; gap: 14px; }
+.notes-section > p { margin: 0; color: var(--ink-soft); max-width: 72ch; }
+.notes-grid { columns: 3 340px; column-gap: 18px; }
+.notes-grid .note { break-inside: avoid; margin-bottom: 18px; }
+
+.overlay { position: fixed; inset: 0; background: rgba(15, 20, 28, .45); display: grid; place-items: center; padding: 16px; z-index: 20; }
+.modal { background: var(--panel); color: var(--ink); border: 2px solid var(--sketch); border-radius: 10px; width: min(440px, 100%); padding: 16px 18px; display: grid; gap: 12px; font-family: var(--font-sketch); box-shadow: 4px 4px 0 var(--sketch); }
+.modal h2 { font-family: var(--font-sketch); font-weight: 700; }
+.modal .row { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--panel); padding: 8px 16px; border-radius: 6px; font-size: .9rem; z-index: 30; max-width: calc(100% - 32px); }
+
+@media (max-width: 1100px) { .below { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .below .note { grid-column: 1 / -1; } }
+@media (max-width: 700px) { .below { grid-template-columns: minmax(0, 1fr); } .page { padding-inline: 16px; } }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+/* LecturersView ja LecturerView lisad */
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; }
+.tile { display: grid; grid-template-rows: auto auto auto 1fr; gap: 4px; border: 1.5px solid var(--sketch); border-radius: 10px; padding: 10px; background: var(--field); color: var(--ink); text-align: left; cursor: pointer; font: inherit; font-family: var(--font-sketch); min-width: 0; }
+.tile:hover { box-shadow: 3px 3px 0 var(--sketch); transform: translate(-1px, -1px); }
+.tile:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.pic { width: 100%; aspect-ratio: 1 / 1; max-width: 100%; border-radius: 8px; border: 1.5px solid var(--sketch); object-fit: cover; display: block; background: var(--field-off); }
+.pic.ph { display: grid; place-items: center; color: var(--ink-soft); border-style: dashed; }
+.pic.ph svg { width: 55%; height: 55%; }
+.tile .nm { font-weight: 700; font-size: 1rem; margin-top: 6px; }
+.tile .tt { font-size: .8rem; color: var(--ink-soft); }
+.tile .sd { font-size: .8rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.intro-text { margin: 0; color: var(--ink-soft); font-size: .92rem; }
+.profile { display: grid; grid-template-columns: minmax(0, 240px) minmax(0, 1fr); gap: 20px; align-items: start; }
+.profile .pic { max-width: 240px; }
+.profile h2 { font-size: 1.6rem; }
+.profile .tt { color: var(--ink-soft); font-size: .95rem; margin-top: 2px; }
+.profile .lead { font-size: 1.02rem; margin: 10px 0; }
+.profile .rich { font-size: .9rem; border-top: 1px dashed var(--line); padding-top: 10px; }
+.profile .rich p { margin: 0 0 8px; max-width: 70ch; }
+.trainings { border: 1.5px solid var(--sketch); border-radius: 8px; padding: 10px 14px; display: grid; gap: 6px; }
+.trainings h3 { font-family: var(--font-sketch); font-size: .95rem; text-transform: none; letter-spacing: 0; color: var(--ink); }
+.trainings ul { margin: 0; padding-left: 18px; display: grid; gap: 3px; }
+.errview { border: 1.5px dashed var(--del); border-radius: 8px; padding: 18px; text-align: center; display: grid; gap: 8px; }
+.sitenav .navlink { background: none; border: 0; font: inherit; color: var(--ink); padding: 0; cursor: pointer; }
+.sitenav .navlink.cur { text-decoration: underline; text-underline-offset: 3px; font-weight: 700; }
+.sitenav .login { margin-left: auto; border: 1.5px solid var(--sketch); border-radius: 10px; padding: 0 8px; font-size: .78rem; }
+@media (max-width: 700px) { .profile { grid-template-columns: minmax(0, 1fr); } }
+.embed .sitenav { display: none; }
+/* hidden-atribuut peab peitma ka elemendid, millel on oma display (nt .menu { display: grid }) */
+[hidden] { display: none !important; }
+</style>
+
+<div class="page">
+  <header class="intro">
+    <h1>Meie koolitajad — läbimäng</h1>
+    <p>LecturersView.vue (avalik koolitajate nimekiri) ja LecturerView.vue (koolitaja detailvaade). Ava navbarist „Meie koolitajad“, klõpsa kaardil, liigu koolitusele või tagasi nimekirja. Paremal all näed backendi päringuid — sh pildipäringud <code>GET /api/lecturer/{id}/photo?v=…</code>, mida brauser teeb <code>&lt;img src&gt;</code> kaudu ja paneb vahemällu. Kollased kastid on mockupi märkmed samas vormingus nagu <code>lecturers-view-markmed.md</code> ja <code>lecturer-view-markmed.md</code>.</p>
+    <p>Andmed on seed-andmete ettepanek: 8 aktiivset koolitajat (ametid ja spetsialiseerumised BCS Koolituse lektorite nimekirjast). Pilt on ainult Rain Tüüril (<code>rain-tuur.jpg</code>), teistel kohatäide. Kustutatud koolitaja (Virve Räni) nimekirjas ei ole. Uute teenuste DTO-d on <strong>ettepanek</strong>.</p>
+    <div class="toolbar">
+      <span class="lbl-soft">Kasutajaliidese keel (navbar):</span>
+      <button class="tbtn" type="button" data-ui-lang="et">et</button>
+      <button class="tbtn" type="button" data-ui-lang="en">en</button>
+      <span class="sep" aria-hidden="true"></span>
+      <button class="tbtn" type="button" id="btn-deleted">Ava kustutatud koolitaja (/lecturer?lecturerId=4)</button>
+      <button class="tbtn" type="button" id="btn-reset">Alusta algusest</button>
+    </div>
+  </header>
+
+  <div class="browser" aria-label="Wireframe">
+    <div class="chrome">
+      <div class="dots" aria-hidden="true"><span></span><span></span><span></span></div>
+      <div class="urlbar" id="urlbar"></div>
+    </div>
+    <nav class="sitenav" aria-label="Navbar (wireframe)">
+      <span class="logo" aria-hidden="true"></span>
+      <button type="button" class="navlink" data-nav="/trainings">Koolitused</button>
+      <button type="button" class="navlink" id="nav-lecturers" data-nav="/lecturers">Meie koolitajad</button>
+      <button type="button" class="navlink" data-nav="#">Teenused</button>
+      <button type="button" class="navlink" data-nav="#" title="Alammenüü „Lektorid“ eemaldatud">Ettevõttest</button>
+      <button type="button" class="navlink" data-nav="#">Blogi</button>
+      <button type="button" class="navlink" data-nav="#">Kontakt</button>
+      <button type="button" class="navlink" data-nav="#">Tagasiside</button>
+      <span class="login">Logi sisse</span>
+    </nav>
+    <div class="view" id="view"></div>
+  </div>
+
+  <div class="below">
+    <div class="card">
+      <h3>Vaate olek</h3>
+      <dl class="kv" id="statekv"></dl>
+    </div>
+    <div class="card">
+      <h3>Päringud</h3>
+      <div class="log" id="log"></div>
+    </div>
+    <div class="note" id="note-view">
+      <div class="note-head"><strong id="view-note-title">Vaate märkmed</strong><button class="copy" type="button" data-copy="view">Kopeeri</button></div>
+      <pre id="view-note-text"></pre>
+    </div>
+  </div>
+
+  <section class="notes-section">
+    <h2>API märkmed (<span id="notes-count"></span>)</h2>
+    <p>Iga backendi kutse kohta üks kast. Vajuta wireframe'il kollasele sildile või päringute logis päringule, et hüpata vastava märkme juurde.</p>
+    <div class="notes-grid" id="notes"></div>
+  </section>
+</div>
+
+<div id="modal-root"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- Prototüübi kest (../index.html): embed-režiim ja vaadete vaheline navigeerimine ---------- */
+  // Eraldi avatuna (ilma ?embed=1) käitub läbimäng nagu varem.
+  var SHELL_Q = new URLSearchParams(location.search);
+  var EMBED = SHELL_Q.get("embed") === "1" && window.parent !== window;
+  if (EMBED) {
+    document.documentElement.classList.add("embed");
+    var sendHeight = function () { window.parent.postMessage({ type: "bcs-height", height: document.documentElement.scrollHeight }, "*"); };
+    if (window.ResizeObserver) new ResizeObserver(sendHeight).observe(document.body);
+    window.addEventListener("load", sendHeight);
+  }
+  function goRoute(path, standaloneMessage) {
+    if (EMBED) { window.parent.postMessage({ type: "bcs-navigate", path: path }, "*"); return; }
+    toast(standaloneMessage || "router.push → " + path);
+  }
+
+  /* ---------- Märkmed (genereeritud failidest markmed/lecturers-view-markmed.md ja lecturer-view-markmed.md) ---------- */
+  var VIEW_NOTES = {"list": {"title": "LecturersView.vue", "text": "Roll: Kõik rollid (ka sisse logimata külastaja)\nFailinimi: LecturersView.vue\nFrontend rada: /lecturers\n\nVaatega seotud lisainfo:\nAvaneb navbari põhimenüü lingist \"Meie koolitajad\" (menüü \"Ettevõttest\" all olev \"Lektorid\" eemaldatakse). Pealkiri \"Meie koolitajad\" ja lühike sissejuhatus. Kaardid ruudustikus (4 / 3 / 2 / 1 veergu ekraani laiuse järgi): pilt, nimi, amet (title), lühikirjeldus (shortDescription); kogu kaart on link → /lecturer?lecturerId={id}.\nPilt tuleb pilditeenusest <img src=\"{API}/lecturer/{lecturerId}/photo?v={photoVersion}\">; photoVersion = null → hall siluett (kohatäide), kaardid on ühesuguse kõrgusega. Ainult aktiivsed koolitajad nime järgi; otsingut ja leheküljestust pole. Tekstid kasutajaliidese keeles (puudumisel põhikeeles), keele vahetusel laaditakse uuesti. Tühi nimekiri: \"Koolitajaid pole veel lisatud.\""}, "detail": {"title": "LecturerView.vue", "text": "Roll: Kõik rollid (ka sisse logimata külastaja)\nFailinimi: LecturerView.vue\nFrontend rada: /lecturer?lecturerId={id}\n\nVaatega seotud lisainfo:\nAvaneb \"Meie koolitajad\" kaardilt. Üleval link \"← Kõik koolitajad\" → /lecturers. Vasakul suur pilt (kuni 240 px; pilditeenusest, photoVersion = null → kohatäide), paremal nimi (h1), amet, lühikirjeldus sissejuhatusena ja kirjeldus rich text'ina (RichTextContent.vue).\nPlokk \"Koolitused\": publitseeritud koolitused, mille koolitajate hulgas ta on (training_lecturer) — nimi lingina → /training?trainingId={id}&trainingTranslationId={id}; koolitusteta plokki ei kuvata. Tekstid kasutajaliidese keeles (puudumisel põhikeeles), keele vahetusel laaditakse uuesti. Kustutatud või olematu koolitaja (404) → üldine veavaade."}};
+  var NOTES = [{"id": "n-summaries", "title": "GET /api/lecturer-summaries", "draft": true, "text": "API: GET /api/lecturer-summaries\n\nQuery parameetrid:\ncontentLang: String — ameti ja lühikirjelduse keel (\"et\"/\"en\")\n\nResponse (200):\nLecturerSummaryDto.java\n[\n  {\n    \"lecturerId\": 7,\n    \"fullName\": \"Andres Liitmaa\",\n    \"title\": \"Spetsialisti valdkonna lektor/konsultant\",\n    \"shortDescription\": \"Microsofti ametlikud sertifitseerimiskoolitused (MOC), serverid, pilvetehnoloogiad, Microsoft Certified Trainer.\",\n    \"photoVersion\": null\n  },\n  {\n    \"lecturerId\": 1,\n    \"fullName\": \"Rain Tüür\",\n    \"title\": \"Lektor/konsultant\",\n    \"shortDescription\": \"Tarkvaraarendus, Java, HTML, CSS, JavaScript, SQL, Git, Spring Boot, REST API, PostgreSQL, JPA (Hibernate), MapStruct, JUnit, Swagger, Gradle, Confluence, Jira. Vali Tarkvaraarendus! programm.\",\n    \"photoVersion\": 1784095200\n  },\n  ...\n]\n\nAPI teenuse lisainfo:\nAinult aktiivsed koolitajad (lecturer.status = \"A\"), sorteeritud fullName järgi. title ja shortDescription contentLang keeles, puudumisel põhikeeles. Sama DTO nagu GET /api/lecturer-summary/{lecturerId} (LecturerCard). Pilti ei tagastata — photoVersion = lecturer_photo.updated_at epoch-sekundites või null, kui pilti pole; frontend koostab pildi URL-i /api/lecturer/{lecturerId}/photo?v={photoVersion}. description (pikk kirjeldus) ei kuulu vastusesse. Tühi list, kui koolitajaid pole.\n\nVeateated: —"}, {"id": "n-photo", "title": "GET /api/lecturer/{lecturerId}/photo", "draft": true, "text": "API: GET /api/lecturer/{lecturerId}/photo\n\nQuery parameetrid:\nv: Long — photoVersion (ainult vahemälu jaoks; backend seda ei kontrolli)\n\nResponse (200): pildi baidid (image/jpeg), mitte JSON\n\nAPI teenuse lisainfo:\nAvalik teenus, mida kasutatakse otse <img src>-is (LecturersView, LecturerView, LecturerCard, LecturerFormView eelvaade). Content-Type = lecturer_photo.content_type (normaliseeritud pildil alati image/jpeg). Päis Cache-Control: public, max-age=31536000, immutable — URL sisaldab versiooni (v), mis muutub pildi vahetamisel. Pilt normaliseeritakse üleslaadimisel (400×400 JPEG, EXIF eemaldatud), seega on see alati väike.\n\nVeateated:\nHTTP: 404\nerrorCode: PRIMARY_KEY_NOT_FOUND\nmessage: \"Ei leidnud primary keyd 'lecturerId' väärtusega: 123\""}, {"id": "n-profile", "title": "GET /api/lecturer-profile/{lecturerId}", "draft": true, "text": "API: GET /api/lecturer-profile/{lecturerId}\n\nQuery parameetrid:\ncontentLang: String — tekstide ja koolituste nimede keel (\"et\"/\"en\")\n\nResponse (200):\nLecturerProfileDto.java\n{\n  \"lecturerId\": 1,\n  \"fullName\": \"Rain Tüür\",\n  \"title\": \"Lektor/konsultant\",\n  \"shortDescription\": \"Tarkvaraarendus, Java, HTML, CSS, JavaScript, SQL, Git, Spring Boot, REST API, PostgreSQL, JPA (Hibernate), MapStruct, JUnit, Swagger, Gradle, Confluence, Jira. Vali Tarkvaraarendus! programm.\",\n  \"description\": \"<p>Tarkvaraarendus, Java, HTML, CSS, JavaScript, SQL, Git, Spring Boot, REST API, PostgreSQL, JPA (Hibernate), MapStruct, JUnit, Swagger, Gradle, Confluence, Jira. Vali Tarkvaraarendus! programm.</p>\",\n  \"photoVersion\": 1784095200,\n  \"trainings\": [\n    {\n      \"trainingId\": 1,\n      \"trainingTranslationId\": 1,\n      \"title\": \"Java algkursus\"\n    },\n    ...\n  ]\n}\n\nAPI teenuse lisainfo:\nÜhe aktiivse koolitaja avalik profiil. title, shortDescription ja description (HTML, HtmlSanitizer-iga puhastatud) contentLang keeles, puudumisel põhikeeles. photoVersion = lecturer_photo.updated_at epoch-sekundites või null. trainings = publitseeritud koolitused (training.status = \"P\"), mille koolitajate hulgas ta on (training_lecturer); title ja trainingTranslationId contentLang keeles, puudumisel põhikeeles (sama reegel nagu admin_training_summary); sorteeritud title järgi; tühi list, kui koolitusi pole.\n\nVeateated:\nHTTP: 404\nerrorCode: PRIMARY_KEY_NOT_FOUND\nmessage: \"Ei leidnud primary keyd 'lecturerId' väärtusega: 123\""}];
+  /* ---------- Andmed (seed-andmete ettepanek) ---------- */
+  var DATA = {"lecturers": [{"id": 1, "name": "Rain Tüür", "status": "A", "photoVersion": 1784095200, "tr": {"et": {"title": "Lektor/konsultant", "shortDescription": "Tarkvaraarendus, Java, HTML, CSS, JavaScript, SQL, Git, Spring Boot, REST API, PostgreSQL, JPA (Hibernate), MapStruct, JUnit, Swagger, Gradle, Confluence, Jira. Vali Tarkvaraarendus! programm.", "description": "<p>Tarkvaraarendus, Java, HTML, CSS, JavaScript, SQL, Git, Spring Boot, REST API, PostgreSQL, JPA (Hibernate), MapStruct, JUnit, Swagger, Gradle, Confluence, Jira. Vali Tarkvaraarendus! programm.</p>"}, "en": {"title": "Lecturer/consultant", "shortDescription": "Software development, Java, HTML, CSS, JavaScript, SQL, Git, Spring Boot, REST API, PostgreSQL, JPA (Hibernate), MapStruct, JUnit, Swagger, Gradle, Confluence, Jira. Vali Tarkvaraarendus! programme.", "description": "<p>Software development, Java, HTML, CSS, JavaScript, SQL, Git, Spring Boot, REST API, PostgreSQL, JPA (Hibernate), MapStruct, JUnit, Swagger, Gradle, Confluence, Jira. Vali Tarkvaraarendus! programme.</p>"}}}, {"id": 2, "name": "Merje Vaide", "status": "A", "photoVersion": null, "tr": {"et": {"title": "Projektijuht/lektor", "shortDescription": "Microsoft Office rakendused, andmeanalüüs, tarkvaraarendus, veebiarendus. Täiskasvanute koolitaja tase 6.", "description": "<p>Microsoft Office rakendused, andmeanalüüs, tarkvaraarendus, veebiarendus. Täiskasvanute koolitaja tase 6.</p>"}, "en": {"title": "Project manager/lecturer", "shortDescription": "Microsoft Office applications, data analysis, software development, web development. Adult educator, level 6.", "description": "<p>Microsoft Office applications, data analysis, software development, web development. Adult educator, level 6.</p>"}}}, {"id": 3, "name": "Kersti Laidvee", "status": "A", "photoVersion": null, "tr": {"et": {"title": "Lektor/konsultant", "shortDescription": "Adobe Photoshop, Illustrator, InDesign, Acrobat, Canva, Figma, e-turundus, e-õppe disain, Office rakendused.", "description": "<p>Adobe Photoshop, Illustrator, InDesign, Acrobat, Canva, Figma, e-turundus, e-õppe disain, Office rakendused.</p>"}}}, {"id": 4, "name": "Virve Räni", "status": "D", "photoVersion": null, "tr": {"et": {"title": "Lektor/konsultant", "shortDescription": "Andmeanalüüs, Power BI, SQL, Tableau, SAP BO, Excel, Vali Andmetarkus! programm.", "description": "<p>Andmeanalüüs, Power BI, SQL, Tableau, SAP BO, Excel, Vali Andmetarkus! programm.</p>"}}}, {"id": 5, "name": "Tarmo Rosenfeldt", "status": "A", "photoVersion": null, "tr": {"et": {"title": "Lektor/konsultant", "shortDescription": "Microsoft 365, MS Teams, SharePoint, Planner, Viva Goals, Office rakendused, küberturvalisus. Täiskasvanute koolitaja tase 6.", "description": "<p>Microsoft 365, MS Teams, SharePoint, Planner, Viva Goals, Office rakendused, küberturvalisus. Täiskasvanute koolitaja tase 6.</p>"}, "en": {"title": "Lecturer/consultant", "shortDescription": "Microsoft 365, MS Teams, SharePoint, Planner, Viva Goals, Office applications, cybersecurity. Adult educator, level 6.", "description": "<p>Microsoft 365, MS Teams, SharePoint, Planner, Viva Goals, Office applications, cybersecurity. Adult educator, level 6.</p>"}}}, {"id": 6, "name": "Margus Sakk", "status": "A", "photoVersion": null, "tr": {"et": {"title": "Lektor/konsultant", "shortDescription": "Power BI, Bizagi, Power Automate, Access, Visio, Office rakendused, kasutajakoolitused ja andmeanalüüs.", "description": "<p>Power BI, Bizagi, Power Automate, Access, Visio, Office rakendused, kasutajakoolitused ja andmeanalüüs.</p>"}, "en": {"title": "Lecturer/consultant", "shortDescription": "Power BI, Bizagi, Power Automate, Access, Visio, Office applications, user training and data analysis.", "description": "<p>Power BI, Bizagi, Power Automate, Access, Visio, Office applications, user training and data analysis.</p>"}}}, {"id": 7, "name": "Andres Liitmaa", "status": "A", "photoVersion": null, "tr": {"et": {"title": "Spetsialisti valdkonna lektor/konsultant", "shortDescription": "Microsofti ametlikud sertifitseerimiskoolitused (MOC), serverid, pilvetehnoloogiad, Microsoft Certified Trainer.", "description": "<p>Microsofti ametlikud sertifitseerimiskoolitused (MOC), serverid, pilvetehnoloogiad, Microsoft Certified Trainer.</p>"}, "en": {"title": "Specialist lecturer/consultant", "shortDescription": "Official Microsoft certification courses (MOC), servers, cloud technologies, Microsoft Certified Trainer.", "description": "<p>Official Microsoft certification courses (MOC), servers, cloud technologies, Microsoft Certified Trainer.</p>"}}}, {"id": 8, "name": "Meelis Teern", "status": "A", "photoVersion": null, "tr": {"et": {"title": "Lektor/konsultant", "shortDescription": "Tarkvaraarendus, Java, JavaScript, HTML, CSS, Vue, Angular, Vali Tarkvaraarendus! programm.", "description": "<p>Tarkvaraarendus, Java, JavaScript, HTML, CSS, Vue, Angular, Vali Tarkvaraarendus! programm.</p>"}, "en": {"title": "Lecturer/consultant", "shortDescription": "Software development, Java, JavaScript, HTML, CSS, Vue, Angular, Vali Tarkvaraarendus! programme.", "description": "<p>Software development, Java, JavaScript, HTML, CSS, Vue, Angular, Vali Tarkvaraarendus! programme.</p>"}}}, {"id": 9, "name": "Tarmo Kallas", "status": "A", "photoVersion": null, "tr": {"et": {"title": "Lektor/konsultant", "shortDescription": "SharePoint, Power Platform, veebiarendus, UX (kasutajakogemus), veebiliideste arendus.", "description": "<p>SharePoint, Power Platform, veebiarendus, UX (kasutajakogemus), veebiliideste arendus.</p>"}}}], "trainings": [{"id": 1, "lects": [1, 8], "status": "P", "tr": {"et": {"id": 1, "title": "Java algkursus"}, "en": {"id": 2, "title": "Java Basics"}}}, {"id": 2, "lects": [2], "status": "P", "tr": {"et": {"id": 3, "title": "Projektijuhtimise põhitõed"}, "en": {"id": 4, "title": "Project Management Fundamentals"}}}, {"id": 3, "lects": [1], "status": "P", "tr": {"et": {"id": 5, "title": "Spring Boot veebiarendus"}, "en": {"id": 6, "title": "Spring Boot Web Development"}}}, {"id": 4, "lects": [8], "status": "P", "tr": {"et": {"id": 7, "title": "Vue.js esmaspetsialist"}, "en": {"id": 8, "title": "Vue.js Essentials"}}}, {"id": 5, "lects": [9], "status": "P", "tr": {"et": {"id": 9, "title": "UX disaini alused"}, "en": {"id": 10, "title": "UX Design Basics"}}}, {"id": 6, "lects": [3], "status": "P", "tr": {"et": {"id": 11, "title": "Figma praktikum"}, "en": {"id": 12, "title": "Figma Workshop"}}}, {"id": 7, "lects": [2], "status": "P", "tr": {"et": {"id": 13, "title": "Agiilne meeskonnajuhtimine"}, "en": {"id": 14, "title": "Agile Team Leadership"}}}, {"id": 8, "lects": [1], "status": "P", "tr": {"et": {"id": 15, "title": "SQL ja andmebaasid"}, "en": {"id": 16, "title": "SQL and Databases"}}}, {"id": 9, "lects": [6, 2], "status": "U", "tr": {"et": {"id": 17, "title": "Exceli algkursus"}}}, {"id": 10, "lects": [7], "status": "U", "tr": {"et": {"id": 18, "title": "Docker ja konteinerid"}}}, {"id": 11, "lects": [8, 1], "status": "P", "tr": {"et": {"id": 19, "title": "Git ja GitHub"}, "en": {"id": 20, "title": "Git and GitHub"}}}, {"id": 12, "lects": [6], "status": "U", "tr": {"et": {"id": 21, "title": "Python andmeanalüüsiks"}, "en": {"id": 22, "title": "Python for Data Analysis"}}}, {"id": 13, "lects": [5], "status": "P", "tr": {"et": {"id": 23, "title": "Tehisaru töövahendid arendajale"}}}, {"id": 14, "lects": [3], "status": "D", "tr": {"et": {"id": 24, "title": "Photoshopi algkursus"}, "en": {"id": 25, "title": "Photoshop Basics"}}}]};
+  var RAIN_PHOTO = "/9j/4AAQSkZJRgABAgAAAQABAAD//gAQTGF2YzYwLjMxLjEwMgD/2wBDAAgGBgcGBwgICAgICAkJCQoKCgkJCQkKCgoKCgoMDAwKCgoKCgoKDAwMDA0ODQ0NDA0ODg8PDxISEREVFRUZGR//xACfAAABBQEBAQAAAAAAAAAAAAAEBwUDBgIBAAgBAAMBAQEAAAAAAAAAAAAAAAABAgMEBRAAAQIDBQMIBwUHBQEBAQAAAQIDAAQREiExQQVRYXGhkfATsYEiBtEUwUJSMiNyQxUH4bKC8TMWNWIlJHNTkqI0dBEAAgIBAwQCAgIBBQEAAAAAAAECESExEgNBUWEEcRMyIkKRwbGhgvAUUv/AABEIAMgAyAMBIgACEQADEQD/2gAMAwEAAhEDEQA/AFVRNS4USVCCPXpQe+mKYmQftGriolEg7mtXPDIvsWw6pJp98ckYOuSafeEVf8MUcSrnjqdJ3GHfgMljV5ik0+9EKvNUoMIZhpI+GJBpSfhEAsjgfNrOSVHuiJXm3Y0rmiFOmNj3RGX5eWlUWnKJ3XVVuAg01Cm9GSHzY8r5WVc0RHzNOKwaPJDFNa0w0bKAlOOwqO++GqZ1i0kFTpSnAWbyb+YCM3yq8GsfXk1bdFtV5hnz7oFdpjB1nU3Pls9xrFHRqzTjlEVA+JR5E0NTwwiUuvdchSRcLwrrAlYG0ZAbq1hfd4K/81/yLiZ/Vle8BzxnrtUX97yQLpOs2lpYmaKBuS7jeT7xwHMItaZVOwRrFqSwYzg4OmV2zqSsX1xz1WeVi85Fm9WGyOiXGyGSVkafMnF1znjQ0p04rWe8xZeoGyOhgQxlb/BtpV3kx38ETsMWXqRsjQZ3QsBSK0NFR8MSJ0dHwiLF1IjvVCAKGFOkN/CIkGlI+EQ+dVujoaEADH+FI+ER78LR8MPvVCPdUIAG8sCsdDA2RNQlVIlDKoSdjoGDI2RoMjZBQYVGgwYABeqGyO9WIL6jfHeohhQzahNtaeyXHDT3Uj4lUigatrzilBa71LHhQP2U7AMyYsfn1pZRLttm+il3HA4DsioaXo7s3MJXNkqsfKcuaMOaXQ6fW41SfchTp84+kOFAUpV9PdAyG0x5HlqcmVWngpewWbgNlDWFAl22W0hIQKCDEPNpyEYV5O1JLoJ5/TLzdAEq49D6Yc5Lyw64UghY40p2ReAtpWKR3iNJfbTgAOENR8i/4le/okOI8Lym1ZEAC/miwaU6soMtMCkxLgJXX7xPuup+1nsiT11IzpELzgLzUyj52qWqe82o+JJ27Y0hJReGc/PxOayqodLG6PWN0T9fL0raTQ4Rz1qWHvJ5I6LOIhsR3q90Seuyo99MZOoSo99MGQOdXujvVmMnVZMe+nkiP8bk7/GLjTKAKRP1ZjXVGBDr0l8aecRg+YpIe+nnEAfqH9WY71ZhrV5nkR94nnHpiJXmyRT94nngHaHrqjHuqhgV5xkR7454z/Wcj8YhWLAwN+cmcaiCB51b6VigNShVBrciEJtKNBEpy7FMuX9aJ2Rk+dNiTFVQiW+MRMlEr8Yisix3LCfOa/hVGD5zdyQYY6Sg94R3/aYWhB+wsdx3XqB1dIdcBqmqaR5g2LwNsRtNtstiwtDiVZtqtJCveQaZiC0IIoRGE3ds7+GEo7VJVRK26pRwMGoZCr1GkA+vsSQ8V6jgIb9Q8wTSEWmZcrHTKM6Om8lm6sXeOsdSlNbzWKPK+bVlyy8koVhZhxm/MHUNhdFJr8QMCaHtZaXGkq+WByotkg5xUJPzPOqeFEAoJzoD3Viyt6k1OpCViw4cK4wJ5Il2Yw6lNTrU48ht1YRWqaZAiBfW59X3rnPDvqfVSykLWpBUu6zfaFnM7oETMsHACOqEXKKyeXyLZN4Ai7On7x3nMYJmzi45zmHQOoOCRHi6Mkxf1vuRuXYa+rmT7y//AEY4pl6iaFWdbzjDiX1DBEblSXXKFJvx3QbGG5DT1D2/nMe9WeO2LV6iPhgWZYU2pKUjGF9fkN3gYPU3jtj3qDvSsWBMq5GxKObYewe4rw09yO/hznQRYhJq2iO+pK2jng2IW5jBLyouuiTVpezJLpd4TfDgw1Ske1hv/Yr+yeyBLASYlxL4+8Xzxy2//wBjnOYNLUZLcSRY2zD0wPvXP/RjmnqfenJZCnXKKfaBvOFsV5Inm0ACIpRXUvtOfA4lX/lQJhSVplQ/KLem5F7kUtSD7ct1v1HFqWpu83qUVY4C66kWk/KABDUnTGn5hqf8JUbJoBU0pcsHZDswfHftjjVpV2Pe5dspqV3cbK5qml6q84pTCktV+9XU2R/ijbDIPLM+8+C9qE86M0N1CCaY1PZCpthCgK0pvjzrsswgm64bopYRnWlFB07yo7LvtqeecdsEEJcoSNxNL4tevaMjUdOQhPgUKEKAFQRxrfyQK9r8iwtbjyw2lGRurvvpHP650kJCCsKQR89RSuVDhC7mjUnRTF+S3G3kuLen1GoqoEFC+IAiz6ToczKLSsOqcaBtJC62kGl6RXKHyS1mWdWkVqlaQpCqXFJ2HAw6qmGlpoCIeqIna6aiaefX3JUsPNqIK3Cg7rLeUU5HmKaQfmi3fmOsESjX+bjvdSxCdLajo4bUdTzPcp8z+Ev6RYEebJhON8Eo84rHzAxUS2YyUGNN0jnryXpHnBHhtJIrhXO/EGLZoM318ylspobAVtqFG7khMdSl1L0vTH0VKW2VocIpcrrLq7YUnykOselVFKb5dHiAv93s9sG52gr9ZP4LwGd0BzTA65F0OyBVVnZTlgR2i3UneRzGkWIq2tTjsm+hCCAFXRCJt5Qr1ggPz+tbKUrQaKCoTpPmadaNLQMG5IM5FRL8z/2CPdfNf9ghN0ecZpOIBjf9aP8Awwb0GRWGkUjGtp/2C/snsgpCcIi10f6e59g9kJDloJsGqprGVNQUlFGxAy7QiWjLdQ2agggQAgKGcEau4tKbt0NCZhwHHOFQ1MVLytqjL0khl1wiYaNhKSq5aaeG7OmHdFiQuwawlWmuKbLbwxQoKuzocOaFFRNpWhKgQQRUEb45+WG130Z6nqex9qSesYpBz+p9VdWG93VkukBR8JNOJ2QJM2nVDYTfDdOaI5qD7KW5hbSEm0oJzNKUrGUtDsjJ2Ga0xJaq0lLqEqKcNo77oZZPy3LoVR7xs1uQo1EPg0ORlUj1hh2YUPeW4tXZBDErpbxCRIWhh96e2C1WpotF+xO842JZttsJR1aaN2cqYDhGtP1RxxICwQcx7YG1Hy5LNoQ+yp2XLagrq0qVRQ+FSSdkEtNtBKSjADvhR1InJ0Vnz9MBT0knMNLJ4FQikKXFp82K9Z1JdLw2hKBxAqe2K2WCThHZxpqKPH9h3yz+SC0I4FAKBuuNb9xwiYyp2RqX092ZXYQMsTgOPsisozLNqKGpnR5duXQlAemG7IytrF44Wgd0W/ye2WFMB0pSttiyumVCOhiqMJUrSmmbNFsKZUBsUFkEqGeMWPQgl6cIKilJQ6k7R9OtYzUnuQ+j+E/6FET/AD6giytm7iD+sDISfpk51POqsRTSy21pxQapuBJuqnqq89QDBaG7HUp2ISL+Ebp2QJ/+Yafpgf5QkTjV8K/+YdyB9r2QkriomQ46sELcesRMSY5UwqKs+hkDCI9cH+nufYMTIGERa7/b1/ZPZFoiWjKCE/TEDLRfBwH0xECkwS1MCta2iiRDGE3iLHr6aJEMCU1UOIhJC6ssEk39ARY5VSmZGWd9w20K3FKqCGeTa/244RZpCXt6OhK00tFwiuYtmhEZexiC+Tv9FXyOv/n/ACiFueboNt9I3KziG3qlXdFW1QzEmpVitK5bK5CGRetPgmlRuvxjlabZ6egsjOrt3A2e+ntglOrs1wTyQiY8yTbe8ZgmJB5mnCoFI4iphbH2GuasCuzk63MJUSoUAPLDKmeaZaNVVANbt2XfFKldT1TUnUsteGpBUcqDEndSHdttQTZqVXmp2xfDxOUvBj7HOuOPl6IGnCZh5x1QvWon0QEGfFDqtqIQz4o7kqPMbbywIs3RPIsFCioKoFeEp+IeyCSzHks0RtJN19KEG+vdEzX6sT0Jw6UPhsJuUgg42ai8EHOHbSZiUaU5adBC0FAIyJGZ33i6GFHXNNOkkeFaCCb/AHqEd9Y7IEtzTNoCwqZSQE0pYraIpHJbTTf/AGxJtQvtj/cU5bjjzGhsUIWpVFjZYQQq1+sWBY+qOEVnRpv8W1Coqhth5Sk0uqKKI40Jvi0L/mDhHXCmin0E2/Mo2WrtvsMIwh1a3QK5wsv5m/yu8/smEak02phPGHLVELWQ7lmiAYjsQ4TLdlsQHSKoVsXxOMRa/wD29f2TEqcREOv/ANvX9kwkVL8WUlI8AiKzBCR9McIzZgkYFb8wJ8I4iGFtNVp4iLJr6CpIyGJJuAG0nZFc9bbYFpF5+MjwjgNu83XQ0mCi2y46KGJudlpBS0ptgqcJPupvsI/zV2Vi8TqUBNlACUpASlIwCQLgO6EDem3Uuh5DigsKtJWCQoHbXaYv/l3zymfQiV1BQRMDwodNyHuOxfIqOf2YydVlI9X0J8cLjJU3/LuOGrSgcqaX0inTkkkKPhoYv00pLnfDHPSiV5c0YI7GUz1EZEiDZLS0qWBjfnBbjBbVuh10toOLTSlKwxNDxIyCNOkXngkWg2cr6m72xA034Rwhw1pwsaO5ZuqtpNR/kqKuzrq2adakOo2i5Q3EYUEdHrK4yfk4fctTivA8qbiFLfijbOpSswkFLgTX47q8DhEqACbqGN6OYiLd0SsspdbsGgKVEpO87dsTpatA5bN8QON2QqhoacxwjPkePKFeasb3yQp9pVL21LGV6b6CAnnrK0bVGuyzSl9duUETDiWnG1um6yUX5qwryw3W22npXrSpbajQ0yvKv0HdHLOnaFJ1FLvf+opHkGdS2+uXcqVqQmxdgMey6sX0/wAzuhLPLk41p81OzxS4bZ6uXQLzRNBQfZBJ4woMlPrVRx+iElltYSLykKNBa3mN+BrYl2BvLT7oon5nfJ3nsMJLpzVZlPGFZ/M80SB9r9mEv0lNZoRb1F1Y9zjYCUwFYEOs8i4cIAsGLExbE4iIPMB/09f2TEqcREHmC+QX9mEipfiyooH00wFPajLyA+oaqOCBj37BEWo6qJRsNteJyhvyTdnvirvOq8RX9VRqTW8nM8p5hFqNmceO9Tk/PuzzilOUsn5U32Up3jP4lb6CGaYJR4Dw47BxPvbBdBin2Copqps7FXita478O6IXkhYsruxsqHLTiTSsNmqVDXjntpsO6B1AjCo7RTpjBbjSkkg3cMLhluAiJaLe5WW/dTdGbRaeR30nzfOSFG5isyzhRR+ongs48DzxbJHzBp+pXIfSlR+7c8Cxz3HuhNFNEi8d4x7xEfVnI14ZRlLhT8G8PYnDyhWXpRLmEE6ZKhp0Xwk7OoahL3NzD6BsCyRy1gtPmDWkignHxwpXnsxn9D7my9uHVMVbzi8yxokw0t0Icd6vqx71pKgq4cIoHrCFWQv5HajnvBHA5QyKem51dqYedcripxRJ4CsHgF1iiakovG3jHRwQ+tM5vY5fuldUlgIRMuSTxbd8SDtzBwO4wf8AiDknRbayps4EHk2A7ob0lM9LCv8AMbqk7em8wM08tm00u9B29MY1sxLVKa8480V21VR8wrlw9sEnURNtWkOWFDAGlK792yKM3MGRmK1JaXcr7J274OlJpTa3mia5juvrjsiHGM8NZE4plkcbLq+rUmtKOXHMEGlTvhumZmxOCiahKiCi7/zzZxlidUmylaqpKSKjFF9QoHkiJMqZnW2GjaNtxCa0paJOUcvLwuLXYUs/CYosjpPVyMs+m5TqSutb0eIEq8VE0vAPfF3095E0wX7IAtsteK/wtqGffWKZ5kmKFhtpKUMsNpaANUqKaFJuwoCm/ab4smkUmNFlWrVhDp+ooYpQFm4b7sdkaQe2W2tA1bKl+ZrqXEIWg1SoKUDupcYTjR0n1oQov5mpSgNoTclKSBwAoIomgpCn4t/kiVq15Q8TwpZgKHDUBeIApFtClqLDWhHGK7518wtSDKZRBtPrTUpGKU5E7K+mHDW9UTpEg9NqFooADaT761GiU9xvJ2VhHJqcfm33JiYX1jrhJKjhupuApZGyCKvJcuxp/UHSoq8F+0d3NdGPXEOXKoCa3p37uhgNxyvL3bb8t5zwEAuoViknsu9ie2KtopIc5lpLqSblpv8AEnEXZ7IbS47Imyv6jBOOJTQ48sRNag9LK8V4zrhTafYINDrM0glF9fmQcruXuhWn8jpo9VLoCMa0sKuoofCTxvgdbVk5/p+piIJLSupJ8CqlpWSFZgmDGHRMIIUAlxs2TXbkTwHLBd66hoCqSfmHzDl204YRnqkPi0BRQ+YZwWpnYKEUuzIyHtMDLqy4HE7aHeM4TQyIsFF9TTnjoacpcrkgxQFyhelYqNg2juiBFUqpl0v4mCkI4kKHzmp34ckFMPKRn6OmyIHcdnTpWNJ6bt/EwwCpV7qpynuu3EccKwRMICibhUdL9+yGpxRQpKhkR3Q4uLJKVDBaK+m7shpgCTLQWgjmiKXcILajeU+BW9JwJ7IIUcYC+Vwp+LDKhyrEvuPoOJmFUZNce0GhPCnLD/KvhxSD8rjSgptWdaHPbs3xUUu1U2mourhXbn7IdJaZKV1wvh0ppomSLqrV2ZsNBVsLbB6wFRXbrh/9E3b4d/LepvToW00epZYCiVOE2RS4lIxvtUpFHbcCZlRpVMw0bz7qm/Eo14dsPWiTjUwEpaqPqhPgF16q3GviUdnfHE90OTLusGeVXkefzJcCikdYlZFRUDhFK8vf/oMW/wDMRHVpl0AKFlq8K+YG69W8xVfLyfrEx1LLF/IeNQvUIBsGDp0/WERWhsim6B6jt+Y8ypLcjLg0Spbjqt5QEpT+0qE6ecofb6OYxdvzLUoTUljQMrO6pXQ+zkhPVLrvPT22eWGng0Stm1KJ6YU27h2xm16b7/3jv+ERGVd+7ptN8crmD/HNR9kFlI2ttLgNRz5cdp3QGuXcYVabURTKt4474LS4M6jj28Y3ZtDw07acdphVYAyZgTSShYsuZZVIz47YmZX9RKzivwODatOB3RA8wFm7wLF49BO2Ig6b6iigUlQO0Z/vQspjpDwlVrO8Z5/xMZdQFgkYm6g2jLgIG66iq7b68c/REyF139MOO2KtMRyV8aVtE3i9NezvjC02VjLp2mND6byVj9N5psOAgiZQFX4Z/r3QUDA5m5QNwqBHWlV6bc+JjkyPpoOYuPbeYiZVQwm6YEzybuBpw3cdsFNKtspwqk8m3gMohNFDpzcdsaYVZqNvLw3CGJkihUZ+0DZxOcAzAosH+B/QQfl7fb35QJNJurTps9MElgoEbV9Yk5HKDWVmARctXd2QS0q/oem+JjgGWTT19YkooCqwqzhcpSaX9M4etAl0NWOqJaLBLhUCLCSkUtUOdTdFVk3rChfS/p03w+NTHq6lFNyHEE1FVE1vVdlSMvZi/wBZrQzn08Dx5tdem2kWng7RJK11+agraUdtcoY/L/8AOVDpMfXklhJKwUpGF9CKmsN+iNKZmloUKEUqIfC26sjqOU6Ku3xB1adpgubALt8QWW9pjV1YPUk/M1X+5kxmGF5bXKeyE6Vu6bO3khQvzNunZM5GXXyOH0wnisadKfwPJB0RqjgPTZd7B2x7A4d3YPbHDXpzkdgjfziud9eOZ9kAzNLWz0n9IjtPMqqg7f4mJL+HoyESBSVXKF+3fs4CAZF6224AHUlByUnLeREEwnw2wQql1pOaf8t8GmUDmFFdMYj9QUmpQaHNBzGzjCaYWiC34UHdBDa+PTLjtgImyCjNKyN8TtquHTuhXQ9Qwqz/AIfwEFJNtCc7qcaemAUqqOnNwETsrus8vo45botMlo4+kFtWNx6KMAoND06cIPdvChdeOUZ8NkNlb4mQ0HJXTphuG85mNWhl0/xG6BUq6ewemJUq6ez0w0xPAWlddvs/hHHU2m1cK/qe0xClXDmu/gInQbV232wxjUo0WrLpnBEuhbykoaQpa1fKlAKlHgACYu35eeWZbUnn5+caQ6004G2WnB9NSx86lpOIANL7qmFC0Py9pshqc9PS8uhoOFtCA2kBLZQKudV8Ns2agXeEjOMJcyizp4/UnyRUtExE0JeZWpDqFtrSaKSsEKSd6TDrLOomEdS5gSCFfCrb35j4RFl83Sc15o8xuS2mS4eXLMoQ65aSgFV6vGtRCbgpKRmKkRUH5Sa0yaclpppTTzSrKkq2n/IXUIvtDBNI0hNTjT6mHNxPjk1+ST1LTKPTQShLaWkJvR4/eN1Dj4qilIJkNKnG31POJSSuqjZhnkZta0ixRTiR4AqlCOHH5Ysklra7YYcSlLqfmpenD5U79sRGH1TdnNJPdYDO1DioErDhM1eeUoCt8R9Uv4I0chM5+aLZC9OdyIeTXeCg05YTk49L+grzQrf5lyZf0YPgXyz6VHchfgP/ANFPNCSVqAYaeDZHunf/ABPJGQCneOnaY3Tpvw9JjtP0HddzCpgGdAtjf7cz3R0JBxH8NvExxKacOWmXPEwTXj7fQIYHENkHwmmH6CCk+MUXQnbgd57sIiSkDpzq74lR6P0ENAAapKhKQ8mpvAV7CeGEAoN3TmEWBSA6hSDeFAg9OMV6wWllChekkHu9kRNUNMICunTKJEuU6csC2qdOzdGg5CsGg8qqAenQQ2LNFmDWVWhToIBd+Y8TDk9ARIk9B2CN26dKc26I0ZdObdHlHp0whDJ0udOmEEMr8QptwhvCoMkCVzMugAkqdQBTPxC72wm6scVckLj5a05Gm6Ey3YqtTYNcy46bR5iaDhD/ADM0zomkuvLIDbDKlqJxNBUniTDU0pKUtM1JBqrYaAwP5ilhqkvL6UFqSmZmG1OGtbMuwoOOHbeE0GVSI47zb6nqU1BJdDPkORdldLe1KZZo9qLy5o7UtqJKAa4YqVXYRshNPOOoq1DV35kNLSyo2GFqSQlxtnw1QqlCm1Uk8IWaafbQyzLNEhLpSygJyTZvsj/BAJ4CKl+ZqpX8Jk5VpIUsTCeqSkXoQlCqhIGAvCeaNeKf7/Jlzce7ga025E4kn1pUCK81b+GJUeZMWXS2UKdLyBf8yhW4K2d+MVJCm2iApV9bNLVDylN3ffth50vVW2ZgJtKTlZcutJ/wKilNOFY65U4+Ty34LLNkSqy6DcsC7eYF/EOEYmJtE4p1twi4gpAGCRdAvq8rtMcbu9SJLe7SFH1qT/ENOnJWleuYdQPtFJsnuVSPnxlRSpTasQSR3YiPpBfsV+1Hzcf/ANS+LkdJqTj082fIOWNp39+74vRGMjwV+zEg979/tiwNDmNeX9BEiSOTvp6TEfvH7R/ZjQz/AHYAJbQ6bdnARpKxt6ZnviHZxMaTiPsRQBiCFDDZ3bB3CGbV2ureDowdHKn04w8NZ/bH7MNuufJL/v8AZEz0BajRajNsgxzZGTjGNlhku9RQrtjL1y1ce2ImcRxiWZ+dfd2RXQRtLTiUBZQoIVgog0PfnuiNR6dOgh1f/trHGGpWPPDA4IsPk6U9b1lkn5WEl5XdcBuvvivpi2eQP7nM/wD8p/aERyfizTgzyRFUm9U0fT1/WmUhaRQISStY/dTa5aQxTfnWWbm1PykutxQYLSVuLCAKqCqlIteAkCtSmtBQiK95k/ubsM+Tv/EO1MZ+vxxlrk6fa5p8d7XQ9zXnHU312uuDJAVZ6tNm4ihob1YEitwxBxMMrmqOKPiWupztE2u0cbNYGc93/iX2wKcWfsmOr64w0VHC+SfJ+UmwtyeDgo4Arfj3ppa5K03QC8Qq6pUgXi14rFc0nEdxUk5mOJ+6+yuMH5R/xDtgZKLC0pxbDDxWm8dUs0pUA0rS85C8RL9P/sTyxA1/b2vte0RHHFy/nIy0b+T/2Q==";
+  var MAIN_CODE = "et";
+
+  var ui, logSteps = [], logTitle = "", openReq = -1;
+  function freshUi() { return { lang: ui ? ui.lang : "et", route: "list", lecturerId: null, list: [], profile: null, error: false }; }
+
+  function j(o) { return JSON.stringify(o, null, 2); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c]; }); }
+  function lect(id) { return DATA.lecturers.filter(function (l) { return l.id === id; })[0]; }
+  function tr(l) { return l.tr[ui.lang] || l.tr[MAIN_CODE]; }
+
+  /* ---------- Simuleeritud backend ---------- */
+  function summariesDto() {
+    return DATA.lecturers.filter(function (l) { return l.status === "A"; }).sort(function (a, b) { return a.name.localeCompare(b.name, "et"); })
+      .map(function (l) { var t = tr(l); return { lecturerId: l.id, fullName: l.name, title: t.title, shortDescription: t.shortDescription, photoVersion: l.photoVersion }; });
+  }
+  function profileDto(id) {
+    var l = lect(id), t = tr(l);
+    var trainings = DATA.trainings.filter(function (x) { return x.lects.indexOf(id) !== -1 && x.status === "P"; /* training_lecturer */ }).map(function (x) {
+      var xt = x.tr[ui.lang] || x.tr[MAIN_CODE];
+      return { trainingId: x.id, trainingTranslationId: xt.id, title: xt.title };
+    }).sort(function (a, b) { return a.title.localeCompare(b.title, ui.lang); });
+    return { lecturerId: l.id, fullName: l.name, title: t.title, shortDescription: t.shortDescription, description: t.description, photoVersion: l.photoVersion, trainings: trainings };
+  }
+
+  /* ---------- Päringute logi ---------- */
+  function call(method, path, req, res) { logSteps.push({ method: method, path: path, req: req, res: res }); }
+  function startStep(title) { logSteps = []; logTitle = title; openReq = -1; }
+  var PHOTO_RES = "image/jpeg, 7 471 baiti (binaarne). Cache-Control: public, max-age=31536000, immutable";
+  function photoCalls(items) {
+    items.forEach(function (x) { if (x.photoVersion) call("GET", "/api/lecturer/" + x.lecturerId + "/photo?v=" + x.photoVersion, null, PHOTO_RES); });
+  }
+
+  /* ---------- Navigeerimine ---------- */
+  function openList(title) {
+    ui.route = "list"; ui.lecturerId = null; ui.error = false;
+    if (title) startStep(title);
+    ui.list = summariesDto();
+    call("GET", "/api/lecturer-summaries?contentLang=" + ui.lang, null, ui.list);
+    photoCalls(ui.list);
+    renderAll();
+  }
+  function openProfile(id, title) {
+    ui.route = "detail"; ui.lecturerId = id;
+    startStep(title);
+    var l = lect(id);
+    if (!l || l.status !== "A") {
+      ui.error = true; ui.profile = null;
+      call("GET", "/api/lecturer-profile/" + id + "?contentLang=" + ui.lang, null, { status: 404, message: "Ei leidnud primary keyd 'lecturerId' väärtusega: " + id, errorCode: "PRIMARY_KEY_NOT_FOUND" });
+      logTitle += " → 404 → NavigationService.navigateToErrorView()";
+    } else {
+      ui.error = false;
+      ui.profile = profileDto(id);
+      call("GET", "/api/lecturer-profile/" + id + "?contentLang=" + ui.lang, null, ui.profile);
+      photoCalls([ui.profile]);
+    }
+    renderAll();
+  }
+  function openView() { ui = freshUi(); startStep("Vaate avamine: navbar „Meie koolitajad“ (/lecturers)"); openList(); }
+
+  function switchLang(code) {
+    if (code === ui.lang) return;
+    ui.lang = code;
+    if (ui.route === "list") openList("Keele vahetus navbaris → " + code + " (nimekiri uuesti)");
+    else openProfile(ui.lecturerId, "Keele vahetus navbaris → " + code + " (profiil uuesti)");
+    toast("Pildipäringud tulevad brauseri vahemälust (sama v=)");
+  }
+
+  /* ---------- Teade ---------- */
+  var toastTimer = null;
+  function toast(msg) {
+    var old = document.querySelector(".toast"); if (old) old.remove();
+    var el = document.createElement("div"); el.className = "toast"; el.setAttribute("role", "status"); el.textContent = msg;
+    document.body.appendChild(el);
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { el.remove(); }, 2400);
+  }
+
+  /* ---------- Renderdamine ---------- */
+  var SILHOUETTE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><circle cx="12" cy="9" r="4"/><path d="M4 21c1.5-4 4.6-6 8-6s6.5 2 8 6"/></svg>';
+  function pin(noteId, label) { return '<button type="button" class="api-pin" data-note="' + noteId + '">' + esc(label) + '</button>'; }
+  // LecturerAvatar.vue: photoVersion ≠ null → <img src="/api/lecturer/{id}/photo?v=…">, muidu kohatäide
+  function pic(id, photoVersion, name) {
+    return photoVersion ? '<img class="pic" alt="' + esc(name) + '" src="data:image/jpeg;base64,' + RAIN_PHOTO + '" title="/api/lecturer/' + id + '/photo?v=' + photoVersion + '">'
+      : '<span class="pic ph" role="img" aria-label="Pilt puudub">' + SILHOUETTE + '</span>';
+  }
+  function renderList() {
+    var tiles = ui.list.length ? '<div class="tiles">' + ui.list.map(function (l) {
+      return '<button type="button" class="tile" data-lecturer="' + l.lecturerId + '">' + pic(l.lecturerId, l.photoVersion, l.fullName) +
+        '<span class="nm">' + esc(l.fullName) + '</span><span class="tt">' + esc(l.title) + '</span><span class="sd">' + esc(l.shortDescription) + '</span></button>';
+    }).join("") + '</div>' : '<p class="hint">Koolitajaid pole veel lisatud.</p>';
+    return '<div class="viewhead"><h2>Meie koolitajad</h2></div>' +
+      '<p class="intro-text">BCS Koolituse lektorid ja konsultandid.</p>' +
+      '<div class="pins">' + pin("n-summaries", "GET /api/lecturer-summaries") + pin("n-photo", "GET /api/lecturer/{id}/photo") + '<span class="hint">Kogu kaart on link; pildita koolitajal kohatäide. Lühikirjeldus on kaardil kuni 3 rida.</span></div>' + tiles;
+  }
+  function renderProfile() {
+    if (ui.error) return '<div class="errview"><strong>Viga</strong><span>Lehte ei leitud (üldine veavaade).</span><button type="button" class="linkish" id="b-back">← Kõik koolitajad</button></div>';
+    var p = ui.profile;
+    var trainings = p.trainings.length ? '<section class="trainings"><h3>Koolitused</h3><ul>' + p.trainings.map(function (t) {
+      return '<li><button type="button" class="linkish" data-training="' + t.trainingId + '" data-tr="' + t.trainingTranslationId + '">' + esc(t.title) + '</button></li>';
+    }).join("") + '</ul></section>' : "";
+    return '<div><button type="button" class="linkish" id="b-back">← Kõik koolitajad</button></div>' +
+      '<div class="pins">' + pin("n-profile", "GET /api/lecturer-profile/{lecturerId}") + (p.photoVersion ? pin("n-photo", "GET /api/lecturer/{id}/photo") : "") + '</div>' +
+      '<div class="profile">' + pic(p.lecturerId, p.photoVersion, p.fullName) +
+      '<div><h2>' + esc(p.fullName) + '</h2><div class="tt">' + esc(p.title) + '</div><p class="lead">' + esc(p.shortDescription) + '</p>' +
+      '<div class="rich" title="RichTextContent.vue">' + p.description + '</div></div></div>' + trainings;
+  }
+  function renderView() { document.getElementById("view").innerHTML = ui.route === "list" ? renderList() : renderProfile(); }
+  function renderKv() {
+    var rows = [["route", ui.route === "list" ? "LecturersView" : "LecturerView"], ["contentLang", ui.lang]];
+    if (ui.route === "list") rows.push(["lecturers.length", String(ui.list.length)]);
+    else rows.push(["lecturerId", String(ui.lecturerId)], ["trainings.length", ui.profile ? String(ui.profile.trainings.length) : "—"]);
+    document.getElementById("statekv").innerHTML = rows.map(function (r) { return "<dt>" + esc(r[0]) + "</dt><dd>" + esc(r[1]) + "</dd>"; }).join("");
+  }
+  function noteFor(method, path) {
+    var p = path.split("?")[0];
+    if (p === "/api/lecturer-summaries") return "n-summaries";
+    if (/\/photo$/.test(p)) return "n-photo";
+    if (/^\/api\/lecturer-profile\//.test(p)) return "n-profile";
+    return null;
+  }
+  var REQUESTS = [
+    { m: "GET", p: "/api/lecturer-summaries?contentLang={UI keel}", note: "n-summaries", when: "nimekiri (ka keele vahetusel)" },
+    { m: "GET", p: "/api/lecturer-profile/{lecturerId}?contentLang={UI keel}", note: "n-profile", when: "detailvaade (ka keele vahetusel)" },
+    { m: "GET", p: "/api/lecturer/{lecturerId}/photo?v={photoVersion}", note: "n-photo", when: "<img src>, ainult photoVersion ≠ null; brauseri vahemälu" }
+  ];
+  function renderLog() {
+    var used = {};
+    function row(d) {
+      var idx = -1;
+      logSteps.forEach(function (r, i) { if (idx === -1 && !used[i] && noteFor(r.method, r.path) === d.note) idx = i; });
+      if (idx !== -1) used[idx] = true;
+      return item(d.m, d.p, d.when, d.note, idx);
+    }
+    function item(m, p, when, note, idx) {
+      var ran = idx !== -1, open = ran && idx === openReq, body = "";
+      if (open) {
+        var r = logSteps[idx];
+        body = '<div class="body"><span class="sub">Tegelik päring: <code>' + esc(r.method + " " + r.path) + '</code></span>' +
+          '<span class="sub">Response</span><pre>' + esc(typeof r.res === "string" ? r.res : j(r.res)) + '</pre>' +
+          '<button type="button" class="linkish" data-note="' + note + '">Ava API märge</button></div>';
+      }
+      var attr = ran ? 'data-req="' + idx + '" aria-expanded="' + open + '"' : 'data-note="' + note + '" title="Ava API märge"';
+      return '<div class="req ' + (ran ? "done" : "idle") + '"><button type="button" ' + attr + '><span class="method m-' + m + '">' + m + '</span><span class="main"><span class="path">' + esc(p) + '</span><span class="when">' + esc(when) + '</span></span>' + (ran ? '<span class="ran">käivitati</span>' : "") + '</button>' + body + '</div>';
+    }
+    var html = '<div class="log-group">Päringud</div>' + REQUESTS.map(row).join("");
+    var extra = [];
+    logSteps.forEach(function (r, i) { if (!used[i]) extra.push(item(r.method, r.path, "sama sammu teine päring", noteFor(r.method, r.path), i)); });
+    if (extra.length) html += '<div class="log-group">Lisaks</div>' + extra.join("");
+    if (logTitle) html += '<div class="log-step">Viimane samm: ' + esc(logTitle) + '. Rohelised päringud käivitati; klõpsa, et näha vastust.</div>';
+    document.getElementById("log").innerHTML = html;
+  }
+  function url() { return "https://bcskoolitus.ee" + (ui.route === "list" ? "/lecturers" : "/lecturer?lecturerId=" + ui.lecturerId); }
+  function renderAll() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-ui-lang]"), function (b) { b.setAttribute("aria-pressed", String(b.dataset.uiLang === ui.lang)); });
+    document.getElementById("urlbar").textContent = url();
+    document.getElementById("nav-lecturers").className = "navlink cur";
+    renderView(); renderKv(); renderLog();
+    var vn = VIEW_NOTES[ui.route];
+    document.getElementById("view-note-title").textContent = "Vaate märkmed — " + vn.title;
+    document.getElementById("view-note-text").textContent = vn.text;
+  }
+
+  /* ---------- Sündmused ---------- */
+  document.getElementById("view").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.note) { goNote(b.dataset.note); return; }
+    if (b.dataset.lecturer) { var l = lect(+b.dataset.lecturer); openProfile(l.id, "Klõps kaardil (" + l.name + ") → /lecturer?lecturerId=" + l.id); return; }
+    if (b.dataset.training) { goRoute("/training?trainingId=" + b.dataset.training + "&trainingTranslationId=" + b.dataset.tr); return; }
+    if (b.id === "b-back") openList("„← Kõik koolitajad“ → /lecturers");
+  });
+  document.querySelector(".sitenav").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-nav]"); if (!b) return;
+    if (b.dataset.nav === "/lecturers") openList("Navbar „Meie koolitajad“ → /lecturers");
+    else if (b.dataset.nav === "#") toast("Link on veel kohatäide (href=\"#\")"); else goRoute(b.dataset.nav);
+  });
+  document.getElementById("log").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.note) { goNote(b.dataset.note); return; }
+    var i = +b.dataset.req; openReq = openReq === i ? -1 : i; renderLog();
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-ui-lang]"), function (b) { b.onclick = function () { switchLang(b.dataset.uiLang); }; });
+  document.getElementById("btn-deleted").onclick = function () { openProfile(4, "Kustutatud koolitaja /lecturer?lecturerId=4"); };
+  document.getElementById("btn-reset").onclick = function () { ui = null; openView(); };
+
+  function goNote(id) {
+    var n = document.getElementById(id); if (!n) return;
+    n.scrollIntoView({ behavior: "smooth", block: "center" });
+    n.classList.remove("flash"); void n.offsetWidth; n.classList.add("flash");
+  }
+
+  document.getElementById("notes-count").textContent = NOTES.length;
+  document.getElementById("notes").innerHTML = NOTES.map(function (n) {
+    return '<article class="note" id="' + n.id + '"><div class="note-head"><strong>' + esc(n.title) + '</strong>' + (n.draft ? '<span class="draft-tag">ettepanek</span>' : "") + '<button class="copy" type="button" data-copy="' + n.id + '">Kopeeri</button></div><pre>' + esc(n.text) + '</pre></article>';
+  }).join("");
+
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-copy]"); if (!b) return;
+    var key = b.dataset.copy;
+    var text = key === "view" ? document.getElementById("view-note-text").textContent : NOTES.filter(function (n) { return n.id === key; })[0].text;
+    var done = function () { b.textContent = "Kopeeritud"; setTimeout(function () { b.textContent = "Kopeeri"; }, 1400); };
+    try { navigator.clipboard.writeText(text).then(done, function () { selectPre(b); }); } catch (err) { selectPre(b); }
+  });
+  function selectPre(b) {
+    var pre = b.closest(".note").querySelector("pre");
+    var r = document.createRange(); r.selectNodeContents(pre);
+    var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+    b.textContent = "Vajuta Ctrl+C";
+  }
+
+  // Käivitusparameetrid (kest): lecturerId → detailvaade
+  (function () {
+    openView();
+    var lid = +SHELL_Q.get("lecturerId");
+    if (lid) openProfile(lid, "Vaate avamine: /lecturer?lecturerId=" + lid);
+  })();
+})();
+</script>

@@ -21,14 +21,16 @@ public class NlToSqlService {
             category_translation(id INTEGER PK, category_id INTEGER, language_id INTEGER, name TEXT)
             location(id INTEGER PK, name TEXT, address TEXT, is_online BOOLEAN)
             room(id INTEGER PK, name TEXT, status TEXT)
-            lecturer(id INTEGER PK, full_name TEXT)
-            lecturer_translation(id INTEGER PK, lecturer_id INTEGER, language_id INTEGER, bio TEXT)
+            lecturer(id INTEGER PK, full_name TEXT, status TEXT)
+            lecturer_translation(id INTEGER PK, lecturer_id INTEGER, language_id INTEGER, title TEXT, short_description TEXT, description TEXT)
             funding_type(id INTEGER PK, code TEXT)
             funding_type_translation(id INTEGER PK, funding_type_id INTEGER, language_id INTEGER, name TEXT)
-            training(id INTEGER PK, default_lecturer_id INTEGER, category_id INTEGER, training_language_id INTEGER, location_id INTEGER, status TEXT, is_orderable BOOLEAN, is_promoted BOOLEAN)
+            training(id INTEGER PK, category_id INTEGER, training_language_id INTEGER, location_id INTEGER, status TEXT, is_orderable BOOLEAN, is_promoted BOOLEAN)
             training_translation(id INTEGER PK, training_id INTEGER, language_id INTEGER, title TEXT, short_description TEXT, description TEXT)
             training_funding_type(id INTEGER PK, training_id INTEGER, funding_type_id INTEGER)
-            course(id INTEGER PK, training_id INTEGER, lecturer_id INTEGER, room_id INTEGER, number_of_days INTEGER, number_of_academic_hours INTEGER, price NUMERIC, status TEXT, start_date DATE, end_date DATE)
+            training_lecturer(id INTEGER PK, training_id INTEGER, lecturer_id INTEGER, sort_order INTEGER)
+            course(id INTEGER PK, training_id INTEGER, room_id INTEGER, number_of_days INTEGER, number_of_academic_hours INTEGER, price NUMERIC, status TEXT, start_date DATE, end_date DATE)
+            course_lecturer(id INTEGER PK, course_id INTEGER, lecturer_id INTEGER, sort_order INTEGER)
             
             RULES:
             1. Generate only one SELECT statement. Never generate INSERT, UPDATE, DELETE, DROP, ALTER, TRUNCATE, CREATE, GRANT or any other statement that changes data or schema.
@@ -41,6 +43,7 @@ public class NlToSqlService {
             8. Inside a WITH clause, only allow SELECT statement. Never use INSERT, UPDATE, DELETE or MERGE in the query.
             9. Show only published trainings: always filter training.status = 'P'.
             10. Do not select training_translation.description unless explicitly asked.
+            11. Show only active lecturers: always filter lecturer.status = 'A'.
             """;
 
     private static final String SQL_USER_PROMPT_TEMPLATE = """

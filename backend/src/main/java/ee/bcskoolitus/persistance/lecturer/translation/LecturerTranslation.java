@@ -7,6 +7,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -33,9 +34,19 @@ public class LecturerTranslation {
     @JoinColumn(name = "language_id", nullable = false)
     private Language language;
 
+    @Size(max = 255)
     @NotNull
-    @Column(name = "bio", nullable = false, length = Integer.MAX_VALUE)
-    private String bio;
+    @Column(name = "title", nullable = false)
+    private String title;
+
+    @Size(max = 255)
+    @NotNull
+    @Column(name = "short_description", nullable = false)
+    private String shortDescription;
+
+    @NotNull
+    @Column(name = "description", nullable = false, length = Integer.MAX_VALUE)
+    private String description;
 
     @NotNull
     @CreatedDate

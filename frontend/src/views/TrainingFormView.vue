@@ -7,14 +7,12 @@ import LanguageService from '@/api-services/LanguageService.js'
 import CategoryService from '@/api-services/CategoryService.js'
 import FundingTypeService from '@/api-services/FundingTypeService.js'
 import LocationService from '@/api-services/LocationService.js'
-import LecturerService from '@/api-services/LecturerService.js'
 import NavigationService from '@/services/NavigationService.js'
 import SessionStorageService from '@/services/SessionStorageService.js'
 import InlineAlerts from '@/components/common/InlineAlerts.vue'
 import TranslationFlags from '@/components/common/TranslationFlags.vue'
 import TrainingDataForm from '@/components/forms/TrainingDataForm.vue'
 import TrainingTranslationForm from '@/components/forms/TrainingTranslationForm.vue'
-import LecturerSelectModal from '@/components/modals/LecturerSelectModal.vue'
 import ConfirmModal from '@/components/modals/ConfirmModal.vue'
 import TrainingStatusButton from '@/components/common/TrainingStatusButton.vue'
 
@@ -31,7 +29,6 @@ export default {
   components: {
     ConfirmModal,
     TrainingStatusButton,
-    LecturerSelectModal,
     TrainingTranslationForm,
     TrainingDataForm,
     TranslationFlags,
@@ -51,7 +48,6 @@ export default {
       categories: [],
       fundingTypes: [],
       locations: [],
-      lecturers: [],
       trainingTranslations: [],
 
       training: {
@@ -59,8 +55,7 @@ export default {
         categoryId: 0,
         trainingLanguageId: 0,
         locationId: 0,
-        defaultLecturerId: null,
-        defaultLecturerName: null,
+        lecturers: [],
         isOrderable: false,
         isPromoted: false,
         status: '',
@@ -84,7 +79,6 @@ export default {
         errorCode: '',
       },
 
-      isLecturerModalOpen: false,
       isAiConfirmModalOpen: false,
       isAiLoading: false,
     }
@@ -297,7 +291,7 @@ export default {
       if (this.errorMessageIsEmpty()) {
         TrainingService.sendPostTrainingRequest(this.createTrainingCreateRequest())
           .then((response) => this.handleAddTrainingResponse(response.data))
-          .catch(() => NavigationService.navigateToErrorView())
+          .catch((error) => this.handleSaveTrainingError(error))
       }
     },
 
@@ -307,7 +301,7 @@ export default {
         categoryId: this.training.categoryId,
         trainingLanguageId: this.training.trainingLanguageId,
         locationId: this.training.locationId,
-        defaultLecturerId: this.training.defaultLecturerId,
+        lecturerIds: this.getLecturerIds(),
         isOrderable: this.training.isOrderable,
         isPromoted: this.training.isPromoted,
         fundingTypeIds: this.training.fundingTypeIds,
@@ -337,7 +331,7 @@ export default {
       if (this.errorMessageIsEmpty()) {
         TrainingService.sendPutTrainingRequest(this.trainingId, this.createTrainingUpdateRequest())
           .then(() => this.handleUpdateTrainingResponse())
-          .catch(() => NavigationService.navigateToErrorView())
+          .catch((error) => this.handleSaveTrainingError(error))
       }
     },
 
@@ -346,7 +340,7 @@ export default {
         categoryId: this.training.categoryId,
         trainingLanguageId: this.training.trainingLanguageId,
         locationId: this.training.locationId,
-        defaultLecturerId: this.training.defaultLecturerId,
+        lecturerIds: this.getLecturerIds(),
         isOrderable: this.training.isOrderable,
         isPromoted: this.training.isPromoted,
         fundingTypeIds: this.training.fundingTypeIds,
@@ -360,6 +354,16 @@ export default {
     handleUpdateTrainingResponse() {
       this.successMessage = this.$t('trainingForm.messages.saved')
       this.savedTranslationTexts = this.getTranslationTexts()
+    },
+
+    // Vahepeal kustutatud koolitaja (404 'lecturerId') → backendi teade vormis, muu viga → veavaade
+    handleSaveTrainingError(error) {
+      this.errorResponse = error.response?.data ?? { message: '', errorCode: '' }
+      if (error.response?.status === 404 && this.errorResponse.message.includes("'lecturerId'")) {
+        this.errorMessage = this.errorResponse.message
+      } else {
+        NavigationService.navigateToErrorView()
+      }
     },
 
     // ---------- "Lisa tõlge" (new-translation) ----------
@@ -438,25 +442,6 @@ export default {
       this.getTraining()
     },
 
-    // ---------- Lektori valik ----------
-
-    openLecturerModal() {
-      this.isLecturerModalOpen = true
-      this.searchLecturers('')
-    },
-
-    searchLecturers(search) {
-      LecturerService.sendGetLecturersRequest(search)
-        .then((response) => (this.lecturers = response.data))
-        .catch(() => NavigationService.navigateToErrorView())
-    },
-
-    handleLecturerSelected(lecturer) {
-      this.training.defaultLecturerId = lecturer ? lecturer.lecturerId : null
-      this.training.defaultLecturerName = lecturer ? lecturer.lecturerName : null
-      this.isLecturerModalOpen = false
-    },
-
     // ---------- AI tõlge ----------
 
     handleAiTranslationClicked() {
@@ -517,6 +502,11 @@ export default {
 
     // ---------- Vormi väljad ----------
 
+    // Koolitajate järjekord = sort_order
+    getLecturerIds() {
+      return this.training.lecturers.map((lecturer) => lecturer.lecturerId)
+    },
+
     updateFundingTypeIds(updatedCheckbox) {
       const otherFundingTypeIds = this.training.fundingTypeIds.filter(
         (fundingTypeId) => fundingTypeId !== updatedCheckbox.fundingTypeId,
@@ -559,8 +549,7 @@ export default {
         categoryId: 0,
         trainingLanguageId: 0,
         locationId: 0,
-        defaultLecturerId: null,
-        defaultLecturerName: null,
+        lecturers: [],
         isOrderable: false,
         isPromoted: false,
         status: '',
@@ -587,6 +576,10 @@ export default {
 
     navigateToAdminTrainingsView() {
       NavigationService.navigateToAdminTrainingsView()
+    },
+
+    navigateToAdminTrainingCoursesView() {
+      NavigationService.navigateToAdminTrainingCoursesView(this.trainingId)
     },
 
     resetMessages() {
@@ -629,7 +622,7 @@ export default {
           </legend>
           <TranslationFlags
             :translation-languages="translationLanguages"
-            :training-translations="trainingTranslations"
+            :existing-translations="trainingTranslations"
             :current-language-code="translation.languageCode"
             @event-translation-flag-clicked="handleTranslationFlagClicked"
           />
@@ -645,7 +638,7 @@ export default {
           @event-new-category-selected="training.categoryId = $event"
           @event-new-training-language-selected="training.trainingLanguageId = $event"
           @event-new-location-selected="training.locationId = $event"
-          @event-select-lecturer-clicked="openLecturerModal"
+          @event-lecturers-changed="training.lecturers = $event"
           @event-funding-type-checkbox-updated="updateFundingTypeIds"
           @event-is-orderable-changed="training.isOrderable = $event"
           @event-is-promoted-changed="training.isPromoted = $event"
@@ -694,6 +687,14 @@ export default {
             {{ $t('trainingForm.buttons.view') }}
           </button>
           <button
+            v-if="!isNewTraining"
+            @click="navigateToAdminTrainingCoursesView"
+            class="btn btn-outline-secondary"
+            type="button"
+          >
+            {{ $t('trainingForm.buttons.calendar') }}
+          </button>
+          <button
             @click="navigateToAdminTrainingsView"
             class="btn btn-outline-secondary"
             type="button"
@@ -709,14 +710,6 @@ export default {
         </div>
       </div>
     </div>
-
-    <LecturerSelectModal
-      :is-open="isLecturerModalOpen"
-      :lecturers="lecturers"
-      @event-lecturer-search="searchLecturers"
-      @event-lecturer-selected="handleLecturerSelected"
-      @event-modal-closed="isLecturerModalOpen = false"
-    />
 
     <ConfirmModal
       :is-open="isAiConfirmModalOpen"

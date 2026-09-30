@@ -1,5 +1,7 @@
 package ee.bcskoolitus.persistance.course;
 
+import ee.bcskoolitus.persistance.room.Room;
+import ee.bcskoolitus.persistance.training.Training;
 import ee.bcskoolitus.persistance.user.User;
 import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -24,6 +26,16 @@ public class Course {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
+
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "training_id", nullable = false)
+    private Training training;
+
+    // null = ruum puudub (nt veebikoolitus)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "room_id")
+    private Room room;
 
     @NotNull
     @Column(name = "number_of_days", nullable = false)

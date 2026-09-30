@@ -6,6 +6,8 @@
 
 ![Mockup](../../mock-wireframe/pdf-images/TrainingFormView-state-new-training.png)
 
+> **Muudatus (koolitajate haldus, 2026-09-30):** `lecturerPhoto` eemaldatakse vastusest (pilt liigub tabelisse `lecturer_photo`, vt `lecturer-db-changes.md`) ja teenus tagastab ainult aktiivsed koolitajad (`lecturer.status = 'A'`, vt `lecturer-deleted-status.md`). Kasutajaliideses on termin nüüd "koolitaja" ("Vali koolitaja"). Allpool olev kirjeldus on algne, rakendatud seis.
+
 ## Sisend
 
 | Parameeter | Tüüp | Kirjeldus |
@@ -26,12 +28,12 @@ Otsing tehakse backendis: `full_name` peab otsingusõna **sisaldama**, tõstutun
 [
   {
     "lecturerId": 1,
-    "lecturerName": "Mari Tamm",
+    "lecturerName": "Rain Tüür",
     "lecturerPhoto": ""
   },
   {
     "lecturerId": 2,
-    "lecturerName": "Jaan Kask",
+    "lecturerName": "Merje Vaide",
     "lecturerPhoto": ""
   }
 ]
@@ -74,8 +76,8 @@ Näidisandmed (`docs/database/3_import.sql`):
 
 | id | full_name | photo |
 |---|---|---|
-| 1 | Mari Tamm | `''::bytea` (tühi) |
-| 2 | Jaan Kask | `''::bytea` (tühi) |
+| 1 | Rain Tüür | `''::bytea` (tühi) |
+| 2 | Merje Vaide | `''::bytea` (tühi) |
 
 ### lecturer_translation
 
@@ -107,7 +109,7 @@ Mockupi märkmetes on `Veateated: —`. `search` parameeter on valikuline String
 
 - [ ] Endpoint `GET /api/lecturers` on olemas ja tagastab `LecturerDto` listi
 - [ ] `search` parameter on valikuline; puuduva/tühja `search` korral tagastatakse kõik lektorid
-- [ ] Otsing `full_name` järgi on tõstutundetu ja "sisaldab" tüüpi (nt `Tam` leiab "Mari Tamm")
+- [ ] Otsing `full_name` järgi on tõstutundetu ja "sisaldab" tüüpi (nt `Tam` leiab "Rain Tüür")
 - [ ] Otsingule mittevastav sisend tagastab tühja listi, mitte viga
 - [ ] Tulemus on sorteeritud `full_name` järgi tähestikuliselt
 - [ ] `lecturerPhoto` on `lecturer.photo` Base64 kujul (praeguste näidisandmetega tühi string); `StringBytesConverter`-it ei kasutata

@@ -74,8 +74,13 @@ TrainingDto.java
   "categoryId": 1,
   "trainingLanguageId": 1,
   "locationId": 1,
-  "defaultLecturerId": 1,
-  "defaultLecturerName": "Mari Tamm",
+  "lecturers": [
+    {
+      "lecturerId": 1,
+      "lecturerName": "Rain Tüür"
+    },
+    ...
+  ],
   "isOrderable": true,
   "isPromoted": true,
   "status": "P",
@@ -86,7 +91,7 @@ TrainingDto.java
 }
 
 API teenuse lisainfo:
-Koolituse väljad ilma tõlketa. defaultLecturerId ja defaultLecturerName võivad olla null. status: "U" = mustand (unpublished), "P" = publitseeritud. Kustutatud koolitus (status "D") on nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.
+Koolituse väljad ilma tõlketa. lecturers = koolituse koolitajad (tabel training_lecturer) sort_order järjekorras; tühi list, kui koolitajaid pole. Kustutatud koolitaja jääb seotuks ja on nimekirjas edasi. status: "U" = mustand (unpublished), "P" = publitseeritud. Kustutatud koolitus (status "D") on nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.
 
 Veateated:
 HTTP: 404
@@ -200,21 +205,20 @@ Veateated: —
 API: GET /api/lecturers
 
 Query parameetrid:
-search: String — otsingusõna lektori nimest, tühi = kõik
+search: String — otsingusõna koolitaja nimest, tühi = kõik
 
 Response (200):
 LecturerDto.java
 [
   {
     "lecturerId": 1,
-    "lecturerName": "Mari Tamm",
-    "lecturerPhoto": "BASE64-image-data"
+    "lecturerName": "Rain Tüür"
   },
   ...
 ]
 
 API teenuse lisainfo:
-Tagastab lektorid, kelle nimi (lecturer.full_name) sisaldab otsingusõna, tõstutundetult. Kasutatakse "Vali lektor" modalis.
+Tagastab aktiivsed koolitajad, kelle nimi (lecturer.full_name) sisaldab otsingusõna, tõstutundetult. Kasutatakse "Vali koolitaja" modalis; juba valitud koolitajad jätab frontend nimekirjast välja.
 
 Veateated: —
 ```
@@ -230,7 +234,10 @@ TrainingUpdateRequestDto.java
   "categoryId": 1,
   "trainingLanguageId": 1,
   "locationId": 1,
-  "defaultLecturerId": 1,
+  "lecturerIds": [
+    1,
+    ...
+  ],
   "isOrderable": true,
   "isPromoted": true,
   "fundingTypeIds": [
@@ -246,7 +253,7 @@ TrainingUpdateRequestDto.java
 Response (200): NONE
 
 API teenuse lisainfo:
-Salvestab koolituse väljad ja trainingTranslationId tõlke ühes transaktsioonis. training_funding_type read kirjutatakse fundingTypeIds järgi üle. Kustutatud koolitus (status "D") on nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.
+Salvestab koolituse väljad ja trainingTranslationId tõlke ühes transaktsioonis. training_funding_type read kirjutatakse fundingTypeIds järgi üle, training_lecturer read lecturerIds järgi (lecturerIds = koolitajate ID-d kuvamise järjekorras (sort_order = positsioon 1, 2, …), võib olla tühi list; backend kirjutab training_lecturer read üle. Uus ID peab olema aktiivne koolitaja; juba seotud kustutatud koolitaja võib jääda.) Kustutatud koolitus (status "D") on nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.
 
 Veateated:
 HTTP: 404

@@ -28,9 +28,10 @@ public class Lecturer {
     @Column(name = "full_name", nullable = false)
     private String fullName;
 
+    @Size(max = 1)
     @NotNull
-    @Column(name = "photo", nullable = false)
-    private byte[] photo;
+    @Column(name = "status", nullable = false, length = 1)
+    private String status;
 
     @NotNull
     @CreatedDate

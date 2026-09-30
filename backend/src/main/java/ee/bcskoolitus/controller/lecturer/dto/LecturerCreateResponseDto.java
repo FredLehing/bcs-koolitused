@@ -4,13 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class LecturerDto implements Serializable {
+public class LecturerCreateResponseDto {
+
     private Integer lecturerId;
-    private String lecturerName;
-    private String lecturerPhoto;
+    private Integer lecturerTranslationId;
 }

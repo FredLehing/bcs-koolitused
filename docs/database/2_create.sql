@@ -42,7 +42,6 @@ CREATE TABLE course
 (
     id                       serial        NOT NULL,
     training_id              int           NOT NULL,
-    lecturer_id              int           NULL,
     room_id                  int           NULL,
     number_of_days           int           NOT NULL,
     number_of_academic_hours int           NOT NULL,
@@ -56,6 +55,17 @@ CREATE TABLE course
     updated_at               timestamp     NOT NULL,
     created_by               int           NOT NULL,
     CONSTRAINT course_session_pk PRIMARY KEY (id)
+);
+
+-- Table: course_lecturer (toimumiskorra koolitajad; sort_order = kuvamise järjekord, 1 = esimene)
+CREATE TABLE course_lecturer
+(
+    id          serial NOT NULL,
+    course_id   int    NOT NULL,
+    lecturer_id int    NOT NULL,
+    sort_order  int    NOT NULL,
+    CONSTRAINT course_lecturer_pk PRIMARY KEY (id),
+    CONSTRAINT course_lecturer_uq UNIQUE (course_id, lecturer_id)
 );
 
 -- Table: course_participant
@@ -141,7 +151,7 @@ CREATE TABLE lecturer
 (
     id         serial       NOT NULL,
     full_name  varchar(255) NOT NULL,
-    photo      bytea        NOT NULL,
+    status     varchar(1)   NOT NULL,
     created_at timestamp    NOT NULL,
     updated_at timestamp    NOT NULL,
     created_by int          NOT NULL,
@@ -151,14 +161,29 @@ CREATE TABLE lecturer
 -- Table: lecturer_translation
 CREATE TABLE lecturer_translation
 (
-    id          serial    NOT NULL,
-    lecturer_id int       NOT NULL,
-    language_id int       NOT NULL,
-    bio         text      NOT NULL,
-    created_at  timestamp NOT NULL,
-    updated_at  timestamp NOT NULL,
+    id                serial       NOT NULL,
+    lecturer_id       int          NOT NULL,
+    language_id       int          NOT NULL,
+    title             varchar(255) NOT NULL,
+    short_description varchar(255) NOT NULL,
+    description       text         NOT NULL,
+    created_at        timestamp    NOT NULL,
+    updated_at        timestamp    NOT NULL,
     CONSTRAINT lecturer_translation_pk PRIMARY KEY (id),
     CONSTRAINT lecturer_translation_uq UNIQUE (lecturer_id, language_id)
+);
+
+-- Table: lecturer_photo (1:1 lecturer'iga; rida puudub = pilti pole)
+CREATE TABLE lecturer_photo
+(
+    id           serial      NOT NULL,
+    lecturer_id  int         NOT NULL,
+    photo        bytea       NOT NULL,
+    content_type varchar(50) NOT NULL,
+    created_at   timestamp   NOT NULL,
+    updated_at   timestamp   NOT NULL,
+    CONSTRAINT lecturer_photo_pk PRIMARY KEY (id),
+    CONSTRAINT lecturer_photo_uq UNIQUE (lecturer_id)
 );
 
 -- Table: location
@@ -264,7 +289,6 @@ CREATE TABLE training
 (
     id                   serial    NOT NULL,
     user_id              int       NOT NULL,
-    default_lecturer_id  int       NULL,
     category_id          int       NOT NULL,
     training_language_id int       NOT NULL,
     location_id          int       NOT NULL,
@@ -284,6 +308,17 @@ CREATE TABLE training_funding_type
     funding_type_id int    NOT NULL,
     CONSTRAINT training_funding_type_pk PRIMARY KEY (id),
     CONSTRAINT training_funding_type_uq UNIQUE (training_id, funding_type_id)
+);
+
+-- Table: training_lecturer (koolituse koolitajad; sort_order = kuvamise järjekord, 1 = esimene)
+CREATE TABLE training_lecturer
+(
+    id          serial NOT NULL,
+    training_id int    NOT NULL,
+    lecturer_id int    NOT NULL,
+    sort_order  int    NOT NULL,
+    CONSTRAINT training_lecturer_pk PRIMARY KEY (id),
+    CONSTRAINT training_lecturer_uq UNIQUE (training_id, lecturer_id)
 );
 
 -- Table: training_translation
@@ -424,6 +459,24 @@ ALTER TABLE training
                 INITIALLY IMMEDIATE
 ;
 
+-- Reference: course_lecturer_course (table: course_lecturer)
+ALTER TABLE course_lecturer
+    ADD CONSTRAINT course_lecturer_course
+        FOREIGN KEY (course_id)
+            REFERENCES course (id)
+            NOT DEFERRABLE
+                INITIALLY IMMEDIATE
+;
+
+-- Reference: course_lecturer_lecturer (table: course_lecturer)
+ALTER TABLE course_lecturer
+    ADD CONSTRAINT course_lecturer_lecturer
+        FOREIGN KEY (lecturer_id)
+            REFERENCES lecturer (id)
+            NOT DEFERRABLE
+                INITIALLY IMMEDIATE
+;
+
 -- Reference: course_participant_course (table: course_participant)
 ALTER TABLE course_participant
     ADD CONSTRAINT course_participant_course
@@ -456,15 +509,6 @@ ALTER TABLE course
     ADD CONSTRAINT course_session_training
         FOREIGN KEY (training_id)
             REFERENCES training (id)
-            NOT DEFERRABLE
-                INITIALLY IMMEDIATE
-;
-
--- Reference: course_timetable_lecturer (table: course)
-ALTER TABLE course
-    ADD CONSTRAINT course_timetable_lecturer
-        FOREIGN KEY (lecturer_id)
-            REFERENCES lecturer (id)
             NOT DEFERRABLE
                 INITIALLY IMMEDIATE
 ;
@@ -519,6 +563,15 @@ ALTER TABLE lecturer
     ADD CONSTRAINT lecturer_created_by
         FOREIGN KEY (created_by)
             REFERENCES "user" (id)
+            NOT DEFERRABLE
+                INITIALLY IMMEDIATE
+;
+
+-- Reference: lecturer_photo_lecturer (table: lecturer_photo)
+ALTER TABLE lecturer_photo
+    ADD CONSTRAINT lecturer_photo_lecturer
+        FOREIGN KEY (lecturer_id)
+            REFERENCES lecturer (id)
             NOT DEFERRABLE
                 INITIALLY IMMEDIATE
 ;
@@ -613,11 +666,20 @@ ALTER TABLE training
                 INITIALLY IMMEDIATE
 ;
 
--- Reference: training_lecturer (table: training)
-ALTER TABLE training
-    ADD CONSTRAINT training_lecturer
-        FOREIGN KEY (default_lecturer_id)
+-- Reference: training_lecturer_lecturer (table: training_lecturer)
+ALTER TABLE training_lecturer
+    ADD CONSTRAINT training_lecturer_lecturer
+        FOREIGN KEY (lecturer_id)
             REFERENCES lecturer (id)
+            NOT DEFERRABLE
+                INITIALLY IMMEDIATE
+;
+
+-- Reference: training_lecturer_training (table: training_lecturer)
+ALTER TABLE training_lecturer
+    ADD CONSTRAINT training_lecturer_training
+        FOREIGN KEY (training_id)
+            REFERENCES training (id)
             NOT DEFERRABLE
                 INITIALLY IMMEDIATE
 ;
@@ -713,5 +775,73 @@ FROM training t
                                                WHERE rtt.training_id = t.id
                                                  AND rtt.language_id = rl.id)) mt
 WHERE cl.requires_translation;
+
+-- Admini koolitajate nimekiri: üks rida koolitaja ja tõlkekeele kohta
+CREATE VIEW admin_lecturer_summary AS
+SELECT row_number() OVER (ORDER BY l.id, cl.id)                    AS id,
+       l.id                                                        AS lecturer_id,
+       cl.code                                                     AS content_language_code,
+       COALESCE(lt.id, mlt.id)                                     AS lecturer_translation_id,
+       l.full_name,
+       COALESCE(lt.title, mlt.title)                               AS title,
+       l.status,
+       mt.missing_translation_language_codes,
+       mt.missing_translation_language_codes IS NULL               AS has_all_translations,
+       (SELECT count(*)
+        FROM training_lecturer trl
+                 JOIN training t ON t.id = trl.training_id
+        WHERE trl.lecturer_id = l.id
+          AND t.status <> 'D')                                     AS training_count,
+       (SELECT count(*)
+        FROM course_lecturer crl
+                 JOIN course c ON c.id = crl.course_id
+        WHERE crl.lecturer_id = l.id
+          AND c.status NOT IN ('D', 'X')
+          AND c.end_date >= current_date)                          AS upcoming_course_count,
+       -- GREATEST ignoreerib NULL-e (pilti ei pruugi olla)
+       GREATEST(l.updated_at,
+                (SELECT MAX(alt.updated_at) FROM lecturer_translation alt WHERE alt.lecturer_id = l.id),
+                (SELECT lp.updated_at FROM lecturer_photo lp WHERE lp.lecturer_id = l.id)) AS updated_at
+FROM lecturer l
+         CROSS JOIN language cl
+         JOIN language ml ON ml.is_main_language
+         LEFT JOIN lecturer_translation lt ON lt.lecturer_id = l.id AND lt.language_id = cl.id
+         LEFT JOIN lecturer_translation mlt ON mlt.lecturer_id = l.id AND mlt.language_id = ml.id
+         -- string_agg tühjast hulgast annab NULL, seega NULL = kõik tõlked olemas
+         CROSS JOIN LATERAL (SELECT string_agg(rl.code, ',' ORDER BY rl.id) AS missing_translation_language_codes
+                             FROM language rl
+                             WHERE rl.requires_translation
+                               AND NOT EXISTS (SELECT 1
+                                               FROM lecturer_translation rlt
+                                               WHERE rlt.lecturer_id = l.id
+                                                 AND rlt.language_id = rl.id)) mt
+WHERE cl.requires_translation;
+
+-- Koolituse kalender: toimumiskord koos koolitaja, ruumi ja osalejate arvuga
+CREATE VIEW course_summary AS
+SELECT c.id                                                         AS course_id,
+       c.training_id,
+       c.start_date,
+       c.end_date,
+       c.end_date < current_date                                    AS is_past,
+       -- sorteerimiseks: tulevased lähimast, möödunud hiliseimast
+       CASE WHEN c.end_date < current_date THEN current_date - c.start_date
+            ELSE c.start_date - current_date END                    AS days_from_today,
+       c.number_of_days,
+       c.number_of_academic_hours,
+       c.price,
+       c.status,
+       -- koolitajad sort_order järjekorras, nt 'Rain Tüür, Meelis Teern'; NULL = koolitajaid pole
+       (SELECT string_agg(l.full_name, ', ' ORDER BY crl.sort_order)
+        FROM course_lecturer crl
+                 JOIN lecturer l ON l.id = crl.lecturer_id
+        WHERE crl.course_id = c.id)                                 AS lecturer_names,
+       c.room_id,
+       r.name                                                       AS room_name,
+       COALESCE(btrim(c.notes), '') <> ''                           AS has_notes,
+       COALESCE(btrim(c.meeting_link), '') <> ''                    AS has_meeting_link,
+       (SELECT count(*) FROM course_participant cp WHERE cp.course_id = c.id) AS participant_count
+FROM course c
+         LEFT JOIN room r ON r.id = c.room_id;
 
 -- End of file.
