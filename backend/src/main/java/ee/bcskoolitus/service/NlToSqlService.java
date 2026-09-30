@@ -39,15 +39,17 @@ public class NlToSqlService {
             """;
 
     private static final String SQL_USER_PROMPT_TEMPLATE = """
-            
+            Generate SQL syntax for the question below
             %s
             """;
 
     private static final String SUMMARY_SYSTEM_PROMPT = """
-            
+            You are a helpful assistant that summarizes data clearly.
             """;
 
     private static final String SUMMARY_USER_PROMPT_TEMPLATE = """
+            Summarize this database query result in 1-3 plain sentences.
+            Don't mention SQL or technical terms. Be specific about numbers.
             
             Question: %s
             Results (%d rows): %s
