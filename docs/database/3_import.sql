@@ -81,12 +81,19 @@ INSERT INTO participant (id, user_id, name, profile_id, created_at) VALUES
 INSERT INTO training (id, user_id, default_lecturer_id, category_id, training_language_id, location_id, status, created_at, updated_at, is_orderable, is_promoted) VALUES
     (1, 1, 1, 1, 1, 1, 'P', '2026-08-01 09:00:00', '2026-08-01 09:00:00', true, true),
     (2, 1, 2, 3, 1, 2, 'P', '2026-08-05 10:00:00', '2026-08-05 10:00:00', false, false),
-    (3, 1, 1, 1, 1, 2, 'P', '2026-08-10 09:00:00', '2026-08-10 09:00:00', true, false),
+    (3, 1, 1, 1, 1, 2, 'P', '2026-08-10 09:00:00', '2026-09-21 14:30:00', true, false),
     (4, 1, 1, 1, 2, 2, 'P', '2026-08-12 09:00:00', '2026-08-12 09:00:00', true, true),
     (5, 1, NULL, 2, 1, 1, 'P', '2026-08-14 09:00:00', '2026-08-14 09:00:00', true, false),
     (6, 1, NULL, 2, 2, 3, 'P', '2026-08-16 09:00:00', '2026-08-16 09:00:00', false, false),
     (7, 1, 2, 3, 1, 3, 'P', '2026-08-18 09:00:00', '2026-08-18 09:00:00', true, false),
-    (8, 1, 1, 1, 1, 1, 'P', '2026-08-20 09:00:00', '2026-08-20 09:00:00', true, false);
+    (8, 1, 1, 1, 1, 1, 'P', '2026-08-20 09:00:00', '2026-08-20 09:00:00', true, false),
+    -- AdminTrainingsView näidised: mustandid (U), kustutatud (D), puuduvad tõlked, õppekeel ru, teine lehekülg
+    (9, 1, 2, 1, 3, 2, 'U', '2026-09-02 11:00:00', '2026-09-02 11:00:00', true, false),
+    (10, 1, 1, 1, 1, 2, 'U', '2026-09-10 13:20:00', '2026-09-10 13:20:00', true, false),
+    (11, 1, 2, 1, 1, 2, 'P', '2026-09-14 09:30:00', '2026-09-14 09:30:00', true, false),
+    (12, 1, NULL, 1, 2, 2, 'U', '2026-09-18 10:00:00', '2026-09-18 10:00:00', false, false),
+    (13, 1, 1, 1, 1, 3, 'P', '2026-09-25 15:10:00', '2026-09-26 09:00:00', true, true),
+    (14, 1, NULL, 2, 1, 1, 'D', '2026-08-25 12:00:00', '2026-09-08 17:40:00', false, false);
 
 -- Table: funding_type
 INSERT INTO funding_type (id, code, created_at, updated_at, created_by) VALUES
@@ -108,11 +115,15 @@ INSERT INTO training_funding_type (id, training_id, funding_type_id) VALUES
     (4, 4, 2),
     (5, 5, 1),
     (6, 7, 2),
-    (7, 8, 1);
+    (7, 8, 1),
+    (8, 10, 2),
+    (9, 11, 1),
+    (10, 13, 1),
+    (11, 13, 2);
 
 -- Table: training_translation
 INSERT INTO training_translation (id, training_id, language_id, title, short_description, description, created_at, updated_at) VALUES
-    (1, 1, 1, 'Java algkursus', 'Java programmeerimise alused algajatele.', 'Kursusel õpitakse Java süntaksit, objektorienteeritud programmeerimist ja põhilisi andmestruktuure.', '2026-08-01 09:00:00', '2026-08-01 09:00:00'),
+    (1, 1, 1, 'Java algkursus', 'Java programmeerimise alused algajatele.', 'Kursusel õpitakse Java süntaksit, objektorienteeritud programmeerimist ja põhilisi andmestruktuure.', '2026-08-01 09:00:00', '2026-09-29 10:15:00'),
     (2, 1, 2, 'Java Basics', 'Fundamentals of Java programming for beginners.', 'The course covers Java syntax, object-oriented programming, and basic data structures.', '2026-08-01 09:00:00', '2026-08-01 09:00:00'),
     (3, 2, 1, 'Projektijuhtimise põhitõed', 'Sissejuhatus IT-projektijuhtimisse.', 'Kursusel käsitletakse Scrumi, Kanbani ja projekti planeerimise põhimõtteid.', '2026-08-05 10:00:00', '2026-08-05 10:00:00'),
     (4, 2, 2, 'Project Management Fundamentals', 'An introduction to IT project management.', 'The course covers Scrum, Kanban, and the principles of project planning.', '2026-08-05 10:00:00', '2026-08-05 10:00:00'),
@@ -127,7 +138,16 @@ INSERT INTO training_translation (id, training_id, language_id, title, short_des
     (13, 7, 1, 'Agiilne meeskonnajuhtimine', 'Scrumi meeskonna juhtimine praktikas.', 'Kursusel õpitakse agiilsete meeskondade juhtimist, retrospektiive ja tagasiside andmist.', '2026-08-18 09:00:00', '2026-08-18 09:00:00'),
     (14, 7, 2, 'Agile Team Leadership', 'Leading a Scrum team in practice.', 'The course covers leading agile teams, retrospectives and giving feedback.', '2026-08-18 09:00:00', '2026-08-18 09:00:00'),
     (15, 8, 1, 'SQL ja andmebaasid', 'Relatsiooniliste andmebaaside alused.', 'Kursusel õpitakse SQL päringuid, tabelite disaini ja PostgreSQL-i kasutamist.', '2026-08-20 09:00:00', '2026-08-20 09:00:00'),
-    (16, 8, 2, 'SQL and Databases', 'Fundamentals of relational databases.', 'The course covers SQL queries, table design and working with PostgreSQL.', '2026-08-20 09:00:00', '2026-08-20 09:00:00');
+    (16, 8, 2, 'SQL and Databases', 'Fundamentals of relational databases.', 'The course covers SQL queries, table design and working with PostgreSQL.', '2026-08-20 09:00:00', '2026-08-20 09:00:00'),
+    (17, 9, 1, 'Exceli algkursus', 'Tabelid, valemid ja diagrammid algajatele.', 'Kursusel õpitakse töötama tabelitega, kasutama põhilisi valemeid ja looma diagramme.', '2026-09-02 11:00:00', '2026-09-02 11:00:00'),
+    (18, 10, 1, 'Docker ja konteinerid', 'Rakenduste pakkimine ja käivitamine konteinerites.', 'Kursusel õpitakse looma Dockerfile''e, haldama konteinereid ja kasutama Docker Compose''i.', '2026-09-10 13:20:00', '2026-09-12 08:45:00'),
+    (19, 11, 1, 'Git ja GitHub', 'Versioonihaldus meeskonnatöös.', 'Kursusel õpitakse Giti põhikäske, harude kasutamist ja koostööd GitHubis.', '2026-09-14 09:30:00', '2026-09-14 09:30:00'),
+    (20, 11, 2, 'Git and GitHub', 'Version control for teamwork.', 'The course covers basic Git commands, working with branches and collaborating on GitHub.', '2026-09-14 09:30:00', '2026-09-15 16:00:00'),
+    (21, 12, 1, 'Python andmeanalüüsiks', 'Andmete töötlemine ja visualiseerimine Pythoniga.', 'Kursusel õpitakse kasutama pandas ja matplotlib teeke andmete analüüsimiseks.', '2026-09-18 10:00:00', '2026-09-18 10:00:00'),
+    (22, 12, 2, 'Python for Data Analysis', 'Processing and visualising data with Python.', 'The course covers using the pandas and matplotlib libraries for data analysis.', '2026-09-18 10:00:00', '2026-09-18 10:00:00'),
+    (23, 13, 1, 'Tehisaru töövahendid arendajale', 'AI-abilised igapäevases tarkvaraarenduses.', 'Kursusel õpitakse kasutama AI-abilisi koodi kirjutamisel, testimisel ja dokumenteerimisel.', '2026-09-25 15:10:00', '2026-09-25 15:10:00'),
+    (24, 14, 1, 'Photoshopi algkursus', 'Pilditöötluse alused Photoshopis.', 'Kursusel õpitakse kihtide, maskide ja põhiliste pilditöötlusvahendite kasutamist.', '2026-08-25 12:00:00', '2026-08-25 12:00:00'),
+    (25, 14, 2, 'Photoshop Basics', 'Fundamentals of image editing in Photoshop.', 'The course covers layers, masks and the basic image editing tools.', '2026-08-25 12:00:00', '2026-08-25 12:00:00');
 
 -- Table: course
 INSERT INTO course (id, training_id, lecturer_id, room_id, number_of_days, number_of_academic_hours, price, status, start_date, end_date, notes, meeting_link, created_at, updated_at, created_by) VALUES

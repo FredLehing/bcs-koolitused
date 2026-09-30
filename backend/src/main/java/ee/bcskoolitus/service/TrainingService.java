@@ -5,10 +5,14 @@ import ee.bcskoolitus.infrastructure.exception.ForbiddenException;
 import ee.bcskoolitus.infrastructure.exception.PrimaryKeyNotFoundException;
 import ee.bcskoolitus.infrastructure.util.HtmlSanitizer;
 import ee.bcskoolitus.controller.common.dto.FundingTypeDto;
+import ee.bcskoolitus.controller.training.dto.AdminTrainingFilterDto;
+import ee.bcskoolitus.controller.training.dto.AdminTrainingSummaryDto;
+import ee.bcskoolitus.controller.training.dto.AdminTrainingSummaryItemDto;
 import ee.bcskoolitus.controller.training.dto.TrainingCreateRequestDto;
 import ee.bcskoolitus.controller.training.dto.TrainingCreateResponseDto;
 import ee.bcskoolitus.controller.training.dto.TrainingSummaryDto;
 import ee.bcskoolitus.controller.training.dto.TrainingSummaryItemDto;
+import ee.bcskoolitus.controller.training.dto.TrainingTitleDto;
 import ee.bcskoolitus.controller.training.dto.TrainingDto;
 import ee.bcskoolitus.controller.training.dto.TrainingTranslationItemDto;
 import ee.bcskoolitus.controller.training.dto.TrainingTranslationCreateRequestDto;
@@ -26,6 +30,10 @@ import ee.bcskoolitus.persistance.training.fundingtype.TrainingFundingTypeReposi
 import ee.bcskoolitus.persistance.training.translation.TrainingTranslation;
 import ee.bcskoolitus.persistance.training.translation.TrainingTranslationMapper;
 import ee.bcskoolitus.persistance.training.translation.TrainingTranslationRepository;
+import ee.bcskoolitus.persistance.view.admintrainingsummary.AdminTrainingSummary;
+import ee.bcskoolitus.persistance.view.admintrainingsummary.AdminTrainingSummaryMapper;
+import ee.bcskoolitus.persistance.view.admintrainingsummary.AdminTrainingSummaryRepository;
+import ee.bcskoolitus.persistance.view.admintrainingsummary.AdminTrainingSummarySpecifications;
 import ee.bcskoolitus.persistance.view.trainingsummary.TrainingSummary;
 import ee.bcskoolitus.persistance.view.trainingsummary.TrainingSummaryMapper;
 import ee.bcskoolitus.persistance.view.trainingsummary.TrainingSummaryRepository;
@@ -42,12 +50,25 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 
+import static ee.bcskoolitus.Error.TRAINING_DELETED;
 import static ee.bcskoolitus.Error.TRANSLATION_EXISTS;
 
 @Service
 @RequiredArgsConstructor
 public class TrainingService {
+
+    // GET /api/admin-trainings sortBy väärtus → AdminTrainingSummary väli (staatus töövoo järjekorras U → P → D)
+    private static final Map<String, String> ADMIN_TRAINING_SORT_PROPERTIES = Map.of(
+            "createdAt", "createdAt",
+            "updatedAt", "updatedAt",
+            "title", "title",
+            "categoryName", "categoryName",
+            "trainingLanguageCode", "trainingLanguageCode",
+            "status", "statusOrder",
+            "hasAllTranslations", "hasAllTranslations");
+    private static final String DEFAULT_ADMIN_TRAINING_SORT_PROPERTY = "createdAt";
 
     private final TrainingSummaryRepository trainingSummaryRepository;
     private final TrainingSummaryMapper trainingSummaryMapper;
@@ -65,6 +86,8 @@ public class TrainingService {
     private final LecturerService lecturerService;
     private final FundingTypeService fundingTypeService;
     private final TrainingTranslationService trainingTranslationService;
+    private final AdminTrainingSummaryRepository adminTrainingSummaryRepository;
+    private final AdminTrainingSummaryMapper adminTrainingSummaryMapper;
 
     public TrainingSummaryDto findFilteredTrainings(Integer categoryId, Integer fundingTypeId, Integer limit, Integer page, Integer trainingLanguageId, String contentLang, String searchText) {
         Pageable pageable = PageRequest.of(page, limit, Sort.by(Sort.Order.desc("training.isPromoted"), Sort.Order.asc("title")));
@@ -80,6 +103,7 @@ public class TrainingService {
                 TrainingSummarySpecifications.hasFundingTypeId(fundingTypeId),
                 TrainingSummarySpecifications.hasTrainingLanguageId(trainingLanguageId),
                 TrainingSummarySpecifications.hasTranslationLanguageCode(contentLang),
+                TrainingSummarySpecifications.hasStatus(TrainingStatus.PUBLISHED.getCode()),
                 TrainingSummarySpecifications.containsAllWords(searchText));
     }
 
@@ -106,14 +130,74 @@ public class TrainingService {
         return trainingSummaryDto;
     }
 
+    public AdminTrainingSummaryDto findAdminTrainings(AdminTrainingFilterDto adminTrainingFilterDto) {
+        Pageable pageable = PageRequest.of(adminTrainingFilterDto.getPage(), adminTrainingFilterDto.getLimit(),
+                createAdminTrainingSort(adminTrainingFilterDto.getSortBy(), adminTrainingFilterDto.getSortDirection()));
+        Specification<AdminTrainingSummary> adminTrainingSummarySpecification = createAdminTrainingSummarySpecification(adminTrainingFilterDto);
+        Page<AdminTrainingSummary> adminTrainingSummaryPage = adminTrainingSummaryRepository.findAll(adminTrainingSummarySpecification, pageable);
+        List<AdminTrainingSummaryItemDto> adminTrainingSummaryItemDtos = findAndCreateAdminTrainingSummaryItemDtos(adminTrainingFilterDto.getContentLang(), adminTrainingSummaryPage);
+        return new AdminTrainingSummaryDto(adminTrainingSummaryPage.getTotalPages(), adminTrainingSummaryPage.getTotalElements(), adminTrainingSummaryItemDtos);
+    }
+
+    // Tundmatu sortBy → createdAt; sortDirection "asc" → kasvav, kõik muu → kahanev.
+    // Lisaks alati id järgi (view id = row_number üle training_id), et võrdsete väärtuste järjekord oleks stabiilne.
+    static Sort createAdminTrainingSort(String sortBy, String sortDirection) {
+        String sortProperty = ADMIN_TRAINING_SORT_PROPERTIES.getOrDefault(sortBy, DEFAULT_ADMIN_TRAINING_SORT_PROPERTY);
+        Sort.Direction direction = "asc".equalsIgnoreCase(sortDirection) ? Sort.Direction.ASC : Sort.Direction.DESC;
+        return Sort.by(new Sort.Order(direction, sortProperty), Sort.Order.asc("id"));
+    }
+
+    private static Specification<AdminTrainingSummary> createAdminTrainingSummarySpecification(AdminTrainingFilterDto adminTrainingFilterDto) {
+        return Specification.allOf(
+                AdminTrainingSummarySpecifications.hasContentLanguageCode(adminTrainingFilterDto.getContentLang()),
+                AdminTrainingSummarySpecifications.hasStatus(adminTrainingFilterDto.getStatus()),
+                AdminTrainingSummarySpecifications.hasCategoryId(adminTrainingFilterDto.getCategoryId()),
+                AdminTrainingSummarySpecifications.hasTrainingLanguageId(adminTrainingFilterDto.getTrainingLanguageId()),
+                AdminTrainingSummarySpecifications.hasFundingTypeId(adminTrainingFilterDto.getFundingTypeId()),
+                AdminTrainingSummarySpecifications.hasIsOrderable(adminTrainingFilterDto.getIsOrderable()),
+                AdminTrainingSummarySpecifications.hasIsPromoted(adminTrainingFilterDto.getIsPromoted()),
+                AdminTrainingSummarySpecifications.hasAllTranslations(adminTrainingFilterDto.getHasAllTranslations()),
+                AdminTrainingSummarySpecifications.titleContainsAllWords(adminTrainingFilterDto.getSearchText()));
+    }
+
+    private List<AdminTrainingSummaryItemDto> findAndCreateAdminTrainingSummaryItemDtos(String contentLang, Page<AdminTrainingSummary> adminTrainingSummaryPage) {
+        List<AdminTrainingSummaryItemDto> adminTrainingSummaryItemDtos = adminTrainingSummaryMapper.toAdminTrainingSummaryItemDtos(adminTrainingSummaryPage.getContent());
+        for (AdminTrainingSummaryItemDto adminTrainingSummaryItemDto : adminTrainingSummaryItemDtos) {
+            handleAddFundingTypes(adminTrainingSummaryItemDto, contentLang);
+        }
+        return adminTrainingSummaryItemDtos;
+    }
+
+    private void handleAddFundingTypes(AdminTrainingSummaryItemDto adminTrainingSummaryItemDto, String contentLang) {
+        List<FundingTypeTranslation> fundingTypeTranslations = fundingTypeTranslationRepository.findTrainingFundingTypeTranslationsBy(adminTrainingSummaryItemDto.getTrainingId(), contentLang);
+        adminTrainingSummaryItemDto.setFundingTypes(fundingTypeTranslationMapper.toFundingTypeDtos(fundingTypeTranslations));
+    }
+
+    // Aktiivsete (status U, P) koolituste nimed contentLang keeles, puuduva tõlke korral põhikeeles
+    public List<TrainingTitleDto> getTrainingTitles(String contentLang) {
+        List<AdminTrainingSummary> adminTrainingSummaries = adminTrainingSummaryRepository
+                .findAllByContentLanguageCodeAndStatusNotOrderByTitleAsc(contentLang, TrainingStatus.DELETED.getCode());
+        return adminTrainingSummaryMapper.toTrainingTitleDtos(adminTrainingSummaries);
+    }
+
+    // Leiab ka kustutatud koolituse — kasutavad delete, restore, publish ja unpublish
     public Training getValidTrainingBy(Integer trainingId) {
         return trainingRepository.findById(trainingId)
                 .orElseThrow(() -> new PrimaryKeyNotFoundException("trainingId", trainingId));
     }
 
+    // Kustutatud koolitus (status D) on nagu olematu → 404
+    public Training getValidActiveTrainingBy(Integer trainingId) {
+        Training training = getValidTrainingBy(trainingId);
+        if (TrainingStatus.DELETED.getCode().equals(training.getStatus())) {
+            throw new PrimaryKeyNotFoundException("trainingId", trainingId);
+        }
+        return training;
+    }
+
     @Transactional(readOnly = true)
     public TrainingDto getTraining(Integer trainingId) {
-        Training training = getValidTrainingBy(trainingId);
+        Training training = getValidActiveTrainingBy(trainingId);
 
         TrainingDto trainingDto = trainingMapper.toTrainingDto(training);
 
@@ -130,7 +214,7 @@ public class TrainingService {
 
     @Transactional(readOnly = true)
     public List<TrainingTranslationItemDto> getTrainingTranslations(Integer trainingId) {
-        getValidTrainingBy(trainingId);
+        getValidActiveTrainingBy(trainingId);
 
         List<TrainingTranslation> trainingTranslations =
                 trainingTranslationRepository
@@ -193,7 +277,7 @@ public class TrainingService {
     // user, status ja created_at ei muutu; teiste keelte tõlkeid ei puudutata.
     @Transactional
     public void updateTraining(Integer trainingId, TrainingUpdateRequestDto trainingUpdateRequestDto) {
-        Training training = getValidTrainingBy(trainingId);
+        Training training = getValidActiveTrainingBy(trainingId);
         TrainingTranslation trainingTranslation = trainingTranslationService
                 .getValidTrainingTranslationBy(trainingUpdateRequestDto.getTrainingTranslationId(), trainingId);
         updateTrainingData(training, trainingUpdateRequestDto);
@@ -224,7 +308,7 @@ public class TrainingService {
     // Lisab koolitusele tõlke uude keelde; koolituse rida ega staatust ei muudeta
     @Transactional
     public TrainingTranslationCreateResponseDto addTrainingTranslation(Integer trainingId, TrainingTranslationCreateRequestDto trainingTranslationCreateRequestDto) {
-        Training training = getValidTrainingBy(trainingId);
+        Training training = getValidActiveTrainingBy(trainingId);
         Language language = languageService.getValidLanguageBy(trainingTranslationCreateRequestDto.getLanguageId(), "languageId");
         validateTranslationDoesNotExist(trainingId, language.getId());
         TrainingTranslation trainingTranslation = createTrainingTranslation(training, language, trainingTranslationCreateRequestDto);
@@ -245,5 +329,57 @@ public class TrainingService {
         trainingTranslation.setTraining(training);
         trainingTranslation.setLanguage(language);
         return trainingTranslation;
+    }
+
+    // Soft delete: ainult status = D (updated_at uueneb auditeerimisega), tõlked ja rahastustüübid jäävad alles.
+    // getValidTrainingBy leiab ka kustutatud koolituse — korduv kustutamine ei muuda midagi.
+    @Transactional
+    public void deleteTraining(Integer trainingId) {
+        Training training = getValidTrainingBy(trainingId);
+        if (TrainingStatus.DELETED.getCode().equals(training.getStatus())) {
+            return;
+        }
+        training.setStatus(TrainingStatus.DELETED.getCode());
+        trainingRepository.save(training);
+    }
+
+    // Taastab kustutatud koolituse mustandisse (D → U); avalikuks muutub see alles publitseerimisega.
+    // Kustutamata koolituse (U, P) korral midagi ei muutu.
+    @Transactional
+    public void restoreTraining(Integer trainingId) {
+        Training training = getValidTrainingBy(trainingId);
+        if (!TrainingStatus.DELETED.getCode().equals(training.getStatus())) {
+            return;
+        }
+        training.setStatus(TrainingStatus.UNPUBLISHED.getCode());
+        trainingRepository.save(training);
+    }
+
+    @Transactional
+    public void publishTraining(Integer trainingId) {
+        changeTrainingStatus(trainingId, TrainingStatus.PUBLISHED);
+    }
+
+    @Transactional
+    public void unpublishTraining(Integer trainingId) {
+        changeTrainingStatus(trainingId, TrainingStatus.UNPUBLISHED);
+    }
+
+    // getValidTrainingBy leiab ka kustutatud koolituse, et anda 403 (mitte 404).
+    // Juba soovitud staatuses koolituse korral midagi ei muutu (updated_at jääb samaks).
+    private void changeTrainingStatus(Integer trainingId, TrainingStatus newTrainingStatus) {
+        Training training = getValidTrainingBy(trainingId);
+        validateTrainingIsNotDeleted(training);
+        if (newTrainingStatus.getCode().equals(training.getStatus())) {
+            return;
+        }
+        training.setStatus(newTrainingStatus.getCode());
+        trainingRepository.save(training);
+    }
+
+    private static void validateTrainingIsNotDeleted(Training training) {
+        if (TrainingStatus.DELETED.getCode().equals(training.getStatus())) {
+            throw new ForbiddenException(TRAINING_DELETED.getMessage(), TRAINING_DELETED.name());
+        }
     }
 }

@@ -4,12 +4,13 @@ import { useLanguageStore } from '@/stores/languageStore.js'
 import TrainingService from '@/api-services/TrainingService.js'
 import NavigationService from '@/services/NavigationService.js'
 import TrainingCard from '@/components/TrainingCard.vue'
+import PaginationNav from '@/components/common/PaginationNav.vue'
 import { PhQuestion, PhX } from '@phosphor-icons/vue'
 import { Tooltip } from 'bootstrap'
 
 export default {
   name: 'TrainingsView',
-  components: { TrainingCard, PhQuestion, PhX },
+  components: { TrainingCard, PaginationNav, PhQuestion, PhX },
   data() {
     return {
       categoryId: 0,
@@ -93,8 +94,8 @@ export default {
     updateSearchHelpTooltip() {
       this.searchHelpTooltip.setContent({ '.tooltip-inner': this.$t('trainings.searchHelp') })
     },
-    handlePageClick(pagination) {
-      this.page = pagination - 1
+    handlePageChanged(newPage) {
+      this.page = newPage
       this.getTrainings()
     },
   },
@@ -181,25 +182,12 @@ export default {
           </template>
           <p v-else class="mb-0">{{ $t('trainings.noResults') }}</p>
         </div>
-        <nav v-if="totalPages > 0" aria-label="...">
-          <ul class="pagination justify-content-center">
-            <li class="page-item"><a href="#" class="page-link" :class="{disabled: page === 0 }" @click.prevent="handlePageClick(page)">Eelmine</a></li>
-
-            <li
-              v-for="totalPage in totalPages"
-              :key="totalPage"
-              class="page-item"
-              :class="{ active: totalPage === page + 1 }"
-            >
-              <a class="page-link" href="#" @click.prevent="handlePageClick(totalPage)">{{totalPage}}</a>
-            </li>
-            <li class="page-item">
-              <a class="page-link" href="#" :class="{disabled: page === totalPages - 1}" @click.prevent="handlePageClick(page + 2)"
-                >Järgmine</a
-              >
-            </li>
-          </ul>
-        </nav>
+        <PaginationNav
+          :page="page"
+          :total-pages="totalPages"
+          @event-page-changed="handlePageChanged"
+          class="mb-3"
+        />
       </div>
     </div>
   </div>

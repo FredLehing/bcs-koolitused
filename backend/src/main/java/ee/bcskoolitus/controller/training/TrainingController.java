@@ -1,9 +1,12 @@
 package ee.bcskoolitus.controller.training;
 
+import ee.bcskoolitus.controller.training.dto.AdminTrainingFilterDto;
+import ee.bcskoolitus.controller.training.dto.AdminTrainingSummaryDto;
 import ee.bcskoolitus.controller.training.dto.TrainingCreateRequestDto;
 import ee.bcskoolitus.controller.training.dto.TrainingCreateResponseDto;
 import ee.bcskoolitus.controller.training.dto.TrainingDto;
 import ee.bcskoolitus.controller.training.dto.TrainingSummaryDto;
+import ee.bcskoolitus.controller.training.dto.TrainingTitleDto;
 import ee.bcskoolitus.controller.training.dto.TrainingTranslationCreateRequestDto;
 import ee.bcskoolitus.controller.training.dto.TrainingTranslationCreateResponseDto;
 import ee.bcskoolitus.controller.training.dto.TrainingTranslationItemDto;
@@ -11,12 +14,14 @@ import ee.bcskoolitus.controller.training.dto.TrainingUpdateRequestDto;
 import ee.bcskoolitus.infrastructure.error.ApiError;
 import ee.bcskoolitus.service.TrainingService;
 import io.swagger.v3.oas.annotations.Operation;
+import org.springdoc.core.annotations.ParameterObject;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -55,6 +60,30 @@ public class TrainingController {
                                                     @RequestParam String contentLang,
                                                     @RequestParam String searchText) {
         return trainingService.findFilteredTrainings(categoryId, fundingTypeId, limit, page, trainingLanguageId, contentLang, searchText);
+    }
+
+    @GetMapping("/admin-trainings")
+    @Operation(summary = "Tagastab admini koolituste tabeli (filtrid, sorteerimine, leheküljestus)",
+            description = "status puudub = aktiivsed (U ja P). searchText otsib ainult pealkirjast (iga sõna peab esinema). "
+                    + "sortBy: createdAt / updatedAt / title / categoryName / trainingLanguageCode / status / hasAllTranslations (tundmatu → createdAt), "
+                    + "sortDirection: asc / desc. Puuduva contentLang tõlke korral põhikeele pealkiri ja kategooria.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Kohustuslik parameeter puudub või on vigane -> 'errorCode:' INCORRECT_INPUT",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            )
+    })
+    public AdminTrainingSummaryDto findAdminTrainings(@Valid @ParameterObject AdminTrainingFilterDto adminTrainingFilterDto) {
+        return trainingService.findAdminTrainings(adminTrainingFilterDto);
+    }
+
+    @GetMapping("/training-titles")
+    @Operation(summary = "Tagastab aktiivsete koolituste nimed otsingu ettepanekuteks",
+            description = "Koolitused staatusega U ja P, nimi contentLang keeles (puuduva tõlke korral põhikeeles), sorteeritud nime järgi.")
+    public List<TrainingTitleDto> getTrainingTitles(@RequestParam String contentLang) {
+        return trainingService.getTrainingTitles(contentLang);
     }
 
     @GetMapping("/training/{trainingId}")
@@ -158,5 +187,75 @@ public class TrainingController {
     public TrainingTranslationCreateResponseDto addTrainingTranslation(@PathVariable Integer trainingId,
                                                                        @Valid @RequestBody TrainingTranslationCreateRequestDto trainingTranslationCreateRequestDto) {
         return trainingService.addTrainingTranslation(trainingId, trainingTranslationCreateRequestDto);
+    }
+
+    @DeleteMapping("/training/{trainingId}")
+    @Operation(summary = "Kustutab koolituse (soft delete)",
+            description = "Määrab training.status = D. Tõlkeid ega rahastustüüpe ei kustutata. Juba kustutatud koolituse korral midagi ei muutu.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Olematu trainingId -> 'errorCode:' PRIMARY_KEY_NOT_FOUND",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            )
+    })
+    public void deleteTraining(@PathVariable Integer trainingId) {
+        trainingService.deleteTraining(trainingId);
+    }
+
+    @PutMapping("/training/{trainingId}/restore")
+    @Operation(summary = "Taastab kustutatud koolituse mustandisse",
+            description = "Tegevusteenus: määrab kustutatud koolituse (status D) staatuseks U. Kustutamata koolituse korral midagi ei muutu.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Olematu trainingId -> 'errorCode:' PRIMARY_KEY_NOT_FOUND",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            )
+    })
+    public void restoreTraining(@PathVariable Integer trainingId) {
+        trainingService.restoreTraining(trainingId);
+    }
+
+    @PutMapping("/training/{trainingId}/publish")
+    @Operation(summary = "Publitseerib koolituse",
+            description = "Tegevusteenus: määrab status = P. Juba publitseeritud koolituse korral midagi ei muutu.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Olematu trainingId -> 'errorCode:' PRIMARY_KEY_NOT_FOUND",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Koolitus on kustutatud (status D) -> 'errorCode:' TRAINING_DELETED",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            )
+    })
+    public void publishTraining(@PathVariable Integer trainingId) {
+        trainingService.publishTraining(trainingId);
+    }
+
+    @PutMapping("/training/{trainingId}/unpublish")
+    @Operation(summary = "Liigutab koolituse mustandisse",
+            description = "Tegevusteenus: määrab status = U. Juba mustandis koolituse korral midagi ei muutu.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Olematu trainingId -> 'errorCode:' PRIMARY_KEY_NOT_FOUND",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Koolitus on kustutatud (status D) -> 'errorCode:' TRAINING_DELETED",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            )
+    })
+    public void unpublishTraining(@PathVariable Integer trainingId) {
+        trainingService.unpublishTraining(trainingId);
     }
 }

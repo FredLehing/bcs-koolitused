@@ -31,17 +31,6 @@ const languages = [
   },
 ]
 
-const categories = [
-  { categoryId: 1, names: { et: 'Programmeerimine', en: 'Programming' } },
-  { categoryId: 2, names: { et: 'Disain', en: 'Design' } },
-  { categoryId: 3, names: { et: 'Juhtimine', en: 'Management' } },
-]
-
-const fundingTypes = [
-  { fundingTypeId: 1, names: { et: 'Töötukassa', en: 'Job Centre' } },
-  { fundingTypeId: 2, names: { et: 'EL rahastus', en: 'EU Funded' } },
-]
-
 const locations = [
   { locationId: 1, locationName: 'BCS Koolitus' },
   { locationId: 2, locationName: 'Veebiõpe' },
@@ -155,26 +144,6 @@ export default {
     }))
   },
 
-  // GET /api/categories?contentLang= → CategoryDto[]
-  getCategories(contentLang) {
-    return categories
-      .filter((category) => category.names[contentLang] !== undefined)
-      .map((category) => ({
-        categoryId: category.categoryId,
-        categoryName: category.names[contentLang],
-      }))
-  },
-
-  // GET /api/funding-types?contentLang= → FundingTypeDto[]
-  getFundingTypes(contentLang) {
-    return fundingTypes
-      .filter((fundingType) => fundingType.names[contentLang] !== undefined)
-      .map((fundingType) => ({
-        fundingTypeId: fundingType.fundingTypeId,
-        fundingTypeName: fundingType.names[contentLang],
-      }))
-  },
-
   // GET /api/locations → LocationDto[]
   getLocations() {
     return locations
@@ -253,11 +222,6 @@ export default {
     translation.title = trainingUpdateRequest.title
     translation.shortDescription = trainingUpdateRequest.shortDescription
     translation.description = trainingUpdateRequest.description
-  },
-
-  // PUT /api/training/{trainingId}/publish ja /unpublish → NONE
-  setTrainingStatus(trainingId, status) {
-    findTraining(trainingId).status = status
   },
 
   // POST /api/training/{trainingId}/training-translation → TrainingTranslationCreateResponseDto

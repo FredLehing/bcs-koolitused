@@ -290,7 +290,7 @@ textarea { min-height: 88px; resize: vertical; }
   <header class="intro">
     <h1>TrainingFormView.vue — läbimäng</h1>
     <p>Vajuta vormi nuppe ja lipukesi nagu päris vaates. URL, backendi päringud ja olek muutuvad kaasa. Kollased kastid on mockupi märkmed samas vormingus nagu <code>skill-uus-mockup-markmed</code> — neid saab otse Balsamiqi kopeerida.</p>
-    <p>Keeled tulevad päringust <code>GET /api/languages</code> (<code>language</code> tabel): <code>et</code> (põhikeel), <code>en</code> ja <code>ru</code>. Tõlkelipud on ainult keeltel, mille <code>requiresTranslation = true</code> (<code>et</code>, <code>en</code>). <code>ru</code> on ainult õppekeel („Koolituse keel“ rippmenüüs), sellesse koolituse sisu ei tõlgita. Näidisandmed: koolitus 1 „Java algkursus“ on andmebaasist (<code>3_import.sql</code>), sellel on et ja en tõlge. Koolitus 9 „Exceli algkursus“ (õppekeel ru, ainult et tõlge) on <strong>ainult läbimängu näidis</strong> olekule C. „Power BI edasijõudnutele“ on mockupi lk 7 põhjal uus koolitus, mis saab ID <code>10</code>. DTO-de väljad on <strong>ettepanek</strong> — need kinnitatakse plaanifailis.</p>
+    <p>Keeled tulevad päringust <code>GET /api/languages</code> (<code>language</code> tabel): <code>et</code> (põhikeel), <code>en</code> ja <code>ru</code>. Tõlkelipud on ainult keeltel, mille <code>requiresTranslation = true</code> (<code>et</code>, <code>en</code>). <code>ru</code> on ainult õppekeel („Koolituse keel“ rippmenüüs), sellesse koolituse sisu ei tõlgita. Näidisandmed: koolitus 1 „Java algkursus“ on andmebaasist (<code>3_import.sql</code>), sellel on et ja en tõlge. Koolitus 9 „Exceli algkursus“ (õppekeel ru, ainult et tõlge, mustand) on samuti andmebaasist ja sobib olekule C. „Power BI edasijõudnutele“ on mockupi lk 7 põhjal uus koolitus, mis saab ID <code>15</code>. DTO-de väljad on <strong>ettepanek</strong> — need kinnitatakse plaanifailis.</p>
     <div class="toolbar">
       <button class="tbtn" id="btn-a" type="button" data-mode="A"><span>A. Alusta uue koolitusega</span><span class="tstate">state: "new-training"</span></button>
       <button class="tbtn" id="btn-b" type="button" data-mode="B"><span>B. Muuda koolitust (Java algkursus)</span><span class="tstate">state: "update"</span></button>
@@ -379,7 +379,7 @@ textarea { min-height: 88px; resize: vertical; }
     return {
       trainings: {
         1: { trainingId: 1, categoryId: 1, trainingLanguageId: 1, locationId: 1, defaultLecturerId: 1, isOrderable: true, isPromoted: true, status: "P", fundingTypeIds: [1] },
-        // ainult läbimängu näidis: õppekeel ru (tõlget ei vaja), olemas ainult et tõlge
+        // 3_import.sql: õppekeel ru (tõlget ei vaja), olemas ainult et tõlge
         9: { trainingId: 9, categoryId: 1, trainingLanguageId: 3, locationId: 2, defaultLecturerId: 2, isOrderable: true, isPromoted: false, status: "U", fundingTypeIds: [] }
       },
       translations: {
@@ -387,8 +387,8 @@ textarea { min-height: 88px; resize: vertical; }
         2: { trainingTranslationId: 2, trainingId: 1, languageId: 2, title: "Java Basics", shortDescription: "Fundamentals of Java programming for beginners.", description: "The course covers Java syntax, object-oriented programming, and basic data structures." },
         17: { trainingTranslationId: 17, trainingId: 9, languageId: 1, title: "Exceli algkursus", shortDescription: "Tabelid, valemid ja diagrammid algajatele.", description: "Kursusel õpitakse töötama tabelitega, kasutama põhilisi valemeid ja looma diagramme." }
       },
-      nextTrainingId: 10,
-      nextTranslationId: 18
+      nextTrainingId: 15,
+      nextTranslationId: 26
     };
   }
 
@@ -915,23 +915,23 @@ textarea { min-height: 88px; resize: vertical; }
     { id: "n-get-training", title: "GET /api/training/{trainingId}", draft: true, text: [
       "API: GET /api/training/{trainingId}", "",
       "Response (200):", "TrainingDto.java", "{", "  \"trainingId\": 1,", "  \"categoryId\": 1,", "  \"trainingLanguageId\": 1,", "  \"locationId\": 1,", "  \"defaultLecturerId\": 1,", "  \"defaultLecturerName\": \"Mari Tamm\",", "  \"isOrderable\": true,", "  \"isPromoted\": true,", "  \"status\": \"P\",", "  \"fundingTypeIds\": [", "    1,", "    ...", "  ]", "}", "",
-      "API teenuse lisainfo:", "Koolituse väljad ilma tõlketa. defaultLecturerId ja defaultLecturerName võivad olla null. status: \"U\" = mustand (unpublished), \"P\" = publitseeritud.", "",
+      "API teenuse lisainfo:", "Koolituse väljad ilma tõlketa. defaultLecturerId ja defaultLecturerName võivad olla null. status: \"U\" = mustand (unpublished), \"P\" = publitseeritud. Kustutatud koolitus (status \"D\") on nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.", "",
       "Veateated:", PK("trainingId")] },
     { id: "n-get-translation", title: "GET /api/training-translation/{id}", draft: true, text: [
       "API: GET /api/training-translation/{trainingTranslationId}", "",
       "Response (200):", "TrainingTranslationDto.java", "{", "  \"trainingTranslationId\": 1,", "  \"trainingId\": 1,", "  \"languageId\": 1,", "  \"languageCode\": \"et\",", "  \"title\": \"Java algkursus\",", "  \"shortDescription\": \"Java programmeerimise alused algajatele.\",", "  \"description\": \"Kursusel õpitakse Java süntaksit, objektorienteeritud programmeerimist ja põhilisi andmestruktuure.\"", "}", "",
-      "API teenuse lisainfo:", "Ühe tõlke andmed. Olekus B laaditakse avatud tõlge. Olekus C laaditakse et tõlge, millega uue tõlke väljad eeltäidetakse.", "",
+      "API teenuse lisainfo:", "Ühe tõlke andmed. Olekus B laaditakse avatud tõlge. Olekus C laaditakse et tõlge, millega uue tõlke väljad eeltäidetakse. Kui tõlke koolitus on kustutatud (status \"D\"), on tõlge nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.", "",
       "Veateated:", PK("trainingTranslationId")] },
     { id: "n-translations", title: "GET /api/training/{id}/training-translations", draft: true, text: [
       "API: GET /api/training/{trainingId}/training-translations", "",
       "Response (200):", "TrainingTranslationItemDto.java", "[", "  {", "    \"trainingTranslationId\": 1,", "    \"languageId\": 1,", "    \"languageCode\": \"et\",", "    \"isMainLanguage\": true", "  },", "  ...", "]", "",
-      "API teenuse lisainfo:", "Koolituse olemasolevad tõlked. Frontend võrdleb languageCode väärtusi GET /api/languages tõlkekeeltega (requiresTranslation = true): tõlge olemas → värviline lipp, puudub → hall lipp. isMainLanguage tuleb language.is_main_language veerust; põhikeele tõlkega eeltäidetakse uue tõlke vorm.", "",
+      "API teenuse lisainfo:", "Koolituse olemasolevad tõlked. Frontend võrdleb languageCode väärtusi GET /api/languages tõlkekeeltega (requiresTranslation = true): tõlge olemas → värviline lipp, puudub → hall lipp. isMainLanguage tuleb language.is_main_language veerust; põhikeele tõlkega eeltäidetakse uue tõlke vorm. Kustutatud koolitus (status \"D\") on nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.", "",
       "Veateated:", PK("trainingId")] },
     { id: "n-ai-translation", title: "GET /api/training/{id}/ai-translation", draft: true, text: [
       "API: GET /api/training/{trainingId}/ai-translation", "",
       "Query parameetrid:", "languageId: Integer — sihtkeel, kuhu tõlgitakse", "",
       "Response (200):", "AiTranslationDto.java", "{", "  \"title\": \"Power BI for Advanced Users\",", "  \"shortDescription\": \"Data models, DAX and interactive reports.\",", "  \"description\": \"The course builds a data model in Power BI, writes DAX formulas and creates interactive reports.\"", "}", "",
-      "API teenuse lisainfo:", "Tõlgib alati andmebaasi salvestatud põhikeele (language.is_main_language = true) tõlke AI abil sihtkeelde — vormi sisu ei kasutata. Andmebaasi midagi ei salvestata. description HTML-märgendid säilitatakse. Vastusel päis Cache-Control: no-store.", "",
+      "API teenuse lisainfo:", "Tõlgib alati andmebaasi salvestatud põhikeele (language.is_main_language = true) tõlke AI abil sihtkeelde — vormi sisu ei kasutata. Andmebaasi midagi ei salvestata. description HTML-märgendid säilitatakse. Vastusel päis Cache-Control: no-store. Kustutatud koolitus (status \"D\") on nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.", "",
       "Veateated:", PK("trainingId"), "", PK("languageId"), "",
       "HTTP: 403\nerrorCode: MAIN_LANGUAGE_NOT_TRANSLATABLE\nmessage: \"Põhikeelde ei saa AI tõlget teha\"", "",
       "HTTP: 404\nerrorCode: MAIN_TRANSLATION_NOT_FOUND\nmessage: \"Koolitusel puudub põhikeele tõlge\"", "",
@@ -946,31 +946,31 @@ textarea { min-height: 88px; resize: vertical; }
       "API: POST /api/training/{trainingId}/training-translation", "",
       "Request body:", "TrainingTranslationCreateRequestDto.java", "{", "  \"languageId\": 2,", "  \"title\": \"Power BI for Advanced Users\",", "  \"shortDescription\": \"Data models, DAX and interactive reports.\",", "  \"description\": \"The course builds a data model in Power BI, writes DAX formulas and creates interactive reports.\"", "}", "",
       "Response (200):", "TrainingTranslationCreateResponseDto.java", "{", "  \"trainingTranslationId\": 6", "}", "",
-      "API teenuse lisainfo:", "Lisab koolitusele uue keele tõlke. Ühes keeles saab koolitusel olla ainult üks tõlge (training_translation_uq).", "",
+      "API teenuse lisainfo:", "Lisab koolitusele uue keele tõlke. Ühes keeles saab koolitusel olla ainult üks tõlge (training_translation_uq). Kustutatud koolitus (status \"D\") on nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.", "",
       "Veateated:", PK("trainingId"), "", PK("languageId"), "", "HTTP: 403\nerrorCode: TRANSLATION_EXISTS\nmessage: \"Selles keeles tõlge on juba olemas\""] },
     { id: "n-put-training", title: "PUT /api/training/{trainingId}", draft: true, text: [
       "API: PUT /api/training/{trainingId}", "",
       "Request body:", "TrainingUpdateRequestDto.java", "{", "  \"categoryId\": 1,", "  \"trainingLanguageId\": 1,", "  \"locationId\": 1,", "  \"defaultLecturerId\": 1,", "  \"isOrderable\": true,", "  \"isPromoted\": true,", "  \"fundingTypeIds\": [", "    1,", "    ...", "  ],", "  \"trainingTranslationId\": 1,", "  \"title\": \"Java algkursus\",", "  \"shortDescription\": \"Java programmeerimise alused algajatele.\",", "  \"description\": \"Kursusel õpitakse Java süntaksit, objektorienteeritud programmeerimist ja põhilisi andmestruktuure.\"", "}", "",
       "Response (200): NONE", "",
-      "API teenuse lisainfo:", "Salvestab koolituse väljad ja trainingTranslationId tõlke ühes transaktsioonis. training_funding_type read kirjutatakse fundingTypeIds järgi üle.", "",
+      "API teenuse lisainfo:", "Salvestab koolituse väljad ja trainingTranslationId tõlke ühes transaktsioonis. training_funding_type read kirjutatakse fundingTypeIds järgi üle. Kustutatud koolitus (status \"D\") on nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.", "",
       "Veateated:", PK("trainingId"), "", PK("trainingTranslationId")] },
     { id: "n-put-publish", title: "PUT /api/training/{id}/publish", text: [
       "API: PUT /api/training/{trainingId}/publish", "",
       "Response (200): NONE", "",
-      "API teenuse lisainfo:", "Tegevusteenus (erand URL-ide kokkuleppest): määrab training.status = \"P\" (publitseeritud). Request body puudub. Juba publitseeritud koolituse korral midagi ei muutu. Frontend kutsub pärast kinnituse modalit.", "",
-      "Veateated:", PK("trainingId")] },
+      "API teenuse lisainfo:", "Tegevusteenus (erand URL-ide kokkuleppest): määrab training.status = \"P\" (publitseeritud). Request body puudub. Juba publitseeritud koolituse korral midagi ei muutu. Frontend kutsub pärast kinnituse modalit. Kustutatud koolituse (status \"D\") korral backend keeldub.", "",
+      "Veateated:", PK("trainingId"), "", "HTTP: 403\nerrorCode: TRAINING_DELETED\nmessage: \"Kustutatud koolituse staatust ei saa muuta, taasta see enne\""] },
     { id: "n-put-unpublish", title: "PUT /api/training/{id}/unpublish", text: [
       "API: PUT /api/training/{trainingId}/unpublish", "",
       "Response (200): NONE", "",
-      "API teenuse lisainfo:", "Tegevusteenus (erand URL-ide kokkuleppest): määrab training.status = \"U\" (mustand). Request body puudub. Juba mustandis koolituse korral midagi ei muutu. Frontend kutsub pärast kinnituse modalit.", "",
-      "Veateated:", PK("trainingId")] }
+      "API teenuse lisainfo:", "Tegevusteenus (erand URL-ide kokkuleppest): määrab training.status = \"U\" (mustand). Request body puudub. Juba mustandis koolituse korral midagi ei muutu. Frontend kutsub pärast kinnituse modalit. Kustutatud koolituse (status \"D\") korral backend keeldub.", "",
+      "Veateated:", PK("trainingId"), "", "HTTP: 403\nerrorCode: TRAINING_DELETED\nmessage: \"Kustutatud koolituse staatust ei saa muuta, taasta see enne\""] }
   ];
   NOTES.forEach(function (n) { n.text = n.text.join("\n"); });
 
   // Olekupõhine lisainfo (sama nagu markmed/training-form-view-state-*-markmed.md failides)
   var GET_TRANSLATION_INFO = {
-    B: "Laadib avatud tõlke (URL-i trainingTranslationId). languageCode näitab, mis keeles avatud tõlge on (tõlke vormi pealkiri, AI nupu nähtavus).",
-    C: "Laadib koolituse salvestatud põhikeele tõlke (training-translations vastusest isMainLanguage = true), millega eeltäidetakse uue tõlke väljad. Vastuse languageCode on põhikeel (et)."
+    B: "Laadib avatud tõlke (URL-i trainingTranslationId). languageCode näitab, mis keeles avatud tõlge on (tõlke vormi pealkiri, AI nupu nähtavus). Kui tõlke koolitus on kustutatud (status \"D\"), on tõlge nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.",
+    C: "Laadib koolituse salvestatud põhikeele tõlke (training-translations vastusest isMainLanguage = true), millega eeltäidetakse uue tõlke väljad. Vastuse languageCode on põhikeel (et). Kui tõlke koolitus on kustutatud (status \"D\"), on tõlge nagu olematu: 404 PRIMARY_KEY_NOT_FOUND."
   };
   var showAllNotes = false;
   function stateNoteIds() {

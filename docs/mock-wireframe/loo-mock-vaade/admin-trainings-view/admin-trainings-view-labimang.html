@@ -1,0 +1,831 @@
+<meta charset="utf-8">
+<title>AdminTrainingsView läbimäng</title>
+<meta name="description" content="AdminTrainingsView.vue otsing, filtrid, sorteerimine, leheküljestus, API päringud ja mockupi märkmed interaktiivse läbimänguna.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Sama visuaalne keel nagu training-form-view-labimang.html: täppidega tahvel, Balsamiqi-stiilis wireframe, kollased märkmed */
+:root {
+  --board: #e9ecef;
+  --board-dots: #d3d8de;
+  --panel: #ffffff;
+  --ink: #23272e;
+  --ink-soft: #5b6470;
+  --line: #b9c0c9;
+  --sketch: #3b4048;
+  --field: #ffffff;
+  --field-off: #eef0f3;
+  --accent: #2f6fde;
+  --accent-soft: #dce7fb;
+  --note: #f2c94c;
+  --note-edge: #d9ad2b;
+  --note-ink: #2e2505;
+  --get: #1f7a5c;
+  --post: #2f6fde;
+  --put: #a56200;
+  --del: #b83a3a;
+  --ok: #1f7a5c;
+  --bad: #c0392b;
+  --shadow: 0 1px 2px rgba(20, 30, 45, .08), 0 4px 14px rgba(20, 30, 45, .06);
+  --font-ui: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-sketch: "Balsamiq Sans", "Comic Sans MS", "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --board: #15181d; --board-dots: #242931; --panel: #1d2127; --ink: #e6e9ee; --ink-soft: #9aa4b2;
+    --line: #3a414b; --sketch: #c9ced6; --field: #252a31; --field-off: #1a1e23; --accent: #7aa5f5; --accent-soft: #22324f;
+    --get: #5cc59e; --post: #7aa5f5; --put: #e0a24a; --del: #ef7d7d; --ok: #5cc59e; --bad: #ef7d7d;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --board: #15181d; --board-dots: #242931; --panel: #1d2127; --ink: #e6e9ee; --ink-soft: #9aa4b2;
+  --line: #3a414b; --sketch: #c9ced6; --field: #252a31; --field-off: #1a1e23; --accent: #7aa5f5; --accent-soft: #22324f;
+  --get: #5cc59e; --post: #7aa5f5; --put: #e0a24a; --del: #ef7d7d; --ok: #5cc59e; --bad: #ef7d7d;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.3);
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background-color: var(--board);
+  background-image: radial-gradient(var(--board-dots) 1px, transparent 1px);
+  background-size: 18px 18px;
+  color: var(--ink);
+  font: 15px/1.5 var(--font-ui);
+}
+.page { max-width: 1320px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 64px; display: grid; gap: 28px; }
+h1, h2, h3 { text-wrap: balance; margin: 0; line-height: 1.2; }
+h1 { font-size: 1.7rem; font-weight: 600; }
+h2 { font-size: 1.15rem; font-weight: 600; }
+h3 { font-size: .8rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft); }
+code, .mono { font-family: var(--font-mono); font-size: .88em; }
+button { font: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Päis */
+.intro { display: grid; gap: 10px; }
+.intro p { margin: 0; max-width: 78ch; color: var(--ink-soft); }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.toolbar .sep { width: 1px; align-self: stretch; background: var(--line); margin-inline: 4px; }
+.toolbar .lbl-soft { font-size: .82rem; color: var(--ink-soft); }
+.tbtn { border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+.tbtn:hover { border-color: var(--accent); }
+.tbtn[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 1px var(--accent); }
+
+/* Brauseri wireframe */
+.browser { background: var(--panel); border: 2px solid var(--sketch); border-radius: 10px; font-family: var(--font-sketch); box-shadow: var(--shadow); overflow: hidden; min-width: 0; }
+.chrome { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-bottom: 2px solid var(--sketch); background: var(--field-off); }
+.chrome .dots { display: flex; gap: 5px; }
+.chrome .dots span { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--sketch); }
+.urlbar { flex: 1; min-width: 0; border: 1.5px solid var(--sketch); border-radius: 14px; padding: 3px 12px; font-family: var(--font-mono); font-size: .8rem; background: var(--field); white-space: nowrap; overflow-x: auto; }
+.sitenav { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; padding: 8px 14px; border-bottom: 1.5px dashed var(--line); font-size: .85rem; }
+.sitenav .logo { width: 44px; height: 24px; border: 1.5px solid var(--sketch); position: relative; }
+.sitenav .logo::before, .sitenav .logo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top right, transparent calc(50% - .75px), var(--sketch) 50%, transparent calc(50% + .75px)); }
+.sitenav .logo::after { transform: scaleX(-1); }
+.sitenav .cur { text-decoration: underline; text-underline-offset: 3px; }
+.sitenav .admin { position: relative; }
+.sitenav .admin > button { background: none; border: 1.5px solid transparent; border-radius: 6px; font: inherit; color: var(--ink); padding: 0 6px; cursor: pointer; }
+.sitenav .admin > button:hover, .sitenav .admin > button[aria-expanded="true"] { border-color: var(--sketch); }
+.sitenav .menu { position: absolute; top: calc(100% + 4px); left: 0; z-index: 6; background: var(--panel); border: 1.5px solid var(--sketch); border-radius: 6px; box-shadow: 3px 3px 0 var(--sketch); display: grid; min-width: 180px; padding: 4px; }
+.sitenav .menu button { background: none; border: 0; text-align: left; font: inherit; color: var(--ink); padding: 4px 8px; border-radius: 4px; cursor: pointer; white-space: nowrap; }
+.sitenav .menu button:hover { background: var(--accent-soft); }
+.sitenav .menu .cur { background: var(--accent-soft); font-weight: 700; }
+.viewhead { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; justify-content: space-between; }
+.sitenav .out { margin-left: auto; border: 1.5px solid var(--sketch); border-radius: 10px; padding: 0 8px; font-size: .78rem; }
+
+.view { padding: 16px 18px 20px; display: grid; gap: 14px; min-width: 0; }
+.view h2 { font-family: var(--font-sketch); font-size: 1.35rem; font-weight: 700; }
+.searchrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.searchrow input { flex: 1 1 260px; min-width: 0; }
+input[type="text"], select { font-family: var(--font-sketch); font-size: .9rem; color: var(--ink); background: var(--field); border: 1.5px solid var(--sketch); border-radius: 5px; padding: 4px 8px; }
+select { width: 100%; }
+.sbtn { font-family: var(--font-sketch); font-size: .9rem; border: 1.5px solid var(--sketch); border-radius: 12px; background: var(--field); color: var(--ink); padding: 3px 14px; cursor: pointer; box-shadow: 1.5px 1.5px 0 var(--sketch); white-space: nowrap; }
+.sbtn:hover:not(:disabled) { background: var(--accent-soft); }
+.sbtn:active:not(:disabled) { transform: translate(1px, 1px); box-shadow: .5px .5px 0 var(--sketch); }
+.sbtn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.sbtn.danger { background: var(--del); border-color: var(--del); color: #fff; }
+.sbtn.small { font-size: .78rem; padding: 1px 10px; }
+.sbtn:disabled { opacity: .45; cursor: not-allowed; }
+.api-pin { font-family: var(--font-mono); font-size: .66rem; background: var(--note); color: var(--note-ink); border: 0; border-radius: 3px; padding: 0 5px; cursor: pointer; line-height: 1.6; white-space: nowrap; }
+.api-pin:hover { outline: 1.5px solid var(--note-edge); }
+.pins { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+
+.tip { position: relative; display: inline-flex; }
+.tip .qmark { width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--sketch); background: var(--field); color: var(--ink); font: 700 .8rem var(--font-sketch); cursor: help; padding: 0; }
+.tip [role="tooltip"] { position: absolute; right: 0; top: calc(100% + 8px); z-index: 5; width: min(300px, 80vw); background: var(--ink); color: var(--panel); font: .78rem/1.4 var(--font-ui); padding: 8px 10px; border-radius: 6px; opacity: 0; visibility: hidden; transition: opacity .12s; pointer-events: none; }
+.tip:hover [role="tooltip"], .tip:focus-within [role="tooltip"] { opacity: 1; visibility: visible; }
+.togglerow { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+.linkish { background: none; border: 0; color: var(--accent); text-decoration: underline; cursor: pointer; padding: 0; font-family: var(--font-sketch); font-size: .9rem; }
+.linkish.small { font-size: .8rem; }
+.badge { border: 1.5px solid var(--sketch); border-radius: 10px; padding: 0 8px; font-size: .75rem; white-space: nowrap; }
+.badge.draft { background: var(--field-off); }
+.badge.pub { background: var(--ok); color: #fff; border-color: var(--ok); }
+.badge.active { background: var(--accent-soft); border-color: var(--accent); }
+.badge.deleted { background: var(--del); color: #fff; border-color: var(--del); }
+tr.is-deleted td { color: var(--ink-soft); }
+tr.is-deleted td .flag, tr.is-deleted td .settings { opacity: .55; }
+
+fieldset { border: 1.5px solid var(--sketch); border-radius: 8px; margin: 0; padding: 10px 12px 12px; display: grid; gap: 12px; min-width: 0; }
+legend { padding: 0 6px; font-weight: 700; font-size: .9rem; }
+.fgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px 14px; }
+.fld { display: grid; gap: 3px; min-width: 0; }
+.lbl { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: .82rem; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.hint { font-size: .8rem; color: var(--ink-soft); }
+
+/* Tabel */
+.tablewrap { overflow-x: auto; border: 1.5px solid var(--sketch); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: .84rem; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px dashed var(--line); vertical-align: middle; }
+thead th { background: var(--field-off); border-bottom: 1.5px solid var(--sketch); font-weight: 700; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr:hover td { background: color-mix(in srgb, var(--accent-soft) 45%, transparent); }
+td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.sorth { background: none; border: 0; padding: 0; font: inherit; font-weight: 700; color: var(--ink); cursor: pointer; display: inline-flex; gap: 4px; align-items: center; }
+.sorth:hover { color: var(--accent); }
+.sorth .arrow { font-size: .75rem; color: var(--accent); min-width: .8em; }
+.th-pin { display: inline-flex; gap: 4px; align-items: center; }
+.title-cell { min-width: 170px; }
+.fallback { display: block; font-size: .7rem; color: var(--ink-soft); }
+.settings { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; min-width: 120px; }
+.settings li { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.settings li::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex: none; }
+.settings .none { color: var(--ink-soft); }
+.settings .none::before { display: none; }
+.tr-ok { color: var(--ok); font-weight: 700; font-size: 1.05rem; }
+.tr-bad { color: var(--bad); font-weight: 700; font-size: 1.05rem; cursor: help; }
+.icons { display: flex; gap: 4px; }
+.ibtn { width: 28px; height: 26px; display: inline-grid; place-items: center; border: 1.5px solid var(--sketch); border-radius: 6px; background: var(--field); color: var(--ink); cursor: pointer; padding: 0; }
+.ibtn:hover { background: var(--accent-soft); }
+.ibtn.del:hover { background: color-mix(in srgb, var(--del) 20%, transparent); }
+.ibtn svg { width: 16px; height: 16px; }
+.flag svg { width: 26px; height: 17px; border: 1.5px solid var(--sketch); display: block; }
+.empty-row td { text-align: center; padding: 20px; color: var(--ink-soft); }
+
+.foot { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; }
+.total { font-size: .85rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.pager { display: flex; flex-wrap: wrap; gap: 0; }
+.pager button { font-family: var(--font-sketch); font-size: .85rem; border: 1.5px solid var(--sketch); margin-left: -1.5px; background: var(--field); color: var(--accent); padding: 2px 10px; cursor: pointer; }
+.pager button:first-child { border-radius: 6px 0 0 6px; margin-left: 0; }
+.pager button:last-child { border-radius: 0 6px 6px 0; }
+.pager button[aria-current="page"] { background: var(--accent); color: #fff; border-color: var(--sketch); }
+.pager button:disabled { color: var(--ink-soft); cursor: not-allowed; opacity: .6; }
+
+/* Alumine rida */
+.below { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; box-shadow: var(--shadow); display: grid; gap: 10px; min-width: 0; }
+.kv { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 12px; font-size: .86rem; margin: 0; }
+.kv dt { color: var(--ink-soft); }
+.kv dd { margin: 0; font-family: var(--font-mono); font-size: .8rem; overflow-wrap: anywhere; }
+
+.note { background: var(--note); color: var(--note-ink); border-radius: 2px; box-shadow: 0 1px 0 var(--note-edge), 0 6px 16px rgba(80, 60, 0, .18); padding: 12px 14px 14px; display: grid; gap: 8px; min-width: 0; }
+.note.flash { animation: noteflash 1.4s ease-out; }
+@keyframes noteflash { 0%, 30% { box-shadow: 0 0 0 4px var(--accent), 0 6px 16px rgba(80,60,0,.18); } 100% { box-shadow: 0 1px 0 var(--note-edge), 0 6px 16px rgba(80,60,0,.18); } }
+.note-head { display: flex; align-items: center; gap: 8px; }
+.note-head strong { font-size: .82rem; font-weight: 600; letter-spacing: .03em; }
+.note-head .copy { margin-left: auto; font: 500 .75rem var(--font-ui); background: rgba(255,255,255,.55); color: var(--note-ink); border: 1px solid var(--note-edge); border-radius: 4px; padding: 1px 8px; cursor: pointer; }
+.note-head .copy:hover { background: #fff; }
+.note pre { margin: 0; font: .78rem/1.45 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+.note .draft-tag { font-size: .72rem; background: rgba(255,255,255,.55); border-radius: 3px; padding: 0 6px; }
+
+.log { display: grid; gap: 6px; }
+.log-step { font-size: .85rem; color: var(--ink-soft); }
+.log-group { font-size: .74rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft); margin-top: 6px; }
+.req { border: 1px solid var(--line); border-radius: 6px; background: var(--field); overflow: hidden; }
+.req.done { border-color: var(--ok); }
+.req > button { width: 100%; display: flex; gap: 8px; align-items: center; text-align: left; background: none; border: 0; color: var(--ink); padding: 6px 10px; cursor: pointer; }
+.req > button:hover { background: var(--field-off); }
+.req .main { display: grid; gap: 1px; flex: 1; min-width: 0; }
+.req .when { display: block; font-size: .74rem; color: var(--ink-soft); }
+.req .ran { font: 600 .68rem var(--font-ui); color: var(--ok); border: 1px solid var(--ok); border-radius: 10px; padding: 0 6px; flex: none; }
+.req.idle .method { opacity: .75; }
+.method { font: 600 .7rem var(--font-mono); padding: 1px 6px; border-radius: 3px; color: #fff; flex: none; }
+.m-GET { background: var(--get); } .m-POST { background: var(--post); } .m-PUT { background: var(--put); } .m-DELETE { background: var(--del); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .method { color: #111; } }
+:root[data-theme="dark"] .method { color: #111; }
+.req .path { font-family: var(--font-mono); font-size: .76rem; overflow-wrap: anywhere; }
+.req .body { border-top: 1px dashed var(--line); padding: 8px 10px; display: grid; gap: 6px; }
+.req .body pre { margin: 0; font: .74rem/1.4 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; max-height: 280px; overflow: auto; }
+.req .body .sub { font-size: .75rem; color: var(--ink-soft); }
+.req .body .linkish { font-size: .8rem; justify-self: start; }
+
+.notes-section { display: grid; gap: 14px; }
+.notes-section > p { margin: 0; color: var(--ink-soft); max-width: 72ch; }
+.notes-grid { columns: 3 340px; column-gap: 18px; }
+.notes-grid .note { break-inside: avoid; margin-bottom: 18px; }
+
+.overlay { position: fixed; inset: 0; background: rgba(15, 20, 28, .45); display: grid; place-items: center; padding: 16px; z-index: 20; }
+.modal { background: var(--panel); color: var(--ink); border: 2px solid var(--sketch); border-radius: 10px; width: min(440px, 100%); padding: 16px 18px; display: grid; gap: 12px; font-family: var(--font-sketch); box-shadow: 4px 4px 0 var(--sketch); }
+.modal h2 { font-family: var(--font-sketch); font-weight: 700; }
+.modal .row { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--panel); padding: 8px 16px; border-radius: 6px; font-size: .9rem; z-index: 30; max-width: calc(100% - 32px); }
+
+@media (max-width: 1100px) { .below { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .below .note { grid-column: 1 / -1; } }
+@media (max-width: 700px) { .below { grid-template-columns: minmax(0, 1fr); } .page { padding-inline: 16px; } }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+
+<div class="page">
+  <header class="intro">
+    <h1>AdminTrainingsView.vue — läbimäng</h1>
+    <p>Otsi, ava filtrid, klõpsa veergude pealkirjadel, vaheta lehte, publitseeri või kustuta koolitusi nagu päris vaates. Paremal all näed, milline backendi päring iga tegevuse peale tehti. Kollased kastid on mockupi märkmed samas vormingus nagu <code>admin-trainings-view-markmed.md</code> ja neid saab otse Balsamiqi kopeerida.</p>
+    <p>Andmed on samad mis andmebaasis (<code>3_import.sql</code>): 14 koolitust, sh mustandid (9, 10, 12), kustutatud koolitus (14, filtriga Staatus = „Kustutatud“), puuduvate tõlgetega koolitused (9, 10, 13) ja teine lehekülg. Kasutajaliidese keele vahetus näitab, kuidas puuduva tõlke korral kuvatakse põhikeele nimi. Uute teenuste DTO-d on <strong>ettepanek</strong>.</p>
+    <div class="toolbar">
+      <span class="lbl-soft">Kasutajaliidese keel (navbar):</span>
+      <button class="tbtn" type="button" data-ui-lang="et">et</button>
+      <button class="tbtn" type="button" data-ui-lang="en">en</button>
+      <span class="sep" aria-hidden="true"></span>
+      <button class="tbtn" type="button" id="btn-reset">Alusta algusest</button>
+    </div>
+  </header>
+
+  <div class="browser" aria-label="AdminTrainingsView wireframe">
+    <div class="chrome">
+      <div class="dots" aria-hidden="true"><span></span><span></span><span></span></div>
+      <div class="urlbar" id="urlbar">https://bcskoolitus.ee/admin-trainings</div>
+    </div>
+    <nav class="sitenav" aria-label="Navbar (wireframe)">
+      <span class="logo" aria-hidden="true"></span><span>Koolitused</span><span>Teenused</span><span>Ettevõttest</span><span>Kontakt</span>
+      <span class="admin"><button type="button" id="b-admin" aria-expanded="false" aria-controls="admin-menu">Admin ▾</button>
+        <span class="menu" id="admin-menu" hidden><button type="button" data-nav="/training-form">Lisa uus koolitus</button><button type="button" class="cur" data-nav="/admin-trainings" aria-current="page">Koolituste haldus</button></span></span>
+      <span class="out">Logi välja</span>
+    </nav>
+    <div class="view" id="view"></div>
+  </div>
+
+  <div class="below">
+    <div class="card">
+      <h3>Vaate olek</h3>
+      <dl class="kv" id="statekv"></dl>
+    </div>
+    <div class="card">
+      <h3>Päringud</h3>
+      <div class="log" id="log"></div>
+    </div>
+    <div class="note" id="note-view">
+      <div class="note-head"><strong>Vaate märkmed</strong><button class="copy" type="button" data-copy="view">Kopeeri</button></div>
+      <pre id="view-note-text"></pre>
+    </div>
+  </div>
+
+  <section class="notes-section">
+    <h2>API märkmed (<span id="notes-count"></span>)</h2>
+    <p>Iga backendi kutse kohta üks kast. Vajuta wireframe'il kollasele sildile või päringute logis päringule, et hüpata vastava märkme juurde.</p>
+    <div class="notes-grid" id="notes"></div>
+  </section>
+</div>
+
+<div id="modal-root"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- Andmed (3_import.sql) ---------- */
+  var LANGUAGES = [
+    { languageId: 1, languageCode: "et", languageName: "Eesti", isMainLanguage: true, requiresTranslation: true, flagIconCode: "fi-ee" },
+    { languageId: 2, languageCode: "en", languageName: "English", isMainLanguage: false, requiresTranslation: true, flagIconCode: "fi-gb" },
+    { languageId: 3, languageCode: "ru", languageName: "Русский", isMainLanguage: false, requiresTranslation: false, flagIconCode: "fi-ru" }
+  ];
+  var CATEGORIES = { 1: { et: "Programmeerimine", en: "Programming" }, 2: { et: "Disain", en: "Design" }, 3: { et: "Juhtimine", en: "Management" } };
+  var FUNDING = { 1: { et: "Töötukassa", en: "Job Centre" }, 2: { et: "EL rahastus", en: "EU Funded" } };
+  var LIMIT = 10;
+  var TRANSLATION_CODES = LANGUAGES.filter(function (l) { return l.requiresTranslation; }).map(function (l) { return l.languageCode; });
+  var MAIN_CODE = LANGUAGES.filter(function (l) { return l.isMainLanguage; })[0].languageCode;
+
+  // tr: tõlked keelekoodi järgi { id, title, updatedAt }
+  function freshDb() {
+    return [
+      { id: 1, cat: 1, lang: 1, status: "P", ord: true, promo: true, fund: [1], created: "2026-08-01 09:00", updated: "2026-08-01 09:00",
+        tr: { et: { id: 1, title: "Java algkursus", updatedAt: "2026-09-29 10:15" }, en: { id: 2, title: "Java Basics", updatedAt: "2026-08-01 09:00" } } },
+      { id: 2, cat: 3, lang: 1, status: "P", ord: false, promo: false, fund: [], created: "2026-08-05 10:00", updated: "2026-08-05 10:00",
+        tr: { et: { id: 3, title: "Projektijuhtimise põhitõed", updatedAt: "2026-08-05 10:00" }, en: { id: 4, title: "Project Management Fundamentals", updatedAt: "2026-08-05 10:00" } } },
+      { id: 3, cat: 1, lang: 1, status: "P", ord: true, promo: false, fund: [1, 2], created: "2026-08-10 09:00", updated: "2026-09-21 14:30",
+        tr: { et: { id: 5, title: "Spring Boot veebiarendus", updatedAt: "2026-08-10 09:00" }, en: { id: 6, title: "Spring Boot Web Development", updatedAt: "2026-08-10 09:00" } } },
+      { id: 4, cat: 1, lang: 2, status: "P", ord: true, promo: true, fund: [2], created: "2026-08-12 09:00", updated: "2026-08-12 09:00",
+        tr: { et: { id: 7, title: "Vue.js esmaspetsialist", updatedAt: "2026-08-12 09:00" }, en: { id: 8, title: "Vue.js Essentials", updatedAt: "2026-08-12 09:00" } } },
+      { id: 5, cat: 2, lang: 1, status: "P", ord: true, promo: false, fund: [1], created: "2026-08-14 09:00", updated: "2026-08-14 09:00",
+        tr: { et: { id: 9, title: "UX disaini alused", updatedAt: "2026-08-14 09:00" }, en: { id: 10, title: "UX Design Basics", updatedAt: "2026-08-14 09:00" } } },
+      { id: 6, cat: 2, lang: 2, status: "P", ord: false, promo: false, fund: [], created: "2026-08-16 09:00", updated: "2026-08-16 09:00",
+        tr: { et: { id: 11, title: "Figma praktikum", updatedAt: "2026-08-16 09:00" }, en: { id: 12, title: "Figma Workshop", updatedAt: "2026-08-16 09:00" } } },
+      { id: 7, cat: 3, lang: 1, status: "P", ord: true, promo: false, fund: [2], created: "2026-08-18 09:00", updated: "2026-08-18 09:00",
+        tr: { et: { id: 13, title: "Agiilne meeskonnajuhtimine", updatedAt: "2026-08-18 09:00" }, en: { id: 14, title: "Agile Team Leadership", updatedAt: "2026-08-18 09:00" } } },
+      { id: 8, cat: 1, lang: 1, status: "P", ord: true, promo: false, fund: [1], created: "2026-08-20 09:00", updated: "2026-08-20 09:00",
+        tr: { et: { id: 15, title: "SQL ja andmebaasid", updatedAt: "2026-08-20 09:00" }, en: { id: 16, title: "SQL and Databases", updatedAt: "2026-08-20 09:00" } } },
+      // AdminTrainingsView näidised (3_import.sql)
+      { id: 9, cat: 1, lang: 3, status: "U", ord: true, promo: false, fund: [], created: "2026-09-02 11:00", updated: "2026-09-02 11:00",
+        tr: { et: { id: 17, title: "Exceli algkursus", updatedAt: "2026-09-02 11:00" } } },
+      { id: 10, cat: 1, lang: 1, status: "U", ord: true, promo: false, fund: [2], created: "2026-09-10 13:20", updated: "2026-09-10 13:20",
+        tr: { et: { id: 18, title: "Docker ja konteinerid", updatedAt: "2026-09-12 08:45" } } },
+      { id: 11, cat: 1, lang: 1, status: "P", ord: true, promo: false, fund: [1], created: "2026-09-14 09:30", updated: "2026-09-14 09:30",
+        tr: { et: { id: 19, title: "Git ja GitHub", updatedAt: "2026-09-14 09:30" }, en: { id: 20, title: "Git and GitHub", updatedAt: "2026-09-15 16:00" } } },
+      { id: 12, cat: 1, lang: 2, status: "U", ord: false, promo: false, fund: [], created: "2026-09-18 10:00", updated: "2026-09-18 10:00",
+        tr: { et: { id: 21, title: "Python andmeanalüüsiks", updatedAt: "2026-09-18 10:00" }, en: { id: 22, title: "Python for Data Analysis", updatedAt: "2026-09-18 10:00" } } },
+      { id: 13, cat: 1, lang: 1, status: "P", ord: true, promo: true, fund: [1, 2], created: "2026-09-25 15:10", updated: "2026-09-26 09:00",
+        tr: { et: { id: 23, title: "Tehisaru töövahendid arendajale", updatedAt: "2026-09-25 15:10" } } },
+      { id: 14, cat: 2, lang: 1, status: "D", ord: false, promo: false, fund: [], created: "2026-08-25 12:00", updated: "2026-09-08 17:40",
+        tr: { et: { id: 24, title: "Photoshopi algkursus", updatedAt: "2026-08-25 12:00" }, en: { id: 25, title: "Photoshop Basics", updatedAt: "2026-08-25 12:00" } } }
+    ];
+  }
+
+  function defaultFilters() {
+    return { categoryId: 0, trainingLanguageId: 0, fundingTypeId: 0, status: "", isOrderable: "", isPromoted: "", hasAllTranslations: "" };
+  }
+  function freshUi() {
+    return { lang: "et", searchInput: "", appliedSearch: "", filters: defaultFilters(), applied: defaultFilters(),
+      sortBy: "createdAt", sortDirection: "desc", page: 0, open: false, result: null, lastQuery: "" };
+  }
+
+  var db = freshDb();
+  var ui = freshUi();
+  var logSteps = [], logTitle = "", openReq = -1;
+
+  function j(o) { return JSON.stringify(o, null, 2); }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c]; }); }
+  function lang(id) { return LANGUAGES.filter(function (l) { return l.languageId === id; })[0]; }
+  function toInstant(local) { return new Date(local.replace(" ", "T") + ":00+03:00").toISOString().replace(".000", ""); }
+  function ddmmyyyy(local) { var d = local.slice(0, 10).split("-"); return d[2] + "/" + d[1] + "/" + d[0]; }
+  function maxStr(a, b) { return a > b ? a : b; }
+
+  /* ---------- Simuleeritud backend: view admin_training_summary ---------- */
+  function viewRow(t, code) {
+    var tr = t.tr[code] || t.tr[MAIN_CODE];
+    var updated = t.updated;
+    Object.keys(t.tr).forEach(function (c) { updated = maxStr(updated, t.tr[c].updatedAt); });
+    var missing = TRANSLATION_CODES.filter(function (c) { return !t.tr[c]; });
+    var tl = lang(t.lang);
+    return {
+      trainingId: t.id, trainingTranslationId: tr.id, title: tr.title, categoryId: t.cat, categoryName: CATEGORIES[t.cat][code] || CATEGORIES[t.cat][MAIN_CODE],
+      trainingLanguageCode: tl.languageCode, trainingLanguageFlagIconCode: tl.flagIconCode, status: t.status, _statusOrder: { U: 1, P: 2, D: 3 }[t.status], isOrderable: t.ord, isPromoted: t.promo,
+      createdAt: toInstant(t.created), updatedAt: toInstant(updated), hasAllTranslations: missing.length === 0, missingTranslationLanguageCodes: missing,
+      fundingTypes: t.fund.map(function (f) { return { fundingTypeId: f, fundingTypeName: FUNDING[f][code] }; }),
+      _fallback: !t.tr[code], _created: t.created, _updated: updated
+    };
+  }
+  function allRows(code) { return db.map(function (t) { return viewRow(t, code); }); }
+
+  function queryParams() {
+    var a = ui.applied;
+    var p = [["contentLang", ui.lang], ["searchText", ui.appliedSearch], ["categoryId", a.categoryId], ["trainingLanguageId", a.trainingLanguageId], ["fundingTypeId", a.fundingTypeId]];
+    if (a.status) p.push(["status", a.status]);
+    if (a.isOrderable) p.push(["isOrderable", a.isOrderable]);
+    if (a.isPromoted) p.push(["isPromoted", a.isPromoted]);
+    if (a.hasAllTranslations) p.push(["hasAllTranslations", a.hasAllTranslations]);
+    p.push(["sortBy", ui.sortBy], ["sortDirection", ui.sortDirection], ["page", ui.page], ["limit", LIMIT]);
+    return p;
+  }
+  function qs(p) { return p.map(function (x) { return x[0] + "=" + encodeURIComponent(x[1]); }).join("&"); }
+
+  function findAdminTrainings() {
+    var a = ui.applied;
+    var words = ui.appliedSearch.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    var rows = allRows(ui.lang).filter(function (r) {
+      if (a.categoryId && r.categoryId !== a.categoryId) return false;
+      if (a.trainingLanguageId && lang(a.trainingLanguageId).languageCode !== r.trainingLanguageCode) return false;
+      if (a.fundingTypeId && !r.fundingTypes.some(function (f) { return f.fundingTypeId === a.fundingTypeId; })) return false;
+      if (a.status ? r.status !== a.status : r.status === "D") return false; // status puudub = aktiivsed (U ja P)
+      if (a.isOrderable && String(r.isOrderable) !== a.isOrderable) return false;
+      if (a.isPromoted && String(r.isPromoted) !== a.isPromoted) return false;
+      if (a.hasAllTranslations && String(r.hasAllTranslations) !== a.hasAllTranslations) return false;
+      var title = r.title.toLowerCase();
+      return words.every(function (w) { return title.indexOf(w) !== -1; });
+    });
+    var key = { createdAt: "_created", updatedAt: "_updated", title: "title", categoryName: "categoryName", trainingLanguageCode: "trainingLanguageCode", status: "_statusOrder", hasAllTranslations: "hasAllTranslations" }[ui.sortBy];
+    var dir = ui.sortDirection === "asc" ? 1 : -1;
+    rows.sort(function (x, y) {
+      var c = String(x[key]).localeCompare(String(y[key]), ui.lang);
+      return c !== 0 ? c * dir : x.trainingId - y.trainingId;
+    });
+    var totalPages = Math.ceil(rows.length / LIMIT);
+    var pageRows = rows.slice(ui.page * LIMIT, ui.page * LIMIT + LIMIT);
+    return { totalPages: totalPages, totalElements: rows.length, adminTrainingSummaries: pageRows };
+  }
+  function publicDto(res) {
+    return { totalPages: res.totalPages, totalElements: res.totalElements, adminTrainingSummaries: res.adminTrainingSummaries.map(function (r) {
+      var o = {}; Object.keys(r).forEach(function (k) { if (k.charAt(0) !== "_") o[k] = r[k]; }); return o;
+    }) };
+  }
+  function titlesDto() {
+    return allRows(ui.lang).filter(function (r) { return r.status !== "D"; }).map(function (r) { return { trainingId: r.trainingId, title: r.title }; })
+      .sort(function (x, y) { return x.title.localeCompare(y.title, ui.lang); });
+  }
+
+  /* ---------- Päringute logi ---------- */
+  function call(method, path, req, res) { logSteps.push({ method: method, path: path, req: req, res: res }); }
+  function startStep(title) { logSteps = []; logTitle = title; openReq = -1; }
+
+  function loadTable() {
+    var res = findAdminTrainings();
+    ui.result = res;
+    ui.lastQuery = qs(queryParams());
+    call("GET", "/api/admin-trainings?" + ui.lastQuery, null, publicDto(res));
+  }
+  function loadLookups(withLanguages) {
+    if (withLanguages) call("GET", "/api/languages", null, LANGUAGES);
+    call("GET", "/api/categories?contentLang=" + ui.lang, null, Object.keys(CATEGORIES).map(function (k) { return { categoryId: +k, categoryName: CATEGORIES[k][ui.lang] }; }));
+    call("GET", "/api/funding-types?contentLang=" + ui.lang, null, Object.keys(FUNDING).map(function (k) { return { fundingTypeId: +k, fundingTypeName: FUNDING[k][ui.lang] }; }));
+    call("GET", "/api/training-titles?contentLang=" + ui.lang, null, titlesDto());
+  }
+
+  /* ---------- Tegevused ---------- */
+  function openView() {
+    db = freshDb(); ui = freshUi();
+    startStep("Vaate avamine: /admin-trainings");
+    loadLookups(true); loadTable(); renderAll();
+  }
+  function switchLang(code) {
+    if (code === ui.lang) return;
+    ui.lang = code;
+    startStep("Keele vahetus navbaris → " + code + " (otsing, filtrid, sorteerimine ja leht jäävad)");
+    loadLookups(false); loadTable(); renderAll();
+  }
+  function doSearch() {
+    ui.appliedSearch = ui.searchInput; ui.page = 0;
+    startStep("„Otsi“ → searchText = \"" + ui.appliedSearch + "\", page = 0");
+    loadTable(); renderAll();
+  }
+  function doFilter() {
+    ui.applied = JSON.parse(JSON.stringify(ui.filters)); ui.page = 0;
+    startStep("„Filtreeri“ → rakendatud filtrid, page = 0");
+    loadTable(); renderAll();
+  }
+  function doClearFilters() {
+    ui.filters = defaultFilters(); ui.applied = defaultFilters(); ui.page = 0;
+    startStep("„Tühjenda filtrid“ → vaikimisi väärtused, page = 0");
+    loadTable(); renderAll();
+  }
+  function doSort(col) {
+    if (ui.sortBy === col) ui.sortDirection = ui.sortDirection === "asc" ? "desc" : "asc";
+    else { ui.sortBy = col; ui.sortDirection = "asc"; }
+    ui.page = 0;
+    startStep("Sorteerimine → sortBy = " + ui.sortBy + ", sortDirection = " + ui.sortDirection + ", page = 0");
+    loadTable(); renderAll();
+  }
+  function doPage(p) {
+    if (p < 0 || p >= ui.result.totalPages || p === ui.page) return;
+    ui.page = p;
+    startStep("Lehe vahetus → page = " + p);
+    loadTable(); renderAll();
+  }
+  function findRow(id) { return ui.result.adminTrainingSummaries.filter(function (r) { return r.trainingId === id; })[0]; }
+  // TrainingStatusButton.vue: U → publish, P → unpublish, D → restore (API kutse teeb komponent ise)
+  var STATUS_ACTIONS = {
+    U: { label: "Publitseeri", title: "Publitseeri koolitus", text: "Kas soovid koolituse „{t}“ publitseerida? See muutub avalikult nähtavaks.", path: "/publish", to: "P", done: "Publitseeritud" },
+    P: { label: "Liiguta mustandisse", title: "Liiguta mustandisse", text: "Kas soovid koolituse „{t}“ mustandisse liigutada? See kaob avalikust nimekirjast.", path: "/unpublish", to: "U", done: "Liigutatud mustandisse" },
+    D: { label: "Taasta", title: "Taasta koolitus", text: "Kas soovid koolituse „{t}“ taastada? See läheb mustandisse, avalikuks muutub alles pärast publitseerimist.", path: "/restore", to: "U", done: "Koolitus taastatud (mustand)" }
+  };
+  function doStatus(id) {
+    var r = findRow(id), a = STATUS_ACTIONS[r.status];
+    confirmModal(a.title, a.text.replace("{t}", r.title), a.label, "primary",
+      function () {
+        startStep("„" + a.label + "“ → kinnitus → PUT " + a.path.slice(1) + " (TrainingStatusButton) → event-status-changed → tabel uuesti");
+        var t = db.filter(function (x) { return x.id === id; })[0];
+        if (r.status === "D") t.updated = "2026-09-30 12:05";
+        t.status = a.to;
+        call("PUT", "/api/training/" + id + a.path, null, null);
+        loadTable();
+        if (r.status === "D") {
+          if (ui.result.adminTrainingSummaries.length === 0 && ui.page > 0) { ui.page--; loadTable(); logTitle += " — leht jäi tühjaks, page - 1"; }
+          call("GET", "/api/training-titles?contentLang=" + ui.lang, null, titlesDto());
+        }
+        renderAll();
+        toast(a.done);
+      });
+  }
+  function doDelete(id) {
+    var r = findRow(id);
+    confirmModal("Kustuta koolitus", "Kas soovid koolituse „" + r.title + "“ kustutada? Koolitus kaob admini tabelist ja avalikust nimekirjast.", "Kustuta", "danger",
+      function () {
+        startStep("„Kustuta“ → kinnitus → DELETE (TrainingDeleteButton, soft delete) → event-training-deleted → tabel uuesti");
+        var t = db.filter(function (x) { return x.id === id; })[0];
+        t.status = "D"; t.updated = "2026-09-30 12:00";
+        call("DELETE", "/api/training/" + id, null, null);
+        loadTable();
+        if (ui.result.adminTrainingSummaries.length === 0 && ui.page > 0) { ui.page--; loadTable(); logTitle += " — leht jäi tühjaks, page - 1"; }
+        call("GET", "/api/training-titles?contentLang=" + ui.lang, null, titlesDto());
+        renderAll();
+        toast("Koolitus kustutatud");
+      });
+  }
+  function doNavigate(kind, id) {
+    var r = findRow(id);
+    var route = (kind === "view" ? "/training" : "/training-form") + "?trainingId=" + r.trainingId + "&trainingTranslationId=" + r.trainingTranslationId;
+    toast("router.push → " + route);
+  }
+
+  /* ---------- Modal ja teade ---------- */
+  var modalRoot = document.getElementById("modal-root");
+  function closeModal() { modalRoot.innerHTML = ""; }
+  function confirmModal(title, text, okLabel, okClass, onOk) {
+    modalRoot.innerHTML = '<div class="overlay" role="dialog" aria-modal="true" aria-labelledby="m-title"><div class="modal"><h2 id="m-title">' + esc(title) + '</h2><p style="margin:0">' + esc(text) + '</p><div class="row"><button class="sbtn" type="button" id="m-no">Katkesta</button><button class="sbtn ' + okClass + '" type="button" id="m-yes">' + esc(okLabel) + '</button></div></div></div>';
+    document.getElementById("m-no").onclick = closeModal;
+    document.getElementById("m-yes").onclick = function () { closeModal(); onOk(); };
+    modalRoot.querySelector(".overlay").onclick = function (e) { if (e.target === e.currentTarget) closeModal(); };
+    document.getElementById("m-yes").focus();
+  }
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeModal(); });
+  var toastTimer = null;
+  function toast(msg) {
+    var old = document.querySelector(".toast"); if (old) old.remove();
+    var el = document.createElement("div"); el.className = "toast"; el.setAttribute("role", "status"); el.textContent = msg;
+    document.body.appendChild(el);
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { el.remove(); }, 2400);
+  }
+
+  /* ---------- Ikoonid ja lipud ---------- */
+  var ICON = {
+    eye: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+    pencil: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>',
+    trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>'
+  };
+  var FLAG_SVG = {
+    "fi-ee": '<svg viewBox="0 0 33 21" aria-hidden="true"><rect width="33" height="7" fill="#0072ce"/><rect y="7" width="33" height="7" fill="#000"/><rect y="14" width="33" height="7" fill="#fff"/></svg>',
+    "fi-gb": '<svg viewBox="0 0 60 30" aria-hidden="true"><rect width="60" height="30" fill="#012169"/><path d="M0,0 60,30M60,0 0,30" stroke="#fff" stroke-width="6"/><path d="M0,0 60,30M60,0 0,30" stroke="#c8102e" stroke-width="2.5"/><path d="M30,0v30M0,15h60" stroke="#fff" stroke-width="10"/><path d="M30,0v30M0,15h60" stroke="#c8102e" stroke-width="6"/></svg>',
+    "fi-ru": '<svg viewBox="0 0 33 21" aria-hidden="true"><rect width="33" height="7" fill="#fff"/><rect y="7" width="33" height="7" fill="#0039a6"/><rect y="14" width="33" height="7" fill="#d52b1e"/></svg>'
+  };
+
+  /* ---------- Renderdamine ---------- */
+  function pin(noteId, label) { return '<button type="button" class="api-pin" data-note="' + noteId + '">' + esc(label) + '</button>'; }
+  function activeFilterCount() {
+    var d = defaultFilters(), a = ui.applied;
+    return Object.keys(d).filter(function (k) { return a[k] !== d[k]; }).length;
+  }
+  function selectHtml(id, value, options) {
+    return '<select id="' + id + '">' + options.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (String(o[0]) === String(value) ? " selected" : "") + '>' + esc(o[1]) + '</option>'; }).join("") + '</select>';
+  }
+  var YES_NO = [["", "Kõik"], ["true", "Jah"], ["false", "Ei"]];
+
+  function renderFilterCard() {
+    var f = ui.filters;
+    var cats = [[0, "Kõik"]].concat(Object.keys(CATEGORIES).map(function (k) { return [+k, CATEGORIES[k][ui.lang]]; }));
+    var langs = [[0, "Kõik"]].concat(LANGUAGES.map(function (l) { return [l.languageId, l.languageName]; }));
+    var funds = [[0, "Kõik"]].concat(Object.keys(FUNDING).map(function (k) { return [+k, FUNDING[k][ui.lang]]; }));
+    return '<fieldset id="filter-card"><legend>Otsingu filtrid</legend><div class="fgrid">' +
+      '<div class="fld"><span class="lbl">Kategooria ' + pin("n-categories", "GET /api/categories") + '</span>' + selectHtml("f-categoryId", f.categoryId, cats) + '</div>' +
+      '<div class="fld"><span class="lbl">Koolituse keel ' + pin("n-languages", "GET /api/languages") + '</span>' + selectHtml("f-trainingLanguageId", f.trainingLanguageId, langs) + '</div>' +
+      '<div class="fld"><span class="lbl">Rahastus ' + pin("n-funding", "GET /api/funding-types") + '</span>' + selectHtml("f-fundingTypeId", f.fundingTypeId, funds) + '</div>' +
+      '<div class="fld"><span class="lbl">Staatus</span>' + selectHtml("f-status", f.status, [["", "Aktiivsed"], ["U", "Mustand"], ["P", "Publitseeritud"], ["D", "Kustutatud"]]) + '</div>' +
+      '<div class="fld"><span class="lbl">Tellitav</span>' + selectHtml("f-isOrderable", f.isOrderable, YES_NO) + '</div>' +
+      '<div class="fld"><span class="lbl">Esile tõstetud</span>' + selectHtml("f-isPromoted", f.isPromoted, YES_NO) + '</div>' +
+      '<div class="fld"><span class="lbl">Tõlked</span>' + selectHtml("f-hasAllTranslations", f.hasAllTranslations, [["", "Kõik"], ["true", "Olemas"], ["false", "Puuduvad"]]) + '</div>' +
+      '</div><div class="actions"><button type="button" class="sbtn primary" id="b-filter">Filtreeri</button><button type="button" class="sbtn" id="b-clear">Tühjenda filtrid</button><span class="hint">Valikud rakenduvad alles „Filtreeri“ vajutamisel.</span></div></fieldset>';
+  }
+
+  var COLS = [
+    { key: "createdAt", label: "Lisatud" }, { key: "updatedAt", label: "Uuendatud" }, { key: "title", label: "Koolituse nimi" },
+    { key: "categoryName", label: "Kategooria" }, { key: "trainingLanguageCode", label: "Keel" },
+    { key: "status", label: "Staatus" }, { key: "hasAllTranslations", label: "Tõlked" }, { label: "Sätted" },
+    { label: "Tegevused", pin: pin("n-delete", "DELETE") }, { label: "", pin: pin("n-put-publish", "PUT publish") + " " + pin("n-put-unpublish", "PUT unpublish") + " " + pin("n-restore", "PUT restore") }
+  ];
+  function renderTable() {
+    var res = ui.result;
+    var head = COLS.map(function (c) {
+      if (c.key) {
+        var active = ui.sortBy === c.key;
+        var arrow = active ? (ui.sortDirection === "asc" ? "▲" : "▼") : "";
+        var aria = active ? (ui.sortDirection === "asc" ? "ascending" : "descending") : "none";
+        return '<th aria-sort="' + aria + '"><button type="button" class="sorth" data-sort="' + c.key + '">' + c.label + '<span class="arrow" aria-hidden="true">' + arrow + '</span></button></th>';
+      }
+      return '<th>' + (c.pin ? '<span class="th-pin">' + c.label + ' ' + c.pin + '</span>' : c.label) + '</th>';
+    }).join("");
+    var body = res.adminTrainingSummaries.length ? res.adminTrainingSummaries.map(function (r) {
+      var settings = r.fundingTypes.map(function (f) { return f.fundingTypeName; });
+      if (r.isOrderable) settings.push("Tellitav");
+      if (r.isPromoted) settings.push("Esile tõstetud");
+      var settingsHtml = settings.length ? settings.map(function (s) { return "<li>" + esc(s) + "</li>"; }).join("") : '<li class="none">—</li>';
+      var tr = r.hasAllTranslations ? '<span class="tr-ok" title="Kõik tõlked olemas" aria-label="Kõik tõlked olemas">✓</span>'
+        : '<span class="tr-bad" title="Puudub: ' + r.missingTranslationLanguageCodes.join(", ") + '" aria-label="Puudub: ' + r.missingTranslationLanguageCodes.join(", ") + '">✗</span>';
+      var deleted = r.status === "D";
+      var badge = { U: ["draft", "Mustand"], P: ["pub", "Publitseeritud"], D: ["deleted", "Kustutatud"] }[r.status];
+      return '<tr' + (deleted ? ' class="is-deleted"' : "") + '>' +
+        '<td class="date" title="' + esc(r.createdAt) + '">' + ddmmyyyy(r._created) + '</td>' +
+        '<td class="date" title="' + esc(r.updatedAt) + '">' + ddmmyyyy(r._updated) + '</td>' +
+        '<td class="title-cell">' + esc(r.title) + (r._fallback ? '<span class="fallback">' + ui.lang + ' tõlge puudub, kuvatud ' + MAIN_CODE + '</span>' : "") + '</td>' +
+        '<td>' + esc(r.categoryName) + '</td>' +
+        '<td><span class="flag" title="' + r.trainingLanguageCode + '">' + FLAG_SVG[r.trainingLanguageFlagIconCode] + '</span></td>' +
+        '<td><span class="badge ' + badge[0] + '">' + badge[1] + '</span></td>' +
+        '<td>' + tr + '</td>' +
+        '<td><ul class="settings">' + settingsHtml + '</ul></td>' +
+        '<td>' + (deleted ? '<span class="hint">—</span>' : '<div class="icons">' +
+          '<button type="button" class="ibtn" data-act="view" data-id="' + r.trainingId + '" title="Vaata" aria-label="Vaata">' + ICON.eye + '</button>' +
+          '<button type="button" class="ibtn" data-act="edit" data-id="' + r.trainingId + '" title="Muuda" aria-label="Muuda">' + ICON.pencil + '</button>' +
+          '<button type="button" class="ibtn del" data-act="delete" data-id="' + r.trainingId + '" title="Kustuta" aria-label="Kustuta">' + ICON.trash + '</button>' +
+        '</div>') + '</td>' +
+        '<td><button type="button" class="sbtn small" data-act="status" data-id="' + r.trainingId + '">' + STATUS_ACTIONS[r.status].label + '</button></td>' +
+        '</tr>';
+    }).join("") : '<tr class="empty-row"><td colspan="' + COLS.length + '">Tulemusi ei leitud</td></tr>';
+    return '<div class="tablewrap"><table><thead><tr>' + head + '</tr></thead><tbody>' + body + '</tbody></table></div>';
+  }
+  function renderPager() {
+    var res = ui.result;
+    if (res.totalPages === 0) return "";
+    var html = '<nav class="pager" aria-label="Leheküljed"><button type="button" data-page="' + (ui.page - 1) + '"' + (ui.page === 0 ? " disabled" : "") + '>Eelmine</button>';
+    for (var i = 0; i < res.totalPages; i++) html += '<button type="button" data-page="' + i + '"' + (i === ui.page ? ' aria-current="page"' : "") + '>' + (i + 1) + '</button>';
+    return html + '<button type="button" data-page="' + (ui.page + 1) + '"' + (ui.page >= res.totalPages - 1 ? " disabled" : "") + '>Järgmine</button></nav>';
+  }
+  function renderView() {
+    var n = activeFilterCount();
+    var titles = titlesDto();
+    document.getElementById("view").innerHTML =
+      '<div class="viewhead"><h2>Koolituste haldus</h2><button type="button" class="sbtn primary" id="b-new">+ Lisa uus koolitus</button></div>' +
+      '<div class="searchrow"><input type="text" id="f-search" list="titles" placeholder="Otsi koolituse nime järgi…" value="' + esc(ui.searchInput) + '" autocomplete="off" aria-label="Otsi koolituse nime järgi">' +
+      '<datalist id="titles">' + titles.map(function (t) { return '<option value="' + esc(t.title) + '"></option>'; }).join("") + '</datalist>' +
+      '<button type="button" class="sbtn primary" id="b-search">Otsi</button>' +
+      '<span class="tip"><button type="button" class="qmark" aria-label="Otsingu selgitus" aria-describedby="search-tip">?</button><span role="tooltip" id="search-tip">Otsitakse koolituse nimest. Iga sõna peab nimes esinema, käändeid ei kohandata. Nimede valikus on ainult aktiivsed koolitused — kustutatud koolituse leidmiseks vali filtrites Staatus „Kustutatud“.</span></span>' +
+      pin("n-titles", "GET /api/training-titles") + '</div>' +
+      '<div class="togglerow"><button type="button" class="linkish" id="b-toggle" aria-expanded="' + ui.open + '" aria-controls="filter-card">' + (ui.open ? "▴ Peida otsingu filtrid" : "▾ Ava otsingu filtrid") + '</button>' +
+      (n ? '<span class="badge active">' + n + (n === 1 ? " filter aktiivne" : " filtrit aktiivne") + '</span><button type="button" class="linkish small" id="b-clear-top">Tühjenda filtrid</button>' : "") + '</div>' +
+      (ui.open ? renderFilterCard() : "") +
+      '<div class="pins">' + pin("n-admin-trainings", "GET /api/admin-trainings") + '<span class="hint">Klõpsa veeru pealkirjal, et sorteerida. Rea ✗ kohal näitab tooltip puuduvaid tõlkeid. Kustutatud read: filter Staatus = „Kustutatud“.</span></div>' +
+      renderTable() +
+      '<div class="foot"><span class="total">Kokku ' + ui.result.totalElements + ' koolitust</span>' + renderPager() + '<span aria-hidden="true"></span></div>';
+  }
+
+  function renderKv() {
+    var a = ui.applied;
+    var rows = [
+      ["contentLang", ui.lang],
+      ["searchText (sisestus)", '"' + ui.searchInput + '"'],
+      ["appliedSearchText", '"' + ui.appliedSearch + '"'],
+      ["isFilterCardOpen", String(ui.open)],
+      ["appliedFilters", JSON.stringify(a).replace(/"/g, "").replace(/,/g, ", ")],
+      ["sortBy / sortDirection", ui.sortBy + " / " + ui.sortDirection],
+      ["page / totalPages", ui.page + " / " + ui.result.totalPages],
+      ["limit", String(LIMIT)]
+    ];
+    document.getElementById("statekv").innerHTML = rows.map(function (r) { return "<dt>" + esc(r[0]) + "</dt><dd>" + esc(r[1]) + "</dd>"; }).join("");
+  }
+
+  function noteFor(method, path) {
+    var p = path.split("?")[0];
+    if (method === "GET" && p === "/api/admin-trainings") return "n-admin-trainings";
+    if (method === "GET" && p === "/api/training-titles") return "n-titles";
+    if (method === "GET" && p === "/api/languages") return "n-languages";
+    if (method === "GET" && p === "/api/categories") return "n-categories";
+    if (method === "GET" && p === "/api/funding-types") return "n-funding";
+    if (method === "DELETE") return "n-delete";
+    if (method === "PUT" && /\/publish$/.test(p)) return "n-put-publish";
+    if (method === "PUT" && /\/unpublish$/.test(p)) return "n-put-unpublish";
+    if (method === "PUT" && /\/restore$/.test(p)) return "n-restore";
+    return null;
+  }
+  var REQUESTS = {
+    load: [
+      { m: "GET", p: "/api/admin-trainings?…", note: "n-admin-trainings", when: "tabel" },
+      { m: "GET", p: "/api/training-titles?contentLang={UI keel}", note: "n-titles", when: "otsinguvälja ettepanekud (ka keele vahetusel)" },
+      { m: "GET", p: "/api/categories?contentLang={UI keel}", note: "n-categories", when: "filter „Kategooria“ (ka keele vahetusel)" },
+      { m: "GET", p: "/api/funding-types?contentLang={UI keel}", note: "n-funding", when: "filter „Rahastus“ (ka keele vahetusel)" },
+      { m: "GET", p: "/api/languages", note: "n-languages", when: "filter „Koolituse keel“" }
+    ],
+    actions: [
+      { m: "PUT", p: "/api/training/{trainingId}/publish", note: "n-put-publish", when: "„Publitseeri“ → kinnitus → tabel uuesti" },
+      { m: "PUT", p: "/api/training/{trainingId}/unpublish", note: "n-put-unpublish", when: "„Liiguta mustandisse“ → kinnitus → tabel uuesti" },
+      { m: "PUT", p: "/api/training/{trainingId}/restore", note: "n-restore", when: "„Taasta“ (status D) → kinnitus → tabel ja pealkirjad uuesti" },
+      { m: "DELETE", p: "/api/training/{trainingId}", note: "n-delete", when: "„Kustuta“ → kinnitus → tabel ja pealkirjad uuesti" }
+    ]
+  };
+  function renderLog() {
+    var used = {};
+    function row(d) {
+      var idx = -1;
+      logSteps.forEach(function (r, i) { if (idx === -1 && !used[i] && noteFor(r.method, r.path) === d.note) idx = i; });
+      if (idx !== -1) used[idx] = true;
+      return item(d.m, d.p, d.when, d.note, idx);
+    }
+    function item(m, p, when, note, idx) {
+      var ran = idx !== -1, open = ran && idx === openReq, body = "";
+      if (open) {
+        var r = logSteps[idx];
+        body = '<div class="body"><span class="sub">Tegelik päring: <code>' + esc(r.method + " " + r.path) + '</code></span>' +
+          '<span class="sub">Response (200)' + (r.res === null ? ": NONE" : "") + '</span>' + (r.res !== null ? '<pre>' + esc(j(r.res)) + '</pre>' : "") +
+          '<button type="button" class="linkish" data-note="' + note + '">Ava API märge</button></div>';
+      }
+      var attr = ran ? 'data-req="' + idx + '" aria-expanded="' + open + '"' : 'data-note="' + note + '" title="Ava API märge"';
+      return '<div class="req ' + (ran ? "done" : "idle") + '"><button type="button" ' + attr + '><span class="method m-' + m + '">' + m + '</span><span class="main"><span class="path">' + esc(p) + '</span><span class="when">' + esc(when) + '</span></span>' + (ran ? '<span class="ran">käivitati</span>' : "") + '</button>' + body + '</div>';
+    }
+    var html = '<div class="log-group">Laadimine (avamisel; tabel ka otsingu, filtrite, sorteerimise ja lehe vahetusel)</div>' + REQUESTS.load.map(row).join("") +
+      '<div class="log-group">Tegevused (rea nupud; kutse teeb komponent)</div>' + REQUESTS.actions.map(row).join("");
+    var extra = [];
+    logSteps.forEach(function (r, i) { if (!used[i]) extra.push(item(r.method, r.path, "sama sammu teine päring", noteFor(r.method, r.path), i)); });
+    if (extra.length) html += '<div class="log-group">Lisaks</div>' + extra.join("");
+    if (logTitle) html += '<div class="log-step">Viimane samm: ' + esc(logTitle) + '. Rohelised päringud käivitati; klõpsa, et näha vastust.</div>';
+    document.getElementById("log").innerHTML = html;
+  }
+
+  function renderAll() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-ui-lang]"), function (b) { b.setAttribute("aria-pressed", String(b.dataset.uiLang === ui.lang)); });
+    renderView(); renderKv(); renderLog();
+    document.getElementById("view-note-text").textContent = VIEW_NOTE;
+  }
+
+  /* ---------- Sündmused ---------- */
+  var viewEl = document.getElementById("view");
+  viewEl.addEventListener("input", function (e) {
+    if (e.target.id === "f-search") { ui.searchInput = e.target.value; renderKv(); }
+  });
+  viewEl.addEventListener("keydown", function (e) {
+    if (e.target.id === "f-search" && e.key === "Enter") { e.preventDefault(); doSearch(); }
+  });
+  viewEl.addEventListener("change", function (e) {
+    var id = e.target.id;
+    if (id.indexOf("f-") === 0 && id !== "f-search") {
+      var k = id.slice(2), v = e.target.value;
+      ui.filters[k] = /Id$/.test(k) ? +v : v;
+    }
+  });
+  viewEl.addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.note) { goNote(b.dataset.note); return; }
+    if (b.dataset.sort) { doSort(b.dataset.sort); return; }
+    if (b.dataset.page !== undefined && b.closest(".pager")) { doPage(+b.dataset.page); return; }
+    if (b.dataset.act) {
+      var id = +b.dataset.id;
+      if (b.dataset.act === "status") doStatus(id);
+      else if (b.dataset.act === "delete") doDelete(id);
+      else doNavigate(b.dataset.act, id);
+      return;
+    }
+    if (b.id === "b-new") { toast("router.push → /training-form (TrainingFormView, state \"new-training\")"); return; }
+    if (b.id === "b-search") doSearch();
+    else if (b.id === "b-toggle") { ui.open = !ui.open; renderView(); renderKv(); document.getElementById("b-toggle").focus(); }
+    else if (b.id === "b-filter") doFilter();
+    else if (b.id === "b-clear" || b.id === "b-clear-top") doClearFilters();
+  });
+  document.getElementById("log").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.note) { goNote(b.dataset.note); return; }
+    var i = +b.dataset.req; openReq = openReq === i ? -1 : i; renderLog();
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-ui-lang]"), function (b) { b.onclick = function () { switchLang(b.dataset.uiLang); }; });
+  document.getElementById("btn-reset").onclick = openView;
+  var adminBtn = document.getElementById("b-admin"), adminMenu = document.getElementById("admin-menu");
+  function setAdminMenu(open) { adminMenu.hidden = !open; adminBtn.setAttribute("aria-expanded", String(open)); }
+  adminBtn.onclick = function (e) { e.stopPropagation(); setAdminMenu(adminMenu.hidden); };
+  adminMenu.onclick = function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    setAdminMenu(false);
+    toast(b.dataset.nav === "/admin-trainings" ? "Oled juba sellel lehel (/admin-trainings)" : "router.push → " + b.dataset.nav);
+  };
+  document.addEventListener("click", function (e) { if (!e.target.closest(".admin")) setAdminMenu(false); });
+
+  function goNote(id) {
+    var n = document.getElementById(id); if (!n) return;
+    n.scrollIntoView({ behavior: "smooth", block: "center" });
+    n.classList.remove("flash"); void n.offsetWidth; n.classList.add("flash");
+  }
+
+  /* ---------- Märkmete tekstid (samad nagu markmed/admin-trainings-view-markmed.md) ---------- */
+  var VIEW_NOTE = [
+    "Roll: Admin",
+    "Failinimi: AdminTrainingsView.vue",
+    "Frontend rada: /admin-trainings",
+    "",
+    "Vaatega seotud lisainfo:",
+    "Tabeli rida = üks koolitus; vaikimisi ainult aktiivsed (status \"U\" ja \"P\"), kustutatud (\"D\") näeb staatuse filtriga \"Kustutatud\". Nimi ja kategooria kuvatakse kasutajaliidese keeles (store'i contentLang); kui selles keeles tõlget pole, kuvatakse põhikeele oma. Keele vahetamisel navbaris laaditakse tabel, kategooriad, rahastustüübid ja nimede ettepanekud uuesti; otsing, filtrid, sorteerimine ja leht jäävad alles.",
+    "Otsinguväli otsib ainult koolituse nimest; trükkimise ajal pakub datalist nimesid (GET /api/training-titles). Otsing käivitub nupu \"Otsi\" või Enteri peale. Nupu kõrval on küsimärgi ikoon, mille tooltip selgitab: otsitakse nimest, iga sõna peab esinema, käändeid ei kohandata; nimede valikus on ainult aktiivsed koolitused — kustutatud koolituse leidmiseks vali filtrites Staatus \"Kustutatud\".",
+    "Kaart \"Otsingu filtrid\" on vaikimisi peidus (link \"▾ Ava otsingu filtrid\" / \"▴ Peida otsingu filtrid\"). Filtrid rakenduvad nupuga \"Filtreeri\" ja jäävad kehtima ka peidetud kaardiga (märk \"N filtrit aktiivne\"); \"Tühjenda filtrid\" taastab vaikimisi väärtused.",
+    "Veeru pealkirja klõps sorteerib backendis (ka Staatus: Mustand → Publitseeritud → Kustutatud ja Tõlked: puuduvad eespool): uus veerg → kasvav, sama veerg uuesti → suund vahetub. Vaikimisi Lisatud kahanevalt. Otsing, filtrid ja sorteerimine alustavad alati lehelt 0; leheküljestus (PaginationNav.vue) 10 rida lehel.",
+    "Vaade avaneb navbari menüüst \"Admin\" → \"Koolituste haldus\" (\"Lisa uus koolitus\" all). Pealkirja real paremal on nupp \"Lisa uus koolitus\" → /training-form.",
+    "Kuupäevad kuvatakse kujul 30/09/2026. \"Vaata\" → /training?trainingId={id}&trainingTranslationId={id}, \"Muuda\" → /training-form?trainingId={id}&trainingTranslationId={id}. Staatuse nupp (TrainingStatusButton.vue: \"Publitseeri\" / \"Liiguta mustandisse\" / \"Taasta\") ja kustutamise ikoon (TrainingDeleteButton.vue) küsivad kinnitust modaliga, teevad API kutse ise ja annavad vaatele sündmusega teada; vaade laadib tabeli uuesti. Kustutatud real on ainult nupp \"Taasta\" (Vaata/Muuda/Kustuta on peidus)."
+  ].join("\n");
+
+  // Tekstid on markmed/admin-trainings-view-markmed.md failist
+  var NOTES = [
+    { id: "n-admin-trainings", title: "GET /api/admin-trainings", draft: true, text: "API: GET /api/admin-trainings\n\nQuery parameetrid:\ncontentLang: String — nime ja kategooria keel (\"et\"/\"en\")\nsearchText: String — otsingutekst, \"\" = kõik; sõnad eraldatakse tühikute kohalt, iga sõna peab esinema (contains, tõstutundetu) title väljas\ncategoryId: Integer — kategooria filter, 0 = kõik\ntrainingLanguageId: Integer — õppekeele filter, 0 = kõik\nfundingTypeId: Integer — rahastustüübi filter, 0 = kõik\nstatus: String — \"U\" = mustand, \"P\" = publitseeritud, \"D\" = kustutatud (valikuline, puudub = \"U\" ja \"P\")\nisOrderable: Boolean — tellitav jah/ei (valikuline)\nisPromoted: Boolean — esile tõstetud jah/ei (valikuline)\nhasAllTranslations: Boolean — true = kõik tõlked olemas, false = mõni tõlge puudub (valikuline)\nsortBy: String — \"createdAt\" / \"updatedAt\" / \"title\" / \"categoryName\" / \"trainingLanguageCode\" / \"status\" / \"hasAllTranslations\"\nsortDirection: String — \"asc\" / \"desc\"\npage: Integer — lehekülje number, algab 0-st\nlimit: Integer — ridade arv lehel\n\nResponse (200):\nAdminTrainingSummaryDto.java\n{\n  \"totalPages\": 2,\n  \"totalElements\": 13,\n  \"adminTrainingSummaries\": [\n    {\n      \"trainingId\": 13,\n      \"trainingTranslationId\": 23,\n      \"title\": \"Tehisaru töövahendid arendajale\",\n      \"categoryId\": 1,\n      \"categoryName\": \"Programmeerimine\",\n      \"trainingLanguageCode\": \"et\",\n      \"trainingLanguageFlagIconCode\": \"fi-ee\",\n      \"status\": \"P\",\n      \"isOrderable\": true,\n      \"isPromoted\": true,\n      \"createdAt\": \"2026-09-25T12:10:00Z\",\n      \"updatedAt\": \"2026-09-26T06:00:00Z\",\n      \"hasAllTranslations\": false,\n      \"missingTranslationLanguageCodes\": [\n        \"en\",\n        ...\n      ],\n      \"fundingTypes\": [\n        {\n          \"fundingTypeId\": 1,\n          \"fundingTypeName\": \"Töötukassa\"\n        },\n        ...\n      ]\n    },\n    ...\n  ]\n}\n\nAPI teenuse lisainfo:\nAndmed tulevad view'st admin_training_summary. Ilma status parameetrita tagastatakse ainult aktiivsed (\"U\" ja \"P\"). Kui koolitusel pole contentLang tõlget, on title, categoryName ja trainingTranslationId põhikeele omad. Valikulise parameetri puudumine = filtrit ei rakendata. Tulemus sorteeritakse sortBy/sortDirection järgi, lisaks alati trainingId järgi; tundmatu sortBy korral kasutatakse createdAt. sortBy \"status\" kasutab töövoo järjekorda (view veerg status_order: U → P → D), \"hasAllTranslations\" kasvavalt = puuduvad tõlked eespool. updatedAt = hiliseim training ja selle tõlgete updated_at. missingTranslationLanguageCodes = tõlkekeeled (requiresTranslation = true), milles tõlge puudub; tühi list, kui kõik on olemas. fundingTypes võib olla tühi list.\n\nVeateated: —" },
+    { id: "n-titles", title: "GET /api/training-titles", draft: true, text: "API: GET /api/training-titles\n\nQuery parameetrid:\ncontentLang: String — nimede keel (\"et\"/\"en\")\n\nResponse (200):\nTrainingTitleDto.java\n[\n  {\n    \"trainingId\": 1,\n    \"title\": \"Java algkursus\"\n  },\n  ...\n]\n\nAPI teenuse lisainfo:\nKõigi aktiivsete (status ≠ \"D\") koolituste nimed contentLang keeles, puuduva tõlke korral põhikeeles (sama view admin_training_summary). Sorteeritud title järgi. AdminTrainingsView kasutab neid otsinguvälja datalist'is ettepanekuteks.\n\nVeateated: —" },
+    { id: "n-delete", title: "DELETE /api/training/{trainingId}", draft: true, text: "API: DELETE /api/training/{trainingId}\n\nResponse (200): NONE\n\nAPI teenuse lisainfo:\nSoft delete: määrab training.status = \"D\" (TrainingStatus.DELETED) ja uuendab updated_at. Tõlkeid ega rahastustüüpe ei kustutata. Kustutatud koolitus ei ole avalikus nimekirjas ega nimede ettepanekutes; admini tabelis näeb seda filtriga \"Kustutatud\" ja saab taastada (PUT /api/training/{trainingId}/restore). Kustutada saab nii mustandit kui ka publitseeritud koolitust. Frontendis teeb kutse TrainingDeleteButton.vue.\n\nVeateated:\nHTTP: 404\nerrorCode: PRIMARY_KEY_NOT_FOUND\nmessage: \"Ei leidnud primary keyd 'trainingId' väärtusega: 123\"" },
+    { id: "n-restore", title: "PUT /api/training/{trainingId}/restore", draft: true, text: "API: PUT /api/training/{trainingId}/restore\n\nResponse (200): NONE\n\nAPI teenuse lisainfo:\nTegevusteenus (erand URL-ide kokkuleppest): taastab kustutatud koolituse — määrab training.status = \"U\" (mustand) ja uuendab updated_at. Publitseerimine on eraldi samm. Request body puudub. Kutse teeb TrainingStatusButton.vue (\"Taasta\", ainult status \"D\" korral) pärast kinnituse modalit; AdminTrainingsView laadib seejärel tabeli ja nimede ettepanekud uuesti.\n\nVeateated:\nHTTP: 404\nerrorCode: PRIMARY_KEY_NOT_FOUND\nmessage: \"Ei leidnud primary keyd 'trainingId' väärtusega: 123\"" },
+    { id: "n-put-publish", title: "PUT /api/training/{trainingId}/publish", text: "API: PUT /api/training/{trainingId}/publish\n\nResponse (200): NONE\n\nAPI teenuse lisainfo:\nTegevusteenus (erand URL-ide kokkuleppest): määrab training.status = \"P\" (publitseeritud). Request body puudub. Kutse teeb TrainingStatusButton.vue (\"Publitseeri\") pärast kinnituse modalit; AdminTrainingsView laadib seejärel tabeli uuesti. Kustutatud koolituse (status \"D\") korral backend keeldub.\n\nVeateated:\nHTTP: 404\nerrorCode: PRIMARY_KEY_NOT_FOUND\nmessage: \"Ei leidnud primary keyd 'trainingId' väärtusega: 123\"\n\nHTTP: 403\nerrorCode: TRAINING_DELETED\nmessage: \"Kustutatud koolituse staatust ei saa muuta, taasta see enne\"" },
+    { id: "n-put-unpublish", title: "PUT /api/training/{trainingId}/unpublish", text: "API: PUT /api/training/{trainingId}/unpublish\n\nResponse (200): NONE\n\nAPI teenuse lisainfo:\nTegevusteenus (erand URL-ide kokkuleppest): määrab training.status = \"U\" (mustand). Request body puudub. Kutse teeb TrainingStatusButton.vue (\"Liiguta mustandisse\") pärast kinnituse modalit; AdminTrainingsView laadib seejärel tabeli uuesti. Kustutatud koolituse (status \"D\") korral backend keeldub.\n\nVeateated:\nHTTP: 404\nerrorCode: PRIMARY_KEY_NOT_FOUND\nmessage: \"Ei leidnud primary keyd 'trainingId' väärtusega: 123\"\n\nHTTP: 403\nerrorCode: TRAINING_DELETED\nmessage: \"Kustutatud koolituse staatust ei saa muuta, taasta see enne\"" },
+    { id: "n-categories", title: "GET /api/categories", text: "API: GET /api/categories\n\nQuery parameetrid:\ncontentLang: String — categoryName keel (\"et\"/\"en\")\n\nResponse (200):\nCategoryDto.java\n[\n  {\n    \"categoryId\": 1,\n    \"categoryName\": \"Programmeerimine\"\n  },\n  ...\n]\n\nAPI teenuse lisainfo:\nTagastab kõik kategooriad contentLang keeles. AdminTrainingsView kasutab neid filtri \"Kategooria\" valikutena (lisaks \"Kõik\" = 0) ja laadib keele vahetusel uuesti.\n\nVeateated: —" },
+    { id: "n-funding", title: "GET /api/funding-types", text: "API: GET /api/funding-types\n\nQuery parameetrid:\ncontentLang: String — fundingTypeName keel (\"et\"/\"en\")\n\nResponse (200):\nFundingTypeDto.java\n[\n  {\n    \"fundingTypeId\": 1,\n    \"fundingTypeName\": \"Töötukassa\"\n  },\n  ...\n]\n\nAPI teenuse lisainfo:\nTagastab kõik rahastustüübid contentLang keeles. AdminTrainingsView kasutab neid filtri \"Rahastus\" valikutena (lisaks \"Kõik\" = 0) ja laadib keele vahetusel uuesti.\n\nVeateated: —" },
+    { id: "n-languages", title: "GET /api/languages", text: "API: GET /api/languages\n\nResponse (200):\nSystemLanguageDto.java\n[\n  {\n    \"languageId\": 1,\n    \"languageCode\": \"et\",\n    \"languageName\": \"Eesti\",\n    \"isMainLanguage\": true,\n    \"requiresTranslation\": true,\n    \"flagIconCode\": \"fi-ee\"\n  },\n  ...\n]\n\nAPI teenuse lisainfo:\nTagastab kõik süsteemi keeled. AdminTrainingsView kasutab neid filtri \"Koolituse keel\" valikutena (languageId → trainingLanguageId, lisaks \"Kõik\" = 0). languageName ei ole tõlgitud, seega contentLang parameetrit pole.\n\nVeateated: —" }
+  ];
+
+  document.getElementById("notes-count").textContent = NOTES.length;
+  document.getElementById("notes").innerHTML = NOTES.map(function (n) {
+    return '<article class="note" id="' + n.id + '"><div class="note-head"><strong>' + esc(n.title) + '</strong>' + (n.draft ? '<span class="draft-tag">ettepanek</span>' : "") + '<button class="copy" type="button" data-copy="' + n.id + '">Kopeeri</button></div><pre>' + esc(n.text) + '</pre></article>';
+  }).join("");
+
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-copy]"); if (!b) return;
+    var key = b.dataset.copy;
+    var text = key === "view" ? VIEW_NOTE : NOTES.filter(function (n) { return n.id === key; })[0].text;
+    var done = function () { b.textContent = "Kopeeritud"; setTimeout(function () { b.textContent = "Kopeeri"; }, 1400); };
+    try { navigator.clipboard.writeText(text).then(done, function () { selectPre(b); }); } catch (err) { selectPre(b); }
+  });
+  function selectPre(b) {
+    var pre = b.closest(".note").querySelector("pre");
+    var r = document.createRange(); r.selectNodeContents(pre);
+    var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+    b.textContent = "Vajuta Ctrl+C";
+  }
+
+  openView();
+})();
+</script>

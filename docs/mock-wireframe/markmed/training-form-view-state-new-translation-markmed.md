@@ -86,7 +86,7 @@ TrainingDto.java
 }
 
 API teenuse lisainfo:
-Koolituse väljad ilma tõlketa. defaultLecturerId ja defaultLecturerName võivad olla null. status: "U" = mustand (unpublished), "P" = publitseeritud.
+Koolituse väljad ilma tõlketa. defaultLecturerId ja defaultLecturerName võivad olla null. status: "U" = mustand (unpublished), "P" = publitseeritud. Kustutatud koolitus (status "D") on nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.
 
 Veateated:
 HTTP: 404
@@ -112,7 +112,7 @@ TrainingTranslationItemDto.java
 ]
 
 API teenuse lisainfo:
-Koolituse olemasolevad tõlked. Frontend võrdleb languageCode väärtusi GET /api/languages tõlkekeeltega (requiresTranslation = true): tõlge olemas → värviline lipp, puudub → hall lipp. isMainLanguage tuleb language.is_main_language veerust; põhikeele tõlkega eeltäidetakse uue tõlke vorm.
+Koolituse olemasolevad tõlked. Frontend võrdleb languageCode väärtusi GET /api/languages tõlkekeeltega (requiresTranslation = true): tõlge olemas → värviline lipp, puudub → hall lipp. isMainLanguage tuleb language.is_main_language veerust; põhikeele tõlkega eeltäidetakse uue tõlke vorm. Kustutatud koolitus (status "D") on nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.
 
 Veateated:
 HTTP: 404
@@ -138,7 +138,7 @@ TrainingTranslationDto.java
 }
 
 API teenuse lisainfo:
-Laadib koolituse salvestatud põhikeele tõlke (training-translations vastusest isMainLanguage = true), millega eeltäidetakse uue tõlke väljad. Vastuse languageCode on põhikeel (et).
+Laadib koolituse salvestatud põhikeele tõlke (training-translations vastusest isMainLanguage = true), millega eeltäidetakse uue tõlke väljad. Vastuse languageCode on põhikeel (et). Kui tõlke koolitus on kustutatud (status "D"), on tõlge nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.
 
 Veateated:
 HTTP: 404
@@ -211,7 +211,7 @@ AiTranslationDto.java
 }
 
 API teenuse lisainfo:
-Tõlgib alati andmebaasi salvestatud põhikeele (language.is_main_language = true) tõlke AI abil sihtkeelde — vormi sisu ei kasutata. Andmebaasi midagi ei salvestata. description HTML-märgendid säilitatakse. Vastusel päis Cache-Control: no-store.
+Tõlgib alati andmebaasi salvestatud põhikeele (language.is_main_language = true) tõlke AI abil sihtkeelde — vormi sisu ei kasutata. Andmebaasi midagi ei salvestata. description HTML-märgendid säilitatakse. Vastusel päis Cache-Control: no-store. Kustutatud koolitus (status "D") on nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.
 
 Veateated:
 HTTP: 404
@@ -256,7 +256,7 @@ TrainingTranslationCreateResponseDto.java
 }
 
 API teenuse lisainfo:
-Lisab koolitusele uue keele tõlke. Ühes keeles saab koolitusel olla ainult üks tõlge (training_translation_uq).
+Lisab koolitusele uue keele tõlke. Ühes keeles saab koolitusel olla ainult üks tõlge (training_translation_uq). Kustutatud koolitus (status "D") on nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.
 
 Veateated:
 HTTP: 404
@@ -280,12 +280,16 @@ API: PUT /api/training/{trainingId}/publish
 Response (200): NONE
 
 API teenuse lisainfo:
-Tegevusteenus (erand URL-ide kokkuleppest): määrab training.status = "P" (publitseeritud). Request body puudub. Juba publitseeritud koolituse korral midagi ei muutu. Frontend kutsub pärast kinnituse modalit.
+Tegevusteenus (erand URL-ide kokkuleppest): määrab training.status = "P" (publitseeritud). Request body puudub. Juba publitseeritud koolituse korral midagi ei muutu. Frontend kutsub pärast kinnituse modalit. Kustutatud koolituse (status "D") korral backend keeldub.
 
 Veateated:
 HTTP: 404
 errorCode: PRIMARY_KEY_NOT_FOUND
 message: "Ei leidnud primary keyd 'trainingId' väärtusega: 123"
+
+HTTP: 403
+errorCode: TRAINING_DELETED
+message: "Kustutatud koolituse staatust ei saa muuta, taasta see enne"
 ```
 
 ## API märkmed — PUT /api/training/{trainingId}/unpublish
@@ -296,10 +300,14 @@ API: PUT /api/training/{trainingId}/unpublish
 Response (200): NONE
 
 API teenuse lisainfo:
-Tegevusteenus (erand URL-ide kokkuleppest): määrab training.status = "U" (mustand). Request body puudub. Juba mustandis koolituse korral midagi ei muutu. Frontend kutsub pärast kinnituse modalit.
+Tegevusteenus (erand URL-ide kokkuleppest): määrab training.status = "U" (mustand). Request body puudub. Juba mustandis koolituse korral midagi ei muutu. Frontend kutsub pärast kinnituse modalit. Kustutatud koolituse (status "D") korral backend keeldub.
 
 Veateated:
 HTTP: 404
 errorCode: PRIMARY_KEY_NOT_FOUND
 message: "Ei leidnud primary keyd 'trainingId' väärtusega: 123"
+
+HTTP: 403
+errorCode: TRAINING_DELETED
+message: "Kustutatud koolituse staatust ei saa muuta, taasta see enne"
 ```

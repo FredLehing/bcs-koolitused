@@ -39,6 +39,9 @@
                 <RouterLink class="nav-link" :to="{ name: 'trainingFormRoute' }">
                   {{ $t('navbar.addTraining') }}
                 </RouterLink>
+                <RouterLink class="nav-link" :to="{ name: 'adminTrainingsRoute' }">
+                  {{ $t('navbar.manageTrainings') }}
+                </RouterLink>
               </div>
             </div>
           </div>

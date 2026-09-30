@@ -59,9 +59,12 @@ Näidisandmed: koolitused 1 ("Java algkursus") ja 2 ("Projektijuhtimise põhitõ
 | Olukord | Status code | Response body |
 |---|---|---|
 | `trainingId` ei leidu andmebaasist | 404 Not Found | `{ "message": "Ei leidnud primary keyd 'trainingId' väärtusega: 123", "errorCode": "PRIMARY_KEY_NOT_FOUND" }` |
+| Koolitus on kustutatud (`status = "D"`) | 403 Forbidden | `{ "message": "Kustutatud koolituse staatust ei saa muuta, taasta see enne", "errorCode": "TRAINING_DELETED" }` |
 | Ootamatu serveripoolne viga | 500 Internal Server Error | Standardne vea response body (vastavalt projekti globaalsele error handler'ile) |
 
 Esimene rida on mockupi märkmetest (`Veateated`) ja vastab olemasolevale mustrile `PrimaryKeyNotFoundException` + `getValid<Entiteet>By(Integer id)` (vt `backend/CLAUDE.md`) — sama meetodit (nt `getValidTrainingBy(Integer trainingId)`) saab jagada `GET /api/training/{trainingId}`, `PUT /api/training/{trainingId}`, publish ja unpublish teenuste vahel.
+
+403 `TRAINING_DELETED` lisandus `AdminTrainingsView` soft delete'iga (`docs/mock-wireframe/markmed/admin-trainings-view-markmed.md`): olemasolev `ForbiddenException`, `Error` enumisse `TRAINING_DELETED("Kustutatud koolituse staatust ei saa muuta, taasta see enne")`. Koolitus leitakse **olemasoleva** `getValidTrainingBy`-ga (leiab ka kustutatud koolituse), mitte aktiivse koolituse meetodiga — muidu tuleks 404, mitte 403. Frontend neid nuppe kustutatud koolitusel ei näita; viga tekib nt siis, kui koolitus kustutati vahepeal teises aknas.
 
 ## Vastuvõtu kriteeriumid
 
@@ -72,7 +75,10 @@ Esimene rida on mockupi märkmetest (`Veateated`) ja vastab olemasolevale mustri
 - [ ] Idempotentne: juba publitseeritud koolituse (`status = "P"`) publitseerimine tagastab 200 OK, staatust ei muudeta uuesti ja viga ei teki
 - [ ] Koolituse staatus kasutab `TrainingStatus` enumit, mitte `ApiStatus`-t
 - [ ] Olematu `trainingId` → 404 `PRIMARY_KEY_NOT_FOUND`
+- [ ] Kustutatud koolitus (`status = "D"`) → 403 `TRAINING_DELETED`, staatus ei muutu
 - [ ] Teenusel on automaattestid (sh idempotentse kutse test)
+
+Näidisandmed: mustandid 9, 10, 12 (publitseerimine), kustutatud koolitus 14 (`403 TRAINING_DELETED`).
 
 ## Avatud küsimused
 

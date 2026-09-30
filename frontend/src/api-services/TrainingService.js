@@ -47,18 +47,43 @@ export default {
     return axios.put(`/api/training/${trainingId}`, trainingUpdateRequest)
   },
 
-  // Backend task: docs/tasks/backend/PUT-api-training-trainingId-publish.md (3. etapp)
+  // Backend task: docs/tasks/backend/PUT-api-training-trainingId-publish.md
   sendPutTrainingPublishRequest(trainingId) {
-    // MOCK — vaheta päris kutse vastu, kui teenus on valmis:
-    // return axios.put(`/api/training/${trainingId}/publish`)
-    return mockResponse(MockDatabase.setTrainingStatus(trainingId, 'P'))
+    return axios.put(`/api/training/${trainingId}/publish`)
   },
 
-  // Backend task: docs/tasks/backend/PUT-api-training-trainingId-unpublish.md (3. etapp)
+  // Backend task: docs/tasks/backend/PUT-api-training-trainingId-unpublish.md
   sendPutTrainingUnpublishRequest(trainingId) {
-    // MOCK — vaheta päris kutse vastu, kui teenus on valmis:
-    // return axios.put(`/api/training/${trainingId}/unpublish`)
-    return mockResponse(MockDatabase.setTrainingStatus(trainingId, 'U'))
+    return axios.put(`/api/training/${trainingId}/unpublish`)
+  },
+
+  // Backend task: docs/tasks/backend/PUT-api-training-trainingId-restore.md
+  sendPutTrainingRestoreRequest(trainingId) {
+    return axios.put(`/api/training/${trainingId}/restore`)
+  },
+
+  // Backend task: docs/tasks/backend/DELETE-api-training-trainingId.md
+  sendDeleteTrainingRequest(trainingId) {
+    return axios.delete(`/api/training/${trainingId}`)
+  },
+
+  // Backend task: docs/tasks/backend/GET-api-admin-trainings.md
+  // adminTrainingFilter: contentLang, searchText, categoryId, trainingLanguageId, fundingTypeId,
+  // status, isOrderable, isPromoted, hasAllTranslations, sortBy, sortDirection, page, limit.
+  // null väärtusega parameetreid axios päringusse ei lisa (valikulised filtrid).
+  sendGetAdminTrainingsRequest(adminTrainingFilter) {
+    return axios.get('/api/admin-trainings', {
+      params: adminTrainingFilter,
+    })
+  },
+
+  // Backend task: docs/tasks/backend/GET-api-training-titles.md
+  sendGetTrainingTitlesRequest(contentLang) {
+    return axios.get('/api/training-titles', {
+      params: {
+        contentLang: contentLang,
+      },
+    })
   },
 
   // Backend task: docs/tasks/backend/POST-api-training-trainingId-training-translation.md (3. etapp)

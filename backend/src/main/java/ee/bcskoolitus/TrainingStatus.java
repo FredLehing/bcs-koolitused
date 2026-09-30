@@ -6,7 +6,8 @@ import lombok.Getter;
 @Getter
 public enum TrainingStatus {
     UNPUBLISHED("U"),
-    PUBLISHED("P");
+    PUBLISHED("P"),
+    DELETED("D");
 
     private final String code;
 
