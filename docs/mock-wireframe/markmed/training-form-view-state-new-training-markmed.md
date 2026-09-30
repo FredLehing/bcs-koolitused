@@ -11,7 +11,7 @@ Frontend rada: /training-form
 
 Vaatega seotud lisainfo:
 state: "new-training" — URL-is query parameetreid pole. Pealkiri "Lisa uus koolitus". Vorm on tühi; tõlke väljad (pealkiri, lühikirjeldus, kirjeldus) täidetakse põhikeeles (et); rippmenüüd (kategooriad, rahastustüübid) laaditakse kasutajaliidese keeles (store'i contentLang) ja laaditakse keele vahetamisel navbaris uuesti — vormi sisu jääb alles. Lipukesi ja staatuse nuppe pole.
-Vaikimisi lektor valitakse "Vali lektor" modalist otsinguga (võib jääda tühjaks). Rahastustüübid on checkboxid, "Tellitav" ja "Esile tõstetud" switchid.
+Koolitajad: valitud koolitajate nimekiri (× eemaldab, ↑ ↓ muudab järjekorda, esimene kuvatakse esimesena); "+ Lisa koolitaja" avab "Vali koolitaja" modali otsinguga (juba valitud koolitajaid ei pakuta). Võib jääda tühjaks. Rahastustüübid on checkboxid, "Tellitav" ja "Esile tõstetud" switchid.
 Nupp "Lisa" → POST /api/training (userId localStorage'ist). Backend loob koolituse staatusega "U" koos põhikeele tõlkega. Vastuse trainingId ja trainingTranslationId järgi tehakse router.replace → state "update".
 ```
 
@@ -115,21 +115,20 @@ Veateated: —
 API: GET /api/lecturers
 
 Query parameetrid:
-search: String — otsingusõna lektori nimest, tühi = kõik
+search: String — otsingusõna koolitaja nimest, tühi = kõik
 
 Response (200):
 LecturerDto.java
 [
   {
     "lecturerId": 1,
-    "lecturerName": "Mari Tamm",
-    "lecturerPhoto": "BASE64-image-data"
+    "lecturerName": "Rain Tüür"
   },
   ...
 ]
 
 API teenuse lisainfo:
-Tagastab lektorid, kelle nimi (lecturer.full_name) sisaldab otsingusõna, tõstutundetult. Kasutatakse "Vali lektor" modalis.
+Tagastab aktiivsed koolitajad, kelle nimi (lecturer.full_name) sisaldab otsingusõna, tõstutundetult. Kasutatakse "Vali koolitaja" modalis; juba valitud koolitajad jätab frontend nimekirjast välja.
 
 Veateated: —
 ```
@@ -146,7 +145,10 @@ TrainingCreateRequestDto.java
   "categoryId": 1,
   "trainingLanguageId": 1,
   "locationId": 2,
-  "defaultLecturerId": 1,
+  "lecturerIds": [
+    1,
+    ...
+  ],
   "isOrderable": true,
   "isPromoted": false,
   "fundingTypeIds": [
@@ -166,7 +168,7 @@ TrainingCreateResponseDto.java
 }
 
 API teenuse lisainfo:
-Loob training rea (status = "U", määrab backend), training_funding_type read ja et tõlke (language_id = 1) ühes transaktsioonis. defaultLecturerId võib olla null. Sama PRIMARY_KEY_NOT_FOUND muster kehtib ka trainingLanguageId, defaultLecturerId ja fundingTypeIds väljadele.
+Loob training rea (status = "U", määrab backend), training_funding_type read ja et tõlke (language_id = 1) ühes transaktsioonis. lecturerIds = koolitajate ID-d kuvamise järjekorras (sort_order = positsioon 1, 2, …), võib olla tühi list; backend kirjutab training_lecturer read üle. Uus ID peab olema aktiivne koolitaja; juba seotud kustutatud koolitaja võib jääda. Sama PRIMARY_KEY_NOT_FOUND muster kehtib ka trainingLanguageId, lecturerIds (sõnumis 'lecturerId') ja fundingTypeIds väljadele.
 
 Veateated:
 HTTP: 404

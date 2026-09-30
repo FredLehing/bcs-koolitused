@@ -7,8 +7,8 @@ function createTrainingViewQuery(trainingId, trainingTranslationId) {
 }
 
 export default {
-  navigateToTrainingsView() {
-    router.push({ name: 'trainingsRoute' })
+  navigateToTrainingsView(query) {
+    router.push({ name: 'trainingsRoute', query: query })
   },
 
   navigateToErrorView() {
@@ -30,6 +30,55 @@ export default {
 
   navigateToTrainingFormView() {
     router.push({ name: 'trainingFormRoute' })
+  },
+
+  navigateToAdminLecturersView() {
+    router.push({ name: 'adminLecturersRoute' })
+  },
+
+  // query: {} (uus koolitaja) või { lecturerId, lecturerTranslationId }
+  navigateToLecturerFormView(query) {
+    router.push({ name: 'lecturerFormRoute', query: query })
+  },
+
+  // Vahetab LecturerFormView oleku (query parameetrid) ilma brauseri ajalukku uut kirjet lisamata
+  replaceLecturerFormView(query) {
+    router.replace({ name: 'lecturerFormRoute', query: query })
+  },
+
+  // successMessage (valikuline) antakse kalendrile edasi history state'is — nt vormi eduteade
+  navigateToAdminTrainingCoursesView(trainingId, successMessage) {
+    router.push({
+      name: 'adminTrainingCoursesRoute',
+      query: { trainingId: trainingId },
+      state: successMessage ? { successMessage: successMessage } : undefined,
+    })
+  },
+
+  // query: { trainingId } (uus toimumiskord) või { courseId } (muutmine)
+  navigateToCourseFormView(query) {
+    router.push({ name: 'courseFormRoute', query: query })
+  },
+
+  // successMessage (valikuline) antakse nimekirjale edasi history state'is — nt vormi eduteade
+  navigateToAdminRoomsView(successMessage) {
+    router.push({
+      name: 'adminRoomsRoute',
+      state: successMessage ? { successMessage: successMessage } : undefined,
+    })
+  },
+
+  // query: {} (uus ruum) või { roomId } (muutmine)
+  navigateToRoomFormView(query) {
+    router.push({ name: 'roomFormRoute', query: query })
+  },
+
+  navigateToAdminEnquiriesView() {
+    router.push({ name: 'adminEnquiriesRoute' })
+  },
+
+  navigateToLecturersView() {
+    router.push({ name: 'lecturersRoute' })
   },
 
   navigateToNotAuthorizedView() {

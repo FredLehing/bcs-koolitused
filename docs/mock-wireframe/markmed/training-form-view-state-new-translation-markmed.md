@@ -74,8 +74,13 @@ TrainingDto.java
   "categoryId": 1,
   "trainingLanguageId": 1,
   "locationId": 1,
-  "defaultLecturerId": 1,
-  "defaultLecturerName": "Mari Tamm",
+  "lecturers": [
+    {
+      "lecturerId": 1,
+      "lecturerName": "Rain Tüür"
+    },
+    ...
+  ],
   "isOrderable": true,
   "isPromoted": true,
   "status": "P",
@@ -86,7 +91,7 @@ TrainingDto.java
 }
 
 API teenuse lisainfo:
-Koolituse väljad ilma tõlketa. defaultLecturerId ja defaultLecturerName võivad olla null. status: "U" = mustand (unpublished), "P" = publitseeritud. Kustutatud koolitus (status "D") on nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.
+Koolituse väljad ilma tõlketa. lecturers = koolituse koolitajad (tabel training_lecturer) sort_order järjekorras; tühi list, kui koolitajaid pole. Kustutatud koolitaja jääb seotuks ja on nimekirjas edasi. status: "U" = mustand (unpublished), "P" = publitseeritud. Kustutatud koolitus (status "D") on nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.
 
 Veateated:
 HTTP: 404

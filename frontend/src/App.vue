@@ -16,16 +16,12 @@
         <div class="collapse navbar-collapse" id="navMenu">
           <div class="navbar-nav gap-4 mx-auto bg-primary bg-opacity-50 rounded-pill px-3">
             <RouterLink class="nav-link" to="/trainings">{{ $t('navbar.trainings') }}</RouterLink>
+            <RouterLink class="nav-link" :to="{ name: 'lecturersRoute' }">
+              {{ $t('navbar.ourLecturers') }}
+            </RouterLink>
             <a class="nav-link" href="#">{{ $t('navbar.services') }}</a>
 
-            <div class="dropdown">
-              <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                {{ $t('navbar.company') }}
-              </a>
-              <div class="dropdown-menu bg-primary bg-opacity-50">
-                <a class="nav-link" href="#">{{ $t('navbar.lecturers') }}</a>
-              </div>
-            </div>
+            <a class="nav-link" href="#">{{ $t('navbar.company') }}</a>
 
             <a class="nav-link" href="#">{{ $t('navbar.blog') }}</a>
             <a class="nav-link" href="#">{{ $t('navbar.contact') }}</a>
@@ -41,6 +37,21 @@
                 </RouterLink>
                 <RouterLink class="nav-link" :to="{ name: 'adminTrainingsRoute' }">
                   {{ $t('navbar.manageTrainings') }}
+                </RouterLink>
+                <hr class="dropdown-divider" />
+                <RouterLink class="nav-link" :to="{ name: 'lecturerFormRoute' }">
+                  {{ $t('navbar.addLecturer') }}
+                </RouterLink>
+                <RouterLink class="nav-link" :to="{ name: 'adminLecturersRoute' }">
+                  {{ $t('navbar.manageLecturers') }}
+                </RouterLink>
+                <hr class="dropdown-divider" />
+                <RouterLink class="nav-link" :to="{ name: 'adminRoomsRoute' }">
+                  {{ $t('navbar.manageRooms') }}
+                </RouterLink>
+                <hr class="dropdown-divider" />
+                <RouterLink class="nav-link" :to="{ name: 'adminEnquiriesRoute' }">
+                  {{ $t('navbar.manageEnquiries') }}
                 </RouterLink>
               </div>
             </div>

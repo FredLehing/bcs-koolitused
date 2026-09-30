@@ -46,7 +46,7 @@ Teenusel puuduvad path variable'id ja query parameetrid. Sisend tuleb request bo
 }
 ```
 
-Näidise ID-d vastavad `3_import.sql` andmetele: kasutaja 1 (`admin@vali-it.ee`, roll admin), kategooria 1 "Programmeerimine", keel 1 "Eesti", asukoht 2 "Veebiõpe", lektor 1 "Mari Tamm", rahastustüübid 1 "Töötukassa" ja 2 "EL rahastus". Koolituse tekst on mockupi lk 7 põhjal uus näide.
+Näidise ID-d vastavad `3_import.sql` andmetele: kasutaja 1 (`admin@vali-it.ee`, roll admin), kategooria 1 "Programmeerimine", keel 1 "Eesti", asukoht 2 "Veebiõpe", lektor 1 "Rain Tüür", rahastustüübid 1 "Töötukassa" ja 2 "EL rahastus". Koolituse tekst on mockupi lk 7 põhjal uus näide.
 
 ## Väljund
 

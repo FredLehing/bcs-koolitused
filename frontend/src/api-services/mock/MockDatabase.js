@@ -38,8 +38,8 @@ const locations = [
 ]
 
 const lecturers = [
-  { lecturerId: 1, lecturerName: 'Mari Tamm', lecturerPhoto: '' },
-  { lecturerId: 2, lecturerName: 'Jaan Kask', lecturerPhoto: '' },
+  { lecturerId: 1, lecturerName: 'Rain Tüür' },
+  { lecturerId: 2, lecturerName: 'Merje Vaide' },
 ]
 
 const trainings = [
@@ -48,7 +48,7 @@ const trainings = [
     categoryId: 1,
     trainingLanguageId: 1,
     locationId: 1,
-    defaultLecturerId: 1,
+    lecturerIds: [1],
     isOrderable: true,
     isPromoted: true,
     status: 'P',
@@ -59,7 +59,7 @@ const trainings = [
     categoryId: 3,
     trainingLanguageId: 1,
     locationId: 2,
-    defaultLecturerId: 2,
+    lecturerIds: [2],
     isOrderable: false,
     isPromoted: false,
     status: 'P',
@@ -157,11 +157,15 @@ export default {
       .sort((a, b) => a.lecturerName.localeCompare(b.lecturerName))
   },
 
-  // GET /api/training/{trainingId} → TrainingDto
+  // GET /api/training/{trainingId} → TrainingDto (lecturers lecturerIds järjekorras)
   getTraining(trainingId) {
-    const training = findTraining(trainingId)
-    const lecturer = lecturers.find((l) => l.lecturerId === training.defaultLecturerId)
-    return { ...training, defaultLecturerName: lecturer ? lecturer.lecturerName : null }
+    const { lecturerIds, ...training } = findTraining(trainingId)
+    return {
+      ...training,
+      lecturers: lecturerIds.map((lecturerId) =>
+        lecturers.find((l) => l.lecturerId === lecturerId),
+      ),
+    }
   },
 
   // GET /api/training/{trainingId}/training-translations → TrainingTranslationItemDto[]
@@ -191,7 +195,7 @@ export default {
       categoryId: trainingCreateRequest.categoryId,
       trainingLanguageId: trainingCreateRequest.trainingLanguageId,
       locationId: trainingCreateRequest.locationId,
-      defaultLecturerId: trainingCreateRequest.defaultLecturerId,
+      lecturerIds: [...trainingCreateRequest.lecturerIds],
       isOrderable: trainingCreateRequest.isOrderable,
       isPromoted: trainingCreateRequest.isPromoted,
       status: 'U',
@@ -214,7 +218,7 @@ export default {
     training.categoryId = trainingUpdateRequest.categoryId
     training.trainingLanguageId = trainingUpdateRequest.trainingLanguageId
     training.locationId = trainingUpdateRequest.locationId
-    training.defaultLecturerId = trainingUpdateRequest.defaultLecturerId
+    training.lecturerIds = [...trainingUpdateRequest.lecturerIds]
     training.isOrderable = trainingUpdateRequest.isOrderable
     training.isPromoted = trainingUpdateRequest.isPromoted
     training.fundingTypeIds = [...new Set(trainingUpdateRequest.fundingTypeIds)]

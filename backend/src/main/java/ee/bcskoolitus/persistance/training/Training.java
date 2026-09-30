@@ -1,7 +1,6 @@
 package ee.bcskoolitus.persistance.training;
 
 import ee.bcskoolitus.persistance.category.Category;
-import ee.bcskoolitus.persistance.lecturer.Lecturer;
 import ee.bcskoolitus.persistance.location.Location;
 import ee.bcskoolitus.persistance.language.Language;
 import ee.bcskoolitus.persistance.user.User;
@@ -31,10 +30,6 @@ public class Training {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "default_lecturer_id")
-    private Lecturer defaultLecturer;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

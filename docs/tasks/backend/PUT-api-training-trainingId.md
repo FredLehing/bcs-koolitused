@@ -54,7 +54,7 @@ Mida request body's **ei ole** (ja mida see teenus ei muuda):
 }
 ```
 
-Näidis põhineb mockupi märkmel ja `3_import.sql` andmetel: koolitus 1 ("Java algkursus"), selle eestikeelne tõlge 1, kategooria 1 "Programmeerimine", keel 1 "Eesti", asukoht 1 "BCS Koolitus", lektor 1 "Mari Tamm". Andmebaasis on koolitusel 1 ainult rahastustüüp 1 "Töötukassa" — näidises lisatakse juurde rahastustüüp 2 "EL rahastus" (mockupi `[1, ...]` täpsustatud), et oleks näha `training_funding_type` ridade ülekirjutamine.
+Näidis põhineb mockupi märkmel ja `3_import.sql` andmetel: koolitus 1 ("Java algkursus"), selle eestikeelne tõlge 1, kategooria 1 "Programmeerimine", keel 1 "Eesti", asukoht 1 "BCS Koolitus", lektor 1 "Rain Tüür". Andmebaasis on koolitusel 1 ainult rahastustüüp 1 "Töötukassa" — näidises lisatakse juurde rahastustüüp 2 "EL rahastus" (mockupi `[1, ...]` täpsustatud), et oleks näha `training_funding_type` ridade ülekirjutamine.
 
 Frontend koostab body meetodis `TrainingFormView.vue` → `createTrainingUpdateRequest()` (samad 11 välja) ja kutsub `TrainingService.sendPutTrainingRequest(trainingId, ...)`. Mock-teostus: `frontend/src/api-services/mock/MockDatabase.js` → `updateTraining` (kasutab samuti `new Set(fundingTypeIds)` duplikaatide eemaldamiseks).
 

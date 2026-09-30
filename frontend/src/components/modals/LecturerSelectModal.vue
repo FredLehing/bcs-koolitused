@@ -7,12 +7,24 @@ export default {
   props: {
     isOpen: Boolean,
     lecturers: Array,
+    // Juba valitud koolitajad — neid nimekirjas ei pakuta
+    excludedLecturerIds: {
+      type: Array,
+      default: () => [],
+    },
   },
   emits: ['event-lecturer-search', 'event-lecturer-selected', 'event-modal-closed'],
   data() {
     return {
       search: '',
     }
+  },
+  computed: {
+    selectableLecturers() {
+      return this.lecturers.filter(
+        (lecturer) => !this.excludedLecturerIds.includes(lecturer.lecturerId),
+      )
+    },
   },
 }
 </script>
@@ -39,7 +51,7 @@ export default {
       </div>
       <div class="list-group">
         <button
-          v-for="lecturer in lecturers"
+          v-for="lecturer in selectableLecturers"
           :key="lecturer.lecturerId"
           @click="$emit('event-lecturer-selected', lecturer)"
           class="list-group-item list-group-item-action"
@@ -48,18 +60,9 @@ export default {
           {{ lecturer.lecturerName }}
         </button>
       </div>
-      <p v-if="lecturers.length === 0" class="text-muted mb-0">
+      <p v-if="selectableLecturers.length === 0" class="text-muted mb-0">
         {{ $t('trainingForm.lecturerModal.notFound') }}
       </p>
-    </template>
-    <template #buttons>
-      <button
-        type="button"
-        class="btn btn-outline-danger"
-        @click="$emit('event-lecturer-selected', null)"
-      >
-        {{ $t('trainingForm.lecturerModal.noLecturer') }}
-      </button>
     </template>
   </BaseModal>
 </template>

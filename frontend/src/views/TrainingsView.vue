@@ -14,12 +14,12 @@ import LanguagesDropdown from '@/components/forms/LanguagesDropdown.vue'
 
 export default {
   name: 'TrainingsView',
-  components: { TrainingCard, PaginationNav, PhQuestion, PhX, LanguagesDropdown},
+  components: { TrainingCard, PaginationNav, PhQuestion, PhX, LanguagesDropdown },
   data() {
     return {
       categoryId: 0,
       fundingTypeId: 0,
-      limit: 3,
+      limit: 4,
       page: 0,
       trainingLanguageId: 0,
       // searchText = väljale sisestatud tekst, appliedSearchText = tekst, millega päring tehti
@@ -139,6 +139,9 @@ export default {
     },
   },
   beforeMount() {
+    const appliedSearchText = this.$route.query.searchText ?? ''
+    this.appliedSearchText = appliedSearchText
+    this.searchText = appliedSearchText
     this.getTrainings()
     this.getLanguages()
     this.getCategories()
@@ -154,10 +157,10 @@ export default {
 </script>
 
 <template>
-  <div class="container">
-    <div class="row">
+  <div class="container d-flex flex-grow-1 flex-column">
+    <div class="row flex-grow-1">
       <div class="col-2"><LanguagesDropdown :languages="languages" :languageId="trainingLanguageId" /></div>
-      <div class="col-10">
+      <div class="col-10 d-flex flex-column">
         <div class="d-flex align-items-center gap-2 mb-3">
           <div class="input-group">
             <input

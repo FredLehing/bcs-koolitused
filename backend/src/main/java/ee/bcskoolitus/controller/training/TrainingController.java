@@ -1,5 +1,6 @@
 package ee.bcskoolitus.controller.training;
 
+import ee.bcskoolitus.controller.training.dto.AdminTrainingDto;
 import ee.bcskoolitus.controller.training.dto.AdminTrainingFilterDto;
 import ee.bcskoolitus.controller.training.dto.AdminTrainingSummaryDto;
 import ee.bcskoolitus.controller.training.dto.TrainingCreateRequestDto;
@@ -122,19 +123,34 @@ public class TrainingController {
         return trainingService.getTrainingTranslations(trainingId);
     }
 
-    @PostMapping("/training")
-    @Operation(summary = "Lisab uue koolituse koos põhikeele tõlkega",
-            description = "Loob training rea (status U = mustand), training_funding_type read ja põhikeele (language.is_main_language) tõlke ühes transaktsioonis. Tagastab uue koolituse ja tõlke ID.")
+    @GetMapping("/admin-training/{trainingId}")
+    @Operation(summary = "Koolituse admini ülevaade (kalender, toimumiskorra vorm)",
+            description = "Ka mustand. title, description, categoryName ja trainingTranslationId contentLang keeles, puudumisel põhikeeles. lecturers = training_lecturer sort_order järjekorras. Pilte ei tagastata.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Olematu categoryId / locationId / trainingLanguageId / defaultLecturerId / fundingTypeId / userId -> 'errorCode:' PRIMARY_KEY_NOT_FOUND",
+                    description = "Olematu või kustutatud trainingId -> 'errorCode:' PRIMARY_KEY_NOT_FOUND",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            )
+    })
+    public AdminTrainingDto getAdminTraining(@PathVariable Integer trainingId, @RequestParam String contentLang) {
+        return trainingService.getAdminTraining(trainingId, contentLang);
+    }
+
+    @PostMapping("/training")
+    @Operation(summary = "Lisab uue koolituse koos põhikeele tõlkega",
+            description = "Loob training rea (status U = mustand), training_funding_type read, training_lecturer read (lecturerIds järjekorras) ja põhikeele (language.is_main_language) tõlke ühes transaktsioonis. Tagastab uue koolituse ja tõlke ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Olematu categoryId / locationId / trainingLanguageId / fundingTypeId / userId, olematu või kustutatud lecturerId -> 'errorCode:' PRIMARY_KEY_NOT_FOUND",
                     content = @Content(schema = @Schema(implementation = ApiError.class))
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Kohustuslik väli puudub või on liiga pikk -> 'errorCode:' INCORRECT_INPUT",
+                    description = "Kohustuslik väli puudub, on liiga pikk või lecturerIds sisaldab korduvat ID-d -> 'errorCode:' INCORRECT_INPUT",
                     content = @Content(schema = @Schema(implementation = ApiError.class))
             )
     })
@@ -144,17 +160,17 @@ public class TrainingController {
 
     @PutMapping("/training/{trainingId}")
     @Operation(summary = "Muudab koolituse andmeid ja avatud tõlke tekste",
-            description = "Uuendab training rea, kirjutab training_funding_type read fundingTypeIds järgi üle ja uuendab trainingTranslationId tõlke tekstid ühes transaktsioonis. Koolituse autor ja staatus ei muutu.")
+            description = "Uuendab training rea, kirjutab training_funding_type read fundingTypeIds järgi ja training_lecturer read lecturerIds järgi üle ning uuendab trainingTranslationId tõlke tekstid ühes transaktsioonis. Koolituse autor ja staatus ei muutu.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Olematu trainingId / trainingTranslationId (ka teisele koolitusele kuuluv) / categoryId / trainingLanguageId / locationId / defaultLecturerId / fundingTypeId -> 'errorCode:' PRIMARY_KEY_NOT_FOUND",
+                    description = "Olematu trainingId / trainingTranslationId (ka teisele koolitusele kuuluv) / categoryId / trainingLanguageId / locationId / fundingTypeId, olematu lecturerId või uus kustutatud lecturerId -> 'errorCode:' PRIMARY_KEY_NOT_FOUND",
                     content = @Content(schema = @Schema(implementation = ApiError.class))
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Kohustuslik väli puudub, on liiga pikk või kirjeldus on tühi -> 'errorCode:' INCORRECT_INPUT",
+                    description = "Kohustuslik väli puudub, on liiga pikk, kirjeldus on tühi või lecturerIds sisaldab korduvat ID-d -> 'errorCode:' INCORRECT_INPUT",
                     content = @Content(schema = @Schema(implementation = ApiError.class))
             )
     })

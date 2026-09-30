@@ -6,10 +6,11 @@ import TrainingTranslationService from '@/api-services/TrainingTranslationServic
 import NavigationService from '@/services/NavigationService.js'
 import RichTextContent from '@/components/common/RichTextContent.vue'
 import EditTrainingLink from '@/components/common/EditTrainingLink.vue'
+import LecturerCard from '@/components/common/LecturerCard.vue'
 
 export default {
   name: 'TrainingView',
-  components: { EditTrainingLink, RichTextContent },
+  components: { EditTrainingLink, LecturerCard, RichTextContent },
   data() {
     return {
       trainingId: 0,
@@ -21,14 +22,27 @@ export default {
         title: '',
         description: '',
       },
+      // Koolituse koolitajad järjekorras; kaardid laevad oma andmed ise
+      lecturers: [],
+      // Kustutatud / olematud koolitajad (kaart andis 404) — kui kõik on peidus, peidetakse ka jaotis
+      notFoundLecturerIds: [],
     }
   },
   computed: {
     ...mapState(useLanguageStore, ['contentLang']),
 
-    // Parema veeru kaartide järjekord (tõlkevõtmed trainingView.sidebar.*)
+    // Parema veeru kaartide järjekord (tõlkevõtmed trainingView.sidebar.*); "lecturers" ainult koolitajatega
     sidebarSections() {
-      return ['trainingData', 'lecturer', 'upcomingCourses', 'calendar']
+      const sidebarSections = ['trainingData', 'lecturers', 'upcomingCourses', 'calendar']
+      return this.hasVisibleLecturers
+        ? sidebarSections
+        : sidebarSections.filter((sidebarSection) => sidebarSection !== 'lecturers')
+    },
+
+    hasVisibleLecturers() {
+      return this.lecturers.some(
+        (lecturer) => !this.notFoundLecturerIds.includes(lecturer.lecturerId),
+      )
     },
   },
   watch: {
@@ -55,6 +69,19 @@ export default {
         return
       }
       this.getTrainingTranslation()
+      this.getTrainingLecturers()
+    },
+
+    // Koolitajad on lisainfo — vea korral jaotist lihtsalt ei kuvata
+    getTrainingLecturers() {
+      this.notFoundLecturerIds = []
+      TrainingService.sendGetTrainingRequest(this.trainingId)
+        .then((response) => (this.lecturers = response.data.lecturers))
+        .catch(() => (this.lecturers = []))
+    },
+
+    handleLecturerNotFound(lecturerId) {
+      this.notFoundLecturerIds.push(lecturerId)
     },
 
     // Valiku järjekord: URL-is antud tõlge (kui kuulub sellele koolitusele) → kasutajaliidese keele
@@ -102,7 +129,7 @@ export default {
     <div class="row text-start">
       <!-- Vasak veerg: koolituse sisu -->
       <div class="col-lg-8">
-        <fieldset class="border rounded p-3 mb-4">
+        <fieldset class="border rounded bg-body p-3 mb-4">
           <legend class="float-none w-auto px-2 fs-5">{{ $t('trainingView.legend') }}</legend>
 
           <p v-if="isMainLanguageFallback" class="small text-muted">
@@ -121,19 +148,35 @@ export default {
         </fieldset>
       </div>
 
-      <!-- Parem veerg: kõrvalsektsioonid (praegu kohatäited) -->
+      <!-- Parem veerg: kõrvalsektsioonid (koolitajad; ülejäänud praegu kohatäited) -->
       <div class="col-lg-4">
         <fieldset
           v-for="sidebarSection in sidebarSections"
           :key="sidebarSection"
-          class="border rounded p-3 mb-4"
+          class="border rounded bg-body p-3 mb-4"
         >
           <legend class="float-none w-auto px-2 fs-5">
             {{ $t('trainingView.sidebar.' + sidebarSection) }}
           </legend>
-          <p class="small text-muted mb-0">{{ $t('trainingView.sidebar.placeholder') }}</p>
+          <template v-if="sidebarSection === 'lecturers'">
+            <LecturerCard
+              v-for="lecturer in lecturers"
+              :key="lecturer.lecturerId"
+              :lecturer-id="lecturer.lecturerId"
+              class="lecturer-card"
+              @event-lecturer-not-found="handleLecturerNotFound"
+            />
+          </template>
+          <p v-else class="small text-muted mb-0">{{ $t('trainingView.sidebar.placeholder') }}</p>
         </fieldset>
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+/* Mitme koolitaja kaardid üksteise all */
+.lecturer-card + .lecturer-card {
+  margin-top: 1rem;
+}
+</style>

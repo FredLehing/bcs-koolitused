@@ -2,17 +2,25 @@
   "common": {
     "close": "Sulge"
   },
+  "homeView": {
+    "title": "Leia üle 100 koolituse seast endale sobiv!",
+    "subtitle": "Praktilised IT-, disaini- ja juhtimiskoolitused oma ala parimatelt"
+  },
   "navbar": {
     "trainings": "Koolitused",
+    "ourLecturers": "Meie koolitajad",
     "services": "Teenused",
     "company": "Ettevõttest",
-    "lecturers": "Lektorid",
     "blog": "Blogi",
     "contact": "Kontakt",
     "feedback": "Tagasiside",
     "admin": "Admin",
     "addTraining": "Lisa uus koolitus",
     "manageTrainings": "Koolituste haldus",
+    "addLecturer": "Lisa uus koolitaja",
+    "manageLecturers": "Koolitajad",
+    "manageRooms": "Koolitusruumid",
+    "manageEnquiries": "Koolituste päringud",
     "login": "Logi sisse",
     "logout": "Logi välja",
     "logoutModal": {
@@ -82,9 +90,7 @@
       "category": "Kategooria",
       "trainingLanguage": "Koolituse keel",
       "location": "Toimumiskoht",
-      "defaultLecturer": "Vaikimisi lektor",
-      "noLecturer": "— lektor puudub —",
-      "selectLecturer": "Vali lektor",
+      "lecturers": "Koolitajad",
       "funding": "Rahastus",
       "orderable": "Tellitav",
       "promoted": "Esile tõstetud",
@@ -105,18 +111,14 @@
       "add": "Lisa",
       "save": "Salvesta",
       "addTranslation": "Lisa tõlge",
-      "view": "Vaata"
-    },
-    "flags": {
-      "open": "Ava {language} tõlge",
-      "add": "Lisa {language} tõlge"
+      "view": "Vaata",
+      "calendar": "Kalender"
     },
     "lecturerModal": {
-      "title": "Vali lektor",
+      "title": "Vali koolitaja",
       "searchPlaceholder": "Otsi nime järgi",
       "search": "Otsi",
-      "notFound": "Ühtegi lektorit ei leitud.",
-      "noLecturer": "Lektor puudub"
+      "notFound": "Ühtegi koolitajat ei leitud."
     },
     "aiModal": {
       "title": "Asenda tekst AI tõlkega?",
@@ -157,7 +159,7 @@
     "mainLanguageFallback": "Valitud keeles tõlge puudub — kuvatakse põhikeele tõlge.",
     "sidebar": {
       "trainingData": "Koolituse andmed",
-      "lecturer": "Koolitaja",
+      "lecturers": "Koolitajad",
       "upcomingCourses": "Järgmised koolitused",
       "calendar": "Kalender",
       "placeholder": "Sisu lisandub peagi."
@@ -248,6 +250,287 @@
       "all": "Kõik",
       "yes": "Jah",
       "no": "Ei"
+    },
+    "calendar": "Kalender"
+  },
+  "translationFlags": {
+    "open": "Ava {language} tõlge",
+    "add": "Lisa {language} tõlge"
+  },
+  "lecturersPicker": {
+    "empty": "— koolitajaid pole —",
+    "add": "Lisa koolitaja",
+    "moveUp": "Liiguta üles",
+    "moveDown": "Liiguta alla",
+    "remove": "Eemalda"
+  },
+  "lecturerDeleteButton": {
+    "label": "Kustuta",
+    "modalTitle": "Kustuta koolitaja",
+    "modalMessage": "Kas soovid koolitaja „{fullName}“ kustutada? Ta kaob „Vali koolitaja“ valikust ja koolitaja kaarte enam ei kuvata.",
+    "confirm": "Kustuta",
+    "hasUpcomingCourses": "Koolitajal on tulevasi toimumiskordi — vali neile enne teine koolitaja"
+  },
+  "lecturerRestoreButton": {
+    "label": "Taasta",
+    "modalTitle": "Taasta koolitaja",
+    "modalMessage": "Kas soovid koolitaja „{fullName}“ taastada? Teda saab siis jälle koolitustele ja toimumiskordadele valida.",
+    "confirm": "Taasta"
+  },
+  "adminLecturers": {
+    "title": "Koolitajad",
+    "searchPlaceholder": "Otsi nime järgi…",
+    "showDeleted": "Näita kustutatud",
+    "noResults": "Koolitajaid ei leitud",
+    "totalCount": "Kokku {n} koolitajat | Kokku {n} koolitaja | Kokku {n} koolitajat",
+    "deleted": "Kustutatud",
+    "edit": "Muuda",
+    "columns": {
+      "fullName": "Nimi",
+      "title": "Ametinimetus",
+      "translations": "Tõlked",
+      "trainingCount": "Koolitusi",
+      "upcomingCourseCount": "Tulevasi toimumiskordi",
+      "updatedAt": "Uuendatud",
+      "actions": "Tegevused"
+    },
+    "messages": {
+      "deleted": "Koolitaja kustutatud",
+      "restored": "Koolitaja taastatud"
+    }
+  },
+  "photoUpload": {
+    "select": "Vali pilt",
+    "remove": "Eemalda",
+    "hint": "PNG, JPEG või WebP, kuni 2 MB",
+    "invalidFile": "Lubatud on PNG, JPEG või WebP pilt kuni 2 MB"
+  },
+  "lecturerForm": {
+    "title": {
+      "newLecturer": "Lisa uus koolitaja",
+      "update": "Muuda koolitajat",
+      "newTranslation": "Lisa koolitaja tõlge"
+    },
+    "translations": {
+      "legend": "Koolitaja tõlked"
+    },
+    "data": {
+      "legend": "Koolitaja andmed",
+      "fullName": "Täisnimi",
+      "photo": "Pilt"
+    },
+    "translation": {
+      "legend": "Tõlge ({language})",
+      "title": "Ametinimetus",
+      "titleHelp": "Ametinimetus kuvatakse koolitaja kaardil nime all. Kirjuta lühidalt, millega koolitaja tegeleb, nt „Tarkvaraarendaja ja Java koolitaja“ või „UX-disainer“. Iga keele jaoks eraldi tõlge.",
+      "titlePlaceholder": "nt Tarkvaraarendaja ja Java koolitaja",
+      "shortDescription": "Lühikirjeldus",
+      "shortDescriptionHint": "Kuvatakse koolitaja kaardil koolituse lehel ja toimumiskorra juures.",
+      "description": "Kirjeldus",
+      "prefilledHint": "Väljad on eeltäidetud põhikeele ({mainLanguage}) tekstiga — tõlgi need või kasuta AI tõlget.",
+      "aiTooltip": "Tõlgib salvestatud põhikeele tekstid; täidab ainult vormi"
+    },
+    "aiModal": {
+      "message": "Vormis on salvestamata muudatusi. AI tõlge kirjutab ametinimetuse, lühikirjelduse ja kirjelduse üle."
+    },
+    "validation": {
+      "fillRequired": "Täida kõik kohustuslikud väljad"
+    },
+    "messages": {
+      "lecturerAdded": "Koolitaja lisatud",
+      "saved": "Salvestatud",
+      "translationAdded": "Tõlge lisatud"
+    }
+  },
+  "courseStatus": {
+    "U": "Mustand",
+    "O": "Avatud",
+    "F": "Täis",
+    "X": "Tühistatud",
+    "past": "Toimunud"
+  },
+  "courseDeleteButton": {
+    "label": "Kustuta",
+    "modalTitle": "Kustuta toimumiskord",
+    "modalMessage": "Kas soovid toimumiskorra {dates} kustutada?",
+    "participantsWarning": "Toimumiskorral on {n} osalejat. Kaalu pigem tühistamist (staatus „Tühistatud“). | Toimumiskorral on {n} osaleja. Kaalu pigem tühistamist (staatus „Tühistatud“). | Toimumiskorral on {n} osalejat. Kaalu pigem tühistamist (staatus „Tühistatud“).",
+    "confirm": "Kustuta"
+  },
+  "trainingSummaryCard": {
+    "category": "Kategooria",
+    "trainingLanguage": "Õppekeel",
+    "location": "Toimumiskoht",
+    "lecturers": "Koolitajad",
+    "funding": "Rahastus",
+    "settings": "Sätted",
+    "orderable": "Tellitav",
+    "promoted": "Esile tõstetud"
+  },
+  "adminTrainingCourses": {
+    "title": "Koolituse kalender",
+    "addCourse": "Lisa toimuv koolitus",
+    "showDescription": "▾ Näita kirjeldust",
+    "hideDescription": "▴ Peida kirjeldus",
+    "includePast": "Näita ka möödunud",
+    "edit": "Muuda",
+    "noCourses": "Toimumiskordi pole veel lisatud",
+    "noUpcomingCourses": "Tulevasi toimumiskordi pole",
+    "totalCount": "Kokku {n} toimumiskorda | Kokku {n} toimumiskord | Kokku {n} toimumiskorda",
+    "columns": {
+      "startDate": "Algus",
+      "endDate": "Lõpp",
+      "numberOfDays": "Päevi",
+      "numberOfAcademicHours": "Akad. tunde",
+      "price": "Hind (€)",
+      "lecturers": "Koolitajad",
+      "room": "Ruum",
+      "status": "Staatus",
+      "participantCount": "Osalejaid",
+      "notes": "Märkmed",
+      "meetingLink": "Veebilink",
+      "actions": "Tegevused"
+    },
+    "messages": {
+      "deleted": "Toimumiskord kustutatud"
+    }
+  },
+  "courseForm": {
+    "title": {
+      "new": "Uus toimumiskord",
+      "update": "Toimumiskorra muutmine"
+    },
+    "legend": "Toimumiskorra andmed",
+    "startDate": "Algus",
+    "endDate": "Lõpp",
+    "numberOfDays": "Päevi",
+    "numberOfDaysHint": "Arvutatud tööpäevadest, saad muuta",
+    "numberOfAcademicHours": "Akadeemilisi tunde",
+    "price": "Hind (€)",
+    "status": "Staatus",
+    "room": "Ruum",
+    "noRoom": "Ruum puudub",
+    "roomDeleted": "(kustutatud)",
+    "meetingLink": "Veebilink",
+    "notes": "Märkmed",
+    "back": "Tagasi",
+    "validation": {
+      "fillRequired": "Täida kõik kohustuslikud väljad",
+      "endBeforeStart": "Lõppkuupäev ei saa olla varasem kui alguskuupäev"
+    },
+    "messages": {
+      "added": "Toimumiskord lisatud",
+      "saved": "Toimumiskord salvestatud"
+    }
+  },
+  "lecturers": {
+    "title": "Meie koolitajad",
+    "intro": "Meie koolitajad on oma ala praktikud, kes jagavad kogemusi päris projektidest.",
+    "empty": "Koolitajaid pole veel lisatud."
+  },
+  "lecturer": {
+    "backToLecturers": "Kõik koolitajad",
+    "trainings": "Koolitused"
+  },
+  "dateInput": {
+    "placeholder": "pp/kk/aaaa",
+    "openCalendar": "Ava kalender"
+  },
+  "adminRooms": {
+    "title": "Koolitusruumid",
+    "addRoom": "Lisa uus ruum",
+    "searchPlaceholder": "Otsi nime järgi…",
+    "showDeleted": "Näita kustutatud",
+    "noResults": "Ruume ei leitud",
+    "totalCount": "Kokku {n} ruumi | Kokku {n} ruum | Kokku {n} ruumi",
+    "deleted": "Kustutatud",
+    "edit": "Muuda",
+    "columns": {
+      "roomName": "Nimi",
+      "upcomingCourseCount": "Tulevasi toimumiskordi",
+      "courseCount": "Toimumiskordi kokku",
+      "updatedAt": "Uuendatud",
+      "actions": "Tegevused"
+    },
+    "messages": {
+      "deleted": "Ruum kustutatud",
+      "restored": "Ruum taastatud"
+    }
+  },
+  "roomDeleteButton": {
+    "label": "Kustuta",
+    "modalTitle": "Kustuta ruum",
+    "modalMessage": "Kas soovid ruumi „{roomName}“ kustutada? Seda ei pakuta enam toimumiskorra vormis; kalendris jääb nimi alles.",
+    "confirm": "Kustuta",
+    "hasUpcomingCourses": "Ruumis on tulevasi toimumiskordi — vali neile enne teine ruum"
+  },
+  "roomRestoreButton": {
+    "label": "Taasta",
+    "modalTitle": "Taasta ruum",
+    "modalMessage": "Kas soovid ruumi „{roomName}“ taastada? Seda saab siis jälle toimumiskordadele valida.",
+    "confirm": "Taasta"
+  },
+  "roomForm": {
+    "title": {
+      "new": "Lisa uus ruum",
+      "update": "Muuda ruumi"
+    },
+    "legend": "Ruumi andmed",
+    "roomName": "Nimi",
+    "buttons": {
+      "add": "Lisa",
+      "save": "Salvesta"
+    },
+    "validation": {
+      "fillRequired": "Täida kõik kohustuslikud väljad"
+    },
+    "messages": {
+      "added": "Ruum lisatud",
+      "saved": "Salvestatud"
+    }
+  },
+  "enquiryStatus": {
+    "U": "Uus",
+    "H": "Käsitletud"
+  },
+  "adminEnquiries": {
+    "title": "Koolituste päringud",
+    "searchPlaceholder": "Otsi nime, e-posti, ettevõtte või koolituse järgi…",
+    "showHandled": "Näita ka käsitletud",
+    "noResults": "Päringuid ei leitud",
+    "totalCount": "Kokku {n} päringut | Kokku {n} päring | Kokku {n} päringut",
+    "view": "Vaata",
+    "columns": {
+      "createdAt": "Saabunud",
+      "fullName": "Nimi",
+      "email": "E-post",
+      "companyName": "Ettevõte",
+      "trainingTitle": "Koolitus",
+      "course": "Toimumiskord",
+      "optionName": "Vorm",
+      "status": "Staatus",
+      "actions": "Tegevused"
+    }
+  },
+  "adminEnquiry": {
+    "title": "Koolituse päring",
+    "enquiryLegend": "Päring",
+    "contactLegend": "Kontakt",
+    "createdAt": "Saabunud",
+    "status": "Staatus",
+    "training": "Koolitus",
+    "course": "Toimumiskord",
+    "noCourse": "Toimumiskorda pole valitud",
+    "option": "Vorm",
+    "companyName": "Ettevõte",
+    "message": "Sõnum",
+    "fullName": "Nimi",
+    "email": "E-post",
+    "phone": "Telefon",
+    "markHandled": "Märgi käsitletuks",
+    "markNew": "Märgi uueks",
+    "messages": {
+      "handled": "Päring märgitud käsitletuks",
+      "reopened": "Päring märgitud uueks"
     }
   }
 }

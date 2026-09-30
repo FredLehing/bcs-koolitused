@@ -130,7 +130,7 @@ Täpsed request/response JSON näidised ja DTO nimed on märkmete failides (vt t
   "trainingLanguageId": 1,
   "locationId": 1,
   "defaultLecturerId": 1,
-  "defaultLecturerName": "Mari Tamm",
+  "defaultLecturerName": "Rain Tüür",
   "isOrderable": true,
   "isPromoted": true,
   "status": "P",

@@ -1,15 +1,66 @@
-<template>
-  <div class="container text-center">
-    <div class="alert alert-primary" role="alert">See on koduvaade, see asub rajal (/)</div>
-    <TestComponent />
-  </div>
-</template>
-
 <script>
-import TestComponent from '@/components/TestComponent.vue'
+import { PhX } from '@phosphor-icons/vue'
+import NavigationService from '@/services/NavigationService.js'
 
 export default {
   name: 'HomeView',
-  components: { TestComponent },
+  components: { PhX },
+
+  data() {
+    return {
+      searchText: '',
+    }
+  },
+  methods: {
+    handleSearchClick() {
+      const appliedSearchText = this.searchText.trim()
+      if (appliedSearchText === '') {
+        NavigationService.navigateToTrainingsView()
+      } else {
+        NavigationService.navigateToTrainingsView({ searchText: appliedSearchText })
+      }
+    },
+    handleClearSearch() {
+      this.searchText = ''
+      this.$refs.searchInput.focus()
+    },
+  },
 }
 </script>
+
+<template>
+  <div class="container">
+    <section class="py-5 text-center">
+      <h1 class="display-5 fw-bold">{{ $t('homeView.title') }}</h1>
+      <p class="lead fw-normal text-body">{{ $t('homeView.subtitle') }}</p>
+      <div class="col-lg-8 mx-auto">
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <div class="input-group input-group-lg">
+            <input
+              ref="searchInput"
+              v-model="searchText"
+              type="text"
+              class="form-control"
+              :placeholder="$t('trainings.searchPlaceholder')"
+              @keyup.enter="handleSearchClick"
+              @keyup.esc="handleClearSearch"
+            />
+            <button
+              v-if="searchText"
+              type="button"
+              class="btn btn-outline-secondary"
+              :title="$t('trainings.clearSearch')"
+              :aria-label="$t('trainings.clearSearch')"
+              @click="handleClearSearch"
+            >
+              <PhX :size="16" />
+            </button>
+            <button type="button" class="btn btn-primary" @click="handleSearchClick">
+              {{ $t('trainings.search') }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</template>

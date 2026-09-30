@@ -2,17 +2,25 @@
   "common": {
     "close": "Close"
   },
+  "homeView": {
+    "title": "Choose from over 100 trainings to find yours",
+    "subtitle": "Practical IT, design and management training from experienced trainers"
+  },
   "navbar": {
     "trainings": "Trainings",
+    "ourLecturers": "Our trainers",
     "services": "Services",
     "company": "Company",
-    "lecturers": "Lecturers",
     "blog": "Blog",
     "contact": "Contact",
     "feedback": "Feedback",
     "admin": "Admin",
     "addTraining": "Add new training",
     "manageTrainings": "Manage trainings",
+    "addLecturer": "Add new trainer",
+    "manageLecturers": "Trainers",
+    "manageRooms": "Training rooms",
+    "manageEnquiries": "Training enquiries",
     "login": "Log in",
     "logout": "Log out",
     "logoutModal": {
@@ -84,9 +92,7 @@
       "category": "Category",
       "trainingLanguage": "Training language",
       "location": "Location",
-      "defaultLecturer": "Default lecturer",
-      "noLecturer": "— no lecturer —",
-      "selectLecturer": "Select lecturer",
+      "lecturers": "Trainers",
       "funding": "Funding",
       "orderable": "Orderable",
       "promoted": "Promoted",
@@ -107,18 +113,14 @@
       "add": "Add",
       "save": "Save",
       "addTranslation": "Add translation",
-      "view": "View"
-    },
-    "flags": {
-      "open": "Open {language} translation",
-      "add": "Add {language} translation"
+      "view": "View",
+      "calendar": "Calendar"
     },
     "lecturerModal": {
-      "title": "Select lecturer",
+      "title": "Select trainer",
       "searchPlaceholder": "Search by name",
       "search": "Search",
-      "notFound": "No lecturers found.",
-      "noLecturer": "No lecturer"
+      "notFound": "No trainers found."
     },
     "aiModal": {
       "title": "Replace text with AI translation?",
@@ -159,7 +161,7 @@
     "mainLanguageFallback": "No translation in the selected language — showing the main language translation.",
     "sidebar": {
       "trainingData": "Training details",
-      "lecturer": "Trainer",
+      "lecturers": "Trainers",
       "upcomingCourses": "Upcoming courses",
       "calendar": "Calendar",
       "placeholder": "Content coming soon."
@@ -250,6 +252,287 @@
       "all": "All",
       "yes": "Yes",
       "no": "No"
+    },
+    "calendar": "Calendar"
+  },
+  "translationFlags": {
+    "open": "Open {language} translation",
+    "add": "Add {language} translation"
+  },
+  "lecturersPicker": {
+    "empty": "— no trainers —",
+    "add": "Add trainer",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "remove": "Remove"
+  },
+  "lecturerDeleteButton": {
+    "label": "Delete",
+    "modalTitle": "Delete trainer",
+    "modalMessage": "Do you want to delete the trainer “{fullName}”? They will no longer be offered in “Select trainer” and their trainer cards will not be shown.",
+    "confirm": "Delete",
+    "hasUpcomingCourses": "The trainer has upcoming courses — assign another trainer to them first"
+  },
+  "lecturerRestoreButton": {
+    "label": "Restore",
+    "modalTitle": "Restore trainer",
+    "modalMessage": "Do you want to restore the trainer “{fullName}”? They can then be assigned to trainings and courses again.",
+    "confirm": "Restore"
+  },
+  "adminLecturers": {
+    "title": "Trainers",
+    "searchPlaceholder": "Search by name…",
+    "showDeleted": "Show deleted",
+    "noResults": "No trainers found",
+    "totalCount": "{n} trainers in total | {n} trainer in total | {n} trainers in total",
+    "deleted": "Deleted",
+    "edit": "Edit",
+    "columns": {
+      "fullName": "Name",
+      "title": "Job title",
+      "translations": "Translations",
+      "trainingCount": "Trainings",
+      "upcomingCourseCount": "Upcoming courses",
+      "updatedAt": "Updated",
+      "actions": "Actions"
+    },
+    "messages": {
+      "deleted": "Trainer deleted",
+      "restored": "Trainer restored"
+    }
+  },
+  "photoUpload": {
+    "select": "Choose photo",
+    "remove": "Remove",
+    "hint": "PNG, JPEG or WebP, up to 2 MB",
+    "invalidFile": "Only PNG, JPEG or WebP images up to 2 MB are allowed"
+  },
+  "lecturerForm": {
+    "title": {
+      "newLecturer": "Add new trainer",
+      "update": "Edit trainer",
+      "newTranslation": "Add trainer translation"
+    },
+    "translations": {
+      "legend": "Trainer translations"
+    },
+    "data": {
+      "legend": "Trainer details",
+      "fullName": "Full name",
+      "photo": "Photo"
+    },
+    "translation": {
+      "legend": "Translation ({language})",
+      "title": "Job title",
+      "titleHelp": "The job title is shown on the trainer card under the name. Briefly describe what the trainer does, e.g. “Software developer and Java trainer” or “UX designer”. Each language has its own translation.",
+      "titlePlaceholder": "e.g. Software developer and Java trainer",
+      "shortDescription": "Short description",
+      "shortDescriptionHint": "Shown on the trainer card on the training page and next to the course.",
+      "description": "Description",
+      "prefilledHint": "The fields are prefilled with the main language ({mainLanguage}) text — translate them or use AI translation.",
+      "aiTooltip": "Translates the saved main language texts; only fills the form"
+    },
+    "aiModal": {
+      "message": "The form has unsaved changes. AI translation overwrites the job title, short description and description."
+    },
+    "validation": {
+      "fillRequired": "Fill in all required fields"
+    },
+    "messages": {
+      "lecturerAdded": "Trainer added",
+      "saved": "Saved",
+      "translationAdded": "Translation added"
+    }
+  },
+  "courseStatus": {
+    "U": "Draft",
+    "O": "Open",
+    "F": "Full",
+    "X": "Cancelled",
+    "past": "Completed"
+  },
+  "courseDeleteButton": {
+    "label": "Delete",
+    "modalTitle": "Delete course",
+    "modalMessage": "Do you want to delete the course {dates}?",
+    "participantsWarning": "The course has {n} participants. Consider cancelling it instead (status “Cancelled”). | The course has {n} participant. Consider cancelling it instead (status “Cancelled”). | The course has {n} participants. Consider cancelling it instead (status “Cancelled”).",
+    "confirm": "Delete"
+  },
+  "trainingSummaryCard": {
+    "category": "Category",
+    "trainingLanguage": "Language of instruction",
+    "location": "Location",
+    "lecturers": "Trainers",
+    "funding": "Funding",
+    "settings": "Settings",
+    "orderable": "Orderable",
+    "promoted": "Promoted"
+  },
+  "adminTrainingCourses": {
+    "title": "Training calendar",
+    "addCourse": "Add course",
+    "showDescription": "▾ Show description",
+    "hideDescription": "▴ Hide description",
+    "includePast": "Show past courses too",
+    "edit": "Edit",
+    "noCourses": "No courses have been added yet",
+    "noUpcomingCourses": "No upcoming courses",
+    "totalCount": "{n} courses in total | {n} course in total | {n} courses in total",
+    "columns": {
+      "startDate": "Start",
+      "endDate": "End",
+      "numberOfDays": "Days",
+      "numberOfAcademicHours": "Acad. hours",
+      "price": "Price (€)",
+      "lecturers": "Trainers",
+      "room": "Room",
+      "status": "Status",
+      "participantCount": "Participants",
+      "notes": "Notes",
+      "meetingLink": "Meeting link",
+      "actions": "Actions"
+    },
+    "messages": {
+      "deleted": "Course deleted"
+    }
+  },
+  "courseForm": {
+    "title": {
+      "new": "New course",
+      "update": "Edit course"
+    },
+    "legend": "Course details",
+    "startDate": "Start",
+    "endDate": "End",
+    "numberOfDays": "Days",
+    "numberOfDaysHint": "Calculated from working days, you can change it",
+    "numberOfAcademicHours": "Academic hours",
+    "price": "Price (€)",
+    "status": "Status",
+    "room": "Room",
+    "noRoom": "No room",
+    "roomDeleted": "(deleted)",
+    "meetingLink": "Meeting link",
+    "notes": "Notes",
+    "back": "Back",
+    "validation": {
+      "fillRequired": "Fill in all required fields",
+      "endBeforeStart": "The end date cannot be earlier than the start date"
+    },
+    "messages": {
+      "added": "Course added",
+      "saved": "Course saved"
+    }
+  },
+  "lecturers": {
+    "title": "Our trainers",
+    "intro": "Our trainers are practitioners in their field who share experience from real projects.",
+    "empty": "No trainers have been added yet."
+  },
+  "lecturer": {
+    "backToLecturers": "All trainers",
+    "trainings": "Trainings"
+  },
+  "dateInput": {
+    "placeholder": "dd/mm/yyyy",
+    "openCalendar": "Open calendar"
+  },
+  "adminRooms": {
+    "title": "Training rooms",
+    "addRoom": "Add new room",
+    "searchPlaceholder": "Search by name…",
+    "showDeleted": "Show deleted",
+    "noResults": "No rooms found",
+    "totalCount": "{n} rooms in total | {n} room in total | {n} rooms in total",
+    "deleted": "Deleted",
+    "edit": "Edit",
+    "columns": {
+      "roomName": "Name",
+      "upcomingCourseCount": "Upcoming courses",
+      "courseCount": "Courses in total",
+      "updatedAt": "Updated",
+      "actions": "Actions"
+    },
+    "messages": {
+      "deleted": "Room deleted",
+      "restored": "Room restored"
+    }
+  },
+  "roomDeleteButton": {
+    "label": "Delete",
+    "modalTitle": "Delete room",
+    "modalMessage": "Do you want to delete the room “{roomName}”? It will no longer be offered in the course form; the calendar keeps its name.",
+    "confirm": "Delete",
+    "hasUpcomingCourses": "The room has upcoming courses — choose another room for them first"
+  },
+  "roomRestoreButton": {
+    "label": "Restore",
+    "modalTitle": "Restore room",
+    "modalMessage": "Do you want to restore the room “{roomName}”? It can then be chosen for courses again.",
+    "confirm": "Restore"
+  },
+  "roomForm": {
+    "title": {
+      "new": "Add new room",
+      "update": "Edit room"
+    },
+    "legend": "Room details",
+    "roomName": "Name",
+    "buttons": {
+      "add": "Add",
+      "save": "Save"
+    },
+    "validation": {
+      "fillRequired": "Fill in all required fields"
+    },
+    "messages": {
+      "added": "Room added",
+      "saved": "Saved"
+    }
+  },
+  "enquiryStatus": {
+    "U": "New",
+    "H": "Handled"
+  },
+  "adminEnquiries": {
+    "title": "Training enquiries",
+    "searchPlaceholder": "Search by name, email, company or training…",
+    "showHandled": "Show handled too",
+    "noResults": "No enquiries found",
+    "totalCount": "{n} enquiries in total | {n} enquiry in total | {n} enquiries in total",
+    "view": "View",
+    "columns": {
+      "createdAt": "Received",
+      "fullName": "Name",
+      "email": "Email",
+      "companyName": "Company",
+      "trainingTitle": "Training",
+      "course": "Course",
+      "optionName": "Format",
+      "status": "Status",
+      "actions": "Actions"
+    }
+  },
+  "adminEnquiry": {
+    "title": "Training enquiry",
+    "enquiryLegend": "Enquiry",
+    "contactLegend": "Contact",
+    "createdAt": "Received",
+    "status": "Status",
+    "training": "Training",
+    "course": "Course",
+    "noCourse": "No course selected",
+    "option": "Format",
+    "companyName": "Company",
+    "message": "Message",
+    "fullName": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "markHandled": "Mark as handled",
+    "markNew": "Mark as new",
+    "messages": {
+      "handled": "Enquiry marked as handled",
+      "reopened": "Enquiry marked as new"
     }
   }
 }
