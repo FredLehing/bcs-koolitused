@@ -4,6 +4,7 @@ import ee.bcskoolitus.controller.training.dto.TrainingCreateRequestDto;
 import ee.bcskoolitus.controller.training.dto.TrainingCreateResponseDto;
 import ee.bcskoolitus.controller.training.dto.TrainingDto;
 import ee.bcskoolitus.controller.training.dto.TrainingSummaryDto;
+import ee.bcskoolitus.controller.training.dto.TrainingTitleDto;
 import ee.bcskoolitus.controller.training.dto.TrainingTranslationCreateRequestDto;
 import ee.bcskoolitus.controller.training.dto.TrainingTranslationCreateResponseDto;
 import ee.bcskoolitus.controller.training.dto.TrainingTranslationItemDto;
@@ -56,6 +57,13 @@ public class TrainingController {
                                                     @RequestParam String contentLang,
                                                     @RequestParam String searchText) {
         return trainingService.findFilteredTrainings(categoryId, fundingTypeId, limit, page, trainingLanguageId, contentLang, searchText);
+    }
+
+    @GetMapping("/training-titles")
+    @Operation(summary = "Tagastab aktiivsete koolituste nimed otsingu ettepanekuteks",
+            description = "Koolitused staatusega U ja P, nimi contentLang keeles (puuduva tõlke korral põhikeeles), sorteeritud nime järgi.")
+    public List<TrainingTitleDto> getTrainingTitles(@RequestParam String contentLang) {
+        return trainingService.getTrainingTitles(contentLang);
     }
 
     @GetMapping("/training/{trainingId}")

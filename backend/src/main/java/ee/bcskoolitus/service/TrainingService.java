@@ -9,6 +9,7 @@ import ee.bcskoolitus.controller.training.dto.TrainingCreateRequestDto;
 import ee.bcskoolitus.controller.training.dto.TrainingCreateResponseDto;
 import ee.bcskoolitus.controller.training.dto.TrainingSummaryDto;
 import ee.bcskoolitus.controller.training.dto.TrainingSummaryItemDto;
+import ee.bcskoolitus.controller.training.dto.TrainingTitleDto;
 import ee.bcskoolitus.controller.training.dto.TrainingDto;
 import ee.bcskoolitus.controller.training.dto.TrainingTranslationItemDto;
 import ee.bcskoolitus.controller.training.dto.TrainingTranslationCreateRequestDto;
@@ -26,6 +27,9 @@ import ee.bcskoolitus.persistance.training.fundingtype.TrainingFundingTypeReposi
 import ee.bcskoolitus.persistance.training.translation.TrainingTranslation;
 import ee.bcskoolitus.persistance.training.translation.TrainingTranslationMapper;
 import ee.bcskoolitus.persistance.training.translation.TrainingTranslationRepository;
+import ee.bcskoolitus.persistance.view.admintrainingsummary.AdminTrainingSummary;
+import ee.bcskoolitus.persistance.view.admintrainingsummary.AdminTrainingSummaryMapper;
+import ee.bcskoolitus.persistance.view.admintrainingsummary.AdminTrainingSummaryRepository;
 import ee.bcskoolitus.persistance.view.trainingsummary.TrainingSummary;
 import ee.bcskoolitus.persistance.view.trainingsummary.TrainingSummaryMapper;
 import ee.bcskoolitus.persistance.view.trainingsummary.TrainingSummaryRepository;
@@ -66,6 +70,8 @@ public class TrainingService {
     private final LecturerService lecturerService;
     private final FundingTypeService fundingTypeService;
     private final TrainingTranslationService trainingTranslationService;
+    private final AdminTrainingSummaryRepository adminTrainingSummaryRepository;
+    private final AdminTrainingSummaryMapper adminTrainingSummaryMapper;
 
     public TrainingSummaryDto findFilteredTrainings(Integer categoryId, Integer fundingTypeId, Integer limit, Integer page, Integer trainingLanguageId, String contentLang, String searchText) {
         Pageable pageable = PageRequest.of(page, limit, Sort.by(Sort.Order.desc("training.isPromoted"), Sort.Order.asc("title")));
@@ -105,6 +111,13 @@ public class TrainingService {
         trainingSummaryDto.setTotalElements(filteredTrainingSummaryPage.getTotalElements());
         trainingSummaryDto.setTrainingSummaries(trainingSummaryItemDtos);
         return trainingSummaryDto;
+    }
+
+    // Aktiivsete (status U, P) koolituste nimed contentLang keeles, puuduva tõlke korral põhikeeles
+    public List<TrainingTitleDto> getTrainingTitles(String contentLang) {
+        List<AdminTrainingSummary> adminTrainingSummaries = adminTrainingSummaryRepository
+                .findAllByContentLanguageCodeAndStatusNotOrderByTitleAsc(contentLang, TrainingStatus.DELETED.getCode());
+        return adminTrainingSummaryMapper.toTrainingTitleDtos(adminTrainingSummaries);
     }
 
     public Training getValidTrainingBy(Integer trainingId) {
