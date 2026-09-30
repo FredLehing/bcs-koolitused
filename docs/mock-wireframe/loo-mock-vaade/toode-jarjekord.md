@@ -12,7 +12,7 @@ Mockid ja otsused: `admin-lecturers-view/`, `admin-training-courses-view/`, `lec
 
 | # | Töö | Taskifail | Keerukus | Märkus |
 |---|---|---|---|---|
-| 1.1 | Koolitaja DDL + seed (`status`, tõlkeväljad, `lecturer_photo`, view `admin_lecturer_summary`), entity'd | `docs/tasks/backend/lecturer-db-changes.md` | keskmine | kõik järgmised sõltuvad |
+| 1.1 | Koolitaja DDL + seed (`status`, tõlkeväljad, `lecturer_photo`, view `admin_lecturer_summary`), entity'd | `docs/tasks/backend/lecturer-db-changes.md` | keskmine | kõik järgmised sõltuvad; **tehakse koos 1.2-ga** (view `admin_lecturer_summary` loeb `training_lecturer` / `course_lecturer` tabeleid) |
 | 1.2 | Mitu koolitajat: `training_lecturer`, `course_lecturer`; `TrainingDto.lecturers`, `lecturerIds` | `docs/tasks/backend/training-lecturers-multiple.md` | keerukas | **muudab töötavat koodi** (TrainingService, DTO-d, testid) |
 | 1.3 | Kustutatud koolitaja peitmine (`GET /api/lecturers`, `lecturerIds`) | `docs/tasks/backend/lecturer-deleted-status.md` | lihtne | |
 | 1.4 | Pilditeenus + pildi normaliseerimise abiklass | `docs/tasks/backend/GET-api-lecturer-lecturerId-photo.md` | keskmine | vajalik 1.8, 1.9 ja avalikule lehele |

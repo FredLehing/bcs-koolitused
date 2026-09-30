@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.UniqueElements;
 
 import java.io.Serializable;
 import java.util.List;
@@ -24,7 +25,10 @@ public class TrainingUpdateRequestDto implements Serializable {
     @NotNull
     private Integer locationId;
 
-    private Integer defaultLecturerId;
+    // Koolitajad järjekorras (sort_order = indeks + 1); tühi list = koolitajaid pole
+    @NotNull
+    @UniqueElements(message = "ei tohi sisaldada korduvaid väärtusi")
+    private List<@NotNull Integer> lecturerIds;
 
     @NotNull
     private Boolean isOrderable;

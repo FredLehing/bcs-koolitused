@@ -1,6 +1,6 @@
 package ee.bcskoolitus.controller.lecturer;
 
-import ee.bcskoolitus.controller.lecturer.dto.LecturerDto;
+import ee.bcskoolitus.controller.common.dto.LecturerDto;
 import ee.bcskoolitus.service.LecturerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

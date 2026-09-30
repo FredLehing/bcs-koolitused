@@ -14,6 +14,8 @@ import ee.bcskoolitus.persistance.training.TrainingMapperImpl;
 import ee.bcskoolitus.persistance.training.TrainingRepository;
 import ee.bcskoolitus.persistance.training.fundingtype.TrainingFundingType;
 import ee.bcskoolitus.persistance.training.fundingtype.TrainingFundingTypeRepository;
+import ee.bcskoolitus.persistance.training.lecturer.TrainingLecturer;
+import ee.bcskoolitus.persistance.training.lecturer.TrainingLecturerRepository;
 import ee.bcskoolitus.persistance.training.translation.TrainingTranslation;
 import ee.bcskoolitus.persistance.training.translation.TrainingTranslationMapper;
 import ee.bcskoolitus.persistance.training.translation.TrainingTranslationMapperImpl;
@@ -36,7 +38,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -71,6 +72,8 @@ class TrainingServiceUpdateTest {
     @Mock
     private FundingTypeService fundingTypeService;
     @Mock
+    private TrainingLecturerRepository trainingLecturerRepository;
+    @Mock
     private TrainingTranslationService trainingTranslationService;
     @Spy
     private TrainingMapper trainingMapper = new TrainingMapperImpl();
@@ -93,14 +96,10 @@ class TrainingServiceUpdateTest {
         translationLanguage = new Language();
         translationLanguage.setId(2);
 
-        Lecturer lecturer = new Lecturer();
-        lecturer.setId(1);
-
         training = new Training();
         training.setId(TRAINING_ID);
         training.setUser(user);
         training.setStatus(TrainingStatus.PUBLISHED.getCode());
-        training.setDefaultLecturer(lecturer);
         training.setIsOrderable(true);
         training.setIsPromoted(true);
 
@@ -118,6 +117,10 @@ class TrainingServiceUpdateTest {
         when(locationService.getValidLocationBy(2)).thenReturn(createLocation(2));
         when(fundingTypeService.getValidFundingTypeBy(1)).thenReturn(createFundingType(1));
         when(fundingTypeService.getValidFundingTypeBy(2)).thenReturn(createFundingType(2));
+        when(trainingLecturerRepository.findTrainingLecturersBy(TRAINING_ID))
+                .thenReturn(List.of(createTrainingLecturer(training, createLecturer(1))));
+        when(lecturerService.getValidActiveLecturerBy(8, "lecturerId")).thenReturn(createLecturer(8));
+        when(lecturerService.getValidLecturerBy(1, "lecturerId")).thenReturn(createLecturer(1));
     }
 
     @Test
@@ -135,11 +138,59 @@ class TrainingServiceUpdateTest {
     }
 
     @Test
-    void updateTraining_nullDefaultLecturerRemovesLecturer() {
+    void updateTraining_replacesLecturersInGivenOrder() {
+        TrainingUpdateRequestDto trainingUpdateRequestDto = createTrainingUpdateRequestDto();
+        trainingUpdateRequestDto.setLecturerIds(List.of(8, 1));
+
+        trainingService.updateTraining(TRAINING_ID, trainingUpdateRequestDto);
+
+        InOrder inOrder = inOrder(trainingLecturerRepository);
+        inOrder.verify(trainingLecturerRepository).deleteTrainingLecturersBy(TRAINING_ID);
+        ArgumentCaptor<TrainingLecturer> trainingLecturerCaptor = ArgumentCaptor.forClass(TrainingLecturer.class);
+        inOrder.verify(trainingLecturerRepository, times(2)).save(trainingLecturerCaptor.capture());
+        List<TrainingLecturer> savedTrainingLecturers = trainingLecturerCaptor.getAllValues();
+        assertEquals(List.of(8, 1), savedTrainingLecturers.stream()
+                .map(trainingLecturer -> trainingLecturer.getLecturer().getId())
+                .toList());
+        assertEquals(List.of(1, 2), savedTrainingLecturers.stream()
+                .map(TrainingLecturer::getSortOrder)
+                .toList());
+        assertSame(training, savedTrainingLecturers.getFirst().getTraining());
+    }
+
+    @Test
+    void updateTraining_emptyLecturerIdsRemovesAllLecturers() {
         trainingService.updateTraining(TRAINING_ID, createTrainingUpdateRequestDto());
 
-        assertNull(training.getDefaultLecturer());
+        verify(trainingLecturerRepository).deleteTrainingLecturersBy(TRAINING_ID);
+        verify(trainingLecturerRepository, never()).save(any());
         verifyNoInteractions(lecturerService);
+    }
+
+    @Test
+    void updateTraining_alreadyLinkedLecturerIsNotCheckedForActiveStatus() {
+        TrainingUpdateRequestDto trainingUpdateRequestDto = createTrainingUpdateRequestDto();
+        trainingUpdateRequestDto.setLecturerIds(List.of(1));
+
+        trainingService.updateTraining(TRAINING_ID, trainingUpdateRequestDto);
+
+        verify(lecturerService).getValidLecturerBy(1, "lecturerId");
+        verify(lecturerService, never()).getValidActiveLecturerBy(any(), any());
+        verify(trainingLecturerRepository).save(any());
+    }
+
+    @Test
+    void updateTraining_newDeletedLecturerThrows() {
+        TrainingUpdateRequestDto trainingUpdateRequestDto = createTrainingUpdateRequestDto();
+        trainingUpdateRequestDto.setLecturerIds(List.of(4));
+        when(lecturerService.getValidActiveLecturerBy(4, "lecturerId"))
+                .thenThrow(new PrimaryKeyNotFoundException("lecturerId", 4));
+
+        PrimaryKeyNotFoundException exception = assertThrows(PrimaryKeyNotFoundException.class,
+                () -> trainingService.updateTraining(TRAINING_ID, trainingUpdateRequestDto));
+
+        assertEquals("Ei leidnud primary keyd 'lecturerId' väärtusega: 4", exception.getMessage());
+        verify(trainingLecturerRepository, never()).save(any());
     }
 
     @Test
@@ -208,7 +259,7 @@ class TrainingServiceUpdateTest {
 
     private TrainingUpdateRequestDto createTrainingUpdateRequestDto() {
         return new TrainingUpdateRequestDto(
-                3, 1, 2, null, false, false, List.of(1, 2, 1),
+                3, 1, 2, List.of(), false, false, List.of(1, 2, 1),
                 TRAINING_TRANSLATION_ID, "Java Advanced", "Advanced Java topics.",
                 "<p onclick=\"alert(1)\">Streams and <strong>lambdas</strong></p><script>alert(1)</script>");
     }
@@ -229,6 +280,20 @@ class TrainingServiceUpdateTest {
         Location location = new Location();
         location.setId(locationId);
         return location;
+    }
+
+    private static Lecturer createLecturer(Integer lecturerId) {
+        Lecturer lecturer = new Lecturer();
+        lecturer.setId(lecturerId);
+        return lecturer;
+    }
+
+    private static TrainingLecturer createTrainingLecturer(Training training, Lecturer lecturer) {
+        TrainingLecturer trainingLecturer = new TrainingLecturer();
+        trainingLecturer.setTraining(training);
+        trainingLecturer.setLecturer(lecturer);
+        trainingLecturer.setSortOrder(1);
+        return trainingLecturer;
     }
 
     private static FundingType createFundingType(Integer fundingTypeId) {
