@@ -13,6 +13,11 @@
     "admin": "Admin",
     "addTraining": "Add new training",
     "login": "Log in",
+    "logout": "Log out",
+    "logoutModal": {
+      "title": "Logging out",
+      "message": "Are you sure you want to log out?"
+    },
     "register": "Register"
   },
   "error": {
@@ -36,6 +41,25 @@
     "incorrectCredentials": "Incorrect email or password"
   },
 
+  "trainings": {
+    "searchPlaceholder": "Search trainings",
+    "search": "Search",
+    "clearSearch": "Clear search",
+    "searchResults": "Results for “{query}”:",
+    "resultCount": "{n} trainings | {n} training | {n} trainings",
+    "cancelSearch": "Clear search",
+    "noSearchResults": "No trainings found for “{query}”.",
+    "noSearchResultsHint": "Try fewer or different words. Word forms are not adjusted, so use the beginning of a word (e.g. “program” instead of “programming”).",
+    "showAllTrainings": "Show all trainings",
+    "noResults": "No trainings match the selected filters.",
+    "searchHelp": "Searches for the entered words in the training title and short description. For best results, enter a few words. Word forms are not adjusted."
+  },
+  "trainingCard": {
+    "language": "Training language",
+    "orderable": "Orderable",
+    "viewDetails": "View details",
+    "edit": "Edit training"
+  },
   "footer": {
     "facebook": "Find us on Facebook",
     "privacy": "Privacy Policy and Terms of Use",
@@ -50,6 +74,9 @@
     "status": {
       "published": "Published",
       "unpublished": "Draft"
+    },
+    "translations": {
+      "legend": "Training translations"
     },
     "data": {
       "legend": "Training details",
@@ -80,7 +107,8 @@
       "save": "Save",
       "addTranslation": "Add translation",
       "publish": "Publish",
-      "unpublish": "Move to draft"
+      "unpublish": "Move to draft",
+      "view": "View"
     },
     "flags": {
       "open": "Open {language} translation",
@@ -110,8 +138,7 @@
       "selectLocation": "Select a location",
       "addTitle": "Add a title",
       "addShortDescription": "Add a short description",
-      "addDescription": "Add a description",
-      "languageNotInSystem": "Language \"{language}\" is not in the system"
+      "addDescription": "Add a description"
     },
     "messages": {
       "trainingAdded": "Training \"{title}\" has been added as a draft",
@@ -120,6 +147,29 @@
       "published": "The training has been published",
       "unpublished": "The training has been moved to draft",
       "aiDone": "The AI translation is in the form — check the text and save"
+    }
+  },
+  "richTextEditor": {
+    "bold": "Bold",
+    "italic": "Italic",
+    "underline": "Underline",
+    "heading3": "Heading",
+    "heading4": "Subheading",
+    "bulletList": "Bullet list",
+    "orderedList": "Numbered list",
+    "link": "Add link",
+    "unlink": "Remove link",
+    "linkPrompt": "Link address"
+  },
+  "trainingView": {
+    "legend": "Training information",
+    "mainLanguageFallback": "No translation in the selected language — showing the main language translation.",
+    "sidebar": {
+      "trainingData": "Training details",
+      "lecturer": "Trainer",
+      "upcomingCourses": "Upcoming courses",
+      "calendar": "Calendar",
+      "placeholder": "Content coming soon."
     }
   }
 }

@@ -15,5 +15,6 @@ public interface FundingTypeTranslationRepository extends JpaRepository<FundingT
             order by ftt.fundingType.id asc""")
     List<FundingTypeTranslation> findTrainingFundingTypeTranslationsBy(Integer trainingId, String contentLang);
 
+    List<FundingTypeTranslation> findAllByLanguage_CodeOrderByFundingType_IdAsc(String contentLang);
 
 }

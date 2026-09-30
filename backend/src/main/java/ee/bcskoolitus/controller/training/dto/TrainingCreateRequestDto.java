@@ -1,5 +1,6 @@
 package ee.bcskoolitus.controller.training.dto;
 
+import ee.bcskoolitus.infrastructure.validation.HtmlNotBlank;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -43,6 +44,7 @@ public class TrainingCreateRequestDto implements Serializable {
     private String shortDescription;
 
     @NotBlank
+    @HtmlNotBlank
     private String description;
 
     @NotNull

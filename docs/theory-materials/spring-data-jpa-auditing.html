@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JPA Auditing – Algajatele</title>
+<style>
+/* Paigutus: üks lugemisveerg (sama mis teistel sarja materjalidel), keskel interaktiivne "ajatemplimasin" */
+:root {
+  --bg: #fafaf8;
+  --surface: #ffffff;
+  --text: #1f2328;
+  --muted: #59636e;
+  --border: #d8dee4;
+  --accent: #0b6bcb;
+  --accent-soft: #e3effb;
+  --code-bg: #f3f4f6;
+  --pre-bg: #1e2430;
+  --pre-text: #e6edf3;
+  --quote-bg: #fff8e5;
+  --quote-border: #d4a72c;
+  --ok: #1a7f37;
+  --ok-soft: #dafbe1;
+  --bad: #cf222e;
+  --bad-soft: #ffebe9;
+  --off: #eef0f2;
+  --kw: #ff7b72;
+  --str: #a5d6ff;
+  --cm: #8b949e;
+  --ann: #d2a8ff;
+  --add-bg: #12351f;
+  --del-bg: #3d1417;
+  --flash: #ffe58a;
+  --flash-text: #1f2328;
+  --on-accent: #ffffff;
+  --stamp: #b3261e;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1216; --surface: #161b22; --text: #e6edf3; --muted: #9da7b3;
+    --border: #30363d; --accent: #58a6ff; --accent-soft: #10243d; --code-bg: #262c36;
+    --pre-bg: #0b0e13; --pre-text: #e6edf3; --quote-bg: #2a2410; --quote-border: #bb8009;
+    --ok: #3fb950; --ok-soft: #12261a; --bad: #f85149; --bad-soft: #2d1215; --off: #1c2129;
+    --flash: #6b5a14; --flash-text: #fff8d6; --on-accent: #0b0e13; --stamp: #ff8a80;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1216; --surface: #161b22; --text: #e6edf3; --muted: #9da7b3;
+  --border: #30363d; --accent: #58a6ff; --accent-soft: #10243d; --code-bg: #262c36;
+  --pre-bg: #0b0e13; --pre-text: #e6edf3; --quote-bg: #2a2410; --quote-border: #bb8009;
+  --ok: #3fb950; --ok-soft: #12261a; --bad: #f85149; --bad-soft: #2d1215; --off: #1c2129;
+  --flash: #6b5a14; --flash-text: #fff8d6; --on-accent: #0b0e13; --stamp: #ff8a80;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+main { max-width: 860px; margin: 0 auto; padding: 40px 16px 80px; }
+h1 { font-size: 2rem; line-height: 1.25; margin: 0 0 12px; text-wrap: balance; }
+h2 { font-size: 1.45rem; margin: 48px 0 12px; padding-top: 8px; border-top: 1px solid var(--border); text-wrap: balance; }
+h3 { font-size: 1.15rem; margin: 28px 0 8px; }
+p, li { max-width: 72ch; }
+a { color: var(--accent); }
+.lead { color: var(--muted); font-size: 1.1rem; margin-top: 0; }
+code {
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  font-size: 0.9em;
+  background: var(--code-bg);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
+pre {
+  background: var(--pre-bg);
+  color: var(--pre-text);
+  padding: 16px;
+  border-radius: 8px;
+  overflow-x: auto;
+  line-height: 1.5;
+  margin: 12px 0;
+}
+pre code { background: none; padding: 0; font-size: 0.85rem; color: inherit; }
+.kw { color: var(--kw); }
+.str { color: var(--str); }
+.cm { color: var(--cm); font-style: italic; }
+.an { color: var(--ann); }
+.add { background: var(--add-bg); display: block; }
+.del { background: var(--del-bg); display: block; text-decoration: line-through; opacity: .8; }
+blockquote {
+  margin: 16px 0;
+  padding: 10px 16px;
+  background: var(--quote-bg);
+  border-left: 4px solid var(--quote-border);
+  border-radius: 0 6px 6px 0;
+}
+blockquote p { margin: 0; }
+.table-wrap { overflow-x: auto; margin: 16px 0; }
+table { border-collapse: collapse; width: 100%; background: var(--surface); font-size: 0.95rem; }
+th, td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; vertical-align: top; }
+th { background: var(--code-bg); }
+.toc {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 20px;
+  margin: 24px 0;
+}
+.toc ol { margin: 6px 0; padding-left: 20px; }
+button {
+  font: inherit;
+  font-size: 0.92rem;
+  padding: 7px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+button:hover:not(:disabled) { border-color: var(--accent); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button:disabled { opacity: .5; cursor: not-allowed; }
+button.primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+
+/* Enne / pärast lülitid */
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; margin: 16px 0 0; }
+.tabs button[aria-selected="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+
+/* Postitempel */
+.stamp-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin: 16px 0; }
+.stamp {
+  border: 3px double var(--stamp);
+  color: var(--stamp);
+  border-radius: 50%;
+  width: 116px; height: 116px;
+  display: grid; place-items: center; text-align: center;
+  font: 700 0.72rem/1.25 ui-monospace, Consolas, monospace;
+  letter-spacing: .06em;
+  transform: rotate(-9deg);
+  flex: none;
+}
+.stamp-row p { flex: 1 1 260px; min-width: 0; margin: 0; }
+
+/* Kolm osa */
+.parts { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; margin: 16px 0; }
+.part { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; min-width: 0; }
+.part h3 { margin: 0 0 4px; font-size: 1rem; }
+.part .where { color: var(--muted); font-size: .85rem; margin: 0 0 8px; }
+.part p { margin: 0; font-size: .95rem; }
+
+/* Simulaator */
+.sim { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin: 20px 0; }
+.sim-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 16px; }
+@media (max-width: 720px) { .sim-grid { grid-template-columns: minmax(0, 1fr); } }
+.sim h3 { margin: 0 0 8px; font-size: .8rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); }
+.switches { display: grid; gap: 6px; margin-bottom: 14px; }
+.switches label { display: flex; gap: 8px; align-items: flex-start; font-size: .92rem; cursor: pointer; }
+.switches input { margin-top: 5px; }
+.switches code { font-size: .82em; }
+.actions { display: grid; gap: 6px; }
+.actions button { text-align: left; }
+.actions .hint { display: block; color: var(--muted); font-size: .8rem; }
+.clock { font: .85rem ui-monospace, Consolas, monospace; color: var(--muted); margin: 0 0 8px; }
+.row-table td, .row-table th { font: .82rem ui-monospace, Consolas, monospace; padding: 6px 8px; white-space: nowrap; }
+.row-table td.null { color: var(--bad); }
+.row-table td.flash { background: var(--flash); color: var(--flash-text); transition: background 1.2s; }
+.empty-row td { color: var(--muted); font-style: italic; white-space: normal; }
+.log {
+  background: var(--pre-bg); color: var(--pre-text);
+  border-radius: 8px; padding: 12px; margin-top: 12px;
+  font: .8rem/1.55 ui-monospace, Consolas, monospace;
+  min-height: 180px; max-height: 320px; overflow: auto;
+  white-space: pre-wrap; word-break: break-word;
+}
+.log .l-step { color: var(--cm); }
+.log .l-ok { color: #7ee787; }
+.log .l-bad { color: #ff7b72; }
+.log .l-sql { color: var(--str); }
+.log .l-warn { color: #e3b341; }
+.verdict { margin-top: 10px; padding: 8px 12px; border-radius: 6px; font-size: .92rem; }
+.verdict.ok { background: var(--ok-soft); color: var(--ok); }
+.verdict.bad { background: var(--bad-soft); color: var(--bad); }
+.verdict.warn { background: var(--quote-bg); color: var(--text); border-left: 4px solid var(--quote-border); }
+
+/* Checklist */
+.check { list-style: none; padding: 0; }
+.check li { display: flex; gap: 10px; align-items: flex-start; padding: 6px 0; border-bottom: 1px dashed var(--border); }
+.check input { margin-top: 6px; flex: none; }
+.check label { min-width: 0; cursor: pointer; }
+.check-done { color: var(--ok); font-weight: 600; margin-top: 8px; }
+
+/* Quiz */
+.quiz-q { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin: 12px 0; }
+.quiz-q p { margin: 0 0 10px; font-weight: 600; }
+.quiz-opts { display: grid; gap: 6px; }
+.quiz-opts button { text-align: left; }
+.quiz-opts button.right { background: var(--ok-soft); border-color: var(--ok); color: var(--ok); }
+.quiz-opts button.wrong { background: var(--bad-soft); border-color: var(--bad); color: var(--bad); }
+.quiz-exp { margin: 10px 0 0; font-size: .92rem; color: var(--muted); }
+.score { font-weight: 600; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<main>
+
+<h1>Automaatsed ajatemplid: JPA Auditing – Algajatele</h1>
+<p class="lead">Kuidas Spring täidab <code>createdAt</code> ja <code>updatedAt</code> väljad ise, nii et me ei pea neid üheski teenuses käsitsi seadma. Näited on meie oma projektist (<code>Training</code>, <code>TrainingService</code>).</p>
+
+<nav class="toc" aria-label="Sisukord">
+  <strong>Sisukord</strong>
+  <ol>
+    <li><a href="#miks">Milleks see vajalik on?</a></li>
+    <li><a href="#enne-parast">Enne ja pärast: mis koodis muutus</a></li>
+    <li><a href="#kolm-osa">Kolm osa, mis peavad koos olema</a></li>
+    <li><a href="#kuidas">Mis salvestamisel tegelikult toimub</a></li>
+    <li><a href="#simulaator">Proovi ise: ajatemplimasin</a></li>
+    <li><a href="#losed">Lõksud</a></li>
+    <li><a href="#hibernate">Aga Hibernate'i <code>@CreationTimestamp</code>?</a></li>
+    <li><a href="#checklist">Checklist uue entiteedi jaoks</a></li>
+    <li><a href="#kokkuvote">Kokkuvõte</a></li>
+    <li><a href="#test">Kontrolli ennast</a></li>
+    <li><a href="#edasi">Järgmised sammud</a></li>
+  </ol>
+</nav>
+
+<h2 id="miks">1. Milleks see vajalik on?</h2>
+<p>Peaaegu igal meie andmebaasitabelil on kaks veergu:</p>
+<ul>
+  <li><code>created_at</code>: millal rida <strong>loodi</strong>. Seda ei muudeta enam kunagi.</li>
+  <li><code>updated_at</code>: millal rida <strong>viimati muudeti</strong>. See uueneb iga muudatusega.</li>
+</ul>
+<p>Mõlemad on <code>NOT NULL</code>, seega peab keegi need alati täitma. Varem tegime seda iga kord käsitsi:</p>
+<pre><code>Instant now = Instant.now();
+training.setCreatedAt(now);
+training.setUpdatedAt(now);</code></pre>
+<p>Kolm rida pole palju. Mure on selles, et neid on vaja <em>igas</em> kohas, kus midagi luuakse või muudetakse. Kui üks arendaja unustab <code>setUpdatedAt()</code> muutmise teenusesse panna, ei anna keegi viga. Andmebaasis on lihtsalt vale kuupäev ja seda märgatakse alles kuude pärast.</p>
+
+<div class="stamp-row">
+  <div class="stamp" aria-hidden="true">POST<br>29.09.2026<br>TALLINN</div>
+  <p><strong>Analoogia: postitempel.</strong> Kui saadad kirja, ei kirjuta sa ümbrikule ise kuupäeva. Postkontor lööb sinna templi, alati ja automaatselt. Sa ei saa seda unustada ega valesti kirjutada. JPA Auditing on meie entiteetide postkontor: sina ainult salvestad, tempel lüüakse ise.</p>
+</div>
+
+<h2 id="enne-parast">2. Enne ja pärast: mis koodis muutus</h2>
+<p>Vali, millist faili vaadata:</p>
+<div class="tabs" role="tablist" aria-label="Failid">
+  <button type="button" role="tab" id="tab-service" aria-selected="true" data-tab="service">TrainingService.java</button>
+  <button type="button" role="tab" id="tab-entity" aria-selected="false" data-tab="entity">Training.java</button>
+  <button type="button" role="tab" id="tab-config" aria-selected="false" data-tab="config">JpaAuditingConfig.java (uus)</button>
+</div>
+
+<div data-panel="service">
+<pre><code>    <span class="kw">private</span> Training createTraining(TrainingCreateRequestDto trainingCreateRequestDto) {
+        Training training = trainingMapper.toTraining(trainingCreateRequestDto);
+        <span class="cm">// ... user, category, location, language ...</span>
+        training.setStatus(TrainingStatus.UNPUBLISHED.getCode());
+<span class="del">        Instant now = Instant.now();</span><span class="del">        training.setCreatedAt(now);</span><span class="del">        training.setUpdatedAt(now);</span>        <span class="kw">return</span> training;
+    }
+
+    <span class="kw">private</span> TrainingTranslation createMainLanguageTrainingTranslation(...) {
+        <span class="cm">// ...</span>
+        trainingTranslation.setLanguage(languageService.getMainLanguage());
+<span class="del">        trainingTranslation.setCreatedAt(training.getCreatedAt());</span><span class="del">        trainingTranslation.setUpdatedAt(training.getCreatedAt());</span>        <span class="kw">return</span> trainingTranslation;
+    }</code></pre>
+<p>Teenusest kaob ajatemplite loogika täielikult. Teenus tegeleb ainult äriloogikaga.</p>
+</div>
+
+<div data-panel="entity" hidden>
+<pre><code><span class="an">@Getter</span>
+<span class="an">@Setter</span>
+<span class="an">@Entity</span>
+<span class="add"><span class="an">@EntityListeners</span>(AuditingEntityListener.<span class="kw">class</span>)</span><span class="an">@Table</span>(name = <span class="str">"training"</span>, schema = <span class="str">"bcs_koolitused"</span>)
+<span class="kw">public class</span> Training {
+    <span class="cm">// ... teised väljad ...</span>
+
+    <span class="an">@NotNull</span>
+<span class="add">    <span class="an">@CreatedDate</span></span>    <span class="an">@Column</span>(name = <span class="str">"created_at"</span>, nullable = <span class="kw">false</span>, <span class="add" style="display:inline">updatable = <span class="kw">false</span></span>)
+    <span class="kw">private</span> Instant createdAt;
+
+    <span class="an">@NotNull</span>
+<span class="add">    <span class="an">@LastModifiedDate</span></span>    <span class="an">@Column</span>(name = <span class="str">"updated_at"</span>, nullable = <span class="kw">false</span>)
+    <span class="kw">private</span> Instant updatedAt;
+}</code></pre>
+<p>Sama muudatus tehti kõigile 19 entiteedile, millel on <code>created_at</code> veerg. <code>User</code>, <code>Participant</code> ja <code>ParticipantCertificate</code> said ainult <code>@CreatedDate</code>, sest neil pole <code>updated_at</code> veergu.</p>
+</div>
+
+<div data-panel="config" hidden>
+<pre><code><span class="kw">package</span> ee.bcskoolitus.infrastructure.config;
+
+<span class="kw">import</span> org.springframework.context.annotation.Configuration;
+<span class="kw">import</span> org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+
+<span class="an">@Configuration</span>
+<span class="an">@EnableJpaAuditing</span>
+<span class="kw">public class</span> JpaAuditingConfig {
+}</code></pre>
+<p>Tühi klass, mille ainus ülesanne on annotatsioon <code>@EnableJpaAuditing</code>. See lülitab kogu auditeerimise sisse. Eraldi klassis, mitte <code>BcskoolitusApplication</code> peal, et <code>@WebMvcTest</code> jms kitsad testid ei nõuaks JPA-d.</p>
+</div>
+
+<h2 id="kolm-osa">3. Kolm osa, mis peavad koos olema</h2>
+<p>Auditing töötab ainult siis, kui kõik kolm osa on paigas. Kui üks puudub, jäävad väljad <code>null</code>-iks ja salvestamine kukub läbi.</p>
+<div class="parts">
+  <div class="part">
+    <h3><code>@EnableJpaAuditing</code></h3>
+    <p class="where">JpaAuditingConfig.java, üks kord terve rakenduse peale</p>
+    <p><strong>Pealüliti.</strong> Ütleb Springile, et auditeerimise masinavärk tuleb käivitada. Postkontori analoogias: postkontor on avatud.</p>
+  </div>
+  <div class="part">
+    <h3><code>@EntityListeners(...)</code></h3>
+    <p class="where">Iga entiteedi klassi peal</p>
+    <p><strong>Kuulaja.</strong> Paneb entiteedile külge <code>AuditingEntityListener</code>-i, kes kuulab sündmusi "hakkan salvestama" ja "hakkan muutma". Analoogias: kiri viiakse postkontorisse, mitte ei visata lihtsalt kasti.</p>
+  </div>
+  <div class="part">
+    <h3><code>@CreatedDate</code> / <code>@LastModifiedDate</code></h3>
+    <p class="where">Konkreetse välja peal</p>
+    <p><strong>Silt.</strong> Ütleb kuulajale, <em>millisesse</em> välja aeg kirjutada. Analoogias: ümbrikul on kast, kuhu tempel lüüakse.</p>
+  </div>
+</div>
+<p>Lisaks on <code>createdAt</code> väljal <code>updatable = false</code>. See on turvavöö: isegi kui keegi kogemata <code>setCreatedAt(...)</code> välja kutsub, ei lähe see väärtus <code>UPDATE</code> lausesse.</p>
+
+<h2 id="kuidas">4. Mis salvestamisel tegelikult toimub</h2>
+<p>JPA (täpsemalt Hibernate) annab entiteedi elu jooksul märku kindlatest hetkedest. Neid nimetatakse <strong>elutsükli sündmusteks</strong> (lifecycle events). Meile olulised on kaks:</p>
+<ul>
+  <li><code>@PrePersist</code>: vahetult enne, kui <strong>uus</strong> rida andmebaasi lisatakse (<code>INSERT</code>).</li>
+  <li><code>@PreUpdate</code>: vahetult enne, kui <strong>olemasolevat</strong> rida muudetakse (<code>UPDATE</code>).</li>
+</ul>
+<pre><code>  TrainingService              Hibernate                 AuditingEntityListener       Andmebaas
+        │                          │                              │                         │
+        │ repository.save(t)       │                              │                         │
+        │─────────────────────────&gt;│                              │                         │
+        │                          │ uus entiteet? → @PrePersist  │                         │
+        │                          │─────────────────────────────&gt;│                         │
+        │                          │                              │ createdAt = now         │
+        │                          │                              │ updatedAt = now         │
+        │                          │&lt;─────────────────────────────│                         │
+        │                          │ @NotNull kontroll: OK        │                         │
+        │                          │ INSERT INTO training (..., created_at, updated_at)      │
+        │                          │───────────────────────────────────────────────────────&gt;│
+        │&lt;─────────────────────────│                              │                         │</code></pre>
+<p>Muutmisel on sama pilt, ainult sündmus on <code>@PreUpdate</code> ja kuulaja seab ainult <code>updatedAt</code>. <code>createdAt</code> jääb puutumata.</p>
+<blockquote><p><strong>Miks <code>@NotNull</code> ei anna viga, kuigi teenus välja ei täida?</strong> Sest kuulaja jõuab enne. Järjekord on: kõigepealt <code>@PrePersist</code> (tempel lüüakse), alles siis valideerimine ja <code>INSERT</code>.</p></blockquote>
+
+<h2 id="simulaator">5. Proovi ise: ajatemplimasin</h2>
+<p>All on väike simulatsioon ühest <code>training</code> reast. Lülita osi sisse ja välja, vajuta nuppe ja vaata, mis tabelisse ja logisse jõuab. Iga nupuvajutus liigutab kella mõne minuti edasi, et ajad oleksid eristatavad.</p>
+
+<div class="sim" id="sim">
+  <div class="sim-grid">
+    <div>
+      <h3>Seadistus</h3>
+      <div class="switches">
+        <label for="sw-enable"><input type="checkbox" id="sw-enable" checked> <span><code>@EnableJpaAuditing</code> konfiguratsioonis</span></label>
+        <label for="sw-listener"><input type="checkbox" id="sw-listener" checked> <span><code>@EntityListeners</code> entiteedil</span></label>
+        <label for="sw-updatable"><input type="checkbox" id="sw-updatable" checked> <span><code>updatable = false</code> createdAt peal</span></label>
+      </div>
+      <h3>Tegevused</h3>
+      <div class="actions">
+        <button type="button" id="act-create" class="primary">1. Loo koolitus<span class="hint">trainingRepository.save(new Training)</span></button>
+        <button type="button" id="act-update">2. Avalda koolitus (U → P)<span class="hint">training.setStatus("P") transaktsioonis</span></button>
+        <button type="button" id="act-overwrite">3. Kirjuta createdAt käsitsi üle<span class="hint">training.setCreatedAt(1999-01-01)</span></button>
+        <button type="button" id="act-jpql">4. Muuda JPQL päringuga<span class="hint">@Modifying UPDATE Training t SET t.status = 'H'</span></button>
+        <button type="button" id="act-reset">Alusta otsast</button>
+      </div>
+    </div>
+    <div>
+      <h3>Andmebaas: tabel training</h3>
+      <p class="clock">Kell: <span id="clock"></span></p>
+      <div class="table-wrap" style="margin:0">
+        <table class="row-table">
+          <thead><tr><th>id</th><th>status</th><th>created_at</th><th>updated_at</th></tr></thead>
+          <tbody id="row"></tbody>
+        </table>
+      </div>
+      <div class="log" id="log" aria-live="polite"></div>
+      <div id="verdict"></div>
+    </div>
+  </div>
+</div>
+<p><strong>Proovi näiteks:</strong></p>
+<ul>
+  <li>Võta <code>@EntityListeners</code> linnuke ära ja vajuta "Loo koolitus". Mis juhtub?</li>
+  <li>Loo koolitus, avalda see ja vaata, kumb aeg muutus.</li>
+  <li>Kirjuta <code>createdAt</code> üle, esmalt <code>updatable = false</code>-ga ja siis ilma.</li>
+  <li>Muuda JPQL päringuga ja vaata <code>updated_at</code> veergu.</li>
+</ul>
+
+<h2 id="losed">6. Lõksud</h2>
+<h3>Lõks 1: JPQL <code>@Modifying</code> päring mööda auditeerimist</h3>
+<p>Auditing töötab ainult siis, kui muudad <strong>entiteeti</strong> (<code>save()</code> või muudatus transaktsiooni sees). Kui kirjutad repositooriumisse otse <code>UPDATE</code> päringu, läheb see Hibernate'i entiteedi sündmustest mööda. Kuulaja ei saa sellest teada.</p>
+<pre><code><span class="cm">// ❌ updated_at jääb vanaks</span>
+<span class="an">@Modifying</span>
+<span class="an">@Query</span>(<span class="str">"UPDATE Training t SET t.status = :status WHERE t.id = :trainingId"</span>)
+<span class="kw">void</span> updateTrainingStatus(String status, Integer trainingId);
+
+<span class="cm">// ✅ sellisel juhul sea updatedAt päringus endas</span>
+<span class="an">@Modifying</span>
+<span class="an">@Query</span>(<span class="str">"UPDATE Training t SET t.status = :status, t.updatedAt = CURRENT_TIMESTAMP WHERE t.id = :trainingId"</span>)
+<span class="kw">void</span> updateTrainingStatus(String status, Integer trainingId);</code></pre>
+
+<h3>Lõks 2: JPA Buddy / IntelliJ genereerib entiteedi ilma annotatsioonideta</h3>
+<p>Kui lood uue entiteedi andmebaasi tabelist, ei tea generaator auditeerimisest midagi. Pead <code>@EntityListeners</code>, <code>@CreatedDate</code> ja <code>@LastModifiedDate</code> ise lisama. Vastasel korral saad esimesel salvestusel vea <code>createdAt: must not be null</code>. Kasuta allpool olevat <a href="#checklist">checklisti</a>.</p>
+
+<h3>Lõks 3: "Aga ma tahan ise aja panna"</h3>
+<p>Näiteks testandmete jaoks. <code>@CreatedDate</code> kirjutab uuel entiteedil sinu väärtuse üle. Kui tõesti on vaja kindlat kuupäeva, lisa see SQL-iga (<code>3_import.sql</code>). Tavakoodis ära proovi seda Java kaudu teha.</p>
+
+<h2 id="hibernate">7. Aga Hibernate'i <code>@CreationTimestamp</code>?</h2>
+<p>Hibernate'il on oma variant, mis teeb peaaegu sama. Mõlemad on korrektsed, meie projektis kasutame Springi oma.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th></th><th>Spring Data (meie valik)</th><th>Hibernate</th></tr></thead>
+  <tbody>
+    <tr><td>Annotatsioonid</td><td><code>@CreatedDate</code>, <code>@LastModifiedDate</code></td><td><code>@CreationTimestamp</code>, <code>@UpdateTimestamp</code></td></tr>
+    <tr><td>Lisaseadistus</td><td><code>@EnableJpaAuditing</code> + <code>@EntityListeners</code></td><td>Pole vaja</td></tr>
+    <tr><td>Kes muutis? (<code>@CreatedBy</code>)</td><td>Jah, <code>AuditorAware</code> abil</td><td>Ei</td></tr>
+    <tr><td>Sõltub</td><td>Spring Data'st</td><td>Hibernate'ist</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Springi variandi suur pluss: kui tulevikus on vaja salvestada ka <strong>kes</strong> rea lõi või muutis, lisad lihtsalt <code>@CreatedBy</code> / <code>@LastModifiedBy</code>. Masinavärk on juba olemas.</p>
+
+<h2 id="checklist">8. Checklist uue entiteedi jaoks</h2>
+<p>Kui lisad projekti uue entiteedi, mille tabelis on <code>created_at</code> / <code>updated_at</code>, käi see nimekiri läbi:</p>
+<ul class="check" id="check">
+  <li><input type="checkbox" id="c1"><label for="c1">Klassil on <code>@EntityListeners(AuditingEntityListener.class)</code></label></li>
+  <li><input type="checkbox" id="c2"><label for="c2"><code>createdAt</code> väljal on <code>@CreatedDate</code></label></li>
+  <li><input type="checkbox" id="c3"><label for="c3"><code>createdAt</code> <code>@Column</code>-is on <code>updatable = false</code></label></li>
+  <li><input type="checkbox" id="c4"><label for="c4"><code>updatedAt</code> väljal on <code>@LastModifiedDate</code> (kui veerg on olemas)</label></li>
+  <li><input type="checkbox" id="c5"><label for="c5">Teenuses <strong>ei ole</strong> <code>setCreatedAt(...)</code> ega <code>setUpdatedAt(...)</code> välja kutsutud</label></li>
+  <li><input type="checkbox" id="c6"><label for="c6">Kui kasutad <code>@Modifying</code> UPDATE päringut, seab see <code>updatedAt</code> ise</label></li>
+</ul>
+<p class="check-done" id="check-done" hidden>Kõik paigas, entiteet saab ajatemplid automaatselt.</p>
+
+<h2 id="kokkuvote">9. Kokkuvõte</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Mõiste</th><th>Mida see teeb</th></tr></thead>
+  <tbody>
+    <tr><td><code>@EnableJpaAuditing</code></td><td>Lülitab auditeerimise terves rakenduses sisse (üks kord, config-klassis).</td></tr>
+    <tr><td><code>AuditingEntityListener</code></td><td>Springi klass, mis kuulab entiteedi sündmusi ja täidab ajaväljad.</td></tr>
+    <tr><td><code>@EntityListeners(...)</code></td><td>Seob kuulaja konkreetse entiteediga.</td></tr>
+    <tr><td><code>@CreatedDate</code></td><td>Väli saab väärtuse ainult loomisel.</td></tr>
+    <tr><td><code>@LastModifiedDate</code></td><td>Väli saab väärtuse loomisel ja igal muutmisel.</td></tr>
+    <tr><td><code>updatable = false</code></td><td>Välja ei panda kunagi <code>UPDATE</code> lausesse. Kaitseb <code>createdAt</code>-i.</td></tr>
+    <tr><td><code>@PrePersist</code> / <code>@PreUpdate</code></td><td>JPA elutsükli sündmused vahetult enne <code>INSERT</code>-i / <code>UPDATE</code>-i.</td></tr>
+    <tr><td><code>@Modifying</code> päring</td><td>Läheb auditeerimisest mööda, seal tuleb <code>updatedAt</code> ise seada.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="test">10. Kontrolli ennast</h2>
+<div id="quiz"></div>
+<p class="score" id="score"></p>
+
+<h2 id="edasi">11. Järgmised sammud</h2>
+<ul>
+  <li>Loe projekti reeglit failis <code>backend/CLAUDE.md</code>, jaotis <strong>"Ajatemplid (createdAt / updatedAt)"</strong>.</li>
+  <li>Käivita backend, tee <code>POST /api/trainings</code> Swaggeris (<code>/swagger-ui.html</code>) ja vaata P6Spy logist, et <code>INSERT</code> sisaldab <code>created_at</code> ja <code>updated_at</code> väärtusi.</li>
+  <li>Uuri JPA elutsükli sündmusi lähemalt: <code>@PrePersist</code>, <code>@PreUpdate</code>, <code>@PostLoad</code>.</li>
+  <li>Edasijõudnutele: <code>@CreatedBy</code> + <code>AuditorAware</code>, et salvestada ka rea looja.</li>
+  <li>Seotud materjalid: <a href="spring-data-jpa-specification.html">JPA Specification</a>, <a href="spring-data-page-ja-mapper.html">Spring Data Page ja mapper</a>.</li>
+</ul>
+
+</main>
+
+<script>
+// --- Enne / pärast tabid ---
+document.querySelectorAll('.tabs button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', b === btn ? 'true' : 'false'))
+    document.querySelectorAll('[data-panel]').forEach(p => { p.hidden = p.dataset.panel !== btn.dataset.tab })
+  })
+})
+
+// --- Simulaator ---
+const $ = id => document.getElementById(id)
+const START = Date.UTC(2026, 8, 29, 7, 0, 0) // 29.09.2026 10:00 Eesti aja järgi
+let clock, row, entityCreatedAt, lastLog
+
+function fmt(ms) {
+  if (ms == null) return 'null'
+  const d = new Date(ms + 3 * 3600 * 1000)
+  const p = n => String(n).padStart(2, '0')
+  return `${d.getUTCFullYear()}-${p(d.getUTCMonth() + 1)}-${p(d.getUTCDate())} ${p(d.getUTCHours())}:${p(d.getUTCMinutes())}`
+}
+function auditOn() { return $('sw-enable').checked && $('sw-listener').checked }
+function tick() { clock += (3 + Math.floor(Math.random() * 12)) * 60 * 1000 }
+
+function log(lines) {
+  $('log').innerHTML = lines.map(([cls, text]) => `<span class="l-${cls}">${text.replace(/</g, '&lt;')}</span>`).join('\n')
+}
+function verdict(cls, text) { $('verdict').innerHTML = text ? `<div class="verdict ${cls}">${text}</div>` : '' }
+
+function render(changed = []) {
+  $('clock').textContent = fmt(clock)
+  if (!row) {
+    $('row').innerHTML = '<tr class="empty-row"><td colspan="4">Tabel on tühi. Vajuta "Loo koolitus".</td></tr>'
+  } else {
+    const cell = (key, val) => `<td class="${val == null ? 'null' : ''} ${changed.includes(key) ? 'flash' : ''}">${key === 'status' ? val : fmt(val)}</td>`
+    $('row').innerHTML = `<tr><td>${row.id}</td>${cell('status', row.status)}${cell('createdAt', row.createdAt)}${cell('updatedAt', row.updatedAt)}</tr>`
+    if (changed.length) setTimeout(() => document.querySelectorAll('.row-table td.flash').forEach(td => td.classList.remove('flash')), 900)
+  }
+  $('act-create').disabled = !!row
+  ;['act-update', 'act-overwrite', 'act-jpql'].forEach(id => { $(id).disabled = !row })
+}
+
+function reset() {
+  clock = START; row = null; entityCreatedAt = null
+  log([['step', '// Siia ilmub, mida Hibernate ja Spring salvestamisel teevad.']])
+  verdict('', '')
+  render()
+}
+
+$('act-create').addEventListener('click', () => {
+  tick()
+  const lines = [['step', '> trainingRepository.save(training)'], ['step', '  Hibernate: uus entiteet → sündmus @PrePersist']]
+  let createdAt = null, updatedAt = null
+  if (auditOn()) {
+    createdAt = updatedAt = clock
+    lines.push(['ok', `  AuditingEntityListener: createdAt = ${fmt(clock)}`])
+    lines.push(['ok', `  AuditingEntityListener: updatedAt = ${fmt(clock)}`])
+  } else if (!$('sw-enable').checked) {
+    lines.push(['warn', '  @EnableJpaAuditing puudub → Spring ei käivita auditeerimist üldse'])
+  } else {
+    lines.push(['warn', '  @EntityListeners puudub → keegi ei kuula selle entiteedi sündmusi'])
+  }
+  lines.push(['step', '  Bean Validation kontrollib @NotNull välju'])
+  if (createdAt == null) {
+    lines.push(['bad', '  ConstraintViolationException: createdAt: must not be null'])
+    lines.push(['bad', '  Tehing rullitakse tagasi, INSERT-i ei tehtud'])
+    log(lines)
+    verdict('bad', 'Salvestamine ebaõnnestus. Kui üks osa puudub, jäävad ajaväljad tühjaks ja <code>@NotNull</code> peatab salvestamise. Ilma <code>@NotNull</code>-ita annaks sama vea andmebaasi <code>NOT NULL</code> piirang.')
+    render()
+    return
+  }
+  lines.push(['ok', '  OK'])
+  lines.push(['sql', `  INSERT INTO training (status, created_at, updated_at, ...) VALUES ('U', '${fmt(createdAt)}', '${fmt(updatedAt)}', ...)`])
+  row = { id: 1, status: 'U', createdAt, updatedAt }
+  entityCreatedAt = createdAt
+  log(lines)
+  verdict('ok', 'Koolitus loodud. Teenus ei seadnud ühtegi aega, mõlemad täitis kuulaja.')
+  render(['status', 'createdAt', 'updatedAt'])
+})
+
+$('act-update').addEventListener('click', () => {
+  tick()
+  const next = row.status === 'P' ? 'U' : 'P'
+  const lines = [['step', `> training.setStatus("${next}")  // transaktsiooni lõpus flush`], ['step', '  Hibernate: entiteet muutus → sündmus @PreUpdate']]
+  const changed = ['status']
+  const sets = [`status = '${next}'`]
+  if (auditOn()) {
+    lines.push(['ok', `  AuditingEntityListener: updatedAt = ${fmt(clock)}  (createdAt jääb puutumata)`])
+    row.updatedAt = clock; changed.push('updatedAt'); sets.push(`updated_at = '${fmt(clock)}'`)
+    verdict('ok', 'Muutus ainult <code>updated_at</code>. <code>created_at</code> näitab endiselt loomise hetke.')
+  } else {
+    lines.push(['warn', '  Keegi ei kuula → updatedAt jääb vanaks'])
+    verdict('warn', '<code>updated_at</code> ei uuenenud, sest auditeerimine on välja lülitatud. Andmed on nüüd eksitavad: rida muutus, aga kuupäev väidab muud.')
+  }
+  lines.push(['sql', `  UPDATE training SET ${sets.join(', ')} WHERE id = 1`])
+  row.status = next
+  log(lines)
+  render(changed)
+})
+
+$('act-overwrite').addEventListener('click', () => {
+  tick()
+  const fake = Date.UTC(1998, 11, 31, 21, 0, 0)
+  entityCreatedAt = fake
+  const lines = [['step', '> training.setCreatedAt(1999-01-01 00:00)  // keegi tegi vea'], ['step', '  Hibernate: entiteet muutus → sündmus @PreUpdate']]
+  const changed = []
+  const sets = []
+  if (auditOn()) {
+    lines.push(['ok', `  AuditingEntityListener: updatedAt = ${fmt(clock)}`])
+    row.updatedAt = clock; changed.push('updatedAt'); sets.push(`updated_at = '${fmt(clock)}'`)
+  }
+  if ($('sw-updatable').checked) {
+    lines.push(['ok', '  created_at on updatable = false → jäetakse UPDATE lausest välja'])
+    verdict('ok', '<code>updatable = false</code> kaitses loomise aega. Java objektis on küll vale väärtus, aga andmebaasi see ei jõudnud.')
+  } else {
+    sets.unshift(`created_at = '${fmt(fake)}'`)
+    row.createdAt = fake; changed.push('createdAt')
+    lines.push(['bad', '  created_at läheb UPDATE lausesse → loomise aeg on nüüd vale'])
+    verdict('bad', 'Loomise aeg kirjutati üle. Ilma <code>updatable = false</code>-ita ei kaitse miski <code>created_at</code>-i juhuslike muudatuste eest.')
+  }
+  if (sets.length) lines.push(['sql', `  UPDATE training SET ${sets.join(', ')} WHERE id = 1`])
+  else lines.push(['step', '  Muudetavaid veerge pole → UPDATE-i ei tehtud'])
+  log(lines)
+  render(changed)
+})
+
+$('act-jpql').addEventListener('click', () => {
+  tick()
+  row.status = 'H'
+  log([
+    ['step', "> trainingRepository.updateTrainingStatus('H', 1)  // @Modifying @Query"],
+    ['sql', "  UPDATE training SET status = 'H' WHERE id = 1"],
+    ['warn', '  Otse SQL: entiteeti ei laetud, @PreUpdate sündmust ei tekkinud'],
+    ['warn', '  AuditingEntityListener ei saanud muudatusest teada']
+  ])
+  verdict('warn', '<code>status</code> muutus, aga <code>updated_at</code> jäi vanaks. <code>@Modifying</code> päringus pead <code>updatedAt</code> ise seadma (vt Lõks 1).')
+  render(['status'])
+})
+
+$('act-reset').addEventListener('click', reset)
+reset()
+
+// --- Checklist ---
+const checks = document.querySelectorAll('#check input')
+checks.forEach(c => c.addEventListener('change', () => {
+  $('check-done').hidden = ![...checks].every(x => x.checked)
+}))
+
+// --- Test ---
+const QUIZ = [
+  {
+    q: 'Uue entiteedi salvestamisel saad vea "createdAt: must not be null". Mis on kõige tõenäolisem põhjus?',
+    opts: ['Andmebaasi kell on vale', 'Entiteedil puudub @EntityListeners(AuditingEntityListener.class)', 'createdAt peaks olema String', 'Teenuses puudub @Transactional'],
+    a: 1,
+    exp: 'Ilma kuulajata ei tea keegi, et ajaväli tuleb täita. Tavaliselt juhtub see JPA Buddy genereeritud uue entiteediga.'
+  },
+  {
+    q: 'Koolituse staatus muudetakse transaktsioonis: training.setStatus("P"). Mis juhtub ajatemplitega?',
+    opts: ['Mõlemad uuenevad', 'Ainult updatedAt uueneb', 'Ainult createdAt uueneb', 'Kumbki ei muutu'],
+    a: 1,
+    exp: '@LastModifiedDate uueneb igal muutmisel, @CreatedDate ainult loomisel.'
+  },
+  {
+    q: 'Milleks on createdAt väljal updatable = false?',
+    opts: ['Et väli oleks kohustuslik', 'Et välja ei saaks lugeda', 'Et createdAt ei läheks kunagi UPDATE lausesse', 'Et Spring teaks, et see on ajaväli'],
+    a: 2,
+    exp: 'See on turvavöö: isegi kui keegi kogemata setCreatedAt() välja kutsub, jääb andmebaasis loomise aeg õigeks.'
+  },
+  {
+    q: 'Kirjutasid repositooriumisse @Modifying @Query("UPDATE Training t SET t.status = :status ..."). Mis juhtub updatedAt-iga?',
+    opts: ['Uueneb automaatselt nagu alati', 'Jääb vanaks, sest päring läheb entiteedi sündmustest mööda', 'Muutub null-iks', 'Päring annab vea'],
+    a: 1,
+    exp: 'Otse UPDATE päring ei tekita @PreUpdate sündmust. Lisa päringusse t.updatedAt = CURRENT_TIMESTAMP.'
+  },
+  {
+    q: 'Kas teenuses on OK kirjutada training.setCreatedAt(Instant.now())?',
+    opts: ['Jah, igaks juhuks võiks', 'Ei, projekti reegel keelab selle: ajatemplid täidab Spring'],
+    a: 1,
+    exp: 'See oleks lihtsalt mürakood. backend/CLAUDE.md reegel ütleb, et teenustes ajatempleid käsitsi ei seata.'
+  }
+]
+let answered = 0, correct = 0
+const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;')
+$('quiz').innerHTML = QUIZ.map((item, qi) => `
+  <div class="quiz-q" data-q="${qi}">
+    <p>${qi + 1}. ${esc(item.q)}</p>
+    <div class="quiz-opts">${item.opts.map((o, oi) => `<button type="button" data-o="${oi}">${esc(o)}</button>`).join('')}</div>
+    <p class="quiz-exp" hidden></p>
+  </div>`).join('')
+document.querySelectorAll('.quiz-q').forEach(box => {
+  const item = QUIZ[box.dataset.q]
+  box.querySelectorAll('button').forEach(btn => btn.addEventListener('click', () => {
+    const chosen = Number(btn.dataset.o)
+    box.querySelectorAll('button').forEach(b => {
+      b.disabled = true
+      if (Number(b.dataset.o) === item.a) b.classList.add('right')
+    })
+    if (chosen !== item.a) btn.classList.add('wrong'); else correct++
+    answered++
+    const exp = box.querySelector('.quiz-exp')
+    exp.textContent = (chosen === item.a ? 'Õige! ' : 'Mitte päris. ') + item.exp
+    exp.hidden = false
+    if (answered === QUIZ.length) $('score').textContent = `Tulemus: ${correct} / ${QUIZ.length}`
+  }))
+})
+</script>
+</body>
+</html>

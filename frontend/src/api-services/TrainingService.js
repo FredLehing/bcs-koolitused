@@ -3,7 +3,15 @@ import { mockResponse } from '@/api-services/mock/mockResponse.js'
 import MockDatabase from '@/api-services/mock/MockDatabase.js'
 
 export default {
-  sendGetTrainingsRequest(categoryId, fundingTypeId, limit, page, trainingLanguageId, contentLang) {
+  sendGetTrainingsRequest(
+    categoryId,
+    fundingTypeId,
+    limit,
+    page,
+    trainingLanguageId,
+    contentLang,
+    searchText,
+  ) {
     return axios.get('/api/trainings', {
       params: {
         categoryId: categoryId,
@@ -12,39 +20,31 @@ export default {
         page: page,
         trainingLanguageId: trainingLanguageId,
         contentLang: contentLang,
+        searchText: searchText,
       },
     })
   },
 
   // Backend task: docs/tasks/backend/POST-api-training.md
-  // NB! Backend on valmis, aga vaheta see koos GET /api/training/{id}, .../training-translations ja
-  // GET /api/training-translation/{id} kutsetega (3. etapp) — "Lisa" järel laaditakse uus koolitus nende kaudu,
-  // mock-andmebaasis päris andmebaasi koolitust pole.
+  // Vahetatud päris kutsele koos GET /api/training/{id}, .../training-translations ja
+  // GET /api/training-translation/{id} kutsetega — "Lisa" järel laaditakse uus koolitus nende kaudu.
   sendPostTrainingRequest(trainingCreateRequest) {
-    // MOCK — vaheta päris kutse vastu, kui teenus on valmis:
-    // return axios.post('/api/training', trainingCreateRequest)
-    return mockResponse(MockDatabase.addTraining(trainingCreateRequest))
+    return axios.post('/api/training', trainingCreateRequest)
   },
 
   // Backend task: docs/tasks/backend/GET-api-training-trainingId.md (3. etapp)
   sendGetTrainingRequest(trainingId) {
-    // MOCK — vaheta päris kutse vastu, kui teenus on valmis:
-    // return axios.get(`/api/training/${trainingId}`)
-    return mockResponse(MockDatabase.getTraining(trainingId))
+    return axios.get(`/api/training/${trainingId}`)
   },
 
   // Backend task: docs/tasks/backend/GET-api-training-trainingId-training-translations.md (3. etapp)
   sendGetTrainingTranslationsRequest(trainingId) {
-    // MOCK — vaheta päris kutse vastu, kui teenus on valmis:
-    // return axios.get(`/api/training/${trainingId}/training-translations`)
-    return mockResponse(MockDatabase.getTrainingTranslations(trainingId))
+    return axios.get(`/api/training/${trainingId}/training-translations`)
   },
 
   // Backend task: docs/tasks/backend/PUT-api-training-trainingId.md (3. etapp)
   sendPutTrainingRequest(trainingId, trainingUpdateRequest) {
-    // MOCK — vaheta päris kutse vastu, kui teenus on valmis:
-    // return axios.put(`/api/training/${trainingId}`, trainingUpdateRequest)
-    return mockResponse(MockDatabase.updateTraining(trainingId, trainingUpdateRequest))
+    return axios.put(`/api/training/${trainingId}`, trainingUpdateRequest)
   },
 
   // Backend task: docs/tasks/backend/PUT-api-training-trainingId-publish.md (3. etapp)
@@ -63,10 +63,9 @@ export default {
 
   // Backend task: docs/tasks/backend/POST-api-training-trainingId-training-translation.md (3. etapp)
   sendPostTrainingTranslationRequest(trainingId, trainingTranslationCreateRequest) {
-    // MOCK — vaheta päris kutse vastu, kui teenus on valmis:
-    // return axios.post(`/api/training/${trainingId}/training-translation`, trainingTranslationCreateRequest)
-    return mockResponse(
-      MockDatabase.addTrainingTranslation(trainingId, trainingTranslationCreateRequest),
+    return axios.post(
+      `/api/training/${trainingId}/training-translation`,
+      trainingTranslationCreateRequest,
     )
   },
 

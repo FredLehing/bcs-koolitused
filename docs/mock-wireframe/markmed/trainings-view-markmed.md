@@ -9,6 +9,7 @@ Frontend rada: /trainings
 
 Vaatega seotud lisainfo:
 Vaate avanemisel tehakse päringud GET /api/trainings, GET /api/categories, GET /api/funding-types ja GET /api/languages (viimased kolm filtrite valikute jaoks); contentLang väärtus võetakse localStorage'ist (vaikimisi "et"), koolituse keele filter on vaikimisi valimata (trainingLanguageId=0). Koolituse keele, kategooria või rahastuse filtri muutmisel tehakse uus päring vastavate query parameetritega ja page lähtestatakse 0-ks. Eelmine/Järgmine ja leheküljenumbrid muudavad page väärtust.
+Kaartide kohal on otsinguväli ja nupp "Otsi"; otsing käivitub nupuvajutuse või Enteri peale (searchText query parameetriga, page lähtestatakse 0-ks). Nupu kõrval on küsimärgi ikoon, mille tooltip selgitab: otsitakse sõnade esinemist koolituse pealkirjast ja lühikirjeldusest, parima tulemuse saab mõne sõna sisestamisel, käändeid ei kohandata.
 Koolituse kaardil (TrainingCard.vue) kuvatakse "Tellitav" märgis, kui isOrderable = true, ja täht-ikoon, kui isPromoted = true.
 Nupule "Vaata lähemalt" vajutades suunatakse kasutaja TrainingView vaatele (/training?trainingId={id}).
 ```
@@ -25,6 +26,7 @@ limit: Integer — koolituste arv lehel
 page: Integer — lehekülje number, algab 0-st
 trainingLanguageId: Integer — õppekeele filter, 0 = kõik
 contentLang: String — tõlgitud väljade keel ("et"/"en")
+searchText: String — otsingutekst, "" = kõik; sõnad eraldatakse tühikute kohalt, iga sõna peab esinema (contains, tõstutundetu) title või shortDescription väljas
 
 Response (200):
 TrainingSummaryDto.java
@@ -34,6 +36,8 @@ TrainingSummaryDto.java
   "trainingSummaries": [
     {
       "trainingId": 1,
+      "trainingLanguageCode": "et",
+      "trainingLanguageFlagIconCode": "fi-ee",
       "title": "Java algkursus",
       "shortDescription": "Java programmeerimise alused algajatele.",
       "categoryId": 1,
@@ -54,7 +58,7 @@ TrainingSummaryDto.java
 
 API teenuse lisainfo:
 Tulemus on sorteeritud: esile tõstetud koolitused (isPromoted = true) eespool, seejärel title järgi tähestikuliselt.
-totalPages ja totalElements kirjeldavad kogu filtreeritud tulemushulka. fundingTypes võib olla tühi list (training_funding_type kaudu).
+totalPages ja totalElements kirjeldavad kogu filtreeritud tulemushulka. fundingTypes võib olla tühi list (training_funding_type kaudu). trainingLanguageCode ja trainingLanguageFlagIconCode on koolituse õppekeele (training.training_language_id → language.code / language.flag_icon_code) andmed; TrainingCard kuvab trainingLanguageFlagIconCode järgi õppekeele lipu.
 
 Veateated: —
 ```
@@ -118,13 +122,16 @@ SystemLanguageDto.java
   {
     "languageId": 1,
     "languageCode": "et",
-    "languageName": "Eesti"
+    "languageName": "Eesti",
+    "isMainLanguage": true,
+    "requiresTranslation": true,
+    "flagIconCode": "fi-ee"
   },
   ...
 ]
 
 API teenuse lisainfo:
-Tagastab kõik süsteemis olevad keeled (language tabel). TrainingsView kasutab neid "Koolituse keel" filtri valikutena (languageId → trainingLanguageId). languageName ei ole tõlgitud, seega contentLang parameetrit pole.
+Tagastab kõik süsteemis olevad keeled (language tabel). TrainingsView kasutab neid "Koolituse keel" filtri valikutena (languageId → trainingLanguageId). languageName ei ole tõlgitud, seega contentLang parameetrit pole. requiresTranslation = false tähendab õppekeelt, millesse koolituse sisu ei tõlgita (nt ru) — see keel on "Koolituse keel" valikutes, aga mitte tõlkelippudes. flagIconCode on flag-icons CSS klass (nt "fi-ee").
 
 Veateated: —
 ```

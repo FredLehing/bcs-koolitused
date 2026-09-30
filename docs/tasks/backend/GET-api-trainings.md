@@ -1,6 +1,6 @@
 # Koolituste nimekirja päring
 
-**Teenus:** `GET /api/trainings?categoryId={categoryId}&fundingTypeId={fundingTypeId}&limit={limit}&page={page}&trainingLanguageId={trainingLanguageId}&contentLang={contentLang}`
+**Teenus:** `GET /api/trainings?categoryId={categoryId}&fundingTypeId={fundingTypeId}&limit={limit}&page={page}&trainingLanguageId={trainingLanguageId}&contentLang={contentLang}&searchText={searchText}`
 
 **Kasutav vaade:** `TrainingsView.vue` (`/trainings`), mockupis lehekülg 1/1
 
@@ -18,8 +18,11 @@ Kõik parameetrid on query parameetrid ja kohustuslikud (`@RequestParam` ilma `r
 | `page` | Integer | Lehekülje number, loendus algab 0-st |
 | `trainingLanguageId` | Integer | Filtreerib koolitused õppekeele järgi (`training.training_language_id`); `0` = kõik keeled |
 | `contentLang` | String (`et`/`en`) | Määrab tõlgitud väljade (`title`/`shortDescription`/`categoryName`/`fundingTypeName`) keele |
+| `searchText` | String | Vabateksti otsing; `""` = otsingut ei rakendata. Tekst jagatakse tühikute kohalt sõnadeks, iga sõna peab esinema (contains, tõstutundetu) kas `title` või `shortDescription` väljas (`training_summary` vaade, `contentLang` keeles). Käändeid ei kohandata. `%` ja `_` otsitakse sõna-sõnalt |
 
 Teenusel puudub request body.
+
+**Teostus:** kuna otsingusõnade arv on muutuv, koostatakse päring JPA Specificationitega (`TrainingSummarySpecifications`, `TrainingSummaryRepository extends JpaSpecificationExecutor`), mitte JPQL `@Query`-ga. Filtreerimine, sorteerimine ja leheküljestamine toimuvad andmebaasis.
 
 Mockupi API URL-is sisaldus lisaks ka `sort={sort}` parameeter, kuid see on taskist teadlikult välja jäetud — vt "Avatud küsimused".
 
@@ -36,6 +39,7 @@ Mockupi API URL-is sisaldus lisaks ka `sort={sort}` parameeter, kuid see on task
   "trainingSummaries": [
     {
       "trainingId": 1,
+      "trainingTranslationId": 1,
       "title": "Java algkursus",
       "shortDescription": "Java programmeerimise alused algajatele.",
       "categoryId": 1,
@@ -51,6 +55,7 @@ Mockupi API URL-is sisaldus lisaks ka `sort={sort}` parameeter, kuid see on task
     },
     {
       "trainingId": 2,
+      "trainingTranslationId": 3,
       "title": "Projektijuhtimise põhitõed",
       "shortDescription": "Sissejuhatus IT-projektijuhtimisse.",
       "categoryId": 3,
@@ -66,6 +71,7 @@ Mockupi API URL-is sisaldus lisaks ka `sort={sort}` parameeter, kuid see on task
 Väljade selgitused:
 
 - `totalPages`, `totalElements` — leheküljestamise metaandmed (kogu tulemushulga ja lehitsemise jaoks), mitte ainult tagastatava lehe kohta.
+- `trainingTranslationId` — kaardil kuvatava (`contentLang` keele) tõlke ID (`training_summary.training_translation_id`). Admini "Muuda" ikoon avab selle tõlke `TrainingFormView` olekus `update`.
 - `isOrderable` — pärineb veerust `training.is_orderable`.
 - `isPromoted` — pärineb veerust `training.is_promoted`.
 - `fundingTypes` — koolitusele määratud rahastustüüpide loend (`training_funding_type` kaudu). Koolitusel võib olla null, üks või mitu rahastustüüpi (näide: koolitusel id=2 pole ühtegi rahastustüüpi, seega tühi list).
@@ -226,12 +232,13 @@ Olematu `categoryId`/`fundingTypeId`/`trainingLanguageId`/`contentLang` väärtu
 ## Vastuvõtu kriteeriumid
 
 - [ ] Endpoint `GET /api/trainings` on olemas ja tagastab `TrainingSummaryDto` struktuuriga vastuse
-- [ ] Kõik loetletud query parameetrid (`categoryId`, `fundingTypeId`, `limit`, `page`, `trainingLanguageId`, `contentLang`) on kohustuslikud ja toimivad kirjeldatud viisil (`categoryId=0`/`fundingTypeId=0`/`trainingLanguageId=0` tagastab kõik)
+- [ ] Kõik loetletud query parameetrid (`categoryId`, `fundingTypeId`, `limit`, `page`, `trainingLanguageId`, `contentLang`, `searchText`) on kohustuslikud ja toimivad kirjeldatud viisil (`categoryId=0`/`fundingTypeId=0`/`trainingLanguageId=0` tagastab kõik)
 - [ ] `totalPages`/`totalElements` kajastavad korrektselt kogu (filtreeritud) tulemushulka, mitte ainult tagastatud lehte
 - [ ] `title`, `shortDescription`, `categoryName`, `fundingTypeName` väljad on tõlgitud `contentLang` parameetri järgi
 - [ ] Tulemus on sorteeritud: `isPromoted = true` koolitused eespool, seejärel `title` järgi tähestikuliselt
 - [ ] Koolitus, millel pole ühtegi rahastustüüpi, tagastab `fundingTypes` väljana tühja listi (mitte `null` ega viga)
 - [ ] Filtreerimine `categoryId`, `fundingTypeId` ja `trainingLanguageId` järgi annab korrektse alamhulga andmebaasi näidisandmete põhjal
+- [ ] `searchText` tühi string tagastab sama tulemuse kui ilma otsinguta; mitme sõna korral tagastatakse ainult koolitused, kus iga sõna esineb `title` või `shortDescription` väljas (suur-/väiketähte ei eristata); `searchText=%` ei tagasta kõiki koolitusi
 - [ ] Kirjeldatud veaolukorrad (400 vigase parameetri korral, 500 ootamatu vea korral) on käsitletud
 - [ ] Automaattestid katavad õnnestunud päringu, filtreerimise ja tühja tulemuse juhtumid
 

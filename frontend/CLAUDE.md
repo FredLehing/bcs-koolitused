@@ -24,7 +24,11 @@ See on Vue 3 + Vite frontend (Vali-IT grupiprojekt).
 
 **Globaalne axios:** Axios on registreeritud `app.config.globalProperties.$axios`-na — komponentides kasuta `this.$axios` (Options API) või inject via `getCurrentInstance` (Composition API).
 
-**Olekuhaldus:** Pinia on registreeritud (`app.use(createPinia())`), aga store'e veel ei ole — need lisatakse kausta `src/stores/` vastavalt vajadusele.
+**Olekuhaldus:** Pinia on registreeritud (`app.use(createPinia())`), store'id asuvad kaustas `src/stores/`:
+
+- `languageStore.js` — `contentLang` (kasutajaliidese keel ja ühtlasi API parameeter `contentLang`; muuda ainult `setContentLang()` kaudu, mis hoiab store'i, vue-i18n ja localStorage'i sünkis) ja `uiLanguages` (navbari keelevalik, pärineb `i18n.js` konstandist `UI_LANGUAGES`).
+
+**Keeled:** kasutajaliidese keeled (`UI_LANGUAGES`) on frontendis kõvasti kirjas, sest iga keele jaoks peab olemas olema tõlkefail `src/locales/<keelekood>.json`. Andmebaasi keeled — tõlkekeeled (`requiresTranslation`), põhikeel (`isMainLanguage`) ja lipud (`flagIconCode`) — tulevad backendist (`GET /api/languages`) ja vaade laadib need ise; store'i neid ei dubleerita. Lipu kuvamiseks kasuta alati komponenti `components/common/FlagIcon.vue` (prop `flagIconCode`, raamiga; suurus klassiga, nt `class="fs-3"`).
 
 **Marsruutimine:** Marsruudid on defineeritud `src/router/index.js`-is.
 

@@ -43,6 +43,9 @@ dependencies {
 
     // SQL with parameter values
     implementation 'p6spy:p6spy:3.9.1'
+
+    // HTML puhastamine (koolituse richtext kirjeldus)
+    implementation 'org.jsoup:jsoup:1.23.2'
 }
 
 compileJava {

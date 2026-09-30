@@ -65,6 +65,13 @@ Igal domeenialal on oma alampakk `controller/`-is koos DTOdega, teenusklass ja p
 
 **Entiteedi otsing ID järgi** — `repository.findById()` kasutamine `orElseThrow`-ga peab olema `public getValid<Entiteet>By(Integer <entiteet>Id)` meetodis vastava service klassi all (nt `getValidEntityBy(Integer entityId)` `EntityService`-s).
 
+**Ajatemplid (`createdAt` / `updatedAt`)** — täidetakse automaatselt Spring Data JPA auditeerimisega (`@EnableJpaAuditing` klassis `infrastructure/config/JpaAuditingConfig`). Teenustes neid **käsitsi ei sea** (`setCreatedAt(Instant.now())` jms on keelatud). Iga entiteet, mille tabelis on `created_at`/`updated_at` veerg, peab olema märgistatud nii:
+- klassil `@EntityListeners(AuditingEntityListener.class)`;
+- `createdAt` väljal `@CreatedDate` ja `@Column(name = "created_at", nullable = false, updatable = false)`;
+- `updatedAt` väljal `@LastModifiedDate` (seatakse nii loomisel kui igal muutmisel).
+
+Kui JPA Buddy / IntelliJ genereerib uue entiteedi andmebaasist, tuleb need annotatsioonid käsitsi juurde lisada. NB: `updatedAt` uueneb ainult entiteedi kaudu salvestamisel — JPQL `@Modifying` update-päringud auditeerimist ei käivita, seal tuleb `updatedAt` päringus endas seada.
+
 **SQL päringud** — Kohandatud päringud on JPQL, kirjutatud otse Spring Data repositooriumi liidesele `@Query` annotatsiooniga. Vajadusel kasutab repositoorium konstruktori avaldist otse DTOsse projekteerimiseks.
 
 **Repositooriumi meetodi nimetamine** — Meetodi nimi peab mainima, mida ta tagastab (subjekti), mitte jääma geneeriliseks: `findFilteredEntitiesBy(...)` tagastab `List<Entity>`, `findUserBy(...)` tagastab `User`. Väldi kujundeid nagu `findFilteredBy(...)`, kust pole näha, mida meetod tagastab.

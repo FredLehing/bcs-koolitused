@@ -32,7 +32,7 @@ Toimumiskorrad (`course` tabel, kuupäevad, hind) ei kuulu selle vaate skoopi �
 |---|---|---|
 | Pealkiri | Tekst | `new-training`: "Lisa uus koolitus"; `update`: "Muuda koolitust"; `new-translation`: "Lisa koolituse tõlge" |
 | Staatuse märgis | Badge | "Mustand" (`status = "U"`) või "Publitseeritud" (`"P"`); ainult `update` ja `new-translation` |
-| Tõlgete lipukesed | Nupud (`TranslationFlags`) | Store'i `supportedLanguages` iga keele kohta lipp (`flag-icons`); tõlge olemas → värviline, puudub → hall; avatud tõlke lipp raamiga. Ainult `update` ja `new-translation` |
+| Tõlgete lipukesed | Nupud (`TranslationFlags`) | `GET /api/languages` iga tõlkekeele (`requiresTranslation = true`) kohta lipp (`flagIconCode`, `flag-icons`); tõlge olemas → värviline, puudub → hall; avatud tõlke lipp raamiga. Ainult `update` ja `new-translation` |
 | Kategooria | Rippmenüü | `GET /api/categories`, kasutajaliidese keeles; kohustuslik |
 | Koolituse keel | Rippmenüü | `GET /api/languages`; õppekeel (`trainingLanguageId`), mitte tõlke keel; kohustuslik |
 | Toimumiskoht | Rippmenüü | `GET /api/locations`; kohustuslik |
@@ -46,7 +46,7 @@ Toimumiskorrad (`course` tabel, kuupäevad, hind) ei kuulu selle vaate skoopi �
 | "Publitseeri" / "Liiguta mustandisse" | Nupp | Teineteist välistavad (status `U` / `P`); ainult `update` ja `new-translation`; avab kinnituse modali |
 | Lektori modal | Modal (`LecturerSelectModal`) | Otsinguväli + "Otsi" (ka Enter), lektorite nimekiri, "Lektor puudub", "Sulge" |
 | Kinnituse modalid | Modal (`ConfirmModal`) | Staatuse muutmine; AI tõlge salvestamata muudatuste korral |
-| Teated | `AlertSuccess` / `AlertDanger` | Eduteated ja valideerimisvead |
+| Teated | `InlineAlerts` | Eduteated ja vead vormi nuppudest kohe paremal (ilmuvad animatsiooniga); eduteade hääbub 4 s pärast, veateade jääb kuni sulgemiseni |
 
 Koolituse andmete sektsioon on tõlke sektsiooni kohal (vertikaalne paigutus), olekus `new-translation` on koolituse andmed kirjutuskaitstud.
 
@@ -56,21 +56,23 @@ Koolituse andmete sektsioon on tõlke sektsiooni kohal (vertikaalne paigutus), o
 1. **Oleku tuvastamine.** `beforeMount` ja `$route.query` jälgija (`watch`) kutsuvad `loadView()`, mis loeb query parameetrid ja määrab `state`: `trainingId` puudub → `new-training`; `trainingTranslationId` olemas → `update`; muidu → `new-translation`. Iga `router.replace` laadib andmed uuesti — erandeid pole.
 2. **Laadimine.** Alati `GET /api/locations` ja `GET /api/languages`; pärast keelte saabumist oleku andmed (keelte nimekirja on vaja `languageId` ↔ `languageCode` teisenduseks):
    - Kõigis olekutes: kategooriad ja rahastustüübid kasutajaliidese keeles (`languageStore.contentLang`); keele vahetamisel navbaris laaditakse ainult need uuesti (`watch: contentLang`), vormi sisu jääb alles.
-   - `new-training`: tühi vorm, tõlke keel = põhikeel (`mainLanguageCode`).
+   - `new-training`: tühi vorm, tõlke keel = põhikeel (`mainLanguageCode` — computed, `GET /api/languages` vastusest `isMainLanguage = true`).
    - `update`: koolitus, tõlgete nimekiri, avatud tõlge.
    - `new-translation`: koolitus, tõlgete nimekiri → põhikeele tõlge (`isMainLanguage`) eeltäitmiseks.
-3. **Valideerimine enne salvestust** (esimene viga kuvatakse `AlertDanger`-is, API kutset ei tehta): "Vali kategooria", "Vali koolituse keel", "Vali toimumiskoht" (mitte olekus `new-translation`), "Lisa pealkiri", "Lisa lühikirjeldus", "Lisa kirjeldus".
+3. **Valideerimine enne salvestust** (esimene viga kuvatakse `InlineAlerts` veateatena nuppude kõrval, API kutset ei tehta): "Vali kategooria", "Vali koolituse keel", "Vali toimumiskoht" (mitte olekus `new-translation`), "Lisa pealkiri", "Lisa lühikirjeldus", "Lisa kirjeldus".
 4. **"Lisa"** → `POST /api/training` (`userId` sessionStorage'ist) → eduteade → `router.replace({ trainingId, trainingTranslationId })` → olek `update`.
 5. **"Salvesta"** → `PUT /api/training/{trainingId}` (koolituse väljad + avatud tõlge) → eduteade.
-6. **Lipule klikk** → olemasolev tõlge: `router.replace({ trainingId, trainingTranslationId })`; puuduv: `router.replace({ trainingId, languageId })`. Kui store'i keelt pole `/api/languages` vastuses, kuvatakse viga.
+6. **Lipule klikk** → olemasolev tõlge: `router.replace({ trainingId, trainingTranslationId })`; puuduv: `router.replace({ trainingId, languageId })`.
 7. **"Lisa tõlge"** → `POST /api/training/{trainingId}/training-translation` → eduteade → `router.replace` olekusse `update`.
 8. **Staatus** → kinnituse modal → `PUT .../publish` või `.../unpublish` → `GET /api/training/{trainingId}` (uus staatus) → nupp vahetub.
 9. **"Tee AI tõlge"** → kui vormi tekst erineb viimati laaditust/salvestatust, küsitakse kinnitust → `GET .../ai-translation?languageId=` (nupp on laadimise ajal keelatud, "Tõlgin…") → tulemus ainult vormi, andmebaasi ei salvestata.
-10. **Vead.** AI tõlke teadaolevad vead (`503 AI_SERVICE_UNAVAILABLE`, `403 MAIN_LANGUAGE_NOT_TRANSLATABLE`, `404 MAIN_TRANSLATION_NOT_FOUND`) kuvatakse vormis `AlertDanger`-iga (backendi `message`), vormi sisu jääb alles. Muud API vead suunavad `ErrorView`-le; ülejäänud backendi veakoodide eraldi kuvamine lisatakse koos päris teenustega.
+10. **Vead.** AI tõlke teadaolevad vead (`503 AI_SERVICE_UNAVAILABLE`, `403 MAIN_LANGUAGE_NOT_TRANSLATABLE`, `404 MAIN_TRANSLATION_NOT_FOUND`) kuvatakse `InlineAlerts` veateatena (backendi `message`), vormi sisu jääb alles. Muud API vead suunavad `ErrorView`-le; ülejäänud backendi veakoodide eraldi kuvamine lisatakse koos päris teenustega.
 
 ## API kutsed
 
-Kõik kutsed on failides `frontend/src/api-services/`. **Mock-vastuseid kasutavad kõik uued kutsed, välja arvatud need, mille backend on valmis** (vt "Mock-vastused" allpool). Päris kutsele vahetatud: `GET /api/languages`, `GET /api/locations`, `GET /api/lecturers`.
+Kõik kutsed on failides `frontend/src/api-services/`. **Mock-vastuseid kasutavad kõik uued kutsed, välja arvatud need, mille backend on valmis** (vt "Mock-vastused" allpool). Päris kutsele vahetatud: `GET /api/languages`, `GET /api/locations`, `GET /api/lecturers`, `POST /api/training`, `GET /api/training/{trainingId}`, `GET /api/training/{trainingId}/training-translations`, `GET /api/training-translation/{trainingTranslationId}`, `PUT /api/training/{trainingId}`, `POST /api/training/{trainingId}/training-translation`.
+
+**NB! Segaolek:** koolitus ja selle tõlked luuakse, laaditakse ja salvestatakse päris andmebaasis, kuid publish/unpublish ja AI tõlge on veel mockid ning töötavad `MockDatabase` andmetega. Päris andmebaasis loodud koolituse puhul need nupud ei tööta (mockis pole sellist koolitust) ning koolituste 1–2 puhul lähevad muudatused ainult mocki. Vaheta need kutsed koos vastavate backend teenustega.
 
 | Teenus | Meetod `api-services`-is | Backend task | Etapp |
 |---|---|---|---|
@@ -193,9 +195,9 @@ Kood on loodud (mustri eeskuju: Options API, `handle`-meetodid, props/emits `eve
 | `components/forms/CategoriesDropdown.vue`, `LanguagesDropdown.vue`, `LocationsDropdown.vue` | Rippmenüüd (korduvkasutatavad, nt TrainingsView filtrites) |
 | `components/forms/FundingTypesCheckbox.vue` | Rahastustüüpide checkboxid |
 | `components/common/TranslationFlags.vue` | Tõlgete lipukesed |
-| `components/common/AlertDanger.vue`, `AlertSuccess.vue` | Teated |
+| `components/common/InlineAlerts.vue` | Teated nuppude kõrval (asendas `AlertDanger` / `AlertSuccess` kasutuse vaates) |
 | `components/modals/BaseModal.vue`, `ConfirmModal.vue`, `LecturerSelectModal.vue` | Modalid |
-| `stores/languageStore.js` | Pinia store: `supportedLanguages` (`languageCode`, `isMainLanguage`, `flagClass`), getter `mainLanguageCode` |
+| `stores/languageStore.js` | Pinia store: `contentLang`, `uiLanguages` (navbari kasutajaliidese keeled, `i18n.js` `UI_LANGUAGES`) |
 | `services/SessionStorageService.js` | `getUserId()`, `userIsAdmin()` |
 | `services/NavigationService.js` | + `replaceTrainingFormView(query)`, `navigateToLoginView()`, `navigateToNotAuthorizedView()` |
 | `router/index.js` | + rajad `/training-form` (`trainingFormRoute`) ja `/not-authorized` (`notAuthorizedRoute`) |

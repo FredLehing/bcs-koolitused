@@ -206,5 +206,5 @@ Allikad:
 3. **Samaaegne muutmine.** Optimistlikku lukustamist (versioon / `updated_at` võrdlus) ei ole — kui kaks admini salvestavad sama koolitust, jääb kehtima viimane. Praegu seda ei nõuta.
 4. **`updated_at` muutmata andmete korral.** Kui request body sisu on sama mis andmebaasis, uuendatakse `updated_at` siiski (lihtsam loogika). Kinnita, et see sobib.
 5. **`training_funding_type` ülekirjutamise viis — otsustatud:** kustuta kõik koolituse read + lisa uued (lihtsaim). Kustutamise järel tee `flush()` enne lisamist, muidu võib `training_funding_type_uq` anda vea.
-6. **Tühi `title` / `shortDescription` / `description`.** Eeldatud on, et tühi string ei ole lubatud (`@NotBlank`), nagu `POST /api/training` puhul. `description` on HTML — tühi richtext-redaktor võib saata nt `<p></p>`; seda backend eraldi ei kontrolli (frontend kontrollib).
+6. **Tühi `title` / `shortDescription` / `description` — lahendatud.** Tühi string ei ole lubatud (`@NotBlank`), nagu `POST /api/training` puhul. `description` on HTML: `@HtmlNotBlank` annab 400 `INCORRECT_INPUT` ka `<p></p>` korral ja sisu puhastatakse enne salvestamist `HtmlSanitizer`-iga (vt `training-description-html-sanitize.md`).
 7. **`Error` enum.** Valitud lahenduse (p 1: 404) korral uusi äriveateateid pole vaja.

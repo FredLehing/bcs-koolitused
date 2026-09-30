@@ -10,8 +10,7 @@ import LocationService from '@/api-services/LocationService.js'
 import LecturerService from '@/api-services/LecturerService.js'
 import NavigationService from '@/services/NavigationService.js'
 import SessionStorageService from '@/services/SessionStorageService.js'
-import AlertDanger from '@/components/common/AlertDanger.vue'
-import AlertSuccess from '@/components/common/AlertSuccess.vue'
+import InlineAlerts from '@/components/common/InlineAlerts.vue'
 import TranslationFlags from '@/components/common/TranslationFlags.vue'
 import TrainingDataForm from '@/components/forms/TrainingDataForm.vue'
 import TrainingTranslationForm from '@/components/forms/TrainingTranslationForm.vue'
@@ -34,8 +33,7 @@ export default {
     TrainingTranslationForm,
     TrainingDataForm,
     TranslationFlags,
-    AlertSuccess,
-    AlertDanger,
+    InlineAlerts,
   },
   data() {
     return {
@@ -91,7 +89,17 @@ export default {
     }
   },
   computed: {
-    ...mapState(useLanguageStore, ['contentLang', 'supportedLanguages', 'mainLanguageCode']),
+    ...mapState(useLanguageStore, ['contentLang']),
+
+    // Keeled, millesse koolituse sisu tõlgitakse (lipukesed); õppekeeled nagu ru siia ei kuulu
+    translationLanguages() {
+      return this.languages.filter((language) => language.requiresTranslation)
+    },
+
+    mainLanguageCode() {
+      const mainLanguage = this.languages.find((language) => language.isMainLanguage)
+      return mainLanguage ? mainLanguage.languageCode : ''
+    },
 
     pageTitle() {
       if (this.state === STATE_NEW_TRAINING) {
@@ -395,13 +403,18 @@ export default {
 
     // ---------- Lipukesed ----------
 
-    handleTranslationFlagClicked(languageCode) {
-      if (this.isNewTraining || languageCode === this.translation.languageCode) {
+    // translationLanguage on GET /api/languages vastuse element, seega languageId on alati olemas
+    handleTranslationFlagClicked(translationLanguage) {
+      if (
+        this.isNewTraining ||
+        translationLanguage.languageCode === this.translation.languageCode
+      ) {
         return
       }
       this.resetMessages()
       const existingTranslation = this.trainingTranslations.find(
-        (trainingTranslation) => trainingTranslation.languageCode === languageCode,
+        (trainingTranslation) =>
+          trainingTranslation.languageCode === translationLanguage.languageCode,
       )
 
       if (existingTranslation) {
@@ -410,21 +423,9 @@ export default {
           trainingTranslationId: existingTranslation.trainingTranslationId,
         })
       } else {
-        this.openNewTranslation(languageCode)
-      }
-    },
-
-    openNewTranslation(languageCode) {
-      const language = this.languages.find((language) => language.languageCode === languageCode)
-
-      if (language) {
         NavigationService.replaceTrainingFormView({
           trainingId: this.trainingId,
-          languageId: language.languageId,
-        })
-      } else {
-        this.errorMessage = this.$t('trainingForm.validation.languageNotInSystem', {
-          language: languageCode,
+          languageId: translationLanguage.languageId,
         })
       }
     },
@@ -590,6 +591,12 @@ export default {
       }
     },
 
+    // Olekus "update" avatakse vormis avatud tõlge; "new-translation" olekus tõlget veel pole
+    // (trainingTranslationId = 0) → vaade valib tõlke kasutajaliidese keele järgi
+    navigateToTrainingView() {
+      NavigationService.navigateToTrainingView(this.trainingId, this.trainingTranslationId)
+    },
+
     resetMessages() {
       this.successMessage = ''
       this.errorMessage = ''
@@ -609,9 +616,6 @@ export default {
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-lg-10">
-        <AlertSuccess :success-message="successMessage" />
-        <AlertDanger :error-message="errorMessage" />
-
         <div class="d-flex flex-wrap align-items-center gap-3 mb-4">
           <h1 class="mb-0">{{ pageTitle }}</h1>
           <span
@@ -625,15 +629,19 @@ export default {
                 : $t('trainingForm.status.unpublished')
             }}
           </span>
+        </div>
+
+        <fieldset v-if="!isNewTraining" class="border rounded p-3 mb-4">
+          <legend class="float-none w-auto px-2 fs-5">
+            {{ $t('trainingForm.translations.legend') }}
+          </legend>
           <TranslationFlags
-            v-if="!isNewTraining"
-            class="ms-auto"
-            :supported-languages="supportedLanguages"
+            :translation-languages="translationLanguages"
             :training-translations="trainingTranslations"
             :current-language-code="translation.languageCode"
             @event-translation-flag-clicked="handleTranslationFlagClicked"
           />
-        </div>
+        </fieldset>
 
         <TrainingDataForm
           :training="training"
@@ -663,7 +671,7 @@ export default {
           @event-ai-translation-clicked="handleAiTranslationClicked"
         />
 
-        <div class="d-flex flex-wrap gap-3 mb-5">
+        <div class="d-flex flex-wrap align-items-center gap-3 mb-5">
           <button v-if="isNewTraining" @click="addTraining" class="btn btn-success" type="button">
             {{ $t('trainingForm.buttons.add') }}
           </button>
@@ -690,6 +698,20 @@ export default {
                 : $t('trainingForm.buttons.publish')
             }}
           </button>
+          <button
+            v-if="!isNewTraining"
+            @click="navigateToTrainingView"
+            class="btn btn-outline-secondary"
+            type="button"
+          >
+            {{ $t('trainingForm.buttons.view') }}
+          </button>
+          <InlineAlerts
+            :success-message="successMessage"
+            :error-message="errorMessage"
+            @event-success-message-closed="successMessage = ''"
+            @event-error-message-closed="errorMessage = ''"
+          />
         </div>
       </div>
     </div>

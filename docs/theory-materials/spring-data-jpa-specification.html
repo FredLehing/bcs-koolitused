@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JPA Specification – Algajatele</title>
+<style>
+:root {
+  --bg: #fafaf8;
+  --surface: #ffffff;
+  --text: #1f2328;
+  --muted: #59636e;
+  --border: #d8dee4;
+  --accent: #0b6bcb;
+  --accent-soft: #e3effb;
+  --code-bg: #f3f4f6;
+  --pre-bg: #1e2430;
+  --pre-text: #e6edf3;
+  --quote-bg: #fff8e5;
+  --quote-border: #d4a72c;
+  --ok: #1a7f37;
+  --ok-soft: #dafbe1;
+  --bad: #cf222e;
+  --bad-soft: #ffebe9;
+  --off: #eef0f2;
+  --sql-kw: #ff7b72;
+  --sql-str: #a5d6ff;
+  --sql-cm: #8b949e;
+  --mark-bg: #ffe58a;
+  --mark-text: #1f2328;
+  --java-soft: #f0e6ff;
+  --java: #6639ba;
+  --on-accent: #ffffff;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1216; --surface: #161b22; --text: #e6edf3; --muted: #9da7b3;
+    --border: #30363d; --accent: #58a6ff; --accent-soft: #10243d; --code-bg: #262c36;
+    --pre-bg: #0b0e13; --pre-text: #e6edf3; --quote-bg: #2a2410; --quote-border: #bb8009;
+    --ok: #3fb950; --ok-soft: #12261a; --bad: #f85149; --bad-soft: #2d1215; --off: #1c2129;
+    --mark-bg: #6b5a14; --mark-text: #fff8d6; --java-soft: #271a45; --java: #c3a6ff; --on-accent: #0b0e13;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1216; --surface: #161b22; --text: #e6edf3; --muted: #9da7b3;
+  --border: #30363d; --accent: #58a6ff; --accent-soft: #10243d; --code-bg: #262c36;
+  --pre-bg: #0b0e13; --pre-text: #e6edf3; --quote-bg: #2a2410; --quote-border: #bb8009;
+  --ok: #3fb950; --ok-soft: #12261a; --bad: #f85149; --bad-soft: #2d1215; --off: #1c2129;
+  --mark-bg: #6b5a14; --mark-text: #fff8d6; --java-soft: #271a45; --java: #c3a6ff; --on-accent: #0b0e13;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+main { max-width: 860px; margin: 0 auto; padding: 40px 16px 80px; }
+h1 { font-size: 2rem; line-height: 1.25; margin: 0 0 12px; }
+h2 { font-size: 1.45rem; margin: 48px 0 12px; padding-top: 8px; border-top: 1px solid var(--border); }
+h3 { font-size: 1.15rem; margin: 28px 0 8px; }
+p, li { max-width: 72ch; }
+a { color: var(--accent); }
+.lead { color: var(--muted); font-size: 1.1rem; margin-top: 0; }
+code {
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  font-size: 0.9em;
+  background: var(--code-bg);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
+pre {
+  background: var(--pre-bg);
+  color: var(--pre-text);
+  padding: 16px;
+  border-radius: 8px;
+  overflow-x: auto;
+  line-height: 1.5;
+  margin: 12px 0;
+}
+pre code { background: none; padding: 0; font-size: 0.85rem; color: inherit; }
+.kw { color: var(--sql-kw); }
+.str { color: var(--sql-str); }
+.cm { color: var(--sql-cm); font-style: italic; }
+blockquote {
+  margin: 16px 0;
+  padding: 10px 16px;
+  background: var(--quote-bg);
+  border-left: 4px solid var(--quote-border);
+  border-radius: 0 6px 6px 0;
+}
+blockquote p { margin: 0; }
+.table-wrap { overflow-x: auto; margin: 16px 0; }
+table { border-collapse: collapse; width: 100%; background: var(--surface); font-size: 0.95rem; }
+th, td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; vertical-align: top; }
+th { background: var(--code-bg); }
+.toc {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 20px;
+  margin: 24px 0;
+}
+.toc-title { font-weight: 600; margin: 0 0 4px; }
+.toc ol { margin: 0; padding-left: 20px; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  margin: 16px 0;
+}
+.card-title { font-weight: 600; margin: 0 0 10px; }
+button {
+  font: inherit;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 6px 12px;
+}
+button:hover { border-color: var(--accent); }
+button.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+button:disabled { opacity: 0.45; cursor: default; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+input[type="text"], select {
+  font: inherit;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+  width: 100%;
+}
+label.field { display: block; font-size: 0.9rem; color: var(--muted); }
+label.field > span { display: block; margin-bottom: 2px; }
+.controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+.toggles { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 12px; font-size: 0.95rem; }
+.toggles label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+
+.blocks { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin: 12px 0; }
+.block {
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 0.85rem;
+  background: var(--off);
+  color: var(--muted);
+  transition: background .2s, border-color .2s;
+}
+.block b { display: block; font-family: ui-monospace, Consolas, monospace; font-size: 0.8rem; color: var(--text); }
+.block.on { background: var(--accent-soft); border-color: var(--accent); color: var(--text); }
+
+.results { list-style: none; padding: 0; margin: 8px 0; }
+.results li {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 6px 0;
+  background: var(--surface);
+  max-width: none;
+}
+.results .meta { font-size: 0.8rem; color: var(--muted); }
+mark { background: var(--mark-bg); color: var(--mark-text); border-radius: 3px; padding: 0 2px; }
+.stats { font-size: 0.9rem; color: var(--muted); }
+.pager { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+
+.flow { list-style: none; padding: 0; margin: 12px 0; counter-reset: step; }
+.flow li {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px 8px 44px;
+  margin: 6px 0;
+  background: var(--surface);
+  opacity: 0.45;
+  transition: opacity .2s, border-color .2s;
+  max-width: none;
+}
+.flow li::before {
+  counter-increment: step;
+  content: counter(step);
+  position: absolute; left: 12px; top: 8px;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--code-bg); text-align: center; font-size: 0.8rem; line-height: 22px;
+}
+.flow li.done { opacity: 1; }
+.flow li.current { opacity: 1; border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.where { font-size: 0.75rem; font-weight: 600; padding: 1px 6px; border-radius: 4px; margin-left: 6px; }
+.where.java { background: var(--java-soft); color: var(--java); }
+.where.db { background: var(--ok-soft); color: var(--ok); }
+.where.vue { background: var(--accent-soft); color: var(--accent); }
+
+.quiz-q { margin: 18px 0; }
+.quiz-q p { margin: 0 0 6px; font-weight: 600; }
+.quiz-opts { display: flex; flex-direction: column; gap: 6px; }
+.quiz-opts button { text-align: left; }
+.quiz-opts button.right { background: var(--ok-soft); border-color: var(--ok); }
+.quiz-opts button.wrong { background: var(--bad-soft); border-color: var(--bad); }
+.feedback { font-size: 0.9rem; margin-top: 6px; min-height: 1.2em; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (prefers-reduced-motion: reduce) { .block, .flow li { transition: none; } }
+.two-col > * { min-width: 0; }
+@media (max-width: 640px) { .two-col { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+.pill { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 0.8rem; font-weight: 600; }
+.pill.ok { background: var(--ok-soft); color: var(--ok); }
+.pill.bad { background: var(--bad-soft); color: var(--bad); }
+</style>
+</head>
+<body>
+<main>
+
+<h1>JPA Specification: dünaamiline filtreerimine – Algajatele</h1>
+<p class="lead">Kuidas panna Spring Data päring kokku väikestest „klotsidest“ nii, et filtreerimine toimub ikkagi andmebaasis. Näited tulevad meie projekti koolituste otsingust (<code>GET /api/trainings</code>).</p>
+
+<nav class="toc">
+  <p class="toc-title">Sisukord</p>
+  <ol>
+    <li><a href="#probleem">Probleem: miks <code>@Query</code> siin ei sobi</a></li>
+    <li><a href="#mis-on">Mis on Specification?</a></li>
+    <li><a href="#labor">Labor: ehita päring ise</a></li>
+    <li><a href="#kus">Kus filtreerimine toimub – Javas või andmebaasis?</a></li>
+    <li><a href="#kood">Meie kood rida-realt</a></li>
+    <li><a href="#escape">Lõks: <code>%</code> ja <code>_</code> ehk escape'imine</a></li>
+    <li><a href="#viktoriin">Kontrolli ennast</a></li>
+    <li><a href="#kokkuvote">Kokkuvõte</a></li>
+  </ol>
+</nav>
+
+<!-- ============================================================ -->
+<h2 id="probleem">1. Probleem: miks <code>@Query</code> siin ei sobi</h2>
+
+<p>Seni kirjutasime kõik päringud nii: <strong>üks fikseeritud JPQL-tekst</strong> <code>@Query</code> annotatsioonis.</p>
+
+<pre><code>@Query("""
+    select ts from TrainingSummary ts
+    where (:categoryId = 0 or ts.categoryId = :categoryId)
+    and ts.translationLanguageCode = :contentLang
+    order by ts.training.isPromoted desc, ts.title""")</code></pre>
+
+<p>See töötab hästi, kui <strong>tingimuste arv on alati sama</strong>. Filtril „kõik“ on nipp <code>:categoryId = 0 or ...</code>, mis teeb tingimuse alati tõeseks.</p>
+
+<p>Otsingus kirjutab kasutaja aga suvalise arvu sõnu:</p>
+
+<div class="table-wrap"><table>
+  <tr><th>Kasutaja sisestab</th><th>Mitu <code>like</code>-tingimust on vaja?</th></tr>
+  <tr><td><code>java</code></td><td>1</td></tr>
+  <tr><td><code>java alg</code></td><td>2</td></tr>
+  <tr><td><code>java alg kursus AI</code></td><td>4</td></tr>
+</table></div>
+
+<p>JPQL-i tekstis ei saa kirjutada „korda seda rida nii mitu korda, kui sõnu on“. Tekst on valmis enne, kui kasutaja midagi sisestab.</p>
+
+<blockquote><p><strong>Analoogia – tellimisvorm vs Lego:</strong> <code>@Query</code> on nagu trükitud tellimisvorm, kus lahtrite arv on paberile ette trükitud. Specification on nagu Lego: sul on eraldi klotsid ja ühendad neid nii palju, kui parajasti vaja.</p></blockquote>
+
+<!-- ============================================================ -->
+<h2 id="mis-on">2. Mis on Specification?</h2>
+
+<p><strong>Specification</strong> on <strong>üks tükk SQL-i <code>WHERE</code> tingimusest, kirjutatud Java koodina</strong>. See on väike funktsioon, mis saab kolm tööriista ja tagastab ühe tingimuse (<code>Predicate</code>):</p>
+
+<pre><code>(root, query, cb) -&gt; cb.equal(root.get("categoryId"), categoryId)
+//  │      │     │        │
+//  │      │     │        └─ tulemus: tingimus "category_id = 3"
+//  │      │     └─ cb = CriteriaBuilder: tööriistakast (equal, like, and, or, lower, exists...)
+//  │      └─ query = päring ise (vaja nt alampäringu loomiseks)
+//  └─ root = tabeli rida, millele tingimus käib (siin TrainingSummary)</code></pre>
+
+<div class="table-wrap"><table>
+  <tr><th>Java (CriteriaBuilder)</th><th>Mis SQL-ist tuleb</th></tr>
+  <tr><td><code>cb.equal(root.get("categoryId"), 3)</code></td><td><code>category_id = 3</code></td></tr>
+  <tr><td><code>cb.like(cb.lower(root.get("title")), "%java%")</code></td><td><code>lower(title) like '%java%'</code></td></tr>
+  <tr><td><code>cb.or(a, b)</code></td><td><code>(a or b)</code></td></tr>
+  <tr><td><code>cb.and(a, b, c)</code></td><td><code>(a and b and c)</code></td></tr>
+  <tr><td><code>cb.conjunction()</code></td><td><code>1=1</code> ehk „alati tõene, ei filtreeri midagi“</td></tr>
+</table></div>
+
+<p>Klotsid pannakse kokku meetodiga <code>Specification.allOf(...)</code> (kõik peavad kehtima, <code>and</code>). Et repository oskaks neid kasutada, lisatakse talle liides <code>JpaSpecificationExecutor</code>:</p>
+
+<pre><code>public interface TrainingSummaryRepository
+        extends JpaRepository&lt;TrainingSummary, Long&gt;,
+                JpaSpecificationExecutor&lt;TrainingSummary&gt; {   // ← annab meetodi findAll(spec, pageable)
+}</code></pre>
+
+<p>Nagu <code>findById</code> puhul, kirjutab Spring meetodi <code>findAll(specification, pageable)</code> sinu eest valmis.</p>
+
+<!-- ============================================================ -->
+<h2 id="labor">3. Labor: ehita päring ise</h2>
+
+<p>Muuda filtreid ja vaata, millised klotsid „süttivad“, milline SQL tekib ja mida andmebaas tagastab. Näidisandmed on väljamõeldud. Lehel on 3 koolitust (<code>limit=3</code>).</p>
+
+<div class="card">
+  <div class="controls">
+    <label class="field"><span>Otsingutekst (searchText)</span>
+      <input type="text" id="searchText" placeholder="nt java alg" autocomplete="off"></label>
+    <label class="field"><span>Kategooria (categoryId)</span>
+      <select id="categoryId"></select></label>
+    <label class="field"><span>Rahastus (fundingTypeId)</span>
+      <select id="fundingTypeId"></select></label>
+    <label class="field"><span>Õppekeel (trainingLanguageId)</span>
+      <select id="trainingLanguageId"></select></label>
+  </div>
+  <div class="toggles">
+    <label><input type="radio" name="mode" value="and" checked> Sõnad AND (kõik peavad esinema)</label>
+    <label><input type="radio" name="mode" value="or"> Sõnad OR (piisab ühest)</label>
+    <label><input type="checkbox" id="escape" checked> Escape <code>%</code> ja <code>_</code></label>
+  </div>
+
+  <p class="card-title" style="margin-top:16px">Klotsid (Specificationid)</p>
+  <div class="blocks" id="blocks"></div>
+
+  <div class="two-col">
+    <div>
+      <p class="card-title">Hibernate'i genereeritud SQL (lihtsustatud)</p>
+      <pre id="sql" style="font-size:0.8rem; min-height: 200px;"></pre>
+    </div>
+    <div>
+      <p class="card-title">Andmebaasi vastus</p>
+      <p class="stats" id="stats"></p>
+      <ul class="results" id="results"></ul>
+      <div class="pager" id="pager"></div>
+    </div>
+  </div>
+</div>
+
+<p><strong>Proovi järgmisi asju:</strong></p>
+<ol>
+  <li>Kirjuta <code>java</code>, siis <code>java alg</code>. AND-režiimis tulemusi <em>väheneb</em>.</li>
+  <li>Lülita OR peale. Nüüd tulemusi <em>lisandub</em> iga sõnaga.</li>
+  <li>Kirjuta <code>JAVA</code>. Tulemus on sama, sest mõlemad pooled tehakse <code>lower()</code>-ga väiketäheliseks.</li>
+  <li>Kirjuta <code>kursus</code>. Leitakse ka „kursuse“, sest <code>like '%kursus%'</code> otsib sõna seest. Aga <code>kursuse</code> ei leia sõna „kursus“, sest käändeid ei kohandata.</li>
+  <li>Kirjuta <code>%</code> ja lülita escape välja. Mis juhtub? (Vt <a href="#escape">6. peatükki</a>)</li>
+</ol>
+
+<!-- ============================================================ -->
+<h2 id="kus">4. Kus filtreerimine toimub – Javas või andmebaasis?</h2>
+
+<p><strong>Andmebaasis.</strong> See on kõige tähtsam mõte. Java ei loe kõiki koolitusi mällu ega sorteeri neid ise. Java ainult <strong>koostab SQL-lause</strong>, andmebaas teeb raske töö ja saadab tagasi ainult ühe lehe jagu ridu.</p>
+
+<p>Vajuta „Järgmine samm“ ja vaata, kuidas üks otsing liigub:</p>
+
+<div class="card">
+  <ol class="flow" id="flow">
+    <li>Kasutaja kirjutab <code>java alg</code> ja vajutab „Otsi“. <span class="where vue">Vue</span><br><span class="stats">GET /api/trainings?...&amp;searchText=java%20alg</span></li>
+    <li><code>TrainingController</code> võtab <code>searchText</code> query parameetrist ja kutsub teenust. <span class="where java">Java</span></li>
+    <li><code>TrainingService</code> paneb klotsid kokku: <code>Specification.allOf(hasCategoryId, ..., containsAllWords)</code>. <strong>Andmeid pole veel kordagi loetud</strong>, ainult „retsept“ on valmis. <span class="where java">Java</span></li>
+    <li><code>trainingSummaryRepository.findAll(spec, pageable)</code> – Hibernate kutsub iga klotsi funktsiooni, saab tingimused ja kirjutab neist <strong>ühe SQL-lause</strong>. <span class="where java">Java</span></li>
+    <li>PostgreSQL käivitab <code>select ... where ... order by ... offset 0 rows fetch first 3 rows only</code>. Filtreerimine, sorteerimine ja lehe väljalõikamine käivad <strong>siin</strong>. <span class="where db">Andmebaas</span></li>
+    <li>Teine päring <code>select count(*) ... where ...</code> loeb kokku kõik sobivad read, et saada <code>totalElements</code> ja <code>totalPages</code>. <span class="where db">Andmebaas</span></li>
+    <li>Javasse jõuavad tagasi <strong>ainult 3 rida</strong> ja üks arv. Service teeb neist DTO-d ja lisab rahastustüübid. <span class="where java">Java</span></li>
+    <li>Vue kuvab kaardid ja leheküljenumbrid. <span class="where vue">Vue</span></li>
+  </ol>
+  <div class="pager">
+    <button type="button" id="flowPrev">← Eelmine</button>
+    <button type="button" class="primary" id="flowNext">Järgmine samm →</button>
+    <button type="button" id="flowReset">Algusest</button>
+  </div>
+</div>
+
+<blockquote><p><strong>Analoogia – raamatukogu:</strong> sa ei tassi kõiki 10 000 raamatut koju, et neid laual sorteerida. Annad raamatukoguhoidjale sedeli („Java raamatud, eesti keeles, esimesed 3“) ja saad kätte just need 3. Java kirjutab sedeli, andmebaas on raamatukoguhoidja.</p></blockquote>
+
+<p>Seda näed ka päriselt: projektis on seadistatud P6Spy, nii et IntelliJ konsoolis on iga päringu järel näha täpne SQL koos väärtustega.</p>
+
+<!-- ============================================================ -->
+<h2 id="kood">5. Meie kood rida-realt</h2>
+
+<h3>5.1 Lihtne klots – kategooria</h3>
+<pre><code>public static Specification&lt;TrainingSummary&gt; hasCategoryId(Integer categoryId) {
+    return (root, query, cb) -&gt; categoryId == 0
+            ? cb.conjunction()                                  // 0 = "kõik" → 1=1, ei filtreeri
+            : cb.equal(root.get("categoryId"), categoryId);     // muidu category_id = ?
+}</code></pre>
+<p>NB: <code>categoryId == 0</code> kontroll käib <strong>Javas</strong>, aga see ei filtreeri andmeid. See ainult otsustab, <em>kas</em> tingimus SQL-i lisatakse. Andmete filtreerimine jääb ikka andmebaasile.</p>
+
+<h3>5.2 Klots alampäringuga – rahastustüüp</h3>
+<pre><code>public static Specification&lt;TrainingSummary&gt; hasFundingTypeId(Integer fundingTypeId) {
+    return (root, query, cb) -&gt; {
+        if (fundingTypeId == 0) {
+            return cb.conjunction();
+        }
+        Subquery&lt;Integer&gt; subquery = query.subquery(Integer.class);       // "select tft.id from ..."
+        Root&lt;TrainingFundingType&gt; trainingFundingType = subquery.from(TrainingFundingType.class);
+        subquery.select(trainingFundingType.get("id"))
+                .where(cb.equal(trainingFundingType.get("training"), root.get("training")),
+                       cb.equal(trainingFundingType.get("fundingType").get("id"), fundingTypeId));
+        return cb.exists(subquery);                                        // "exists (select ...)"
+    };
+}</code></pre>
+<p>Koolitusel võib olla mitu rahastustüüpi (many-to-many). <code>exists</code> küsib: „kas sellel koolitusel on <em>vähemalt üks</em> selline rahastus?“ Nii ei teki duplikaatridu ja leheküljestamine loeb koolitusi õigesti.</p>
+
+<h3>5.3 Tsükliga klots – otsingusõnad</h3>
+<pre><code>public static Specification&lt;TrainingSummary&gt; containsAllWords(String searchText) {
+    return (root, query, cb) -&gt; {
+        if (searchText == null || searchText.isBlank()) {
+            return cb.conjunction();                                   // tühi otsing = kõik
+        }
+        List&lt;Predicate&gt; wordPredicates = new ArrayList&lt;&gt;();
+        for (String word : searchText.trim().toLowerCase().split("\\s+")) {   // "Java  alg" → ["java", "alg"]
+            String pattern = "%" + escapeLikeWildcards(word) + "%";           // "java" → "%java%"
+            wordPredicates.add(cb.or(                                        // title VÕI kirjeldus
+                    cb.like(cb.lower(root.get("title")), pattern, LIKE_ESCAPE_CHAR),
+                    cb.like(cb.lower(root.get("shortDescription")), pattern, LIKE_ESCAPE_CHAR)));
+        }
+        return cb.and(wordPredicates.toArray(new Predicate[0]));          // kõik sõnad (AND)
+    };
+}</code></pre>
+<p><strong>Siin on Specificationi mõte:</strong> tavaline Java <code>for</code>-tsükkel lisab iga sõna jaoks ühe tingimuse. <code>@Query</code> tekstiga seda teha ei saaks.</p>
+<p><code>split("\\s+")</code> tähendab „tükelda ühe või mitme järjestikuse tühiku kohalt“, nii et <code>"java&nbsp;&nbsp;&nbsp;alg"</code> annab ikka kaks sõna.</p>
+
+<h3>5.4 Kokkupanek teenuses</h3>
+<pre><code>Pageable pageable = PageRequest.of(page, limit,
+        Sort.by(Sort.Order.desc("training.isPromoted"), Sort.Order.asc("title")));   // order by
+
+Specification&lt;TrainingSummary&gt; spec = Specification.allOf(
+        TrainingSummarySpecifications.hasCategoryId(categoryId),
+        TrainingSummarySpecifications.hasFundingTypeId(fundingTypeId),
+        TrainingSummarySpecifications.hasTrainingLanguageId(trainingLanguageId),
+        TrainingSummarySpecifications.hasTranslationLanguageCode(contentLang),
+        TrainingSummarySpecifications.containsAllWords(searchText));
+
+Page&lt;TrainingSummary&gt; page = trainingSummaryRepository.findAll(spec, pageable);   // ← alles SIIN läheb SQL andmebaasi</code></pre>
+<p>Sorteerimine liikus <code>@Query</code> seest <code>Sort</code> objekti sisse, sest Specification kirjeldab ainult <code>WHERE</code> osa.</p>
+
+<!-- ============================================================ -->
+<h2 id="escape">6. Lõks: <code>%</code> ja <code>_</code> ehk escape'imine</h2>
+
+<p>SQL-i <code>like</code> mustris on kaks <strong>erimärki</strong> (metamärki):</p>
+<div class="table-wrap"><table>
+  <tr><th>Märk</th><th>Tähendus <code>like</code>-is</th><th>Näide</th></tr>
+  <tr><td><code>%</code></td><td>ükskõik mis tekst (ka tühi)</td><td><code>'%java%'</code> sobib „Java algkursus“</td></tr>
+  <tr><td><code>_</code></td><td>täpselt üks suvaline märk</td><td><code>'j_va'</code> sobib „java“ ja „jova“</td></tr>
+</table></div>
+
+<p>Kui kasutaja kirjutab otsingusse <code>%</code>, tekib ilma kaitseta muster <code>'%%%'</code>, mis sobib <strong>kõigega</strong>. Ootamatu tulemus! Lahendus on panna erimärgi ette <code>\</code>. See ütleb andmebaasile: „seda märki otsi tavalise tähena“.</p>
+
+<div class="card">
+  <p class="card-title">Proovi: mis muster SQL-i läheb?</p>
+  <label class="field"><span>Kasutaja sisestatud sõna</span>
+    <input type="text" id="escInput" value="%" autocomplete="off"></label>
+  <div class="two-col" style="margin-top:12px">
+    <div>
+      <p class="card-title">Ilma escape'ita</p>
+      <pre id="escOff" style="font-size:0.8rem"></pre>
+    </div>
+    <div>
+      <p class="card-title">Escape'iga (meie kood)</p>
+      <pre id="escOn" style="font-size:0.8rem"></pre>
+    </div>
+  </div>
+</div>
+
+<pre><code>// Kasutaja sisestatud % ja _ otsitakse sõna-sõnalt, mitte LIKE metamärkidena
+private static String escapeLikeWildcards(String word) {
+    return word.replace("\\", "\\\\")   // 1) kõigepealt \ ise, muidu topeltescape
+            .replace("%", "\\%")
+            .replace("_", "\\_");
+}
+// ja cb.like(..., pattern, '\\') ütleb andmebaasile, et \ on escape-märk</code></pre>
+
+<!-- ============================================================ -->
+<h2 id="viktoriin">7. Kontrolli ennast</h2>
+<div class="card" id="quiz"></div>
+<p class="stats" id="quizScore"></p>
+
+<!-- ============================================================ -->
+<h2 id="kokkuvote">8. Kokkuvõte</h2>
+<div class="table-wrap"><table>
+  <tr><th>Mõiste</th><th>Lühidalt</th></tr>
+  <tr><td><code>Specification&lt;T&gt;</code></td><td>Üks <code>WHERE</code> tingimuse tükk Java koodina (funktsioon <code>root, query, cb → Predicate</code>).</td></tr>
+  <tr><td><code>JpaSpecificationExecutor&lt;T&gt;</code></td><td>Liides repositoryle, mis annab meetodi <code>findAll(spec, pageable)</code>.</td></tr>
+  <tr><td><code>CriteriaBuilder</code> (<code>cb</code>)</td><td>Tööriistakast tingimuste tegemiseks: <code>equal</code>, <code>like</code>, <code>lower</code>, <code>and</code>, <code>or</code>, <code>exists</code>.</td></tr>
+  <tr><td><code>root</code></td><td>Entiteedi rida, mille väljadele viidatakse (<code>root.get("title")</code>).</td></tr>
+  <tr><td><code>cb.conjunction()</code></td><td>Alati tõene tingimus (<code>1=1</code>) – filter „kõik“.</td></tr>
+  <tr><td><code>Specification.allOf(...)</code></td><td>Paneb klotsid kokku <code>and</code>-iga.</td></tr>
+  <tr><td><code>Sort</code> + <code>PageRequest</code></td><td>Järjestus ja leheküljestamine; lähevad SQL-i <code>order by</code> ja <code>offset/fetch</code> osaks.</td></tr>
+  <tr><td>Kus filtreeritakse?</td><td><strong>Andmebaasis.</strong> Java ainult koostab SQL-i.</td></tr>
+  <tr><td>Escape</td><td><code>%</code> ja <code>_</code> ees <code>\</code>, et kasutaja sisend ei muutuks metamärgiks.</td></tr>
+</table></div>
+
+<p><strong>Millal mida kasutada?</strong></p>
+<ul>
+  <li><code>@Query</code> – kui tingimuste arv on alati sama. See on lihtsam lugeda ja projektis tavaline.</li>
+  <li><code>Specification</code> – kui tingimuste arv muutub (otsingusõnad, valikulised filtrid, „täpsem otsing“).</li>
+</ul>
+
+<h3>Järgmised sammud</h3>
+<ul>
+  <li>Loe varasemat materjali <a href="spring-data-page-ja-mapper.html">Leheküljestamine: Page&lt;T&gt; ja MapStruct mapper</a>, sest Specification kasutab sama <code>Page</code>/<code>Pageable</code> mehhanismi.</li>
+  <li>Käivita backend, tee otsing ja vaata IntelliJ konsoolist P6Spy logi: leia sealt oma <code>like</code>-tingimused ja <code>count</code> päring.</li>
+  <li>Edasijõudnutele: PostgreSQL-i täistekstiotsing (<code>to_tsvector</code>) oskab arvestada ka eesti keele käänetega.</li>
+</ul>
+
+</main>
+
+<script>
+// ---------- Näidisandmed (väljamõeldud) ----------
+const categories = { 1: 'Programmeerimine', 2: 'AI', 3: 'Juhtimine', 4: 'Andmebaasid' }
+const languages = { 1: 'Eesti', 2: 'Inglise' }
+const fundingTypes = { 1: 'Töötukassa', 2: 'EU-rahastus', 3: 'Pilet' }
+const trainings = [
+  { title: 'Java algkursus', shortDescription: 'Java programmeerimise alused algajatele.', categoryId: 1, trainingLanguageId: 1, fundingTypeIds: [1, 2], isPromoted: true },
+  { title: 'Java edasijõudnutele', shortDescription: 'Spring Boot ja REST teenused Java kursuse jätkuna.', categoryId: 1, trainingLanguageId: 1, fundingTypeIds: [1], isPromoted: false },
+  { title: 'Püütoni algkursus AI abiga', shortDescription: 'Pythoni alused, kasutades AI abilist.', categoryId: 2, trainingLanguageId: 1, fundingTypeIds: [2, 3], isPromoted: true },
+  { title: 'Noorem AI-arendaja', shortDescription: 'Programmeerimise kursus AI tööriistadega.', categoryId: 2, trainingLanguageId: 1, fundingTypeIds: [1], isPromoted: false },
+  { title: 'Projektijuhtimise põhitõed', shortDescription: 'Sissejuhatus IT-projektijuhtimisse.', categoryId: 3, trainingLanguageId: 1, fundingTypeIds: [], isPromoted: false },
+  { title: 'Agile team leadership', shortDescription: 'Scrum and Kanban for team leads.', categoryId: 3, trainingLanguageId: 2, fundingTypeIds: [3], isPromoted: false },
+  { title: 'SQL andmebaaside alused', shortDescription: 'PostgreSQL päringud algajatele, sh like ja join.', categoryId: 4, trainingLanguageId: 1, fundingTypeIds: [1, 3], isPromoted: false },
+  { title: 'Andmebaaside disain', shortDescription: 'Kuidas tabelid 100% õigesti üles ehitada.', categoryId: 4, trainingLanguageId: 1, fundingTypeIds: [2], isPromoted: false },
+  { title: 'Java for beginners', shortDescription: 'Java basics course in English.', categoryId: 1, trainingLanguageId: 2, fundingTypeIds: [3], isPromoted: false },
+  { title: 'user_story kirjutamine', shortDescription: 'Kasutajalugude kirjutamise töötuba.', categoryId: 3, trainingLanguageId: 1, fundingTypeIds: [3], isPromoted: false },
+]
+const LIMIT = 3
+
+const $ = (id) => document.getElementById(id)
+const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+
+function fillSelect(el, map, allLabel) {
+  el.innerHTML = `<option value="0">0 = ${allLabel}</option>` +
+    Object.entries(map).map(([id, name]) => `<option value="${id}">${id} = ${name}</option>`).join('')
+}
+fillSelect($('categoryId'), categories, 'kõik')
+fillSelect($('fundingTypeId'), fundingTypes, 'kõik')
+fillSelect($('trainingLanguageId'), languages, 'kõik')
+
+let page = 0
+
+function escapeLike(word) {
+  return word.replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_')
+}
+
+// Imiteerib andmebaasi LIKE-i: % = .*, _ = ., \ = escape
+function likeToRegex(pattern, useEscape) {
+  let re = ''
+  for (let i = 0; i < pattern.length; i++) {
+    const c = pattern[i]
+    if (useEscape && c === '\\' && i + 1 < pattern.length) {
+      re += pattern[++i].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    } else if (c === '%') re += '.*'
+    else if (c === '_') re += '.'
+    else re += c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  }
+  return new RegExp('^' + re + '$', 's')
+}
+
+function getState() {
+  const words = $('searchText').value.trim().toLowerCase().split(/\s+/).filter(Boolean)
+  const useEscape = $('escape').checked
+  return {
+    categoryId: +$('categoryId').value,
+    fundingTypeId: +$('fundingTypeId').value,
+    trainingLanguageId: +$('trainingLanguageId').value,
+    words,
+    mode: document.querySelector('input[name="mode"]:checked').value,
+    useEscape,
+    patterns: words.map((w) => '%' + (useEscape ? escapeLike(w) : w) + '%'),
+  }
+}
+
+function matches(t, s) {
+  if (s.categoryId && t.categoryId !== s.categoryId) return false
+  if (s.fundingTypeId && !t.fundingTypeIds.includes(s.fundingTypeId)) return false
+  if (s.trainingLanguageId && t.trainingLanguageId !== s.trainingLanguageId) return false
+  if (s.patterns.length) {
+    const test = (p) => {
+      const re = likeToRegex(p, s.useEscape)
+      return re.test(t.title.toLowerCase()) || re.test(t.shortDescription.toLowerCase())
+    }
+    return s.mode === 'and' ? s.patterns.every(test) : s.patterns.some(test)
+  }
+  return true
+}
+
+function renderBlocks(s) {
+  const b = [
+    ['hasCategoryId', s.categoryId ? `category_id = ${s.categoryId}` : '0 → 1=1 (ei tee midagi)', !!s.categoryId],
+    ['hasFundingTypeId', s.fundingTypeId ? `exists (… funding_type_id = ${s.fundingTypeId})` : '0 → 1=1 (ei tee midagi)', !!s.fundingTypeId],
+    ['hasTrainingLanguageId', s.trainingLanguageId ? `training_language_id = ${s.trainingLanguageId}` : '0 → 1=1 (ei tee midagi)', !!s.trainingLanguageId],
+    ['hasTranslationLanguageCode', "translation_language_code = 'et' (alati)", true],
+    ['containsAllWords', s.words.length ? `${s.words.length} sõna → ${s.words.length} × (title or kirjeldus)` : 'tühi → 1=1 (ei tee midagi)', s.words.length > 0],
+  ]
+  $('blocks').innerHTML = b.map(([name, desc, on]) =>
+    `<div class="block ${on ? 'on' : ''}"><b>${name}</b>${esc(desc)}</div>`).join('')
+}
+
+function sqlStr(v) { return `<span class="str">'${esc(v)}'</span>` }
+
+function buildWhere(s) {
+  const lines = []
+  lines.push(s.categoryId ? `ts.category_id = ${s.categoryId}` : `1=1 <span class="cm">-- categoryId = 0</span>`)
+  lines.push(s.fundingTypeId
+    ? `<span class="kw">exists</span> (<span class="kw">select</span> tft.id <span class="kw">from</span> training_funding_type tft\n         <span class="kw">where</span> tft.training_id = ts.training_id\n         <span class="kw">and</span> tft.funding_type_id = ${s.fundingTypeId})`
+    : `1=1 <span class="cm">-- fundingTypeId = 0</span>`)
+  lines.push(s.trainingLanguageId ? `ts.training_language_id = ${s.trainingLanguageId}` : `1=1 <span class="cm">-- trainingLanguageId = 0</span>`)
+  lines.push(`ts.translation_language_code = ${sqlStr('et')}`)
+  if (s.patterns.length) {
+    const escClause = s.useEscape ? ` <span class="kw">escape</span> ${sqlStr('\\')}` : ''
+    const parts = s.patterns.map((p) =>
+      `(<span class="kw">lower</span>(ts.title) <span class="kw">like</span> ${sqlStr(p)}${escClause}\n     <span class="kw">or</span> <span class="kw">lower</span>(ts.short_description) <span class="kw">like</span> ${sqlStr(p)}${escClause})`)
+    lines.push(parts.join(`\n  <span class="kw">${s.mode}</span> `))
+  } else {
+    lines.push(`1=1 <span class="cm">-- searchText tühi</span>`)
+  }
+  return lines.map((l, i) => (i === 0 ? '<span class="kw">where</span> ' : '  <span class="kw">and</span> ') + l).join('\n')
+}
+
+function highlight(text, s) {
+  if (!s.words.length) return esc(text)
+  let out = esc(text)
+  s.patterns.forEach((p) => {
+    // leia vasteosa (lihtne esiletõst ainult tavaliste sõnade korral)
+    const inner = p.slice(1, -1)
+    const plain = s.useEscape ? inner.replace(/\\(.)/g, '$1') : inner
+    if (!plain || /[%_]/.test(s.useEscape ? '' : plain)) return
+    const idx = out.toLowerCase().indexOf(esc(plain).toLowerCase())
+    if (idx >= 0) {
+      const len = esc(plain).length
+      out = out.slice(0, idx) + '<mark>' + out.slice(idx, idx + len) + '</mark>' + out.slice(idx + len)
+    }
+  })
+  return out
+}
+
+function render() {
+  const s = getState()
+  renderBlocks(s)
+  const where = buildWhere(s)
+  $('sql').innerHTML =
+    `<span class="cm">-- 1) andmete päring</span>\n<span class="kw">select</span> ts.* <span class="kw">from</span> training_summary ts\n${where}\n` +
+    `<span class="kw">order by</span> t.is_promoted <span class="kw">desc</span>, ts.title <span class="kw">asc</span>\n` +
+    `<span class="kw">offset</span> ${page * LIMIT} <span class="kw">rows fetch first</span> ${LIMIT} <span class="kw">rows only</span>;\n\n` +
+    `<span class="cm">-- 2) koguarv (totalElements)</span>\n<span class="kw">select count</span>(ts.id) <span class="kw">from</span> training_summary ts\n<span class="kw">where</span> <span class="cm">… samad tingimused …</span>;`
+
+  const all = trainings.filter((t) => matches(t, s))
+    .sort((a, b) => (b.isPromoted - a.isPromoted) || a.title.localeCompare(b.title, 'et'))
+  const totalPages = Math.ceil(all.length / LIMIT)
+  if (page > 0 && page >= totalPages) { page = Math.max(0, totalPages - 1); return render() }
+  const rows = all.slice(page * LIMIT, page * LIMIT + LIMIT)
+
+  $('stats').innerHTML = `Tabelis ${trainings.length} rida → sobivaid <b>${all.length}</b> (totalElements) → Javasse tuli <b>${rows.length}</b> rida · totalPages = ${totalPages}`
+  $('results').innerHTML = rows.length
+    ? rows.map((t) => `<li>${t.isPromoted ? '★ ' : ''}<b>${highlight(t.title, s)}</b><br>${highlight(t.shortDescription, s)}
+        <div class="meta">${categories[t.categoryId]} · ${languages[t.trainingLanguageId]} · ${t.fundingTypeIds.map((f) => fundingTypes[f]).join(', ') || 'rahastus puudub'}</div></li>`).join('')
+    : '<li class="stats">Tühi list – see ei ole viga, lihtsalt vasteid pole.</li>'
+
+  let pager = `<button type="button" ${page === 0 ? 'disabled' : ''} data-p="${page - 1}">Eelmine</button>`
+  for (let i = 0; i < totalPages; i++) pager += `<button type="button" class="${i === page ? 'primary' : ''}" data-p="${i}">${i + 1}</button>`
+  pager += `<button type="button" ${page >= totalPages - 1 ? 'disabled' : ''} data-p="${page + 1}">Järgmine</button>`
+  $('pager').innerHTML = totalPages ? pager : ''
+}
+
+$('pager').addEventListener('click', (e) => {
+  const p = e.target.dataset.p
+  if (p !== undefined && !e.target.disabled) { page = +p; render() }
+})
+// filtri muutmine → page tagasi 0-ks, nagu TrainingsView.vue-s
+document.querySelectorAll('#searchText, #categoryId, #fundingTypeId, #trainingLanguageId, #escape, input[name="mode"]')
+  .forEach((el) => el.addEventListener(el.tagName === 'INPUT' && el.type === 'text' ? 'input' : 'change', () => { page = 0; render() }))
+render()
+
+// ---------- Voo samm-sammult ----------
+let flowStep = 0
+const flowItems = [...document.querySelectorAll('#flow li')]
+function renderFlow() {
+  flowItems.forEach((li, i) => {
+    li.classList.toggle('done', i < flowStep)
+    li.classList.toggle('current', i === flowStep)
+  })
+  $('flowPrev').disabled = flowStep === 0
+  $('flowNext').disabled = flowStep === flowItems.length - 1
+}
+$('flowNext').addEventListener('click', () => { flowStep++; renderFlow() })
+$('flowPrev').addEventListener('click', () => { flowStep--; renderFlow() })
+$('flowReset').addEventListener('click', () => { flowStep = 0; renderFlow() })
+renderFlow()
+
+// ---------- Escape demo ----------
+function renderEsc() {
+  const w = $('escInput').value.toLowerCase()
+  const off = '%' + w + '%'
+  const on = '%' + escapeLike(w) + '%'
+  const count = (p, useEsc) => trainings.filter((t) => {
+    const re = likeToRegex(p, useEsc)
+    return re.test(t.title.toLowerCase()) || re.test(t.shortDescription.toLowerCase())
+  }).length
+  const n1 = count(off, false), n2 = count(on, true)
+  $('escOff').innerHTML = `<span class="kw">like</span> ${sqlStr(off)}\n\n<span class="cm">-- vasteid: ${n1} / ${trainings.length}</span>`
+  $('escOn').innerHTML = `<span class="kw">like</span> ${sqlStr(on)} <span class="kw">escape</span> ${sqlStr('\\')}\n\n<span class="cm">-- vasteid: ${n2} / ${trainings.length}</span>`
+}
+$('escInput').addEventListener('input', renderEsc)
+renderEsc()
+
+// ---------- Viktoriin ----------
+const quiz = [
+  { q: 'Kus toimub koolituste filtreerimine, kui kasutame Specificationit?',
+    opts: ['Javas: Hibernate loeb kõik read mällu ja filtreerib seal', 'Andmebaasis: Java koostab SQL-i, PostgreSQL filtreerib', 'Brauseris Vue komponendis'],
+    right: 1, why: 'Specificationid muutuvad SQL-i WHERE osaks. Javasse tulevad ainult ühe lehe read.' },
+  { q: 'Miks ei saanud otsingut teha tavalise @Query JPQL-iga?',
+    opts: ['JPQL ei toeta like-operaatorit', 'Otsingusõnade arv muutub ja JPQL-i tekst on fikseeritud', 'JPQL ei tööta vaadetega (view)'],
+    right: 1, why: 'Like töötab JPQL-is küll, aga iga sõna jaoks on vaja uut tingimust ja nende arv selgub alles kasutaja sisendist.' },
+  { q: 'Mida teeb cb.conjunction()?',
+    opts: ['Tagastab alati tõese tingimuse (1=1), ehk filtrit ei rakendata', 'Ühendab kaks tabelit (join)', 'Viskab vea, kui filter on 0'],
+    right: 0, why: 'Nii saab filter „kõik“ (0 või tühi tekst) jääda klotsiks, mis mitte midagi välja ei filtreeri.' },
+  { q: 'Kasutaja otsib „java alg“ (AND-režiimis). Milline koolitus leitakse?',
+    opts: ['„Java edasijõudnutele“', '„Java algkursus“', 'Mõlemad'],
+    right: 1, why: 'AND-i korral peavad mõlemad sõnad esinema. „alg“ leidub ainult sõnas „algkursus“ (ja „algajatele“).' },
+  { q: 'Miks escape\'ime kasutaja sisendis märgid % ja _?',
+    opts: ['Et vältida SQL injectionit', 'Et need ei muutuks like-mustri metamärkideks ja ei annaks ootamatuid vasteid', 'Et PostgreSQL oskaks eesti täpitähti'],
+    right: 1, why: 'Parameetrid on niikuinii SQL injectioni eest kaitstud. Escape on vajalik, sest % tähendab like-is „ükskõik mis tekst“.' },
+]
+let score = 0, answered = 0
+$('quiz').innerHTML = quiz.map((item, qi) => `
+  <div class="quiz-q" data-q="${qi}">
+    <p>${qi + 1}. ${esc(item.q)}</p>
+    <div class="quiz-opts">${item.opts.map((o, oi) => `<button type="button" data-o="${oi}">${esc(o)}</button>`).join('')}</div>
+    <div class="feedback"></div>
+  </div>`).join('')
+$('quiz').addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-o]')
+  if (!btn) return
+  const box = btn.closest('.quiz-q')
+  if (box.dataset.done) return
+  box.dataset.done = '1'
+  const item = quiz[+box.dataset.q]
+  const chosen = +btn.dataset.o
+  box.querySelectorAll('button').forEach((b, i) => {
+    if (i === item.right) b.classList.add('right')
+    else if (i === chosen) b.classList.add('wrong')
+    b.disabled = i !== item.right && i !== chosen
+  })
+  const ok = chosen === item.right
+  if (ok) score++
+  answered++
+  box.querySelector('.feedback').innerHTML = `<span class="pill ${ok ? 'ok' : 'bad'}">${ok ? 'Õige' : 'Vale'}</span> ${esc(item.why)}`
+  if (answered === quiz.length) $('quizScore').textContent = `Tulemus: ${score} / ${quiz.length}${score === quiz.length ? ' – suurepärane!' : ' – vaata vajadusel labor ja 4. peatükk üle.'}`
+})
+</script>
+</body>
+</html>

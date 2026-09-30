@@ -1,16 +1,18 @@
 <script>
-import { PhShootingStar } from '@phosphor-icons/vue'
-import { mapState } from 'pinia'
-import { useLanguageStore } from '@/stores/languageStore.js'
+import { PhCurrencyEur, PhShootingStar } from '@phosphor-icons/vue'
+import FlagIcon from '@/components/common/FlagIcon.vue'
+import EditTrainingLink from '@/components/common/EditTrainingLink.vue'
 
 export default {
   name: 'TrainingCard',
-  components: { PhShootingStar },
+  components: { EditTrainingLink, FlagIcon, PhCurrencyEur, PhShootingStar },
   props: {
     training: Object,
   },
   computed: {
-    ...mapState(useLanguageStore, ['getFlagClass']),
+    fundingTypeNames() {
+      return (this.training.fundingTypes ?? []).map((f) => f.fundingTypeName).join(', ')
+    },
   },
 }
 </script>
@@ -19,25 +21,40 @@ export default {
   <div class="card mb-4" :class="{ 'bg-warning-subtle': training.isPromoted }">
     <h5 class="card-header fs-3 d-flex justify-content-between align-items-center">
       {{ training.title }}
-      <PhShootingStar v-if="training.isPromoted" :size="32" />
+      <div class="d-flex align-items-center gap-2">
+        <PhShootingStar v-if="training.isPromoted" :size="32" />
+        <EditTrainingLink
+          :training-id="training.trainingId"
+          :training-translation-id="training.trainingTranslationId"
+        />
+      </div>
     </h5>
     <div class="card-body d-flex justify-content-between fs-5">
       <div>
         <p class="card-text">{{ training.shortDescription }}</p>
         <span class="badge text-bg-primary">{{ training.categoryName }}</span>
-        <div class="mt-2 d-flex gap-2 fs-5">
+        <div v-if="fundingTypeNames" class="mt-2 d-flex align-items-center gap-1 fs-6 text-success">
           <span
-            v-for="fundingType in training.fundingTypes"
-            :key="fundingType.fundingTypeId"
-            class="badge text-bg-primary"
-            >{{ fundingType.fundingTypeName }}</span
+            class="d-inline-flex align-items-center justify-content-center rounded-circle bg-success text-white p-1"
           >
+            <PhCurrencyEur :size="14" weight="bold" />
+          </span>
+          <span>{{ fundingTypeNames }}</span>
         </div>
       </div>
       <div class="d-flex align-items-center flex-column gap-3 fs-5">
-        <span class="fi fs-3" :class="getFlagClass(training.trainingLanguageCode)"></span>
-        <span v-if="training.isOrderable" class="badge text-bg-success">Tellitav</span>
-        <RouterLink to="/training" class="btn btn-primary">Vaata lähemalt</RouterLink>
+        <div class="d-flex flex-column align-items-center">
+          <small class="text-body-secondary fs-6">{{ $t('trainingCard.language') }}</small>
+          <FlagIcon :flag-icon-code="training.trainingLanguageFlagIconCode" class="fs-3" />
+        </div>
+        <span v-if="training.isOrderable" class="badge text-bg-success">{{
+          $t('trainingCard.orderable')
+        }}</span>
+        <RouterLink
+          :to="{ name: 'trainingRoute', query: { trainingId: training.trainingId } }"
+          class="btn btn-primary"
+          >{{ $t('trainingCard.viewDetails') }}</RouterLink
+        >
       </div>
     </div>
   </div>

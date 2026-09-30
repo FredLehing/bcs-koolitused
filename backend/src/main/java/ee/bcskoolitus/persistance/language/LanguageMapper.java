@@ -11,6 +11,9 @@ public interface LanguageMapper {
     @Mapping(source = "id", target = "languageId")
     @Mapping(source = "code", target = "languageCode")
     @Mapping(source = "name", target = "languageName")
+    @Mapping(source = "isMainLanguage", target = "isMainLanguage")
+    @Mapping(source = "requiresTranslation", target = "requiresTranslation")
+    @Mapping(source = "flagIconCode", target = "flagIconCode")
     SystemLanguageDto toSystemLanguageDto(Language language);
 
     List<SystemLanguageDto> toSystemLanguageDtos(List<Language> languages);

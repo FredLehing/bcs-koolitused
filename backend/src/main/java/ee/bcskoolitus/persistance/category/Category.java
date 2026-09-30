@@ -2,6 +2,9 @@ package ee.bcskoolitus.persistance.category;
 
 import ee.bcskoolitus.persistance.user.User;
 import jakarta.persistence.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,6 +14,7 @@ import java.time.Instant;
 @Getter
 @Setter
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "category", schema = "bcs_koolitused")
 public class Category {
     @Id
@@ -19,10 +23,12 @@ public class Category {
     private Integer id;
 
     @NotNull
-    @Column(name = "created_at", nullable = false)
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
     @NotNull
+    @LastModifiedDate
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 

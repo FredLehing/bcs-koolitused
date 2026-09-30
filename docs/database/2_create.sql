@@ -123,10 +123,12 @@ CREATE TABLE funding_type_translation
 -- Table: language
 CREATE TABLE language
 (
-    id               serial      NOT NULL,
-    code             varchar(2)  NOT NULL,
-    name             varchar(50) NOT NULL,
-    is_main_language boolean     NOT NULL,
+    id                   serial      NOT NULL,
+    code                 varchar(2)  NOT NULL,
+    name                 varchar(50) NOT NULL,
+    is_main_language     boolean     NOT NULL,
+    requires_translation boolean     NOT NULL,
+    flag_icon_code       varchar(10) NOT NULL,
     CONSTRAINT language_pk PRIMARY KEY (id),
     CONSTRAINT language_code_uq UNIQUE (code)
 );
@@ -658,6 +660,7 @@ SELECT row_number() OVER (ORDER BY tt.id)                      AS id,
        tt.training_id,
        t.training_language_id,
        trl.code                                                AS training_language_code,
+       trl.flag_icon_code                                      AS training_language_flag_icon_code,
        tt.language_id                                          AS translation_language_id,
        tl.code                                                 AS translation_language_code,
        tt.title,

@@ -13,6 +13,11 @@
     "admin": "Admin",
     "addTraining": "Lisa uus koolitus",
     "login": "Logi sisse",
+    "logout": "Logi välja",
+    "logoutModal": {
+      "title": "Väljalogimine",
+      "message": "Kas soovid kindlasti välja logida?"
+    },
     "register": "Registreeri"
   },
   "error": {
@@ -34,6 +39,25 @@
     "errorMessage": "Täida kõik väljad",
     "incorrectCredentials": "Vale email või parool"
   },
+  "trainings": {
+    "searchPlaceholder": "Otsi koolitust",
+    "search": "Otsi",
+    "clearSearch": "Tühjenda otsing",
+    "searchResults": "Otsingu „{query}“ tulemused:",
+    "resultCount": "{n} koolitust | {n} koolitus | {n} koolitust",
+    "cancelSearch": "Tühista otsing",
+    "noSearchResults": "Otsingule „{query}“ ei leitud ühtegi koolitust.",
+    "noSearchResultsHint": "Proovi vähem või teisi sõnu. Sõnade käändeid ei arvestata, seega kasuta sõna algust (nt „kursus“, mitte „kursusele“).",
+    "showAllTrainings": "Näita kõiki koolitusi",
+    "noResults": "Valitud filtritele vastavaid koolitusi ei leitud.",
+    "searchHelp": "Otsitakse sõnade esinemist koolituse pealkirjast ja lühikirjeldusest. Parima tulemuse saad, kui sisestad mõned sõnad. Sõnade käändeid ei arvestata."
+  },
+  "trainingCard": {
+    "language": "Koolituse keel",
+    "orderable": "Tellitav",
+    "viewDetails": "Vaata lähemalt",
+    "edit": "Muuda koolitust"
+  },
   "footer": {
     "facebook": "Leia meid Facebookist",
     "privacy": "Privaatsus- ja kasutustingimused",
@@ -48,6 +72,9 @@
     "status": {
       "published": "Publitseeritud",
       "unpublished": "Mustand"
+    },
+    "translations": {
+      "legend": "Koolituse tõlked"
     },
     "data": {
       "legend": "Koolituse andmed",
@@ -78,7 +105,8 @@
       "save": "Salvesta",
       "addTranslation": "Lisa tõlge",
       "publish": "Publitseeri",
-      "unpublish": "Liiguta mustandisse"
+      "unpublish": "Liiguta mustandisse",
+      "view": "Vaata"
     },
     "flags": {
       "open": "Ava {language} tõlge",
@@ -108,8 +136,7 @@
       "selectLocation": "Vali toimumiskoht",
       "addTitle": "Lisa pealkiri",
       "addShortDescription": "Lisa lühikirjeldus",
-      "addDescription": "Lisa kirjeldus",
-      "languageNotInSystem": "Keelt \"{language}\" ei ole süsteemis"
+      "addDescription": "Lisa kirjeldus"
     },
     "messages": {
       "trainingAdded": "Koolitus \"{title}\" on lisatud mustandina",
@@ -118,6 +145,29 @@
       "published": "Koolitus on publitseeritud",
       "unpublished": "Koolitus on liigutatud mustandisse",
       "aiDone": "AI tõlge on vormis — kontrolli teksti ja salvesta"
+    }
+  },
+  "richTextEditor": {
+    "bold": "Paks",
+    "italic": "Kaldkiri",
+    "underline": "Allajoonitud",
+    "heading3": "Pealkiri",
+    "heading4": "Alapealkiri",
+    "bulletList": "Täpploend",
+    "orderedList": "Numberloend",
+    "link": "Lisa link",
+    "unlink": "Eemalda link",
+    "linkPrompt": "Lingi aadress"
+  },
+  "trainingView": {
+    "legend": "Koolituse info",
+    "mainLanguageFallback": "Valitud keeles tõlge puudub — kuvatakse põhikeele tõlge.",
+    "sidebar": {
+      "trainingData": "Koolituse andmed",
+      "lecturer": "Koolitaja",
+      "upcomingCourses": "Järgmised koolitused",
+      "calendar": "Kalender",
+      "placeholder": "Sisu lisandub peagi."
     }
   }
 }
