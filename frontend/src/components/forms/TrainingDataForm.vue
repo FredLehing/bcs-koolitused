@@ -38,7 +38,7 @@ export default {
 </script>
 
 <template>
-  <fieldset class="border rounded p-3 mb-4">
+  <fieldset class="border rounded bg-body p-3 mb-4">
     <legend class="float-none w-auto px-2 fs-5">{{ $t('trainingForm.data.legend') }}</legend>
     <div class="row g-3 text-start">
       <div class="col-md-4">

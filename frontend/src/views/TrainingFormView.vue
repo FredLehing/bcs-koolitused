@@ -616,7 +616,7 @@ export default {
           </span>
         </div>
 
-        <fieldset v-if="!isNewTraining" class="border rounded p-3 mb-4">
+        <fieldset v-if="!isNewTraining" class="border rounded bg-body p-3 mb-4">
           <legend class="float-none w-auto px-2 fs-5">
             {{ $t('trainingForm.translations.legend') }}
           </legend>

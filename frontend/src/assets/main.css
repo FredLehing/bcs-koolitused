@@ -1,7 +1,7 @@
-body {
-  background-image: radial-gradient(#95B1DD80 1.5px, transparent 1.5px);
-  background-size: 24px 24px;
-}
+/*body {*/
+/*  background-image: radial-gradient(#95B1DD80 1.5px, transparent 1.5px);*/
+/*  background-size: 24px 24px;*/
+/*}*/
 .navbar-glass {
   background: linear-gradient(rgba(255, 255, 255, 0.55), rgba(149, 177, 221, 0.25));
   backdrop-filter: blur(10px);
