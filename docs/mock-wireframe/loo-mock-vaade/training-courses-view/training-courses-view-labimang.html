@@ -1,0 +1,905 @@
+<meta charset="utf-8">
+<title>Koolituse kalendri läbimäng</title>
+<meta name="description" content="TrainingCoursesView.vue (koolituse kalender) ja CourseFormView.vue (toimumiskorra vorm): API päringud ja mockupi märkmed interaktiivse läbimänguna.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Sama visuaalne keel nagu admin-trainings-view-labimang.html: täppidega tahvel, Balsamiqi-stiilis wireframe, kollased märkmed */
+:root {
+  --board: #e9ecef;
+  --board-dots: #d3d8de;
+  --panel: #ffffff;
+  --ink: #23272e;
+  --ink-soft: #5b6470;
+  --line: #b9c0c9;
+  --sketch: #3b4048;
+  --field: #ffffff;
+  --field-off: #eef0f3;
+  --accent: #2f6fde;
+  --accent-soft: #dce7fb;
+  --note: #f2c94c;
+  --note-edge: #d9ad2b;
+  --note-ink: #2e2505;
+  --get: #1f7a5c;
+  --post: #2f6fde;
+  --put: #a56200;
+  --del: #b83a3a;
+  --ok: #1f7a5c;
+  --bad: #c0392b;
+  --shadow: 0 1px 2px rgba(20, 30, 45, .08), 0 4px 14px rgba(20, 30, 45, .06);
+  --font-ui: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-sketch: "Balsamiq Sans", "Comic Sans MS", "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --board: #15181d; --board-dots: #242931; --panel: #1d2127; --ink: #e6e9ee; --ink-soft: #9aa4b2;
+    --line: #3a414b; --sketch: #c9ced6; --field: #252a31; --field-off: #1a1e23; --accent: #7aa5f5; --accent-soft: #22324f;
+    --get: #5cc59e; --post: #7aa5f5; --put: #e0a24a; --del: #ef7d7d; --ok: #5cc59e; --bad: #ef7d7d;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --board: #15181d; --board-dots: #242931; --panel: #1d2127; --ink: #e6e9ee; --ink-soft: #9aa4b2;
+  --line: #3a414b; --sketch: #c9ced6; --field: #252a31; --field-off: #1a1e23; --accent: #7aa5f5; --accent-soft: #22324f;
+  --get: #5cc59e; --post: #7aa5f5; --put: #e0a24a; --del: #ef7d7d; --ok: #5cc59e; --bad: #ef7d7d;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.3);
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background-color: var(--board);
+  background-image: radial-gradient(var(--board-dots) 1px, transparent 1px);
+  background-size: 18px 18px;
+  color: var(--ink);
+  font: 15px/1.5 var(--font-ui);
+}
+.page { max-width: 1320px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 64px; display: grid; gap: 28px; }
+h1, h2, h3 { text-wrap: balance; margin: 0; line-height: 1.2; }
+h1 { font-size: 1.7rem; font-weight: 600; }
+h2 { font-size: 1.15rem; font-weight: 600; }
+h3 { font-size: .8rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft); }
+code, .mono { font-family: var(--font-mono); font-size: .88em; }
+button { font: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Päis */
+.intro { display: grid; gap: 10px; }
+.intro p { margin: 0; max-width: 78ch; color: var(--ink-soft); }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.toolbar .sep { width: 1px; align-self: stretch; background: var(--line); margin-inline: 4px; }
+.toolbar .lbl-soft { font-size: .82rem; color: var(--ink-soft); }
+.tbtn { border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+.tbtn:hover { border-color: var(--accent); }
+.tbtn[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 1px var(--accent); }
+
+/* Brauseri wireframe */
+.browser { background: var(--panel); border: 2px solid var(--sketch); border-radius: 10px; font-family: var(--font-sketch); box-shadow: var(--shadow); overflow: hidden; min-width: 0; }
+.chrome { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-bottom: 2px solid var(--sketch); background: var(--field-off); }
+.chrome .dots { display: flex; gap: 5px; }
+.chrome .dots span { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--sketch); }
+.urlbar { flex: 1; min-width: 0; border: 1.5px solid var(--sketch); border-radius: 14px; padding: 3px 12px; font-family: var(--font-mono); font-size: .8rem; background: var(--field); white-space: nowrap; overflow-x: auto; }
+.sitenav { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; padding: 8px 14px; border-bottom: 1.5px dashed var(--line); font-size: .85rem; }
+.sitenav .logo { width: 44px; height: 24px; border: 1.5px solid var(--sketch); position: relative; }
+.sitenav .logo::before, .sitenav .logo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top right, transparent calc(50% - .75px), var(--sketch) 50%, transparent calc(50% + .75px)); }
+.sitenav .logo::after { transform: scaleX(-1); }
+.sitenav .cur { text-decoration: underline; text-underline-offset: 3px; }
+.sitenav .admin { position: relative; }
+.sitenav .admin > button { background: none; border: 1.5px solid transparent; border-radius: 6px; font: inherit; color: var(--ink); padding: 0 6px; cursor: pointer; }
+.sitenav .admin > button:hover, .sitenav .admin > button[aria-expanded="true"] { border-color: var(--sketch); }
+.sitenav .menu { position: absolute; top: calc(100% + 4px); left: 0; z-index: 6; background: var(--panel); border: 1.5px solid var(--sketch); border-radius: 6px; box-shadow: 3px 3px 0 var(--sketch); display: grid; min-width: 180px; padding: 4px; }
+.sitenav .menu button { background: none; border: 0; text-align: left; font: inherit; color: var(--ink); padding: 4px 8px; border-radius: 4px; cursor: pointer; white-space: nowrap; }
+.sitenav .menu button:hover { background: var(--accent-soft); }
+.sitenav .menu .cur { background: var(--accent-soft); font-weight: 700; }
+.viewhead { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; justify-content: space-between; }
+.sitenav .out { margin-left: auto; border: 1.5px solid var(--sketch); border-radius: 10px; padding: 0 8px; font-size: .78rem; }
+
+.view { padding: 16px 18px 20px; display: grid; gap: 14px; min-width: 0; }
+.view h2 { font-family: var(--font-sketch); font-size: 1.35rem; font-weight: 700; }
+.searchrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.searchrow input { flex: 1 1 260px; min-width: 0; }
+input[type="text"], select { font-family: var(--font-sketch); font-size: .9rem; color: var(--ink); background: var(--field); border: 1.5px solid var(--sketch); border-radius: 5px; padding: 4px 8px; }
+select { width: 100%; }
+.sbtn { font-family: var(--font-sketch); font-size: .9rem; border: 1.5px solid var(--sketch); border-radius: 12px; background: var(--field); color: var(--ink); padding: 3px 14px; cursor: pointer; box-shadow: 1.5px 1.5px 0 var(--sketch); white-space: nowrap; }
+.sbtn:hover:not(:disabled) { background: var(--accent-soft); }
+.sbtn:active:not(:disabled) { transform: translate(1px, 1px); box-shadow: .5px .5px 0 var(--sketch); }
+.sbtn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.sbtn.danger { background: var(--del); border-color: var(--del); color: #fff; }
+.sbtn.small { font-size: .78rem; padding: 1px 10px; }
+.sbtn:disabled { opacity: .45; cursor: not-allowed; }
+.api-pin { font-family: var(--font-mono); font-size: .66rem; background: var(--note); color: var(--note-ink); border: 0; border-radius: 3px; padding: 0 5px; cursor: pointer; line-height: 1.6; white-space: nowrap; }
+.api-pin:hover { outline: 1.5px solid var(--note-edge); }
+.pins { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+
+.tip { position: relative; display: inline-flex; }
+.tip .qmark { width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--sketch); background: var(--field); color: var(--ink); font: 700 .8rem var(--font-sketch); cursor: help; padding: 0; }
+.tip [role="tooltip"] { position: absolute; right: 0; top: calc(100% + 8px); z-index: 5; width: min(300px, 80vw); background: var(--ink); color: var(--panel); font: .78rem/1.4 var(--font-ui); padding: 8px 10px; border-radius: 6px; opacity: 0; visibility: hidden; transition: opacity .12s; pointer-events: none; }
+.tip:hover [role="tooltip"], .tip:focus-within [role="tooltip"] { opacity: 1; visibility: visible; }
+.togglerow { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+.linkish { background: none; border: 0; color: var(--accent); text-decoration: underline; cursor: pointer; padding: 0; font-family: var(--font-sketch); font-size: .9rem; }
+.linkish.small { font-size: .8rem; }
+.badge { border: 1.5px solid var(--sketch); border-radius: 10px; padding: 0 8px; font-size: .75rem; white-space: nowrap; }
+.badge.draft { background: var(--field-off); }
+.badge.pub { background: var(--ok); color: #fff; border-color: var(--ok); }
+.badge.active { background: var(--accent-soft); border-color: var(--accent); }
+.badge.deleted { background: var(--del); color: #fff; border-color: var(--del); }
+tr.is-deleted td { color: var(--ink-soft); }
+tr.is-deleted td .flag, tr.is-deleted td .settings { opacity: .55; }
+
+fieldset { border: 1.5px solid var(--sketch); border-radius: 8px; margin: 0; padding: 10px 12px 12px; display: grid; gap: 12px; min-width: 0; }
+legend { padding: 0 6px; font-weight: 700; font-size: .9rem; }
+.fgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px 14px; }
+.fld { display: grid; gap: 3px; min-width: 0; }
+.lbl { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: .82rem; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.hint { font-size: .8rem; color: var(--ink-soft); }
+
+/* Tabel */
+.tablewrap { overflow-x: auto; border: 1.5px solid var(--sketch); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: .84rem; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px dashed var(--line); vertical-align: middle; }
+thead th { background: var(--field-off); border-bottom: 1.5px solid var(--sketch); font-weight: 700; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr:hover td { background: color-mix(in srgb, var(--accent-soft) 45%, transparent); }
+td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.sorth { background: none; border: 0; padding: 0; font: inherit; font-weight: 700; color: var(--ink); cursor: pointer; display: inline-flex; gap: 4px; align-items: center; }
+.sorth:hover { color: var(--accent); }
+.sorth .arrow { font-size: .75rem; color: var(--accent); min-width: .8em; }
+.th-pin { display: inline-flex; gap: 4px; align-items: center; }
+.title-cell { min-width: 170px; }
+.fallback { display: block; font-size: .7rem; color: var(--ink-soft); }
+.settings { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; min-width: 120px; }
+.settings li { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.settings li::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex: none; }
+.settings .none { color: var(--ink-soft); }
+.settings .none::before { display: none; }
+.tr-ok { color: var(--ok); font-weight: 700; font-size: 1.05rem; }
+.tr-bad { color: var(--bad); font-weight: 700; font-size: 1.05rem; cursor: help; }
+.icons { display: flex; gap: 4px; }
+.ibtn { width: 28px; height: 26px; display: inline-grid; place-items: center; border: 1.5px solid var(--sketch); border-radius: 6px; background: var(--field); color: var(--ink); cursor: pointer; padding: 0; }
+.ibtn:hover { background: var(--accent-soft); }
+.ibtn.del:hover { background: color-mix(in srgb, var(--del) 20%, transparent); }
+.ibtn svg { width: 16px; height: 16px; }
+.flag svg { width: 26px; height: 17px; border: 1.5px solid var(--sketch); display: block; }
+.empty-row td { text-align: center; padding: 20px; color: var(--ink-soft); }
+
+.foot { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; }
+.total { font-size: .85rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.pager { display: flex; flex-wrap: wrap; gap: 0; }
+.pager button { font-family: var(--font-sketch); font-size: .85rem; border: 1.5px solid var(--sketch); margin-left: -1.5px; background: var(--field); color: var(--accent); padding: 2px 10px; cursor: pointer; }
+.pager button:first-child { border-radius: 6px 0 0 6px; margin-left: 0; }
+.pager button:last-child { border-radius: 0 6px 6px 0; }
+.pager button[aria-current="page"] { background: var(--accent); color: #fff; border-color: var(--sketch); }
+.pager button:disabled { color: var(--ink-soft); cursor: not-allowed; opacity: .6; }
+
+/* Alumine rida */
+.below { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; box-shadow: var(--shadow); display: grid; gap: 10px; min-width: 0; }
+.kv { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 12px; font-size: .86rem; margin: 0; }
+.kv dt { color: var(--ink-soft); }
+.kv dd { margin: 0; font-family: var(--font-mono); font-size: .8rem; overflow-wrap: anywhere; }
+
+.note { background: var(--note); color: var(--note-ink); border-radius: 2px; box-shadow: 0 1px 0 var(--note-edge), 0 6px 16px rgba(80, 60, 0, .18); padding: 12px 14px 14px; display: grid; gap: 8px; min-width: 0; }
+.note.flash { animation: noteflash 1.4s ease-out; }
+@keyframes noteflash { 0%, 30% { box-shadow: 0 0 0 4px var(--accent), 0 6px 16px rgba(80,60,0,.18); } 100% { box-shadow: 0 1px 0 var(--note-edge), 0 6px 16px rgba(80,60,0,.18); } }
+.note-head { display: flex; align-items: center; gap: 8px; }
+.note-head strong { font-size: .82rem; font-weight: 600; letter-spacing: .03em; }
+.note-head .copy { margin-left: auto; font: 500 .75rem var(--font-ui); background: rgba(255,255,255,.55); color: var(--note-ink); border: 1px solid var(--note-edge); border-radius: 4px; padding: 1px 8px; cursor: pointer; }
+.note-head .copy:hover { background: #fff; }
+.note pre { margin: 0; font: .78rem/1.45 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+.note .draft-tag { font-size: .72rem; background: rgba(255,255,255,.55); border-radius: 3px; padding: 0 6px; }
+
+.log { display: grid; gap: 6px; }
+.log-step { font-size: .85rem; color: var(--ink-soft); }
+.log-group { font-size: .74rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft); margin-top: 6px; }
+.req { border: 1px solid var(--line); border-radius: 6px; background: var(--field); overflow: hidden; }
+.req.done { border-color: var(--ok); }
+.req > button { width: 100%; display: flex; gap: 8px; align-items: center; text-align: left; background: none; border: 0; color: var(--ink); padding: 6px 10px; cursor: pointer; }
+.req > button:hover { background: var(--field-off); }
+.req .main { display: grid; gap: 1px; flex: 1; min-width: 0; }
+.req .when { display: block; font-size: .74rem; color: var(--ink-soft); }
+.req .ran { font: 600 .68rem var(--font-ui); color: var(--ok); border: 1px solid var(--ok); border-radius: 10px; padding: 0 6px; flex: none; }
+.req.idle .method { opacity: .75; }
+.method { font: 600 .7rem var(--font-mono); padding: 1px 6px; border-radius: 3px; color: #fff; flex: none; }
+.m-GET { background: var(--get); } .m-POST { background: var(--post); } .m-PUT { background: var(--put); } .m-DELETE { background: var(--del); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .method { color: #111; } }
+:root[data-theme="dark"] .method { color: #111; }
+.req .path { font-family: var(--font-mono); font-size: .76rem; overflow-wrap: anywhere; }
+.req .body { border-top: 1px dashed var(--line); padding: 8px 10px; display: grid; gap: 6px; }
+.req .body pre { margin: 0; font: .74rem/1.4 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; max-height: 280px; overflow: auto; }
+.req .body .sub { font-size: .75rem; color: var(--ink-soft); }
+.req .body .linkish { font-size: .8rem; justify-self: start; }
+
+.notes-section { display: grid; gap: 14px; }
+.notes-section > p { margin: 0; color: var(--ink-soft); max-width: 72ch; }
+.notes-grid { columns: 3 340px; column-gap: 18px; }
+.notes-grid .note { break-inside: avoid; margin-bottom: 18px; }
+
+.overlay { position: fixed; inset: 0; background: rgba(15, 20, 28, .45); display: grid; place-items: center; padding: 16px; z-index: 20; }
+.modal { background: var(--panel); color: var(--ink); border: 2px solid var(--sketch); border-radius: 10px; width: min(440px, 100%); padding: 16px 18px; display: grid; gap: 12px; font-family: var(--font-sketch); box-shadow: 4px 4px 0 var(--sketch); }
+.modal h2 { font-family: var(--font-sketch); font-weight: 700; }
+.modal .row { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--panel); padding: 8px 16px; border-radius: 6px; font-size: .9rem; z-index: 30; max-width: calc(100% - 32px); }
+
+@media (max-width: 1100px) { .below { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .below .note { grid-column: 1 / -1; } }
+@media (max-width: 700px) { .below { grid-template-columns: minmax(0, 1fr); } .page { padding-inline: 16px; } }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+/* TrainingCoursesView ja CourseFormView lisad */
+.viewhead .sub { display: block; font-size: .9rem; color: var(--ink-soft); font-weight: 400; margin-top: 2px; }
+.headbtns { display: flex; flex-wrap: wrap; gap: 8px; }
+.tcard { border: 1.5px solid var(--sketch); border-radius: 8px; padding: 12px 14px; display: grid; gap: 10px; min-width: 0; }
+.tcard-head { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+.tcard-head h3 { font-family: var(--font-sketch); font-size: 1.15rem; text-transform: none; letter-spacing: 0; color: var(--ink); }
+.tcard-head .links { margin-left: auto; display: flex; gap: 12px; align-items: center; }
+.facts { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 6px 18px; margin: 0; font-size: .86rem; }
+.facts div { display: flex; gap: 8px; align-items: center; min-width: 0; }
+.facts dt { color: var(--ink-soft); white-space: nowrap; }
+.facts dd { margin: 0; min-width: 0; }
+.facts .settings { min-width: 0; display: flex; flex-wrap: wrap; gap: 2px 10px; }
+.lect-inline { display: inline-flex; gap: 6px; align-items: center; }
+.lcard { display: flex; gap: 10px; align-items: flex-start; border: 1.5px solid var(--sketch); border-radius: 8px; padding: 8px 10px; max-width: 440px; background: var(--field); }
+.lcard .txt { display: grid; gap: 1px; min-width: 0; font-size: .85rem; }
+.lcard .txt .t { color: var(--ink-soft); font-size: .8rem; }
+.lcard .txt p { margin: 2px 0 0; }
+.lcard-wrap { display: grid; gap: 4px; }
+.avatar { width: 48px; height: 48px; border-radius: 50%; border: 1.5px solid var(--sketch); object-fit: cover; flex: none; image-rendering: pixelated; }
+.avatar.ph { display: inline-grid; place-items: center; color: var(--ink-soft); border-style: dashed; }
+.avatar.ph svg { width: 38px; height: 38px; }
+.desc { border: 1.5px solid var(--sketch); border-radius: 8px; padding: 10px 14px; font-size: .88rem; }
+.desc p { margin: 0; max-width: 72ch; }
+.switch { display: inline-flex; gap: 8px; align-items: center; cursor: pointer; font-size: .9rem; }
+.switch input { appearance: none; width: 34px; height: 18px; border: 1.5px solid var(--sketch); border-radius: 10px; background: var(--field-off); position: relative; cursor: pointer; margin: 0; }
+.switch input::after { content: ""; position: absolute; top: 2px; left: 2px; width: 11px; height: 11px; border-radius: 50%; background: var(--sketch); transition: left .12s; }
+.switch input:checked { background: var(--accent); border-color: var(--accent); }
+.switch input:checked::after { left: 18px; background: #fff; }
+.badge.open { background: var(--ok); color: #fff; border-color: var(--ok); }
+.badge.full { background: var(--put); color: #fff; border-color: var(--put); }
+.badge.cancelled { color: var(--del); border-color: var(--del); }
+.badge.past { background: var(--field-off); color: var(--ink-soft); border-style: dashed; }
+tr.is-past td { color: var(--ink-soft); }
+tr.is-cancelled td.date { text-decoration: line-through; }
+td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+th.num { text-align: right; }
+td.center, th.center { text-align: center; }
+.stack { display: inline-flex; gap: 4px; flex-wrap: wrap; }
+.formgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 18px; }
+.formgrid .wide { grid-column: 1 / -1; }
+input[type="date"], input[type="number"], textarea { font-family: var(--font-sketch); font-size: .9rem; color: var(--ink); background: var(--field); border: 1.5px solid var(--sketch); border-radius: 5px; padding: 4px 8px; width: 100%; min-width: 0; }
+.fld input[type="text"] { width: 100%; }
+textarea { min-height: 70px; resize: vertical; }
+.lect { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.lect .name { border: 1.5px dashed var(--line); border-radius: 5px; padding: 3px 8px; min-width: 140px; }
+.alert { border: 1.5px solid var(--del); background: color-mix(in srgb, var(--del) 14%, transparent); color: var(--ink); border-radius: 6px; padding: 6px 10px; font-size: .88rem; }
+.req-star { color: var(--del); }
+.lectlist { display: grid; gap: 4px; max-height: 220px; overflow: auto; }
+.lectlist button { text-align: left; font-family: var(--font-sketch); border: 1.5px solid var(--sketch); border-radius: 6px; background: var(--field); color: var(--ink); padding: 4px 10px; cursor: pointer; }
+.lectlist button:hover { background: var(--accent-soft); }
+.modal input[type="text"] { width: 100%; }
+@media (max-width: 700px) { .formgrid { grid-template-columns: minmax(0, 1fr); } .tcard-head .links { margin-left: 0; } }
+</style>
+
+<div class="page">
+  <header class="intro">
+    <h1>Koolituse kalender — läbimäng</h1>
+    <p>TrainingCoursesView.vue (koolituse kalender) ja CourseFormView.vue (toimumiskorra vorm) koos. Ava kirjeldus, lülita möödunud toimumiskorrad sisse, sorteeri veerge (ainult frontendis), lisa uus toimumiskord, muuda või kustuta olemasolevat. Paremal all näed, milline backendi päring iga tegevuse peale tehti. Kollased kastid on mockupi märkmed samas vormingus nagu <code>training-courses-view-markmed.md</code> ja <code>course-form-view-markmed.md</code>.</p>
+    <p>Andmed on seed-andmete ettepanek (skeemide fail, jaotised 1–2), täna = <strong>30/09/2026</strong>. „Java algkursus“ näitab kõiki olukordi (avatud, täis, tühistatud, mustand, möödunud, kustutatud); „Docker ja konteinerid“ on mustand ilma toimumiskordadeta. „Git ja GitHub“ vaikimisi koolitajal (Jaan Kask) pole pilti → kohatäite ikoon. Uute teenuste DTO-d on <strong>ettepanek</strong>.</p>
+    <div class="toolbar">
+      <span class="lbl-soft">Koolitus:</span>
+      <button class="tbtn" type="button" data-training="1">Java algkursus (1)</button>
+      <button class="tbtn" type="button" data-training="10">Docker ja konteinerid (10)</button>
+      <button class="tbtn" type="button" data-training="11">Git ja GitHub (11)</button>
+      <span class="sep" aria-hidden="true"></span>
+      <span class="lbl-soft">Kasutajaliidese keel (navbar):</span>
+      <button class="tbtn" type="button" data-ui-lang="et">et</button>
+      <button class="tbtn" type="button" data-ui-lang="en">en</button>
+      <span class="sep" aria-hidden="true"></span>
+      <button class="tbtn" type="button" id="btn-reset">Alusta algusest</button>
+    </div>
+  </header>
+
+  <div class="browser" aria-label="Wireframe">
+    <div class="chrome">
+      <div class="dots" aria-hidden="true"><span></span><span></span><span></span></div>
+      <div class="urlbar" id="urlbar"></div>
+    </div>
+    <nav class="sitenav" aria-label="Navbar (wireframe)">
+      <span class="logo" aria-hidden="true"></span><span>Koolitused</span><span>Teenused</span><span>Ettevõttest</span><span>Kontakt</span>
+      <span class="admin"><button type="button" id="b-admin" aria-expanded="false" aria-controls="admin-menu">Admin ▾</button>
+        <span class="menu" id="admin-menu" hidden><button type="button" data-nav="/training-form">Lisa uus koolitus</button><button type="button" data-nav="/admin-trainings">Koolituste haldus</button></span></span>
+      <span class="out">Logi välja</span>
+    </nav>
+    <div class="view" id="view"></div>
+  </div>
+
+  <div class="below">
+    <div class="card">
+      <h3>Vaate olek</h3>
+      <dl class="kv" id="statekv"></dl>
+    </div>
+    <div class="card">
+      <h3>Päringud</h3>
+      <div class="log" id="log"></div>
+    </div>
+    <div class="note" id="note-view">
+      <div class="note-head"><strong id="view-note-title">Vaate märkmed</strong><button class="copy" type="button" data-copy="view">Kopeeri</button></div>
+      <pre id="view-note-text"></pre>
+    </div>
+  </div>
+
+  <section class="notes-section">
+    <h2>API märkmed (<span id="notes-count"></span>)</h2>
+    <p>Iga backendi kutse kohta üks kast. Vajuta wireframe'il kollasele sildile või päringute logis päringule, et hüpata vastava märkme juurde.</p>
+    <div class="notes-grid" id="notes"></div>
+  </section>
+</div>
+
+<div id="modal-root"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- Märkmed (genereeritud failidest markmed/training-courses-view-markmed.md ja course-form-view-markmed.md) ---------- */
+  var VIEW_NOTES = [{"title": "TrainingCoursesView.vue", "text": "Roll: Admin\nFailinimi: TrainingCoursesView.vue\nFrontend rada: /training-courses?trainingId={id}\n\nVaatega seotud lisainfo:\nAvaneb AdminTrainingsView rea ikoonist \"Kalender\" ja TrainingFormView kiirnupust \"Kalender\". Ülal koolituse kaart (TrainingSummaryCard.vue): nimi, staatus, kategooria, õppekeele lipp, toimumiskoht, vaikimisi koolitaja kaart (LecturerCard.vue: pilt, nimi, ametinimetus, lühikirjeldus — laeb ise GET /api/lecturer-summary/{lecturerId}), rahastus, sätted ning lingid \"Vaata\" ja \"Muuda\"; andmed kasutajaliidese keeles (puuduva tõlke korral põhikeeles), keele vahetusel laaditakse uuesti. Kirjelduse kaart on vaikimisi peidus (\"▾ Näita kirjeldust\" / \"▴ Peida kirjeldus\").\nTabelis on toimumiskorrad: tulevased eespool (lähim üleval), lüliti \"Näita ka möödunud\" lisab möödunud (hiliseim üleval) tuhmimalt ja märgisega \"Toimunud\" — see tuleneb kuupäevast, mitte staatusest. Kustutatud toimumiskordi ei kuvata. Märkmete ja veebilingi sisu ei näidata, ainult ✓/✗. Kuupäevad kujul 30/09/2026, puuduv koolitaja/ruum \"—\". Leheküljestust pole, all \"Kokku N toimumiskorda\". Veerud Algus, Hind, Staatus ja Osalejaid on sorteeritavad ainult frontendis (API kutset ei tehta): 1. klõps kasvav, 2. kahanev, 3. tagasi vaikimisi järjestusse; staatus järjekorras Mustand → Avatud → Täis → Tühistatud.\nNupp \"+ Lisa toimuv koolitus\" → /course-form?trainingId={id}; pliiats → /course-form?courseId={id}; prügikast (CourseDeleteButton.vue) küsib kinnitust, teeb DELETE ise ja vaade laadib tabeli uuesti (osalejate korral hoiatab ja soovitab tühistamist). Kiirnupp \"Koolituste haldus\" → /admin-trainings. Kustutatud või olematu koolitus → üldine veavaade."}, {"title": "CourseFormView.vue", "text": "Roll: Admin\nFailinimi: CourseFormView.vue\nFrontend rada: /course-form?trainingId={id} (uus), /course-form?courseId={id} (muutmine)\n\nVaatega seotud lisainfo:\ntrainingId-ga avatuna on pealkiri \"Uus toimumiskord\": staatus vaikimisi \"Mustand\", koolitaja = koolituse vaikimisi koolitaja (GET /api/admin-training/{trainingId}). courseId-ga avatuna \"Toimumiskorra muutmine\": väljad täidetakse GET /api/course/{courseId} vastusest ja selle trainingId järgi laaditakse koolituse nimi; lisaks on prügikasti ikoon (CourseDeleteButton.vue). Pealkirja all koolituse nimi, kiirnupp \"Kalender\" → /training-courses?trainingId={id}.\nKoolitaja valitakse \"Vali koolitaja\" modaliga (LecturerSelectModal.vue, GET /api/lecturers, ainult aktiivsed koolitajad); nupu all on valitud koolitaja kaart (LecturerCard.vue: pilt, nimi, ametinimetus, lühikirjeldus — GET /api/lecturer-summary/{lecturerId}), ruum rippmenüüst (GET /api/rooms, esimene valik \"Ruum puudub\"). Staatuse rippmenüüs Mustand / Avatud / Täis / Tühistatud. Kui algus ja lõpp on valitud ja admin pole päevade arvu ise muutnud, täidab vorm selle tööpäevade (E–R) arvuga (\"Arvutatud tööpäevadest, saad muuta\").\nEnne saatmist: algus, lõpp, päevi (≥ 1), akad. tunde (≥ 1), hind (≥ 0) ja staatus on kohustuslikud (\"Täida kõik kohustuslikud väljad\"), lõpp ei tohi olla enne algust (\"Lõppkuupäev ei saa olla varasem kui alguskuupäev\") — AlertDanger.vue. \"Salvesta\" → POST / PUT, seejärel kalendrisse eduteatega (\"Toimumiskord lisatud\" / \"Toimumiskord salvestatud\"). \"Tagasi\" → kalendrisse ilma salvestamata. Kustutatud või olematu toimumiskord/koolitus → üldine veavaade."}];
+  var NOTES = [{"id": "n-admin-training", "title": "GET /api/admin-training/{trainingId}", "draft": true, "text": "API: GET /api/admin-training/{trainingId}\n\nQuery parameetrid:\ncontentLang: String — nimede ja kirjelduse keel (\"et\"/\"en\")\n\nResponse (200):\nAdminTrainingDto.java\n{\n  \"trainingId\": 1,\n  \"trainingTranslationId\": 1,\n  \"title\": \"Java algkursus\",\n  \"description\": \"<p>Kursusel õpitakse Java süntaksit, objektorienteeritud programmeerimist ja põhilisi andmestruktuure.</p>\",\n  \"categoryName\": \"Programmeerimine\",\n  \"trainingLanguageCode\": \"et\",\n  \"trainingLanguageFlagIconCode\": \"fi-ee\",\n  \"locationName\": \"BCS Koolitus\",\n  \"defaultLecturerId\": 1,\n  \"defaultLecturerName\": \"Mari Tamm\",\n  \"status\": \"P\",\n  \"isOrderable\": true,\n  \"isPromoted\": true,\n  \"fundingTypes\": [\n    {\n      \"fundingTypeId\": 1,\n      \"fundingTypeName\": \"Töötukassa\"\n    },\n    ...\n  ]\n}\n\nAPI teenuse lisainfo:\nÜhe koolituse admini ülevaade (ka mustand). Andmed: view admin_training_summary (training_id + contentLang) + training (location, default_lecturer) + kuvatud tõlke description. Kui contentLang tõlget pole, on title, description, categoryName ja trainingTranslationId põhikeele omad. defaultLecturerId ja defaultLecturerName on null, kui vaikimisi koolitajat pole. Koolitaja pilti, ametinimetust ja lühikirjeldust siin ei tagastata — need tulevad koolitaja kaardile teenusest GET /api/lecturer-summary/{lecturerId} (defaultLecturerId järgi). fundingTypes võib olla tühi list. Kasutavad TrainingCoursesView (koolituse kaart) ja CourseFormView (pealkiri, vaikimisi koolitaja). Kustutatud koolitus (status \"D\") = olematu.\n\nVeateated:\nHTTP: 404\nerrorCode: PRIMARY_KEY_NOT_FOUND\nmessage: \"Ei leidnud primary keyd 'trainingId' väärtusega: 123\""}, {"id": "n-lecturer-summary", "title": "GET /api/lecturer-summary/{lecturerId}", "draft": true, "text": "API: GET /api/lecturer-summary/{lecturerId}\n\nQuery parameetrid:\ncontentLang: String — ametinimetuse ja lühikirjelduse keel (\"et\"/\"en\")\n\nResponse (200):\nLecturerSummaryDto.java\n{\n  \"lecturerId\": 1,\n  \"fullName\": \"Mari Tamm\",\n  \"title\": \"Tarkvaraarendaja ja Java koolitaja\",\n  \"shortDescription\": \"Üle 10 aasta kogemust tarkvaraarenduse koolitajana.\",\n  \"photo\": \"iVBORw0KGgoAAAANSUhEUgAAACAAAAAg...\",\n  \"photoContentType\": \"image/png\"\n}\n\nAPI teenuse lisainfo:\nKoolitaja kaardi (LecturerCard.vue) andmed: lecturer + lecturer_translation contentLang keeles (puudumisel põhikeeles) + lecturer_photo. title = ametinimetus. photo ja photoContentType on null, kui pilti pole (kaardil kohatäite ikoon); frontend kuvab pildi kujul data:{photoContentType};base64,{photo}. Kustutatud koolitaja (status \"D\") on nagu olematu — LecturerCard 404 korral kaarti ei kuvata (üldisele veavaatele ei suunata). Kasutavad TrainingView (/training, parem veerg \"Koolitaja\"), TrainingCoursesView (vaikimisi koolitaja) ja CourseFormView (valitud koolitaja). Teenus on defineeritud admin-lecturers-view skeemides.\n\nVeateated:\nHTTP: 404\nerrorCode: PRIMARY_KEY_NOT_FOUND\nmessage: \"Ei leidnud primary keyd 'lecturerId' väärtusega: 123\""}, {"id": "n-courses", "title": "GET /api/training/{trainingId}/courses", "draft": true, "text": "API: GET /api/training/{trainingId}/courses\n\nQuery parameetrid:\nincludePast: Boolean — true = ka möödunud toimumiskorrad (end_date < täna); valikuline, vaikimisi false\n\nResponse (200):\nCourseSummaryDto.java\n[\n  {\n    \"courseId\": 1,\n    \"startDate\": \"2026-10-05\",\n    \"endDate\": \"2026-10-09\",\n    \"numberOfDays\": 5,\n    \"numberOfAcademicHours\": 40,\n    \"price\": 490.00,\n    \"lecturerName\": \"Mari Tamm\",\n    \"roomName\": \"A101\",\n    \"status\": \"O\",\n    \"isPast\": false,\n    \"participantCount\": 1,\n    \"hasNotes\": true,\n    \"hasMeetingLink\": false\n  },\n  ...\n]\n\nAPI teenuse lisainfo:\nAndmed tulevad view'st course_summary. Kustutatud (status \"D\") toimumiskordi ei tagastata. status: \"U\" = mustand, \"O\" = avatud, \"F\" = täis, \"X\" = tühistatud. Järjestus: tulevased enne möödunuid, tulevased lähimast, möödunud hiliseimast (is_past, days_from_today, course_id). lecturerName ja roomName on null, kui koolitaja/ruum on valimata. notes ja meetingLink sisu ei tagastata, ainult hasNotes/hasMeetingLink. participantCount = course_participant ridade arv. Tühi list, kui toimumiskordi pole. Kustutatud koolitus (status \"D\") = olematu.\n\nVeateated:\nHTTP: 404\nerrorCode: PRIMARY_KEY_NOT_FOUND\nmessage: \"Ei leidnud primary keyd 'trainingId' väärtusega: 123\""}, {"id": "n-delete", "title": "DELETE /api/course/{courseId}", "draft": true, "text": "API: DELETE /api/course/{courseId}\n\nResponse (200): NONE\n\nAPI teenuse lisainfo:\nSoft delete: määrab course.status = \"D\" (CourseStatus.DELETED) ja uuendab updated_at. Osalejaid ei kustutata. Kustutatud toimumiskord kaob kalendrist; taastamist praegu pole. Kustutada saab ka osalejatega ja möödunud toimumiskorda (frontend hoiatab osalejate korral). Frontendis teeb kutse CourseDeleteButton.vue (kalendri tabel ja CourseFormView muutmise olek). Juba kustutatud toimumiskorra korral midagi ei muutu.\n\nVeateated:\nHTTP: 404\nerrorCode: PRIMARY_KEY_NOT_FOUND\nmessage: \"Ei leidnud primary keyd 'courseId' väärtusega: 123\""}, {"id": "n-course", "title": "GET /api/course/{courseId}", "draft": true, "text": "API: GET /api/course/{courseId}\n\nResponse (200):\nCourseDto.java\n{\n  \"courseId\": 4,\n  \"trainingId\": 1,\n  \"startDate\": \"2026-10-19\",\n  \"endDate\": \"2026-10-23\",\n  \"numberOfDays\": 5,\n  \"numberOfAcademicHours\": 40,\n  \"price\": 490.00,\n  \"lecturerId\": 2,\n  \"lecturerName\": \"Jaan Kask\",\n  \"roomId\": 2,\n  \"status\": \"X\",\n  \"notes\": \"Tühistatud koolitaja haiguse tõttu.\",\n  \"meetingLink\": null\n}\n\nAPI teenuse lisainfo:\nToimumiskorra andmed muutmise vormi jaoks. lecturerId/lecturerName, roomId, notes ja meetingLink võivad olla null. trainingId järgi laadib vorm koolituse nime (GET /api/admin-training/{trainingId}). Kustutatud toimumiskord (status \"D\") = olematu.\n\nVeateated:\nHTTP: 404\nerrorCode: PRIMARY_KEY_NOT_FOUND\nmessage: \"Ei leidnud primary keyd 'courseId' väärtusega: 123\""}, {"id": "n-post", "title": "POST /api/training/{trainingId}/course", "draft": true, "text": "API: POST /api/training/{trainingId}/course\n\nRequest body:\nCourseCreateRequestDto.java\n{\n  \"userId\": 1,\n  \"startDate\": \"2027-01-11\",\n  \"endDate\": \"2027-01-15\",\n  \"numberOfDays\": 5,\n  \"numberOfAcademicHours\": 40,\n  \"price\": 490.00,\n  \"lecturerId\": 1,\n  \"roomId\": 1,\n  \"status\": \"U\",\n  \"notes\": \"\",\n  \"meetingLink\": \"\"\n}\n\nResponse (200): NONE\n\nAPI teenuse lisainfo:\nLisab koolitusele toimumiskorra; created_by = userId (sisselogitud kasutaja). Kohustuslikud: userId, startDate, endDate, numberOfDays (≥ 1), numberOfAcademicHours (≥ 1), price (≥ 0), status (\"U\" / \"O\" / \"F\" / \"X\"; muu väärtus → 400). lecturerId ja roomId võivad olla null; tühi notes/meetingLink salvestatakse null-ina. meetingLink max 255 märki. numberOfDays saadab frontend (backend kuupäevadest ei arvuta). Toimumiskorra saab lisada ka mustandis koolitusele, mitte kustutatud koolitusele.\n\nVeateated:\nHTTP: 403\nerrorCode: COURSE_END_BEFORE_START\nmessage: \"Lõppkuupäev ei saa olla varasem kui alguskuupäev\"\n\nHTTP: 404\nerrorCode: PRIMARY_KEY_NOT_FOUND\nmessage: \"Ei leidnud primary keyd 'trainingId' väärtusega: 123\""}, {"id": "n-put", "title": "PUT /api/course/{courseId}", "draft": true, "text": "API: PUT /api/course/{courseId}\n\nRequest body:\nCourseUpdateRequestDto.java\n{\n  \"startDate\": \"2026-10-19\",\n  \"endDate\": \"2026-10-23\",\n  \"numberOfDays\": 5,\n  \"numberOfAcademicHours\": 40,\n  \"price\": 490.00,\n  \"lecturerId\": 2,\n  \"roomId\": 2,\n  \"status\": \"X\",\n  \"notes\": \"Tühistatud koolitaja haiguse tõttu.\",\n  \"meetingLink\": \"\"\n}\n\nResponse (200): NONE\n\nAPI teenuse lisainfo:\nMuudab toimumiskorra kõiki välju (ka staatust — eraldi tegevusteenuseid pole). Valideerimine sama mis POST puhul; status \"D\" ei ole lubatud (kustutamiseks DELETE). Uuendab updated_at. Kustutatud toimumiskord (status \"D\") = olematu.\n\nVeateated:\nHTTP: 403\nerrorCode: COURSE_END_BEFORE_START\nmessage: \"Lõppkuupäev ei saa olla varasem kui alguskuupäev\"\n\nHTTP: 404\nerrorCode: PRIMARY_KEY_NOT_FOUND\nmessage: \"Ei leidnud primary keyd 'courseId' väärtusega: 123\""}, {"id": "n-rooms", "title": "GET /api/rooms", "draft": true, "text": "API: GET /api/rooms\n\nResponse (200):\nRoomDto.java\n[\n  {\n    \"roomId\": 1,\n    \"roomName\": \"A101\",\n    \"roomStatus\": \"VAB\"\n  },\n  ...\n]\n\nAPI teenuse lisainfo:\nKõik ruumid nime järgi. CourseFormView kasutab neid ruumi rippmenüüs (esimene valik \"Ruum puudub\" = null). roomStatus tähendus (VAB / KIN) on lahtine küsimus — praegu kuvatakse kõik ruumid.\n\nVeateated: —"}, {"id": "n-lecturers", "title": "GET /api/lecturers", "draft": false, "text": "API: GET /api/lecturers\n\nQuery parameetrid:\nsearch: String — otsingusõna koolitaja nimest (valikuline, \"\" = kõik)\n\nResponse (200):\nLecturerDto.java\n[\n  {\n    \"lecturerId\": 1,\n    \"lecturerName\": \"Mari Tamm\"\n  },\n  ...\n]\n\nAPI teenuse lisainfo:\nOlemasolev teenus; muudatused: lecturerPhoto eemaldatakse DTO-st (pilt on nüüd eraldi tabelis lecturer_photo ja otsingus seda ei loeta) ja tagastatakse ainult aktiivsed koolitajad (lecturer.status = \"A\"). Tagastab koolitajad, kelle nimi sisaldab otsingusõna (tõstutundetu), nime järgi tähestikuliselt. CourseFormView kasutab seda \"Vali koolitaja\" modalis (LecturerSelectModal.vue) nagu TrainingFormView.\n\nVeateated: —"}];
+
+  /* ---------- Andmed (seed-andmete ettepanek) ---------- */
+  var TODAY = "2026-09-30";
+  var MAIN_CODE = "et";
+  var LECTURERS = [{ lecturerId: 2, lecturerName: "Jaan Kask" }, { lecturerId: 1, lecturerName: "Mari Tamm" }];
+  // tabel lecturer_photo: Mari Tammel on pilt, Jaan Kaskil mitte
+  // lecturer_translation (ametinimetus, lühikirjeldus) — admin-lecturers-view seed-andmed
+  var LECTURER_TR = {
+    1: { et: { title: "Tarkvaraarendaja ja Java koolitaja", shortDescription: "Üle 10 aasta kogemust tarkvaraarenduse koolitajana." },
+         en: { title: "Software developer and Java trainer", shortDescription: "Over 10 years of experience as a software development trainer." } },
+    2: { et: { title: "IT-projektijuht ja Scrum Master", shortDescription: "Koolitab meeskonnatöö ja agiilse projektijuhtimise teemadel." },
+         en: { title: "IT project manager and Scrum Master", shortDescription: "Trains teams on teamwork and agile project management." } }
+  };
+  var LECTURER_PHOTOS = { 1: { photo: "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAAAaElEQVR42mO48/w3TRHDqAWjFsCQfv49NERNCzBNJ94OBrJNJ9IOBkpMJ8aOUQsGvQU0T0X0yAf0yMmjpekAW0DDZEpMLiNoDQOFRhO0hoFapuOyg+4WUGI6VjvoawHlpmPaMWoBQQsAjEBZdEobAXMAAAAASUVORK5CYII=", contentType: "image/png" } };
+  var ROOMS = [{ roomId: 1, roomName: "A101", roomStatus: "VAB" }, { roomId: 2, roomName: "A102", roomStatus: "KIN" }];
+  var FUNDING = { 1: { et: "Töötukassa", en: "Job Centre" }, 2: { et: "EL rahastus", en: "EU Funded" } };
+  var TRAININGS = {
+    1: { trainingId: 1, status: "P", cat: { et: "Programmeerimine", en: "Programming" }, langCode: "et", flag: "fi-ee", locationName: "BCS Koolitus", lect: 1, ord: true, promo: true, fund: [1],
+      tr: { et: { id: 1, title: "Java algkursus", description: "<p>Kursusel õpitakse Java süntaksit, objektorienteeritud programmeerimist ja põhilisi andmestruktuure.</p>" },
+            en: { id: 2, title: "Java Basics", description: "<p>The course covers Java syntax, object-oriented programming, and basic data structures.</p>" } } },
+    10: { trainingId: 10, status: "U", cat: { et: "Programmeerimine", en: "Programming" }, langCode: "et", flag: "fi-ee", locationName: "Veebiõpe", lect: 1, ord: true, promo: false, fund: [2],
+      tr: { et: { id: 18, title: "Docker ja konteinerid", description: "<p>Kursusel õpitakse looma Dockerfile'e, haldama konteinereid ja kasutama Docker Compose'i.</p>" } } },
+    11: { trainingId: 11, status: "P", cat: { et: "Programmeerimine", en: "Programming" }, langCode: "et", flag: "fi-ee", locationName: "Veebiõpe", lect: 2, ord: true, promo: false, fund: [1],
+      tr: { et: { id: 19, title: "Git ja GitHub", description: "<p>Kursusel õpitakse Giti põhikäske, harude kasutamist ja koostööd GitHubis.</p>" },
+            en: { id: 20, title: "Git and GitHub", description: "<p>The course covers basic Git commands, working with branches and collaborating on GitHub.</p>" } } }
+  };
+  function freshCourses() {
+    return [
+      { id: 1, t: 1, s: "2026-10-05", e: "2026-10-09", d: 5, h: 40, p: 490, l: 1, r: 1, st: "O", notes: "Kaasa sülearvuti.", link: "", pc: 1 },
+      { id: 2, t: 2, s: "2026-11-02", e: "2026-11-04", d: 3, h: 24, p: 350, l: 2, r: null, st: "O", notes: "", link: "https://meet.vali-it.ee/pm-kursus", pc: 0 },
+      { id: 3, t: 1, s: "2026-09-07", e: "2026-09-11", d: 5, h: 40, p: 490, l: 1, r: 1, st: "O", notes: "Grupp oli täis, järgmine kord suurem ruum.", link: "", pc: 1 },
+      { id: 4, t: 1, s: "2026-10-19", e: "2026-10-23", d: 5, h: 40, p: 490, l: 2, r: 2, st: "X", notes: "Tühistatud koolitaja haiguse tõttu.", link: "", pc: 0 },
+      { id: 5, t: 1, s: "2026-11-16", e: "2026-11-20", d: 5, h: 40, p: 520, l: 1, r: null, st: "F", notes: "", link: "https://meet.vali-it.ee/java-nov", pc: 0 },
+      { id: 6, t: 1, s: "2026-12-07", e: "2026-12-11", d: 5, h: 40, p: 520, l: null, r: 1, st: "U", notes: "", link: "", pc: 0 },
+      { id: 7, t: 1, s: "2026-06-08", e: "2026-06-12", d: 5, h: 40, p: 450, l: 2, r: 2, st: "O", notes: "", link: "https://meet.vali-it.ee/java-jun", pc: 0 },
+      { id: 8, t: 1, s: "2026-11-30", e: "2026-12-04", d: 5, h: 40, p: 490, l: 1, r: 1, st: "D", notes: "", link: "", pc: 0 }
+    ];
+  }
+  var STATUS = { U: ["draft", "Mustand"], O: ["open", "Avatud"], F: ["full", "Täis"], X: ["cancelled", "Tühistatud"] };
+
+  var courses, ui, form, logSteps = [], logTitle = "", openReq = -1, nextId = 9;
+  function freshUi(trainingId) { return { lang: ui ? ui.lang : "et", route: "calendar", trainingId: trainingId || 1, includePast: false, descOpen: false, training: null, list: [], sortBy: null, sortDirection: "asc" }; }
+
+  function j(o) { return JSON.stringify(o, null, 2); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c]; }); }
+  function dmy(iso) { var d = iso.split("-"); return d[2] + "/" + d[1] + "/" + d[0]; }
+  function money(n) { return Number(n).toFixed(2).replace(".", ","); }
+  function lecturerName(id) { var l = LECTURERS.filter(function (x) { return x.lecturerId === id; })[0]; return l ? l.lecturerName : null; }
+  function roomName(id) { var r = ROOMS.filter(function (x) { return x.roomId === id; })[0]; return r ? r.roomName : null; }
+  function dayDiff(a, b) { return Math.round((Date.parse(b) - Date.parse(a)) / 86400000); }
+  function workdays(s, e) {
+    if (!s || !e || e < s) return "";
+    var n = 0, d = new Date(s + "T00:00:00Z"), end = new Date(e + "T00:00:00Z");
+    while (d <= end) { var w = d.getUTCDay(); if (w !== 0 && w !== 6) n++; d.setUTCDate(d.getUTCDate() + 1); }
+    return n;
+  }
+
+  /* ---------- Simuleeritud backend ---------- */
+  function adminTrainingDto(id) {
+    var t = TRAININGS[id], tr = t.tr[ui.lang] || t.tr[MAIN_CODE];
+    return {
+      trainingId: t.trainingId, trainingTranslationId: tr.id, title: tr.title, description: tr.description,
+      categoryName: t.cat[ui.lang] || t.cat[MAIN_CODE], trainingLanguageCode: t.langCode, trainingLanguageFlagIconCode: t.flag,
+      locationName: t.locationName, defaultLecturerId: t.lect, defaultLecturerName: lecturerName(t.lect), status: t.status,
+      isOrderable: t.ord, isPromoted: t.promo,
+      fundingTypes: t.fund.map(function (f) { return { fundingTypeId: f, fundingTypeName: FUNDING[f][ui.lang] }; }),
+      _fallback: !t.tr[ui.lang]
+    };
+  }
+  // GET /api/lecturer-summary/{lecturerId}: LecturerCard.vue andmed
+  function lecturerSummaryDto(id) {
+    var tr = LECTURER_TR[id][ui.lang] || LECTURER_TR[id][MAIN_CODE], ph = LECTURER_PHOTOS[id];
+    return { lecturerId: id, fullName: lecturerName(id), title: tr.title, shortDescription: tr.shortDescription, photo: ph ? ph.photo : null, photoContentType: ph ? ph.contentType : null };
+  }
+  function loadLecturerCard(id) {
+    if (!id) return null;
+    var dto = lecturerSummaryDto(id), logged = Object.assign({}, dto);
+    if (logged.photo) logged.photo = logged.photo.slice(0, 32) + "...";
+    call("GET", "/api/lecturer-summary/" + id + "?contentLang=" + ui.lang, null, logged);
+    return dto;
+  }
+  function summaryRow(c) {
+    var past = c.e < TODAY;
+    return { courseId: c.id, startDate: c.s, endDate: c.e, numberOfDays: c.d, numberOfAcademicHours: c.h, price: c.p,
+      lecturerName: lecturerName(c.l), roomName: roomName(c.r), status: c.st, isPast: past, participantCount: c.pc,
+      hasNotes: !!c.notes.trim(), hasMeetingLink: !!c.link.trim(),
+      _days: past ? dayDiff(c.s, TODAY) : dayDiff(TODAY, c.s) };
+  }
+  function coursesDto(trainingId, includePast) {
+    return courses.filter(function (c) { return c.t === trainingId && c.st !== "D"; }).map(summaryRow)
+      .filter(function (r) { return includePast || !r.isPast; })
+      .sort(function (a, b) { return (a.isPast - b.isPast) || (a._days - b._days) || (a.courseId - b.courseId); });
+  }
+  function courseDto(c) {
+    return { courseId: c.id, trainingId: c.t, startDate: c.s, endDate: c.e, numberOfDays: c.d, numberOfAcademicHours: c.h, price: c.p,
+      lecturerId: c.l, lecturerName: lecturerName(c.l), roomId: c.r, status: c.st, notes: c.notes || null, meetingLink: c.link || null };
+  }
+  function clean(o) {
+    if (Array.isArray(o)) return o.map(clean);
+    var r = {}; Object.keys(o).forEach(function (k) { if (k.charAt(0) !== "_") r[k] = o[k]; }); return r;
+  }
+
+  /* ---------- Päringute logi ---------- */
+  function call(method, path, req, res) { logSteps.push({ method: method, path: path, req: req, res: res }); }
+  function startStep(title) { logSteps = []; logTitle = title; openReq = -1; }
+
+  function loadTraining() {
+    ui.training = adminTrainingDto(ui.trainingId);
+    call("GET", "/api/admin-training/" + ui.trainingId + "?contentLang=" + ui.lang, null, clean(ui.training));
+    ui.card = loadLecturerCard(ui.training.defaultLecturerId);
+  }
+  function loadCourses() {
+    ui.list = coursesDto(ui.trainingId, ui.includePast);
+    call("GET", "/api/training/" + ui.trainingId + "/courses?includePast=" + ui.includePast, null, clean(ui.list));
+  }
+
+  /* ---------- Navigeerimine ---------- */
+  function openCalendar(trainingId, title) {
+    ui.route = "calendar"; ui.trainingId = trainingId; form = null;
+    if (title) startStep(title);
+    loadTraining(); loadCourses();
+  }
+  function openView(trainingId) {
+    courses = freshCourses(); nextId = 9; ui = freshUi(trainingId);
+    startStep("Vaate avamine: /training-courses?trainingId=" + ui.trainingId + " (AdminTrainingsView „Kalender“)");
+    openCalendar(ui.trainingId); renderAll();
+  }
+  function openNewForm() {
+    startStep("„+ Lisa toimuv koolitus“ → /course-form?trainingId=" + ui.trainingId);
+    ui.route = "form";
+    var t = adminTrainingDto(ui.trainingId);
+    call("GET", "/api/admin-training/" + ui.trainingId + "?contentLang=" + ui.lang, null, clean(t));
+    call("GET", "/api/rooms", null, ROOMS);
+    var newCard = loadLecturerCard(t.defaultLecturerId);
+    form = { mode: "new", card: newCard, courseId: null, trainingId: ui.trainingId, trainingTitle: t.title, daysEdited: false, alert: "",
+      f: { startDate: "", endDate: "", numberOfDays: "", numberOfAcademicHours: "", price: "", lecturerId: t.defaultLecturerId, roomId: null, status: "U", notes: "", meetingLink: "" } };
+    renderAll();
+  }
+  function openEditForm(courseId) {
+    startStep("Pliiats → /course-form?courseId=" + courseId);
+    ui.route = "form";
+    var c = courses.filter(function (x) { return x.id === courseId; })[0], dto = courseDto(c);
+    call("GET", "/api/course/" + courseId, null, dto);
+    var t = adminTrainingDto(c.t);
+    call("GET", "/api/admin-training/" + c.t + "?contentLang=" + ui.lang, null, clean(t));
+    call("GET", "/api/rooms", null, ROOMS);
+    var editCard = loadLecturerCard(c.l);
+    form = { mode: "update", card: editCard, courseId: courseId, trainingId: c.t, trainingTitle: t.title, daysEdited: true, alert: "", participantCount: c.pc,
+      f: { startDate: c.s, endDate: c.e, numberOfDays: c.d, numberOfAcademicHours: c.h, price: c.p, lecturerId: c.l, roomId: c.r, status: c.st, notes: c.notes, meetingLink: c.link } };
+    renderAll();
+  }
+
+  /* ---------- Sorteerimine (ainult frontendis, computed sortedCourses) ---------- */
+  var STATUS_ORDER = { U: 1, O: 2, F: 3, X: 4 };
+  var SORT_VALUE = { startDate: function (r) { return r.startDate; }, price: function (r) { return r.price; }, status: function (r) { return STATUS_ORDER[r.status]; }, participantCount: function (r) { return r.participantCount; } };
+  function sortedCourses() {
+    if (!ui.sortBy) return ui.list;
+    var get = SORT_VALUE[ui.sortBy], dir = ui.sortDirection === "asc" ? 1 : -1;
+    // stabiilne: võrdsete väärtuste korral jääb backendi (vaikimisi) järjekord
+    return ui.list.map(function (r, i) { return [r, i]; }).sort(function (a, b) {
+      var x = get(a[0]), y = get(b[0]);
+      return (x < y ? -1 : x > y ? 1 : 0) * dir || a[1] - b[1];
+    }).map(function (p) { return p[0]; });
+  }
+  function doSort(key) {
+    if (ui.sortBy !== key) { ui.sortBy = key; ui.sortDirection = "asc"; }
+    else if (ui.sortDirection === "asc") ui.sortDirection = "desc";
+    else { ui.sortBy = null; ui.sortDirection = "asc"; }
+    renderView(); renderKv();
+    toast(ui.sortBy ? "Sorteeritud frontendis: " + ui.sortBy + " " + ui.sortDirection + " (API kutset ei tehta)" : "Vaikimisi järjestus (tulevased eespool)");
+  }
+
+  /* ---------- Tegevused ---------- */
+  function toggleDesc() { ui.descOpen = !ui.descOpen; renderView(); renderKv(); var b = document.getElementById("b-desc"); if (b) b.focus(); }
+  function togglePast(v) {
+    ui.includePast = v;
+    startStep("Lüliti „Näita ka möödunud“ → includePast = " + v);
+    loadCourses(); renderAll();
+  }
+  function deleteCourse(courseId, fromForm) {
+    var c = courses.filter(function (x) { return x.id === courseId; })[0];
+    var text = "Kas soovid toimumiskorra " + dmy(c.s) + " – " + dmy(c.e) + " kustutada?";
+    if (c.pc > 0) text += " Toimumiskorral on " + c.pc + (c.pc === 1 ? " osaleja" : " osalejat") + ". Kaalu pigem tühistamist (staatus „Tühistatud“).";
+    confirmModal("Kustuta toimumiskord", text, "Kustuta", "danger", function () {
+      startStep("Prügikast → kinnitus → DELETE (CourseDeleteButton, soft delete) → event-course-deleted" + (fromForm ? " → kalendrisse" : " → tabel uuesti"));
+      c.st = "D";
+      call("DELETE", "/api/course/" + courseId, null, null);
+      if (fromForm) openCalendar(c.t); else loadCourses();
+      renderAll();
+      toast("Toimumiskord kustutatud");
+    });
+  }
+  function readForm() {
+    var f = form.f;
+    ["startDate", "endDate", "numberOfDays", "numberOfAcademicHours", "price", "notes", "meetingLink", "status"].forEach(function (k) {
+      var el = document.getElementById("c-" + k); if (el) f[k] = el.value;
+    });
+    var room = document.getElementById("c-roomId"); if (room) f.roomId = room.value ? +room.value : null;
+  }
+  function save() {
+    readForm();
+    var f = form.f;
+    var missing = !f.startDate || !f.endDate || !(+f.numberOfDays >= 1) || !(+f.numberOfAcademicHours >= 1) || f.price === "" || !(+f.price >= 0) || !f.status;
+    if (missing) { form.alert = "Täida kõik kohustuslikud väljad"; renderView(); return; }
+    if (f.endDate < f.startDate) { form.alert = "Lõppkuupäev ei saa olla varasem kui alguskuupäev"; renderView(); return; }
+    form.alert = "";
+    var body = { startDate: f.startDate, endDate: f.endDate, numberOfDays: +f.numberOfDays, numberOfAcademicHours: +f.numberOfAcademicHours, price: +f.price,
+      lecturerId: f.lecturerId, roomId: f.roomId, status: f.status, notes: f.notes, meetingLink: f.meetingLink };
+    var tId = form.trainingId, msg;
+    if (form.mode === "new") {
+      startStep("„Salvesta“ (uus) → POST → kalendrisse eduteatega");
+      var req = Object.assign({ userId: 1 }, body);
+      courses.push({ id: nextId++, t: tId, s: f.startDate, e: f.endDate, d: +f.numberOfDays, h: +f.numberOfAcademicHours, p: +f.price, l: f.lecturerId, r: f.roomId, st: f.status, notes: f.notes.trim(), link: f.meetingLink.trim(), pc: 0 });
+      call("POST", "/api/training/" + tId + "/course", req, null);
+      msg = "Toimumiskord lisatud";
+    } else {
+      startStep("„Salvesta“ (muutmine) → PUT → kalendrisse eduteatega");
+      var c = courses.filter(function (x) { return x.id === form.courseId; })[0];
+      c.s = f.startDate; c.e = f.endDate; c.d = +f.numberOfDays; c.h = +f.numberOfAcademicHours; c.p = +f.price; c.l = f.lecturerId; c.r = f.roomId; c.st = f.status; c.notes = f.notes.trim(); c.link = f.meetingLink.trim();
+      call("PUT", "/api/course/" + form.courseId, body, null);
+      msg = "Toimumiskord salvestatud";
+    }
+    var pastNeeded = f.endDate < TODAY && !ui.includePast;
+    if (pastNeeded) ui.includePast = true;
+    openCalendar(tId);
+    if (pastNeeded) logTitle += " (möödunud kuupäev → lüliti „Näita ka möödunud“ sisse)";
+    renderAll(); toast(msg);
+  }
+  function back() {
+    var tId = form.trainingId;
+    startStep("„Tagasi“ / „Kalender“ → /training-courses?trainingId=" + tId + " (ilma salvestamata)");
+    openCalendar(tId); renderAll();
+  }
+  function lecturerModal() {
+    readForm();
+    function list(search) {
+      var s = search.trim().toLowerCase();
+      var res = LECTURERS.filter(function (l) { return l.lecturerName.toLowerCase().indexOf(s) !== -1; });
+      call("GET", "/api/lecturers?search=" + encodeURIComponent(search), null, res);
+      renderLog();
+      return res;
+    }
+    startStep("„Vali koolitaja“ → LecturerSelectModal");
+    function draw(search) {
+      var res = list(search);
+      document.getElementById("lect-list").innerHTML = (res.length ? res.map(function (l) { return '<button type="button" data-lect="' + l.lecturerId + '">' + esc(l.lecturerName) + '</button>'; }).join("") : '<span class="hint">Koolitajaid ei leitud</span>') +
+        '<button type="button" data-lect="">— Koolitaja puudub —</button>';
+    }
+    modalRoot.innerHTML = '<div class="overlay" role="dialog" aria-modal="true" aria-labelledby="m-title"><div class="modal"><h2 id="m-title">Vali koolitaja</h2>' +
+      '<input type="text" id="lect-search" placeholder="Otsi nime järgi…" aria-label="Otsi koolitajat">' +
+      '<div class="lectlist" id="lect-list"></div><div class="row"><button class="sbtn" type="button" id="m-no">Katkesta</button></div></div></div>';
+    draw("");
+    var inp = document.getElementById("lect-search"), timer = null;
+    inp.oninput = function () { clearTimeout(timer); timer = setTimeout(function () { draw(inp.value); }, 250); };
+    inp.focus();
+    document.getElementById("m-no").onclick = closeModal;
+    document.getElementById("lect-list").onclick = function (e) {
+      var b = e.target.closest("[data-lect]"); if (!b) return;
+      form.f.lecturerId = b.dataset.lect ? +b.dataset.lect : null;
+      form.card = loadLecturerCard(form.f.lecturerId);
+      if (form.f.lecturerId) logTitle += " → valitud koolitaja kaart (LecturerCard)";
+      closeModal(); renderView(); renderKv(); renderLog();
+    };
+    modalRoot.querySelector(".overlay").onclick = function (e) { if (e.target === e.currentTarget) closeModal(); };
+  }
+  function switchLang(code) {
+    if (code === ui.lang) return;
+    ui.lang = code;
+    startStep("Keele vahetus navbaris → " + code + " (toimumiskorrad keelest ei sõltu)");
+    if (ui.route === "calendar") loadTraining();
+    else { var t = adminTrainingDto(form.trainingId); form.trainingTitle = t.title; readForm(); call("GET", "/api/admin-training/" + form.trainingId + "?contentLang=" + ui.lang, null, clean(t)); form.card = loadLecturerCard(form.f.lecturerId); }
+    renderAll();
+  }
+
+  /* ---------- Modal ja teade ---------- */
+  var modalRoot = document.getElementById("modal-root");
+  function closeModal() { modalRoot.innerHTML = ""; }
+  function confirmModal(title, text, okLabel, okClass, onOk) {
+    modalRoot.innerHTML = '<div class="overlay" role="dialog" aria-modal="true" aria-labelledby="m-title"><div class="modal"><h2 id="m-title">' + esc(title) + '</h2><p style="margin:0">' + esc(text) + '</p><div class="row"><button class="sbtn" type="button" id="m-no">Katkesta</button><button class="sbtn ' + okClass + '" type="button" id="m-yes">' + esc(okLabel) + '</button></div></div></div>';
+    document.getElementById("m-no").onclick = closeModal;
+    document.getElementById("m-yes").onclick = function () { closeModal(); onOk(); };
+    modalRoot.querySelector(".overlay").onclick = function (e) { if (e.target === e.currentTarget) closeModal(); };
+    document.getElementById("m-yes").focus();
+  }
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeModal(); });
+  var toastTimer = null;
+  function toast(msg) {
+    var old = document.querySelector(".toast"); if (old) old.remove();
+    var el = document.createElement("div"); el.className = "toast"; el.setAttribute("role", "status"); el.textContent = msg;
+    document.body.appendChild(el);
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { el.remove(); }, 2400);
+  }
+
+  /* ---------- Ikoonid ja lipud ---------- */
+  var ICON = {
+    pencil: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>',
+    trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>'
+  };
+  var FLAG_SVG = {
+    "fi-ee": '<svg viewBox="0 0 33 21" aria-hidden="true"><rect width="33" height="7" fill="#0072ce"/><rect y="7" width="33" height="7" fill="#000"/><rect y="14" width="33" height="7" fill="#fff"/></svg>'
+  };
+
+  /* ---------- Renderdamine ---------- */
+  function pin(noteId, label) { return '<button type="button" class="api-pin" data-note="' + noteId + '">' + esc(label) + '</button>'; }
+  function check(v, yes, no) { return v ? '<span class="tr-ok" title="' + yes + '" aria-label="' + yes + '">✓</span>' : '<span class="tr-bad" title="' + no + '" aria-label="' + no + '">✗</span>'; }
+  function badge(st) { var b = STATUS[st]; return '<span class="badge ' + b[0] + '">' + b[1] + '</span>'; }
+  // LecturerAvatar.vue: data:{contentType};base64,{photo} või kohatäide (PhUserCircle)
+  function avatar(photo, contentType) {
+    return photo ? '<img class="avatar" alt="" src="data:' + contentType + ';base64,' + photo + '">'
+      : '<span class="avatar ph" title="Pilt puudub" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3.2"/><path d="M6 18.5c1.4-2.3 3.5-3.4 6-3.4s4.6 1.1 6 3.4"/></svg></span>';
+  }
+  // LecturerCard.vue: pilt, nimi, ametinimetus, lühikirjeldus
+  function lecturerCard(c) {
+    if (!c) return "—";
+    return '<div class="lcard">' + avatar(c.photo, c.photoContentType) + '<div class="txt"><strong>' + esc(c.fullName) + '</strong><span class="t">' + esc(c.title) + '</span><p>' + esc(c.shortDescription) + '</p></div></div>';
+  }
+  function trainingBadge(st) { return st === "P" ? '<span class="badge pub">Publitseeritud</span>' : '<span class="badge draft">Mustand</span>'; }
+
+  function renderCalendar() {
+    var t = ui.training, tId = ui.trainingId;
+    var settings = t.fundingTypes.map(function (f) { return f.fundingTypeName; });
+    if (t.isOrderable) settings.push("Tellitav");
+    if (t.isPromoted) settings.push("Esile tõstetud");
+    var facts = [
+      ["Kategooria", esc(t.categoryName)],
+      ["Õppekeel", '<span class="flag" title="' + t.trainingLanguageCode + '">' + FLAG_SVG[t.trainingLanguageFlagIconCode] + '</span>'],
+      ["Toimumiskoht", esc(t.locationName)],
+      ["Vaikimisi koolitaja", '<span class="lcard-wrap">' + lecturerCard(ui.card) + (ui.card ? pin("n-lecturer-summary", "GET /api/lecturer-summary/{lecturerId}") : "") + '</span>'],
+      ["Rahastus / sätted", settings.length ? '<ul class="settings">' + settings.map(function (s) { return "<li>" + esc(s) + "</li>"; }).join("") + '</ul>' : "—"]
+    ];
+    var head = [["Algus", "", "", "startDate"], ["Lõpp"], ["Päevi", "num"], ["Akad. tunde", "num"], ["Hind (€)", "num", "", "price"], ["Koolitaja"], ["Ruum"], ["Staatus", "", "", "status"], ["Osalejaid", "num", "", "participantCount"], ["Märkmed", "center"], ["Veebilink", "center"], ["Tegevused", "", pin("n-delete", "DELETE")]];
+    var rows = ui.list.length ? sortedCourses().map(function (r) {
+      var cls = []; if (r.isPast) cls.push("is-past"); if (r.status === "X") cls.push("is-cancelled");
+      return '<tr' + (cls.length ? ' class="' + cls.join(" ") + '"' : "") + '>' +
+        '<td class="date">' + dmy(r.startDate) + '</td><td class="date">' + dmy(r.endDate) + '</td>' +
+        '<td class="num">' + r.numberOfDays + '</td><td class="num">' + r.numberOfAcademicHours + '</td><td class="num">' + money(r.price) + '</td>' +
+        '<td>' + (r.lecturerName ? esc(r.lecturerName) : "—") + '</td><td>' + (r.roomName ? esc(r.roomName) : "—") + '</td>' +
+        '<td><span class="stack">' + badge(r.status) + (r.isPast ? '<span class="badge past">Toimunud</span>' : "") + '</span></td>' +
+        '<td class="num">' + r.participantCount + '</td>' +
+        '<td class="center">' + check(r.hasNotes, "Märkmed olemas", "Märkmeid pole") + '</td>' +
+        '<td class="center">' + check(r.hasMeetingLink, "Veebilink olemas", "Veebilinki pole") + '</td>' +
+        '<td><div class="icons"><button type="button" class="ibtn" data-act="edit" data-id="' + r.courseId + '" title="Muuda" aria-label="Muuda">' + ICON.pencil + '</button>' +
+        '<button type="button" class="ibtn del" data-act="delete" data-id="' + r.courseId + '" title="Kustuta" aria-label="Kustuta">' + ICON.trash + '</button></div></td></tr>';
+    }).join("") : '<tr class="empty-row"><td colspan="' + head.length + '">' + (ui.includePast || !courses.some(function (c) { return c.t === tId && c.st !== "D"; }) ? "Toimumiskordi pole veel lisatud" : "Tulevasi toimumiskordi pole") + '</td></tr>';
+    var n = ui.list.length;
+    return '<div class="viewhead"><h2>Koolituse kalender</h2><div class="headbtns"><button type="button" class="sbtn" id="b-admin-trainings">Koolituste haldus</button><button type="button" class="sbtn primary" id="b-new">+ Lisa toimuv koolitus</button></div></div>' +
+      '<section class="tcard" aria-label="Koolituse andmed"><div class="tcard-head"><h3>' + esc(t.title) + '</h3>' + trainingBadge(t.status) + pin("n-admin-training", "GET /api/admin-training/{trainingId}") +
+      '<span class="links"><button type="button" class="linkish small" id="b-view">Vaata</button><button type="button" class="linkish small" id="b-edit-training">Muuda</button></span></div>' +
+      (t._fallback ? '<span class="fallback">' + ui.lang + ' tõlge puudub, kuvatud ' + MAIN_CODE + '</span>' : "") +
+      '<dl class="facts">' + facts.map(function (f) { return '<div><dt>' + f[0] + ':</dt><dd>' + f[1] + '</dd></div>'; }).join("") + '</dl></section>' +
+      '<div class="togglerow"><button type="button" class="linkish" id="b-desc" aria-expanded="' + ui.descOpen + '" aria-controls="desc-card">' + (ui.descOpen ? "▴ Peida kirjeldus" : "▾ Näita kirjeldust") + '</button></div>' +
+      (ui.descOpen ? '<div class="desc" id="desc-card">' + t.description + '</div>' : "") +
+      '<div class="togglerow"><label class="switch"><input type="checkbox" id="c-past"' + (ui.includePast ? " checked" : "") + '> Näita ka möödunud</label>' + pin("n-courses", "GET /api/training/{trainingId}/courses") + '</div>' +
+      '<div class="tablewrap"><table><thead><tr>' + head.map(function (h) {
+        var cls = h[1] ? ' class="' + h[1] + '"' : "";
+        if (h[3]) {
+          var active = ui.sortBy === h[3], arrow = active ? (ui.sortDirection === "asc" ? "▲" : "▼") : "";
+          var aria = active ? (ui.sortDirection === "asc" ? "ascending" : "descending") : "none";
+          return '<th' + cls + ' aria-sort="' + aria + '"><button type="button" class="sorth" data-sort="' + h[3] + '">' + h[0] + '<span class="arrow" aria-hidden="true">' + arrow + '</span></button></th>';
+        }
+        return '<th' + cls + '>' + (h[2] ? '<span class="th-pin">' + h[0] + ' ' + h[2] + '</span>' : h[0]) + '</th>'; }).join("") + '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      '<div class="foot"><span class="total">Kokku ' + n + (n === 1 ? " toimumiskord" : " toimumiskorda") + '</span></div>';
+  }
+
+  function renderForm() {
+    var f = form.f, isNew = form.mode === "new";
+    function num(id, label, value, extra) {
+      return '<div class="fld"><span class="lbl">' + label + ' <span class="req-star">*</span></span><input type="number" id="c-' + id + '" value="' + esc(value) + '" ' + (extra || "") + '>' + '</div>';
+    }
+    var roomOpts = '<option value="">Ruum puudub</option>' + ROOMS.map(function (r) { return '<option value="' + r.roomId + '"' + (r.roomId === f.roomId ? " selected" : "") + '>' + esc(r.roomName) + ' (' + r.roomStatus + ')</option>'; }).join("");
+    var statusOpts = ["U", "O", "F", "X"].map(function (s) { return '<option value="' + s + '"' + (s === f.status ? " selected" : "") + '>' + STATUS[s][1] + '</option>'; }).join("");
+    return '<div class="viewhead"><h2>' + (isNew ? "Uus toimumiskord" : "Toimumiskorra muutmine") + '<span class="sub">' + esc(form.trainingTitle) + '</span></h2><div class="headbtns"><button type="button" class="sbtn" id="b-calendar">Kalender</button></div></div>' +
+      (form.alert ? '<div class="alert" role="alert">' + esc(form.alert) + '</div>' : "") +
+      '<fieldset><legend>Toimumiskorra andmed</legend><div class="formgrid">' +
+      '<div class="fld"><span class="lbl">Algus <span class="req-star">*</span></span><input type="date" id="c-startDate" value="' + esc(f.startDate) + '"></div>' +
+      '<div class="fld"><span class="lbl">Lõpp <span class="req-star">*</span></span><input type="date" id="c-endDate" value="' + esc(f.endDate) + '"></div>' +
+      '<div class="fld"><span class="lbl">Päevi <span class="req-star">*</span></span><input type="number" min="1" id="c-numberOfDays" value="' + esc(f.numberOfDays) + '"><span class="hint">' + (form.daysEdited ? "Sisestatud käsitsi" : "Arvutatud tööpäevadest, saad muuta") + '</span></div>' +
+      num("numberOfAcademicHours", "Akadeemilisi tunde", f.numberOfAcademicHours, 'min="1"') +
+      num("price", "Hind (€)", f.price, 'min="0" step="0.01"') +
+      '<div class="fld"><span class="lbl">Staatus <span class="req-star">*</span></span><select id="c-status">' + statusOpts + '</select></div>' +
+      '<div class="fld"><span class="lbl">Koolitaja ' + pin("n-lecturers", "GET /api/lecturers") + '</span><div class="lect"><span class="name">' + (f.lecturerId ? esc(lecturerName(f.lecturerId)) : "—") + '</span><button type="button" class="sbtn small" id="b-lect">Vali koolitaja</button></div>' + (form.card ? '<div class="lcard-wrap">' + lecturerCard(form.card) + pin("n-lecturer-summary", "GET /api/lecturer-summary/{lecturerId}") + '</div>' : "") + '</div>' +
+      '<div class="fld"><span class="lbl">Ruum ' + pin("n-rooms", "GET /api/rooms") + '</span><select id="c-roomId">' + roomOpts + '</select></div>' +
+      '<div class="fld wide"><span class="lbl">Veebilink</span><input type="text" id="c-meetingLink" value="' + esc(f.meetingLink) + '" placeholder="https://…"></div>' +
+      '<div class="fld wide"><span class="lbl">Märkmed</span><textarea id="c-notes">' + esc(f.notes) + '</textarea></div>' +
+      '</div><div class="actions"><button type="button" class="sbtn primary" id="b-save">Salvesta</button>' +
+      (isNew ? pin("n-post", "POST /api/training/{trainingId}/course") : pin("n-put", "PUT /api/course/{courseId}")) +
+      '<button type="button" class="sbtn" id="b-back">Tagasi</button>' +
+      (isNew ? "" : '<button type="button" class="ibtn del" id="b-form-delete" title="Kustuta" aria-label="Kustuta">' + ICON.trash + '</button>' + pin("n-delete", "DELETE") + pin("n-course", "GET /api/course/{courseId}")) +
+      '</div></fieldset>';
+  }
+
+  function renderView() {
+    document.getElementById("view").innerHTML = ui.route === "calendar" ? renderCalendar() : renderForm();
+  }
+  function url() {
+    if (ui.route === "calendar") return "https://bcskoolitus.ee/training-courses?trainingId=" + ui.trainingId;
+    return "https://bcskoolitus.ee/course-form?" + (form.mode === "new" ? "trainingId=" + form.trainingId : "courseId=" + form.courseId);
+  }
+  function renderKv() {
+    var rows = [["route", ui.route === "calendar" ? "TrainingCoursesView" : "CourseFormView (" + form.mode + ")"], ["contentLang", ui.lang]];
+    if (ui.route === "calendar") {
+      rows.push(["trainingId", String(ui.trainingId)], ["includePast", String(ui.includePast)], ["sortBy / sortDirection", ui.sortBy ? ui.sortBy + " / " + ui.sortDirection : "null (vaikimisi)"], ["isDescriptionOpen", String(ui.descOpen)], ["courses.length", String(ui.list.length)]);
+    } else {
+      rows.push(["trainingId", String(form.trainingId)], ["courseId", String(form.courseId)], ["isNumberOfDaysEdited", String(form.daysEdited)],
+        ["course", JSON.stringify(form.f).replace(/"/g, "").replace(/,/g, ", ")]);
+    }
+    document.getElementById("statekv").innerHTML = rows.map(function (r) { return "<dt>" + esc(r[0]) + "</dt><dd>" + esc(r[1]) + "</dd>"; }).join("");
+  }
+
+  function noteFor(method, path) {
+    var p = path.split("?")[0];
+    if (method === "GET" && /^\/api\/admin-training\//.test(p)) return "n-admin-training";
+    if (method === "GET" && /\/courses$/.test(p)) return "n-courses";
+    if (method === "GET" && /^\/api\/course\//.test(p)) return "n-course";
+    if (method === "GET" && /^\/api\/lecturer-summary\//.test(p)) return "n-lecturer-summary";
+    if (method === "GET" && p === "/api/rooms") return "n-rooms";
+    if (method === "GET" && p === "/api/lecturers") return "n-lecturers";
+    if (method === "POST") return "n-post";
+    if (method === "PUT") return "n-put";
+    if (method === "DELETE") return "n-delete";
+    return null;
+  }
+  var REQUESTS = {
+    calendar: [
+      { m: "GET", p: "/api/admin-training/{trainingId}?contentLang={UI keel}", note: "n-admin-training", when: "koolituse kaart ja kirjeldus (ka keele vahetusel)" },
+      { m: "GET", p: "/api/training/{trainingId}/courses?includePast=…", note: "n-courses", when: "tabel (ka lüliti muutmisel)" },
+      { m: "GET", p: "/api/lecturer-summary/{lecturerId}?contentLang={UI keel}", note: "n-lecturer-summary", when: "LecturerCard: vaikimisi koolitaja" },
+      { m: "DELETE", p: "/api/course/{courseId}", note: "n-delete", when: "prügikast → kinnitus → tabel uuesti" }
+    ],
+    form: [
+      { m: "GET", p: "/api/course/{courseId}", note: "n-course", when: "ainult muutmisel; annab trainingId" },
+      { m: "GET", p: "/api/admin-training/{trainingId}?contentLang={UI keel}", note: "n-admin-training", when: "koolituse nimi, vaikimisi koolitaja" },
+      { m: "GET", p: "/api/rooms", note: "n-rooms", when: "ruumi rippmenüü" },
+      { m: "GET", p: "/api/lecturers?search=", note: "n-lecturers", when: "„Vali koolitaja“ modal (olemas)" },
+      { m: "GET", p: "/api/lecturer-summary/{lecturerId}?contentLang={UI keel}", note: "n-lecturer-summary", when: "LecturerCard: valitud koolitaja" },
+      { m: "POST", p: "/api/training/{trainingId}/course", note: "n-post", when: "„Salvesta“ (uus) → kalendrisse" },
+      { m: "PUT", p: "/api/course/{courseId}", note: "n-put", when: "„Salvesta“ (muutmine) → kalendrisse" },
+      { m: "DELETE", p: "/api/course/{courseId}", note: "n-delete", when: "prügikast (muutmine) → kalendrisse" }
+    ]
+  };
+  function renderLog() {
+    var used = {};
+    function row(d) {
+      var idx = -1;
+      logSteps.forEach(function (r, i) { if (idx === -1 && !used[i] && noteFor(r.method, r.path) === d.note) idx = i; });
+      if (idx !== -1) used[idx] = true;
+      return item(d.m, d.p, d.when, d.note, idx);
+    }
+    function item(m, p, when, note, idx) {
+      var ran = idx !== -1, open = ran && idx === openReq, body = "";
+      if (open) {
+        var r = logSteps[idx];
+        body = '<div class="body"><span class="sub">Tegelik päring: <code>' + esc(r.method + " " + r.path) + '</code></span>' +
+          (r.req ? '<span class="sub">Request body</span><pre>' + esc(j(r.req)) + '</pre>' : "") +
+          '<span class="sub">Response (200)' + (r.res === null ? ": NONE" : "") + '</span>' + (r.res !== null ? '<pre>' + esc(j(r.res)) + '</pre>' : "") +
+          '<button type="button" class="linkish" data-note="' + note + '">Ava API märge</button></div>';
+      }
+      var attr = ran ? 'data-req="' + idx + '" aria-expanded="' + open + '"' : 'data-note="' + note + '" title="Ava API märge"';
+      return '<div class="req ' + (ran ? "done" : "idle") + '"><button type="button" ' + attr + '><span class="method m-' + m + '">' + m + '</span><span class="main"><span class="path">' + esc(p) + '</span><span class="when">' + esc(when) + '</span></span>' + (ran ? '<span class="ran">käivitati</span>' : "") + '</button>' + body + '</div>';
+    }
+    var html = '<div class="log-group">Kalender (TrainingCoursesView)</div>' + REQUESTS.calendar.map(row).join("") +
+      '<div class="log-group">Vorm (CourseFormView)</div>' + REQUESTS.form.map(row).join("");
+    var extra = [];
+    logSteps.forEach(function (r, i) { if (!used[i]) extra.push(item(r.method, r.path, "sama sammu teine päring", noteFor(r.method, r.path), i)); });
+    if (extra.length) html += '<div class="log-group">Lisaks</div>' + extra.join("");
+    if (logTitle) html += '<div class="log-step">Viimane samm: ' + esc(logTitle) + '. Rohelised päringud käivitati; klõpsa, et näha vastust.</div>';
+    document.getElementById("log").innerHTML = html;
+  }
+
+  function renderAll() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-ui-lang]"), function (b) { b.setAttribute("aria-pressed", String(b.dataset.uiLang === ui.lang)); });
+    var tId = ui.route === "calendar" ? ui.trainingId : form.trainingId;
+    Array.prototype.forEach.call(document.querySelectorAll("[data-training]"), function (b) { b.setAttribute("aria-pressed", String(+b.dataset.training === tId)); });
+    document.getElementById("urlbar").textContent = url();
+    renderView(); renderKv(); renderLog();
+    var vn = VIEW_NOTES[ui.route === "calendar" ? 0 : 1];
+    document.getElementById("view-note-title").textContent = "Vaate märkmed — " + vn.title;
+    document.getElementById("view-note-text").textContent = vn.text;
+  }
+
+  /* ---------- Sündmused ---------- */
+  var viewEl = document.getElementById("view");
+  viewEl.addEventListener("change", function (e) {
+    var id = e.target.id;
+    if (id === "c-past") { togglePast(e.target.checked); return; }
+    if (!form) return;
+    if (id === "c-startDate" || id === "c-endDate") {
+      readForm();
+      if (!form.daysEdited) { var w = workdays(form.f.startDate, form.f.endDate); if (w !== "") form.f.numberOfDays = w; }
+      renderView(); renderKv();
+    } else if (id === "c-numberOfDays") {
+      readForm(); form.daysEdited = true; renderView(); renderKv();
+    } else { readForm(); renderKv(); }
+  });
+  viewEl.addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.note) { goNote(b.dataset.note); return; }
+    if (b.dataset.sort) { doSort(b.dataset.sort); return; }
+    if (b.dataset.act === "edit") { openEditForm(+b.dataset.id); return; }
+    if (b.dataset.act === "delete") { deleteCourse(+b.dataset.id, false); return; }
+    switch (b.id) {
+      case "b-new": openNewForm(); break;
+      case "b-desc": toggleDesc(); break;
+      case "b-admin-trainings": toast("router.push → /admin-trainings"); break;
+      case "b-view": toast("router.push → /training?trainingId=" + ui.training.trainingId + "&trainingTranslationId=" + ui.training.trainingTranslationId); break;
+      case "b-edit-training": toast("router.push → /training-form?trainingId=" + ui.training.trainingId + "&trainingTranslationId=" + ui.training.trainingTranslationId); break;
+      case "b-calendar": case "b-back": back(); break;
+      case "b-save": save(); break;
+      case "b-lect": lecturerModal(); break;
+      case "b-form-delete": readForm(); deleteCourse(form.courseId, true); break;
+    }
+  });
+  document.getElementById("log").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.note) { goNote(b.dataset.note); return; }
+    var i = +b.dataset.req; openReq = openReq === i ? -1 : i; renderLog();
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-ui-lang]"), function (b) { b.onclick = function () { switchLang(b.dataset.uiLang); }; });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-training]"), function (b) { b.onclick = function () { openView(+b.dataset.training); }; });
+  document.getElementById("btn-reset").onclick = function () { ui = null; openView(1); };
+  var adminBtn = document.getElementById("b-admin"), adminMenu = document.getElementById("admin-menu");
+  function setAdminMenu(open) { adminMenu.hidden = !open; adminBtn.setAttribute("aria-expanded", String(open)); }
+  adminBtn.onclick = function (e) { e.stopPropagation(); setAdminMenu(adminMenu.hidden); };
+  adminMenu.onclick = function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    setAdminMenu(false); toast("router.push → " + b.dataset.nav);
+  };
+  document.addEventListener("click", function (e) { if (!e.target.closest(".admin")) setAdminMenu(false); });
+
+  function goNote(id) {
+    var n = document.getElementById(id); if (!n) return;
+    n.scrollIntoView({ behavior: "smooth", block: "center" });
+    n.classList.remove("flash"); void n.offsetWidth; n.classList.add("flash");
+  }
+
+  document.getElementById("notes-count").textContent = NOTES.length;
+  document.getElementById("notes").innerHTML = NOTES.map(function (n) {
+    return '<article class="note" id="' + n.id + '"><div class="note-head"><strong>' + esc(n.title) + '</strong>' + (n.draft ? '<span class="draft-tag">ettepanek</span>' : "") + '<button class="copy" type="button" data-copy="' + n.id + '">Kopeeri</button></div><pre>' + esc(n.text) + '</pre></article>';
+  }).join("");
+
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-copy]"); if (!b) return;
+    var key = b.dataset.copy;
+    var text = key === "view" ? document.getElementById("view-note-text").textContent : NOTES.filter(function (n) { return n.id === key; })[0].text;
+    var done = function () { b.textContent = "Kopeeritud"; setTimeout(function () { b.textContent = "Kopeeri"; }, 1400); };
+    try { navigator.clipboard.writeText(text).then(done, function () { selectPre(b); }); } catch (err) { selectPre(b); }
+  });
+  function selectPre(b) {
+    var pre = b.closest(".note").querySelector("pre");
+    var r = document.createRange(); r.selectNodeContents(pre);
+    var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+    b.textContent = "Vajuta Ctrl+C";
+  }
+
+  openView(1);
+})();
+</script>
