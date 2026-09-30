@@ -1,7 +1,7 @@
 <script>
 import { mapState } from 'pinia'
 import { Tooltip } from 'bootstrap'
-import { PhCheck, PhEye, PhPlus, PhQuestion, PhX } from '@phosphor-icons/vue'
+import { PhCalendarBlank, PhCheck, PhEye, PhPlus, PhQuestion, PhX } from '@phosphor-icons/vue'
 import { useLanguageStore } from '@/stores/languageStore.js'
 import TrainingService from '@/api-services/TrainingService.js'
 import LanguageService from '@/api-services/LanguageService.js'
@@ -42,6 +42,7 @@ function padTwoDigits(number) {
 export default {
   name: 'AdminTrainingsView',
   components: {
+    PhCalendarBlank,
     PhCheck,
     PhEye,
     PhPlus,
@@ -532,6 +533,17 @@ export default {
                   :training-id="adminTrainingSummary.trainingId"
                   :training-translation-id="adminTrainingSummary.trainingTranslationId"
                 />
+                <RouterLink
+                  :to="{
+                    name: 'adminTrainingCoursesRoute',
+                    query: { trainingId: adminTrainingSummary.trainingId },
+                  }"
+                  :title="$t('adminTrainings.calendar')"
+                  :aria-label="$t('adminTrainings.calendar')"
+                  class="btn btn-sm btn-outline-secondary d-inline-flex"
+                >
+                  <PhCalendarBlank :size="20" />
+                </RouterLink>
                 <TrainingDeleteButton
                   :training-id="adminTrainingSummary.trainingId"
                   :title="adminTrainingSummary.title"

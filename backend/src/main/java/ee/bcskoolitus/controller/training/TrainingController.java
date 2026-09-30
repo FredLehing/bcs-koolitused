@@ -1,5 +1,6 @@
 package ee.bcskoolitus.controller.training;
 
+import ee.bcskoolitus.controller.training.dto.AdminTrainingDto;
 import ee.bcskoolitus.controller.training.dto.AdminTrainingFilterDto;
 import ee.bcskoolitus.controller.training.dto.AdminTrainingSummaryDto;
 import ee.bcskoolitus.controller.training.dto.TrainingCreateRequestDto;
@@ -120,6 +121,21 @@ public class TrainingController {
             @PathVariable Integer trainingId) {
 
         return trainingService.getTrainingTranslations(trainingId);
+    }
+
+    @GetMapping("/admin-training/{trainingId}")
+    @Operation(summary = "Koolituse admini ülevaade (kalender, toimumiskorra vorm)",
+            description = "Ka mustand. title, description, categoryName ja trainingTranslationId contentLang keeles, puudumisel põhikeeles. lecturers = training_lecturer sort_order järjekorras. Pilte ei tagastata.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Olematu või kustutatud trainingId -> 'errorCode:' PRIMARY_KEY_NOT_FOUND",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            )
+    })
+    public AdminTrainingDto getAdminTraining(@PathVariable Integer trainingId, @RequestParam String contentLang) {
+        return trainingService.getAdminTraining(trainingId, contentLang);
     }
 
     @PostMapping("/training")

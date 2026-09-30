@@ -6,21 +6,22 @@ export default {
   components: { FlagIcon },
   props: {
     translationLanguages: Array,
-    trainingTranslations: Array,
+    // Olemasolevad tõlked (vähemalt languageCode väli) — nt koolituse või koolitaja tõlked
+    existingTranslations: Array,
     currentLanguageCode: String,
   },
   emits: ['event-translation-flag-clicked'],
   methods: {
     translationExists(languageCode) {
-      return this.trainingTranslations.some(
-        (trainingTranslation) => trainingTranslation.languageCode === languageCode,
+      return this.existingTranslations.some(
+        (existingTranslation) => existingTranslation.languageCode === languageCode,
       )
     },
 
     flagTitle(languageCode) {
       return this.translationExists(languageCode)
-        ? this.$t('trainingForm.flags.open', { language: languageCode })
-        : this.$t('trainingForm.flags.add', { language: languageCode })
+        ? this.$t('translationFlags.open', { language: languageCode })
+        : this.$t('translationFlags.add', { language: languageCode })
     },
   },
 }

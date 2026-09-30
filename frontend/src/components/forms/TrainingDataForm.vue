@@ -3,10 +3,17 @@ import CategoriesDropdown from '@/components/forms/CategoriesDropdown.vue'
 import LanguagesDropdown from '@/components/forms/LanguagesDropdown.vue'
 import LocationsDropdown from '@/components/forms/LocationsDropdown.vue'
 import FundingTypesCheckbox from '@/components/forms/FundingTypesCheckbox.vue'
+import LecturersPicker from '@/components/forms/LecturersPicker.vue'
 
 export default {
   name: 'TrainingDataForm',
-  components: { FundingTypesCheckbox, LocationsDropdown, LanguagesDropdown, CategoriesDropdown },
+  components: {
+    FundingTypesCheckbox,
+    LocationsDropdown,
+    LanguagesDropdown,
+    CategoriesDropdown,
+    LecturersPicker,
+  },
   props: {
     training: Object,
     categories: Array,
@@ -22,7 +29,7 @@ export default {
     'event-new-category-selected',
     'event-new-training-language-selected',
     'event-new-location-selected',
-    'event-select-lecturer-clicked',
+    'event-lecturers-changed',
     'event-funding-type-checkbox-updated',
     'event-is-orderable-changed',
     'event-is-promoted-changed',
@@ -106,23 +113,12 @@ export default {
         </div>
       </div>
       <div class="col-md-6">
-        <label class="form-label fw-bold">{{ $t('trainingForm.data.defaultLecturer') }}</label>
-        <div class="input-group">
-          <input
-            :value="training.defaultLecturerName ?? $t('trainingForm.data.noLecturer')"
-            class="form-control"
-            type="text"
-            readonly
-          />
-          <button
-            @click="$emit('event-select-lecturer-clicked')"
-            :disabled="isDisabled"
-            class="btn btn-outline-secondary"
-            type="button"
-          >
-            {{ $t('trainingForm.data.selectLecturer') }}
-          </button>
-        </div>
+        <label class="form-label fw-bold">{{ $t('trainingForm.data.lecturers') }}</label>
+        <LecturersPicker
+          :lecturers="training.lecturers"
+          :is-disabled="isDisabled"
+          @event-lecturers-changed="$emit('event-lecturers-changed', $event)"
+        />
       </div>
     </div>
   </fieldset>

@@ -5,6 +5,7 @@ import ee.bcskoolitus.infrastructure.exception.ForbiddenException;
 import ee.bcskoolitus.infrastructure.exception.PrimaryKeyNotFoundException;
 import ee.bcskoolitus.infrastructure.util.HtmlSanitizer;
 import ee.bcskoolitus.controller.common.dto.FundingTypeDto;
+import ee.bcskoolitus.controller.training.dto.AdminTrainingDto;
 import ee.bcskoolitus.controller.training.dto.AdminTrainingFilterDto;
 import ee.bcskoolitus.controller.training.dto.AdminTrainingSummaryDto;
 import ee.bcskoolitus.controller.training.dto.AdminTrainingSummaryItemDto;
@@ -22,7 +23,6 @@ import ee.bcskoolitus.persistance.fundingtype.translation.FundingTypeTranslation
 import ee.bcskoolitus.persistance.fundingtype.translation.FundingTypeTranslationMapper;
 import ee.bcskoolitus.persistance.fundingtype.translation.FundingTypeTranslationRepository;
 import ee.bcskoolitus.persistance.language.Language;
-import ee.bcskoolitus.persistance.lecturer.Lecturer;
 import ee.bcskoolitus.persistance.training.Training;
 import ee.bcskoolitus.persistance.training.TrainingMapper;
 import ee.bcskoolitus.persistance.training.TrainingRepository;
@@ -221,6 +221,22 @@ public class TrainingService {
         return trainingDto;
     }
 
+    // Admini ülevaade (ka mustand): tekstid contentLang keeles, puudumisel põhikeeles (admin_training_summary)
+    @Transactional(readOnly = true)
+    public AdminTrainingDto getAdminTraining(Integer trainingId, String contentLang) {
+        Training training = getValidActiveTrainingBy(trainingId);
+        AdminTrainingSummary adminTrainingSummary = adminTrainingSummaryRepository.findByTraining_IdAndContentLanguageCode(trainingId, contentLang)
+                .or(() -> adminTrainingSummaryRepository.findByTraining_IdAndContentLanguageCode(trainingId, languageService.getMainLanguage().getCode()))
+                .orElseThrow(() -> new PrimaryKeyNotFoundException("trainingId", trainingId));
+        AdminTrainingDto adminTrainingDto = adminTrainingSummaryMapper.toAdminTrainingDto(adminTrainingSummary);
+        adminTrainingDto.setDescription(trainingTranslationService.getValidTrainingTranslationBy(adminTrainingSummary.getTrainingTranslationId()).getDescription());
+        adminTrainingDto.setLocationName(training.getLocation().getName());
+        adminTrainingDto.setLecturers(trainingLecturerMapper.toLecturerDtos(trainingLecturerRepository.findTrainingLecturersBy(trainingId)));
+        List<FundingTypeTranslation> fundingTypeTranslations = fundingTypeTranslationRepository.findTrainingFundingTypeTranslationsBy(trainingId, contentLang);
+        adminTrainingDto.setFundingTypes(fundingTypeTranslationMapper.toFundingTypeDtos(fundingTypeTranslations));
+        return adminTrainingDto;
+    }
+
     @Transactional(readOnly = true)
     public List<TrainingTranslationItemDto> getTrainingTranslations(Integer trainingId) {
         getValidActiveTrainingBy(trainingId);
@@ -266,24 +282,17 @@ public class TrainingService {
     }
 
     // Järjekord listis = sort_order (1 = esimene). Uus koolitaja peab olema aktiivne; juba seotud
-    // (linkedLecturerIds) võib olla ka kustutatud, et koolituse muid välju saaks edasi salvestada.
+    // (linkedLecturerIds) võib olla ka kustutatud (LecturerService.getValidAssignableLecturerBy).
     // Korduvad ID-d lükkab tagasi DTO valideerimine (@UniqueElements).
     private void addTrainingLecturers(Training training, List<Integer> lecturerIds, List<Integer> linkedLecturerIds) {
         int sortOrder = 1;
         for (Integer lecturerId : lecturerIds) {
             TrainingLecturer trainingLecturer = new TrainingLecturer();
             trainingLecturer.setTraining(training);
-            trainingLecturer.setLecturer(getValidTrainingLecturerBy(lecturerId, linkedLecturerIds));
+            trainingLecturer.setLecturer(lecturerService.getValidAssignableLecturerBy(lecturerId, linkedLecturerIds));
             trainingLecturer.setSortOrder(sortOrder++);
             trainingLecturerRepository.save(trainingLecturer);
         }
-    }
-
-    private Lecturer getValidTrainingLecturerBy(Integer lecturerId, List<Integer> linkedLecturerIds) {
-        if (linkedLecturerIds.contains(lecturerId)) {
-            return lecturerService.getValidLecturerBy(lecturerId, "lecturerId");
-        }
-        return lecturerService.getValidActiveLecturerBy(lecturerId, "lecturerId");
     }
 
     private TrainingTranslation createMainLanguageTrainingTranslation(Training training, TrainingCreateRequestDto trainingCreateRequestDto) {

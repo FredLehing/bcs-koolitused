@@ -16,6 +16,9 @@ public interface TrainingLecturerRepository extends JpaRepository<TrainingLectur
             order by tl.sortOrder""")
     List<TrainingLecturer> findTrainingLecturersBy(Integer trainingId);
 
+    @Query("select tl.training.id from TrainingLecturer tl where tl.lecturer.id = :lecturerId")
+    List<Integer> findTrainingIdsBy(Integer lecturerId);
+
     // Kustutab kohe andmebaasist (mitte flush'i ajal) — samad paarid saab samas transaktsioonis uuesti lisada
     // ilma training_lecturer_uq veata
     @Modifying(flushAutomatically = true)

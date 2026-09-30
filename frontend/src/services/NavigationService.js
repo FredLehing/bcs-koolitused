@@ -32,6 +32,38 @@ export default {
     router.push({ name: 'trainingFormRoute' })
   },
 
+  navigateToAdminLecturersView() {
+    router.push({ name: 'adminLecturersRoute' })
+  },
+
+  // query: {} (uus koolitaja) või { lecturerId, lecturerTranslationId }
+  navigateToLecturerFormView(query) {
+    router.push({ name: 'lecturerFormRoute', query: query })
+  },
+
+  // Vahetab LecturerFormView oleku (query parameetrid) ilma brauseri ajalukku uut kirjet lisamata
+  replaceLecturerFormView(query) {
+    router.replace({ name: 'lecturerFormRoute', query: query })
+  },
+
+  // successMessage (valikuline) antakse kalendrile edasi history state'is — nt vormi eduteade
+  navigateToAdminTrainingCoursesView(trainingId, successMessage) {
+    router.push({
+      name: 'adminTrainingCoursesRoute',
+      query: { trainingId: trainingId },
+      state: successMessage ? { successMessage: successMessage } : undefined,
+    })
+  },
+
+  // query: { trainingId } (uus toimumiskord) või { courseId } (muutmine)
+  navigateToCourseFormView(query) {
+    router.push({ name: 'courseFormRoute', query: query })
+  },
+
+  navigateToLecturersView() {
+    router.push({ name: 'lecturersRoute' })
+  },
+
   navigateToNotAuthorizedView() {
     router.push({ name: 'notAuthorizedRoute' })
   },
