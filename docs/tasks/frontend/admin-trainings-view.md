@@ -23,6 +23,7 @@ Admin avab navbari menüüst "Admin" → "Koolituste haldus" tabeli, kus on vaik
 | "Lisa uus koolitus" | Nupp (primary) | Päise real paremal → `/training-form`; kitsal ekraanil pealkirja all |
 | Otsinguväli | Tekstisisend + `<datalist>` | Placeholder "Otsi koolituse nime järgi…"; ettepanekud `GET /api/training-titles`; ettepaneku valik ainult täidab välja |
 | "Otsi" | Nupp | Käivitab otsingu (ka Enter) |
+| Küsimärgi ikoon | Ikoon + tooltip | Nupu "Otsi" kõrval, sama muster nagu `TrainingsView`-s. Tooltip: "Otsitakse koolituse nimest. Iga sõna peab nimes esinema, käändeid ei kohandata. Nimede valikus on ainult aktiivsed koolitused — kustutatud koolituse leidmiseks vali filtrites Staatus „Kustutatud“." |
 | "▾ Ava otsingu filtrid" / "▴ Peida otsingu filtrid" | Link-nupp | Avab/peidab filtrikaardi; `aria-expanded` |
 | "N filtrit aktiivne" + "Tühjenda filtrid" | Märgis + link | Nähtav, kui rakendatud filtrid erinevad vaikimisi väärtustest (ka peidetud kaardiga) |
 | Kaart "Otsingu filtrid" | Kaart | Sama stiil nagu TrainingFormView "Koolituse andmed"; vaikimisi peidus |
@@ -182,6 +183,7 @@ Kuupäeva vorming `dd/MM/yyyy` tehakse väikese abifunktsiooniga (nt `services/D
 - [ ] Päise real paremal on nupp "Lisa uus koolitus" → `/training-form`
 - [ ] Avamisel kuvatakse aktiivsed koolitused Lisatud järgi kahanevalt, 10 rida lehel, "Kokku N koolitust"
 - [ ] Tabelis on kõik 10 veergu õiges järjekorras; kuupäevad kujul `30/09/2026`; lipp, staatuse märgis, linnuke/rist koos tooltip'iga, sätted täppidega
+- [ ] Otsingunupu kõrval on küsimärgi ikoon, mille tooltip selgitab otsingut ja seda, et kustutatud koolitusi nimede valikus pole
 - [ ] Otsing (nupp ja Enter) otsib ainult nimest, alustab lehelt 0 ja arvestab rakendatud filtreid; datalist pakub nimesid
 - [ ] Filtrikaart on vaikimisi peidus; link vahetab teksti ja noole; filtrid rakenduvad ainult "Filtreeri" vajutamisel ja jäävad kehtima peidetud kaardiga; aktiivsete filtrite märk ja "Tühjenda filtrid" töötavad
 - [ ] Staatuse filter "Kustutatud" näitab kustutatud koolitusi; nende real on ainult nupp "Taasta"

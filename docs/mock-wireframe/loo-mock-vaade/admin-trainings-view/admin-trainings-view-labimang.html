@@ -115,6 +115,10 @@ select { width: 100%; }
 .api-pin:hover { outline: 1.5px solid var(--note-edge); }
 .pins { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 
+.tip { position: relative; display: inline-flex; }
+.tip .qmark { width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--sketch); background: var(--field); color: var(--ink); font: 700 .8rem var(--font-sketch); cursor: help; padding: 0; }
+.tip [role="tooltip"] { position: absolute; right: 0; top: calc(100% + 8px); z-index: 5; width: min(300px, 80vw); background: var(--ink); color: var(--panel); font: .78rem/1.4 var(--font-ui); padding: 8px 10px; border-radius: 6px; opacity: 0; visibility: hidden; transition: opacity .12s; pointer-events: none; }
+.tip:hover [role="tooltip"], .tip:focus-within [role="tooltip"] { opacity: 1; visibility: visible; }
 .togglerow { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
 .linkish { background: none; border: 0; color: var(--accent); text-decoration: underline; cursor: pointer; padding: 0; font-family: var(--font-sketch); font-size: .9rem; }
 .linkish.small { font-size: .8rem; }
@@ -631,7 +635,9 @@ td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
       '<div class="viewhead"><h2>Koolituste haldus</h2><button type="button" class="sbtn primary" id="b-new">+ Lisa uus koolitus</button></div>' +
       '<div class="searchrow"><input type="text" id="f-search" list="titles" placeholder="Otsi koolituse nime järgi…" value="' + esc(ui.searchInput) + '" autocomplete="off" aria-label="Otsi koolituse nime järgi">' +
       '<datalist id="titles">' + titles.map(function (t) { return '<option value="' + esc(t.title) + '"></option>'; }).join("") + '</datalist>' +
-      '<button type="button" class="sbtn primary" id="b-search">Otsi</button>' + pin("n-titles", "GET /api/training-titles") + '</div>' +
+      '<button type="button" class="sbtn primary" id="b-search">Otsi</button>' +
+      '<span class="tip"><button type="button" class="qmark" aria-label="Otsingu selgitus" aria-describedby="search-tip">?</button><span role="tooltip" id="search-tip">Otsitakse koolituse nimest. Iga sõna peab nimes esinema, käändeid ei kohandata. Nimede valikus on ainult aktiivsed koolitused — kustutatud koolituse leidmiseks vali filtrites Staatus „Kustutatud“.</span></span>' +
+      pin("n-titles", "GET /api/training-titles") + '</div>' +
       '<div class="togglerow"><button type="button" class="linkish" id="b-toggle" aria-expanded="' + ui.open + '" aria-controls="filter-card">' + (ui.open ? "▴ Peida otsingu filtrid" : "▾ Ava otsingu filtrid") + '</button>' +
       (n ? '<span class="badge active">' + n + (n === 1 ? " filter aktiivne" : " filtrit aktiivne") + '</span><button type="button" class="linkish small" id="b-clear-top">Tühjenda filtrid</button>' : "") + '</div>' +
       (ui.open ? renderFilterCard() : "") +
@@ -781,7 +787,7 @@ td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
     "",
     "Vaatega seotud lisainfo:",
     "Tabeli rida = üks koolitus; vaikimisi ainult aktiivsed (status \"U\" ja \"P\"), kustutatud (\"D\") näeb staatuse filtriga \"Kustutatud\". Nimi ja kategooria kuvatakse kasutajaliidese keeles (store'i contentLang); kui selles keeles tõlget pole, kuvatakse põhikeele oma. Keele vahetamisel navbaris laaditakse tabel, kategooriad, rahastustüübid ja nimede ettepanekud uuesti; otsing, filtrid, sorteerimine ja leht jäävad alles.",
-    "Otsinguväli otsib ainult koolituse nimest; trükkimise ajal pakub datalist nimesid (GET /api/training-titles). Otsing käivitub nupu \"Otsi\" või Enteri peale.",
+    "Otsinguväli otsib ainult koolituse nimest; trükkimise ajal pakub datalist nimesid (GET /api/training-titles). Otsing käivitub nupu \"Otsi\" või Enteri peale. Nupu kõrval on küsimärgi ikoon, mille tooltip selgitab: otsitakse nimest, iga sõna peab esinema, käändeid ei kohandata; nimede valikus on ainult aktiivsed koolitused — kustutatud koolituse leidmiseks vali filtrites Staatus \"Kustutatud\".",
     "Kaart \"Otsingu filtrid\" on vaikimisi peidus (link \"▾ Ava otsingu filtrid\" / \"▴ Peida otsingu filtrid\"). Filtrid rakenduvad nupuga \"Filtreeri\" ja jäävad kehtima ka peidetud kaardiga (märk \"N filtrit aktiivne\"); \"Tühjenda filtrid\" taastab vaikimisi väärtused.",
     "Veeru pealkirja klõps sorteerib backendis (ka Staatus: Mustand → Publitseeritud → Kustutatud ja Tõlked: puuduvad eespool): uus veerg → kasvav, sama veerg uuesti → suund vahetub. Vaikimisi Lisatud kahanevalt. Otsing, filtrid ja sorteerimine alustavad alati lehelt 0; leheküljestus (PaginationNav.vue) 10 rida lehel.",
     "Vaade avaneb navbari menüüst \"Admin\" → \"Koolituste haldus\" (\"Lisa uus koolitus\" all). Pealkirja real paremal on nupp \"Lisa uus koolitus\" → /training-form.",

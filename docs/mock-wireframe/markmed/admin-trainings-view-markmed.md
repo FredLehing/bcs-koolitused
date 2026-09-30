@@ -11,7 +11,7 @@ Frontend rada: /admin-trainings
 
 Vaatega seotud lisainfo:
 Tabeli rida = üks koolitus; vaikimisi ainult aktiivsed (status "U" ja "P"), kustutatud ("D") näeb staatuse filtriga "Kustutatud". Nimi ja kategooria kuvatakse kasutajaliidese keeles (store'i contentLang); kui selles keeles tõlget pole, kuvatakse põhikeele oma. Keele vahetamisel navbaris laaditakse tabel, kategooriad, rahastustüübid ja nimede ettepanekud uuesti; otsing, filtrid, sorteerimine ja leht jäävad alles.
-Otsinguväli otsib ainult koolituse nimest; trükkimise ajal pakub datalist nimesid (GET /api/training-titles). Otsing käivitub nupu "Otsi" või Enteri peale.
+Otsinguväli otsib ainult koolituse nimest; trükkimise ajal pakub datalist nimesid (GET /api/training-titles). Otsing käivitub nupu "Otsi" või Enteri peale. Nupu kõrval on küsimärgi ikoon, mille tooltip selgitab: otsitakse nimest, iga sõna peab esinema, käändeid ei kohandata; nimede valikus on ainult aktiivsed koolitused — kustutatud koolituse leidmiseks vali filtrites Staatus "Kustutatud".
 Kaart "Otsingu filtrid" on vaikimisi peidus (link "▾ Ava otsingu filtrid" / "▴ Peida otsingu filtrid"). Filtrid rakenduvad nupuga "Filtreeri" ja jäävad kehtima ka peidetud kaardiga (märk "N filtrit aktiivne"); "Tühjenda filtrid" taastab vaikimisi väärtused.
 Veeru pealkirja klõps sorteerib backendis (ka Staatus: Mustand → Publitseeritud → Kustutatud ja Tõlked: puuduvad eespool): uus veerg → kasvav, sama veerg uuesti → suund vahetub. Vaikimisi Lisatud kahanevalt. Otsing, filtrid ja sorteerimine alustavad alati lehelt 0; leheküljestus (PaginationNav.vue) 10 rida lehel.
 Vaade avaneb navbari menüüst "Admin" → "Koolituste haldus" ("Lisa uus koolitus" all). Pealkirja real paremal on nupp "Lisa uus koolitus" → /training-form.
