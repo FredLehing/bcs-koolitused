@@ -42,9 +42,6 @@ public class AdminEnquirySummary {
     @Column(name = "course_end_date")
     private LocalDate courseEndDate;
 
-    @Column(name = "option_name")
-    private String optionName;
-
     @Column(name = "full_name", nullable = false)
     private String fullName;
 

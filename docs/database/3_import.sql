@@ -82,18 +82,6 @@ INSERT INTO room (id, name, status, created_at, updated_at, created_by) VALUES
     (5, 'Landskrone', 'A', '2026-07-15 09:00:00', '2026-07-15 09:00:00', 1),
     (6, 'Megede', 'A', '2026-07-15 09:00:00', '2026-07-15 09:00:00', 1);
 
--- Table: option
-INSERT INTO option (id, type, created_at, updated_at) VALUES
-    (1, 'FM', '2026-07-15 09:00:00', '2026-07-15 09:00:00'),
-    (2, 'FM', '2026-07-15 09:00:00', '2026-07-15 09:00:00');
-
--- Table: option_translation
-INSERT INTO option_translation (id, option_id, language_id, name, created_at, updated_at) VALUES
-    (1, 1, 1, 'Auditoorne', '2026-07-15 09:00:00', '2026-07-15 09:00:00'),
-    (2, 1, 2, 'In-person', '2026-07-15 09:00:00', '2026-07-15 09:00:00'),
-    (3, 2, 1, 'Veebipõhine', '2026-07-15 09:00:00', '2026-07-15 09:00:00'),
-    (4, 2, 2, 'Online', '2026-07-15 09:00:00', '2026-07-15 09:00:00');
-
 -- Table: profile
 INSERT INTO profile (id, first_name, last_name, phone, email, created_at, updated_at) VALUES
     (1, 'Anna', 'Saar', '+37256789012', 'anna.saar@example.com', '2026-09-05 09:00:00', '2026-09-05 09:00:00'),
@@ -226,11 +214,11 @@ INSERT INTO course_participant (id, course_id, participant_id, notes, has_paid, 
     (2, 3, 1, 'Osales septembris.', true, true, 'REG', '2026-09-01 12:00:00', '2026-09-01 12:00:00');
 
 -- Table: enquiry (status: U = uus, H = käsitletud)
-INSERT INTO enquiry (id, training_id, profile_id, course_id, option_id, message, company_name, status, created_at, updated_at) VALUES
-    (1, 1, 1, 1, 1, 'Huvitab, kas kursusele on veel vabu kohti.', NULL, 'U', '2026-09-15 08:30:00', '2026-09-15 08:30:00'),
-    (2, 2, 2, NULL, 2, 'Kas koolitust on võimalik tellida ka ettevõttele?', 'OÜ Näidisfirma', 'U', '2026-09-16 14:20:00', '2026-09-16 14:20:00'),
-    (3, 3, 3, NULL, 1, 'Soovime koolitust kaheksale arendajale meie kontoris, eelistatavalt novembris.', 'AS Tarkvaramaja', 'H', '2026-09-20 11:05:00', '2026-09-22 09:00:00'),
-    (4, 1, 4, 5, 2, 'Kas veebis osalejad saavad hiljem ka salvestust vaadata?', NULL, 'U', '2026-09-28 16:40:00', '2026-09-28 16:40:00');
+INSERT INTO enquiry (id, training_id, profile_id, course_id, message, company_name, status, created_at, updated_at) VALUES
+    (1, 1, 1, 1, 'Huvitab, kas kursusele on veel vabu kohti.', NULL, 'U', '2026-09-15 08:30:00', '2026-09-15 08:30:00'),
+    (2, 2, 2, NULL, 'Kas koolitust on võimalik tellida ka ettevõttele?', 'OÜ Näidisfirma', 'U', '2026-09-16 14:20:00', '2026-09-16 14:20:00'),
+    (3, 3, 3, NULL, 'Soovime koolitust kaheksale arendajale meie kontoris, eelistatavalt novembris.', 'AS Tarkvaramaja', 'H', '2026-09-20 11:05:00', '2026-09-22 09:00:00'),
+    (4, 1, 4, 5, 'Kas veebis osalejad saavad hiljem ka salvestust vaadata?', NULL, 'U', '2026-09-28 16:40:00', '2026-09-28 16:40:00');
 
 -- Table: certificate_template
 INSERT INTO certificate_template (id, course_id, status, created_at, updated_at, created_by) VALUES
@@ -263,8 +251,6 @@ SELECT setval(pg_get_serial_sequence('lecturer', 'id'), (SELECT MAX(id) FROM lec
 SELECT setval(pg_get_serial_sequence('lecturer_translation', 'id'), (SELECT MAX(id) FROM lecturer_translation));
 SELECT setval(pg_get_serial_sequence('lecturer_photo', 'id'), (SELECT MAX(id) FROM lecturer_photo));
 SELECT setval(pg_get_serial_sequence('room', 'id'), (SELECT MAX(id) FROM room));
-SELECT setval(pg_get_serial_sequence('option', 'id'), (SELECT MAX(id) FROM option));
-SELECT setval(pg_get_serial_sequence('option_translation', 'id'), (SELECT MAX(id) FROM option_translation));
 SELECT setval(pg_get_serial_sequence('profile', 'id'), (SELECT MAX(id) FROM profile));
 SELECT setval(pg_get_serial_sequence('participant', 'id'), (SELECT MAX(id) FROM participant));
 SELECT setval(pg_get_serial_sequence('training', 'id'), (SELECT MAX(id) FROM training));

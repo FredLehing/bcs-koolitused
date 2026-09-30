@@ -20,6 +20,5 @@ public class AdminEnquirySummaryDto {
     private String trainingTitle;
     private LocalDate courseStartDate;
     private LocalDate courseEndDate;
-    private String optionName;
     private String status;
 }

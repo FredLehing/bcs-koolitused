@@ -27,7 +27,7 @@ public class EnquiryController {
 
     @GetMapping("/admin-enquiries")
     @Operation(summary = "Admini huviliste päringute nimekiri",
-            description = "Uusimad eespool (created_at kahanevalt). Vaikimisi ainult uued (status U); includeHandled=true → ka käsitletud (H). trainingTitle ja optionName contentLang keeles, puudumisel põhikeeles. Sõnumit ja telefoni ei tagastata. Tundmatu contentLang → tühi list.")
+            description = "Uusimad eespool (created_at kahanevalt). Vaikimisi ainult uued (status U); includeHandled=true → ka käsitletud (H). trainingTitle contentLang keeles, puudumisel põhikeeles. Sõnumit ja telefoni ei tagastata. Tundmatu contentLang → tühi list.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK")
     })
@@ -38,7 +38,7 @@ public class EnquiryController {
 
     @GetMapping("/admin-enquiry/{enquiryId}")
     @Operation(summary = "Ühe päringu admini vaade",
-            description = "Päringu andmed, sõnum ja kontakt. trainingTitle ja optionName contentLang keeles, puudumisel põhikeeles; trainingTranslationId = kuvatud tõlke ID.")
+            description = "Päringu andmed, sõnum ja kontakt. trainingTitle contentLang keeles, puudumisel põhikeeles; trainingTranslationId = kuvatud tõlke ID.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(

@@ -367,7 +367,7 @@ tr.is-new td { font-weight: 700; }
       "Frontend rada: /admin-enquiries",
       "",
       "Vaatega seotud lisainfo:",
-      "Avaneb navbari menüüst \"Admin\" → \"Koolituste päringud\". Tabelis Saabunud | Nimi | E-post | Ettevõte | Koolitus | Toimumiskord | Vorm | Staatus | Tegevused; uusimad üleval, uue päringu rida paksus kirjas. Koolituse ja vormi nimi on kasutajaliidese keeles (puudumisel põhikeeles), keele vahetusel laaditakse nimekiri uuesti. Toimumiskord \"—\", kui päring on koolituse kohta üldiselt.",
+      "Avaneb navbari menüüst \"Admin\" → \"Koolituste päringud\". Tabelis Saabunud | Nimi | E-post | Ettevõte | Koolitus | Toimumiskord | Staatus | Tegevused; uusimad üleval, uue päringu rida paksus kirjas. Koolituse nimi on kasutajaliidese keeles (puudumisel põhikeeles), keele vahetusel laaditakse nimekiri uuesti. Toimumiskord \"—\", kui päring on koolituse kohta üldiselt.",
       "Lüliti \"Näita ka käsitletud\" (vaikimisi väljas) → includeHandled=true. Otsinguväli filtreerib frontendis nime, e-posti, ettevõtte ja koolituse järgi; veerud Saabunud, Nimi, Koolitus ja Staatus on sorteeritavad frontendis (1. klõps kasvav, 2. kahanev, 3. vaikimisi). All \"Kokku N päringut\".",
       "Silma ikoon \"Vaata\" → /admin-enquiry?enquiryId={id}."
     ].join("\n") },
@@ -377,7 +377,7 @@ tr.is-new td { font-weight: 700; }
       "Frontend rada: /admin-enquiry?enquiryId={id}",
       "",
       "Vaatega seotud lisainfo:",
-      "Kaart \"Päring\": Saabunud, Staatus, Koolitus (link avalikule lehele /training), Toimumiskord (või \"Toimumiskorda pole valitud\"), Vorm, Ettevõte, Sõnum. Kaart \"Kontakt\": Nimi, E-post (mailto), Telefon (tel). Keele vahetusel laaditakse päring uuesti.",
+      "Kaart \"Päring\": Saabunud, Staatus, Koolitus (link avalikule lehele /training), Toimumiskord (või \"Toimumiskorda pole valitud\"), Ettevõte, Sõnum. Kaart \"Kontakt\": Nimi, E-post (mailto), Telefon (tel). Keele vahetusel laaditakse päring uuesti.",
       "Uue päringu korral nupp \"Märgi käsitletuks\" (PUT /api/enquiry/{enquiryId}/handle), käsitletu korral \"Märgi uueks\" (PUT /api/enquiry/{enquiryId}/reopen); pärast seda laaditakse päring uuesti ja näidatakse eduteadet.",
       "Kiirnupp \"Koolituste päringud\" → /admin-enquiries. Olematu päring → üldine veavaade."
     ].join("\n") }
@@ -386,17 +386,17 @@ tr.is-new td { font-weight: 700; }
   var NOTES = [
     { id: "n-list", title: "GET /api/admin-enquiries", text: [
       "API: GET /api/admin-enquiries", "",
-      "Query parameetrid:", "contentLang: String — koolituse ja vormi nime keel (\"et\"/\"en\")", "includeHandled: Boolean — true = ka käsitletud päringud (valikuline, vaikimisi false)", "",
+      "Query parameetrid:", "contentLang: String — koolituse nime keel (\"et\"/\"en\")", "includeHandled: Boolean — true = ka käsitletud päringud (valikuline, vaikimisi false)", "",
       "Response (200):", "AdminEnquirySummaryDto.java",
-      "[", "  {", "    \"enquiryId\": 4,", "    \"createdAt\": \"2026-09-28T13:40:00Z\",", "    \"fullName\": \"Martin Kask\",", "    \"email\": \"martin.kask@example.com\",", "    \"companyName\": null,", "    \"trainingTitle\": \"Java algkursus\",", "    \"courseStartDate\": \"2026-11-16\",", "    \"courseEndDate\": \"2026-11-20\",", "    \"optionName\": \"Veebipõhine\",", "    \"status\": \"U\"", "  },", "  ...", "]", "",
+      "[", "  {", "    \"enquiryId\": 4,", "    \"createdAt\": \"2026-09-28T13:40:00Z\",", "    \"fullName\": \"Martin Kask\",", "    \"email\": \"martin.kask@example.com\",", "    \"companyName\": null,", "    \"trainingTitle\": \"Java algkursus\",", "    \"courseStartDate\": \"2026-11-16\",", "    \"courseEndDate\": \"2026-11-20\",", "    \"status\": \"U\"", "  },", "  ...", "]", "",
       "API teenuse lisainfo:",
-      "Andmed tulevad view'st admin_enquiry_summary, uusimad eespool (created_at kahanevalt). status: \"U\" = uus, \"H\" = käsitletud; ilma includeHandled=true tagastatakse ainult uued. trainingTitle ja optionName on contentLang keeles, puudumisel põhikeeles. courseStartDate ja courseEndDate on null, kui päring pole toimumiskorra kohta; companyName võib olla null. Sõnumit ja telefoni nimekirjas ei tagastata. Otsing ja sorteerimine toimuvad frontendis.", "",
+      "Andmed tulevad view'st admin_enquiry_summary, uusimad eespool (created_at kahanevalt). status: \"U\" = uus, \"H\" = käsitletud; ilma includeHandled=true tagastatakse ainult uued. trainingTitle on contentLang keeles, puudumisel põhikeeles. courseStartDate ja courseEndDate on null, kui päring pole toimumiskorra kohta; companyName võib olla null. Sõnumit ja telefoni nimekirjas ei tagastata. Otsing ja sorteerimine toimuvad frontendis.", "",
       "Veateated: —"].join("\n") },
     { id: "n-detail", title: "GET /api/admin-enquiry/{enquiryId}", text: [
       "API: GET /api/admin-enquiry/{enquiryId}", "",
-      "Query parameetrid:", "contentLang: String — koolituse ja vormi nime keel (\"et\"/\"en\")", "",
+      "Query parameetrid:", "contentLang: String — koolituse nime keel (\"et\"/\"en\")", "",
       "Response (200):", "AdminEnquiryDto.java",
-      "{", "  \"enquiryId\": 4,", "  \"createdAt\": \"2026-09-28T13:40:00Z\",", "  \"status\": \"U\",", "  \"trainingId\": 1,", "  \"trainingTranslationId\": 1,", "  \"trainingTitle\": \"Java algkursus\",", "  \"courseId\": 5,", "  \"courseStartDate\": \"2026-11-16\",", "  \"courseEndDate\": \"2026-11-20\",", "  \"optionName\": \"Veebipõhine\",", "  \"companyName\": null,", "  \"message\": \"Kas veebis osalejad saavad hiljem ka salvestust vaadata?\",", "  \"fullName\": \"Martin Kask\",", "  \"email\": \"martin.kask@example.com\",", "  \"phone\": \"+37253344556\"", "}", "",
+      "{", "  \"enquiryId\": 4,", "  \"createdAt\": \"2026-09-28T13:40:00Z\",", "  \"status\": \"U\",", "  \"trainingId\": 1,", "  \"trainingTranslationId\": 1,", "  \"trainingTitle\": \"Java algkursus\",", "  \"courseId\": 5,", "  \"courseStartDate\": \"2026-11-16\",", "  \"courseEndDate\": \"2026-11-20\",", "  \"companyName\": null,", "  \"message\": \"Kas veebis osalejad saavad hiljem ka salvestust vaadata?\",", "  \"fullName\": \"Martin Kask\",", "  \"email\": \"martin.kask@example.com\",", "  \"phone\": \"+37253344556\"", "}", "",
       "API teenuse lisainfo:",
       "Sama view admin_enquiry_summary (enquiry_id + contentLang). trainingTranslationId = kuvatud tõlke ID (link avalikule koolituse lehele). courseId, courseStartDate, courseEndDate ja companyName võivad olla null.", "",
       "Veateated:", NOT_FOUND].join("\n") },
@@ -416,7 +416,6 @@ tr.is-new td { font-weight: 700; }
 
   /* ---------- Andmed (seed-andmete ettepanek) ---------- */
   var TRAININGS = { 1: { et: [1, "Java algkursus"], en: [2, "Java Basics"] }, 2: { et: [3, "Projektijuhtimise põhitõed"], en: [4, "Project Management Fundamentals"] }, 3: { et: [5, "Spring Boot veebiarendus"], en: [6, "Spring Boot Web Development"] } };
-  var OPTIONS = { 1: { et: "Auditoorne", en: "In-person" }, 2: { et: "Veebipõhine", en: "Online" } };
   var COURSES = { 1: ["2026-10-05", "2026-10-09"], 5: ["2026-11-16", "2026-11-20"] };
   function freshDb() {
     return [
@@ -441,12 +440,12 @@ tr.is-new td { font-weight: 700; }
   function summaryDto(e) {
     var c = e.c ? COURSES[e.c] : null;
     return { enquiryId: e.id, createdAt: toInstant(e.created), fullName: e.name, email: e.email, companyName: e.company, trainingTitle: TRAININGS[e.t][ui.lang][1],
-      courseStartDate: c ? c[0] : null, courseEndDate: c ? c[1] : null, optionName: OPTIONS[e.o][ui.lang], status: e.st };
+      courseStartDate: c ? c[0] : null, courseEndDate: c ? c[1] : null, status: e.st };
   }
   function detailDto(e) {
     var c = e.c ? COURSES[e.c] : null;
     return { enquiryId: e.id, createdAt: toInstant(e.created), status: e.st, trainingId: e.t, trainingTranslationId: TRAININGS[e.t][ui.lang][0], trainingTitle: TRAININGS[e.t][ui.lang][1],
-      courseId: e.c, courseStartDate: c ? c[0] : null, courseEndDate: c ? c[1] : null, optionName: OPTIONS[e.o][ui.lang], companyName: e.company, message: e.msg,
+      courseId: e.c, courseStartDate: c ? c[0] : null, courseEndDate: c ? c[1] : null, companyName: e.company, message: e.msg,
       fullName: e.name, email: e.email, phone: e.phone };
   }
   function call(method, path, req, res) { logSteps.push({ method: method, path: path, req: req, res: res }); }
@@ -504,7 +503,7 @@ tr.is-new td { font-weight: 700; }
   var STATUS_ORDER = { U: 1, H: 2 };
   var COLUMNS = [
     { key: "createdAt", label: "Saabunud" }, { key: "fullName", label: "Nimi" }, { label: "E-post" }, { label: "Ettevõte" },
-    { key: "trainingTitle", label: "Koolitus" }, { label: "Toimumiskord" }, { label: "Vorm" }, { key: "status", label: "Staatus" }, { label: "Tegevused" }
+    { key: "trainingTitle", label: "Koolitus" }, { label: "Toimumiskord" }, { key: "status", label: "Staatus" }, { label: "Tegevused" }
   ];
   function pin(noteId, label) { return '<button type="button" class="api-pin" data-note="' + noteId + '">' + esc(label) + '</button>'; }
   function badge(st) { return st === "U" ? '<span class="badge active">Uus</span>' : '<span class="badge draft">Käsitletud</span>'; }
@@ -524,9 +523,9 @@ tr.is-new td { font-weight: 700; }
       return '<th><button type="button" class="sorth" data-sort="' + c.key + '">' + c.label + '<span class="arrow" aria-hidden="true">' + arrow + '</span></button></th>';
     }).join("");
     var body = rows.length ? rows.map(function (r) {
-      return '<tr' + (r.status === "U" ? ' class="is-new"' : "") + '><td class="date">' + dateTime(r.createdAt) + '</td><td>' + esc(r.fullName) + '</td><td>' + esc(r.email) + '</td><td>' + esc(r.companyName || "—") + '</td><td>' + esc(r.trainingTitle) + '</td><td class="date">' + courseText(r.courseStartDate, r.courseEndDate) + '</td><td>' + esc(r.optionName) + '</td><td>' + badge(r.status) + '</td>' +
+      return '<tr' + (r.status === "U" ? ' class="is-new"' : "") + '><td class="date">' + dateTime(r.createdAt) + '</td><td>' + esc(r.fullName) + '</td><td>' + esc(r.email) + '</td><td>' + esc(r.companyName || "—") + '</td><td>' + esc(r.trainingTitle) + '</td><td class="date">' + courseText(r.courseStartDate, r.courseEndDate) + '</td><td>' + badge(r.status) + '</td>' +
         '<td><button type="button" class="ibtn" data-open="' + r.enquiryId + '" title="Vaata" aria-label="Vaata">' + EYE + '</button></td></tr>';
-    }).join("") : '<tr class="empty-row"><td colspan="9">Päringuid ei leitud</td></tr>';
+    }).join("") : '<tr class="empty-row"><td colspan="8">Päringuid ei leitud</td></tr>';
     return '<div class="viewhead"><h2>Koolituste päringud</h2></div>' +
       '<div class="searchrow"><input type="text" id="e-search" placeholder="Otsi nime, e-posti, ettevõtte või koolituse järgi…" aria-label="Otsi" value="' + esc(ui.search) + '">' +
       '<label class="switch"><input type="checkbox" id="e-handled"' + (ui.includeHandled ? " checked" : "") + '> Näita ka käsitletud</label>' + pin("n-list", "GET /api/admin-enquiries") + '</div>' +
@@ -544,7 +543,7 @@ tr.is-new td { font-weight: 700; }
       row("Saabunud", dateTime(d.createdAt)) + row("Staatus", badge(d.status)) +
       row("Koolitus", '<button type="button" class="linkish" id="b-training">' + esc(d.trainingTitle) + '</button>') +
       row("Toimumiskord", d.courseStartDate ? courseText(d.courseStartDate, d.courseEndDate) : '<span class="hint">Toimumiskorda pole valitud</span>') +
-      row("Vorm", esc(d.optionName)) + row("Ettevõte", esc(d.companyName || "—")) +
+      row("Ettevõte", esc(d.companyName || "—")) +
       row("Sõnum", '<span class="msg">' + esc(d.message) + '</span>') + '</dl></fieldset>' +
       '<fieldset><legend>Kontakt</legend><dl class="dl">' + row("Nimi", esc(d.fullName)) +
       row("E-post", '<a href="mailto:' + esc(d.email) + '">' + esc(d.email) + '</a>') + row("Telefon", '<a href="tel:' + esc(d.phone) + '">' + esc(d.phone) + '</a>') + '</dl></fieldset>' +

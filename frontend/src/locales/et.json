@@ -506,7 +506,6 @@
       "companyName": "Ettevõte",
       "trainingTitle": "Koolitus",
       "course": "Toimumiskord",
-      "optionName": "Vorm",
       "status": "Staatus",
       "actions": "Tegevused"
     }
@@ -520,7 +519,6 @@
     "training": "Koolitus",
     "course": "Toimumiskord",
     "noCourse": "Toimumiskorda pole valitud",
-    "option": "Vorm",
     "companyName": "Ettevõte",
     "message": "Sõnum",
     "fullName": "Nimi",

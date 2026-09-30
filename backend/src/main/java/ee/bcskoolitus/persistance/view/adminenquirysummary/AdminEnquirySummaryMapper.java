@@ -17,7 +17,6 @@ public interface AdminEnquirySummaryMapper {
     @Mapping(source = "trainingTitle", target = "trainingTitle")
     @Mapping(source = "courseStartDate", target = "courseStartDate")
     @Mapping(source = "courseEndDate", target = "courseEndDate")
-    @Mapping(source = "optionName", target = "optionName")
     @Mapping(source = "status", target = "status")
     AdminEnquirySummaryDto toAdminEnquirySummaryDto(AdminEnquirySummary adminEnquirySummary);
 
@@ -32,7 +31,6 @@ public interface AdminEnquirySummaryMapper {
     @Mapping(source = "courseId", target = "courseId")
     @Mapping(source = "courseStartDate", target = "courseStartDate")
     @Mapping(source = "courseEndDate", target = "courseEndDate")
-    @Mapping(source = "optionName", target = "optionName")
     @Mapping(source = "companyName", target = "companyName")
     @Mapping(source = "message", target = "message")
     @Mapping(source = "fullName", target = "fullName")

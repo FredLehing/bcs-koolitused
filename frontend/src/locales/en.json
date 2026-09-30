@@ -508,7 +508,6 @@
       "companyName": "Company",
       "trainingTitle": "Training",
       "course": "Course",
-      "optionName": "Format",
       "status": "Status",
       "actions": "Actions"
     }
@@ -522,7 +521,6 @@
     "training": "Training",
     "course": "Course",
     "noCourse": "No course selected",
-    "option": "Format",
     "companyName": "Company",
     "message": "Message",
     "fullName": "Name",

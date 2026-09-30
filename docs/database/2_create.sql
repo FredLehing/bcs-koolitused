@@ -90,7 +90,6 @@ CREATE TABLE enquiry
     training_id  int          NOT NULL,
     profile_id   int          NOT NULL,
     course_id    int          NULL,
-    option_id    int          NOT NULL,
     message      varchar(255) NOT NULL,
     company_name varchar(255) NULL,
     status       char(1)      NOT NULL,
@@ -208,29 +207,6 @@ CREATE TABLE newsletter
     last_name  varchar(255) NOT NULL,
     status     varchar(1)   NOT NULL,
     CONSTRAINT newsletter_pk PRIMARY KEY (id)
-);
-
--- Table: option
-CREATE TABLE option
-(
-    id         serial     NOT NULL,
-    type       varchar(2) NOT NULL,
-    created_at timestamp  NOT NULL,
-    updated_at timestamp  NOT NULL,
-    CONSTRAINT option_pk PRIMARY KEY (id)
-);
-
--- Table: option_translation
-CREATE TABLE option_translation
-(
-    id          serial      NOT NULL,
-    option_id   int         NOT NULL,
-    language_id int         NOT NULL,
-    name        varchar(20) NOT NULL,
-    created_at  timestamp   NOT NULL,
-    updated_at  timestamp   NOT NULL,
-    CONSTRAINT option_translation_pk PRIMARY KEY (id),
-    CONSTRAINT option_translation_uq UNIQUE (option_id, language_id)
 );
 
 -- Table: participant
@@ -359,15 +335,6 @@ ALTER TABLE enquiry
     ADD CONSTRAINT application_course
         FOREIGN KEY (course_id)
             REFERENCES course (id)
-            NOT DEFERRABLE
-                INITIALLY IMMEDIATE
-;
-
--- Reference: application_option (table: enquiry)
-ALTER TABLE enquiry
-    ADD CONSTRAINT application_option
-        FOREIGN KEY (option_id)
-            REFERENCES option (id)
             NOT DEFERRABLE
                 INITIALLY IMMEDIATE
 ;
@@ -615,24 +582,6 @@ ALTER TABLE location
                 INITIALLY IMMEDIATE
 ;
 
--- Reference: option_translation_language (table: option_translation)
-ALTER TABLE option_translation
-    ADD CONSTRAINT option_translation_language
-        FOREIGN KEY (language_id)
-            REFERENCES language (id)
-            NOT DEFERRABLE
-                INITIALLY IMMEDIATE
-;
-
--- Reference: option_translation_option (table: option_translation)
-ALTER TABLE option_translation
-    ADD CONSTRAINT option_translation_option
-        FOREIGN KEY (option_id)
-            REFERENCES option (id)
-            NOT DEFERRABLE
-                INITIALLY IMMEDIATE
-;
-
 -- Reference: participant_profile (table: participant)
 ALTER TABLE participant
     ADD CONSTRAINT participant_profile
@@ -846,7 +795,7 @@ SELECT r.id                                          AS room_id,
        r.updated_at
 FROM room r;
 
--- Huviliste päringud (admin): üks rida päringu ja tõlkekeele kohta; koolituse ja vormi nimi puudumisel põhikeeles
+-- Huviliste päringud (admin): üks rida päringu ja tõlkekeele kohta; koolituse nimi puudumisel põhikeeles
 CREATE VIEW admin_enquiry_summary AS
 SELECT row_number() OVER (ORDER BY e.id, cl.id)                    AS id,
        e.id                                                        AS enquiry_id,
@@ -857,7 +806,6 @@ SELECT row_number() OVER (ORDER BY e.id, cl.id)                    AS id,
        e.course_id,
        c.start_date                                                AS course_start_date,
        c.end_date                                                  AS course_end_date,
-       COALESCE(ot.name, mot.name)                                 AS option_name,
        p.first_name || ' ' || p.last_name                          AS full_name,
        p.email,
        p.phone,
@@ -867,12 +815,9 @@ SELECT row_number() OVER (ORDER BY e.id, cl.id)                    AS id,
        e.created_at
 FROM enquiry e
          CROSS JOIN language cl
-         JOIN language ml ON ml.is_main_language
          JOIN profile p ON p.id = e.profile_id
          JOIN admin_training_summary ats ON ats.training_id = e.training_id AND ats.content_language_code = cl.code
          LEFT JOIN course c ON c.id = e.course_id
-         LEFT JOIN option_translation ot ON ot.option_id = e.option_id AND ot.language_id = cl.id
-         LEFT JOIN option_translation mot ON mot.option_id = e.option_id AND mot.language_id = ml.id
 WHERE cl.requires_translation;
 
 -- Koolituse kalender: toimumiskord koos koolitaja, ruumi ja osalejate arvuga

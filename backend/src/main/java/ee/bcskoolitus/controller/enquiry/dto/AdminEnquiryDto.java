@@ -21,7 +21,6 @@ public class AdminEnquiryDto {
     private Integer courseId;
     private LocalDate courseStartDate;
     private LocalDate courseEndDate;
-    private String optionName;
     private String companyName;
     private String message;
     private String fullName;

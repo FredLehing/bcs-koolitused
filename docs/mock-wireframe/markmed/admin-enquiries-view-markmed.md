@@ -10,7 +10,7 @@ Failinimi: AdminEnquiriesView.vue
 Frontend rada: /admin-enquiries
 
 Vaatega seotud lisainfo:
-Avaneb navbari menüüst "Admin" → "Koolituste päringud". Tabelis Saabunud | Nimi | E-post | Ettevõte | Koolitus | Toimumiskord | Vorm | Staatus | Tegevused; uusimad üleval, uue päringu rida paksus kirjas. Koolituse ja vormi nimi on kasutajaliidese keeles (puudumisel põhikeeles), keele vahetusel laaditakse nimekiri uuesti. Toimumiskord "—", kui päring on koolituse kohta üldiselt.
+Avaneb navbari menüüst "Admin" → "Koolituste päringud". Tabelis Saabunud | Nimi | E-post | Ettevõte | Koolitus | Toimumiskord | Staatus | Tegevused; uusimad üleval, uue päringu rida paksus kirjas. Koolituse nimi on kasutajaliidese keeles (puudumisel põhikeeles), keele vahetusel laaditakse nimekiri uuesti. Toimumiskord "—", kui päring on koolituse kohta üldiselt.
 Lüliti "Näita ka käsitletud" (vaikimisi väljas) → includeHandled=true. Otsinguväli filtreerib frontendis nime, e-posti, ettevõtte ja koolituse järgi; veerud Saabunud, Nimi, Koolitus ja Staatus on sorteeritavad frontendis (1. klõps kasvav, 2. kahanev, 3. vaikimisi). All "Kokku N päringut".
 Silma ikoon "Vaata" → /admin-enquiry?enquiryId={id}.
 ```
@@ -21,7 +21,7 @@ Silma ikoon "Vaata" → /admin-enquiry?enquiryId={id}.
 API: GET /api/admin-enquiries
 
 Query parameetrid:
-contentLang: String — koolituse ja vormi nime keel ("et"/"en")
+contentLang: String — koolituse nime keel ("et"/"en")
 includeHandled: Boolean — true = ka käsitletud päringud (valikuline, vaikimisi false)
 
 Response (200):
@@ -36,14 +36,13 @@ AdminEnquirySummaryDto.java
     "trainingTitle": "Java algkursus",
     "courseStartDate": "2026-11-16",
     "courseEndDate": "2026-11-20",
-    "optionName": "Veebipõhine",
     "status": "U"
   },
   ...
 ]
 
 API teenuse lisainfo:
-Andmed tulevad view'st admin_enquiry_summary, uusimad eespool (created_at kahanevalt). status: "U" = uus, "H" = käsitletud; ilma includeHandled=true tagastatakse ainult uued. trainingTitle ja optionName on contentLang keeles, puudumisel põhikeeles. courseStartDate ja courseEndDate on null, kui päring pole toimumiskorra kohta; companyName võib olla null. Sõnumit ja telefoni nimekirjas ei tagastata. Otsing ja sorteerimine toimuvad frontendis.
+Andmed tulevad view'st admin_enquiry_summary, uusimad eespool (created_at kahanevalt). status: "U" = uus, "H" = käsitletud; ilma includeHandled=true tagastatakse ainult uued. trainingTitle on contentLang keeles, puudumisel põhikeeles. courseStartDate ja courseEndDate on null, kui päring pole toimumiskorra kohta; companyName võib olla null. Sõnumit ja telefoni nimekirjas ei tagastata. Otsing ja sorteerimine toimuvad frontendis.
 
 Veateated: —
 ```
