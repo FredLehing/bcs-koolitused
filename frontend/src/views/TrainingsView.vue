@@ -231,7 +231,7 @@ export default {
           :page="page"
           :total-pages="totalPages"
           @event-page-changed="handlePageChanged"
-          class="mb-3"
+          class="mb-3 mt-auto"
         />
       </div>
     </div>
