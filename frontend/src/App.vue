@@ -1,6 +1,6 @@
 <template>
   <div class="d-flex flex-column min-vh-100">
-    <nav class="navbar navbar-expand-lg navbar-light bg-white mb-3">
+    <nav class="navbar navbar-expand-lg navbar-light navbar-glass mb-3 shadow sticky-top">
       <div class="container">
         <RouterLink class="navbar-brand" to="/">
           <img src="@/assets/bcs-koolitus.svg" alt="BCS koolituse logo" height="68" />
