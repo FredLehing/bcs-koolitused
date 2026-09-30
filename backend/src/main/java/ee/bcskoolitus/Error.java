@@ -5,7 +5,8 @@ import lombok.Getter;
 @Getter
 public enum Error {
     INCORRECT_CREDENTIALS("Vale email või parool"),
-    TRANSLATION_EXISTS("Selles keeles tõlge on juba olemas");
+    TRANSLATION_EXISTS("Selles keeles tõlge on juba olemas"),
+    TRAINING_DELETED("Kustutatud koolituse staatust ei saa muuta, taasta see enne");
 
     private final String message;
 
