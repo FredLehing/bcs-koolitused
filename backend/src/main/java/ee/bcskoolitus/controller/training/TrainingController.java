@@ -175,4 +175,19 @@ public class TrainingController {
     public void deleteTraining(@PathVariable Integer trainingId) {
         trainingService.deleteTraining(trainingId);
     }
+
+    @PutMapping("/training/{trainingId}/restore")
+    @Operation(summary = "Taastab kustutatud koolituse mustandisse",
+            description = "Tegevusteenus: määrab kustutatud koolituse (status D) staatuseks U. Kustutamata koolituse korral midagi ei muutu.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Olematu trainingId -> 'errorCode:' PRIMARY_KEY_NOT_FOUND",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            )
+    })
+    public void restoreTraining(@PathVariable Integer trainingId) {
+        trainingService.restoreTraining(trainingId);
+    }
 }

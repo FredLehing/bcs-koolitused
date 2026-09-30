@@ -258,4 +258,16 @@ public class TrainingService {
         training.setStatus(TrainingStatus.DELETED.getCode());
         trainingRepository.save(training);
     }
+
+    // Taastab kustutatud koolituse mustandisse (D → U); avalikuks muutub see alles publitseerimisega.
+    // Kustutamata koolituse (U, P) korral midagi ei muutu.
+    @Transactional
+    public void restoreTraining(Integer trainingId) {
+        Training training = getValidTrainingBy(trainingId);
+        if (!TrainingStatus.DELETED.getCode().equals(training.getStatus())) {
+            return;
+        }
+        training.setStatus(TrainingStatus.UNPUBLISHED.getCode());
+        trainingRepository.save(training);
+    }
 }
