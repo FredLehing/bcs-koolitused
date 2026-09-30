@@ -86,18 +86,18 @@ Query parameetrid: `contentLang`, `searchText`, `categoryId`, `trainingLanguageI
   "totalElements": 13,
   "adminTrainingSummaries": [
     {
-      "trainingId": 8,
-      "trainingTranslationId": 15,
-      "title": "SQL ja andmebaasid",
+      "trainingId": 13,
+      "trainingTranslationId": 23,
+      "title": "Tehisaru töövahendid arendajale",
       "categoryId": 1,
       "categoryName": "Programmeerimine",
       "trainingLanguageCode": "et",
       "trainingLanguageFlagIconCode": "fi-ee",
       "status": "P",
       "isOrderable": true,
-      "isPromoted": false,
-      "createdAt": "2026-08-20T06:00:00Z",
-      "updatedAt": "2026-08-20T06:00:00Z",
+      "isPromoted": true,
+      "createdAt": "2026-09-25T12:10:00Z",
+      "updatedAt": "2026-09-26T06:00:00Z",
       "hasAllTranslations": false,
       "missingTranslationLanguageCodes": [
         "en"
@@ -106,6 +106,10 @@ Query parameetrid: `contentLang`, `searchText`, `categoryId`, `trainingLanguageI
         {
           "fundingTypeId": 1,
           "fundingTypeName": "Töötukassa"
+        },
+        {
+          "fundingTypeId": 2,
+          "fundingTypeName": "EL rahastus"
         }
       ]
     }

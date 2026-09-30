@@ -290,7 +290,7 @@ textarea { min-height: 88px; resize: vertical; }
   <header class="intro">
     <h1>TrainingFormView.vue — läbimäng</h1>
     <p>Vajuta vormi nuppe ja lipukesi nagu päris vaates. URL, backendi päringud ja olek muutuvad kaasa. Kollased kastid on mockupi märkmed samas vormingus nagu <code>skill-uus-mockup-markmed</code> — neid saab otse Balsamiqi kopeerida.</p>
-    <p>Keeled tulevad päringust <code>GET /api/languages</code> (<code>language</code> tabel): <code>et</code> (põhikeel), <code>en</code> ja <code>ru</code>. Tõlkelipud on ainult keeltel, mille <code>requiresTranslation = true</code> (<code>et</code>, <code>en</code>). <code>ru</code> on ainult õppekeel („Koolituse keel“ rippmenüüs), sellesse koolituse sisu ei tõlgita. Näidisandmed: koolitus 1 „Java algkursus“ on andmebaasist (<code>3_import.sql</code>), sellel on et ja en tõlge. Koolitus 9 „Exceli algkursus“ (õppekeel ru, ainult et tõlge) on <strong>ainult läbimängu näidis</strong> olekule C. „Power BI edasijõudnutele“ on mockupi lk 7 põhjal uus koolitus, mis saab ID <code>10</code>. DTO-de väljad on <strong>ettepanek</strong> — need kinnitatakse plaanifailis.</p>
+    <p>Keeled tulevad päringust <code>GET /api/languages</code> (<code>language</code> tabel): <code>et</code> (põhikeel), <code>en</code> ja <code>ru</code>. Tõlkelipud on ainult keeltel, mille <code>requiresTranslation = true</code> (<code>et</code>, <code>en</code>). <code>ru</code> on ainult õppekeel („Koolituse keel“ rippmenüüs), sellesse koolituse sisu ei tõlgita. Näidisandmed: koolitus 1 „Java algkursus“ on andmebaasist (<code>3_import.sql</code>), sellel on et ja en tõlge. Koolitus 9 „Exceli algkursus“ (õppekeel ru, ainult et tõlge, mustand) on samuti andmebaasist ja sobib olekule C. „Power BI edasijõudnutele“ on mockupi lk 7 põhjal uus koolitus, mis saab ID <code>15</code>. DTO-de väljad on <strong>ettepanek</strong> — need kinnitatakse plaanifailis.</p>
     <div class="toolbar">
       <button class="tbtn" id="btn-a" type="button" data-mode="A"><span>A. Alusta uue koolitusega</span><span class="tstate">state: "new-training"</span></button>
       <button class="tbtn" id="btn-b" type="button" data-mode="B"><span>B. Muuda koolitust (Java algkursus)</span><span class="tstate">state: "update"</span></button>
@@ -379,7 +379,7 @@ textarea { min-height: 88px; resize: vertical; }
     return {
       trainings: {
         1: { trainingId: 1, categoryId: 1, trainingLanguageId: 1, locationId: 1, defaultLecturerId: 1, isOrderable: true, isPromoted: true, status: "P", fundingTypeIds: [1] },
-        // ainult läbimängu näidis: õppekeel ru (tõlget ei vaja), olemas ainult et tõlge
+        // 3_import.sql: õppekeel ru (tõlget ei vaja), olemas ainult et tõlge
         9: { trainingId: 9, categoryId: 1, trainingLanguageId: 3, locationId: 2, defaultLecturerId: 2, isOrderable: true, isPromoted: false, status: "U", fundingTypeIds: [] }
       },
       translations: {
@@ -387,8 +387,8 @@ textarea { min-height: 88px; resize: vertical; }
         2: { trainingTranslationId: 2, trainingId: 1, languageId: 2, title: "Java Basics", shortDescription: "Fundamentals of Java programming for beginners.", description: "The course covers Java syntax, object-oriented programming, and basic data structures." },
         17: { trainingTranslationId: 17, trainingId: 9, languageId: 1, title: "Exceli algkursus", shortDescription: "Tabelid, valemid ja diagrammid algajatele.", description: "Kursusel õpitakse töötama tabelitega, kasutama põhilisi valemeid ja looma diagramme." }
       },
-      nextTrainingId: 10,
-      nextTranslationId: 18
+      nextTrainingId: 15,
+      nextTranslationId: 26
     };
   }
 

@@ -34,56 +34,57 @@ Valikulised parameetrid: `@RequestParam(required = false)`; `null` = filtrit ei 
 
 **Response (200 OK):** `AdminTrainingSummaryDto.java` — leheküljestatud nimekiri.
 
-Näide vaikimisi päringust `?contentLang=et&searchText=&categoryId=0&trainingLanguageId=0&fundingTypeId=0&sortBy=createdAt&sortDirection=desc&page=0&limit=2` (`3_import.sql` andmed, kõik 8 koolitust on `status = 'P'`):
+Näide vaikimisi päringust `?contentLang=et&searchText=&categoryId=0&trainingLanguageId=0&fundingTypeId=0&sortBy=createdAt&sortDirection=desc&page=0&limit=2` (`3_import.sql` andmed: 13 aktiivset koolitust, kustutatud koolitus 14 ei tule):
 
 ```json
 {
-  "totalPages": 4,
-  "totalElements": 8,
+  "totalPages": 7,
+  "totalElements": 13,
   "adminTrainingSummaries": [
     {
-      "trainingId": 8,
-      "trainingTranslationId": 15,
-      "title": "SQL ja andmebaasid",
+      "trainingId": 13,
+      "trainingTranslationId": 23,
+      "title": "Tehisaru töövahendid arendajale",
       "categoryId": 1,
       "categoryName": "Programmeerimine",
       "trainingLanguageCode": "et",
       "trainingLanguageFlagIconCode": "fi-ee",
       "status": "P",
       "isOrderable": true,
-      "isPromoted": false,
-      "createdAt": "2026-08-20T06:00:00Z",
-      "updatedAt": "2026-08-20T06:00:00Z",
-      "hasAllTranslations": true,
-      "missingTranslationLanguageCodes": [],
+      "isPromoted": true,
+      "createdAt": "2026-09-25T12:10:00Z",
+      "updatedAt": "2026-09-26T06:00:00Z",
+      "hasAllTranslations": false,
+      "missingTranslationLanguageCodes": [
+        "en"
+      ],
       "fundingTypes": [
         {
           "fundingTypeId": 1,
           "fundingTypeName": "Töötukassa"
-        }
-      ]
-    },
-    {
-      "trainingId": 7,
-      "trainingTranslationId": 13,
-      "title": "Agiilne meeskonnajuhtimine",
-      "categoryId": 3,
-      "categoryName": "Juhtimine",
-      "trainingLanguageCode": "et",
-      "trainingLanguageFlagIconCode": "fi-ee",
-      "status": "P",
-      "isOrderable": true,
-      "isPromoted": false,
-      "createdAt": "2026-08-18T06:00:00Z",
-      "updatedAt": "2026-08-18T06:00:00Z",
-      "hasAllTranslations": true,
-      "missingTranslationLanguageCodes": [],
-      "fundingTypes": [
+        },
         {
           "fundingTypeId": 2,
           "fundingTypeName": "EL rahastus"
         }
       ]
+    },
+    {
+      "trainingId": 12,
+      "trainingTranslationId": 21,
+      "title": "Python andmeanalüüsiks",
+      "categoryId": 1,
+      "categoryName": "Programmeerimine",
+      "trainingLanguageCode": "en",
+      "trainingLanguageFlagIconCode": "fi-gb",
+      "status": "U",
+      "isOrderable": false,
+      "isPromoted": false,
+      "createdAt": "2026-09-18T07:00:00Z",
+      "updatedAt": "2026-09-18T07:00:00Z",
+      "hasAllTranslations": true,
+      "missingTranslationLanguageCodes": [],
+      "fundingTypes": []
     }
   ]
 }
@@ -157,7 +158,7 @@ FROM training t
 WHERE cl.requires_translation;
 ```
 
-**NB!** SQL-i pole veel andmebaasi vastu käivitatud — kontrolli esimese asjana (`1_reset` → `2_create` → `3_import`, siis `SELECT * FROM admin_training_summary WHERE content_language_code = 'et'`). `3_import.sql` andmetega peab tulema 8 rida keele kohta, kõigil `has_all_translations = true`.
+View on `2_create.sql`-is ja andmebaasis kontrollitud. `3_import.sql` andmetega on view's 14 rida keele kohta (sh kustutatud koolitus 14); `has_all_translations = false` koolitustel 9, 10 ja 13.
 
 | View veerg | Filter / sorteerimine / väli |
 |---|---|
@@ -178,7 +179,7 @@ View entity (nt `persistance/view/admintrainingsummary/AdminTrainingSummary.java
 
 View põhitabelid ja rahastustüübid — struktuur `2_create.sql`-is. `training.status` väärtused: `U` = mustand, `P` = publitseeritud, `D` = kustutatud (`TrainingStatus` enum, `DELETED("D")` lisatakse `DELETE-api-training-trainingId.md` taskis).
 
-Näidisandmed (`3_import.sql`): 8 koolitust (id 1–8), kõik `status = 'P'`, kõigil `et` ja `en` tõlge. Loodud vahemikus `2026-08-01` (id 1) kuni `2026-08-20` (id 8). Õppekeel `en` on koolitustel 4 ja 6. Rahastustüübita on koolitused 2 ja 6. Mustandi, kustutatud koolituse ja puuduva tõlke kontrollimiseks tuleb testis andmeid muuta (vt läbimängu näidised 9–14).
+Näidisandmed (`3_import.sql`): 14 koolitust. Publitseeritud (`P`): 1–8, 11, 13; mustandid (`U`): 9, 10, 12; kustutatud (`D`): 14 ("Photoshopi algkursus"). Ainult `et` tõlge (puudub `en`): 9, 10, 13. Õppekeel `ru`: 9; `en`: 4, 6, 12. "Uuendatud" tuleb tõlkest koolitustel 1, 10 ja 11 (tõlge muudetud hiljem kui koolitus). Rahastustüübita: 2, 6, 9, 12, 14. Mitte tellitavad: 2, 6, 12, 14. Esile tõstetud: 1, 4, 13. 13 aktiivset koolitust = 2 lehte (`limit=10`).
 
 ## Veaolukorrad
 

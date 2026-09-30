@@ -78,6 +78,8 @@ Esimene rida on mockupi märkmetest (`Veateated`) ja vastab olemasolevale mustri
 - [ ] Kustutatud koolitus (`status = "D"`) → 403 `TRAINING_DELETED`, staatus ei muutu
 - [ ] Teenusel on automaattestid (sh idempotentse kutse test)
 
+Näidisandmed: mustandid 9, 10, 12 (publitseerimine), kustutatud koolitus 14 (`403 TRAINING_DELETED`).
+
 ## Avatud küsimused
 
 1. **`TrainingStatus` enum — otsustatud:** luuakse `POST /api/training` taski käigus (esimene teenus, mis seda vajab). Kui see task tehakse enne, loo enum siin (`UNPUBLISHED("U")`, `PUBLISHED("P")`) — **mitte** `ApiStatus` (seal `"D"` = kustutatud).

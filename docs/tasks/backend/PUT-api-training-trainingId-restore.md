@@ -34,7 +34,7 @@ Muudetakse ainult `status` (ja auditeerimise kaudu `updated_at`). Struktuur vt `
 
 `status` väärtused (`TrainingStatus`): `UNPUBLISHED("U")`, `PUBLISHED("P")`, `DELETED("D")` (viimane lisatakse `DELETE-api-training-trainingId.md` taskis).
 
-Näidisandmed: `3_import.sql`-is kustutatud koolitusi pole — testi jaoks kustuta enne mõni koolitus (`DELETE /api/training/{trainingId}`).
+Näidisandmed: `3_import.sql`-is on kustutatud koolitus 14 ("Photoshopi algkursus") — selle taastamine viib selle mustandisse. Kustutamata koolituse juhtumi jaoks sobib nt 11 (`P`) või 10 (`U`).
 
 ## Veaolukorrad
 

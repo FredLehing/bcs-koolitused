@@ -18,16 +18,21 @@ Teenusel puudub request body.
 
 **Response (200 OK):** `List<TrainingTitleDto>` — kõigi aktiivsete (`status <> 'D'`) koolituste nimed, sorteeritud `title` järgi.
 
-Näide `?contentLang=et` (`3_import.sql` andmed):
+Näide `?contentLang=et` (`3_import.sql` andmed; kustutatud "Photoshopi algkursus" (14) ei tule):
 
 ```json
 [
   { "trainingId": 7, "title": "Agiilne meeskonnajuhtimine" },
+  { "trainingId": 10, "title": "Docker ja konteinerid" },
+  { "trainingId": 9, "title": "Exceli algkursus" },
   { "trainingId": 6, "title": "Figma praktikum" },
+  { "trainingId": 11, "title": "Git ja GitHub" },
   { "trainingId": 1, "title": "Java algkursus" },
   { "trainingId": 2, "title": "Projektijuhtimise põhitõed" },
+  { "trainingId": 12, "title": "Python andmeanalüüsiks" },
   { "trainingId": 3, "title": "Spring Boot veebiarendus" },
   { "trainingId": 8, "title": "SQL ja andmebaasid" },
+  { "trainingId": 13, "title": "Tehisaru töövahendid arendajale" },
   { "trainingId": 5, "title": "UX disaini alused" },
   { "trainingId": 4, "title": "Vue.js esmaspetsialist" }
 ]
