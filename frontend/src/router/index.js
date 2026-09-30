@@ -1,13 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from "@/views/HomeView.vue";
-import TestView from "@/views/TestView.vue";
-import LoginView from "@/views/LoginView.vue";
+import HomeView from '@/views/HomeView.vue'
+import TestView from '@/views/TestView.vue'
+import LoginView from '@/views/LoginView.vue'
 import TrainingsView from '@/views/TrainingsView.vue'
 import ErrorView from '@/views/ErrorView.vue'
 import TrainingFormView from '@/views/TrainingFormView.vue'
 import NotAuthorizedView from '@/views/NotAuthorizedView.vue'
 import TrainingView from '@/views/TrainingView.vue'
-
+import AdminTrainingsView from '@/views/AdminTrainingsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -43,6 +43,11 @@ const router = createRouter({
       component: TrainingFormView,
     },
     {
+      path: '/admin-trainings',
+      name: 'adminTrainingsRoute',
+      component: AdminTrainingsView,
+    },
+    {
       path: '/not-authorized',
       name: 'notAuthorizedRoute',
       component: NotAuthorizedView,
@@ -52,7 +57,7 @@ const router = createRouter({
       name: 'errorRoute',
       component: ErrorView,
     },
-  ]
+  ],
 })
 
 export default router

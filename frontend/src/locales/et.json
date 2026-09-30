@@ -12,6 +12,7 @@
     "feedback": "Tagasiside",
     "admin": "Admin",
     "addTraining": "Lisa uus koolitus",
+    "manageTrainings": "Koolituste haldus",
     "login": "Logi sisse",
     "logout": "Logi välja",
     "logoutModal": {
@@ -178,6 +179,75 @@
       "restoreTitle": "Taasta koolitus",
       "restoreMessage": "Kas soovid koolituse taastada? See läheb mustandisse, avalikuks muutub alles pärast publitseerimist.",
       "restoreMessageWithTitle": "Kas soovid koolituse „{title}“ taastada? See läheb mustandisse, avalikuks muutub alles pärast publitseerimist."
+    }
+  },
+  "pagination": {
+    "label": "Leheküljed",
+    "previous": "Eelmine",
+    "next": "Järgmine"
+  },
+  "trainingDeleteButton": {
+    "label": "Kustuta",
+    "modalTitle": "Kustuta koolitus",
+    "modalMessage": "Kas soovid koolituse „{title}“ kustutada? Koolitus kaob admini tabelist (vaikimisi) ja avalikust nimekirjast. Selle saab hiljem taastada.",
+    "confirm": "Kustuta"
+  },
+  "adminTrainings": {
+    "title": "Koolituste haldus",
+    "search": "Otsi",
+    "searchPlaceholder": "Otsi koolituse nime järgi…",
+    "searchHelp": "Otsitakse koolituse nimest. Iga sõna peab nimes esinema, käändeid ei kohandata. Nimede valikus on ainult aktiivsed koolitused — kustutatud koolituse leidmiseks vali filtrites Staatus „Kustutatud“.",
+    "noResults": "Tulemusi ei leitud",
+    "totalCount": "Kokku {n} koolitust | Kokku {n} koolitus | Kokku {n} koolitust",
+    "view": "Vaata",
+    "translationsComplete": "Kõik tõlked olemas",
+    "translationsMissing": "Puudub: {languages}",
+    "columns": {
+      "createdAt": "Lisatud",
+      "updatedAt": "Uuendatud",
+      "title": "Koolituse nimi",
+      "category": "Kategooria",
+      "language": "Keel",
+      "status": "Staatus",
+      "translations": "Tõlked",
+      "settings": "Sätted",
+      "actions": "Tegevused"
+    },
+    "status": {
+      "U": "Mustand",
+      "P": "Publitseeritud",
+      "D": "Kustutatud"
+    },
+    "settings": {
+      "orderable": "Tellitav",
+      "promoted": "Esile tõstetud"
+    },
+    "messages": {
+      "deleted": "Koolitus kustutatud",
+      "published": "Koolitus on publitseeritud",
+      "unpublished": "Koolitus on liigutatud mustandisse",
+      "restored": "Koolitus taastatud (mustand)"
+    },
+    "filters": {
+      "title": "Otsingu filtrid",
+      "show": "▾ Ava otsingu filtrid",
+      "hide": "▴ Peida otsingu filtrid",
+      "activeCount": "{n} filtrit aktiivne | {n} filter aktiivne | {n} filtrit aktiivne",
+      "filter": "Filtreeri",
+      "clear": "Tühjenda filtrid",
+      "category": "Kategooria",
+      "trainingLanguage": "Koolituse keel",
+      "fundingType": "Rahastus",
+      "status": "Staatus",
+      "active": "Aktiivsed",
+      "orderable": "Tellitav",
+      "promoted": "Esile tõstetud",
+      "translations": "Tõlked",
+      "translationsComplete": "Olemas",
+      "translationsMissing": "Puuduvad",
+      "all": "Kõik",
+      "yes": "Jah",
+      "no": "Ei"
     }
   }
 }

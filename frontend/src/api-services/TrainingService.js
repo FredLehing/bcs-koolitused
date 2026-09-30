@@ -62,6 +62,30 @@ export default {
     return axios.put(`/api/training/${trainingId}/restore`)
   },
 
+  // Backend task: docs/tasks/backend/DELETE-api-training-trainingId.md
+  sendDeleteTrainingRequest(trainingId) {
+    return axios.delete(`/api/training/${trainingId}`)
+  },
+
+  // Backend task: docs/tasks/backend/GET-api-admin-trainings.md
+  // adminTrainingFilter: contentLang, searchText, categoryId, trainingLanguageId, fundingTypeId,
+  // status, isOrderable, isPromoted, hasAllTranslations, sortBy, sortDirection, page, limit.
+  // null väärtusega parameetreid axios päringusse ei lisa (valikulised filtrid).
+  sendGetAdminTrainingsRequest(adminTrainingFilter) {
+    return axios.get('/api/admin-trainings', {
+      params: adminTrainingFilter,
+    })
+  },
+
+  // Backend task: docs/tasks/backend/GET-api-training-titles.md
+  sendGetTrainingTitlesRequest(contentLang) {
+    return axios.get('/api/training-titles', {
+      params: {
+        contentLang: contentLang,
+      },
+    })
+  },
+
   // Backend task: docs/tasks/backend/POST-api-training-trainingId-training-translation.md (3. etapp)
   sendPostTrainingTranslationRequest(trainingId, trainingTranslationCreateRequest) {
     return axios.post(
