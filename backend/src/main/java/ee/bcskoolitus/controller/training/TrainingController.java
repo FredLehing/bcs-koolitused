@@ -1,5 +1,7 @@
 package ee.bcskoolitus.controller.training;
 
+import ee.bcskoolitus.controller.training.dto.AdminTrainingFilterDto;
+import ee.bcskoolitus.controller.training.dto.AdminTrainingSummaryDto;
 import ee.bcskoolitus.controller.training.dto.TrainingCreateRequestDto;
 import ee.bcskoolitus.controller.training.dto.TrainingCreateResponseDto;
 import ee.bcskoolitus.controller.training.dto.TrainingDto;
@@ -12,6 +14,7 @@ import ee.bcskoolitus.controller.training.dto.TrainingUpdateRequestDto;
 import ee.bcskoolitus.infrastructure.error.ApiError;
 import ee.bcskoolitus.service.TrainingService;
 import io.swagger.v3.oas.annotations.Operation;
+import org.springdoc.core.annotations.ParameterObject;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -57,6 +60,23 @@ public class TrainingController {
                                                     @RequestParam String contentLang,
                                                     @RequestParam String searchText) {
         return trainingService.findFilteredTrainings(categoryId, fundingTypeId, limit, page, trainingLanguageId, contentLang, searchText);
+    }
+
+    @GetMapping("/admin-trainings")
+    @Operation(summary = "Tagastab admini koolituste tabeli (filtrid, sorteerimine, leheküljestus)",
+            description = "status puudub = aktiivsed (U ja P). searchText otsib ainult pealkirjast (iga sõna peab esinema). "
+                    + "sortBy: createdAt / updatedAt / title / categoryName / trainingLanguageCode / status / hasAllTranslations (tundmatu → createdAt), "
+                    + "sortDirection: asc / desc. Puuduva contentLang tõlke korral põhikeele pealkiri ja kategooria.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Kohustuslik parameeter puudub või on vigane -> 'errorCode:' INCORRECT_INPUT",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            )
+    })
+    public AdminTrainingSummaryDto findAdminTrainings(@Valid @ParameterObject AdminTrainingFilterDto adminTrainingFilterDto) {
+        return trainingService.findAdminTrainings(adminTrainingFilterDto);
     }
 
     @GetMapping("/training-titles")

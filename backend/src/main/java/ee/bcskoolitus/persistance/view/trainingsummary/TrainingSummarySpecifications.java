@@ -1,5 +1,6 @@
 package ee.bcskoolitus.persistance.view.trainingsummary;
 
+import ee.bcskoolitus.infrastructure.util.LikePatterns;
 import ee.bcskoolitus.persistance.training.fundingtype.TrainingFundingType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
@@ -11,8 +12,6 @@ import java.util.List;
 
 // Iga meetod tagastab ühe WHERE tingimuse tüki; filtri väärtus 0 või tühi tekst = tingimust ei rakendata
 public class TrainingSummarySpecifications {
-
-    private static final char LIKE_ESCAPE_CHAR = '\\';
 
     public static Specification<TrainingSummary> hasCategoryId(Integer categoryId) {
         return (root, query, cb) -> categoryId == 0
@@ -47,24 +46,14 @@ public class TrainingSummarySpecifications {
     // Iga sõna peab esinema (contains, tõstutundetu) kas pealkirjas või lühikirjelduses
     public static Specification<TrainingSummary> containsAllWords(String searchText) {
         return (root, query, cb) -> {
-            if (searchText == null || searchText.isBlank()) {
-                return cb.conjunction();
-            }
             List<Predicate> wordPredicates = new ArrayList<>();
-            for (String word : searchText.trim().toLowerCase().split("\\s+")) {
-                String pattern = "%" + escapeLikeWildcards(word) + "%";
+            for (String word : LikePatterns.toLowerCaseWords(searchText)) {
+                String pattern = LikePatterns.toContainsPattern(word);
                 wordPredicates.add(cb.or(
-                        cb.like(cb.lower(root.get("title")), pattern, LIKE_ESCAPE_CHAR),
-                        cb.like(cb.lower(root.get("shortDescription")), pattern, LIKE_ESCAPE_CHAR)));
+                        cb.like(cb.lower(root.get("title")), pattern, LikePatterns.ESCAPE_CHAR),
+                        cb.like(cb.lower(root.get("shortDescription")), pattern, LikePatterns.ESCAPE_CHAR)));
             }
             return cb.and(wordPredicates.toArray(new Predicate[0]));
         };
-    }
-
-    // Kasutaja sisestatud % ja _ otsitakse sõna-sõnalt, mitte LIKE metamärkidena
-    private static String escapeLikeWildcards(String word) {
-        return word.replace("\\", "\\\\")
-                .replace("%", "\\%")
-                .replace("_", "\\_");
     }
 }

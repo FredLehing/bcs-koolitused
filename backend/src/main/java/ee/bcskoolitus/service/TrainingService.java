@@ -5,6 +5,9 @@ import ee.bcskoolitus.infrastructure.exception.ForbiddenException;
 import ee.bcskoolitus.infrastructure.exception.PrimaryKeyNotFoundException;
 import ee.bcskoolitus.infrastructure.util.HtmlSanitizer;
 import ee.bcskoolitus.controller.common.dto.FundingTypeDto;
+import ee.bcskoolitus.controller.training.dto.AdminTrainingFilterDto;
+import ee.bcskoolitus.controller.training.dto.AdminTrainingSummaryDto;
+import ee.bcskoolitus.controller.training.dto.AdminTrainingSummaryItemDto;
 import ee.bcskoolitus.controller.training.dto.TrainingCreateRequestDto;
 import ee.bcskoolitus.controller.training.dto.TrainingCreateResponseDto;
 import ee.bcskoolitus.controller.training.dto.TrainingSummaryDto;
@@ -30,6 +33,7 @@ import ee.bcskoolitus.persistance.training.translation.TrainingTranslationReposi
 import ee.bcskoolitus.persistance.view.admintrainingsummary.AdminTrainingSummary;
 import ee.bcskoolitus.persistance.view.admintrainingsummary.AdminTrainingSummaryMapper;
 import ee.bcskoolitus.persistance.view.admintrainingsummary.AdminTrainingSummaryRepository;
+import ee.bcskoolitus.persistance.view.admintrainingsummary.AdminTrainingSummarySpecifications;
 import ee.bcskoolitus.persistance.view.trainingsummary.TrainingSummary;
 import ee.bcskoolitus.persistance.view.trainingsummary.TrainingSummaryMapper;
 import ee.bcskoolitus.persistance.view.trainingsummary.TrainingSummaryRepository;
@@ -46,6 +50,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 
 import static ee.bcskoolitus.Error.TRAINING_DELETED;
 import static ee.bcskoolitus.Error.TRANSLATION_EXISTS;
@@ -53,6 +58,17 @@ import static ee.bcskoolitus.Error.TRANSLATION_EXISTS;
 @Service
 @RequiredArgsConstructor
 public class TrainingService {
+
+    // GET /api/admin-trainings sortBy väärtus → AdminTrainingSummary väli (staatus töövoo järjekorras U → P → D)
+    private static final Map<String, String> ADMIN_TRAINING_SORT_PROPERTIES = Map.of(
+            "createdAt", "createdAt",
+            "updatedAt", "updatedAt",
+            "title", "title",
+            "categoryName", "categoryName",
+            "trainingLanguageCode", "trainingLanguageCode",
+            "status", "statusOrder",
+            "hasAllTranslations", "hasAllTranslations");
+    private static final String DEFAULT_ADMIN_TRAINING_SORT_PROPERTY = "createdAt";
 
     private final TrainingSummaryRepository trainingSummaryRepository;
     private final TrainingSummaryMapper trainingSummaryMapper;
@@ -111,6 +127,49 @@ public class TrainingService {
         trainingSummaryDto.setTotalElements(filteredTrainingSummaryPage.getTotalElements());
         trainingSummaryDto.setTrainingSummaries(trainingSummaryItemDtos);
         return trainingSummaryDto;
+    }
+
+    public AdminTrainingSummaryDto findAdminTrainings(AdminTrainingFilterDto adminTrainingFilterDto) {
+        Pageable pageable = PageRequest.of(adminTrainingFilterDto.getPage(), adminTrainingFilterDto.getLimit(),
+                createAdminTrainingSort(adminTrainingFilterDto.getSortBy(), adminTrainingFilterDto.getSortDirection()));
+        Specification<AdminTrainingSummary> adminTrainingSummarySpecification = createAdminTrainingSummarySpecification(adminTrainingFilterDto);
+        Page<AdminTrainingSummary> adminTrainingSummaryPage = adminTrainingSummaryRepository.findAll(adminTrainingSummarySpecification, pageable);
+        List<AdminTrainingSummaryItemDto> adminTrainingSummaryItemDtos = findAndCreateAdminTrainingSummaryItemDtos(adminTrainingFilterDto.getContentLang(), adminTrainingSummaryPage);
+        return new AdminTrainingSummaryDto(adminTrainingSummaryPage.getTotalPages(), adminTrainingSummaryPage.getTotalElements(), adminTrainingSummaryItemDtos);
+    }
+
+    // Tundmatu sortBy → createdAt; sortDirection "asc" → kasvav, kõik muu → kahanev.
+    // Lisaks alati id järgi (view id = row_number üle training_id), et võrdsete väärtuste järjekord oleks stabiilne.
+    static Sort createAdminTrainingSort(String sortBy, String sortDirection) {
+        String sortProperty = ADMIN_TRAINING_SORT_PROPERTIES.getOrDefault(sortBy, DEFAULT_ADMIN_TRAINING_SORT_PROPERTY);
+        Sort.Direction direction = "asc".equalsIgnoreCase(sortDirection) ? Sort.Direction.ASC : Sort.Direction.DESC;
+        return Sort.by(new Sort.Order(direction, sortProperty), Sort.Order.asc("id"));
+    }
+
+    private static Specification<AdminTrainingSummary> createAdminTrainingSummarySpecification(AdminTrainingFilterDto adminTrainingFilterDto) {
+        return Specification.allOf(
+                AdminTrainingSummarySpecifications.hasContentLanguageCode(adminTrainingFilterDto.getContentLang()),
+                AdminTrainingSummarySpecifications.hasStatus(adminTrainingFilterDto.getStatus()),
+                AdminTrainingSummarySpecifications.hasCategoryId(adminTrainingFilterDto.getCategoryId()),
+                AdminTrainingSummarySpecifications.hasTrainingLanguageId(adminTrainingFilterDto.getTrainingLanguageId()),
+                AdminTrainingSummarySpecifications.hasFundingTypeId(adminTrainingFilterDto.getFundingTypeId()),
+                AdminTrainingSummarySpecifications.hasIsOrderable(adminTrainingFilterDto.getIsOrderable()),
+                AdminTrainingSummarySpecifications.hasIsPromoted(adminTrainingFilterDto.getIsPromoted()),
+                AdminTrainingSummarySpecifications.hasAllTranslations(adminTrainingFilterDto.getHasAllTranslations()),
+                AdminTrainingSummarySpecifications.titleContainsAllWords(adminTrainingFilterDto.getSearchText()));
+    }
+
+    private List<AdminTrainingSummaryItemDto> findAndCreateAdminTrainingSummaryItemDtos(String contentLang, Page<AdminTrainingSummary> adminTrainingSummaryPage) {
+        List<AdminTrainingSummaryItemDto> adminTrainingSummaryItemDtos = adminTrainingSummaryMapper.toAdminTrainingSummaryItemDtos(adminTrainingSummaryPage.getContent());
+        for (AdminTrainingSummaryItemDto adminTrainingSummaryItemDto : adminTrainingSummaryItemDtos) {
+            handleAddFundingTypes(adminTrainingSummaryItemDto, contentLang);
+        }
+        return adminTrainingSummaryItemDtos;
+    }
+
+    private void handleAddFundingTypes(AdminTrainingSummaryItemDto adminTrainingSummaryItemDto, String contentLang) {
+        List<FundingTypeTranslation> fundingTypeTranslations = fundingTypeTranslationRepository.findTrainingFundingTypeTranslationsBy(adminTrainingSummaryItemDto.getTrainingId(), contentLang);
+        adminTrainingSummaryItemDto.setFundingTypes(fundingTypeTranslationMapper.toFundingTypeDtos(fundingTypeTranslations));
     }
 
     // Aktiivsete (status U, P) koolituste nimed contentLang keeles, puuduva tõlke korral põhikeeles
