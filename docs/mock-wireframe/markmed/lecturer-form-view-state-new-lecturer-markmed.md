@@ -11,7 +11,7 @@ Frontend rada: /lecturer-form
 
 Vaatega seotud lisainfo:
 state: "new-lecturer" — query parameetreid pole. Avaneb navbari menüüst "Admin" → "Lisa uus koolitaja" või AdminLecturersView nupust. Pealkiri "Lisa uus koolitaja", lipukesi pole, kiirnupp "Koolitajad" → /admin-lecturers.
-Kaart "Koolitaja andmed": Täisnimi *, Pilt (valikuline: "Vali pilt" → eelvaade, "Eemalda"; PNG, JPEG või WebP kuni 2 MB, kontrollitakse enne saatmist). Kaart "Tõlge (et)": Ametinimetus *, Lühikirjeldus *, Kirjeldus * (RichTextEditor). Välja "Ametinimetus" sildi kõrval on "?" ikoon tooltip'iga: "Ametinimetus kuvatakse koolitaja kaardil nime all. Kirjuta lühidalt, millega koolitaja tegeleb, nt „Tarkvaraarendaja ja Java koolitaja“ või „UX-disainer“. Iga keele jaoks eraldi tõlge." Lühikirjelduse all vihje "Kuvatakse koolitaja kaardil koolituse lehel ja toimumiskorra juures".
+Kaart "Koolitaja andmed": Täisnimi *, Pilt (valikuline: "Vali pilt" → eelvaade, "Eemalda"; PNG, JPEG või WebP kuni 2 MB, kontrollitakse enne saatmist). Kaart "Tõlge (et)": Ametinimetus *, Lühikirjeldus *, Kirjeldus * (RichTextEditor). Välja "Ametinimetus" sildi kõrval on "?" ikoon tooltip'iga: "Ametinimetus kuvatakse koolitaja kaardil nime all. Kirjuta lühidalt, millega koolitaja tegeleb, nt „Lektor/konsultant“ või „Projektijuht/lektor“. Iga keele jaoks eraldi tõlge." Lühikirjelduse all vihje "Kuvatakse koolitaja kaardil koolituse lehel ja toimumiskorra juures".
 Vead AlertDanger.vue-ga ("Täida kõik kohustuslikud väljad", pildi viga või backendi message). "Lisa" → POST /api/lecturer (userId localStorage'ist). Vastuse järgi router.replace → state "update", eduteade "Koolitaja lisatud".
 ```
 
@@ -60,12 +60,12 @@ LecturerCreateRequestDto.java
 Response (200):
 LecturerCreateResponseDto.java
 {
-  "lecturerId": 5,
-  "lecturerTranslationId": 7
+  "lecturerId": 10,
+  "lecturerTranslationId": 16
 }
 
 API teenuse lisainfo:
-Loob koolitaja ühes transaktsioonis: lecturer (status = "A", created_by = userId), lecturer_photo (ainult kui photo ≠ null) ja põhikeele (language.is_main_language) lecturer_translation. Kohustuslikud: userId, fullName (kuni 255), title (ametinimetus, kuni 255), shortDescription (kuni 255), description (HTML, mitte tühi). photo on Base64 või null; photoContentType on kohustuslik, kui photo on olemas. Lubatud tüübid image/png, image/jpeg, image/webp; dekodeeritud pilt kuni 2 MB. Sama nimega koolitajat ei keelata. Vastuse järgi teeb frontend router.replace → state "update".
+Loob koolitaja ühes transaktsioonis: lecturer (status = "A", created_by = userId), lecturer_photo (ainult kui photo ≠ null) ja põhikeele (language.is_main_language) lecturer_translation. Kohustuslikud: userId, fullName (kuni 255), title (ametinimetus, kuni 255), shortDescription (kuni 255), description (HTML, mitte tühi). photo on Base64 või null; photoContentType on kohustuslik, kui photo on olemas. Lubatud tüübid image/png, image/jpeg, image/webp; dekodeeritud pilt kuni 2 MB. Backend normaliseerib pildi: lõikab ruuduks, vähendab 400×400-ks ja salvestab JPEG-ina (content_type = image/jpeg, EXIF eemaldatud). Sama nimega koolitajat ei keelata. Vastuse järgi teeb frontend router.replace → state "update".
 
 Veateated:
 HTTP: 403

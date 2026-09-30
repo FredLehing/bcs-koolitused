@@ -228,6 +228,9 @@ td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
 @media (max-width: 1100px) { .below { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .below .note { grid-column: 1 / -1; } }
 @media (max-width: 700px) { .below { grid-template-columns: minmax(0, 1fr); } .page { padding-inline: 16px; } }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+.embed .sitenav { display: none; }
+/* hidden-atribuut peab peitma ka elemendid, millel on oma display (nt .menu { display: grid }) */
+[hidden] { display: none !important; }
 </style>
 
 <div class="page">
@@ -285,6 +288,21 @@ td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
 <script>
 (function () {
   "use strict";
+
+  /* ---------- Prototüübi kest (../index.html): embed-režiim ja vaadete vaheline navigeerimine ---------- */
+  // Eraldi avatuna (ilma ?embed=1) käitub läbimäng nagu varem.
+  var SHELL_Q = new URLSearchParams(location.search);
+  var EMBED = SHELL_Q.get("embed") === "1" && window.parent !== window;
+  if (EMBED) {
+    document.documentElement.classList.add("embed");
+    var sendHeight = function () { window.parent.postMessage({ type: "bcs-height", height: document.documentElement.scrollHeight }, "*"); };
+    if (window.ResizeObserver) new ResizeObserver(sendHeight).observe(document.body);
+    window.addEventListener("load", sendHeight);
+  }
+  function goRoute(path, standaloneMessage) {
+    if (EMBED) { window.parent.postMessage({ type: "bcs-navigate", path: path }, "*"); return; }
+    toast(standaloneMessage || "router.push → " + path);
+  }
 
   /* ---------- Andmed (3_import.sql) ---------- */
   var LANGUAGES = [
@@ -515,7 +533,7 @@ td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
   function doNavigate(kind, id) {
     var r = findRow(id);
     var route = (kind === "view" ? "/training" : "/training-form") + "?trainingId=" + r.trainingId + "&trainingTranslationId=" + r.trainingTranslationId;
-    toast("router.push → " + route);
+    goRoute(route);
   }
 
   /* ---------- Modal ja teade ---------- */
@@ -541,6 +559,7 @@ td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
   var ICON = {
     eye: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
     pencil: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>',
+    calendar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
     trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>'
   };
   var FLAG_SVG = {
@@ -614,6 +633,7 @@ td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
         '<td>' + (deleted ? '<span class="hint">—</span>' : '<div class="icons">' +
           '<button type="button" class="ibtn" data-act="view" data-id="' + r.trainingId + '" title="Vaata" aria-label="Vaata">' + ICON.eye + '</button>' +
           '<button type="button" class="ibtn" data-act="edit" data-id="' + r.trainingId + '" title="Muuda" aria-label="Muuda">' + ICON.pencil + '</button>' +
+          '<button type="button" class="ibtn" data-act="calendar" data-id="' + r.trainingId + '" title="Kalender" aria-label="Kalender">' + ICON.calendar + '</button>' +
           '<button type="button" class="ibtn del" data-act="delete" data-id="' + r.trainingId + '" title="Kustuta" aria-label="Kustuta">' + ICON.trash + '</button>' +
         '</div>') + '</td>' +
         '<td><button type="button" class="sbtn small" data-act="status" data-id="' + r.trainingId + '">' + STATUS_ACTIONS[r.status].label + '</button></td>' +
@@ -747,10 +767,11 @@ td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
       var id = +b.dataset.id;
       if (b.dataset.act === "status") doStatus(id);
       else if (b.dataset.act === "delete") doDelete(id);
+      else if (b.dataset.act === "calendar") goRoute("/admin-training-courses?trainingId=" + id);
       else doNavigate(b.dataset.act, id);
       return;
     }
-    if (b.id === "b-new") { toast("router.push → /training-form (TrainingFormView, state \"new-training\")"); return; }
+    if (b.id === "b-new") { goRoute("/training-form", "router.push → /training-form (TrainingFormView, state \"new-training\")"); return; }
     if (b.id === "b-search") doSearch();
     else if (b.id === "b-toggle") { ui.open = !ui.open; renderView(); renderKv(); document.getElementById("b-toggle").focus(); }
     else if (b.id === "b-filter") doFilter();
@@ -769,7 +790,7 @@ td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
   adminMenu.onclick = function (e) {
     var b = e.target.closest("button"); if (!b) return;
     setAdminMenu(false);
-    toast(b.dataset.nav === "/admin-trainings" ? "Oled juba sellel lehel (/admin-trainings)" : "router.push → " + b.dataset.nav);
+    if (b.dataset.nav === "/admin-trainings") toast("Oled juba sellel lehel (/admin-trainings)"); else goRoute(b.dataset.nav);
   };
   document.addEventListener("click", function (e) { if (!e.target.closest(".admin")) setAdminMenu(false); });
 

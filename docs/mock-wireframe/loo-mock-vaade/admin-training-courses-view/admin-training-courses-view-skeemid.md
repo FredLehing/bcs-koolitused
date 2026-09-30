@@ -1,23 +1,23 @@
-# TrainingCoursesView.vue ja CourseFormView.vue — skeemid
+# AdminTrainingCoursesView.vue ja CourseFormView.vue — skeemid
 
-Koolituse kalender (koolituse andmed + toimumiskordade tabel) ja toimumiskorra vorm. Selles failis on otsused, andmebaasi view ettepanek ja andmevood skeemidena (Mermaid). Märkmed: `docs/mock-wireframe/markmed/training-courses-view-markmed.md` ja `docs/mock-wireframe/markmed/course-form-view-markmed.md`. Interaktiivne läbimäng: `training-courses-view-labimang.html`.
+Koolituse kalender (koolituse andmed + toimumiskordade tabel) ja toimumiskorra vorm. Selles failis on otsused, andmebaasi view ettepanek ja andmevood skeemidena (Mermaid). Märkmed: `docs/mock-wireframe/markmed/admin-training-courses-view-markmed.md` ja `docs/mock-wireframe/markmed/course-form-view-markmed.md`. Interaktiivne läbimäng: `admin-training-courses-view-labimang.html`.
 
 Eeskuju: `docs/mock-wireframe/loo-mock-vaade/admin-trainings-view/` (skeemid, läbimäng, tööde järjekord) ja `docs/mock-wireframe/markmed/admin-trainings-view-markmed.md`.
 
 ## Otsused
 
-### Koolituse kalender — `TrainingCoursesView.vue`
+### Koolituse kalender — `AdminTrainingCoursesView.vue`
 
-- Roll: Admin. Rada `/training-courses?trainingId={id}`.
+- Roll: Admin. Rada `/admin-training-courses?trainingId={id}`.
 - Avaneb AdminTrainingsView rea uuest ikoonist "Kalender" ja TrainingFormView kiirnupust "Kalender".
-- Ülal koolituse andmed (suures pildis nagu `/training`): pealkiri, staatus, kategooria, õppekeel (lipp), toimumiskoht, vaikimisi koolitaja, rahastus, sätted. Vaikimisi koolitaja kuvatakse koolitaja kaardina (`LecturerCard.vue`: pilt, nimi, ametinimetus, lühikirjeldus — vt admin-lecturers-view skeemid). Korduvad osad tehakse komponentideks, mida saab kasutada ka `/training` vaates.
+- Ülal koolituse andmed (suures pildis nagu `/training`): pealkiri, staatus, kategooria, õppekeel (lipp), toimumiskoht, koolitajad, rahastus, sätted. Koolitajad (`training_lecturer`, `sort_order` järjekorras) kuvatakse **ainult nimedena** komadega (koolitaja kaart `LecturerCard.vue` on avalikul koolituse lehel, mitte admini kalendris). Korduvad osad tehakse komponentideks, mida saab kasutada ka `/training` vaates.
   - Andmed kuvatakse kasutajaliidese keeles (store'i `contentLang`); puuduva tõlke korral põhikeeles (sama reegel nagu AdminTrainingsView-s). Keele vahetusel laaditakse koolituse andmed uuesti.
   - Koolituse kaardil on lingid "Vaata" (`/training?...`) ja "Muuda" (`/training-form?...`) ning kiirnupp "Koolituste haldus" (`/admin-trainings`).
 - Kaart "Kirjeldus" (pikk `description`, `RichTextContent`) on **vaikimisi peidus**, avatakse lingiga "▾ Näita kirjeldust" / "▴ Peida kirjeldus" (sama muster nagu AdminTrainingsView filtrikaart).
-- Kalendritabel: üks rida iga toimumiskorra (`course`) kohta. Veerud: Algus | Lõpp (`30/09/2026`) | Päevi | Akad. tunde | Hind (€) | Koolitaja | Ruum | Staatus | Osalejaid | Märkmed | Veebilink | Tegevused.
+- Kalendritabel: üks rida iga toimumiskorra (`course`) kohta. Veerud: Algus | Lõpp (`30/09/2026`) | Päevi | Akad. tunde | Hind (€) | Koolitajad | Ruum | Staatus | Osalejaid | Märkmed | Veebilink | Tegevused.
   - `notes` sisu ei kuvata — ainult `hasNotes` (✓/✗). Samamoodi `hasMeetingLink` (✓/✗).
   - Osalejaid = `course_participant` ridade arv.
-  - Koolitaja või ruum puudub → "—".
+  - Koolitajad: nimed komadega `sort_order` järjekorras (`course_lecturer`). Koolitajad või ruum puuduvad → "—".
   - Järjestus: tulevased eespool (lähim üleval), möödunud nende all (hiliseim üleval). Leheküljestust pole (toimumiskordi on koolitusel vähe).
   - **Sorteerimine ainult frontendis** (kogu nimekiri on laaditud, backend `sortBy` parameetreid ei saa). Sorteeritavad veerud: Algus, Hind, Staatus, Osalejaid (`SortableColumnHeader.vue`). Klõpsud: 1. kasvav → 2. kahanev → 3. tagasi vaikimisi järjestusse (nool kaob). Sorteeritakse kogu nimekiri (tulevased ja möödunud segamini); võrdsete väärtuste korral jääb vaikimisi järjestus. Staatuse kasvav järjekord: Mustand → Avatud → Täis → Tühistatud. Lüliti "Näita ka möödunud" ja kustutamine sorteerimist ei lähtesta.
   - Lüliti "Näita ka möödunud" (vaikimisi väljas) → päring `includePast=true`.
@@ -32,13 +32,13 @@ Eeskuju: `docs/mock-wireframe/loo-mock-vaade/admin-trainings-view/` (skeemid, l�
 ### Toimumiskorra vorm — `CourseFormView.vue`
 
 - Roll: Admin. Kaks olekut: uus (`/course-form?trainingId={id}`) ja muutmine (`/course-form?courseId={id}`).
-- Pealkiri: "Uus toimumiskord" / "Toimumiskorra muutmine", selle all koolituse nimi (`contentLang` keeles). Kiirnupp "Kalender" → `/training-courses?trainingId={id}`.
-- Väljad: algus, lõpp (`<input type="date">`), päevi, akadeemilisi tunde, hind (€), koolitaja (vaikimisi koolituse `default_lecturer`, sama "Vali koolitaja" modal nagu TrainingFormView-s, `LecturerSelectModal.vue`; valitud koolitaja kaart `LecturerCard.vue` nupu all), ruum (rippmenüü, esimene valik "Ruum puudub"), veebilink, märkmed, staatus.
-- Uue toimumiskorra vaikimisi väärtused: staatus `U` (Mustand), koolitaja = koolituse vaikimisi koolitaja, ülejäänud tühjad.
+- Pealkiri: "Uus toimumiskord" / "Toimumiskorra muutmine", selle all koolituse nimi (`contentLang` keeles). Kiirnupp "Kalender" → `/admin-training-courses?trainingId={id}`.
+- Väljad: algus, lõpp (`<input type="date">`), päevi, akadeemilisi tunde, hind (€), **koolitajad** (mitu, `course_lecturer`: valitud koolitajate nimekiri, × eemaldab, ↑ ↓ muudab järjekorda, "+ Lisa koolitaja" avab sama "Vali koolitaja" modali nagu TrainingFormView-s, juba valitud koolitajaid ei pakuta; kuvatakse ainult nimed), ruum (rippmenüü, esimene valik "Ruum puudub"), veebilink, märkmed, staatus.
+- Uue toimumiskorra vaikimisi väärtused: staatus `U` (Mustand), **koolitajad = koolituse koolitajad** (`GET /api/admin-training/{trainingId}` → `lecturers`, samas järjekorras), ülejäänud tühjad. Edasi on toimumiskorra koolitajad koolitusest sõltumatud.
 - **Päevade arv (eeldus):** kui algus ja lõpp on valitud ja admin pole päevade arvu ise muutnud, täidab vorm selle tööpäevade (E–R) arvuga; admin saab väärtust muuta. Vihje: "Arvutatud tööpäevadest, saad muuta". Backend arvu ei arvuta.
 - Staatust muudetakse **vormi rippmenüüst** (U / O / F / X; `D` valikus ei ole). Kustutamine on muutmise olekus eraldi prügikasti ikoon kinnitusega (`CourseDeleteButton.vue`).
 - Frontendi kontroll enne saatmist: kohustuslikud algus, lõpp, päevi (≥ 1), akad. tunde (≥ 1), hind (≥ 0), staatus; lõpp ei tohi olla enne algust. Viga → `AlertDanger` ("Täida kõik kohustuslikud väljad" / "Lõppkuupäev ei saa olla varasem kui alguskuupäev").
-- "Salvesta" → `POST` / `PUT` → suunatakse kalendrisse (`/training-courses?trainingId={id}`), eduteade "Toimumiskord lisatud" / "Toimumiskord salvestatud". "Tagasi" → kalendrisse ilma salvestamata.
+- "Salvesta" → `POST` / `PUT` → suunatakse kalendrisse (`/admin-training-courses?trainingId={id}`), eduteade "Toimumiskord lisatud" / "Toimumiskord salvestatud". "Tagasi" → kalendrisse ilma salvestamata.
 - `created_by` = sisselogitud kasutaja (`userId`), nagu koolituse lisamisel.
 - Muutmise olekus avatakse kustutatud või olematu toimumiskord → 404 → üldine veavaade.
 
@@ -46,10 +46,10 @@ Eeskuju: `docs/mock-wireframe/loo-mock-vaade/admin-trainings-view/` (skeemid, l�
 
 - `lecturer.photo` veerg eemaldatakse; pilt on eraldi 1:1 tabelis `lecturer_photo` (`lecturer_id` unikaalne). Rida puudub = koolitajal pilti pole.
 - **Miks:** JPA laeb `bytea` välja entity'ga alati kaasa (laisk laadimine vajaks bytecode enhancement'it). Eraldi tabeliga ei loeta pilte näiteks "Vali koolitaja" otsingus ega teistes koolitajate päringutes. Kaob ka `NOT NULL` + `''::bytea` kohatäide.
-- `content_type` (nt `image/png`, `image/jpeg`) salvestatakse koos pildiga, et frontend saaks koostada `data:{contentType};base64,{photo}` URL-i.
+- `content_type` salvestatakse koos pildiga (normaliseeritud pildil `image/jpeg`); pilditeenus saadab selle `Content-Type` päisena.
 - `GET /api/lecturers` → `LecturerDto` ilma `lecturerPhoto`-ta (`{ lecturerId, lecturerName }`). Muutub olemasolev kood: `Lecturer` entity (`photo` väli kaob), `LecturerMapper` (`bytesToBase64` liigub pildi mapperisse), `LecturerDto`, `MockDatabase.js`.
-- Pilti kuvab koolitaja kaart (`LecturerCard.vue`), mis laeb andmed teenusest `GET /api/lecturer-summary/{lecturerId}?contentLang=` (pilt, nimi, ametinimetus, lühikirjeldus; vt `docs/mock-wireframe/loo-mock-vaade/admin-lecturers-view/admin-lecturers-view-skeemid.md`). `GET /api/admin-training/{trainingId}` pilti **ei** tagasta — pilt loetakse ühest kohast. Pildi puudumisel kohatäite ikoon (`PhUserCircle`).
-- Hiljem, kui pilte on vaja nimekirjades (nt avalik koolitajate leht), sobib eraldi teenus `GET /api/lecturer/{lecturerId}/photo` (tagastab pildi baidid õige `Content-Type`-iga, kasutatav `<img src>`-is). Praegu seda ei tehta.
+- Kalender ja toimumiskorra vorm pilte ei kuva (koolitajad on nimedena). Pilti kuvab avalikul koolituse lehel koolitaja kaart (`LecturerCard.vue`, teenus `GET /api/lecturer-summary/{lecturerId}` — vt `docs/mock-wireframe/loo-mock-vaade/admin-lecturers-view/admin-lecturers-view-skeemid.md`). `GET /api/admin-training/{trainingId}` pilti **ei** tagasta.
+- **Uuendus (avalik koolitajate leht):** pilt tuleb pilditeenusest `GET /api/lecturer/{lecturerId}/photo?v={photoVersion}` ja DTO-d tagastavad Base64 asemel `photoVersion`; üleslaadimisel pilt normaliseeritakse (400×400 JPEG). Vt `docs/mock-wireframe/loo-mock-vaade/lecturers-view/lecturers-view-skeemid.md`, "Pildid".
 
 ### Staatused (`course.status`, ingliskeelsed ühetähelised koodid)
 
@@ -78,7 +78,6 @@ Eeskuju: `docs/mock-wireframe/loo-mock-vaade/admin-trainings-view/` (skeemid, l�
 | `DELETE /api/course/{courseId}` | soft delete (`status = 'D'`) |
 | `GET /api/rooms` | ruumide nimekiri vormi rippmenüüsse |
 | `GET /api/lecturers?search=` | **olemas, muutub** — "Vali koolitaja" modal; `lecturerPhoto` eemaldatakse DTO-st, tagastab ainult aktiivsed koolitajad |
-| `GET /api/lecturer-summary/{lecturerId}?contentLang=` | koolitaja kaart (`LecturerCard.vue`) — defineeritud admin-lecturers-view skeemides |
 
 Uus viga `Error` enumisse: `COURSE_END_BEFORE_START("Lõppkuupäev ei saa olla varasem kui alguskuupäev")` → `403` (`POST` ja `PUT`).
 
@@ -114,20 +113,7 @@ ALTER TABLE lecturer_photo
 ;
 ```
 
-Seed (`3_import.sql`): `lecturer` INSERT-ist kaob `photo`; Mari Tammel (1) on näidispilt (32×32 PNG avatar), Jaan Kaskil (2) pilti pole — nii on näha mõlemad olukorrad.
-
-```sql
--- Table: lecturer
-INSERT INTO lecturer (id, full_name, created_at, updated_at, created_by) VALUES
-    (1, 'Mari Tamm', '2026-07-15 09:00:00', '2026-07-15 09:00:00', 1),
-    (2, 'Jaan Kask', '2026-07-15 09:00:00', '2026-07-15 09:00:00', 1);
-
--- Table: lecturer_photo
-INSERT INTO lecturer_photo (id, lecturer_id, photo, content_type, created_at, updated_at) VALUES
-    (1, 1, decode('iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAAAaElEQVR42mO48/w3TRHDqAWjFsCQfv49NERNCzBNJ94OBrJNJ9IOBkpMJ8aOUQsGvQU0T0X0yAf0yMmjpekAW0DDZEpMLiNoDQOFRhO0hoFapuOyg+4WUGI6VjvoawHlpmPaMWoBQQsAjEBZdEobAXMAAAAASUVORK5CYII=', 'base64'), 'image/png', '2026-07-15 09:00:00', '2026-07-15 09:00:00');
-```
-
-Lisaks `setval(pg_get_serial_sequence('lecturer_photo', 'id'), …)` teiste järjestuste kõrvale.
+Seed: koolitajad (9) ja pildid on `admin-lecturers-view-skeemid.md` jaotises 1 ning taskis `docs/tasks/backend/lecturer-db-changes.md` — Rain Tüüril (1) on näidispilt, teistel pilti pole.
 
 Backend: uus entity `persistance/lecturer/photo/LecturerPhoto` (`@ManyToOne` / `@OneToOne` väli `lecturer`) ja `LecturerPhotoRepository.findByLecturerId(Integer)` → `Optional`. Pildi loeb ainult `GET /api/lecturer-summary/{lecturerId}` (ja koolitaja vormi `GET /api/lecturer/{lecturerId}`).
 
@@ -154,15 +140,17 @@ SELECT c.id                                                         AS course_id
        c.number_of_academic_hours,
        c.price,
        c.status,
-       c.lecturer_id,
-       l.full_name                                                  AS lecturer_name,
+       -- koolitajad sort_order järjekorras, nt 'Rain Tüür, Meelis Teern'; NULL = koolitajaid pole
+       (SELECT string_agg(l.full_name, ', ' ORDER BY crl.sort_order)
+        FROM course_lecturer crl
+                 JOIN lecturer l ON l.id = crl.lecturer_id
+        WHERE crl.course_id = c.id)                                 AS lecturer_names,
        c.room_id,
        r.name                                                       AS room_name,
        COALESCE(btrim(c.notes), '') <> ''                           AS has_notes,
        COALESCE(btrim(c.meeting_link), '') <> ''                    AS has_meeting_link,
        (SELECT count(*) FROM course_participant cp WHERE cp.course_id = c.id) AS participant_count
 FROM course c
-         LEFT JOIN lecturer l ON l.id = c.lecturer_id
          LEFT JOIN room r ON r.id = c.room_id;
 ```
 
@@ -175,7 +163,7 @@ FROM course c
 | `days_from_today` | sorteerimine `is_past, days_from_today, course_id` |
 | `number_of_days`, `number_of_academic_hours`, `price` | veerud |
 | `status` | filter `status <> 'D'`; märgis |
-| `lecturer_name`, `room_name` | veerud (`NULL` → "—") |
+| `lecturer_names`, `room_name` | veerud (`NULL` → "—") |
 | `has_notes`, `has_meeting_link` | ✓/✗ |
 | `participant_count` | Osalejaid (`bigint` → `Long`) |
 
@@ -183,18 +171,35 @@ FROM course c
 
 Et kõik olukorrad oleksid kohe näha (täna = 2026-09-30), saab koolitus 1 "Java algkursus" mitu toimumiskorda; koolitusel 10 "Docker ja konteinerid" (mustand) toimumiskordi pole → tühi tabel.
 
-| id | Koolitus | Algus – Lõpp | Päevi / tunde | Hind | Koolitaja | Ruum | Status | Märkmed | Veebilink | Osalejaid | Olukord |
+| id | Koolitus | Algus – Lõpp | Päevi / tunde | Hind | Koolitajad | Ruum | Status | Märkmed | Veebilink | Osalejaid | Olukord |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| 1 | 1 | 05/10/2026 – 09/10/2026 | 5 / 40 | 490 | Mari Tamm | A101 | `O` | ✓ | ✗ | 1 | olemas, `'AVA'` → `'O'` |
-| 2 | 2 | 02/11/2026 – 04/11/2026 | 3 / 24 | 350 | Jaan Kask | — | `O` | ✗ | ✓ | 0 | olemas, `'AVA'` → `'O'` |
-| 3 | 1 | 07/09/2026 – 11/09/2026 | 5 / 40 | 490 | Mari Tamm | A101 | `O` | ✓ | ✗ | 1 | möödunud |
-| 4 | 1 | 19/10/2026 – 23/10/2026 | 5 / 40 | 490 | Jaan Kask | A102 | `X` | ✓ | ✗ | 0 | tühistatud |
-| 5 | 1 | 16/11/2026 – 20/11/2026 | 5 / 40 | 520 | Mari Tamm | — | `F` | ✗ | ✓ | 0 | täis, veebis |
-| 6 | 1 | 07/12/2026 – 11/12/2026 | 5 / 40 | 520 | — | A101 | `U` | ✗ | ✗ | 0 | mustand, koolitaja valimata |
-| 7 | 1 | 08/06/2026 – 12/06/2026 | 5 / 40 | 450 | Jaan Kask | A102 | `O` | ✗ | ✓ | 0 | möödunud |
-| 8 | 1 | 30/11/2026 – 04/12/2026 | 5 / 40 | 490 | Mari Tamm | A101 | `D` | ✗ | ✗ | 0 | kustutatud, ei kuvata |
+| 1 | 1 | 05/10/2026 – 09/10/2026 | 5 / 40 | 490 | Rain Tüür, Meelis Teern | Assauwe | `O` | ✓ | ✗ | 1 | olemas, `'AVA'` → `'O'` |
+| 2 | 2 | 02/11/2026 – 04/11/2026 | 3 / 24 | 350 | Merje Vaide | — | `O` | ✗ | ✓ | 0 | olemas, `'AVA'` → `'O'` |
+| 3 | 1 | 07/09/2026 – 11/09/2026 | 5 / 40 | 490 | Rain Tüür | Assauwe | `O` | ✓ | ✗ | 1 | möödunud |
+| 4 | 1 | 19/10/2026 – 23/10/2026 | 5 / 40 | 490 | Meelis Teern | Bremeni | `X` | ✓ | ✗ | 0 | tühistatud |
+| 5 | 1 | 16/11/2026 – 20/11/2026 | 5 / 40 | 520 | Rain Tüür | — | `F` | ✗ | ✓ | 0 | täis, veebis |
+| 6 | 1 | 07/12/2026 – 11/12/2026 | 5 / 40 | 520 | — | Assauwe | `U` | ✗ | ✗ | 0 | mustand, koolitajad valimata |
+| 7 | 1 | 08/06/2026 – 12/06/2026 | 5 / 40 | 450 | Meelis Teern | Bremeni | `O` | ✗ | ✓ | 0 | möödunud |
+| 8 | 1 | 30/11/2026 – 04/12/2026 | 5 / 40 | 490 | Rain Tüür | Assauwe | `D` | ✗ | ✗ | 0 | kustutatud, ei kuvata |
 
 Lisaks `course_participant` rida kursusele 3 (osaleja 1).
+
+Toimumiskordade koolitajad (`course_lecturer`; toimumiskord 1 on kahe koolitajaga, 6 ilma):
+
+```sql
+-- Table: course_lecturer (toimumiskorra koolitajad)
+INSERT INTO course_lecturer (id, course_id, lecturer_id, sort_order) VALUES
+    (1, 1, 1, 1),
+    (2, 1, 8, 2),
+    (3, 2, 2, 1),
+    (4, 3, 1, 1),
+    (5, 4, 8, 1),
+    (6, 5, 1, 1),
+    (7, 7, 8, 1),
+    (8, 8, 1, 1);
+```
+
+**Ruumid** (`room`, juba `3_import.sql`-is): 1 Assauwe, 2 Bremeni, 3 Eppingi, 4 Hellemanni, 5 Landskrone, 6 Megede. `status`: Bremeni `'KIN'`, teised `'VAB'` (tähendus on lahtine küsimus, jaotis 8). **Koolitajad** ja koolituste koolitajad (`training_lecturer`): `admin-lecturers-view-skeemid.md`, jaotis 1 (koolitus 1 → Rain Tüür, Meelis Teern; 10 → Andres Liitmaa; 11 → Meelis Teern, Rain Tüür).
 
 ---
 
@@ -203,16 +208,14 @@ Lisaks `course_participant` rida kursusele 3 (osaleja 1).
 ```mermaid
 sequenceDiagram
     actor Admin
-    participant FE as TrainingCoursesView.vue
+    participant FE as AdminTrainingCoursesView.vue
     participant BE as Backend
     participant DB as Andmebaas
 
     Admin->>FE: AdminTrainingsView "Kalender" (Java algkursus)
     FE->>BE: GET /api/admin-training/1?contentLang=et
-    BE->>DB: admin_training_summary (training_id = 1, 'et')<br/>+ training (location, default_lecturer)<br/>+ training_translation.description
+    BE->>DB: admin_training_summary (training_id = 1, 'et')<br/>+ training (location) + training_lecturer (koolitajad)<br/>+ training_translation.description
     BE-->>FE: AdminTrainingDto
-    FE->>BE: LecturerCard: GET /api/lecturer-summary/1?contentLang=et
-    BE-->>FE: LecturerSummaryDto (pilt, nimi, ametinimetus, lühikirjeldus)
     FE->>BE: GET /api/training/1/courses?includePast=false
     BE->>DB: SELECT … FROM course_summary<br/>WHERE training_id = 1 AND status <> 'D' AND NOT is_past<br/>ORDER BY is_past, days_from_today, course_id
     BE-->>FE: List<CourseSummaryDto>
@@ -235,7 +238,7 @@ stateDiagram-v2
     [*] --> Uus: /course-form?trainingId=1
     [*] --> Muutmine: /course-form?courseId=4
 
-    Uus: Uus toimumiskord<br/>GET /api/admin-training/1<br/>GET /api/rooms<br/>staatus U, koolitaja = vaikimisi koolitaja
+    Uus: Uus toimumiskord<br/>GET /api/admin-training/1<br/>GET /api/rooms<br/>staatus U, koolitajad = koolituse koolitajad
     Muutmine: Toimumiskorra muutmine<br/>GET /api/course/4 → trainingId<br/>GET /api/admin-training/{trainingId}<br/>GET /api/rooms
 
     Uus --> Kalender: "Salvesta"<br/>POST /api/training/1/course
@@ -244,7 +247,7 @@ stateDiagram-v2
     Uus --> Kalender: "Tagasi"
     Muutmine --> Kalender: "Tagasi"
 
-    Kalender: /training-courses?trainingId=1<br/>eduteade
+    Kalender: /admin-training-courses?trainingId=1<br/>eduteade
 ```
 
 ```mermaid
@@ -269,7 +272,7 @@ Päevade arvu täitmine (eeldus, vt lahtised küsimused): `startDate` või `endD
 ```mermaid
 sequenceDiagram
     actor Admin
-    participant FE as TrainingCoursesView.vue
+    participant FE as AdminTrainingCoursesView.vue
     participant Btn as CourseDeleteButton.vue
     participant BE as Backend
     participant DB as Andmebaas
@@ -297,14 +300,12 @@ Vormis (muutmise olek) on sama komponent; `event-course-deleted` järel suunatak
 |---|---|---|---|
 | kalender | Laadimine | `GET /api/admin-training/{trainingId}?contentLang={UI keel}` | koolituse kaart ja kirjeldus (ka keele vahetusel) |
 | kalender | Laadimine | `GET /api/training/{trainingId}/courses?includePast=false` | tabel (lüliti muutmisel uuesti) |
-| kalender | Laadimine | `GET /api/lecturer-summary/{defaultLecturerId}?contentLang={UI keel}` | `LecturerCard`: vaikimisi koolitaja kaart (ka keele vahetusel) |
 | kalender | Tegevus | `DELETE /api/course/{courseId}` | `CourseDeleteButton` → kinnitus → tabel uuesti |
 | kalender | Navigeerimine | — | "+ Lisa toimuv koolitus" → `/course-form?trainingId={id}`; pliiats → `/course-form?courseId={id}`; "Vaata" / "Muuda" koolitust; "Koolituste haldus" |
 | vorm | Laadimine | `GET /api/course/{courseId}` | ainult muutmise olekus; annab `trainingId` |
-| vorm | Laadimine | `GET /api/admin-training/{trainingId}?contentLang={UI keel}` | koolituse nimi ja vaikimisi koolitaja |
+| vorm | Laadimine | `GET /api/admin-training/{trainingId}?contentLang={UI keel}` | koolituse nimi ja koolitajad (uue toimumiskorra eeltäitmine) |
 | vorm | Laadimine | `GET /api/rooms` | ruumi rippmenüü |
 | vorm | Tegevus | `GET /api/lecturers?search=` | "Vali koolitaja" modal (olemas) |
-| vorm | Laadimine / tegevus | `GET /api/lecturer-summary/{lecturerId}?contentLang={UI keel}` | `LecturerCard`: valitud koolitaja kaart (avamisel ja iga valiku järel) |
 | vorm | Tegevus | `POST /api/training/{trainingId}/course` | "Salvesta" (uus) |
 | vorm | Tegevus | `PUT /api/course/{courseId}` | "Salvesta" (muutmine) |
 | vorm | Tegevus | `DELETE /api/course/{courseId}` | prügikast (muutmine) |
@@ -315,21 +316,19 @@ Vormis (muutmise olek) on sama komponent; `event-course-deleted` järel suunatak
 
 | Komponent | Uus / olemas | Kirjeldus |
 |---|---|---|
-| `views/TrainingCoursesView.vue` | uus | kalender; hoiab `trainingId`, `training`, `courses`, `includePast`, `isDescriptionOpen`, `sortBy`, `sortDirection`; `computed: sortedCourses` |
+| `views/AdminTrainingCoursesView.vue` | uus | kalender; hoiab `trainingId`, `training`, `courses`, `includePast`, `isDescriptionOpen`, `sortBy`, `sortDirection`; `computed: sortedCourses` |
 | `components/common/SortableColumnHeader.vue` | olemas | sorteeritav veeru pealkiri (Algus, Hind, Staatus, Osalejaid); komponenti muuta pole vaja: see emit'ib ainult `sortKey`, suuna ja kolmanda klõpsu (`sortBy = null`, nool kaob) loogika on vaates |
 | `views/CourseFormView.vue` | uus | vorm, olekud `new` / `update` |
-| `router/index.js` | muudetakse | rajad `/training-courses` (`trainingCoursesRoute`), `/course-form` (`courseFormRoute`) |
-| `NavigationService.js` | muudetakse | `navigateToTrainingCoursesView(trainingId)`, `navigateToCourseFormView({ trainingId, courseId })` |
+| `router/index.js` | muudetakse | rajad `/admin-training-courses` (`adminTrainingCoursesRoute`), `/course-form` (`courseFormRoute`) |
+| `NavigationService.js` | muudetakse | `navigateToAdminTrainingCoursesView(trainingId)`, `navigateToCourseFormView({ trainingId, courseId })` |
 | `views/AdminTrainingsView.vue` | muudetakse | rea tegevustesse ikoon "Kalender" (kustutatud real peidus) |
 | `views/TrainingFormView.vue` | muudetakse | kiirnupp "Kalender" (olekutes `update` ja `new-translation`) |
-| `components/training/TrainingSummaryCard.vue` | uus, jagatud | pealkiri + staatuse märgis + faktid (kategooria, õppekeele lipp, toimumiskoht, vaikimisi koolitaja `LecturerCard`-ina, rahastus, sätted); slot tegevuslinkidele. Hiljem ka `TrainingView.vue` paremas veerus |
+| `components/training/TrainingSummaryCard.vue` | uus, jagatud | pealkiri + staatuse märgis + faktid (kategooria, õppekeele lipp, toimumiskoht, koolitajad nimedena, rahastus, sätted); slot tegevuslinkidele. Hiljem ka `TrainingView.vue` paremas veerus |
 | `components/common/CollapsibleCard.vue` | uus, jagatud | link "▾ Näita … / ▴ Peida …" + kaart slotiga (kirjeldus; sobib ka AdminTrainingFilters toggle'iks) |
 | `components/common/RichTextContent.vue` | olemas | kirjeldus |
 | `components/common/CourseStatusBadge.vue` | uus | U/O/F/X märgis |
 | `components/common/CheckMark.vue` | uus | ✓/✗ (`value` Boolean, `title`) |
 | `components/common/CourseDeleteButton.vue` | uus | propsid `courseId`, `startDate`, `endDate`, `participantCount`; `ConfirmModal` + `DELETE`; emit `event-course-deleted` |
-| `components/common/LecturerCard.vue` | uus, jagatud | prop `lecturerId`; laeb `GET /api/lecturer-summary/{id}` ise; pilt, nimi, ametinimetus, lühikirjeldus; 404 → ei kuvata (vt admin-lecturers-view skeemid) |
-| `components/common/LecturerAvatar.vue` | uus | propsid `photo`, `contentType`, `size`; `<img src="data:{contentType};base64,{photo}">` või `PhUserCircle` kohatäide |
 | `components/modals/LecturerSelectModal.vue` | olemas | "Vali koolitaja" (pilti ei kasuta) |
 | `components/forms/RoomsDropdown.vue` | uus | `GET /api/rooms`, esimene valik "Ruum puudub" (`null`) |
 | `components/common/FlagIcon.vue`, `EditTrainingLink.vue`, `ConfirmModal.vue`, `AlertDanger.vue` | olemas | |
@@ -348,19 +347,19 @@ Vormis (muutmise olek) on sama komponent; `event-course-deleted` järel suunatak
 
 ## 9. Balsamiq AI käsud
 
-### TrainingCoursesView
+### AdminTrainingCoursesView
 
 ```text
 Create a desktop wireframe of an admin page "Koolituse kalender" in a web app.
 Top: site navigation bar with logo and links (Koolitused, Teenused, Ettevõttest, Kontakt), a dropdown "Admin ▾" and "Logi välja" on the right.
 Header row: page title "Koolituse kalender" on the left, a secondary button "Koolituste haldus" and a primary button "+ Lisa toimuv koolitus" on the right.
-Below: a card with the training title "Java algkursus", a green badge "Publitseeritud" and small links "Vaata" and "Muuda". Inside the card a two-column list of label/value pairs: "Kategooria: Programmeerimine", "Õppekeel: Estonian flag", "Toimumiskoht: BCS Koolitus", "Vaikimisi koolitaja:" followed by a small card with a round photo, the name "Mari Tamm" in bold, a grey line "Tarkvaraarendaja ja Java koolitaja" and one sentence "Üle 10 aasta kogemust tarkvaraarenduse koolitajana.", "Rahastus: Töötukassa", "Sätted: • Tellitav • Esile tõstetud".
+Below: a card with the training title "Java algkursus", a green badge "Publitseeritud" and small links "Vaata" and "Muuda". Inside the card a two-column list of label/value pairs: "Kategooria: Programmeerimine", "Õppekeel: Estonian flag", "Toimumiskoht: BCS Koolitus", "Koolitajad: Rain Tüür, Meelis Teern", "Rahastus: Töötukassa", "Sätted: • Tellitav • Esile tõstetud".
 Below the card: a small text link with a down arrow "▾ Näita kirjeldust" (the description card is collapsed).
 Below: a toggle switch "Näita ka möödunud" (off).
-Main area: a data table with columns "Algus" (sortable), "Lõpp", "Päevi", "Akad. tunde", "Hind (€)" (sortable), "Koolitaja", "Ruum", "Staatus" (sortable), "Osalejaid" (sortable), "Märkmed", "Veebilink", "Tegevused".
+Main area: a data table with columns "Algus" (sortable), "Lõpp", "Päevi", "Akad. tunde", "Hind (€)" (sortable), "Koolitajad", "Ruum", "Staatus" (sortable), "Osalejaid" (sortable), "Märkmed", "Veebilink", "Tegevused".
 Sortable column headers look like links; no sort arrow is shown by default (default order is chronological).
-Show 4 rows, for example: "05/10/2026 | 09/10/2026 | 5 | 40 | 490,00 | Mari Tamm | A101 | badge Avatud | 1 | green check | red X | pencil icon, trash icon".
-Other rows have status badges "Tühistatud", "Täis" and "Mustand"; one row has "—" in Koolitaja, one has "—" in Ruum.
+Show 4 rows, for example: "05/10/2026 | 09/10/2026 | 5 | 40 | 490,00 | Rain Tüür, Meelis Teern | Assauwe | badge Avatud | 1 | green check | red X | pencil icon, trash icon".
+Other rows have status badges "Tühistatud", "Täis" and "Mustand"; one row has "—" in Koolitajad, one has "—" in Ruum.
 Below the table: text "Kokku 4 toimumiskorda".
 ```
 
@@ -374,7 +373,7 @@ Main area: a card titled "Toimumiskorra andmed" with a form in a two-column grid
 "Algus *" date input, "Lõpp *" date input,
 "Päevi *" number input with a small hint "Arvutatud tööpäevadest, saad muuta", "Akadeemilisi tunde *" number input,
 "Hind (€) *" number input, "Staatus *" dropdown showing "Mustand",
-"Koolitaja" with a small button "Vali koolitaja" and below it a small card (round photo, "Mari Tamm" in bold, grey line "Tarkvaraarendaja ja Java koolitaja", one sentence of short description), "Ruum" dropdown showing "Ruum puudub",
+"Koolitajad": a small list "1. Rain Tüür ↑ ↓ ×", "2. Meelis Teern ↑ ↓ ×", a button "+ Lisa koolitaja", "Ruum" dropdown showing "Ruum puudub",
 "Veebilink" text input across both columns,
 "Märkmed" multi-line textarea across both columns.
 Bottom of the card: primary button "Salvesta" and secondary button "Tagasi".

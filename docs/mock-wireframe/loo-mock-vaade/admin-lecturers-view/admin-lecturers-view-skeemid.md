@@ -5,7 +5,7 @@ Koolitajate haldus: nimekiri (`AdminLecturersView.vue`), koolitaja lisamise/muut
 Eeskuju:
 - vormi olekud ja tõlkeloogika — `docs/mock-wireframe/loo-mock-vaade/form-view/training-form-view-skeemid.md` (TrainingFormView);
 - nimekiri, soft delete ja taastamine — `docs/mock-wireframe/loo-mock-vaade/admin-trainings-view/admin-trainings-view-skeemid.md` (AdminTrainingsView);
-- koolitaja pilt (`lecturer_photo` tabel) — `docs/mock-wireframe/loo-mock-vaade/training-courses-view/training-courses-view-skeemid.md`, jaotis 1.
+- koolitaja pilt (`lecturer_photo` tabel) — `docs/mock-wireframe/loo-mock-vaade/admin-training-courses-view/admin-training-courses-view-skeemid.md`, jaotis 1.
 
 ## Otsused
 
@@ -17,31 +17,38 @@ Eeskuju:
   - "Koolitajad" → `/admin-lecturers` (i18n `navbar.manageLecturers`).
 - **Staatus** (`lecturer.status`, `varchar(1)`): `A` = aktiivne (`LecturerStatus.ACTIVE`), `D` = kustutatud (`LecturerStatus.DELETED`, soft delete). Mustandi/publitseerimise olekut koolitajal pole.
 
+### Mitu koolitajat — `training_lecturer` ja `course_lecturer`
+
+- Koolitusel ja toimumiskorral võib olla **mitu koolitajat** (ka 0). Seostabelid `training_lecturer` ja `course_lecturer` (veerg `sort_order` = kuvamise järjekord, 1 = esimene); eraldi "peakoolitaja" rolli pole. `training.default_lecturer_id` ja `course.lecturer_id` eemaldatakse.
+- Koolituse koolitajad on "vaikimisi meeskond": **uue toimumiskorra vorm eeltäidetakse koolituse koolitajatega**; edasi on toimumiskorra koolitajad koolitusest sõltumatud (koolituse koolitajate hilisem muutmine olemasolevaid toimumiskordi ei muuda).
+- Vormides (TrainingFormView, CourseFormView) on väli **"Koolitajad"**: valitud koolitajate nimekiri (× eemaldab, ↑ ↓ muudab järjekorda), "+ Lisa koolitaja" avab "Vali koolitaja" modali (juba valitud koolitajaid ei pakuta). API-s `lecturerIds: [1, 8]` (järjekord = `sort_order`) ja vastustes `lecturers: [{ lecturerId, lecturerName }]`.
+- Kuvamine: avalikul koolituse lehel (`/training`) on iga koolitaja jaoks `LecturerCard`; admini kalendris (koolituse kaart, tabeli veerg "Koolitajad", toimumiskorra vorm) ainult nimed.
+- Kustutatud koolitaja: olemasolevad seosed jäävad; uueks koolitajaks teda lisada ei saa (404), aga juba seotud koolitajaga saab koolitust / toimumiskorda edasi salvestada.
+- Koolitajate nimekirja arvud ja kustutamise keeld loetakse seostabelitest (vt view allpool); avaliku profiili "Koolitused" = publitseeritud koolitused `training_lecturer` kaudu.
+
 ### Koolitaja tõlge — samad väljad nagu koolitusel
 
 `lecturer_translation` tabelis on `bio` asemel samad väljad nagu `training_translation`-il:
 
 | Väli | Vormis | Tähendus | Kus kuvatakse |
 |---|---|---|---|
-| `title` | "Ametinimetus *" | lühidalt, millega koolitaja tegeleb, nt "Tarkvaraarendaja ja Java koolitaja", "UX-disainer" | koolitaja kaardil nime all, admini nimekirjas |
+| `title` | "Ametinimetus *" | lühidalt, millega koolitaja tegeleb, nt "Lektor/konsultant", "Projektijuht/lektor" | koolitaja kaardil nime all, admini nimekirjas |
 | `short_description` | "Lühikirjeldus *" | 1–2 lauset | koolitaja kaardil |
 | `description` | "Kirjeldus *" (`RichTextEditor`) | pikk tutvustus | tulevikus avalikul koolitajate lehel |
 
 - Kõik kolm on kohustuslikud; `title` ja `short_description` kuni 255 märki (nagu koolitusel).
-- Välja "Ametinimetus" sildi kõrval on **küsimärgi ikoon tooltip'iga** (sama muster nagu AdminTrainingsView otsingu selgitus): "Ametinimetus kuvatakse koolitaja kaardil nime all. Kirjuta lühidalt, millega koolitaja tegeleb, nt „Tarkvaraarendaja ja Java koolitaja“ või „UX-disainer“. Iga keele jaoks eraldi tõlge."
+- Välja "Ametinimetus" sildi kõrval on **küsimärgi ikoon tooltip'iga** (sama muster nagu AdminTrainingsView otsingu selgitus): "Ametinimetus kuvatakse koolitaja kaardil nime all. Kirjuta lühidalt, millega koolitaja tegeleb, nt „Lektor/konsultant“ või „Projektijuht/lektor“. Iga keele jaoks eraldi tõlge."
 - Välja "Lühikirjeldus" all vihje: "Kuvatakse koolitaja kaardil koolituse lehel ja toimumiskorra juures."
 - AI tõlge tõlgib kõik kolm välja korraga (nagu koolituse AI tõlge: `title`, `shortDescription`, `description`).
 
 ### Koolitaja kaart — `LecturerCard.vue`
 
-- Kuvab: pilt (`LecturerAvatar`), nimi, ametinimetus (`title`), lühikirjeldus (`shortDescription`) — kasutajaliidese keeles (store'i `contentLang`), puuduva tõlke korral põhikeeles.
+- Kuvab: pilt (`LecturerAvatar`, pilt pilditeenusest `GET /api/lecturer/{lecturerId}/photo?v={photoVersion}` (vt `lecturers-view-skeemid.md`, "Pildid")), nimi, ametinimetus (`title`), lühikirjeldus (`shortDescription`) — kasutajaliidese keeles (store'i `contentLang`), puuduva tõlke korral põhikeeles.
 - Komponent laeb andmed ise: prop `lecturerId`, päring `GET /api/lecturer-summary/{lecturerId}?contentLang=` (ka `lecturerId` või keele muutumisel). `lecturerId = null` → kaarti ei kuvata.
 - Kustutatud või olematu koolitaja → 404 → kaarti ei kuvata (üldisele veavaatele ei suunata).
-- Kasutavad:
-  - `TrainingView.vue` (`/training`) — parema veeru olemasolev kohatäide "Koolitaja" (`trainingView.sidebar.lecturer`): koolituse vaikimisi koolitaja;
-  - `TrainingCoursesView.vue` — koolituse kaardil vaikimisi koolitaja;
-  - `CourseFormView.vue` — valitud koolitaja kaart "Vali koolitaja" nupu all (toimumiskorra koolitaja).
-- Seepärast ei tagasta `GET /api/admin-training/{trainingId}` enam `defaultLecturerPhoto` / `defaultLecturerPhotoContentType` — pilt tuleb ainult `lecturer-summary` teenusest (training-courses-view skeemid ja märkmed on uuendatud).
+- Kasutab:
+  - `TrainingView.vue` (`/training`) — parema veeru olemasolev kohatäide "Koolitaja" (`trainingView.sidebar.lecturer`): koolituse koolitajad (iga koolitaja jaoks oma kaart);
+- Seepärast ei tagasta `GET /api/admin-training/{trainingId}` enam `defaultLecturerPhoto` / `defaultLecturerPhotoContentType` — pilt tuleb ainult `lecturer-summary` teenusest (admin-training-courses-view skeemid ja märkmed on uuendatud).
 
 ### Koolitajate nimekiri — `AdminLecturersView.vue`
 
@@ -51,13 +58,13 @@ Eeskuju:
 - Veerud: Nimi | Ametinimetus | Tõlked | Koolitusi | Tulevasi toimumiskordi | Uuendatud | Tegevused.
   - **Ametinimetus** = `title` kasutajaliidese keeles, puudumisel põhikeeles.
   - **Tõlked** = ✓, kui tõlge on olemas igas keeles, mille `requires_translation = true`; muidu ✗, mille tooltip näitab puuduvaid keeli ("Puudub: en") — sama nagu AdminTrainingsView-s.
-  - **Koolitusi** = aktiivsed koolitused (`status <> 'D'`), mille vaikimisi koolitaja ta on.
+  - **Koolitusi** = aktiivsed koolitused (`status <> 'D'`), mille koolitajate hulgas ta on (`training_lecturer`).
   - **Tulevasi toimumiskordi** = toimumiskorrad, kus ta on koolitaja, `end_date >= täna` ja `status NOT IN ('D', 'X')`.
   - **Uuendatud** = hiliseim `lecturer`, `lecturer_translation` ja `lecturer_photo` `updated_at`, kuvatakse `30/09/2026`.
   - **Tegevused**: "Muuda" (pliiats) → `/lecturer-form?lecturerId={id}&lecturerTranslationId={id}` (kasutajaliidese keele tõlge, puudumisel põhikeele oma) ja "Kustuta" (prügikast, `LecturerDeleteButton.vue`).
-- **Kustutamine** (`LecturerDeleteButton.vue`, sama muster nagu `TrainingDeleteButton`): prügikast → kinnituse modal "Kas soovid koolitaja „Kadri Lepp“ kustutada?" → `DELETE /api/lecturer/{lecturerId}` → nimekiri uuesti, eduteade "Koolitaja kustutatud".
+- **Kustutamine** (`LecturerDeleteButton.vue`, sama muster nagu `TrainingDeleteButton`): prügikast → kinnituse modal "Kas soovid koolitaja „Kersti Laidvee“ kustutada?" → `DELETE /api/lecturer/{lecturerId}` → nimekiri uuesti, eduteade "Koolitaja kustutatud".
   - Kui `upcomingCourseCount > 0`, on prügikast keelatud (`disabled`) ja tooltip ütleb: "Koolitajal on tulevasi toimumiskordi — vali neile enne teine koolitaja". Backend kontrollib sama (`403 LECTURER_HAS_UPCOMING_COURSES`); kui see siiski tuleb (nt teises aknas lisati toimumiskord), näidatakse backendi `message`-it ja laaditakse nimekiri uuesti.
-  - Vaikimisi koolitaja roll koolitustel kustutamist ei keela — koolitus jääb seotuks, aga koolitaja kaarti enam ei kuvata.
+  - Koolitaja roll koolitustel kustutamist ei keela — koolitus jääb seotuks, aga koolitaja kaarti enam ei kuvata.
 - **Lüliti "Näita kustutatud"** (vaikimisi väljas) → päring `includeDeleted=true`. Kustutatud read on tuhmimad, märgisega "Kustutatud"; neil on ainult nupp "Taasta" (kinnitusega, `PUT /api/lecturer/{lecturerId}/restore` → `status = 'A'`), "Muuda" ja "Kustuta" on peidus.
 - Järjestus nime järgi (A → Õ). Sorteerimist ja leheküljestust pole.
 - Otsinguväli "Otsi nime järgi…" filtreerib **frontendis** (sisaldab, tõstutundetu, trükkimise ajal). Tühi tulemus: "Koolitajaid ei leitud".
@@ -71,7 +78,7 @@ Kustutatud koolitaja on nagu olematu → `404 PRIMARY_KEY_NOT_FOUND` (`'lecturer
 - vormi teenused `GET/PUT /api/lecturer/{lecturerId}`, `GET .../lecturer-translations`, `GET /api/lecturer-translation/{id}`, `POST .../lecturer-translation`, `GET .../ai-translation`, `GET /api/lecturer-summary/{lecturerId}`;
 - `POST /api/training`, `PUT /api/training/{trainingId}` (`defaultLecturerId`), `POST /api/training/{trainingId}/course`, `PUT /api/course/{courseId}` (`lecturerId`) — kustutatud koolitajat ei saa valida.
 - Erandid: `DELETE` (juba kustutatud → midagi ei muutu) ja `restore`.
-- Olemasolevad seosed (koolituse vaikimisi koolitaja, toimumiskorra koolitaja) jäävad alles; nimi kuvatakse tabelites edasi.
+- Olemasolevad seosed (`training_lecturer`, `course_lecturer`) jäävad alles; nimi kuvatakse tabelites edasi.
 
 ### Koolitaja vorm — `LecturerFormView.vue`
 
@@ -85,11 +92,11 @@ Sama olekuloogika nagu TrainingFormView-l: olek tuleneb URL-i query parameetrite
 
 - **Kaart "Koolitaja andmed"** (ei ole tõlgitav):
   - **Täisnimi** (`lecturer.full_name`) — kohustuslik, kuni 255 märki.
-  - **Pilt** (`lecturer_photo`) — valikuline; "Vali pilt" (PNG, JPEG, WebP, kuni 2 MB), eelvaade (`LecturerAvatar.vue`, suurem) ja "Eemalda". Frontend loeb faili `FileReader`-iga Base64-ks ja kontrollib tüüpi ning suurust enne saatmist ("Lubatud on PNG, JPEG või WebP pilt kuni 2 MB"). Kärpimist ega vähendamist ei tehta.
+  - **Pilt** (`lecturer_photo`) — valikuline; "Vali pilt" (PNG, JPEG, WebP, kuni 2 MB), eelvaade (`LecturerAvatar.vue`, suurem) ja "Eemalda". Salvestatud pilti näidatakse pilditeenusest (`photoVersion`), uut valitud pilti `FileReader`-i Base64 eelvaatena. Frontend kontrollib tüüpi ning suurust enne saatmist ("Lubatud on PNG, JPEG või WebP pilt kuni 2 MB"). **Backend normaliseerib pildi** (ruut, 400×400, JPEG, EXIF eemaldatud) — vt `lecturers-view-skeemid.md`, "Pildid".
 - **Kaart "Tõlge ({keel})"** (lipp pealkirjas): Ametinimetus (+ "?" tooltip), Lühikirjeldus, Kirjeldus (`RichTextEditor.vue`).
 - **Lipukesed** (`TranslationFlags.vue`, olemas): tõlkekeeled vs `GET /api/lecturer/{lecturerId}/lecturer-translations`. Tõlge olemas → värviline lipp (klikk avab selle tõlke), puudub → hall lipp (klikk → olek C). Komponendi prop `trainingTranslations` nimetatakse üldisemaks (`existingTranslations`) ja i18n võtmed `trainingForm.flags.*` → `translationFlags.*`; TrainingFormView kasutab sama komponenti edasi.
 - **"Lisa"** (A) → `POST /api/lecturer` (nimi, pilt, põhikeele tõlge; `userId` localStorage'ist) → vastuse järgi `router.replace` → olek B, eduteade "Koolitaja lisatud".
-- **"Salvesta"** (B) → `PUT /api/lecturer/{lecturerId}` — nimi, pilt ja avatud tõlge ühes transaktsioonis. Pilt saadetakse alati praegusel kujul: Base64 → lisatakse või asendatakse, `null` → eemaldatakse. Eduteade "Salvestatud".
+- **"Salvesta"** (B) → `PUT /api/lecturer/{lecturerId}` — nimi, pilt ja avatud tõlge ühes transaktsioonis. Pilt: `photo` = **uus** pilt (Base64) → lisatakse või asendatakse (normaliseeritult); `photo = null` → pilti ei muudeta; `isPhotoRemoved: true` → pilt eemaldatakse. Nii ei kodeerita sama pilti igal salvestamisel uuesti. Eduteade "Salvestatud".
 - **"Lisa tõlge"** (C) → `POST /api/lecturer/{lecturerId}/lecturer-translation` → `router.replace` → olek B.
 - **"Tee AI tõlge"** (C ja B mitte-põhikeelel) → `GET /api/lecturer/{lecturerId}/ai-translation?languageId={id}` tõlgib **salvestatud põhikeele tõlke** (kõik kolm välja) ja täidab ainult vormi; salvestamata muudatuste korral küsitakse enne üle kirjutamist kinnitust. Frontend võib alustada mock-vastusega.
 - Kiirnupp "Koolitajad" → `/admin-lecturers` (olekutes A, B, C). Kustutamist vormis pole (ainult nimekirjas).
@@ -111,6 +118,7 @@ Sama olekuloogika nagu TrainingFormView-l: olek tuleneb URL-i query parameetrite
 | `DELETE /api/lecturer/{lecturerId}` | soft delete (`status = 'D'`) |
 | `PUT /api/lecturer/{lecturerId}/restore` | tegevusteenus: taastab (`status = 'A'`) |
 | `GET /api/lecturer-summary/{lecturerId}?contentLang=` | koolitaja kaardi andmed (sama nimeloogika nagu `training_summary` / `TrainingSummaryDto`) |
+| `GET /api/lecturer/{lecturerId}/photo` | pildi baidid `<img src>`-i jaoks — defineeritud `lecturers-view-skeemid.md`-s |
 | `GET /api/languages` | **olemas** — lipukesed, põhikeel |
 | `GET /api/lecturers?search=` | **olemas, muutub** — ainult aktiivsed; `lecturerPhoto` eemaldatakse DTO-st |
 
@@ -125,7 +133,7 @@ Olemasolevat `TRANSLATION_EXISTS` kasutatakse ka koolitaja tõlke korral. AI tõ
 
 ## 1. Andmebaasi muudatused (ettepanek)
 
-**NB!** DDL ja seed on ettepanek, andmebaasi vastu pole käivitatud. `2_create.sql` ja `3_import.sql` muudetakse backend taski käigus. Tabel `lecturer_photo` ja `lecturer.photo` veeru eemaldamine: training-courses-view skeemid, jaotis 1.
+**NB!** DDL ja seed on ettepanek, andmebaasi vastu pole käivitatud. `2_create.sql` ja `3_import.sql` muudetakse backend taski käigus. Tabel `lecturer_photo` ja `lecturer.photo` veeru eemaldamine: admin-training-courses-view skeemid, jaotis 1.
 
 ```sql
 -- Table: lecturer (photo veerg eemaldatud, lisandub status)
@@ -154,6 +162,32 @@ CREATE TABLE lecturer_translation
     CONSTRAINT lecturer_translation_pk PRIMARY KEY (id),
     CONSTRAINT lecturer_translation_uq UNIQUE (lecturer_id, language_id)
 );
+
+-- Table: training_lecturer (koolituse koolitajad; asendab training.default_lecturer_id)
+CREATE TABLE training_lecturer
+(
+    id          serial NOT NULL,
+    training_id int    NOT NULL,
+    lecturer_id int    NOT NULL,
+    sort_order  int    NOT NULL,
+    CONSTRAINT training_lecturer_pk PRIMARY KEY (id),
+    CONSTRAINT training_lecturer_uq UNIQUE (training_id, lecturer_id)
+);
+
+-- Table: course_lecturer (toimumiskorra koolitajad; asendab course.lecturer_id)
+CREATE TABLE course_lecturer
+(
+    id          serial NOT NULL,
+    course_id   int    NOT NULL,
+    lecturer_id int    NOT NULL,
+    sort_order  int    NOT NULL,
+    CONSTRAINT course_lecturer_pk PRIMARY KEY (id),
+    CONSTRAINT course_lecturer_uq UNIQUE (course_id, lecturer_id)
+);
+
+-- + välisvõtmed: training_lecturer_training → training(id), training_lecturer_lecturer → lecturer(id),
+--   course_lecturer_course → course(id), course_lecturer_lecturer → lecturer(id)
+-- Eemaldatakse: training.default_lecturer_id (FK course_default_lecturer / vastav), course.lecturer_id (FK course_timetable_lecturer)
 ```
 
 ### View `admin_lecturer_summary`
@@ -173,12 +207,14 @@ SELECT row_number() OVER (ORDER BY l.id, cl.id)                    AS id,
        mt.missing_translation_language_codes,
        mt.missing_translation_language_codes IS NULL               AS has_all_translations,
        (SELECT count(*)
-        FROM training t
-        WHERE t.default_lecturer_id = l.id
+        FROM training_lecturer trl
+                 JOIN training t ON t.id = trl.training_id
+        WHERE trl.lecturer_id = l.id
           AND t.status <> 'D')                                     AS training_count,
        (SELECT count(*)
-        FROM course c
-        WHERE c.lecturer_id = l.id
+        FROM course_lecturer crl
+                 JOIN course c ON c.id = crl.course_id
+        WHERE crl.lecturer_id = l.id
           AND c.status NOT IN ('D', 'X')
           AND c.end_date >= current_date)                          AS upcoming_course_count,
        -- GREATEST ignoreerib NULL-e (pilti ei pruugi olla)
@@ -218,29 +254,76 @@ WHERE cl.requires_translation;
 ```sql
 -- Table: lecturer
 INSERT INTO lecturer (id, full_name, status, created_at, updated_at, created_by) VALUES
-    (1, 'Mari Tamm', 'A', '2026-07-15 09:00:00', '2026-07-15 09:00:00', 1),
-    (2, 'Jaan Kask', 'A', '2026-07-15 09:00:00', '2026-07-15 09:00:00', 1),
-    (3, 'Kadri Lepp', 'A', '2026-09-20 10:00:00', '2026-09-20 10:00:00', 1),
-    (4, 'Peeter Rebane', 'D', '2026-07-20 09:00:00', '2026-09-01 16:00:00', 1);
+    (1, 'Rain Tüür', 'A', '2026-07-15 09:00:00', '2026-07-15 09:00:00', 1),
+    (2, 'Merje Vaide', 'A', '2026-07-15 09:00:00', '2026-07-15 09:00:00', 1),
+    (3, 'Kersti Laidvee', 'A', '2026-09-20 10:00:00', '2026-09-20 10:00:00', 1),
+    (4, 'Virve Räni', 'D', '2026-07-20 09:00:00', '2026-09-01 16:00:00', 1),
+    (5, 'Tarmo Rosenfeldt', 'A', '2026-07-15 09:00:00', '2026-07-15 09:00:00', 1),
+    (6, 'Margus Sakk', 'A', '2026-07-15 09:00:00', '2026-07-15 09:00:00', 1),
+    (7, 'Andres Liitmaa', 'A', '2026-07-15 09:00:00', '2026-07-15 09:00:00', 1),
+    (8, 'Meelis Teern', 'A', '2026-07-15 09:00:00', '2026-07-15 09:00:00', 1),
+    (9, 'Tarmo Kallas', 'A', '2026-09-22 11:00:00', '2026-09-22 11:00:00', 1);
 
--- Table: lecturer_translation
+-- Table: lecturer_translation (title = amet, short_description = peamised spetsialiseerumised)
 INSERT INTO lecturer_translation (id, lecturer_id, language_id, title, short_description, description, created_at, updated_at) VALUES
-    (1, 1, 1, 'Tarkvaraarendaja ja Java koolitaja', 'Üle 10 aasta kogemust tarkvaraarenduse koolitajana.', '<p>Mari on töötanud tarkvaraarendajana panganduses ja telekommunikatsioonis ning koolitab Java ja Spring Booti teemadel alates 2015. aastast.</p>', '2026-07-15 09:00:00', '2026-07-15 09:00:00'),
-    (2, 1, 2, 'Software developer and Java trainer', 'Over 10 years of experience as a software development trainer.', '<p>Mari has worked as a software developer in banking and telecommunications and has been teaching Java and Spring Boot since 2015.</p>', '2026-07-15 09:00:00', '2026-07-15 09:00:00'),
-    (3, 2, 1, 'IT-projektijuht ja Scrum Master', 'Koolitab meeskonnatöö ja agiilse projektijuhtimise teemadel.', '<p>Jaan on juhtinud IT-projekte üle 12 aasta ning aitab meeskondadel Scrumi ja Kanbani igapäevatöös kasutusele võtta.</p>', '2026-07-15 09:00:00', '2026-07-15 09:00:00'),
-    (4, 2, 2, 'IT project manager and Scrum Master', 'Trains teams on teamwork and agile project management.', '<p>Jaan has led IT projects for over 12 years and helps teams adopt Scrum and Kanban in their daily work.</p>', '2026-07-15 09:00:00', '2026-07-15 09:00:00'),
-    (5, 3, 1, 'UX-disainer', 'Koolitab kasutajakeskse disaini ja Figma teemadel.', '<p>Kadri on disaininud veebi- ja mobiilirakendusi idufirmadele ning juhendab disainimeeskondi kasutajauuringute läbiviimisel.</p>', '2026-09-20 10:00:00', '2026-09-20 10:00:00'),
-    (6, 4, 1, 'Andmeanalüütik', 'Koolitas Exceli ja Power BI teemadel.', '<p>Peeter koolitas andmeanalüüsi ja aruandluse teemadel.</p>', '2026-07-20 09:00:00', '2026-07-20 09:00:00');
+    (1, 1, 1, 'Lektor/konsultant', 'Tarkvaraarendus, Java, HTML, CSS, JavaScript, SQL, Git, Spring Boot, REST API, PostgreSQL, JPA (Hibernate), MapStruct, JUnit, Swagger, Gradle, Confluence, Jira. Vali Tarkvaraarendus! programm.', '<p>Tarkvaraarendus, Java, HTML, CSS, JavaScript, SQL, Git, Spring Boot, REST API, PostgreSQL, JPA (Hibernate), MapStruct, JUnit, Swagger, Gradle, Confluence, Jira. Vali Tarkvaraarendus! programm.</p>', '2026-07-15 09:00:00', '2026-07-15 09:00:00'),
+    (2, 1, 2, 'Lecturer/consultant', 'Software development, Java, HTML, CSS, JavaScript, SQL, Git, Spring Boot, REST API, PostgreSQL, JPA (Hibernate), MapStruct, JUnit, Swagger, Gradle, Confluence, Jira. Vali Tarkvaraarendus! programme.', '<p>Software development, Java, HTML, CSS, JavaScript, SQL, Git, Spring Boot, REST API, PostgreSQL, JPA (Hibernate), MapStruct, JUnit, Swagger, Gradle, Confluence, Jira. Vali Tarkvaraarendus! programme.</p>', '2026-07-15 09:00:00', '2026-07-15 09:00:00'),
+    (3, 2, 1, 'Projektijuht/lektor', 'Microsoft Office rakendused, andmeanalüüs, tarkvaraarendus, veebiarendus. Täiskasvanute koolitaja tase 6.', '<p>Microsoft Office rakendused, andmeanalüüs, tarkvaraarendus, veebiarendus. Täiskasvanute koolitaja tase 6.</p>', '2026-07-15 09:00:00', '2026-07-15 09:00:00'),
+    (4, 2, 2, 'Project manager/lecturer', 'Microsoft Office applications, data analysis, software development, web development. Adult educator, level 6.', '<p>Microsoft Office applications, data analysis, software development, web development. Adult educator, level 6.</p>', '2026-07-15 09:00:00', '2026-07-15 09:00:00'),
+    (5, 3, 1, 'Lektor/konsultant', 'Adobe Photoshop, Illustrator, InDesign, Acrobat, Canva, Figma, e-turundus, e-õppe disain, Office rakendused.', '<p>Adobe Photoshop, Illustrator, InDesign, Acrobat, Canva, Figma, e-turundus, e-õppe disain, Office rakendused.</p>', '2026-09-20 10:00:00', '2026-09-20 10:00:00'),
+    (6, 4, 1, 'Lektor/konsultant', 'Andmeanalüüs, Power BI, SQL, Tableau, SAP BO, Excel, Vali Andmetarkus! programm.', '<p>Andmeanalüüs, Power BI, SQL, Tableau, SAP BO, Excel, Vali Andmetarkus! programm.</p>', '2026-07-20 09:00:00', '2026-07-20 09:00:00'),
+    (7, 5, 1, 'Lektor/konsultant', 'Microsoft 365, MS Teams, SharePoint, Planner, Viva Goals, Office rakendused, küberturvalisus. Täiskasvanute koolitaja tase 6.', '<p>Microsoft 365, MS Teams, SharePoint, Planner, Viva Goals, Office rakendused, küberturvalisus. Täiskasvanute koolitaja tase 6.</p>', '2026-07-15 09:00:00', '2026-07-15 09:00:00'),
+    (8, 5, 2, 'Lecturer/consultant', 'Microsoft 365, MS Teams, SharePoint, Planner, Viva Goals, Office applications, cybersecurity. Adult educator, level 6.', '<p>Microsoft 365, MS Teams, SharePoint, Planner, Viva Goals, Office applications, cybersecurity. Adult educator, level 6.</p>', '2026-07-15 09:00:00', '2026-07-15 09:00:00'),
+    (9, 6, 1, 'Lektor/konsultant', 'Power BI, Bizagi, Power Automate, Access, Visio, Office rakendused, kasutajakoolitused ja andmeanalüüs.', '<p>Power BI, Bizagi, Power Automate, Access, Visio, Office rakendused, kasutajakoolitused ja andmeanalüüs.</p>', '2026-07-15 09:00:00', '2026-07-15 09:00:00'),
+    (10, 6, 2, 'Lecturer/consultant', 'Power BI, Bizagi, Power Automate, Access, Visio, Office applications, user training and data analysis.', '<p>Power BI, Bizagi, Power Automate, Access, Visio, Office applications, user training and data analysis.</p>', '2026-07-15 09:00:00', '2026-07-15 09:00:00'),
+    (11, 7, 1, 'Spetsialisti valdkonna lektor/konsultant', 'Microsofti ametlikud sertifitseerimiskoolitused (MOC), serverid, pilvetehnoloogiad, Microsoft Certified Trainer.', '<p>Microsofti ametlikud sertifitseerimiskoolitused (MOC), serverid, pilvetehnoloogiad, Microsoft Certified Trainer.</p>', '2026-07-15 09:00:00', '2026-07-15 09:00:00'),
+    (12, 7, 2, 'Specialist lecturer/consultant', 'Official Microsoft certification courses (MOC), servers, cloud technologies, Microsoft Certified Trainer.', '<p>Official Microsoft certification courses (MOC), servers, cloud technologies, Microsoft Certified Trainer.</p>', '2026-07-15 09:00:00', '2026-07-15 09:00:00'),
+    (13, 8, 1, 'Lektor/konsultant', 'Tarkvaraarendus, Java, JavaScript, HTML, CSS, Vue, Angular, Vali Tarkvaraarendus! programm.', '<p>Tarkvaraarendus, Java, JavaScript, HTML, CSS, Vue, Angular, Vali Tarkvaraarendus! programm.</p>', '2026-07-15 09:00:00', '2026-07-15 09:00:00'),
+    (14, 8, 2, 'Lecturer/consultant', 'Software development, Java, JavaScript, HTML, CSS, Vue, Angular, Vali Tarkvaraarendus! programme.', '<p>Software development, Java, JavaScript, HTML, CSS, Vue, Angular, Vali Tarkvaraarendus! programme.</p>', '2026-07-15 09:00:00', '2026-07-15 09:00:00'),
+    (15, 9, 1, 'Lektor/konsultant', 'SharePoint, Power Platform, veebiarendus, UX (kasutajakogemus), veebiliideste arendus.', '<p>SharePoint, Power Platform, veebiarendus, UX (kasutajakogemus), veebiliideste arendus.</p>', '2026-09-22 11:00:00', '2026-09-22 11:00:00');
+
+-- Table: lecturer_photo (Rain Tüüri foto docs/mock-wireframe/lecturer-photos/rain-tuur.jpg, 200×200 JPEG; teistel pilti pole)
+INSERT INTO lecturer_photo (id, lecturer_id, photo, content_type, created_at, updated_at) VALUES
+    (1, 1, decode('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', 'base64'), 'image/jpeg', '2026-07-15 09:00:00', '2026-07-15 09:00:00');
 ```
 
-| Koolitaja | Status | Pilt | Tõlked | Koolitusi | Tulevasi toimumiskordi | Olukord |
-|---|---|---|---|---|---|---|
-| Jaan Kask | `A` | — | et, en ✓ | 4 (2, 7, 9, 11) | 1 (course 2; course 4 on tühistatud) | prügikast keelatud |
-| Kadri Lepp | `A` | — | et ✗ (puudub en) | 0 | 0 | saab kustutada, puuduv tõlge |
-| Mari Tamm | `A` | ✓ | et, en ✓ | 6 (1, 3, 4, 8, 10, 13) | 2 (course 1, 5) | prügikast keelatud |
-| Peeter Rebane | `D` | — | et ✗ | 0 | 0 | kustutatud, "Näita kustutatud" + "Taasta" |
+```sql
+-- Table: training_lecturer (koolituse koolitajad; sort_order = kuvamise järjekord)
+INSERT INTO training_lecturer (id, training_id, lecturer_id, sort_order) VALUES
+    (1, 1, 1, 1),
+    (2, 1, 8, 2),
+    (3, 2, 2, 1),
+    (4, 3, 1, 1),
+    (5, 4, 8, 1),
+    (6, 5, 9, 1),
+    (7, 6, 3, 1),
+    (8, 7, 2, 1),
+    (9, 8, 1, 1),
+    (10, 9, 6, 1),
+    (11, 9, 2, 2),
+    (12, 10, 7, 1),
+    (13, 11, 8, 1),
+    (14, 11, 1, 2),
+    (15, 12, 6, 1),
+    (16, 13, 5, 1),
+    (17, 14, 3, 1);
+```
 
-Toimumiskorrad on training-courses-view seed-andmete ettepanekust.
+| Koolitaja | Status | Pilt | Tõlked | Koolitusi (`training_lecturer`) | Tulevasi toimumiskordi (`course_lecturer`) | Olukord |
+|---|---|---|---|---|---|---|
+| Rain Tüür (1) | `A` | ✓ | et, en | 4 (1, 3, 8, 11) | 2 (course 1, 5) | pildiga; prügikast keelatud |
+| Merje Vaide (2) | `A` | — | et, en | 3 (2, 7, 9) | 1 (course 2) | prügikast keelatud |
+| Kersti Laidvee (3) | `A` | — | et ✗ | 1 (6) | 0 | puuduv en tõlge |
+| Virve Räni (4) | `D` | — | et ✗ | 0 | 0 | kustutatud, "Näita kustutatud" + "Taasta" |
+| Tarmo Rosenfeldt (5) | `A` | — | et, en | 1 (13) | 0 |  |
+| Margus Sakk (6) | `A` | — | et, en | 2 (9, 12) | 0 |  |
+| Andres Liitmaa (7) | `A` | — | et, en | 1 (10) | 0 |  |
+| Meelis Teern (8) | `A` | — | et, en | 3 (1, 4, 11) | 1 (course 1) | prügikast keelatud |
+| Tarmo Kallas (9) | `A` | — | et ✗ | 1 (5) | 0 | puuduv en tõlge, saab kustutada |
+
+Koolituste koolitajad (`training_lecturer`, spetsialiseerumiste järgi; mitu koolitajat: 1, 9, 11): 1 Java algkursus → Rain Tüür, Meelis Teern; 2 Projektijuhtimise põhitõed → Merje Vaide; 3 Spring Boot veebiarendus → Rain Tüür; 4 Vue.js esmaspetsialist → Meelis Teern; 5 UX disaini alused → Tarmo Kallas; 6 Figma praktikum → Kersti Laidvee; 7 Agiilne meeskonnajuhtimine → Merje Vaide; 8 SQL ja andmebaasid → Rain Tüür; 9 Exceli algkursus → Margus Sakk, Merje Vaide; 10 Docker ja konteinerid → Andres Liitmaa; 11 Git ja GitHub → Meelis Teern, Rain Tüür; 12 Python andmeanalüüsiks → Margus Sakk; 13 Tehisaru töövahendid arendajale → Tarmo Rosenfeldt; 14 Photoshopi algkursus → Kersti Laidvee. Toimumiskordade koolitajad (`course_lecturer`) ja toimumiskorrad: `admin-training-courses-view-skeemid.md`, jaotis 2.
+
+Ametid ja spetsialiseerumised on BCS Koolituse lektorite nimekirjast; `description` on esialgu sama tekst `<p>`-s (täiendatakse hiljem). Inglise tõlked on tehtud eestikeelse teksti põhjal.
 
 ---
 
@@ -310,29 +393,29 @@ sequenceDiagram
     FE->>BE: POST /api/lecturer<br/>{ userId, fullName, photo, photoContentType,<br/>title, shortDescription, description }
     Note over BE,DB: üks transaktsioon
     BE->>DB: INSERT lecturer (status = 'A')
-    BE->>DB: INSERT lecturer_photo (kui photo ≠ null)
+    BE->>DB: INSERT lecturer_photo (kui photo ≠ null; normaliseeritud 400×400 JPEG)
     BE->>DB: INSERT lecturer_translation (põhikeel)
-    BE-->>FE: 200 { lecturerId: 5, lecturerTranslationId: 7 }
-    FE->>FE: router.replace(?lecturerId=5&lecturerTranslationId=7)
+    BE-->>FE: 200 { lecturerId: 10, lecturerTranslationId: 16 }
+    FE->>FE: router.replace(?lecturerId=10&lecturerTranslationId=16)
     FE-->>Admin: olek B, eduteade "Koolitaja lisatud",<br/>lipud: et värviline, en hall
 
     Admin->>FE: klikib hallil en lipul
-    FE->>FE: router.replace(?lecturerId=5&languageId=2)
-    FE->>BE: GET /api/lecturer/5<br/>GET /api/lecturer/5/lecturer-translations<br/>GET /api/lecturer-translation/7 (et)
+    FE->>FE: router.replace(?lecturerId=10&languageId=2)
+    FE->>BE: GET /api/lecturer/10<br/>GET /api/lecturer/10/lecturer-translations<br/>GET /api/lecturer-translation/16 (et)
     FE-->>Admin: olek C: nimi ja pilt lukus, tõlke väljad et tekstiga
 
     opt AI tõlge
         Admin->>FE: "Tee AI tõlge"
-        FE->>BE: GET /api/lecturer/5/ai-translation?languageId=2
+        FE->>BE: GET /api/lecturer/10/ai-translation?languageId=2
         BE-->>FE: { title, shortDescription, description }
         FE-->>Admin: tõlke väljad täidetud (salvestamata)
     end
 
     Admin->>FE: "Lisa tõlge"
-    FE->>BE: POST /api/lecturer/5/lecturer-translation<br/>{ languageId: 2, title, shortDescription, description }
+    FE->>BE: POST /api/lecturer/10/lecturer-translation<br/>{ languageId: 2, title, shortDescription, description }
     BE->>DB: INSERT lecturer_translation (language_id = 2)
-    BE-->>FE: 200 { lecturerTranslationId: 8 }
-    FE->>FE: router.replace(?lecturerId=5&lecturerTranslationId=8)
+    BE-->>FE: 200 { lecturerTranslationId: 17 }
+    FE->>FE: router.replace(?lecturerId=10&lecturerTranslationId=17)
     FE-->>Admin: olek B, mõlemad lipud värvilised
 ```
 
@@ -347,15 +430,15 @@ sequenceDiagram
     participant BE as Backend
     participant DB as Andmebaas
 
-    Admin->>FE: AdminLecturersView "Muuda" (Mari Tamm)
+    Admin->>FE: AdminLecturersView "Muuda" (Rain Tüür)
     FE->>BE: GET /api/lecturer/1<br/>GET /api/lecturer-translation/1<br/>GET /api/lecturer/1/lecturer-translations
     FE-->>Admin: nimi, pildi eelvaade, et tõlge
 
     Admin->>FE: "Eemalda" pilt, muudab lühikirjeldust, "Salvesta"
-    FE->>BE: PUT /api/lecturer/1<br/>{ fullName, photo: null, photoContentType: null,<br/>lecturerTranslation: { lecturerTranslationId: 1, title, shortDescription, description } }
+    FE->>BE: PUT /api/lecturer/1<br/>{ fullName, photo: null, photoContentType: null, isPhotoRemoved: true,<br/>lecturerTranslation: { lecturerTranslationId: 1, title, shortDescription, description } }
     Note over BE,DB: üks transaktsioon
     BE->>DB: UPDATE lecturer
-    BE->>DB: DELETE lecturer_photo (photo = null)<br/>või INSERT / UPDATE (photo ≠ null)
+    BE->>DB: DELETE lecturer_photo (isPhotoRemoved)<br/>või INSERT / UPDATE normaliseeritud pildiga (photo ≠ null)
     BE->>DB: UPDATE lecturer_translation (id = 1)
     BE-->>FE: 200 (NONE)
     FE-->>Admin: eduteade "Salvestatud"
@@ -373,9 +456,9 @@ sequenceDiagram
     participant BE as Backend
     participant DB as Andmebaas
 
-    Note over FE: Mari Tamm: upcomingCourseCount = 2 → prügikast disabled + tooltip
-    Admin->>Btn: prügikast (Kadri Lepp)
-    Btn-->>Admin: modal "Kas soovid koolitaja „Kadri Lepp“ kustutada?"
+    Note over FE: Rain Tüür: upcomingCourseCount = 2 → prügikast disabled + tooltip
+    Admin->>Btn: prügikast (Kersti Laidvee)
+    Btn-->>Admin: modal "Kas soovid koolitaja „Kersti Laidvee“ kustutada?"
     Admin->>Btn: "Kustuta"
     Btn->>BE: DELETE /api/lecturer/3
     BE->>DB: tulevasi toimumiskordi? (end_date ≥ täna, status ∉ D, X)
@@ -393,7 +476,7 @@ sequenceDiagram
 
     Admin->>FE: lüliti "Näita kustutatud"
     FE->>BE: GET /api/admin-lecturers?contentLang=et&includeDeleted=true
-    Admin->>FE: "Taasta" (Kadri Lepp) → kinnitus
+    Admin->>FE: "Taasta" (Kersti Laidvee) → kinnitus
     FE->>BE: PUT /api/lecturer/3/restore
     BE->>DB: UPDATE lecturer SET status = 'A', updated_at = now()
     FE->>BE: GET /api/admin-lecturers?…&includeDeleted=true
@@ -419,7 +502,7 @@ sequenceDiagram
 | vorm B | Tegevus | `PUT /api/lecturer/{lecturerId}` | "Salvesta" |
 | vorm C | Tegevus | `POST /api/lecturer/{lecturerId}/lecturer-translation` | "Lisa tõlge" → olek B |
 | vorm B (mitte-põhikeel), C | Tegevus | `GET /api/lecturer/{lecturerId}/ai-translation?languageId={id}` | "Tee AI tõlge" |
-| `LecturerCard` (TrainingView, TrainingCoursesView, CourseFormView) | Laadimine | `GET /api/lecturer-summary/{lecturerId}?contentLang={UI keel}` | koolitaja kaart |
+| `LecturerCard` (TrainingView) | Laadimine | `GET /api/lecturer-summary/{lecturerId}?contentLang={UI keel}` | koolitaja kaart |
 
 Lipule klikkimine päringut ei tee — see teeb `router.replace`-i ja käivitab laadimise uuesti.
 
@@ -434,8 +517,8 @@ Lipule klikkimine päringut ei tee — see teeb `router.replace`-i ja käivitab 
 | `App.vue` (navbar) | muudetakse | menüüsse "Admin" eraldaja + "Lisa uus koolitaja", "Koolitajad" |
 | `router/index.js` | muudetakse | `/admin-lecturers` (`adminLecturersRoute`), `/lecturer-form` (`lecturerFormRoute`) |
 | `NavigationService.js` | muudetakse | `navigateToAdminLecturersView()`, `navigateToLecturerFormView(query)` |
-| `components/common/LecturerCard.vue` | uus, jagatud | prop `lecturerId`; laeb `GET /api/lecturer-summary/{id}` ise; pilt, nimi, ametinimetus, lühikirjeldus; 404 → ei kuvata. Kasutavad TrainingView, TrainingCoursesView, CourseFormView |
-| `components/common/LecturerAvatar.vue` | uus (training-courses-view mockist) | pilt või kohatäide (`PhUserCircle`); prop `size` |
+| `components/common/LecturerCard.vue` | uus, jagatud | prop `lecturerId`; laeb `GET /api/lecturer-summary/{id}` ise; pilt, nimi, ametinimetus, lühikirjeldus; 404 → ei kuvata. Kasutab TrainingView (admini kalender näitab ainult nimesid) |
+| `components/common/LecturerAvatar.vue` | uus (admin-training-courses-view mockist) | pilt või kohatäide (`PhUserCircle`); prop `size` |
 | `components/common/LecturerDeleteButton.vue` | uus | propsid `lecturerId`, `fullName`, `upcomingCourseCount`; `disabled` + tooltip, kui > 0; `ConfirmModal` + `DELETE`; emits `event-lecturer-deleted`, `event-delete-error` |
 | `components/common/LecturerRestoreButton.vue` | uus | "Taasta" + `ConfirmModal` + `PUT .../restore`; emit `event-lecturer-restored` (või üks ühine `LecturerStatusButton`, arendaja otsustada) |
 | `components/common/TranslationFlags.vue` | olemas, muudetakse | prop `trainingTranslations` → `existingTranslations`, i18n `translationFlags.*` |
@@ -463,11 +546,12 @@ Top: site navigation bar with logo and links (Koolitused, Teenused, Ettevõttest
 Header row: page title "Koolitajad" on the left and a primary button "+ Lisa uus koolitaja" on the right.
 Below the header: a search text input "Otsi nime järgi…" and a toggle switch "Näita kustutatud" (on).
 Main area: a data table with columns "Nimi", "Ametinimetus", "Tõlked", "Koolitusi", "Tulevasi toimumiskordi", "Uuendatud", "Tegevused". No photos.
-Rows: "Jaan Kask | IT-projektijuht ja Scrum Master | green check | 4 | 1 | 15/07/2026 | pencil icon, greyed-out trash icon",
-"Kadri Lepp | UX-disainer | red X | 0 | 0 | 20/09/2026 | pencil icon, trash icon",
-"Mari Tamm | Tarkvaraarendaja ja Java koolitaja | green check | 6 | 2 | 15/07/2026 | pencil icon, greyed-out trash icon",
-and a greyed-out row "Peeter Rebane | Andmeanalüütik | red X | 0 | 0 | 01/09/2026 | badge Kustutatud, button Taasta".
-Below the table: text "Kokku 4 koolitajat".
+Rows: "Merje Vaide | Projektijuht/lektor | green check | 3 | 1 | 15/07/2026 | pencil icon, greyed-out trash icon",
+"Kersti Laidvee | Lektor/konsultant | red X | 1 | 0 | 20/09/2026 | pencil icon, trash icon",
+"Margus Sakk | Lektor/konsultant | green check | 2 | 0 | 15/07/2026 | pencil icon, trash icon",
+"Rain Tüür | Lektor/konsultant | green check | 4 | 2 | 15/07/2026 | pencil icon, greyed-out trash icon",
+and a greyed-out row "Virve Räni | Lektor/konsultant | red X | 0 | 0 | 01/09/2026 | badge Kustutatud, button Taasta".
+Below the table: text "Kokku 9 koolitajat".
 ```
 
 ### LecturerFormView
@@ -475,11 +559,11 @@ Below the table: text "Kokku 4 koolitajat".
 ```text
 Create a desktop wireframe of an admin form page "Muuda koolitajat" in a web app.
 Top: site navigation bar with logo and links, a dropdown "Admin ▾" and "Logi välja" on the right.
-Header row: page title "Muuda koolitajat" with subtitle "Mari Tamm" on the left and a secondary button "Koolitajad" on the right.
+Header row: page title "Muuda koolitajat" with subtitle "Rain Tüür" on the left and a secondary button "Koolitajad" on the right.
 Below the header: a row of small language flag buttons "et" (colored, selected) and "en" (colored).
-First card titled "Koolitaja andmed": a text input "Täisnimi *" with value "Mari Tamm"; a field "Pilt" with a round photo preview (80 px), a button "Vali pilt", a button "Eemalda" and a small hint "PNG, JPEG või WebP, kuni 2 MB".
+First card titled "Koolitaja andmed": a text input "Täisnimi *" with value "Rain Tüür"; a field "Pilt" with a round photo preview (80 px), a button "Vali pilt", a button "Eemalda" and a small hint "PNG, JPEG või WebP, kuni 2 MB".
 Second card titled "Tõlge (et)" with an Estonian flag:
-a text input "Ametinimetus *" with a small round "?" icon next to the label (tooltip), value "Tarkvaraarendaja ja Java koolitaja";
+a text input "Ametinimetus *" with a small round "?" icon next to the label (tooltip), value "Lektor/konsultant";
 a text input "Lühikirjeldus *" with a small hint below "Kuvatakse koolitaja kaardil koolituse lehel ja toimumiskorra juures";
 a rich text editor "Kirjeldus *" with a small toolbar (B, I, list, link) and two lines of text.
 Bottom: primary button "Salvesta".
@@ -490,5 +574,5 @@ In the "new lecturer" version the title is "Lisa uus koolitaja", there are no fl
 ### LecturerCard (koolituse lehel)
 
 ```text
-Create a small wireframe card titled "Koolitaja" for a right sidebar: a round photo (56 px) on the left; on the right the name "Mari Tamm" in bold, below it a smaller grey line "Tarkvaraarendaja ja Java koolitaja", and below that one sentence "Üle 10 aasta kogemust tarkvaraarenduse koolitajana.".
+Create a small wireframe card titled "Koolitaja" for a right sidebar: a round photo (56 px) on the left; on the right the name "Rain Tüür" in bold, below it a smaller grey line "Lektor/konsultant", and below that one sentence "Tarkvaraarendus, Java, HTML, CSS, JavaScript, SQL, Git, Spring Boot, REST API, PostgreSQL, JPA (Hibernate), MapStruct, JUnit, Swagger, Gradle, Confluence, Jira. Vali Tarkvaraarendus! programm.".
 ```

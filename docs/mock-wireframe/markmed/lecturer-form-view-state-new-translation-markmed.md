@@ -10,7 +10,7 @@ Failinimi: LecturerFormView.vue
 Frontend rada: /lecturer-form?lecturerId={id}&languageId={id}
 
 Vaatega seotud lisainfo:
-state: "new-translation" — URL-is lecturerId ja languageId (keel, mille tõlge puudub). Pealkiri "Lisa koolitaja tõlge". Täisnimi ja pilt on kirjutuskaitstud; ametinimetus, lühikirjeldus ja kirjeldus eeltäidetakse salvestatud põhikeele (et) tõlkega, mida admin tõlgib. Välja "Ametinimetus" sildi kõrval on "?" ikoon tooltip'iga: "Ametinimetus kuvatakse koolitaja kaardil nime all. Kirjuta lühidalt, millega koolitaja tegeleb, nt „Tarkvaraarendaja ja Java koolitaja“ või „UX-disainer“. Iga keele jaoks eraldi tõlge." Lühikirjelduse all vihje "Kuvatakse koolitaja kaardil koolituse lehel ja toimumiskorra juures".
+state: "new-translation" — URL-is lecturerId ja languageId (keel, mille tõlge puudub). Pealkiri "Lisa koolitaja tõlge". Täisnimi ja pilt on kirjutuskaitstud; ametinimetus, lühikirjeldus ja kirjeldus eeltäidetakse salvestatud põhikeele (et) tõlkega, mida admin tõlgib. Välja "Ametinimetus" sildi kõrval on "?" ikoon tooltip'iga: "Ametinimetus kuvatakse koolitaja kaardil nime all. Kirjuta lühidalt, millega koolitaja tegeleb, nt „Lektor/konsultant“ või „Projektijuht/lektor“. Iga keele jaoks eraldi tõlge." Lühikirjelduse all vihje "Kuvatakse koolitaja kaardil koolituse lehel ja toimumiskorra juures".
 "Tee AI tõlge" tõlgib salvestatud põhikeele tõlke (kõik kolm välja) ja täidab ainult vormi; salvestamata muudatuste korral küsitakse enne kinnitust.
 "Lisa tõlge" → POST /api/lecturer/{lecturerId}/lecturer-translation. Vastuse järgi router.replace → state "update". Kiirnupp "Koolitajad" → /admin-lecturers.
 ```
@@ -49,13 +49,12 @@ Response (200):
 LecturerDetailDto.java
 {
   "lecturerId": 1,
-  "fullName": "Mari Tamm",
-  "photo": "iVBORw0KGgoAAAANSUhEUgAAACAAAAAg...",
-  "photoContentType": "image/png"
+  "fullName": "Rain Tüür",
+  "photoVersion": 1784095200
 }
 
 API teenuse lisainfo:
-Koolitaja nimi ja pilt (tabelist lecturer_photo, Base64). photo ja photoContentType on null, kui pilti pole. Frontend kuvab eelvaate kujul data:{photoContentType};base64,{photo} ja saadab sama väärtuse PUT päringuga tagasi, kui pilti ei muudetud. Kustutatud koolitaja (status "D") on nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.
+Koolitaja nimi ja pildi versioon. Pilti ei tagastata — photoVersion = lecturer_photo.updated_at epoch-sekundites või null, kui pilti pole; eelvaade tuleb pilditeenusest /api/lecturer/{lecturerId}/photo?v={photoVersion}. Kustutatud koolitaja (status "D") on nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.
 
 Veateated:
 HTTP: 404
@@ -101,9 +100,9 @@ LecturerTranslationDto.java
   "lecturerId": 1,
   "languageId": 1,
   "languageCode": "et",
-  "title": "Tarkvaraarendaja ja Java koolitaja",
-  "shortDescription": "Üle 10 aasta kogemust tarkvaraarenduse koolitajana.",
-  "description": "<p>Mari on töötanud tarkvaraarendajana panganduses ja telekommunikatsioonis ning koolitab Java ja Spring Booti teemadel alates 2015. aastast.</p>"
+  "title": "Lektor/konsultant",
+  "shortDescription": "Tarkvaraarendus, Java, HTML, CSS, JavaScript, SQL, Git, Spring Boot, REST API, PostgreSQL, JPA (Hibernate), MapStruct, JUnit, Swagger, Gradle, Confluence, Jira. Vali Tarkvaraarendus! programm.",
+  "description": "<p>Tarkvaraarendus, Java, HTML, CSS, JavaScript, SQL, Git, Spring Boot, REST API, PostgreSQL, JPA (Hibernate), MapStruct, JUnit, Swagger, Gradle, Confluence, Jira. Vali Tarkvaraarendus! programm.</p>"
 }
 
 API teenuse lisainfo:
@@ -126,9 +125,9 @@ languageId: Integer — sihtkeel, kuhu tõlgitakse
 Response (200):
 LecturerAiTranslationDto.java
 {
-  "title": "UX designer",
-  "shortDescription": "Teaches user-centred design and Figma.",
-  "description": "<p>Kadri has designed web and mobile apps for start-ups and coaches design teams in running user research.</p>"
+  "title": "Lecturer/consultant",
+  "shortDescription": "Adobe Photoshop, Illustrator, InDesign, Acrobat, Canva, Figma, digital marketing, e-learning design, Office applications.",
+  "description": "<p>Adobe Photoshop, Illustrator, InDesign, Acrobat, Canva, Figma, digital marketing, e-learning design, Office applications.</p>"
 }
 
 API teenuse lisainfo:
@@ -161,15 +160,15 @@ Request body:
 LecturerTranslationCreateRequestDto.java
 {
   "languageId": 2,
-  "title": "UX designer",
-  "shortDescription": "Teaches user-centred design and Figma.",
-  "description": "<p>Kadri has designed web and mobile apps for start-ups and coaches design teams in running user research.</p>"
+  "title": "Lecturer/consultant",
+  "shortDescription": "Adobe Photoshop, Illustrator, InDesign, Acrobat, Canva, Figma, digital marketing, e-learning design, Office applications.",
+  "description": "<p>Adobe Photoshop, Illustrator, InDesign, Acrobat, Canva, Figma, digital marketing, e-learning design, Office applications.</p>"
 }
 
 Response (200):
 LecturerTranslationCreateResponseDto.java
 {
-  "lecturerTranslationId": 8
+  "lecturerTranslationId": 16
 }
 
 API teenuse lisainfo:

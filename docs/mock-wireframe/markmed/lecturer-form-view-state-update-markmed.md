@@ -10,9 +10,9 @@ Failinimi: LecturerFormView.vue
 Frontend rada: /lecturer-form?lecturerId={id}&lecturerTranslationId={id}
 
 Vaatega seotud lisainfo:
-state: "update" — URL-is lecturerId ja lecturerTranslationId. Pealkiri "Muuda koolitajat". Kaardid "Koolitaja andmed" (nimi, pilt) ja "Tõlge ({keel})" (ametinimetus, lühikirjeldus, kirjeldus) on täidetud. Välja "Ametinimetus" sildi kõrval on "?" ikoon tooltip'iga: "Ametinimetus kuvatakse koolitaja kaardil nime all. Kirjuta lühidalt, millega koolitaja tegeleb, nt „Tarkvaraarendaja ja Java koolitaja“ või „UX-disainer“. Iga keele jaoks eraldi tõlge." Lühikirjelduse all vihje "Kuvatakse koolitaja kaardil koolituse lehel ja toimumiskorra juures". Iga router.replace järel laaditakse andmed uuesti.
+state: "update" — URL-is lecturerId ja lecturerTranslationId. Pealkiri "Muuda koolitajat". Kaardid "Koolitaja andmed" (nimi, pilt) ja "Tõlge ({keel})" (ametinimetus, lühikirjeldus, kirjeldus) on täidetud. Välja "Ametinimetus" sildi kõrval on "?" ikoon tooltip'iga: "Ametinimetus kuvatakse koolitaja kaardil nime all. Kirjuta lühidalt, millega koolitaja tegeleb, nt „Lektor/konsultant“ või „Projektijuht/lektor“. Iga keele jaoks eraldi tõlge." Lühikirjelduse all vihje "Kuvatakse koolitaja kaardil koolituse lehel ja toimumiskorra juures". Iga router.replace järel laaditakse andmed uuesti.
 Lipukesed: tõlge olemas → värviline lipp (klikk avab selle tõlke), puudub → hall lipp (klikk → state "new-translation").
-"Salvesta" → PUT /api/lecturer/{lecturerId} (nimi, pilt ja avatud tõlge ühes transaktsioonis; pilt saadetakse alati praegusel kujul, null = eemaldatakse), eduteade "Salvestatud". "Tee AI tõlge" on ainult mitte-põhikeele tõlkel: täidab vaid vormi, salvestamata muudatuste korral küsib enne kinnitust. Kiirnupp "Koolitajad" → /admin-lecturers. Kustutatud koolitaja → üldine veavaade.
+"Salvesta" → PUT /api/lecturer/{lecturerId} (nimi, pilt ja avatud tõlge ühes transaktsioonis; photo = uus pilt või null = ei muudeta, isPhotoRemoved = eemalda), eduteade "Salvestatud". "Tee AI tõlge" on ainult mitte-põhikeele tõlkel: täidab vaid vormi, salvestamata muudatuste korral küsib enne kinnitust. Kiirnupp "Koolitajad" → /admin-lecturers. Kustutatud koolitaja → üldine veavaade.
 ```
 
 ## API märkmed — GET /api/languages
@@ -49,13 +49,12 @@ Response (200):
 LecturerDetailDto.java
 {
   "lecturerId": 1,
-  "fullName": "Mari Tamm",
-  "photo": "iVBORw0KGgoAAAANSUhEUgAAACAAAAAg...",
-  "photoContentType": "image/png"
+  "fullName": "Rain Tüür",
+  "photoVersion": 1784095200
 }
 
 API teenuse lisainfo:
-Koolitaja nimi ja pilt (tabelist lecturer_photo, Base64). photo ja photoContentType on null, kui pilti pole. Frontend kuvab eelvaate kujul data:{photoContentType};base64,{photo} ja saadab sama väärtuse PUT päringuga tagasi, kui pilti ei muudetud. Kustutatud koolitaja (status "D") on nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.
+Koolitaja nimi ja pildi versioon. Pilti ei tagastata — photoVersion = lecturer_photo.updated_at epoch-sekundites või null, kui pilti pole; eelvaade tuleb pilditeenusest /api/lecturer/{lecturerId}/photo?v={photoVersion}. Kustutatud koolitaja (status "D") on nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.
 
 Veateated:
 HTTP: 404
@@ -75,9 +74,9 @@ LecturerTranslationDto.java
   "lecturerId": 1,
   "languageId": 1,
   "languageCode": "et",
-  "title": "Tarkvaraarendaja ja Java koolitaja",
-  "shortDescription": "Üle 10 aasta kogemust tarkvaraarenduse koolitajana.",
-  "description": "<p>Mari on töötanud tarkvaraarendajana panganduses ja telekommunikatsioonis ning koolitab Java ja Spring Booti teemadel alates 2015. aastast.</p>"
+  "title": "Lektor/konsultant",
+  "shortDescription": "Tarkvaraarendus, Java, HTML, CSS, JavaScript, SQL, Git, Spring Boot, REST API, PostgreSQL, JPA (Hibernate), MapStruct, JUnit, Swagger, Gradle, Confluence, Jira. Vali Tarkvaraarendus! programm.",
+  "description": "<p>Tarkvaraarendus, Java, HTML, CSS, JavaScript, SQL, Git, Spring Boot, REST API, PostgreSQL, JPA (Hibernate), MapStruct, JUnit, Swagger, Gradle, Confluence, Jira. Vali Tarkvaraarendus! programm.</p>"
 }
 
 API teenuse lisainfo:
@@ -123,21 +122,22 @@ API: PUT /api/lecturer/{lecturerId}
 Request body:
 LecturerUpdateRequestDto.java
 {
-  "fullName": "Mari Tamm",
+  "fullName": "Rain Tüür",
   "photo": null,
   "photoContentType": null,
+  "isPhotoRemoved": true,
   "lecturerTranslation": {
     "lecturerTranslationId": 1,
-    "title": "Tarkvaraarendaja ja Java koolitaja",
-    "shortDescription": "Üle 10 aasta kogemust Java ja Spring Booti koolitajana.",
-    "description": "<p>Mari on töötanud tarkvaraarendajana panganduses ja telekommunikatsioonis.</p>"
+    "title": "Lektor/konsultant",
+    "shortDescription": "Tarkvaraarendus, Java, Spring Boot, REST API, PostgreSQL, Git. Vali Tarkvaraarendus! programm.",
+    "description": "<p>Tarkvaraarendus, Java, HTML, CSS, JavaScript, SQL, Git, Spring Boot, REST API, PostgreSQL, JPA (Hibernate), MapStruct, JUnit, Swagger, Gradle, Confluence, Jira. Vali Tarkvaraarendus! programm. Juhendab Java algkursust ja Spring Booti veebiarenduse koolitust.</p>"
   }
 }
 
 Response (200): NONE
 
 API teenuse lisainfo:
-Muudab ühes transaktsioonis koolitaja nime, pilti ja avatud tõlget (sama muster nagu PUT /api/training/{trainingId}). Pilt saadetakse alati praegusel kujul: photo ≠ null → lecturer_photo lisatakse või asendatakse, photo = null → lecturer_photo rida kustutatakse. Valideerimine sama mis POST puhul. lecturerTranslation peab kuuluma sellele koolitajale. Uuendab updated_at. Kustutatud koolitaja (status "D") on nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.
+Muudab ühes transaktsioonis koolitaja nime, pilti ja avatud tõlget (sama muster nagu PUT /api/training/{trainingId}). Pilt: photo ≠ null → uus pilt, normaliseeritakse ja lecturer_photo lisatakse või asendatakse; photo = null → pilti ei muudeta; isPhotoRemoved = true → lecturer_photo rida kustutatakse (photo peab siis olema null). Salvestatud pilti tagasi ei saadeta, seega seda ei kodeerita uuesti. Valideerimine sama mis POST puhul. lecturerTranslation peab kuuluma sellele koolitajale. Uuendab updated_at. Kustutatud koolitaja (status "D") on nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.
 
 Veateated:
 HTTP: 404
@@ -168,9 +168,9 @@ languageId: Integer — sihtkeel, kuhu tõlgitakse
 Response (200):
 LecturerAiTranslationDto.java
 {
-  "title": "UX designer",
-  "shortDescription": "Teaches user-centred design and Figma.",
-  "description": "<p>Kadri has designed web and mobile apps for start-ups and coaches design teams in running user research.</p>"
+  "title": "Lecturer/consultant",
+  "shortDescription": "Adobe Photoshop, Illustrator, InDesign, Acrobat, Canva, Figma, digital marketing, e-learning design, Office applications.",
+  "description": "<p>Adobe Photoshop, Illustrator, InDesign, Acrobat, Canva, Figma, digital marketing, e-learning design, Office applications.</p>"
 }
 
 API teenuse lisainfo:

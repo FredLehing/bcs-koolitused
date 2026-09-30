@@ -15,7 +15,8 @@ Selles failis on `TrainingFormView.vue` olekud ja andmevood skeemidena (Mermaid)
 - "Salvesta" teeb ühe `PUT /api/training/{trainingId}` päringu, mis salvestab koolituse väljad ja avatud tõlke ühes transaktsioonis.
 - Rippmenüüde väärtused tulevad backendist, `contentLang` = **kasutajaliidese keel** (Pinia `languageStore.contentLang`, valitakse navbaris). Keele vahetamisel laaditakse ainult rippmenüüd uuesti (`watch: contentLang`), vormi sisu jääb alles. Avatud tõlke keel on sellest sõltumatu.
 - `userId` võetakse localStorage'ist ja saadetakse `POST /api/training` body's.
-- Lektorite ja toimumiskohtade otsing/valik käib backendis (`GET /api/lecturers?search=`, `GET /api/locations`).
+- Koolitajate ja toimumiskohtade otsing/valik käib backendis (`GET /api/lecturers?search=`, `GET /api/locations`).
+- **Uuendus (2026-09-30): koolitusel võib olla mitu koolitajat** (tabel `training_lecturer`, veerg `sort_order`; `training.default_lecturer_id` eemaldatakse). Vormis on väli "Koolitajad": valitud koolitajate nimekiri (× eemaldab, ↑ ↓ muudab järjekorda), "+ Lisa koolitaja" avab "Vali koolitaja" modali (juba valitud koolitajaid ei pakuta). `TrainingDto.lecturers: [{ lecturerId, lecturerName }]`, request DTO-des `lecturerIds: [..]` (järjekord = `sort_order`). Vt `docs/mock-wireframe/loo-mock-vaade/admin-lecturers-view/admin-lecturers-view-skeemid.md`, "Mitu koolitajat".
 - Põhikeel on määratud andmebaasis (`language.is_main_language`, praegu `et`) ja frontendi store'is (`supportedLanguages[].isMainLanguage`). Uus koolitus luuakse põhikeele tõlkega ja uue tõlke vorm eeltäidetakse põhikeele tekstiga.
 - "Tee AI tõlge" nupp on olekus C ja olekus B, kui avatud tõlge pole põhikeeles. Nupp kutsub `GET /api/training/{trainingId}/ai-translation?languageId={id}`, mis tõlgib alati **salvestatud põhikeele tõlke** (mitte vormi sisu) ja tagastab `AiTranslationDto` (`title`, `shortDescription`, `description`). Tulemus kuvatakse ainult vormis — andmebaasi läheb see alles "Lisa tõlge" / "Salvesta" nupuga. Kui vormis on salvestamata muudatusi, küsitakse enne üle kirjutamist kinnitust. Nupu tooltip selgitab seda kasutajale.
 - Olemasolevad tõlked kuvatakse lipukestena: frontendi store'i `supportedLanguages` (`et`, `en`, `ru`) võrreldakse `GET /api/training/{trainingId}/training-translations` vastusega — tõlge olemas → värviline lipp, puudub → hall lipp.
@@ -98,7 +99,7 @@ Iga oleku kõik võimalikud päringud. **Laadimine** käivitub vaate avamisel ja
 | Laadimine | `GET /api/locations` | "Toimumiskoht" rippmenüü |
 | Laadimine | `GET /api/categories?contentLang={UI keel}` | kategooriad kasutajaliidese keeles (ka keele vahetusel) |
 | Laadimine | `GET /api/funding-types?contentLang={UI keel}` | rahastustüübid kasutajaliidese keeles (ka keele vahetusel) |
-| Tegevus | `GET /api/lecturers?search={otsingusõna}` | "Vali lektor" modalis otsides |
+| Tegevus | `GET /api/lecturers?search={otsingusõna}` | "Vali koolitaja" modalis otsides |
 | Tegevus | `POST /api/training` | "Lisa" → `router.replace` olekusse `update` |
 
 ### `state: "update"` (B. Muutmine)
@@ -112,7 +113,7 @@ Iga oleku kõik võimalikud päringud. **Laadimine** käivitub vaate avamisel ja
 | Laadimine | `GET /api/training/{trainingId}/training-translations` | lipukesed |
 | Laadimine | `GET /api/categories?contentLang={UI keel}` | kategooriad kasutajaliidese keeles (ka keele vahetusel) |
 | Laadimine | `GET /api/funding-types?contentLang={UI keel}` | rahastustüübid kasutajaliidese keeles (ka keele vahetusel) |
-| Tegevus | `GET /api/lecturers?search={otsingusõna}` | "Vali lektor" modalis otsides |
+| Tegevus | `GET /api/lecturers?search={otsingusõna}` | "Vali koolitaja" modalis otsides |
 | Tegevus | `PUT /api/training/{trainingId}` | "Salvesta" |
 | Tegevus | `GET /api/training/{trainingId}/ai-translation?languageId={id}` | "Tee AI tõlge" (ainult mitte-põhikeele tõlkel) |
 | Tegevus | `PUT /api/training/{trainingId}/publish` | "Publitseeri" (status `U`) → kinnitus |
@@ -152,13 +153,13 @@ sequenceDiagram
     BE-->>FE: rippmenüüde väärtused
     FE-->>Admin: tühi vorm (tõlke keel et), nupp "Lisa"
 
-    opt Lektori valik
-        Admin->>FE: "Vali lektor"
+    opt Koolitajate valik (korduvalt)
+        Admin->>FE: "+ Lisa koolitaja"
         FE-->>Admin: modal otsinguväljaga
         Admin->>FE: sisestab otsingusõna
-        FE->>BE: GET /api/lecturers?search=Mari
-        BE-->>FE: leitud lektorid
-        Admin->>FE: valib lektori
+        FE->>BE: GET /api/lecturers?search=Rain
+        BE-->>FE: leitud koolitajad (valitud jäetakse välja)
+        Admin->>FE: valib koolitaja → lisandub nimekirja
     end
 
     Admin->>FE: täidab vormi, vajutab "Lisa"
@@ -270,7 +271,7 @@ sequenceDiagram
 | `GET /api/categories?contentLang=` | kategooria rippmenüü | — | `CategoryDto[]` |
 | `GET /api/funding-types?contentLang=` | rahastustüüpide checkboxid | — | `FundingTypeDto[]` |
 | `GET /api/locations` | toimumiskoha rippmenüü | — | täpsustamisel |
-| `GET /api/lecturers?search=` | lektori modal | — | täpsustamisel |
+| `GET /api/lecturers?search=` | "Vali koolitaja" modal | — | `LecturerDto[]` |
 | `GET /api/training/{trainingId}` | koolituse väljad (olekud B, C) | — | `TrainingDto` |
 | `GET /api/training-translation/{trainingTranslationId}` | avatud tõlge (olek B), `et` tõlge eeltäitmiseks (olek C) | — | `TrainingTranslationDto` |
 | `GET /api/training/{trainingId}/training-translations` | lipukesed (olekud B, C), põhikeele leidmine | — | `TrainingTranslationItemDto[]` (sh `isMainLanguage`) |
@@ -294,20 +295,26 @@ erDiagram
     funding_type ||--o{ training_funding_type : ""
     category ||--o{ training : ""
     location ||--o{ training : ""
-    lecturer |o--o{ training : "default_lecturer_id"
+    training ||--o{ training_lecturer : "koolitajad"
+    lecturer ||--o{ training_lecturer : ""
     language ||--o{ training : "training_language_id"
     language ||--o{ training_translation : "language_id"
 
     training {
         int id PK
         int user_id
-        int default_lecturer_id "NULL lubatud"
         int category_id
         int training_language_id
         int location_id
         varchar1 status "U / P"
         boolean is_orderable
         boolean is_promoted
+    }
+    training_lecturer {
+        int id PK
+        int training_id
+        int lecturer_id
+        int sort_order
     }
     training_translation {
         int id PK

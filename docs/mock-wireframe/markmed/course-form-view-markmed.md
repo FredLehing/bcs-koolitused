@@ -1,6 +1,6 @@
 # CourseFormView.vue — märkmed
 
-Toimumiskorra vorm (uus ja muutmine). Otsused ja skeemid: `docs/mock-wireframe/loo-mock-vaade/training-courses-view/training-courses-view-skeemid.md`. Vorm kasutab ka teenuseid `GET /api/admin-training/{trainingId}`, `GET /api/lecturer-summary/{lecturerId}` ja `DELETE /api/course/{courseId}` — nende märkmed on failis `training-courses-view-markmed.md`. Uute teenuste DTO-d on ettepanek.
+Toimumiskorra vorm (uus ja muutmine). Otsused ja skeemid: `docs/mock-wireframe/loo-mock-vaade/admin-training-courses-view/admin-training-courses-view-skeemid.md`. Vorm kasutab ka teenuseid `GET /api/admin-training/{trainingId}` ja `DELETE /api/course/{courseId}` — nende märkmed on failis `admin-training-courses-view-markmed.md`. Uute teenuste DTO-d on ettepanek.
 
 ## Vaate märkmed
 
@@ -10,8 +10,8 @@ Failinimi: CourseFormView.vue
 Frontend rada: /course-form?trainingId={id} (uus), /course-form?courseId={id} (muutmine)
 
 Vaatega seotud lisainfo:
-trainingId-ga avatuna on pealkiri "Uus toimumiskord": staatus vaikimisi "Mustand", koolitaja = koolituse vaikimisi koolitaja (GET /api/admin-training/{trainingId}). courseId-ga avatuna "Toimumiskorra muutmine": väljad täidetakse GET /api/course/{courseId} vastusest ja selle trainingId järgi laaditakse koolituse nimi; lisaks on prügikasti ikoon (CourseDeleteButton.vue). Pealkirja all koolituse nimi, kiirnupp "Kalender" → /training-courses?trainingId={id}.
-Koolitaja valitakse "Vali koolitaja" modaliga (LecturerSelectModal.vue, GET /api/lecturers, ainult aktiivsed koolitajad); nupu all on valitud koolitaja kaart (LecturerCard.vue: pilt, nimi, ametinimetus, lühikirjeldus — GET /api/lecturer-summary/{lecturerId}), ruum rippmenüüst (GET /api/rooms, esimene valik "Ruum puudub"). Staatuse rippmenüüs Mustand / Avatud / Täis / Tühistatud. Kui algus ja lõpp on valitud ja admin pole päevade arvu ise muutnud, täidab vorm selle tööpäevade (E–R) arvuga ("Arvutatud tööpäevadest, saad muuta").
+trainingId-ga avatuna on pealkiri "Uus toimumiskord": staatus vaikimisi "Mustand", koolitajad = koolituse koolitajad samas järjekorras (GET /api/admin-training/{trainingId} → lecturers); edasi on toimumiskorra koolitajad koolitusest sõltumatud. courseId-ga avatuna "Toimumiskorra muutmine": väljad täidetakse GET /api/course/{courseId} vastusest ja selle trainingId järgi laaditakse koolituse nimi; lisaks on prügikasti ikoon (CourseDeleteButton.vue). Pealkirja all koolituse nimi, kiirnupp "Kalender" → /admin-training-courses?trainingId={id}.
+Koolitajad: valitud koolitajate nimekiri (× eemaldab, ↑ ↓ muudab järjekorda), "+ Lisa koolitaja" avab "Vali koolitaja" modali (LecturerSelectModal.vue, GET /api/lecturers, ainult aktiivsed; juba valitud ei pakuta); kuvatakse ainult nimed; ruum rippmenüüst (GET /api/rooms, esimene valik "Ruum puudub"). Staatuse rippmenüüs Mustand / Avatud / Täis / Tühistatud. Kui algus ja lõpp on valitud ja admin pole päevade arvu ise muutnud, täidab vorm selle tööpäevade (E–R) arvuga ("Arvutatud tööpäevadest, saad muuta").
 Enne saatmist: algus, lõpp, päevi (≥ 1), akad. tunde (≥ 1), hind (≥ 0) ja staatus on kohustuslikud ("Täida kõik kohustuslikud väljad"), lõpp ei tohi olla enne algust ("Lõppkuupäev ei saa olla varasem kui alguskuupäev") — AlertDanger.vue. "Salvesta" → POST / PUT, seejärel kalendrisse eduteatega ("Toimumiskord lisatud" / "Toimumiskord salvestatud"). "Tagasi" → kalendrisse ilma salvestamata. Kustutatud või olematu toimumiskord/koolitus → üldine veavaade.
 ```
 
@@ -30,8 +30,13 @@ CourseDto.java
   "numberOfDays": 5,
   "numberOfAcademicHours": 40,
   "price": 490.00,
-  "lecturerId": 2,
-  "lecturerName": "Jaan Kask",
+  "lecturers": [
+    {
+      "lecturerId": 8,
+      "lecturerName": "Meelis Teern"
+    },
+    ...
+  ],
   "roomId": 2,
   "status": "X",
   "notes": "Tühistatud koolitaja haiguse tõttu.",
@@ -39,7 +44,7 @@ CourseDto.java
 }
 
 API teenuse lisainfo:
-Toimumiskorra andmed muutmise vormi jaoks. lecturerId/lecturerName, roomId, notes ja meetingLink võivad olla null. trainingId järgi laadib vorm koolituse nime (GET /api/admin-training/{trainingId}). Kustutatud toimumiskord (status "D") = olematu.
+Toimumiskorra andmed muutmise vormi jaoks. lecturers = toimumiskorra koolitajad (course_lecturer) sort_order järjekorras, võib olla tühi list; roomId, notes ja meetingLink võivad olla null. trainingId järgi laadib vorm koolituse nime (GET /api/admin-training/{trainingId}). Kustutatud toimumiskord (status "D") = olematu.
 
 Veateated:
 HTTP: 404
@@ -61,7 +66,10 @@ CourseCreateRequestDto.java
   "numberOfDays": 5,
   "numberOfAcademicHours": 40,
   "price": 490.00,
-  "lecturerId": 1,
+  "lecturerIds": [
+    1,
+    8
+  ],
   "roomId": 1,
   "status": "U",
   "notes": "",
@@ -71,7 +79,7 @@ CourseCreateRequestDto.java
 Response (200): NONE
 
 API teenuse lisainfo:
-Lisab koolitusele toimumiskorra; created_by = userId (sisselogitud kasutaja). Kohustuslikud: userId, startDate, endDate, numberOfDays (≥ 1), numberOfAcademicHours (≥ 1), price (≥ 0), status ("U" / "O" / "F" / "X"; muu väärtus → 400). lecturerId ja roomId võivad olla null; tühi notes/meetingLink salvestatakse null-ina. meetingLink max 255 märki. numberOfDays saadab frontend (backend kuupäevadest ei arvuta). Toimumiskorra saab lisada ka mustandis koolitusele, mitte kustutatud koolitusele.
+Lisab koolitusele toimumiskorra; created_by = userId (sisselogitud kasutaja). Kohustuslikud: userId, startDate, endDate, numberOfDays (≥ 1), numberOfAcademicHours (≥ 1), price (≥ 0), status ("U" / "O" / "F" / "X"; muu väärtus → 400). lecturerIds = koolitajate ID-d järjekorras (sort_order = positsioon), võib olla tühi list — iga uus ID peab olema aktiivne koolitaja (juba seotud kustutatud koolitaja võib jääda), vastasel juhul 404 'lecturerId'; roomId võib olla null; tühi notes/meetingLink salvestatakse null-ina. meetingLink max 255 märki. numberOfDays saadab frontend (backend kuupäevadest ei arvuta). Toimumiskorra saab lisada ka mustandis koolitusele, mitte kustutatud koolitusele.
 
 Veateated:
 HTTP: 403
@@ -96,7 +104,9 @@ CourseUpdateRequestDto.java
   "numberOfDays": 5,
   "numberOfAcademicHours": 40,
   "price": 490.00,
-  "lecturerId": 2,
+  "lecturerIds": [
+    8
+  ],
   "roomId": 2,
   "status": "X",
   "notes": "Tühistatud koolitaja haiguse tõttu.",
@@ -106,7 +116,7 @@ CourseUpdateRequestDto.java
 Response (200): NONE
 
 API teenuse lisainfo:
-Muudab toimumiskorra kõiki välju (ka staatust — eraldi tegevusteenuseid pole). Valideerimine sama mis POST puhul; status "D" ei ole lubatud (kustutamiseks DELETE). Uuendab updated_at. Kustutatud toimumiskord (status "D") = olematu.
+Muudab toimumiskorra kõiki välju (ka staatust — eraldi tegevusteenuseid pole). Valideerimine sama mis POST puhul; course_lecturer read kirjutatakse lecturerIds järgi üle; status "D" ei ole lubatud (kustutamiseks DELETE). Uuendab updated_at. Kustutatud toimumiskord (status "D") = olematu.
 
 Veateated:
 HTTP: 403
@@ -128,7 +138,7 @@ RoomDto.java
 [
   {
     "roomId": 1,
-    "roomName": "A101",
+    "roomName": "Assauwe",
     "roomStatus": "VAB"
   },
   ...
@@ -153,7 +163,7 @@ LecturerDto.java
 [
   {
     "lecturerId": 1,
-    "lecturerName": "Mari Tamm"
+    "lecturerName": "Rain Tüür"
   },
   ...
 ]

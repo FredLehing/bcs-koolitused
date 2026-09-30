@@ -27,7 +27,7 @@ Teenusel puuduvad query parameetrid ja request body.
   "trainingLanguageId": 1,
   "locationId": 1,
   "defaultLecturerId": 1,
-  "defaultLecturerName": "Mari Tamm",
+  "defaultLecturerName": "Rain Tüür",
   "isOrderable": true,
   "isPromoted": true,
   "status": "P",
@@ -105,7 +105,7 @@ CREATE TABLE lecturer
 );
 ```
 
-Näidisandmed: id=1 "Mari Tamm" (koolitus 1 vaikimisi lektor), id=2 "Jaan Kask" (koolitus 2 vaikimisi lektor).
+Näidisandmed: id=1 "Rain Tüür" (koolitus 1 vaikimisi lektor), id=2 "Merje Vaide" (koolitus 2 vaikimisi lektor).
 
 ### training_funding_type
 

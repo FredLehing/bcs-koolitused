@@ -30,15 +30,15 @@ AdminLecturerSummaryDto.java
   {
     "lecturerId": 3,
     "lecturerTranslationId": 5,
-    "fullName": "Kadri Lepp",
-    "title": "UX-disainer",
+    "fullName": "Kersti Laidvee",
+    "title": "Lektor/konsultant",
     "status": "A",
     "hasAllTranslations": false,
     "missingTranslationLanguageCodes": [
       "en",
       ...
     ],
-    "trainingCount": 0,
+    "trainingCount": 1,
     "upcomingCourseCount": 0,
     "updatedAt": "2026-09-20T07:00:00Z"
   },
@@ -46,7 +46,7 @@ AdminLecturerSummaryDto.java
 ]
 
 API teenuse lisainfo:
-Andmed tulevad view'st admin_lecturer_summary, sorteeritud fullName järgi. Pilte ei tagastata. status: "A" = aktiivne, "D" = kustutatud; ilma includeDeleted=true tagastatakse ainult aktiivsed. title ja lecturerTranslationId on contentLang keeles, puudumisel põhikeeles ("Muuda" link). missingTranslationLanguageCodes = tõlkekeeled (requiresTranslation = true), milles tõlge puudub; tühi list, kui kõik on olemas. trainingCount = aktiivsed koolitused (status ≠ "D"), kus ta on vaikimisi koolitaja. upcomingCourseCount = toimumiskorrad, kus ta on koolitaja, end_date ≥ täna ja status ei ole "D" ega "X" — kui > 0, on prügikast keelatud. updatedAt = hiliseim lecturer, lecturer_translation ja lecturer_photo updated_at. Otsing nime järgi toimub frontendis.
+Andmed tulevad view'st admin_lecturer_summary, sorteeritud fullName järgi. Pilte ei tagastata. status: "A" = aktiivne, "D" = kustutatud; ilma includeDeleted=true tagastatakse ainult aktiivsed. title ja lecturerTranslationId on contentLang keeles, puudumisel põhikeeles ("Muuda" link). missingTranslationLanguageCodes = tõlkekeeled (requiresTranslation = true), milles tõlge puudub; tühi list, kui kõik on olemas. trainingCount = aktiivsed koolitused (status ≠ "D"), mille koolitajate hulgas ta on (training_lecturer). upcomingCourseCount = toimumiskorrad, mille koolitajate hulgas ta on (course_lecturer), end_date ≥ täna ja status ei ole "D" ega "X" — kui > 0, on prügikast keelatud. updatedAt = hiliseim lecturer, lecturer_translation ja lecturer_photo updated_at. Otsing nime järgi toimub frontendis.
 
 Veateated: —
 ```
@@ -59,7 +59,7 @@ API: DELETE /api/lecturer/{lecturerId}
 Response (200): NONE
 
 API teenuse lisainfo:
-Soft delete: määrab lecturer.status = "D" (LecturerStatus.DELETED) ja uuendab updated_at. Tõlkeid, pilti ega seoseid (koolituse vaikimisi koolitaja, toimumiskorra koolitaja) ei kustutata. Keeldub, kui koolitajal on tulevasi toimumiskordi (end_date ≥ täna, status ei ole "D" ega "X"). Juba kustutatud koolitaja korral midagi ei muutu. Kustutatud koolitajat ei pakuta "Vali koolitaja" modalis ja tema kaarti ei kuvata; nimekirjas näeb teda lülitiga "Näita kustutatud" ja saab taastada (PUT /api/lecturer/{lecturerId}/restore). Frontendis teeb kutse LecturerDeleteButton.vue.
+Soft delete: määrab lecturer.status = "D" (LecturerStatus.DELETED) ja uuendab updated_at. Tõlkeid, pilti ega seoseid (training_lecturer, course_lecturer) ei kustutata. Keeldub, kui koolitajal on tulevasi toimumiskordi (end_date ≥ täna, status ei ole "D" ega "X"). Juba kustutatud koolitaja korral midagi ei muutu. Kustutatud koolitajat ei pakuta "Vali koolitaja" modalis ja tema kaarti ei kuvata; nimekirjas näeb teda lülitiga "Näita kustutatud" ja saab taastada (PUT /api/lecturer/{lecturerId}/restore). Frontendis teeb kutse LecturerDeleteButton.vue.
 
 Veateated:
 HTTP: 404
