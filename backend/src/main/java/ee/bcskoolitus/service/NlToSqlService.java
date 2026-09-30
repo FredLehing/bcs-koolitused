@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 public class NlToSqlService {
 
     private static final String SQL_SYSTEM_PROMPT_TEMPLATE = """
-            You are a %s query generator for an bcs-koolitused database.
+            You are a %s query generator for bcs-koolitused database.
             
             SCHEMA:
             language(id INTEGER PK, code TEXT, name TEXT, is_main_language BOOLEAN)
