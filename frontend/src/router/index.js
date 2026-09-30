@@ -12,6 +12,8 @@ import AdminLecturersView from '@/views/AdminLecturersView.vue'
 import LecturerFormView from '@/views/LecturerFormView.vue'
 import AdminRoomsView from '@/views/AdminRoomsView.vue'
 import RoomFormView from '@/views/RoomFormView.vue'
+import AdminEnquiriesView from '@/views/AdminEnquiriesView.vue'
+import AdminEnquiryView from '@/views/AdminEnquiryView.vue'
 import AdminTrainingCoursesView from '@/views/AdminTrainingCoursesView.vue'
 import CourseFormView from '@/views/CourseFormView.vue'
 import LecturersView from '@/views/LecturersView.vue'
@@ -74,6 +76,16 @@ const router = createRouter({
       path: '/room-form',
       name: 'roomFormRoute',
       component: RoomFormView,
+    },
+    {
+      path: '/admin-enquiries',
+      name: 'adminEnquiriesRoute',
+      component: AdminEnquiriesView,
+    },
+    {
+      path: '/admin-enquiry',
+      name: 'adminEnquiryRoute',
+      component: AdminEnquiryView,
     },
     {
       path: '/admin-training-courses',

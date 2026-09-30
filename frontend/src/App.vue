@@ -49,6 +49,10 @@
                 <RouterLink class="nav-link" :to="{ name: 'adminRoomsRoute' }">
                   {{ $t('navbar.manageRooms') }}
                 </RouterLink>
+                <hr class="dropdown-divider" />
+                <RouterLink class="nav-link" :to="{ name: 'adminEnquiriesRoute' }">
+                  {{ $t('navbar.manageEnquiries') }}
+                </RouterLink>
               </div>
             </div>
           </div>

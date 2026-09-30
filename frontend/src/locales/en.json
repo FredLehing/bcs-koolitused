@@ -16,6 +16,7 @@
     "addLecturer": "Add new trainer",
     "manageLecturers": "Trainers",
     "manageRooms": "Training rooms",
+    "manageEnquiries": "Training enquiries",
     "login": "Log in",
     "logout": "Log out",
     "logoutModal": {
@@ -483,6 +484,51 @@
     "messages": {
       "added": "Room added",
       "saved": "Saved"
+    }
+  },
+  "enquiryStatus": {
+    "U": "New",
+    "H": "Handled"
+  },
+  "adminEnquiries": {
+    "title": "Training enquiries",
+    "searchPlaceholder": "Search by name, email, company or training…",
+    "showHandled": "Show handled too",
+    "noResults": "No enquiries found",
+    "totalCount": "{n} enquiries in total | {n} enquiry in total | {n} enquiries in total",
+    "view": "View",
+    "columns": {
+      "createdAt": "Received",
+      "fullName": "Name",
+      "email": "Email",
+      "companyName": "Company",
+      "trainingTitle": "Training",
+      "course": "Course",
+      "optionName": "Format",
+      "status": "Status",
+      "actions": "Actions"
+    }
+  },
+  "adminEnquiry": {
+    "title": "Training enquiry",
+    "enquiryLegend": "Enquiry",
+    "contactLegend": "Contact",
+    "createdAt": "Received",
+    "status": "Status",
+    "training": "Training",
+    "course": "Course",
+    "noCourse": "No course selected",
+    "option": "Format",
+    "companyName": "Company",
+    "message": "Message",
+    "fullName": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "markHandled": "Mark as handled",
+    "markNew": "Mark as new",
+    "messages": {
+      "handled": "Enquiry marked as handled",
+      "reopened": "Enquiry marked as new"
     }
   }
 }

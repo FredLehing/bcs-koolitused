@@ -97,7 +97,9 @@ INSERT INTO option_translation (id, option_id, language_id, name, created_at, up
 -- Table: profile
 INSERT INTO profile (id, first_name, last_name, phone, email, created_at, updated_at) VALUES
     (1, 'Anna', 'Saar', '+37256789012', 'anna.saar@example.com', '2026-09-05 09:00:00', '2026-09-05 09:00:00'),
-    (2, 'Peeter', 'Mets', '+37251234567', 'peeter.mets@example.com', '2026-09-16 14:15:00', '2026-09-16 14:15:00');
+    (2, 'Peeter', 'Mets', '+37251234567', 'peeter.mets@example.com', '2026-09-16 14:15:00', '2026-09-16 14:15:00'),
+    (3, 'Kadri', 'Tamm', '+37255512345', 'kadri.tamm@example.com', '2026-09-20 11:05:00', '2026-09-20 11:05:00'),
+    (4, 'Martin', 'Kask', '+37253344556', 'martin.kask@example.com', '2026-09-28 16:40:00', '2026-09-28 16:40:00');
 
 -- Table: participant
 INSERT INTO participant (id, user_id, name, profile_id, created_at) VALUES
@@ -223,10 +225,12 @@ INSERT INTO course_participant (id, course_id, participant_id, notes, has_paid, 
     (1, 1, 1, 'Registreerus veebilehe kaudu.', true, true, 'REG', '2026-09-10 12:00:00', '2026-09-10 12:00:00'),
     (2, 3, 1, 'Osales septembris.', true, true, 'REG', '2026-09-01 12:00:00', '2026-09-01 12:00:00');
 
--- Table: enquiry
+-- Table: enquiry (status: U = uus, H = käsitletud)
 INSERT INTO enquiry (id, training_id, profile_id, course_id, option_id, message, company_name, status, created_at, updated_at) VALUES
     (1, 1, 1, 1, 1, 'Huvitab, kas kursusele on veel vabu kohti.', NULL, 'U', '2026-09-15 08:30:00', '2026-09-15 08:30:00'),
-    (2, 2, 2, NULL, 2, 'Kas koolitust on võimalik tellida ka ettevõttele?', 'OÜ Näidisfirma', 'U', '2026-09-16 14:20:00', '2026-09-16 14:20:00');
+    (2, 2, 2, NULL, 2, 'Kas koolitust on võimalik tellida ka ettevõttele?', 'OÜ Näidisfirma', 'U', '2026-09-16 14:20:00', '2026-09-16 14:20:00'),
+    (3, 3, 3, NULL, 1, 'Soovime koolitust kaheksale arendajale meie kontoris, eelistatavalt novembris.', 'AS Tarkvaramaja', 'H', '2026-09-20 11:05:00', '2026-09-22 09:00:00'),
+    (4, 1, 4, 5, 2, 'Kas veebis osalejad saavad hiljem ka salvestust vaadata?', NULL, 'U', '2026-09-28 16:40:00', '2026-09-28 16:40:00');
 
 -- Table: certificate_template
 INSERT INTO certificate_template (id, course_id, status, created_at, updated_at, created_by) VALUES
