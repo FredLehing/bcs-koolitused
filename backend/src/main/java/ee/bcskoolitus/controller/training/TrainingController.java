@@ -190,4 +190,44 @@ public class TrainingController {
     public void restoreTraining(@PathVariable Integer trainingId) {
         trainingService.restoreTraining(trainingId);
     }
+
+    @PutMapping("/training/{trainingId}/publish")
+    @Operation(summary = "Publitseerib koolituse",
+            description = "Tegevusteenus: määrab status = P. Juba publitseeritud koolituse korral midagi ei muutu.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Olematu trainingId -> 'errorCode:' PRIMARY_KEY_NOT_FOUND",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Koolitus on kustutatud (status D) -> 'errorCode:' TRAINING_DELETED",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            )
+    })
+    public void publishTraining(@PathVariable Integer trainingId) {
+        trainingService.publishTraining(trainingId);
+    }
+
+    @PutMapping("/training/{trainingId}/unpublish")
+    @Operation(summary = "Liigutab koolituse mustandisse",
+            description = "Tegevusteenus: määrab status = U. Juba mustandis koolituse korral midagi ei muutu.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Olematu trainingId -> 'errorCode:' PRIMARY_KEY_NOT_FOUND",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Koolitus on kustutatud (status D) -> 'errorCode:' TRAINING_DELETED",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            )
+    })
+    public void unpublishTraining(@PathVariable Integer trainingId) {
+        trainingService.unpublishTraining(trainingId);
+    }
 }

@@ -43,6 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.LinkedHashSet;
 import java.util.List;
 
+import static ee.bcskoolitus.Error.TRAINING_DELETED;
 import static ee.bcskoolitus.Error.TRANSLATION_EXISTS;
 
 @Service
@@ -269,5 +270,33 @@ public class TrainingService {
         }
         training.setStatus(TrainingStatus.UNPUBLISHED.getCode());
         trainingRepository.save(training);
+    }
+
+    @Transactional
+    public void publishTraining(Integer trainingId) {
+        changeTrainingStatus(trainingId, TrainingStatus.PUBLISHED);
+    }
+
+    @Transactional
+    public void unpublishTraining(Integer trainingId) {
+        changeTrainingStatus(trainingId, TrainingStatus.UNPUBLISHED);
+    }
+
+    // getValidTrainingBy leiab ka kustutatud koolituse, et anda 403 (mitte 404).
+    // Juba soovitud staatuses koolituse korral midagi ei muutu (updated_at jääb samaks).
+    private void changeTrainingStatus(Integer trainingId, TrainingStatus newTrainingStatus) {
+        Training training = getValidTrainingBy(trainingId);
+        validateTrainingIsNotDeleted(training);
+        if (newTrainingStatus.getCode().equals(training.getStatus())) {
+            return;
+        }
+        training.setStatus(newTrainingStatus.getCode());
+        trainingRepository.save(training);
+    }
+
+    private static void validateTrainingIsNotDeleted(Training training) {
+        if (TrainingStatus.DELETED.getCode().equals(training.getStatus())) {
+            throw new ForbiddenException(TRAINING_DELETED.getMessage(), TRAINING_DELETED.name());
+        }
     }
 }
