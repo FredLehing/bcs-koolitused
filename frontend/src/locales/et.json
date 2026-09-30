@@ -104,8 +104,6 @@
       "add": "Lisa",
       "save": "Salvesta",
       "addTranslation": "Lisa tõlge",
-      "publish": "Publitseeri",
-      "unpublish": "Liiguta mustandisse",
       "view": "Vaata"
     },
     "flags": {
@@ -118,12 +116,6 @@
       "search": "Otsi",
       "notFound": "Ühtegi lektorit ei leitud.",
       "noLecturer": "Lektor puudub"
-    },
-    "statusModal": {
-      "publishTitle": "Publitseeri koolitus",
-      "publishMessage": "Kas soovid koolituse publitseerida? See muutub avalikult nähtavaks.",
-      "unpublishTitle": "Liiguta mustandisse",
-      "unpublishMessage": "Kas soovid koolituse mustandisse liigutada? See kaob avalikust nimekirjast."
     },
     "aiModal": {
       "title": "Asenda tekst AI tõlkega?",
@@ -168,6 +160,24 @@
       "upcomingCourses": "Järgmised koolitused",
       "calendar": "Kalender",
       "placeholder": "Sisu lisandub peagi."
+    }
+  },
+  "trainingStatusButton": {
+    "buttons": {
+      "publish": "Publitseeri",
+      "unpublish": "Liiguta mustandisse",
+      "restore": "Taasta"
+    },
+    "modal": {
+      "publishTitle": "Publitseeri koolitus",
+      "publishMessage": "Kas soovid koolituse publitseerida? See muutub avalikult nähtavaks.",
+      "publishMessageWithTitle": "Kas soovid koolituse „{title}“ publitseerida? See muutub avalikult nähtavaks.",
+      "unpublishTitle": "Liiguta mustandisse",
+      "unpublishMessage": "Kas soovid koolituse mustandisse liigutada? See kaob avalikust nimekirjast.",
+      "unpublishMessageWithTitle": "Kas soovid koolituse „{title}“ mustandisse liigutada? See kaob avalikust nimekirjast.",
+      "restoreTitle": "Taasta koolitus",
+      "restoreMessage": "Kas soovid koolituse taastada? See läheb mustandisse, avalikuks muutub alles pärast publitseerimist.",
+      "restoreMessageWithTitle": "Kas soovid koolituse „{title}“ taastada? See läheb mustandisse, avalikuks muutub alles pärast publitseerimist."
     }
   }
 }

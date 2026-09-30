@@ -255,11 +255,6 @@ export default {
     translation.description = trainingUpdateRequest.description
   },
 
-  // PUT /api/training/{trainingId}/publish ja /unpublish → NONE
-  setTrainingStatus(trainingId, status) {
-    findTraining(trainingId).status = status
-  },
-
   // POST /api/training/{trainingId}/training-translation → TrainingTranslationCreateResponseDto
   addTrainingTranslation(trainingId, trainingTranslationCreateRequest) {
     const trainingTranslationId = nextTrainingTranslationId++
