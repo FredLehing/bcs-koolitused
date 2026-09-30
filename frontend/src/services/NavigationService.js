@@ -1,5 +1,11 @@
 import router from '@/router/index.js'
 
+function createTrainingViewQuery(trainingId, trainingTranslationId) {
+  return trainingTranslationId
+    ? { trainingId: trainingId, trainingTranslationId: trainingTranslationId }
+    : { trainingId: trainingId }
+}
+
 export default {
   navigateToTrainingsView() {
     router.push({ name: 'trainingsRoute' })
@@ -22,8 +28,17 @@ export default {
     router.push({ name: 'notAuthorizedRoute' })
   },
 
-  navigateToTrainingView(trainingId) {
-    router.push({ name: 'trainingRoute', query: { trainingId: trainingId } })
+  // trainingTranslationId on valikuline (kindla tõlke eelvaade); ilma selleta valitakse tõlge
+  // kasutajaliidese keele järgi
+  navigateToTrainingView(trainingId, trainingTranslationId) {
+    router.push({
+      name: 'trainingRoute',
+      query: createTrainingViewQuery(trainingId, trainingTranslationId),
+    })
+  },
+
+  replaceTrainingView(trainingId) {
+    router.replace({ name: 'trainingRoute', query: createTrainingViewQuery(trainingId) })
   },
 
   // Vahetab TrainingFormView oleku (query parameetrid) ilma brauseri ajalukku uut kirjet lisamata

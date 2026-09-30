@@ -57,7 +57,8 @@
   "trainingCard": {
     "language": "Training language",
     "orderable": "Orderable",
-    "viewDetails": "View details"
+    "viewDetails": "View details",
+    "edit": "Edit training"
   },
   "footer": {
     "facebook": "Find us on Facebook",

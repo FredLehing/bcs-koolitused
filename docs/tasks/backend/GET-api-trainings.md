@@ -39,6 +39,7 @@ Mockupi API URL-is sisaldus lisaks ka `sort={sort}` parameeter, kuid see on task
   "trainingSummaries": [
     {
       "trainingId": 1,
+      "trainingTranslationId": 1,
       "title": "Java algkursus",
       "shortDescription": "Java programmeerimise alused algajatele.",
       "categoryId": 1,
@@ -54,6 +55,7 @@ Mockupi API URL-is sisaldus lisaks ka `sort={sort}` parameeter, kuid see on task
     },
     {
       "trainingId": 2,
+      "trainingTranslationId": 3,
       "title": "Projektijuhtimise põhitõed",
       "shortDescription": "Sissejuhatus IT-projektijuhtimisse.",
       "categoryId": 3,
@@ -69,6 +71,7 @@ Mockupi API URL-is sisaldus lisaks ka `sort={sort}` parameeter, kuid see on task
 Väljade selgitused:
 
 - `totalPages`, `totalElements` — leheküljestamise metaandmed (kogu tulemushulga ja lehitsemise jaoks), mitte ainult tagastatava lehe kohta.
+- `trainingTranslationId` — kaardil kuvatava (`contentLang` keele) tõlke ID (`training_summary.training_translation_id`). Admini "Muuda" ikoon avab selle tõlke `TrainingFormView` olekus `update`.
 - `isOrderable` — pärineb veerust `training.is_orderable`.
 - `isPromoted` — pärineb veerust `training.is_promoted`.
 - `fundingTypes` — koolitusele määratud rahastustüüpide loend (`training_funding_type` kaudu). Koolitusel võib olla null, üks või mitu rahastustüüpi (näide: koolitusel id=2 pole ühtegi rahastustüüpi, seega tühi list).
