@@ -1,5 +1,7 @@
 # Ruumide nimekiri
 
+> **Uuendus (2026-09-30):** `room.status` on nüüd `A` / `D` (soft delete). Teenus tagastab ainult aktiivsed ruumid ja `roomStatus` eemaldatakse — vt `room-deleted-status.md`.
+
 **Teenus:** `GET /api/rooms`
 
 **Kasutav vaade:** `CourseFormView.vue` (ruumi rippmenüü, esimene valik "Ruum puudub")

@@ -15,6 +15,7 @@
     "manageTrainings": "Koolituste haldus",
     "addLecturer": "Lisa uus koolitaja",
     "manageLecturers": "Koolitajad",
+    "manageRooms": "Koolitusruumid",
     "login": "Logi sisse",
     "logout": "Logi välja",
     "logoutModal": {
@@ -403,6 +404,7 @@
     "status": "Staatus",
     "room": "Ruum",
     "noRoom": "Ruum puudub",
+    "roomDeleted": "(kustutatud)",
     "meetingLink": "Veebilink",
     "notes": "Märkmed",
     "back": "Tagasi",
@@ -427,5 +429,58 @@
   "dateInput": {
     "placeholder": "pp/kk/aaaa",
     "openCalendar": "Ava kalender"
+  },
+  "adminRooms": {
+    "title": "Koolitusruumid",
+    "addRoom": "Lisa uus ruum",
+    "searchPlaceholder": "Otsi nime järgi…",
+    "showDeleted": "Näita kustutatud",
+    "noResults": "Ruume ei leitud",
+    "totalCount": "Kokku {n} ruumi | Kokku {n} ruum | Kokku {n} ruumi",
+    "deleted": "Kustutatud",
+    "edit": "Muuda",
+    "columns": {
+      "roomName": "Nimi",
+      "upcomingCourseCount": "Tulevasi toimumiskordi",
+      "courseCount": "Toimumiskordi kokku",
+      "updatedAt": "Uuendatud",
+      "actions": "Tegevused"
+    },
+    "messages": {
+      "deleted": "Ruum kustutatud",
+      "restored": "Ruum taastatud"
+    }
+  },
+  "roomDeleteButton": {
+    "label": "Kustuta",
+    "modalTitle": "Kustuta ruum",
+    "modalMessage": "Kas soovid ruumi „{roomName}“ kustutada? Seda ei pakuta enam toimumiskorra vormis; kalendris jääb nimi alles.",
+    "confirm": "Kustuta",
+    "hasUpcomingCourses": "Ruumis on tulevasi toimumiskordi — vali neile enne teine ruum"
+  },
+  "roomRestoreButton": {
+    "label": "Taasta",
+    "modalTitle": "Taasta ruum",
+    "modalMessage": "Kas soovid ruumi „{roomName}“ taastada? Seda saab siis jälle toimumiskordadele valida.",
+    "confirm": "Taasta"
+  },
+  "roomForm": {
+    "title": {
+      "new": "Lisa uus ruum",
+      "update": "Muuda ruumi"
+    },
+    "legend": "Ruumi andmed",
+    "roomName": "Nimi",
+    "buttons": {
+      "add": "Lisa",
+      "save": "Salvesta"
+    },
+    "validation": {
+      "fillRequired": "Täida kõik kohustuslikud väljad"
+    },
+    "messages": {
+      "added": "Ruum lisatud",
+      "saved": "Salvestatud"
+    }
   }
 }

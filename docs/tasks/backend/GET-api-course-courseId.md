@@ -14,7 +14,7 @@ Eeldab taski `course-db-changes.md`.
 
 ## Väljund
 
-**Response (200 OK):** `CourseDto` — `courseId`, `trainingId`, `startDate`, `endDate`, `numberOfDays`, `numberOfAcademicHours`, `price`, `lecturers: [{ lecturerId, lecturerName }]` (`course_lecturer`, `sort_order`), `roomId`, `status`, `notes`, `meetingLink` (viimased võivad olla `null`). JSON: `docs/mock-wireframe/markmed/course-form-view-markmed.md`.
+**Response (200 OK):** `CourseDto` — `courseId`, `trainingId`, `startDate`, `endDate`, `numberOfDays`, `numberOfAcademicHours`, `price`, `lecturers: [{ lecturerId, lecturerName }]` (`course_lecturer`, `sort_order`), `roomId`, `roomName` (ka kustutatud ruumi nimi — vt `room-deleted-status.md`), `status`, `notes`, `meetingLink` (viimased võivad olla `null`). JSON: `docs/mock-wireframe/markmed/course-form-view-markmed.md`.
 
 ## Eesmärk
 

@@ -166,7 +166,9 @@ code { font-family: var(--font-mono); font-size: .88em; }
     { key: "admin-training-courses", path: "/admin-training-courses", name: "Koolituse kalender", view: "AdminTrainingCoursesView.vue", group: "admin", sample: "/admin-training-courses?trainingId=1", file: "admin-training-courses-view/admin-training-courses-view-labimang.html", params: ["trainingId"] },
     { key: "course-form", path: "/course-form", name: "Toimumiskorra vorm", view: "CourseFormView.vue", group: "admin", sample: "/course-form?trainingId=1", file: "admin-training-courses-view/admin-training-courses-view-labimang.html", params: ["trainingId", "courseId"], extra: "view=course-form" },
     { key: "admin-lecturers", path: "/admin-lecturers", name: "Koolitajad (haldus)", view: "AdminLecturersView.vue", group: "admin", file: "admin-lecturers-view/admin-lecturers-view-labimang.html" },
-    { key: "lecturer-form", path: "/lecturer-form", name: "Koolitaja vorm", view: "LecturerFormView.vue", group: "admin", file: "admin-lecturers-view/admin-lecturers-view-labimang.html", params: ["lecturerId", "lecturerTranslationId", "languageId"], extra: "view=lecturer-form" }
+    { key: "lecturer-form", path: "/lecturer-form", name: "Koolitaja vorm", view: "LecturerFormView.vue", group: "admin", file: "admin-lecturers-view/admin-lecturers-view-labimang.html", params: ["lecturerId", "lecturerTranslationId", "languageId"], extra: "view=lecturer-form" },
+    { key: "admin-rooms", path: "/admin-rooms", name: "Koolitusruumid", view: "AdminRoomsView.vue", group: "admin", file: "admin-rooms-view/admin-rooms-view-labimang.html" },
+    { key: "room-form", path: "/room-form", name: "Ruumi vorm", view: "RoomFormView.vue", group: "admin", file: "admin-rooms-view/admin-rooms-view-labimang.html", params: ["roomId"], extra: "view=room-form" }
   ];
   var ROLE_NAMES = { public: "Külastaja", user: "Kasutaja", admin: "Admin" };
 
@@ -217,7 +219,8 @@ code { font-family: var(--font-mono); font-size: .88em; }
     var dead = function (label) { return '<button type="button" class="lnk dead" data-dead="1" title="Kohatäide (href=&quot;#&quot;)">' + label + '</button>'; };
     var admin = state.role === "admin" ? '<span class="admin"><button type="button" id="b-admin" aria-expanded="false" aria-controls="admin-menu">Admin ▾</button><span class="menu" id="admin-menu" hidden>' +
       '<button type="button" data-go="/training-form">Lisa uus koolitus</button><button type="button" data-go="/admin-trainings">Koolituste haldus</button><hr>' +
-      '<button type="button" data-go="/lecturer-form">Lisa uus koolitaja</button><button type="button" data-go="/admin-lecturers">Koolitajad</button></span></span>' : "";
+      '<button type="button" data-go="/lecturer-form">Lisa uus koolitaja</button><button type="button" data-go="/admin-lecturers">Koolitajad</button><hr>' +
+      '<button type="button" data-go="/admin-rooms">Koolitusruumid</button></span></span>' : "";
     var right = state.role === "public" ? '<button type="button" class="pill" data-go="/login">Logi sisse</button><span class="pill" style="cursor:default" title="Kohatäide">Registreeru</span>'
       : '<span class="who">' + ROLE_NAMES[state.role] + '</span><button type="button" class="pill" id="b-logout">Logi välja</button>';
     document.getElementById("sitenav").innerHTML = '<button type="button" class="logo" data-go="/" aria-label="Avaleht"></button>' +

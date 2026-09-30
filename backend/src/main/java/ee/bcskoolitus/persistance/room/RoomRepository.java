@@ -6,5 +6,9 @@ import java.util.List;
 
 public interface RoomRepository extends JpaRepository<Room, Integer> {
 
-    List<Room> findAllByOrderByNameAsc();
+    List<Room> findAllByStatusOrderByNameAscIdAsc(String status);
+
+    boolean existsByNameIgnoreCase(String name);
+
+    boolean existsByNameIgnoreCaseAndIdNot(String name, Integer id);
 }

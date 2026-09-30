@@ -38,13 +38,14 @@ CourseDto.java
     ...
   ],
   "roomId": 2,
+  "roomName": "Bremeni",
   "status": "X",
   "notes": "Tühistatud koolitaja haiguse tõttu.",
   "meetingLink": null
 }
 
 API teenuse lisainfo:
-Toimumiskorra andmed muutmise vormi jaoks. lecturers = toimumiskorra koolitajad (course_lecturer) sort_order järjekorras, võib olla tühi list; roomId, notes ja meetingLink võivad olla null. trainingId järgi laadib vorm koolituse nime (GET /api/admin-training/{trainingId}). Kustutatud toimumiskord (status "D") = olematu.
+Toimumiskorra andmed muutmise vormi jaoks. lecturers = toimumiskorra koolitajad (course_lecturer) sort_order järjekorras, võib olla tühi list; roomId, roomName, notes ja meetingLink võivad olla null. roomName tagastatakse ka kustutatud ruumi korral — vorm näitab seda rippmenüüs "Bremeni (kustutatud)", sest GET /api/rooms kustutatud ruumi ei tagasta. trainingId järgi laadib vorm koolituse nime (GET /api/admin-training/{trainingId}). Kustutatud toimumiskord (status "D") = olematu.
 
 Veateated:
 HTTP: 404
@@ -138,14 +139,13 @@ RoomDto.java
 [
   {
     "roomId": 1,
-    "roomName": "Assauwe",
-    "roomStatus": "VAB"
+    "roomName": "Assauwe"
   },
   ...
 ]
 
 API teenuse lisainfo:
-Kõik ruumid nime järgi. CourseFormView kasutab neid ruumi rippmenüüs (esimene valik "Ruum puudub" = null). roomStatus tähendus (VAB / KIN) on lahtine küsimus — praegu kuvatakse kõik ruumid.
+Aktiivsed ruumid (room.status = "A") nime järgi. CourseFormView kasutab neid ruumi rippmenüüs (esimene valik "Ruum puudub" = null). Kustutatud ruumi ei tagastata; uueks ruumiks seda valida ei saa (POST/PUT → 404 'roomId'), toimumiskorra praegune kustutatud ruum jääb aga alles.
 
 Veateated: —
 ```

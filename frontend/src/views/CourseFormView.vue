@@ -46,6 +46,8 @@ export default {
       courseId: 0,
       trainingTitle: '',
       rooms: [],
+      // Toimumiskorra praegune ruum ({ roomId, roomName }) — kustutatud ruumi GET /api/rooms ei tagasta
+      linkedRoom: null,
       // true, kui admin on päevade arvu ise muutnud — siis seda kuupäevadest enam ei arvutata
       isNumberOfDaysEdited: false,
       isSending: false,
@@ -72,6 +74,19 @@ export default {
 
     courseStatuses() {
       return COURSE_STATUSES
+    },
+
+    // Kustutatud praegune ruum jääb rippmenüüsse märgisega "(kustutatud)", et valik ei kaoks
+    roomOptions() {
+      const linkedRoom = this.linkedRoom
+      if (linkedRoom === null || this.rooms.some((room) => room.roomId === linkedRoom.roomId)) {
+        return this.rooms
+      }
+      const deletedRoom = {
+        roomId: linkedRoom.roomId,
+        roomName: `${linkedRoom.roomName} ${this.$t('courseForm.roomDeleted')}`,
+      }
+      return [...this.rooms, deletedRoom]
     },
   },
   watch: {
@@ -101,6 +116,7 @@ export default {
       this.state = this.courseId === 0 ? STATE_NEW : STATE_UPDATE
       this.errorMessage = ''
       this.isNumberOfDaysEdited = false
+      this.linkedRoom = null
       this.getRooms()
       if (this.isNew) {
         this.resetCourse()
@@ -144,6 +160,10 @@ export default {
     handleGetCourseResponse(courseDto) {
       this.isNumberOfDaysEdited = true
       this.trainingId = courseDto.trainingId
+      this.linkedRoom =
+        courseDto.roomId === null
+          ? null
+          : { roomId: courseDto.roomId, roomName: courseDto.roomName }
       this.course = {
         startDate: courseDto.startDate,
         endDate: courseDto.endDate,
@@ -214,14 +234,15 @@ export default {
       NavigationService.navigateToAdminTrainingCoursesView(this.trainingId, successMessage)
     },
 
-    // 403 COURSE_END_BEFORE_START, 400 ja vahepeal kustutatud koolitaja (404 'lecturerId') → teade vormis
+    // 403 COURSE_END_BEFORE_START, 400 ja vahepeal kustutatud koolitaja või ruum (404 'lecturerId' /
+    // 'roomId') → teade vormis
     handleSaveCourseError(error) {
       const statusCode = error.response?.status
       const message = error.response?.data?.message ?? ''
       if (
         statusCode === 400 ||
         statusCode === 403 ||
-        (statusCode === 404 && message.includes("'lecturerId'"))
+        (statusCode === 404 && (message.includes("'lecturerId'") || message.includes("'roomId'")))
       ) {
         this.errorMessage = message
       } else {
@@ -379,7 +400,7 @@ export default {
               <label class="form-label">{{ $t('courseForm.room') }}</label>
               <RoomsDropdown
                 :room-id="course.roomId"
-                :rooms="rooms"
+                :rooms="roomOptions"
                 @event-new-room-selected="course.roomId = $event"
               />
               <label class="form-label mt-3" for="meetingLink">{{
