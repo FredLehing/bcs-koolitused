@@ -2,6 +2,10 @@
   "common": {
     "close": "Close"
   },
+  "homeView": {
+    "title": "Choose from over 100 trainings to find yours",
+    "subtitle": "Practical IT, design and management training from experienced trainers"
+  },
   "navbar": {
     "trainings": "Trainings",
     "ourLecturers": "Our trainers",

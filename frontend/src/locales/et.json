@@ -2,6 +2,10 @@
   "common": {
     "close": "Sulge"
   },
+  "homeView": {
+    "title": "Leia üle 100 koolituse seast endale sobiv!",
+    "subtitle": "Praktilised IT-, disaini- ja juhtimiskoolitused oma ala parimatelt"
+  },
   "navbar": {
     "trainings": "Koolitused",
     "ourLecturers": "Meie koolitajad",
