@@ -5,15 +5,19 @@ import TrainingService from '@/api-services/TrainingService.js'
 import TrainingTranslationService from '@/api-services/TrainingTranslationService.js'
 import NavigationService from '@/services/NavigationService.js'
 import RichTextContent from '@/components/common/RichTextContent.vue'
+import EditTrainingLink from '@/components/common/EditTrainingLink.vue'
 
 export default {
   name: 'TrainingView',
-  components: { RichTextContent },
+  components: { EditTrainingLink, RichTextContent },
   data() {
     return {
       trainingId: 0,
+      // Valikuline: kindla tõlge eelvaade (nt vormi "Vaata" nupp); 0 = tõlge kasutajaliidese keele järgi
+      requestedTrainingTranslationId: 0,
       isMainLanguageFallback: false,
       translation: {
+        trainingTranslationId: 0,
         title: '',
         description: '',
       },
@@ -32,14 +36,20 @@ export default {
       this.loadView()
     },
 
-    // Kasutajaliidese keele vahetus (navbar) → kuva koolituse info selles keeles
+    // Kasutajaliidese keele vahetus (navbar) → kuva koolituse info selles keeles.
+    // Kindla tõlke parameeter eemaldatakse URL-ist (query jälgija laadib vaate uuesti).
     contentLang() {
-      this.getTrainingTranslation()
+      if (this.requestedTrainingTranslationId !== 0) {
+        NavigationService.replaceTrainingView(this.trainingId)
+      } else {
+        this.getTrainingTranslation()
+      }
     },
   },
   methods: {
     loadView() {
       this.trainingId = Number(this.$route.query.trainingId ?? 0)
+      this.requestedTrainingTranslationId = Number(this.$route.query.trainingTranslationId ?? 0)
       if (this.trainingId === 0) {
         NavigationService.navigateToErrorView()
         return
@@ -47,7 +57,8 @@ export default {
       this.getTrainingTranslation()
     },
 
-    // Tõlge kasutajaliidese keeles; kui seda pole, siis põhikeele tõlge
+    // Valiku järjekord: URL-is antud tõlge (kui kuulub sellele koolitusele) → kasutajaliidese keele
+    // tõlge → põhikeele tõlge
     getTrainingTranslation() {
       TrainingService.sendGetTrainingTranslationsRequest(this.trainingId)
         .then((response) => this.handleGetTrainingTranslationsResponse(response.data))
@@ -55,18 +66,24 @@ export default {
     },
 
     handleGetTrainingTranslationsResponse(trainingTranslations) {
+      const requestedTranslation = trainingTranslations.find(
+        (trainingTranslation) =>
+          trainingTranslation.trainingTranslationId === this.requestedTrainingTranslationId,
+      )
       const contentLangTranslation = trainingTranslations.find(
         (trainingTranslation) => trainingTranslation.languageCode === this.contentLang,
       )
       const mainLanguageTranslation = trainingTranslations.find(
         (trainingTranslation) => trainingTranslation.isMainLanguage,
       )
-      const trainingTranslation = contentLangTranslation ?? mainLanguageTranslation
+      const trainingTranslation =
+        requestedTranslation ?? contentLangTranslation ?? mainLanguageTranslation
       if (trainingTranslation === undefined) {
         NavigationService.navigateToErrorView()
         return
       }
-      this.isMainLanguageFallback = contentLangTranslation === undefined
+      this.isMainLanguageFallback =
+        requestedTranslation === undefined && contentLangTranslation === undefined
       TrainingTranslationService.sendGetTrainingTranslationRequest(
         trainingTranslation.trainingTranslationId,
       )
@@ -92,7 +109,14 @@ export default {
             {{ $t('trainingView.mainLanguageFallback') }}
           </p>
 
-          <div class="fs-4 fw-semibold mb-3">{{ translation.title }}</div>
+          <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
+            <div class="fs-4 fw-semibold">{{ translation.title }}</div>
+            <EditTrainingLink
+              v-if="translation.trainingTranslationId !== 0"
+              :training-id="trainingId"
+              :training-translation-id="translation.trainingTranslationId"
+            />
+          </div>
           <RichTextContent :html="translation.description" />
         </fieldset>
       </div>

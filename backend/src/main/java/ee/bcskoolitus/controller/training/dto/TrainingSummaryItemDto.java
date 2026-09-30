@@ -13,6 +13,8 @@ import java.util.List;
 @NoArgsConstructor
 public class TrainingSummaryItemDto implements Serializable {
     private Long trainingId;
+    // Nimekirja rea (kasutajaliidese keele) tõlge — admini "Muuda" link avab selle vormis
+    private Integer trainingTranslationId;
     private String trainingLanguageCode;
     private String trainingLanguageFlagIconCode;
     private String title;

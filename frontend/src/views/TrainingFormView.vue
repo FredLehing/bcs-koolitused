@@ -591,8 +591,10 @@ export default {
       }
     },
 
+    // Olekus "update" avatakse vormis avatud tõlge; "new-translation" olekus tõlget veel pole
+    // (trainingTranslationId = 0) → vaade valib tõlke kasutajaliidese keele järgi
     navigateToTrainingView() {
-      NavigationService.navigateToTrainingView(this.trainingId)
+      NavigationService.navigateToTrainingView(this.trainingId, this.trainingTranslationId)
     },
 
     resetMessages() {

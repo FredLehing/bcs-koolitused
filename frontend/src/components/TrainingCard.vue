@@ -1,10 +1,11 @@
 <script>
 import { PhCurrencyEur, PhShootingStar } from '@phosphor-icons/vue'
 import FlagIcon from '@/components/common/FlagIcon.vue'
+import EditTrainingLink from '@/components/common/EditTrainingLink.vue'
 
 export default {
   name: 'TrainingCard',
-  components: { FlagIcon, PhCurrencyEur, PhShootingStar },
+  components: { EditTrainingLink, FlagIcon, PhCurrencyEur, PhShootingStar },
   props: {
     training: Object,
   },
@@ -20,7 +21,13 @@ export default {
   <div class="card mb-4" :class="{ 'bg-warning-subtle': training.isPromoted }">
     <h5 class="card-header fs-3 d-flex justify-content-between align-items-center">
       {{ training.title }}
-      <PhShootingStar v-if="training.isPromoted" :size="32" />
+      <div class="d-flex align-items-center gap-2">
+        <PhShootingStar v-if="training.isPromoted" :size="32" />
+        <EditTrainingLink
+          :training-id="training.trainingId"
+          :training-translation-id="training.trainingTranslationId"
+        />
+      </div>
     </h5>
     <div class="card-body d-flex justify-content-between fs-5">
       <div>

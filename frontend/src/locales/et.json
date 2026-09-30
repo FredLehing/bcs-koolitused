@@ -55,7 +55,8 @@
   "trainingCard": {
     "language": "Koolituse keel",
     "orderable": "Tellitav",
-    "viewDetails": "Vaata lähemalt"
+    "viewDetails": "Vaata lähemalt",
+    "edit": "Muuda koolitust"
   },
   "footer": {
     "facebook": "Leia meid Facebookist",
