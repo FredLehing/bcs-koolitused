@@ -18,7 +18,11 @@ repositories {
 }
 
 ext {
-    springAiVersion = '2.0.1'
+    springAiVersion = '1.1.8'
+}
+
+repositories {
+    mavenCentral()
 }
 
 dependencyManagement {
@@ -26,6 +30,7 @@ dependencyManagement {
         mavenBom "org.springframework.ai:spring-ai-bom:${springAiVersion}"
     }
 }
+
 dependencies {
     // Spring Boot
     implementation 'org.springframework.ai:spring-ai-starter-model-google-genai'
