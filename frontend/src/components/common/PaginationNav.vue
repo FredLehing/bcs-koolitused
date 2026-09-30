@@ -37,7 +37,7 @@ export default {
 <template>
   <nav v-if="totalPages > 0" :aria-label="$t('pagination.label')">
     <ul class="pagination justify-content-center mb-0">
-      <li class="page-item" :class="{ disabled: isFirstPage }">
+      <li v-if="!isFirstPage" class="page-item">
         <a class="page-link" href="#" @click.prevent="changePage(page - 1)">
           {{ $t('pagination.previous') }}
         </a>
@@ -57,7 +57,7 @@ export default {
           {{ pageNumber }}
         </a>
       </li>
-      <li class="page-item" :class="{ disabled: isLastPage }">
+      <li v-if="!isLastPage" class="page-item">
         <a class="page-link" href="#" @click.prevent="changePage(page + 1)">
           {{ $t('pagination.next') }}
         </a>
