@@ -73,6 +73,10 @@ export default {
     router.push({ name: 'roomFormRoute', query: query })
   },
 
+  navigateToAdminEnquiriesView() {
+    router.push({ name: 'adminEnquiriesRoute' })
+  },
+
   navigateToLecturersView() {
     router.push({ name: 'lecturersRoute' })
   },

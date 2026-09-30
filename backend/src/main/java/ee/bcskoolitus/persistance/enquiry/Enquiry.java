@@ -1,6 +1,9 @@
 package ee.bcskoolitus.persistance.enquiry;
 
 import ee.bcskoolitus.persistance.course.Course;
+import ee.bcskoolitus.persistance.option.Option;
+import ee.bcskoolitus.persistance.profile.Profile;
+import ee.bcskoolitus.persistance.training.Training;
 import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -23,9 +26,24 @@ public class Enquiry {
     @Column(name = "id", nullable = false)
     private Integer id;
 
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "training_id", nullable = false)
+    private Training training;
+
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "profile_id", nullable = false)
+    private Profile profile;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id")
     private Course course;
+
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "option_id", nullable = false)
+    private Option option;
 
     @Size(max = 255)
     @NotNull
@@ -37,7 +55,7 @@ public class Enquiry {
     private String companyName;
 
     @NotNull
-    @Column(name = "status", nullable = false, length = Integer.MAX_VALUE)
+    @Column(name = "status", nullable = false, length = 1)
     private String status;
 
     @NotNull

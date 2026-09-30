@@ -846,6 +846,35 @@ SELECT r.id                                          AS room_id,
        r.updated_at
 FROM room r;
 
+-- Huviliste päringud (admin): üks rida päringu ja tõlkekeele kohta; koolituse ja vormi nimi puudumisel põhikeeles
+CREATE VIEW admin_enquiry_summary AS
+SELECT row_number() OVER (ORDER BY e.id, cl.id)                    AS id,
+       e.id                                                        AS enquiry_id,
+       cl.code                                                     AS content_language_code,
+       e.training_id,
+       ats.training_translation_id,
+       ats.title                                                   AS training_title,
+       e.course_id,
+       c.start_date                                                AS course_start_date,
+       c.end_date                                                  AS course_end_date,
+       COALESCE(ot.name, mot.name)                                 AS option_name,
+       p.first_name || ' ' || p.last_name                          AS full_name,
+       p.email,
+       p.phone,
+       e.company_name,
+       e.message,
+       e.status,
+       e.created_at
+FROM enquiry e
+         CROSS JOIN language cl
+         JOIN language ml ON ml.is_main_language
+         JOIN profile p ON p.id = e.profile_id
+         JOIN admin_training_summary ats ON ats.training_id = e.training_id AND ats.content_language_code = cl.code
+         LEFT JOIN course c ON c.id = e.course_id
+         LEFT JOIN option_translation ot ON ot.option_id = e.option_id AND ot.language_id = cl.id
+         LEFT JOIN option_translation mot ON mot.option_id = e.option_id AND mot.language_id = ml.id
+WHERE cl.requires_translation;
+
 -- Koolituse kalender: toimumiskord koos koolitaja, ruumi ja osalejate arvuga
 CREATE VIEW course_summary AS
 SELECT c.id                                                         AS course_id,

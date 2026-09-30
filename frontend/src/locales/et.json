@@ -16,6 +16,7 @@
     "addLecturer": "Lisa uus koolitaja",
     "manageLecturers": "Koolitajad",
     "manageRooms": "Koolitusruumid",
+    "manageEnquiries": "Koolituste päringud",
     "login": "Logi sisse",
     "logout": "Logi välja",
     "logoutModal": {
@@ -481,6 +482,51 @@
     "messages": {
       "added": "Ruum lisatud",
       "saved": "Salvestatud"
+    }
+  },
+  "enquiryStatus": {
+    "U": "Uus",
+    "H": "Käsitletud"
+  },
+  "adminEnquiries": {
+    "title": "Koolituste päringud",
+    "searchPlaceholder": "Otsi nime, e-posti, ettevõtte või koolituse järgi…",
+    "showHandled": "Näita ka käsitletud",
+    "noResults": "Päringuid ei leitud",
+    "totalCount": "Kokku {n} päringut | Kokku {n} päring | Kokku {n} päringut",
+    "view": "Vaata",
+    "columns": {
+      "createdAt": "Saabunud",
+      "fullName": "Nimi",
+      "email": "E-post",
+      "companyName": "Ettevõte",
+      "trainingTitle": "Koolitus",
+      "course": "Toimumiskord",
+      "optionName": "Vorm",
+      "status": "Staatus",
+      "actions": "Tegevused"
+    }
+  },
+  "adminEnquiry": {
+    "title": "Koolituse päring",
+    "enquiryLegend": "Päring",
+    "contactLegend": "Kontakt",
+    "createdAt": "Saabunud",
+    "status": "Staatus",
+    "training": "Koolitus",
+    "course": "Toimumiskord",
+    "noCourse": "Toimumiskorda pole valitud",
+    "option": "Vorm",
+    "companyName": "Ettevõte",
+    "message": "Sõnum",
+    "fullName": "Nimi",
+    "email": "E-post",
+    "phone": "Telefon",
+    "markHandled": "Märgi käsitletuks",
+    "markNew": "Märgi uueks",
+    "messages": {
+      "handled": "Päring märgitud käsitletuks",
+      "reopened": "Päring märgitud uueks"
     }
   }
 }
