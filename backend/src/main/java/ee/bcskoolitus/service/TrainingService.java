@@ -22,11 +22,15 @@ import ee.bcskoolitus.persistance.fundingtype.translation.FundingTypeTranslation
 import ee.bcskoolitus.persistance.fundingtype.translation.FundingTypeTranslationMapper;
 import ee.bcskoolitus.persistance.fundingtype.translation.FundingTypeTranslationRepository;
 import ee.bcskoolitus.persistance.language.Language;
+import ee.bcskoolitus.persistance.lecturer.Lecturer;
 import ee.bcskoolitus.persistance.training.Training;
 import ee.bcskoolitus.persistance.training.TrainingMapper;
 import ee.bcskoolitus.persistance.training.TrainingRepository;
 import ee.bcskoolitus.persistance.training.fundingtype.TrainingFundingType;
 import ee.bcskoolitus.persistance.training.fundingtype.TrainingFundingTypeRepository;
+import ee.bcskoolitus.persistance.training.lecturer.TrainingLecturer;
+import ee.bcskoolitus.persistance.training.lecturer.TrainingLecturerMapper;
+import ee.bcskoolitus.persistance.training.lecturer.TrainingLecturerRepository;
 import ee.bcskoolitus.persistance.training.translation.TrainingTranslation;
 import ee.bcskoolitus.persistance.training.translation.TrainingTranslationMapper;
 import ee.bcskoolitus.persistance.training.translation.TrainingTranslationRepository;
@@ -84,6 +88,8 @@ public class TrainingService {
     private final LanguageService languageService;
     private final LocationService locationService;
     private final LecturerService lecturerService;
+    private final TrainingLecturerRepository trainingLecturerRepository;
+    private final TrainingLecturerMapper trainingLecturerMapper;
     private final FundingTypeService fundingTypeService;
     private final TrainingTranslationService trainingTranslationService;
     private final AdminTrainingSummaryRepository adminTrainingSummaryRepository;
@@ -209,6 +215,9 @@ public class TrainingService {
 
         trainingDto.setFundingTypeIds(fundingTypeIds);
 
+        List<TrainingLecturer> trainingLecturers = trainingLecturerRepository.findTrainingLecturersBy(trainingId);
+        trainingDto.setLecturers(trainingLecturerMapper.toLecturerDtos(trainingLecturers));
+
         return trainingDto;
     }
 
@@ -224,12 +233,13 @@ public class TrainingService {
                 .toTrainingTranslationItemDtos(trainingTranslations);
     }
 
-    // Loob koolituse (status U), rahastustüüpide seosed ja põhikeele tõlke ühes transaktsioonis
+    // Loob koolituse (status U), rahastustüüpide ja koolitajate seosed ning põhikeele tõlke ühes transaktsioonis
     @Transactional
     public TrainingCreateResponseDto addTraining(TrainingCreateRequestDto trainingCreateRequestDto) {
         Training training = createTraining(trainingCreateRequestDto);
         trainingRepository.save(training);
         addTrainingFundingTypes(training, trainingCreateRequestDto.getFundingTypeIds());
+        addTrainingLecturers(training, trainingCreateRequestDto.getLecturerIds(), List.of());
         TrainingTranslation trainingTranslation = createMainLanguageTrainingTranslation(training, trainingCreateRequestDto);
         trainingTranslationRepository.save(trainingTranslation);
         return new TrainingCreateResponseDto(training.getId(), trainingTranslation.getId());
@@ -241,18 +251,8 @@ public class TrainingService {
         training.setCategory(categoryService.getValidCategoryBy(trainingCreateRequestDto.getCategoryId()));
         training.setLocation(locationService.getValidLocationBy(trainingCreateRequestDto.getLocationId()));
         training.setTrainingLanguage(languageService.getValidLanguageBy(trainingCreateRequestDto.getTrainingLanguageId(), "trainingLanguageId"));
-        handleSetDefaultLecturer(training, trainingCreateRequestDto.getDefaultLecturerId());
         training.setStatus(TrainingStatus.UNPUBLISHED.getCode());
         return training;
-    }
-
-    // null eemaldab lektori (muutmisel oluline — lisamisel on lektor niikuinii null)
-    private void handleSetDefaultLecturer(Training training, Integer defaultLecturerId) {
-        if (defaultLecturerId != null) {
-            training.setDefaultLecturer(lecturerService.getValidLecturerBy(defaultLecturerId, "defaultLecturerId"));
-        } else {
-            training.setDefaultLecturer(null);
-        }
     }
 
     // Duplikaadid eemaldatakse, muidu annaks training_funding_type_uq andmebaasi vea
@@ -265,6 +265,27 @@ public class TrainingService {
         }
     }
 
+    // Järjekord listis = sort_order (1 = esimene). Uus koolitaja peab olema aktiivne; juba seotud
+    // (linkedLecturerIds) võib olla ka kustutatud, et koolituse muid välju saaks edasi salvestada.
+    // Korduvad ID-d lükkab tagasi DTO valideerimine (@UniqueElements).
+    private void addTrainingLecturers(Training training, List<Integer> lecturerIds, List<Integer> linkedLecturerIds) {
+        int sortOrder = 1;
+        for (Integer lecturerId : lecturerIds) {
+            TrainingLecturer trainingLecturer = new TrainingLecturer();
+            trainingLecturer.setTraining(training);
+            trainingLecturer.setLecturer(getValidTrainingLecturerBy(lecturerId, linkedLecturerIds));
+            trainingLecturer.setSortOrder(sortOrder++);
+            trainingLecturerRepository.save(trainingLecturer);
+        }
+    }
+
+    private Lecturer getValidTrainingLecturerBy(Integer lecturerId, List<Integer> linkedLecturerIds) {
+        if (linkedLecturerIds.contains(lecturerId)) {
+            return lecturerService.getValidLecturerBy(lecturerId, "lecturerId");
+        }
+        return lecturerService.getValidActiveLecturerBy(lecturerId, "lecturerId");
+    }
+
     private TrainingTranslation createMainLanguageTrainingTranslation(Training training, TrainingCreateRequestDto trainingCreateRequestDto) {
         TrainingTranslation trainingTranslation = trainingTranslationMapper.toTrainingTranslation(trainingCreateRequestDto);
         trainingTranslation.setDescription(HtmlSanitizer.sanitizeDescription(trainingCreateRequestDto.getDescription()));
@@ -273,7 +294,7 @@ public class TrainingService {
         return trainingTranslation;
     }
 
-    // Muudab koolituse väljad, rahastustüübid (üle kirjutades) ja avatud tõlke ühes transaktsioonis.
+    // Muudab koolituse väljad, rahastustüübid ja koolitajad (üle kirjutades) ning avatud tõlke ühes transaktsioonis.
     // user, status ja created_at ei muutu; teiste keelte tõlkeid ei puudutata.
     @Transactional
     public void updateTraining(Integer trainingId, TrainingUpdateRequestDto trainingUpdateRequestDto) {
@@ -283,6 +304,7 @@ public class TrainingService {
         updateTrainingData(training, trainingUpdateRequestDto);
         trainingRepository.save(training);
         replaceTrainingFundingTypes(training, trainingUpdateRequestDto.getFundingTypeIds());
+        replaceTrainingLecturers(training, trainingUpdateRequestDto.getLecturerIds());
         updateTrainingTranslationTexts(trainingTranslation, trainingUpdateRequestDto);
         trainingTranslationRepository.save(trainingTranslation);
     }
@@ -292,12 +314,20 @@ public class TrainingService {
         training.setCategory(categoryService.getValidCategoryBy(trainingUpdateRequestDto.getCategoryId()));
         training.setTrainingLanguage(languageService.getValidLanguageBy(trainingUpdateRequestDto.getTrainingLanguageId(), "trainingLanguageId"));
         training.setLocation(locationService.getValidLocationBy(trainingUpdateRequestDto.getLocationId()));
-        handleSetDefaultLecturer(training, trainingUpdateRequestDto.getDefaultLecturerId());
     }
 
     private void replaceTrainingFundingTypes(Training training, List<Integer> fundingTypeIds) {
         trainingFundingTypeRepository.deleteTrainingFundingTypesBy(training.getId());
         addTrainingFundingTypes(training, fundingTypeIds);
+    }
+
+    // Praegused seosed loetakse enne kustutamist — nende koolitajad võivad jääda ka kustutatuna
+    private void replaceTrainingLecturers(Training training, List<Integer> lecturerIds) {
+        List<Integer> linkedLecturerIds = trainingLecturerRepository.findTrainingLecturersBy(training.getId()).stream()
+                .map(trainingLecturer -> trainingLecturer.getLecturer().getId())
+                .toList();
+        trainingLecturerRepository.deleteTrainingLecturersBy(training.getId());
+        addTrainingLecturers(training, lecturerIds, linkedLecturerIds);
     }
 
     private void updateTrainingTranslationTexts(TrainingTranslation trainingTranslation, TrainingUpdateRequestDto trainingUpdateRequestDto) {

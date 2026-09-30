@@ -38,8 +38,8 @@ const locations = [
 ]
 
 const lecturers = [
-  { lecturerId: 1, lecturerName: 'Rain Tüür', lecturerPhoto: '' },
-  { lecturerId: 2, lecturerName: 'Merje Vaide', lecturerPhoto: '' },
+  { lecturerId: 1, lecturerName: 'Rain Tüür' },
+  { lecturerId: 2, lecturerName: 'Merje Vaide' },
 ]
 
 const trainings = [
