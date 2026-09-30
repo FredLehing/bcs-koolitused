@@ -23,6 +23,8 @@ public class CourseDto {
     private BigDecimal price;
     private List<LecturerDto> lecturers;
     private Integer roomId;
+    // Ka kustutatud ruumi nimi — vorm näitab seda rippmenüüs "(kustutatud)"
+    private String roomName;
     private String status;
     private String notes;
     private String meetingLink;

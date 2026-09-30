@@ -66,6 +66,6 @@ Mockid ja otsused: `admin-lecturers-view/`, `admin-training-courses-view/`, `lec
 
 ## Lahtised küsimused
 
-- `room.status` (`VAB` / `KIN`) tähendus — praegu kuvatakse kõik ruumid.
+- ~~`room.status` (`VAB` / `KIN`) tähendus~~ — lahendatud: `A` / `D` (soft delete), vt `admin-rooms-view/admin-rooms-view-skeemid.md`.
 - `/training` läbimäng (koolituse leht koos koolitajate kaartidega) puudub; kestas on kohatäide.
 - Mockupi pildid (Balsamiq) — käsud skeemide failides.

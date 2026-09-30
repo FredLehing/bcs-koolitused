@@ -10,7 +10,6 @@ public interface RoomMapper {
 
     @Mapping(source = "id", target = "roomId")
     @Mapping(source = "name", target = "roomName")
-    @Mapping(source = "status", target = "roomStatus")
     RoomDto toRoomDto(Room room);
 
     List<RoomDto> toRoomDtos(List<Room> rooms);

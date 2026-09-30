@@ -81,7 +81,7 @@ public class CourseService {
         Course course = courseMapper.toCourse(courseCreateRequestDto);
         course.setTraining(trainingService.getValidActiveTrainingBy(trainingId));
         course.setCreatedBy(userService.getValidUserBy(courseCreateRequestDto.getUserId()));
-        course.setRoom(getRoomOrNull(courseCreateRequestDto.getRoomId()));
+        course.setRoom(getActiveRoomOrNull(courseCreateRequestDto.getRoomId()));
         course.setNotes(blankToNull(courseCreateRequestDto.getNotes()));
         course.setMeetingLink(blankToNull(courseCreateRequestDto.getMeetingLink()));
         courseRepository.save(course);
@@ -93,8 +93,9 @@ public class CourseService {
     public void updateCourse(Integer courseId, CourseUpdateRequestDto courseUpdateRequestDto) {
         Course course = getValidActiveCourseBy(courseId);
         validateEndDateNotBeforeStartDate(courseUpdateRequestDto.getStartDate(), courseUpdateRequestDto.getEndDate());
+        Room room = getAssignableRoomOrNull(courseUpdateRequestDto.getRoomId(), course.getRoom());
         courseMapper.updateCourse(courseUpdateRequestDto, course);
-        course.setRoom(getRoomOrNull(courseUpdateRequestDto.getRoomId()));
+        course.setRoom(room);
         course.setNotes(blankToNull(courseUpdateRequestDto.getNotes()));
         course.setMeetingLink(blankToNull(courseUpdateRequestDto.getMeetingLink()));
         courseRepository.save(course);
@@ -118,8 +119,16 @@ public class CourseService {
         }
     }
 
-    private Room getRoomOrNull(Integer roomId) {
-        return roomId == null ? null : roomService.getValidRoomBy(roomId);
+    private Room getActiveRoomOrNull(Integer roomId) {
+        return roomId == null ? null : roomService.getValidActiveRoomBy(roomId);
+    }
+
+    // Praegune ruum võib olla ka kustutatud — nii saab toimumiskorra muid välju edasi salvestada
+    private Room getAssignableRoomOrNull(Integer roomId, Room linkedRoom) {
+        if (roomId == null) {
+            return null;
+        }
+        return roomService.getValidAssignableRoomBy(roomId, linkedRoom == null ? null : linkedRoom.getId());
     }
 
     private static String blankToNull(String value) {

@@ -34,6 +34,7 @@ public interface CourseMapper {
     @Mapping(source = "id", target = "courseId")
     @Mapping(source = "training.id", target = "trainingId")
     @Mapping(source = "room.id", target = "roomId")
+    @Mapping(source = "room.name", target = "roomName")
     @Mapping(target = "lecturers", ignore = true)
     CourseDto toCourseDto(Course course);
 }

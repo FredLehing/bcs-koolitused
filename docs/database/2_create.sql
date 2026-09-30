@@ -278,9 +278,12 @@ CREATE TABLE role
 -- Table: room
 CREATE TABLE room
 (
-    id     serial       NOT NULL,
-    name   varchar(255) NOT NULL,
-    status varchar(3)   NOT NULL,
+    id         serial       NOT NULL,
+    name       varchar(255) NOT NULL,
+    status     varchar(1)   NOT NULL,
+    created_at timestamp    NOT NULL,
+    updated_at timestamp    NOT NULL,
+    created_by int          NOT NULL,
     CONSTRAINT room_pk PRIMARY KEY (id)
 );
 
@@ -567,6 +570,15 @@ ALTER TABLE lecturer
                 INITIALLY IMMEDIATE
 ;
 
+-- Reference: room_created_by (table: room)
+ALTER TABLE room
+    ADD CONSTRAINT room_created_by
+        FOREIGN KEY (created_by)
+            REFERENCES "user" (id)
+            NOT DEFERRABLE
+                INITIALLY IMMEDIATE
+;
+
 -- Reference: lecturer_photo_lecturer (table: lecturer_photo)
 ALTER TABLE lecturer_photo
     ADD CONSTRAINT lecturer_photo_lecturer
@@ -816,6 +828,23 @@ FROM lecturer l
                                                WHERE rlt.lecturer_id = l.id
                                                  AND rlt.language_id = rl.id)) mt
 WHERE cl.requires_translation;
+
+-- Koolitusruumide nimekiri (admin): toimumiskordade arvud
+CREATE VIEW admin_room_summary AS
+SELECT r.id                                          AS room_id,
+       r.name,
+       r.status,
+       (SELECT count(*)
+        FROM course c
+        WHERE c.room_id = r.id
+          AND c.status NOT IN ('D', 'X')
+          AND c.end_date >= current_date)            AS upcoming_course_count,
+       (SELECT count(*)
+        FROM course c
+        WHERE c.room_id = r.id
+          AND c.status <> 'D')                       AS course_count,
+       r.updated_at
+FROM room r;
 
 -- Koolituse kalender: toimumiskord koos koolitaja, ruumi ja osalejate arvuga
 CREATE VIEW course_summary AS

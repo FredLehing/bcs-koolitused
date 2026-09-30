@@ -98,7 +98,8 @@ class CourseServiceTest {
         course.setCreatedBy(user);
         when(courseRepository.findById(COURSE_ID)).thenReturn(Optional.of(course));
         when(trainingService.getValidActiveTrainingBy(TRAINING_ID)).thenReturn(training);
-        when(roomService.getValidRoomBy(2)).thenReturn(createRoom(2));
+        when(roomService.getValidActiveRoomBy(2)).thenReturn(createRoom(2));
+        when(roomService.getValidAssignableRoomBy(any(), any())).thenAnswer(invocation -> createRoom(invocation.getArgument(0)));
         when(userService.getValidUserBy(1)).thenReturn(new User());
         when(lecturerService.getValidAssignableLecturerBy(any(), any()))
                 .thenAnswer(invocation -> createLecturer(invocation.getArgument(0), "Koolitaja " + invocation.getArgument(0)));
@@ -139,6 +140,7 @@ class CourseServiceTest {
 
         assertEquals(TRAINING_ID, courseDto.getTrainingId());
         assertEquals(2, courseDto.getRoomId());
+        assertEquals("Ruum 2", courseDto.getRoomName());
         assertEquals("Märge", courseDto.getNotes());
         assertEquals(List.of(new LecturerDto(8, "Meelis Teern"), new LecturerDto(1, "Rain Tüür")), courseDto.getLecturers());
     }
@@ -170,6 +172,7 @@ class CourseServiceTest {
         assertEquals(List.of(1, 8), courseLecturerCaptor.getAllValues().stream().map(courseLecturer -> courseLecturer.getLecturer().getId()).toList());
         assertEquals(List.of(1, 2), courseLecturerCaptor.getAllValues().stream().map(CourseLecturer::getSortOrder).toList());
         verify(lecturerService).getValidAssignableLecturerBy(1, List.of());
+        verify(roomService).getValidActiveRoomBy(2);
     }
 
     @Test
@@ -207,6 +210,28 @@ class CourseServiceTest {
         inOrder.verify(courseLecturerRepository).deleteCourseLecturersBy(COURSE_ID);
         inOrder.verify(courseLecturerRepository).save(any());
         verify(lecturerService).getValidAssignableLecturerBy(8, List.of(8));
+    }
+
+    @Test
+    void updateCourse_linkedRoomMayBeDeleted() {
+        course.setRoom(createRoom(2));
+        CourseUpdateRequestDto courseUpdateRequestDto = new CourseUpdateRequestDto(LocalDate.of(2026, 10, 19), LocalDate.of(2026, 10, 23),
+                5, 40, new BigDecimal("490.00"), List.of(), 2, "O", null, null);
+
+        courseService.updateCourse(COURSE_ID, courseUpdateRequestDto);
+
+        verify(roomService).getValidAssignableRoomBy(2, 2);
+        assertEquals(2, course.getRoom().getId());
+    }
+
+    @Test
+    void updateCourse_newRoomWithoutLinkedRoomMustBeAssignable() {
+        CourseUpdateRequestDto courseUpdateRequestDto = new CourseUpdateRequestDto(LocalDate.of(2026, 10, 19), LocalDate.of(2026, 10, 23),
+                5, 40, new BigDecimal("490.00"), List.of(), 3, "O", null, null);
+
+        courseService.updateCourse(COURSE_ID, courseUpdateRequestDto);
+
+        verify(roomService).getValidAssignableRoomBy(3, null);
     }
 
     @Test
@@ -262,6 +287,7 @@ class CourseServiceTest {
     private static Room createRoom(Integer roomId) {
         Room room = new Room();
         room.setId(roomId);
+        room.setName("Ruum " + roomId);
         return room;
     }
 }

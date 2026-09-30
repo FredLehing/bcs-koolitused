@@ -60,6 +60,19 @@ export default {
     router.push({ name: 'courseFormRoute', query: query })
   },
 
+  // successMessage (valikuline) antakse nimekirjale edasi history state'is — nt vormi eduteade
+  navigateToAdminRoomsView(successMessage) {
+    router.push({
+      name: 'adminRoomsRoute',
+      state: successMessage ? { successMessage: successMessage } : undefined,
+    })
+  },
+
+  // query: {} (uus ruum) või { roomId } (muutmine)
+  navigateToRoomFormView(query) {
+    router.push({ name: 'roomFormRoute', query: query })
+  },
+
   navigateToLecturersView() {
     router.push({ name: 'lecturersRoute' })
   },

@@ -15,6 +15,7 @@
     "manageTrainings": "Manage trainings",
     "addLecturer": "Add new trainer",
     "manageLecturers": "Trainers",
+    "manageRooms": "Training rooms",
     "login": "Log in",
     "logout": "Log out",
     "logoutModal": {
@@ -405,6 +406,7 @@
     "status": "Status",
     "room": "Room",
     "noRoom": "No room",
+    "roomDeleted": "(deleted)",
     "meetingLink": "Meeting link",
     "notes": "Notes",
     "back": "Back",
@@ -429,5 +431,58 @@
   "dateInput": {
     "placeholder": "dd/mm/yyyy",
     "openCalendar": "Open calendar"
+  },
+  "adminRooms": {
+    "title": "Training rooms",
+    "addRoom": "Add new room",
+    "searchPlaceholder": "Search by name…",
+    "showDeleted": "Show deleted",
+    "noResults": "No rooms found",
+    "totalCount": "{n} rooms in total | {n} room in total | {n} rooms in total",
+    "deleted": "Deleted",
+    "edit": "Edit",
+    "columns": {
+      "roomName": "Name",
+      "upcomingCourseCount": "Upcoming courses",
+      "courseCount": "Courses in total",
+      "updatedAt": "Updated",
+      "actions": "Actions"
+    },
+    "messages": {
+      "deleted": "Room deleted",
+      "restored": "Room restored"
+    }
+  },
+  "roomDeleteButton": {
+    "label": "Delete",
+    "modalTitle": "Delete room",
+    "modalMessage": "Do you want to delete the room “{roomName}”? It will no longer be offered in the course form; the calendar keeps its name.",
+    "confirm": "Delete",
+    "hasUpcomingCourses": "The room has upcoming courses — choose another room for them first"
+  },
+  "roomRestoreButton": {
+    "label": "Restore",
+    "modalTitle": "Restore room",
+    "modalMessage": "Do you want to restore the room “{roomName}”? It can then be chosen for courses again.",
+    "confirm": "Restore"
+  },
+  "roomForm": {
+    "title": {
+      "new": "Add new room",
+      "update": "Edit room"
+    },
+    "legend": "Room details",
+    "roomName": "Name",
+    "buttons": {
+      "add": "Add",
+      "save": "Save"
+    },
+    "validation": {
+      "fillRequired": "Fill in all required fields"
+    },
+    "messages": {
+      "added": "Room added",
+      "saved": "Saved"
+    }
   }
 }
