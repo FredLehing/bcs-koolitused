@@ -7,10 +7,14 @@ import TrainingCard from '@/components/TrainingCard.vue'
 import PaginationNav from '@/components/common/PaginationNav.vue'
 import { PhQuestion, PhX } from '@phosphor-icons/vue'
 import { Tooltip } from 'bootstrap'
+import LanguageService from '@/api-services/LanguageService.js'
+import CategoryService from '@/api-services/CategoryService.js'
+import FundingTypeService from '@/api-services/FundingTypeService.js'
+import LanguagesDropdown from '@/components/forms/LanguagesDropdown.vue'
 
 export default {
   name: 'TrainingsView',
-  components: { TrainingCard, PaginationNav, PhQuestion, PhX },
+  components: { TrainingCard, PaginationNav, PhQuestion, PhX, LanguagesDropdown},
   data() {
     return {
       categoryId: 0,
@@ -71,6 +75,8 @@ export default {
     contentLang() {
       this.getTrainings()
       this.$nextTick(() => this.updateSearchHelpTooltip())
+      this.getCategories()
+      this.getFundingTypes()
     },
     // Väli tühjendati (käsitsi, × nupu või Esc-iga) → näita kohe kõiki koolitusi
     searchText(newSearchText) {
@@ -116,9 +122,27 @@ export default {
       this.page = newPage
       this.getTrainings()
     },
+    getLanguages() {
+      LanguageService.sendGetLanguagesRequest()
+        .then((response) => (this.languages = response.data))
+        .catch(() => NavigationService.navigateToErrorView())
+    },
+    getCategories() {
+      CategoryService.sendGetCategoriesRequest(this.contentLang)
+        .then((response) => (this.categories = response.data))
+        .catch(() => NavigationService.navigateToErrorView())
+    },
+    getFundingTypes() {
+      FundingTypeService.sendGetFundingTypesRequest(this.contentLang)
+        .then((response) => (this.fundingTypes = response.data))
+        .catch(() => NavigationService.navigateToErrorView())
+    },
   },
   beforeMount() {
     this.getTrainings()
+    this.getLanguages()
+    this.getCategories()
+    this.getFundingTypes()
   },
   mounted() {
     this.searchHelpTooltip = new Tooltip(this.$refs.searchHelp)
@@ -132,7 +156,7 @@ export default {
 <template>
   <div class="container">
     <div class="row">
-      <div class="col-2">Siin on filtrid</div>
+      <div class="col-2"><LanguagesDropdown :languages="languages" :languageId="trainingLanguageId" /></div>
       <div class="col-10">
         <div class="d-flex align-items-center gap-2 mb-3">
           <div class="input-group">
