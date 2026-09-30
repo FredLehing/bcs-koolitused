@@ -112,10 +112,10 @@ export default {
 </script>
 
 <template>
-  <div class="container">
-    <div class="row">
+  <div class="container d-flex flex-grow-1 flex-column">
+    <div class="row flex-grow-1">
       <div class="col-2">Siin on filtrid</div>
-      <div class="col-10">
+      <div class="col-10 d-flex flex-column">
         <div class="d-flex align-items-center gap-2 mb-3">
           <div class="input-group">
             <input
@@ -186,7 +186,7 @@ export default {
           :page="page"
           :total-pages="totalPages"
           @event-page-changed="handlePageChanged"
-          class="mb-3"
+          class="mb-3 mt-auto"
         />
       </div>
     </div>
