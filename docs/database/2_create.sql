@@ -673,4 +673,44 @@ FROM training_translation tt
          JOIN language tl ON tl.id = tt.language_id
          LEFT JOIN category_translation ct ON ct.category_id = t.category_id AND ct.language_id = tt.language_id;
 
+-- Admini koolituste tabel: üks rida koolituse ja tõlkekeele kohta; puuduva tõlke korral põhikeele pealkiri ja kategooria
+CREATE VIEW admin_training_summary AS
+SELECT row_number() OVER (ORDER BY t.id, cl.id)                    AS id,
+       t.id                                                        AS training_id,
+       cl.code                                                     AS content_language_code,
+       COALESCE(tt.id, mtt.id)                                     AS training_translation_id,
+       COALESCE(tt.title, mtt.title)                               AS title,
+       t.category_id,
+       COALESCE(ct.name, mct.name)                                 AS category_name,
+       t.training_language_id,
+       trl.code                                                    AS training_language_code,
+       trl.flag_icon_code                                          AS training_language_flag_icon_code,
+       t.status,
+       CASE t.status WHEN 'U' THEN 1 WHEN 'P' THEN 2 ELSE 3 END   AS status_order,
+       t.is_orderable,
+       t.is_promoted,
+       t.created_at,
+       GREATEST(t.updated_at, (SELECT MAX(att.updated_at)
+                               FROM training_translation att
+                               WHERE att.training_id = t.id))     AS updated_at,
+       mt.missing_translation_language_codes,
+       mt.missing_translation_language_codes IS NULL               AS has_all_translations
+FROM training t
+         CROSS JOIN language cl
+         JOIN language trl ON trl.id = t.training_language_id
+         JOIN language ml ON ml.is_main_language
+         LEFT JOIN training_translation tt ON tt.training_id = t.id AND tt.language_id = cl.id
+         LEFT JOIN training_translation mtt ON mtt.training_id = t.id AND mtt.language_id = ml.id
+         LEFT JOIN category_translation ct ON ct.category_id = t.category_id AND ct.language_id = cl.id
+         LEFT JOIN category_translation mct ON mct.category_id = t.category_id AND mct.language_id = ml.id
+         -- string_agg tühjast hulgast annab NULL, seega NULL = kõik tõlked olemas
+         CROSS JOIN LATERAL (SELECT string_agg(rl.code, ',' ORDER BY rl.id) AS missing_translation_language_codes
+                             FROM language rl
+                             WHERE rl.requires_translation
+                               AND NOT EXISTS (SELECT 1
+                                               FROM training_translation rtt
+                                               WHERE rtt.training_id = t.id
+                                                 AND rtt.language_id = rl.id)) mt
+WHERE cl.requires_translation;
+
 -- End of file.

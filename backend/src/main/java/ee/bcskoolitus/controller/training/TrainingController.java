@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -158,5 +159,20 @@ public class TrainingController {
     public TrainingTranslationCreateResponseDto addTrainingTranslation(@PathVariable Integer trainingId,
                                                                        @Valid @RequestBody TrainingTranslationCreateRequestDto trainingTranslationCreateRequestDto) {
         return trainingService.addTrainingTranslation(trainingId, trainingTranslationCreateRequestDto);
+    }
+
+    @DeleteMapping("/training/{trainingId}")
+    @Operation(summary = "Kustutab koolituse (soft delete)",
+            description = "Määrab training.status = D. Tõlkeid ega rahastustüüpe ei kustutata. Juba kustutatud koolituse korral midagi ei muutu.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Olematu trainingId -> 'errorCode:' PRIMARY_KEY_NOT_FOUND",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            )
+    })
+    public void deleteTraining(@PathVariable Integer trainingId) {
+        trainingService.deleteTraining(trainingId);
     }
 }

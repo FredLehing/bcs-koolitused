@@ -54,7 +54,7 @@ CREATE TABLE training
 
 `updated_at` uueneb auditeerimisega (`@LastModifiedDate`), kui staatus muudetakse entiteedi kaudu — käsitsi seda ei seata (vt `backend/CLAUDE.md`, "Ajatemplid").
 
-Näidisandmed: `3_import.sql` koolitused 1–8 on kõik `status = 'P'`.
+Näidisandmed (`3_import.sql`): 14 koolitust. Publitseeritud (`P`): 1–8, 11, 13; mustandid (`U`): 9, 10, 12; kustutatud (`D`): 14 ("Photoshopi algkursus"). Ainult `et` tõlge (puudub `en`): 9, 10, 13. Õppekeel `ru`: 9; `en`: 4, 6, 12. Kustutamist saab proovida nii mustandil (nt 10) kui ka publitseeritud koolitusel (nt 11); korduvat kustutamist koolitusel 14.
 
 ## Veaolukorrad
 

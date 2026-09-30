@@ -246,4 +246,16 @@ public class TrainingService {
         trainingTranslation.setLanguage(language);
         return trainingTranslation;
     }
+
+    // Soft delete: ainult status = D (updated_at uueneb auditeerimisega), tõlked ja rahastustüübid jäävad alles.
+    // getValidTrainingBy leiab ka kustutatud koolituse — korduv kustutamine ei muuda midagi.
+    @Transactional
+    public void deleteTraining(Integer trainingId) {
+        Training training = getValidTrainingBy(trainingId);
+        if (TrainingStatus.DELETED.getCode().equals(training.getStatus())) {
+            return;
+        }
+        training.setStatus(TrainingStatus.DELETED.getCode());
+        trainingRepository.save(training);
+    }
 }

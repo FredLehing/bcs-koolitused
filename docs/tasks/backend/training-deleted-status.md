@@ -83,7 +83,7 @@ FROM training_translation tt
 
 ### training
 
-`status`: `U` = mustand, `P` = publitseeritud, `D` = kustutatud (`TrainingStatus`). Näidisandmed: `3_import.sql` koolitused 1–8 on kõik `P` — mustandi ja kustutatud koolituse testiks muuda andmeid testis.
+`status`: `U` = mustand, `P` = publitseeritud, `D` = kustutatud (`TrainingStatus`). Näidisandmed (`3_import.sql`): 14 koolitust. Publitseeritud (`P`): 1–8, 11, 13; mustandid (`U`): 9, 10, 12; kustutatud (`D`): 14 ("Photoshopi algkursus"). Ainult `et` tõlge (puudub `en`): 9, 10, 13. Õppekeel `ru`: 9; `en`: 4, 6, 12. Kustutatud koolituse 404 juhtumi jaoks sobib koolitus 14 (tõlked 24, 25); mustandi juhtumi jaoks 9, 10, 12.
 
 ## Veaolukorrad
 
