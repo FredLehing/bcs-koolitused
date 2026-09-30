@@ -7,8 +7,8 @@ function createTrainingViewQuery(trainingId, trainingTranslationId) {
 }
 
 export default {
-  navigateToTrainingsView() {
-    router.push({ name: 'trainingsRoute' })
+  navigateToTrainingsView(query) {
+    router.push({ name: 'trainingsRoute', query: query })
   },
 
   navigateToErrorView() {
