@@ -255,7 +255,7 @@ Kontrollide järjekord: `trainingId` → `languageId` → sihtkeel on põhikeel 
 
 | Olukord | Status code | Response body |
 |---|---|---|
-| `trainingId` ei leidu andmebaasist | 404 Not Found | `{ "message": "Ei leidnud primary keyd 'trainingId' väärtusega: 123", "errorCode": "PRIMARY_KEY_NOT_FOUND" }` |
+| `trainingId` ei leidu andmebaasist **või koolitus on kustutatud** (`status = "D"`) | 404 Not Found | `{ "message": "Ei leidnud primary keyd 'trainingId' väärtusega: 123", "errorCode": "PRIMARY_KEY_NOT_FOUND" }` |
 | `languageId` ei leidu andmebaasist | 404 Not Found | `{ "message": "Ei leidnud primary keyd 'languageId' väärtusega: 123", "errorCode": "PRIMARY_KEY_NOT_FOUND" }` |
 | `languageId` on põhikeel (`is_main_language = true`) | 403 Forbidden | `{ "message": "Põhikeelde ei saa AI tõlget teha", "errorCode": "MAIN_LANGUAGE_NOT_TRANSLATABLE" }` |
 | Koolitusel puudub põhikeele `training_translation` rida | 404 Not Found | `{ "message": "Koolitusel puudub põhikeele tõlge", "errorCode": "MAIN_TRANSLATION_NOT_FOUND" }` |
@@ -266,6 +266,7 @@ Kontrollide järjekord: `trainingId` → `languageId` → sihtkeel on põhikeel 
 Märkused:
 
 - Kõik 404/403/503 read on mockupi märkmetest (`Veateated`) ja kasutaja kinnitatud. Frontend (`TrainingFormView.handleGetAiTranslationError()`) kuvab need kolm errorCode'i vormis — **nende kuju ei tohi muutuda**.
+- Kustutatud koolitus on nagu olematu (otsus `AdminTrainingsView` soft delete'i juures, vt `training-deleted-status.md`): kasuta aktiivse koolituse leiu-meetodit (nt `getValidActiveTrainingBy`), mitte `getValidTrainingBy`-d.
 - `PRIMARY_KEY_NOT_FOUND` read vastavad olemasolevale mustrile `PrimaryKeyNotFoundException` + `getValidTrainingBy(Integer trainingId)` / `getValidLanguageBy(Integer languageId)` (vt `backend/CLAUDE.md`). `PrimaryKeyNotFoundException` paneb `errorCode` ise, seda `Error` enumisse ei lisata.
 - 403 → olemasolev `ForbiddenException`; 404 `MAIN_TRANSLATION_NOT_FOUND` → olemasolev `DataNotFoundException`.
 - **503 jaoks praegu käsitlus puudub:** luua uus erind `infrastructure/exception/AiServiceUnavailableException` (sama kujuga nagu `ForbiddenException` / `DataNotFoundException`: `message` + `errorCode`) ja lisada `RestExceptionHandler`-isse meetod, mis tagastab `ApiError` staatusega `HttpStatus.SERVICE_UNAVAILABLE`.
@@ -286,6 +287,7 @@ Märkused:
 - [ ] Kasutatakse Spring AI `ChatClient`-i ja `spring-ai-starter-model-google-genai` starterit; mudel tuleb konfiguratsioonist; vastus küsitakse struktureeritud väljundina
 - [ ] API võti tuleb keskkonnamuutujast `GEMINI_API_KEY`, mitte koodist ega repost
 - [ ] Olematu `trainingId` / `languageId` → 404 `PRIMARY_KEY_NOT_FOUND` õige väljanimega
+- [ ] Kustutatud koolitus (`status = "D"`) → 404 `PRIMARY_KEY_NOT_FOUND` (`trainingId`)
 - [ ] `languageId` on põhikeel → 403 `MAIN_LANGUAGE_NOT_TRANSLATABLE`
 - [ ] Koolitusel puudub põhikeele tõlge → 404 `MAIN_TRANSLATION_NOT_FOUND`
 - [ ] AI viga, kvoodi ületamine, timeout, keeldumine, pooleli või vigase kujuga vastus → 503 `AI_SERVICE_UNAVAILABLE`
