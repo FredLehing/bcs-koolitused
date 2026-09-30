@@ -42,6 +42,24 @@ export default {
           ],
         },
       ],
+      categories: [
+        {
+          categoryId: 0,
+          categoryName: '',
+        },
+      ],
+      languages: [
+        {
+          languageId: 0,
+          languageName: '',
+        },
+      ],
+      fundingTypes: [
+        {
+          fundingTypeId: 0,
+          fundingTypeName: '',
+        },
+      ],
     }
   },
   computed: {
