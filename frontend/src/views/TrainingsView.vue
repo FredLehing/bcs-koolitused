@@ -15,7 +15,7 @@ export default {
     return {
       categoryId: 0,
       fundingTypeId: 0,
-      limit: 3,
+      limit: 4,
       page: 0,
       trainingLanguageId: 0,
       // searchText = väljale sisestatud tekst, appliedSearchText = tekst, millega päring tehti

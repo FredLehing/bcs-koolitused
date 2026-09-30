@@ -42,9 +42,10 @@ export default {
 
 <template>
   <div class="container flex-grow-1 d-flex flex-column justify-content-center">
-    <div class="row">
-      <div class="col-6"></div>
-
+    <div class="row align-items-center">
+      <div class="col-6">
+        <img class="img-fluid" src="@/assets/programming.gif" alt="koodimine">
+      </div>
       <div class="col-6 text-center">
         <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
 
