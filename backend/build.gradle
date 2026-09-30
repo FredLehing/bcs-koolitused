@@ -61,6 +61,9 @@ dependencies {
 
     // HTML puhastamine (koolituse richtext kirjeldus)
     implementation 'org.jsoup:jsoup:1.23.2'
+
+    // WebP piltide lugemine (ImageIO lisapistik) — koolitaja pildi normaliseerimine
+    implementation 'com.twelvemonkeys.imageio:imageio-webp:3.15.2'
 }
 
 compileJava {

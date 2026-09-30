@@ -817,4 +817,31 @@ FROM lecturer l
                                                  AND rlt.language_id = rl.id)) mt
 WHERE cl.requires_translation;
 
+-- Koolituse kalender: toimumiskord koos koolitaja, ruumi ja osalejate arvuga
+CREATE VIEW course_summary AS
+SELECT c.id                                                         AS course_id,
+       c.training_id,
+       c.start_date,
+       c.end_date,
+       c.end_date < current_date                                    AS is_past,
+       -- sorteerimiseks: tulevased lähimast, möödunud hiliseimast
+       CASE WHEN c.end_date < current_date THEN current_date - c.start_date
+            ELSE c.start_date - current_date END                    AS days_from_today,
+       c.number_of_days,
+       c.number_of_academic_hours,
+       c.price,
+       c.status,
+       -- koolitajad sort_order järjekorras, nt 'Rain Tüür, Meelis Teern'; NULL = koolitajaid pole
+       (SELECT string_agg(l.full_name, ', ' ORDER BY crl.sort_order)
+        FROM course_lecturer crl
+                 JOIN lecturer l ON l.id = crl.lecturer_id
+        WHERE crl.course_id = c.id)                                 AS lecturer_names,
+       c.room_id,
+       r.name                                                       AS room_name,
+       COALESCE(btrim(c.notes), '') <> ''                           AS has_notes,
+       COALESCE(btrim(c.meeting_link), '') <> ''                    AS has_meeting_link,
+       (SELECT count(*) FROM course_participant cp WHERE cp.course_id = c.id) AS participant_count
+FROM course c
+         LEFT JOIN room r ON r.id = c.room_id;
+
 -- End of file.

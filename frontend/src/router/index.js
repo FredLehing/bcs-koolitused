@@ -8,6 +8,12 @@ import TrainingFormView from '@/views/TrainingFormView.vue'
 import NotAuthorizedView from '@/views/NotAuthorizedView.vue'
 import TrainingView from '@/views/TrainingView.vue'
 import AdminTrainingsView from '@/views/AdminTrainingsView.vue'
+import AdminLecturersView from '@/views/AdminLecturersView.vue'
+import LecturerFormView from '@/views/LecturerFormView.vue'
+import AdminTrainingCoursesView from '@/views/AdminTrainingCoursesView.vue'
+import CourseFormView from '@/views/CourseFormView.vue'
+import LecturersView from '@/views/LecturersView.vue'
+import LecturerView from '@/views/LecturerView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -46,6 +52,36 @@ const router = createRouter({
       path: '/admin-trainings',
       name: 'adminTrainingsRoute',
       component: AdminTrainingsView,
+    },
+    {
+      path: '/admin-lecturers',
+      name: 'adminLecturersRoute',
+      component: AdminLecturersView,
+    },
+    {
+      path: '/lecturer-form',
+      name: 'lecturerFormRoute',
+      component: LecturerFormView,
+    },
+    {
+      path: '/admin-training-courses',
+      name: 'adminTrainingCoursesRoute',
+      component: AdminTrainingCoursesView,
+    },
+    {
+      path: '/course-form',
+      name: 'courseFormRoute',
+      component: CourseFormView,
+    },
+    {
+      path: '/lecturers',
+      name: 'lecturersRoute',
+      component: LecturersView,
+    },
+    {
+      path: '/lecturer',
+      name: 'lecturerRoute',
+      component: LecturerView,
     },
     {
       path: '/not-authorized',

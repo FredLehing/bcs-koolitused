@@ -40,6 +40,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 // Koolituse koolitajad (training_lecturer): GET tagastab sort_order järjekorras, POST salvestab lecturerIds järjekorras
+// (uus koolitus — seotud koolitajaid pole, seega peavad kõik olema aktiivsed)
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class TrainingServiceLecturersTest {
@@ -104,8 +105,8 @@ class TrainingServiceLecturersTest {
 
     @Test
     void addTraining_savesActiveLecturersInGivenOrder() {
-        when(lecturerService.getValidActiveLecturerBy(8, "lecturerId")).thenReturn(createLecturer(8, "Meelis Teern"));
-        when(lecturerService.getValidActiveLecturerBy(1, "lecturerId")).thenReturn(createLecturer(1, "Rain Tüür"));
+        when(lecturerService.getValidAssignableLecturerBy(8, List.of())).thenReturn(createLecturer(8, "Meelis Teern"));
+        when(lecturerService.getValidAssignableLecturerBy(1, List.of())).thenReturn(createLecturer(1, "Rain Tüür"));
 
         trainingService.addTraining(createTrainingCreateRequestDto(List.of(8, 1)));
 
@@ -118,12 +119,11 @@ class TrainingServiceLecturersTest {
         assertEquals(List.of(1, 2), savedTrainingLecturers.stream()
                 .map(TrainingLecturer::getSortOrder)
                 .toList());
-        verify(lecturerService, never()).getValidLecturerBy(any(), any());
     }
 
     @Test
     void addTraining_deletedLecturerThrows() {
-        when(lecturerService.getValidActiveLecturerBy(4, "lecturerId"))
+        when(lecturerService.getValidAssignableLecturerBy(4, List.of()))
                 .thenThrow(new PrimaryKeyNotFoundException("lecturerId", 4));
 
         PrimaryKeyNotFoundException exception = assertThrows(PrimaryKeyNotFoundException.class,

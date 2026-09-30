@@ -197,18 +197,31 @@ INSERT INTO training_translation (id, training_id, language_id, title, short_des
 
 -- Table: course
 INSERT INTO course (id, training_id, room_id, number_of_days, number_of_academic_hours, price, status, start_date, end_date, notes, meeting_link, created_at, updated_at, created_by) VALUES
-    (1, 1, 1, 5, 40, 490.0000, 'AVA', '2026-10-05', '2026-10-09', 'Kaasa sülearvuti.', NULL, '2026-08-02 10:00:00', '2026-08-02 10:00:00', 1),
-    (2, 2, NULL, 3, 24, 350.0000, 'AVA', '2026-11-02', '2026-11-04', NULL, 'https://meet.vali-it.ee/pm-kursus', '2026-08-06 11:00:00', '2026-08-06 11:00:00', 1);
+    (1, 1, 1, 5, 40, 490.0000, 'O', '2026-10-05', '2026-10-09', 'Kaasa sülearvuti.', NULL, '2026-08-02 10:00:00', '2026-08-02 10:00:00', 1),
+    (2, 2, NULL, 3, 24, 350.0000, 'O', '2026-11-02', '2026-11-04', NULL, 'https://meet.vali-it.ee/pm-kursus', '2026-08-06 11:00:00', '2026-08-06 11:00:00', 1),
+    -- Koolituse kalendri näidised (koolitus 1): möödunud (3, 7), tühistatud (4), täis ja veebis (5), mustand ilma koolitajata (6), kustutatud (8)
+    (3, 1, 1, 5, 40, 490.0000, 'O', '2026-09-07', '2026-09-11', 'Grupp oli täis, järgmine kord suurem ruum.', NULL, '2026-08-15 10:00:00', '2026-08-15 10:00:00', 1),
+    (4, 1, 2, 5, 40, 490.0000, 'X', '2026-10-19', '2026-10-23', 'Tühistatud koolitaja haiguse tõttu.', NULL, '2026-08-15 10:00:00', '2026-08-15 10:00:00', 1),
+    (5, 1, NULL, 5, 40, 520.0000, 'F', '2026-11-16', '2026-11-20', NULL, 'https://meet.vali-it.ee/java-nov', '2026-08-15 10:00:00', '2026-08-15 10:00:00', 1),
+    (6, 1, 1, 5, 40, 520.0000, 'U', '2026-12-07', '2026-12-11', NULL, NULL, '2026-08-15 10:00:00', '2026-08-15 10:00:00', 1),
+    (7, 1, 2, 5, 40, 450.0000, 'O', '2026-06-08', '2026-06-12', NULL, 'https://meet.vali-it.ee/java-jun', '2026-05-15 10:00:00', '2026-05-15 10:00:00', 1),
+    (8, 1, 1, 5, 40, 490.0000, 'D', '2026-11-30', '2026-12-04', NULL, NULL, '2026-08-15 10:00:00', '2026-08-15 10:00:00', 1);
 
 -- Table: course_lecturer (toimumiskorra koolitajad; sort_order = kuvamise järjekord)
 INSERT INTO course_lecturer (id, course_id, lecturer_id, sort_order) VALUES
     (1, 1, 1, 1),
     (2, 1, 8, 2),
-    (3, 2, 2, 1);
+    (3, 2, 2, 1),
+    (4, 3, 1, 1),
+    (5, 4, 8, 1),
+    (6, 5, 1, 1),
+    (7, 7, 8, 1),
+    (8, 8, 1, 1);
 
 -- Table: course_participant
 INSERT INTO course_participant (id, course_id, participant_id, notes, has_paid, requires_laptop, status, created_at, updated_at) VALUES
-    (1, 1, 1, 'Registreerus veebilehe kaudu.', true, true, 'REG', '2026-09-10 12:00:00', '2026-09-10 12:00:00');
+    (1, 1, 1, 'Registreerus veebilehe kaudu.', true, true, 'REG', '2026-09-10 12:00:00', '2026-09-10 12:00:00'),
+    (2, 3, 1, 'Osales septembris.', true, true, 'REG', '2026-09-01 12:00:00', '2026-09-01 12:00:00');
 
 -- Table: enquiry
 INSERT INTO enquiry (id, training_id, profile_id, course_id, option_id, message, company_name, status, created_at, updated_at) VALUES

@@ -119,8 +119,8 @@ class TrainingServiceUpdateTest {
         when(fundingTypeService.getValidFundingTypeBy(2)).thenReturn(createFundingType(2));
         when(trainingLecturerRepository.findTrainingLecturersBy(TRAINING_ID))
                 .thenReturn(List.of(createTrainingLecturer(training, createLecturer(1))));
-        when(lecturerService.getValidActiveLecturerBy(8, "lecturerId")).thenReturn(createLecturer(8));
-        when(lecturerService.getValidLecturerBy(1, "lecturerId")).thenReturn(createLecturer(1));
+        when(lecturerService.getValidAssignableLecturerBy(8, List.of(1))).thenReturn(createLecturer(8));
+        when(lecturerService.getValidAssignableLecturerBy(1, List.of(1))).thenReturn(createLecturer(1));
     }
 
     @Test
@@ -168,14 +168,13 @@ class TrainingServiceUpdateTest {
     }
 
     @Test
-    void updateTraining_alreadyLinkedLecturerIsNotCheckedForActiveStatus() {
+    void updateTraining_passesCurrentlyLinkedLecturersForActiveCheck() {
         TrainingUpdateRequestDto trainingUpdateRequestDto = createTrainingUpdateRequestDto();
         trainingUpdateRequestDto.setLecturerIds(List.of(1));
 
         trainingService.updateTraining(TRAINING_ID, trainingUpdateRequestDto);
 
-        verify(lecturerService).getValidLecturerBy(1, "lecturerId");
-        verify(lecturerService, never()).getValidActiveLecturerBy(any(), any());
+        verify(lecturerService).getValidAssignableLecturerBy(1, List.of(1));
         verify(trainingLecturerRepository).save(any());
     }
 
@@ -183,7 +182,7 @@ class TrainingServiceUpdateTest {
     void updateTraining_newDeletedLecturerThrows() {
         TrainingUpdateRequestDto trainingUpdateRequestDto = createTrainingUpdateRequestDto();
         trainingUpdateRequestDto.setLecturerIds(List.of(4));
-        when(lecturerService.getValidActiveLecturerBy(4, "lecturerId"))
+        when(lecturerService.getValidAssignableLecturerBy(4, List.of(1)))
                 .thenThrow(new PrimaryKeyNotFoundException("lecturerId", 4));
 
         PrimaryKeyNotFoundException exception = assertThrows(PrimaryKeyNotFoundException.class,
