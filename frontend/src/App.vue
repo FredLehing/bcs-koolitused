@@ -8,6 +8,32 @@
 
         <!-- Desktop menüü -->
         <nav class="hidden flex-1 items-center gap-1 lg:flex" :aria-label="$t('navbar.menu')">
+          <!-- Koolitused: rippmenüü (meie koolitused ja kalender) -->
+          <div ref="trainingsMenu" class="relative">
+            <button
+              @click="toggleMenu('trainings')"
+              :aria-expanded="openMenu === 'trainings'"
+              :class="{ 'bg-brand-50 text-brand-700!': isTrainingsRouteActive }"
+              class="inline-flex cursor-pointer items-center gap-1 rounded-lg px-3 py-2 font-medium text-ink hover:bg-brand-50 hover:text-brand-700"
+              type="button"
+            >
+              {{ $t('navbar.trainings') }}
+              <PhCaretDown :size="14" weight="bold" />
+            </button>
+            <div
+              v-if="openMenu === 'trainings'"
+              class="absolute left-0 mt-2 w-60 overflow-hidden rounded-xl border border-line bg-white py-2 shadow-xl shadow-navy/10"
+            >
+              <RouterLink
+                v-for="navLink in trainingsNavLinks"
+                :key="navLink.label"
+                :to="navLink.to"
+                class="block px-4 py-2.5 text-ink hover:bg-brand-50 hover:text-brand-700"
+              >
+                {{ navLink.label }}
+              </RouterLink>
+            </div>
+          </div>
           <RouterLink
             v-for="navLink in publicNavLinks"
             :key="navLink.label"
@@ -151,6 +177,18 @@
         class="border-t border-line bg-white px-4 pt-2 pb-4 lg:hidden"
         :aria-label="$t('navbar.menu')"
       >
+        <div class="px-3 pt-2 pb-1 text-xs font-bold tracking-wide text-muted uppercase">
+          {{ $t('navbar.trainings') }}
+        </div>
+        <RouterLink
+          v-for="navLink in trainingsNavLinks"
+          :key="navLink.label"
+          :to="navLink.to"
+          class="flex min-h-12 items-center rounded-lg px-3 font-medium text-ink hover:bg-brand-50"
+        >
+          {{ navLink.label }}
+        </RouterLink>
+        <div class="my-2 border-t border-line"></div>
         <RouterLink
           v-for="navLink in publicNavLinks"
           :key="navLink.label"
@@ -249,8 +287,9 @@ const languageStore = useLanguageStore()
 const userIsLoggedIn = ref(false)
 const userIsAdmin = ref(false)
 const isLogoutModalOpen = ref(false)
-// Avatud menüü: 'admin' ja 'profile' (desktopi rippmenüüd), 'mobile' (mobiilimenüü paneel) või null
+// Avatud menüü: 'trainings', 'admin' ja 'profile' (desktopi rippmenüüd), 'mobile' (mobiilimenüü paneel) või null
 const openMenu = ref(null)
+const trainingsMenu = useTemplateRef('trainingsMenu')
 const adminMenu = useTemplateRef('adminMenu')
 const profileMenu = useTemplateRef('profileMenu')
 
@@ -262,9 +301,14 @@ const PROFILE_ROUTE_NAMES = [
 ]
 const isProfileRouteActive = computed(() => PROFILE_ROUTE_NAMES.includes(route.name))
 
-const publicNavLinks = computed(() => [
+const trainingsNavLinks = computed(() => [
   { label: t('navbar.ourTrainings'), to: { name: 'trainingsRoute' } },
   { label: t('navbar.coursesCalendar'), to: { name: 'coursesRoute' } },
+])
+const isTrainingsRouteActive = computed(() =>
+  ['trainingsRoute', 'coursesRoute'].includes(route.name),
+)
+const publicNavLinks = computed(() => [
   { label: t('navbar.ourLecturers'), to: { name: 'lecturersRoute' } },
 ])
 const placeholderNavLabels = computed(() => [t('navbar.services'), t('navbar.contact')])
@@ -314,7 +358,11 @@ function toggleMenu(menuName) {
 
 // Rippmenüü sulgub klikiga väljaspool seda
 function handleDocumentClick(event) {
-  const openDropdown = { admin: adminMenu.value, profile: profileMenu.value }[openMenu.value]
+  const openDropdown = {
+    trainings: trainingsMenu.value,
+    admin: adminMenu.value,
+    profile: profileMenu.value,
+  }[openMenu.value]
   if (openDropdown && !openDropdown.contains(event.target)) {
     openMenu.value = null
   }
