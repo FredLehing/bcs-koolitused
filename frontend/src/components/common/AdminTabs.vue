@@ -19,7 +19,7 @@ export default {
 </script>
 
 <template>
-  <ul class="nav nav-tabs mb-3">
+  <ul class="nav nav-tabs admin-tabs mb-3">
     <li v-for="tab in tabs" :key="tab.routeName" class="nav-item">
       <RouterLink
         :to="{ name: tab.routeName }"
@@ -32,3 +32,22 @@ export default {
     </li>
   </ul>
 </template>
+
+<style scoped>
+/* Kõik vahelehed ühel real; kui ekraanile ei mahu, keritakse rida külgsuunas (ei murra kahele reale) */
+.admin-tabs {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  /* Kerimine lõikaks aktiivse vahelehe alla ulatuva serva ära — alumine joon on seepärast vari,
+     mille aktiivne vaheleht oma taustaga katab */
+  border-bottom: 0;
+  box-shadow: inset 0 calc(-1 * var(--bs-nav-tabs-border-width)) 0 var(--bs-nav-tabs-border-color);
+}
+
+.admin-tabs .nav-link {
+  margin-bottom: 0;
+  white-space: nowrap;
+}
+</style>
