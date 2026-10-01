@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <title>Minu profiili läbimäng</title>
-<meta name="description" content="Sisseloginud kasutaja profiilivaated MyDetailsView, MyCoursesView, MyCertificatesView ja ChangePasswordView (navbaris rippmenüü Minu profiil): API päringud ja mockupi märkmed interaktiivse läbimänguna.">
+<meta name="description" content="Sisseloginud kasutaja profiilivaated ParticipantDetailsView, ParticipantCoursesView, ParticipantCertificatesView ja ChangePasswordView (navbaris rippmenüü Minu profiil): API päringud ja mockupi märkmed interaktiivse läbimänguna.">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -348,7 +348,7 @@ td .linkish { font-size: .84rem; }
 <div class="page">
   <header class="intro">
     <h1>Minu profiil — läbimäng</h1>
-    <p>Sisseloginud kasutaja profiil mockupi järgi (<code>BCS.pdf</code> leht 14) <strong>nelja eraldi vaatena</strong>: <code>MyDetailsView</code> (<code>/my-details</code>), <code>MyCoursesView</code> (<code>/my-courses</code>), <code>MyCertificatesView</code> (<code>/my-certificates</code>) ja <code>ChangePasswordView</code> (<code>/change-password</code>). Neid avatakse navbari rippmenüüst <strong>„Minu profiil ▾“</strong> ja vasakult profiilimenüüst (<code>ProfileMenu.vue</code>). Proovi andmeid muuta (ka e-posti, nt <code>liis.kuusk@example.com</code> annab vea „juba kasutusel“), tulevasest koolitusest loobuda ja parooli muuta (praegune parool on <code>parool123</code>). Paremal all näed, mis päringud tehti ja mida backend vastas; kollased sildid viivad API märkmete juurde.</p>
+    <p>Sisseloginud kasutaja profiil mockupi järgi (<code>BCS.pdf</code> leht 14) <strong>nelja eraldi vaatena</strong>: <code>ParticipantDetailsView</code> (<code>/participant-details</code>), <code>ParticipantCoursesView</code> (<code>/participant-courses</code>), <code>ParticipantCertificatesView</code> (<code>/participant-certificates</code>) ja <code>ChangePasswordView</code> (<code>/change-password</code>). Neid avatakse navbari rippmenüüst <strong>„Minu profiil ▾“</strong> ja vasakult profiilimenüüst (<code>ProfileMenu.vue</code>). Proovi andmeid muuta (ka e-posti, nt <code>liis.kuusk@example.com</code> annab vea „juba kasutusel“), tulevasest koolitusest loobuda ja parooli muuta (praegune parool on <code>parool123</code>). Paremal all näed, mis päringud tehti ja mida backend vastas; kollased sildid viivad API märkmete juurde.</p>
     <p>Andmed on <code>3_import.sql</code>-ist (täna = 01/10/2026). Kasutaja on Anna Saar (<code>userId = 2</code>, osaleja 1), admin on <code>admin@vali-it.ee</code> (<code>userId = 1</code>, osalejat pole). Anna registreerumised 10 (Vue.js, veebis) ja 11 (Spring Boot, loobunud) on seed'i <strong>ettepanek</strong>. Uued teenused ja DTO-d on samuti ettepanek (vt <code>profile-view-skeemid.md</code>). Seed'is erinevad Anna profiili e-post (<code>anna.saar@example.com</code>) ja konto e-post (<code>kasutaja@vali-it.ee</code>); pärast esimest salvestust on need samad. Muudatused kehtivad ainult selles läbimängus.</p>
     <div class="toolbar">
       <span class="lbl-soft">Kes on sisse loginud:</span>
@@ -410,17 +410,17 @@ td .linkish { font-size: .84rem; }
     toast(standaloneMessage || "router.push → " + path);
   }
 
-  /* ---------- Märkmed (hiljem failidesse markmed/my-details-view-markmed.md, my-courses-view-markmed.md, my-certificates-view-markmed.md, change-password-view-markmed.md) ---------- */
+  /* ---------- Märkmed (hiljem failidesse markmed/participant-details-view-markmed.md, participant-courses-view-markmed.md, participant-certificates-view-markmed.md, change-password-view-markmed.md) ---------- */
   var COMMON_NOTE = "Avaneb navbari rippmenüüst \"Minu profiil ▾\" (sisseloginud kasutajal, ka adminil; \"Logi välja\" kõrval): Minu andmed, Minu koolitused, Tunnistused, Parool. Vasakul profiilimenüü (ProfileMenu.vue — sama neli linki, aktiivne esile tõstetud; kitsal ekraanil horisontaalselt sisu kohal), mockupi järgi. Sisselogimata kasutaja suunatakse /login?redirect={selle vaate rada}. userId tuleb sessionStorage'ist.";
   function viewNote(file, path, lines) { return { title: file, text: ["Roll: Kasutaja (ka admin)", "Failinimi: " + file, "Frontend rada: " + path, "", "Vaatega seotud lisainfo:", COMMON_NOTE].concat(lines).join("\n") }; }
   var VIEW_NOTES = {
-    details: viewNote("MyDetailsView.vue", "/my-details", [
+    details: viewNote("ParticipantDetailsView.vue", "/participant-details", [
       "Pealkiri \"Minu andmed\", paremal nupp \"Muuda\". Eesnimi, Perekonnanimi, Telefon, E-post 2×2 paigutuses, vaikimisi ainult lugemiseks (GET /api/user/{userId}/participant). \"Muuda\" → väljad muudetavad, nupud \"Salvesta\" ja \"Tühista\" (taastab laaditud väärtused). Kõik väljad kohustuslikud, e-post korrektne, telefon kuni 20 märki. E-posti all vihje \"Selle e-postiga logid ka sisse.\"",
       "\"Salvesta\" → PUT /api/user/{userId}/profile; EMAIL_TAKEN → viga e-posti välja all, vorm jääb lahti; edu → teade \"Andmed salvestatud\", andmed laaditakse uuesti ja vorm läheb lugemisrežiimi. Kui kasutajal osalejat pole (nt admin): väljad tühjad, e-post = konto e-post ja teade \"Sinu kontol pole veel profiiliandmeid. Lisa need nupuga „Muuda“.\""]),
-    courses: viewNote("MyCoursesView.vue", "/my-courses", [
+    courses: viewNote("ParticipantCoursesView.vue", "/participant-courses", [
       "Pealkiri \"Minu koolitused\". GET /api/user/{userId}/registrations?contentLang={UI keel} (keele vahetusel uuesti). Plokid \"Tulevased\" (lõpp täna või hiljem, alguse järgi kasvavalt) ja \"Toimunud\" (uusimad eespool). Igal real koolituse nimi lingina → /course?courseId={id}, toimumisaeg dd/MM/yyyy – dd/MM/yyyy, vorm (Kohapeal / Veebis / Kohapeal + veebis), staatus (CourseParticipantStatusBadge: Registreerunud / Loobunud), Tasutud / Tasumata, tühistatud toimumiskorral \"Tühistatud\". Loobunud rida tuhmim.",
       "Nupp \"Loobu\" ainult kui canCancel → ConfirmModal \"Kas soovid koolitusest loobuda?\" → PUT /api/user/{userId}/registration/{courseParticipantId}/cancel → teade \"Oled koolitusest loobunud\" ja nimekiri laaditakse uuesti. Tühi nimekiri: \"Sa pole veel ühelegi koolitusele registreerunud.\" + link \"Vaata koolituste kalendrit\" → /courses."]),
-    certificates: viewNote("MyCertificatesView.vue", "/my-certificates", [
+    certificates: viewNote("ParticipantCertificatesView.vue", "/participant-certificates", [
       "Pealkiri \"Tunnistused\" ja tekst \"Tunnistused tulevad varsti — siia ilmuvad sinu läbitud koolituste tunnistused.\" Päringut pole (tunnistused tehakse hiljem)."]),
     password: viewNote("ChangePasswordView.vue", "/change-password", [
       "Pealkiri \"Parool\". Praegune parool*, Uus parool* (vähemalt 8 märki), Korda uut parooli* (type=password). Frontendi kontroll: uus ≥ 8 märki, kordus klapib, uus ≠ praegune. \"Muuda parool\" → PUT /api/user/{userId}/password; INCORRECT_PASSWORD → viga välja \"Praegune parool\" all; edu → teade \"Parool muudetud\" ja väljad tühjaks."])
@@ -566,8 +566,8 @@ td .linkish { font-size: .84rem; }
 
   /* ---------- Tegevused ---------- */
   var TAB_NAMES = { details: "Minu andmed", courses: "Minu koolitused", certificates: "Tunnistused", password: "Parool" };
-  var TAB_PATHS = { details: "/my-details", courses: "/my-courses", certificates: "/my-certificates", password: "/change-password" };
-  var TAB_VIEWS = { details: "MyDetailsView", courses: "MyCoursesView", certificates: "MyCertificatesView", password: "ChangePasswordView" };
+  var TAB_PATHS = { details: "/participant-details", courses: "/participant-courses", certificates: "/participant-certificates", password: "/change-password" };
+  var TAB_VIEWS = { details: "ParticipantDetailsView", courses: "ParticipantCoursesView", certificates: "ParticipantCertificatesView", password: "ChangePasswordView" };
   function openTab(tab, title) {
     startStep(title);
     ui.tab = tab; ui.success = ""; ui.coursesMsg = ""; ui.pwMsg = ""; ui.edit = false; ui.form = null; ui.errors = {}; ui.pwErrors = {};

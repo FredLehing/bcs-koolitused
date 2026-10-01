@@ -1,0 +1,734 @@
+<meta charset="utf-8">
+<title>Kontode läbimäng</title>
+<meta name="description" content="AdminUsersView.vue (kõigi kontode nimekiri) ja AdminUserView.vue (ühe konto vaade, deaktiveerimine ja taastamine): API päringud ja mockupi märkmed interaktiivse läbimänguna.">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Sama visuaalne keel nagu admin-registrations-view-labimang.html: täppidega tahvel, Balsamiqi-stiilis wireframe, kollased märkmed */
+:root {
+  --board: #e9ecef;
+  --board-dots: #d3d8de;
+  --panel: #ffffff;
+  --ink: #23272e;
+  --ink-soft: #5b6470;
+  --line: #b9c0c9;
+  --sketch: #3b4048;
+  --field: #ffffff;
+  --field-off: #eef0f3;
+  --accent: #2f6fde;
+  --accent-soft: #dce7fb;
+  --note: #f2c94c;
+  --note-edge: #d9ad2b;
+  --note-ink: #2e2505;
+  --get: #1f7a5c;
+  --post: #2f6fde;
+  --put: #a56200;
+  --del: #b83a3a;
+  --ok: #1f7a5c;
+  --bad: #c0392b;
+  --shadow: 0 1px 2px rgba(20, 30, 45, .08), 0 4px 14px rgba(20, 30, 45, .06);
+  --font-ui: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-sketch: "Balsamiq Sans", "Comic Sans MS", "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --board: #15181d; --board-dots: #242931; --panel: #1d2127; --ink: #e6e9ee; --ink-soft: #9aa4b2;
+    --line: #3a414b; --sketch: #c9ced6; --field: #252a31; --field-off: #1a1e23; --accent: #7aa5f5; --accent-soft: #22324f;
+    --get: #5cc59e; --post: #7aa5f5; --put: #e0a24a; --del: #ef7d7d; --ok: #5cc59e; --bad: #ef7d7d;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --board: #15181d; --board-dots: #242931; --panel: #1d2127; --ink: #e6e9ee; --ink-soft: #9aa4b2;
+  --line: #3a414b; --sketch: #c9ced6; --field: #252a31; --field-off: #1a1e23; --accent: #7aa5f5; --accent-soft: #22324f;
+  --get: #5cc59e; --post: #7aa5f5; --put: #e0a24a; --del: #ef7d7d; --ok: #5cc59e; --bad: #ef7d7d;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.3);
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background-color: var(--board);
+  background-image: radial-gradient(var(--board-dots) 1px, transparent 1px);
+  background-size: 18px 18px;
+  color: var(--ink);
+  font: 15px/1.5 var(--font-ui);
+}
+.page { max-width: 1320px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 64px; display: grid; gap: 28px; }
+h1, h2, h3 { text-wrap: balance; margin: 0; line-height: 1.2; }
+h1 { font-size: 1.7rem; font-weight: 600; }
+h2 { font-size: 1.15rem; font-weight: 600; }
+h3 { font-size: .8rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft); }
+code, .mono { font-family: var(--font-mono); font-size: .88em; }
+button { font: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Päis */
+.intro { display: grid; gap: 10px; }
+.intro p { margin: 0; max-width: 78ch; color: var(--ink-soft); }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.toolbar .sep { width: 1px; align-self: stretch; background: var(--line); margin-inline: 4px; }
+.toolbar .lbl-soft { font-size: .82rem; color: var(--ink-soft); }
+.tbtn { border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+.tbtn:hover { border-color: var(--accent); }
+.tbtn[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 1px var(--accent); }
+
+/* Brauseri wireframe */
+.browser { background: var(--panel); border: 2px solid var(--sketch); border-radius: 10px; font-family: var(--font-sketch); box-shadow: var(--shadow); overflow: hidden; min-width: 0; }
+.chrome { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-bottom: 2px solid var(--sketch); background: var(--field-off); }
+.chrome .dots { display: flex; gap: 5px; }
+.chrome .dots span { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--sketch); }
+.urlbar { flex: 1; min-width: 0; border: 1.5px solid var(--sketch); border-radius: 14px; padding: 3px 12px; font-family: var(--font-mono); font-size: .8rem; background: var(--field); white-space: nowrap; overflow-x: auto; }
+.sitenav { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; padding: 8px 14px; border-bottom: 1.5px dashed var(--line); font-size: .85rem; }
+.sitenav .logo { width: 44px; height: 24px; border: 1.5px solid var(--sketch); position: relative; }
+.sitenav .logo::before, .sitenav .logo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top right, transparent calc(50% - .75px), var(--sketch) 50%, transparent calc(50% + .75px)); }
+.sitenav .logo::after { transform: scaleX(-1); }
+.sitenav .cur { text-decoration: underline; text-underline-offset: 3px; }
+.sitenav .admin { position: relative; }
+.sitenav .admin > button { background: none; border: 1.5px solid transparent; border-radius: 6px; font: inherit; color: var(--ink); padding: 0 6px; cursor: pointer; }
+.sitenav .admin > button:hover, .sitenav .admin > button[aria-expanded="true"] { border-color: var(--sketch); }
+.sitenav .menu { position: absolute; top: calc(100% + 4px); left: 0; z-index: 6; background: var(--panel); border: 1.5px solid var(--sketch); border-radius: 6px; box-shadow: 3px 3px 0 var(--sketch); display: grid; min-width: 180px; padding: 4px; }
+.sitenav .menu button { background: none; border: 0; text-align: left; font: inherit; color: var(--ink); padding: 4px 8px; border-radius: 4px; cursor: pointer; white-space: nowrap; }
+.sitenav .menu button:hover { background: var(--accent-soft); }
+.sitenav .menu .cur { background: var(--accent-soft); font-weight: 700; }
+.viewhead { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; justify-content: space-between; }
+.sitenav .out { margin-left: auto; border: 1.5px solid var(--sketch); border-radius: 10px; padding: 0 8px; font-size: .78rem; }
+
+.view { padding: 16px 18px 20px; display: grid; gap: 14px; min-width: 0; }
+.view h2 { font-family: var(--font-sketch); font-size: 1.35rem; font-weight: 700; }
+.searchrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.searchrow input { flex: 1 1 260px; min-width: 0; }
+input[type="text"], select { font-family: var(--font-sketch); font-size: .9rem; color: var(--ink); background: var(--field); border: 1.5px solid var(--sketch); border-radius: 5px; padding: 4px 8px; }
+select { width: 100%; }
+.sbtn { font-family: var(--font-sketch); font-size: .9rem; border: 1.5px solid var(--sketch); border-radius: 12px; background: var(--field); color: var(--ink); padding: 3px 14px; cursor: pointer; box-shadow: 1.5px 1.5px 0 var(--sketch); white-space: nowrap; }
+.sbtn:hover:not(:disabled) { background: var(--accent-soft); }
+.sbtn:active:not(:disabled) { transform: translate(1px, 1px); box-shadow: .5px .5px 0 var(--sketch); }
+.sbtn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.sbtn.danger { background: var(--del); border-color: var(--del); color: #fff; }
+.sbtn.small { font-size: .78rem; padding: 1px 10px; }
+.sbtn:disabled { opacity: .45; cursor: not-allowed; }
+.api-pin { font-family: var(--font-mono); font-size: .66rem; background: var(--note); color: var(--note-ink); border: 0; border-radius: 3px; padding: 0 5px; cursor: pointer; line-height: 1.6; white-space: nowrap; }
+.api-pin:hover { outline: 1.5px solid var(--note-edge); }
+.pins { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+
+.tip { position: relative; display: inline-flex; }
+.tip .qmark { width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--sketch); background: var(--field); color: var(--ink); font: 700 .8rem var(--font-sketch); cursor: help; padding: 0; }
+.tip [role="tooltip"] { position: absolute; right: 0; top: calc(100% + 8px); z-index: 5; width: min(300px, 80vw); background: var(--ink); color: var(--panel); font: .78rem/1.4 var(--font-ui); padding: 8px 10px; border-radius: 6px; opacity: 0; visibility: hidden; transition: opacity .12s; pointer-events: none; }
+.tip:hover [role="tooltip"], .tip:focus-within [role="tooltip"] { opacity: 1; visibility: visible; }
+.togglerow { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+.linkish { background: none; border: 0; color: var(--accent); text-decoration: underline; cursor: pointer; padding: 0; font-family: var(--font-sketch); font-size: .9rem; }
+.linkish.small { font-size: .8rem; }
+.badge { border: 1.5px solid var(--sketch); border-radius: 10px; padding: 0 8px; font-size: .75rem; white-space: nowrap; }
+.badge.draft { background: var(--field-off); }
+.badge.pub { background: var(--ok); color: #fff; border-color: var(--ok); }
+.badge.active { background: var(--accent-soft); border-color: var(--accent); }
+.badge.deleted { background: var(--del); color: #fff; border-color: var(--del); }
+tr.is-deleted td { color: var(--ink-soft); }
+tr.is-deleted td .flag, tr.is-deleted td .settings { opacity: .55; }
+
+fieldset { border: 1.5px solid var(--sketch); border-radius: 8px; margin: 0; padding: 10px 12px 12px; display: grid; gap: 12px; min-width: 0; }
+legend { padding: 0 6px; font-weight: 700; font-size: .9rem; }
+.fgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px 14px; }
+.fld { display: grid; gap: 3px; min-width: 0; }
+.lbl { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: .82rem; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.hint { font-size: .8rem; color: var(--ink-soft); }
+
+/* Tabel */
+.tablewrap { overflow-x: auto; border: 1.5px solid var(--sketch); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: .84rem; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px dashed var(--line); vertical-align: middle; }
+thead th { background: var(--field-off); border-bottom: 1.5px solid var(--sketch); font-weight: 700; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr:hover td { background: color-mix(in srgb, var(--accent-soft) 45%, transparent); }
+td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.sorth { background: none; border: 0; padding: 0; font: inherit; font-weight: 700; color: var(--ink); cursor: pointer; display: inline-flex; gap: 4px; align-items: center; }
+.sorth:hover { color: var(--accent); }
+.sorth .arrow { font-size: .75rem; color: var(--accent); min-width: .8em; }
+.th-pin { display: inline-flex; gap: 4px; align-items: center; }
+.title-cell { min-width: 170px; }
+.fallback { display: block; font-size: .7rem; color: var(--ink-soft); }
+.settings { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; min-width: 120px; }
+.settings li { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.settings li::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex: none; }
+.settings .none { color: var(--ink-soft); }
+.settings .none::before { display: none; }
+.tr-ok { color: var(--ok); font-weight: 700; font-size: 1.05rem; }
+.tr-bad { color: var(--bad); font-weight: 700; font-size: 1.05rem; cursor: help; }
+.icons { display: flex; gap: 4px; }
+.ibtn { width: 28px; height: 26px; display: inline-grid; place-items: center; border: 1.5px solid var(--sketch); border-radius: 6px; background: var(--field); color: var(--ink); cursor: pointer; padding: 0; }
+.ibtn:hover { background: var(--accent-soft); }
+.ibtn.del:hover { background: color-mix(in srgb, var(--del) 20%, transparent); }
+.ibtn svg { width: 16px; height: 16px; }
+.flag svg { width: 26px; height: 17px; border: 1.5px solid var(--sketch); display: block; }
+.empty-row td { text-align: center; padding: 20px; color: var(--ink-soft); }
+
+.foot { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; }
+.total { font-size: .85rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.pager { display: flex; flex-wrap: wrap; gap: 0; }
+.pager button { font-family: var(--font-sketch); font-size: .85rem; border: 1.5px solid var(--sketch); margin-left: -1.5px; background: var(--field); color: var(--accent); padding: 2px 10px; cursor: pointer; }
+.pager button:first-child { border-radius: 6px 0 0 6px; margin-left: 0; }
+.pager button:last-child { border-radius: 0 6px 6px 0; }
+.pager button[aria-current="page"] { background: var(--accent); color: #fff; border-color: var(--sketch); }
+.pager button:disabled { color: var(--ink-soft); cursor: not-allowed; opacity: .6; }
+
+/* Alumine rida */
+.below { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; box-shadow: var(--shadow); display: grid; gap: 10px; min-width: 0; }
+.kv { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 12px; font-size: .86rem; margin: 0; }
+.kv dt { color: var(--ink-soft); }
+.kv dd { margin: 0; font-family: var(--font-mono); font-size: .8rem; overflow-wrap: anywhere; }
+
+.note { background: var(--note); color: var(--note-ink); border-radius: 2px; box-shadow: 0 1px 0 var(--note-edge), 0 6px 16px rgba(80, 60, 0, .18); padding: 12px 14px 14px; display: grid; gap: 8px; min-width: 0; }
+.note.flash { animation: noteflash 1.4s ease-out; }
+@keyframes noteflash { 0%, 30% { box-shadow: 0 0 0 4px var(--accent), 0 6px 16px rgba(80,60,0,.18); } 100% { box-shadow: 0 1px 0 var(--note-edge), 0 6px 16px rgba(80,60,0,.18); } }
+.note-head { display: flex; align-items: center; gap: 8px; }
+.note-head strong { font-size: .82rem; font-weight: 600; letter-spacing: .03em; }
+.note-head .copy { margin-left: auto; font: 500 .75rem var(--font-ui); background: rgba(255,255,255,.55); color: var(--note-ink); border: 1px solid var(--note-edge); border-radius: 4px; padding: 1px 8px; cursor: pointer; }
+.note-head .copy:hover { background: #fff; }
+.note pre { margin: 0; font: .78rem/1.45 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+.note .draft-tag { font-size: .72rem; background: rgba(255,255,255,.55); border-radius: 3px; padding: 0 6px; }
+
+.log { display: grid; gap: 6px; }
+.log-step { font-size: .85rem; color: var(--ink-soft); }
+.log-group { font-size: .74rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft); margin-top: 6px; }
+.req { border: 1px solid var(--line); border-radius: 6px; background: var(--field); overflow: hidden; }
+.req.done { border-color: var(--ok); }
+.req > button { width: 100%; display: flex; gap: 8px; align-items: center; text-align: left; background: none; border: 0; color: var(--ink); padding: 6px 10px; cursor: pointer; }
+.req > button:hover { background: var(--field-off); }
+.req .main { display: grid; gap: 1px; flex: 1; min-width: 0; }
+.req .when { display: block; font-size: .74rem; color: var(--ink-soft); }
+.req .ran { font: 600 .68rem var(--font-ui); color: var(--ok); border: 1px solid var(--ok); border-radius: 10px; padding: 0 6px; flex: none; }
+.req.idle .method { opacity: .75; }
+.method { font: 600 .7rem var(--font-mono); padding: 1px 6px; border-radius: 3px; color: #fff; flex: none; }
+.m-GET { background: var(--get); } .m-POST { background: var(--post); } .m-PUT { background: var(--put); } .m-DELETE { background: var(--del); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .method { color: #111; } }
+:root[data-theme="dark"] .method { color: #111; }
+.req .path { font-family: var(--font-mono); font-size: .76rem; overflow-wrap: anywhere; }
+.req .body { border-top: 1px dashed var(--line); padding: 8px 10px; display: grid; gap: 6px; }
+.req .body pre { margin: 0; font: .74rem/1.4 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; max-height: 280px; overflow: auto; }
+.req .body .sub { font-size: .75rem; color: var(--ink-soft); }
+.req .body .linkish { font-size: .8rem; justify-self: start; }
+
+.notes-section { display: grid; gap: 14px; }
+.notes-section > p { margin: 0; color: var(--ink-soft); max-width: 72ch; }
+.notes-grid { columns: 3 340px; column-gap: 18px; }
+.notes-grid .note { break-inside: avoid; margin-bottom: 18px; }
+
+.overlay { position: fixed; inset: 0; background: rgba(15, 20, 28, .45); display: grid; place-items: center; padding: 16px; z-index: 20; }
+.modal { background: var(--panel); color: var(--ink); border: 2px solid var(--sketch); border-radius: 10px; width: min(440px, 100%); padding: 16px 18px; display: grid; gap: 12px; font-family: var(--font-sketch); box-shadow: 4px 4px 0 var(--sketch); }
+.modal h2 { font-family: var(--font-sketch); font-weight: 700; }
+.modal .row { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--panel); padding: 8px 16px; border-radius: 6px; font-size: .9rem; z-index: 30; max-width: calc(100% - 32px); }
+
+@media (max-width: 1100px) { .below { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .below .note { grid-column: 1 / -1; } }
+@media (max-width: 700px) { .below { grid-template-columns: minmax(0, 1fr); } .page { padding-inline: 16px; } }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+/* Nimekirja ja vormi lisad (koolitajate läbimängust) */
+.viewhead .sub { display: block; font-size: .9rem; color: var(--ink-soft); font-weight: 400; margin-top: 2px; }
+.headbtns { display: flex; flex-wrap: wrap; gap: 8px; }
+.sitenav .menu hr { border: 0; border-top: 1.5px dashed var(--line); margin: 3px 4px; }
+.flags { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.flagbtn { display: inline-flex; gap: 6px; align-items: center; font-family: var(--font-sketch); font-size: .85rem; border: 1.5px solid var(--line); border-radius: 6px; background: var(--field); color: var(--ink); padding: 2px 8px; cursor: pointer; }
+.flagbtn:hover { border-color: var(--accent); }
+.flagbtn.missing svg { filter: grayscale(1); opacity: .4; }
+.flagbtn.missing { color: var(--ink-soft); border-style: dashed; }
+.flagbtn[aria-current="true"] { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.flagbtn svg, .lbl .flag svg { width: 22px; height: 14px; border: 1px solid var(--sketch); display: block; }
+.lbl .flag { display: inline-flex; }
+.formgrid { display: grid; gap: 12px; }
+.fld input[type="text"] { width: 100%; }
+.fld input[readonly], .fld textarea[readonly] { background: var(--field-off); color: var(--ink-soft); }
+textarea { font-family: var(--font-sketch); font-size: .9rem; color: var(--ink); background: var(--field); border: 1.5px solid var(--sketch); border-radius: 5px; padding: 6px 8px; width: 100%; min-height: 90px; resize: vertical; }
+.photo-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.photo-row .btns { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.avatar { border-radius: 50%; border: 1.5px solid var(--sketch); object-fit: cover; flex: none; width: 80px; height: 80px; }
+.avatar.ph { display: inline-grid; place-items: center; color: var(--ink-soft); border-style: dashed; }
+.avatar.ph svg { width: 60px; height: 60px; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.alert { border: 1.5px solid var(--del); background: color-mix(in srgb, var(--del) 14%, transparent); color: var(--ink); border-radius: 6px; padding: 6px 10px; font-size: .88rem; }
+.req-star { color: var(--del); }
+td.num { text-align: right; font-variant-numeric: tabular-nums; }
+th.num { text-align: right; }
+td.center, th.center { text-align: center; }
+.name-cell { min-width: 160px; font-weight: 700; }
+.switch { display: inline-flex; gap: 8px; align-items: center; cursor: pointer; font-size: .9rem; }
+.switch input { appearance: none; width: 34px; height: 18px; border: 1.5px solid var(--sketch); border-radius: 10px; background: var(--field-off); position: relative; cursor: pointer; margin: 0; }
+.switch input::after { content: ""; position: absolute; top: 2px; left: 2px; width: 11px; height: 11px; border-radius: 50%; background: var(--sketch); transition: left .12s; }
+.switch input:checked { background: var(--accent); border-color: var(--accent); }
+.switch input:checked::after { left: 18px; background: #fff; }
+tr.is-deleted td { color: var(--ink-soft); }
+.ibtn:disabled { opacity: .35; cursor: not-allowed; }
+.cards { display: grid; gap: 14px; }
+.rte { border: 1.5px solid var(--sketch); border-radius: 5px; background: var(--field); }
+.rte .bar { display: flex; gap: 4px; padding: 3px 6px; border-bottom: 1px dashed var(--line); font-family: var(--font-sketch); font-size: .8rem; color: var(--ink-soft); }
+.rte .bar span { border: 1px solid var(--line); border-radius: 4px; padding: 0 6px; }
+.rte .area { min-height: 80px; padding: 6px 8px; font-family: var(--font-sketch); font-size: .9rem; outline: none; }
+.rte .area p { margin: 0 0 6px; }
+.rte.readonly .area { background: var(--field-off); }
+.tip [role="tooltip"] { left: 0; right: auto; }
+.tip .qmark { width: 20px; height: 20px; font-size: .72rem; }
+.stack { display: inline-flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.lect-legend { display: inline-flex; gap: 6px; align-items: center; }
+.lect-legend .flag svg { width: 22px; height: 14px; border: 1px solid var(--sketch); display: block; }
+.helper { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.embed .sitenav { display: none; }
+/* AdminRoomsView ja RoomFormView lisad */
+.ok-alert { border: 1.5px solid var(--ok); background: color-mix(in srgb, var(--ok) 14%, transparent); color: var(--ink); border-radius: 6px; padding: 6px 10px; font-size: .88rem; }
+.ok-alert .x, .alert .x { float: right; background: none; border: 0; color: var(--ink); cursor: pointer; font-size: 1rem; line-height: 1; padding: 0 2px; }
+.ph { display: grid; gap: 10px; justify-items: start; padding: 20px 0; }
+.view fieldset input[type="text"] { max-width: 420px; }
+/* AdminEnquiriesView ja AdminEnquiryView lisad */
+tr.is-new td { font-weight: 700; }
+.dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 16px; margin: 0; font-size: .9rem; }
+.dl dt { color: var(--ink-soft); }
+.dl dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.dl a { color: var(--accent); }
+.msg { white-space: pre-wrap; }
+/* AdminRegistrationsView ja AdminRegistrationView lisad */
+.badge.past { background: var(--field-off); border-color: var(--line); color: var(--ink-soft); margin-left: 4px; }
+.badge.full { background: color-mix(in srgb, var(--put) 22%, transparent); border-color: var(--put); }
+.badge.cancel { background: color-mix(in srgb, var(--del) 16%, transparent); border-color: var(--del); }
+.cardrow { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+.switch input.radio { appearance: auto; width: auto; height: auto; border: 0; background: none; accent-color: var(--accent); }
+.switch input.radio::after { display: none; }
+td .linkish { font-size: .84rem; }
+/* hidden-atribuut peab peitma ka elemendid, millel on oma display (nt .menu { display: grid }) */
+[hidden] { display: none !important; }
+/* AdminUsersView ja AdminUserView lisad */
+.badge.me { background: var(--accent); color: #fff; border-color: var(--accent); margin-left: 6px; }
+.badge.role-admin { background: color-mix(in srgb, var(--put) 22%, transparent); border-color: var(--put); }
+.searchrow select { width: auto; flex: 0 0 auto; }
+.empty-inline { color: var(--ink-soft); font-size: .88rem; }
+</style>
+
+<div class="page">
+  <header class="intro">
+    <h1>Kontod — läbimäng</h1>
+    <p>AdminUsersView.vue (kõigi kontode nimekiri) ja AdminUserView.vue (üks konto). Otsi, filtreeri rolli järgi, sorteeri veerge (1. klõps kasvav, 2. kahanev, 3. vaikimisi), lülita sisse deaktiveeritud, ava konto, deaktiveeri ja taasta. Enda kontot (<code>admin@vali-it.ee</code>, sisse loginud admin) deaktiveerida ei saa. Paremal all näed, mis päringud tehti ja mida backend vastas; kollased sildid viivad API märkmete juurde.</p>
+    <p>Andmed on <code>3_import.sql</code>-ist (täna = 01/10/2026): 7 kontot, neist 2 adminit. Mari Lepal on ainult loobunud registreerumine. Uute teenuste DTO-d on <strong>ettepanek</strong> (vt <code>admin-users-view-skeemid.md</code>). Muudatused kehtivad ainult selles läbimängus.</p>
+    <div class="toolbar">
+      <span class="lbl-soft">Kasutajaliidese keel (navbar):</span>
+      <button class="tbtn" type="button" data-ui-lang="et">et</button>
+      <button class="tbtn" type="button" data-ui-lang="en">en</button>
+      <span class="sep" aria-hidden="true"></span>
+      <button class="tbtn" type="button" id="btn-self">Ava enda konto</button>
+      <button class="tbtn" type="button" id="btn-reset">Alusta algusest</button>
+    </div>
+  </header>
+
+  <div class="browser" aria-label="Wireframe">
+    <div class="chrome">
+      <div class="dots" aria-hidden="true"><span></span><span></span><span></span></div>
+      <div class="urlbar" id="urlbar"></div>
+    </div>
+    <nav class="sitenav" aria-label="Navbar (wireframe)">
+      <span class="logo" aria-hidden="true"></span><span>Koolitused</span><span>Meie koolitajad</span><span>Teenused</span><span>Kontakt</span>
+      <span class="admin"><button type="button" id="b-admin" aria-expanded="false" aria-controls="admin-menu">Admin ▾</button>
+        <span class="menu" id="admin-menu" hidden><button type="button" data-nav="/admin-enquiries">Koolituste päringud</button><button type="button" data-nav="/admin-registrations">Registreerumised</button><hr><button type="button" data-nav="/admin-trainings">Koolitused</button><button type="button" data-nav="/admin-all-courses">Koolituste kalender</button><hr><button type="button" data-nav="/admin-lecturers">Koolitajad</button><button type="button" data-nav="/admin-rooms">Koolitusruumid</button><hr><button type="button" data-nav="/admin-users" class="cur">Kontod</button></span></span>
+      <span class="out">Logi välja</span>
+    </nav>
+    <div class="view" id="view"></div>
+  </div>
+
+  <div class="below">
+    <div class="card">
+      <h3>Vaate olek</h3>
+      <dl class="kv" id="statekv"></dl>
+    </div>
+    <div class="card">
+      <h3>Päringud</h3>
+      <div class="log" id="log"></div>
+    </div>
+    <div class="note" id="note-view">
+      <div class="note-head"><strong id="view-note-title">Vaate märkmed</strong><button class="copy" type="button" data-copy="view">Kopeeri</button></div>
+      <pre id="view-note-text"></pre>
+    </div>
+  </div>
+
+  <section class="notes-section">
+    <h2>API märkmed (<span id="notes-count"></span>)</h2>
+    <p>Iga backendi kutse kohta üks kast. Vajuta wireframe'il kollasele sildile või päringute logis päringule, et hüpata vastava märkme juurde.</p>
+    <div class="notes-grid" id="notes"></div>
+  </section>
+</div>
+
+<div id="modal-root"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- Prototüübi kest (../index.html): embed-režiim ja vaadete vaheline navigeerimine ---------- */
+  var SHELL_Q = new URLSearchParams(location.search);
+  var EMBED = SHELL_Q.get("embed") === "1" && window.parent !== window;
+  if (EMBED) document.documentElement.classList.add("embed");
+  function goRoute(path, standaloneMessage) {
+    if (EMBED) { window.parent.postMessage({ type: "bcs-navigate", path: path }, "*"); return; }
+    toast(standaloneMessage || "router.push → " + path);
+  }
+
+  /* ---------- Märkmed (hiljem failidesse markmed/admin-users-view-markmed.md ja admin-user-view-markmed.md) ---------- */
+  var VIEW_NOTES = {
+    "admin-users": { title: "AdminUsersView.vue", text: [
+      "Roll: Admin",
+      "Failinimi: AdminUsersView.vue",
+      "Frontend rada: /admin-users",
+      "",
+      "Vaatega seotud lisainfo:",
+      "Avaneb navbari menüüst \"Admin\" → \"Kontod\" (uus, neljas rühm lõpus, eraldaja järel). Pealkiri \"Kontod\". Tabelis Loodud | E-post | Nimi | Telefon | Roll (Admin / Osaleja) | Registreerumisi | Staatus (Aktiivne / Deaktiveeritud) | Tegevused. Nimi ja telefon tulevad osalejalt, osaleja puudumisel \"—\". Registreerumisi = registreerunud (\"R\") registreerumiste arv. Sisse loginud admini real märgis \"Sina\". Deaktiveeritud rida on tuhmim.",
+      "Otsinguväli filtreerib frontendis e-posti, nime ja telefoni järgi. Rolli valik \"Kõik rollid\" / \"Osalejad\" / \"Adminid\" filtreerib frontendis. Lüliti \"Näita ka deaktiveeritud\" (vaikimisi väljas → ainult aktiivsed) → includeDeleted=true, muutmisel laaditakse nimekiri uuesti. Veerud Loodud, E-post, Nimi, Roll, Registreerumisi ja Staatus on sorteeritavad frontendis (1. klõps kasvav, 2. kahanev, 3. vaikimisi = loodud, uusimad eespool). Leheküljestust pole. All \"Kokku N kontot\".",
+      "Tegevused: silm \"Vaata\" → /admin-user?userId={id}. Aktiivsel kontol \"Deaktiveeri\" (ConfirmModal \"Deaktiveeri konto?\" → DELETE /api/admin-user/{userId}?currentUserId={sisseloginud admin}), enda real seda nuppu pole. Deaktiveeritud kontol \"Taasta\" (ConfirmModal \"Taasta konto?\" → PUT /api/admin-user/{userId}/restore). Pärast tegevust laaditakse nimekiri uuesti ja näidatakse teadet."
+    ].join("\n") },
+    "admin-user": { title: "AdminUserView.vue", text: [
+      "Roll: Admin",
+      "Failinimi: AdminUserView.vue",
+      "Frontend rada: /admin-user?userId={id}",
+      "",
+      "Vaatega seotud lisainfo:",
+      "Ülal tagasilink \"← Kõik kontod\" → /admin-users. Pealkiri \"Konto\", all konto e-post; deaktiveeritud kontol märgis \"Deaktiveeritud\".",
+      "Kaart \"Konto\": E-post, Roll, Staatus, Loodud. Kaart \"Osaleja\": Nimi, E-post (mailto; ainult kui erineb konto e-postist), Telefon (tel); osaleja puudumisel \"Kontol pole osaleja andmeid\". Kaart \"Registreerumised\": tabel Koolitus | Toimumisaeg (link → /admin-course?courseId={id}, toimunul märgis \"Toimunud\") | Staatus (Registreerunud / Loobunud) | Tasunud ✓/✗ | silm → /admin-registration?courseParticipantId={id}&returnTo=/admin-user?userId={id}. Uusimad toimumiskorrad eespool. Tühi: \"Registreerumisi pole\". Koolituse nimi kasutajaliidese keeles, keele vahetusel laaditakse uuesti.",
+      "Nupp \"Deaktiveeri konto\" (aktiivne) / \"Taasta konto\" (deaktiveeritud), kinnitusega (ConfirmModal). Enda kontol nuppu pole, selle asemel vihje \"See on sinu konto — enda kontot deaktiveerida ei saa.\" Edu korral teade \"Konto deaktiveeritud\" / \"Konto taastatud\" ja andmed laaditakse uuesti. Olematu konto → üldine veavaade."
+    ].join("\n") }
+  };
+  var NOT_FOUND = "HTTP: 404\nerrorCode: PRIMARY_KEY_NOT_FOUND\nmessage: \"Ei leidnud primary keyd 'userId' väärtusega: 123\"";
+  var NOTES = [
+    { id: "n-list", title: "GET /api/admin-users", text: [
+      "API: GET /api/admin-users", "",
+      "Query parameetrid:", "includeDeleted: Boolean — true = ka deaktiveeritud kontod (status \"D\") (valikuline, vaikimisi false)", "",
+      "Response (200):", "AdminUserSummaryDto.java",
+      "[", "  {", "    \"userId\": 7,", "    \"email\": \"toomas.rebane@example.com\",", "    \"roleName\": \"participant\",", "    \"participantName\": \"Toomas Rebane\",", "    \"phone\": \"+37255007788\",", "    \"registrationCount\": 2,", "    \"createdAt\": \"2026-09-22T10:45:00Z\",", "    \"status\": \"A\"", "  },", "  ...", "]", "",
+      "API teenuse lisainfo:",
+      "\"user\" + role (name) + participant (name) + profile (phone) LEFT JOIN-iga — adminikontodel osalejat tavaliselt pole (participantName ja phone = null). registrationCount = osaleja course_participant ridade arv, kus status = \"R\" (ka toimunud toimumiskordadel; osaleja puudumisel 0). includeDeleted=false → ainult status = \"A\". Järjestus created_at kahanevalt. Otsing, rolli filter ja sorteerimine toimuvad frontendis; leheküljestust pole. Parooli ei tagastata. Kui päring läheb keerukaks, võib lisada view admin_user_summary.", "",
+      "Veateated: —"].join("\n") },
+    { id: "n-detail", title: "GET /api/admin-user/{userId}", text: [
+      "API: GET /api/admin-user/{userId}", "",
+      "Query parameetrid:", "contentLang: String — koolituse nime keel (\"et\"/\"en\")", "",
+      "Response (200):", "AdminUserDto.java",
+      "{", "  \"userId\": 2,", "  \"email\": \"kasutaja@vali-it.ee\",", "  \"roleName\": \"participant\",", "  \"status\": \"A\",", "  \"createdAt\": \"2026-09-05T06:00:00Z\",",
+      "  \"participantId\": 1,", "  \"participantName\": \"Anna Saar\",", "  \"profileEmail\": \"anna.saar@example.com\",", "  \"phone\": \"+37256789012\",",
+      "  \"registrations\": [", "    {", "      \"courseParticipantId\": 1,", "      \"courseId\": 1,", "      \"trainingTitle\": \"Java algkursus\",", "      \"startDate\": \"2026-10-05\",", "      \"endDate\": \"2026-10-09\",", "      \"isPast\": false,", "      \"status\": \"R\",", "      \"hasPaid\": true", "    },", "    ...", "  ]", "}", "",
+      "API teenuse lisainfo:",
+      "Üks konto (ka deaktiveeritud) koos osaleja ja profiiliga; osaleja puudumisel participantId, participantName, profileEmail ja phone = null ning registrations = []. registrations (AdminUserRegistrationDto) = osaleja kõik course_participant read (ka loobunud), koolituse nimi contentLang keeles (puudumisel põhikeeles), kustutatud toimumiskorrad (course.status = \"D\") välja. isPast = end_date < täna. Järjestus start_date kahanevalt. Parooli ei tagastata.", "",
+      "Veateated:", NOT_FOUND].join("\n") },
+    { id: "n-delete", title: "DELETE /api/admin-user/{userId}", text: [
+      "API: DELETE /api/admin-user/{userId}", "",
+      "Query parameetrid:", "currentUserId: Integer — sisse loginud admini userId (sessionStorage)", "",
+      "Response (200): NONE", "",
+      "API teenuse lisainfo:",
+      "Soft delete: \"user\".status = \"D\" (ApiStatus.STATUS_DELETED). Osaleja, profiil ja registreerumised jäävad alles. Deaktiveeritud konto ei saa sisse logida (POST /api/login otsib ainult status = \"A\" → INCORRECT_CREDENTIALS); e-post jääb hõivatuks (user_email_uq). Admin ei saa deaktiveerida iseennast (userId = currentUserId). Juba deaktiveeritud konto korral midagi ei muutu (200).", "",
+      "Veateated:", NOT_FOUND, "",
+      "HTTP: 403\nerrorCode: CANNOT_DEACTIVATE_SELF\nmessage: \"Enda kontot ei saa deaktiveerida\""].join("\n") },
+    { id: "n-restore", title: "PUT /api/admin-user/{userId}/restore", text: [
+      "API: PUT /api/admin-user/{userId}/restore", "",
+      "Response (200): NONE", "",
+      "API teenuse lisainfo:",
+      "\"user\".status = \"A\" (ApiStatus.STATUS_ACTIVE). Konto saab jälle sisse logida sama e-posti ja parooliga. Juba aktiivse konto korral midagi ei muutu (200).", "",
+      "Veateated:", NOT_FOUND].join("\n") }
+  ];
+
+  /* ---------- Andmed (3_import.sql) ---------- */
+  var TODAY = "2026-10-01";
+  var ME = 1; // sisse loginud admin (sessionStorage userId)
+  var TRAININGS = { 1: { et: "Java algkursus", en: "Java Basics" }, 3: { et: "Spring Boot veebiarendus", en: "Spring Boot Web Development" }, 7: { et: "Agiilne meeskonnajuhtimine", en: "Agile Team Leadership" } };
+  var COURSES = { 1: { t: 1, start: "2026-10-05", end: "2026-10-09" }, 3: { t: 1, start: "2026-09-07", end: "2026-09-11" }, 5: { t: 1, start: "2026-11-16", end: "2026-11-20" },
+    9: { t: 3, start: "2026-10-12", end: "2026-10-15" }, 12: { t: 7, start: "2026-10-14", end: "2026-10-15" } };
+  // participant + profile (konto järgi)
+  var PARTICIPANTS = { 2: { id: 1, name: "Anna Saar", email: "anna.saar@example.com", phone: "+37256789012" }, 4: { id: 2, name: "Liis Kuusk", email: "liis.kuusk@example.com", phone: "+37255001122" },
+    5: { id: 3, name: "Jaan Org", email: "jaan.org@example.com", phone: "+37255003344" }, 6: { id: 4, name: "Mari Lepp", email: "mari.lepp@example.com", phone: "+37255005566" },
+    7: { id: 5, name: "Toomas Rebane", email: "toomas.rebane@example.com", phone: "+37255007788" } };
+  var REGS = [
+    { id: 1, c: 1, p: 1, paid: true, st: "R" }, { id: 2, c: 3, p: 1, paid: true, st: "R" }, { id: 3, c: 1, p: 2, paid: false, st: "R" },
+    { id: 4, c: 1, p: 3, paid: true, st: "R" }, { id: 5, c: 1, p: 4, paid: false, st: "C" }, { id: 6, c: 12, p: 2, paid: true, st: "R" },
+    { id: 7, c: 12, p: 5, paid: false, st: "R" }, { id: 8, c: 5, p: 3, paid: false, st: "R" }, { id: 9, c: 9, p: 5, paid: true, st: "R" }
+  ];
+  function freshDb() {
+    return [
+      { id: 1, email: "admin@vali-it.ee", role: "admin", st: "A", created: "2026-01-01 00:00" },
+      { id: 2, email: "kasutaja@vali-it.ee", role: "participant", st: "A", created: "2026-09-05 09:00" },
+      { id: 3, email: "admin", role: "admin", st: "A", created: "2026-09-28 00:00" },
+      { id: 4, email: "liis.kuusk@example.com", role: "participant", st: "A", created: "2026-09-12 10:00" },
+      { id: 5, email: "jaan.org@example.com", role: "participant", st: "A", created: "2026-09-14 15:30" },
+      { id: 6, email: "mari.lepp@example.com", role: "participant", st: "A", created: "2026-09-18 09:10" },
+      { id: 7, email: "toomas.rebane@example.com", role: "participant", st: "A", created: "2026-09-22 13:45" }
+    ];
+  }
+  var db, ui, detail = null, logSteps = [], logTitle = "", openReq = -1;
+  function freshUi() { return { lang: ui ? ui.lang : "et", route: "list", search: "", role: "", includeDeleted: false, sortBy: null, sortDir: "asc", list: [], success: "" }; }
+
+  function j(o) { return JSON.stringify(o, null, 2); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c]; }); }
+  // Tallinna aeg: suveaeg (+03:00) aprillist oktoobrini, muidu +02:00 (seed'i kuupäevade jaoks piisav)
+  function toInstant(local) { var m = +local.slice(5, 7); return new Date(local.replace(" ", "T") + ":00" + (m >= 4 && m <= 10 ? "+03:00" : "+02:00")).toISOString().replace(".000", ""); }
+  function dmy(iso) { var d = iso.split("-"); return d[2] + "/" + d[1] + "/" + d[0]; }
+  function dateTime(instant) { var s = new Date(instant).toLocaleString("sv-SE", { timeZone: "Europe/Tallinn" }); return dmy(s.slice(0, 10)) + " " + s.slice(11, 16); }
+  function user(id) { return db.filter(function (u) { return u.id === id; })[0]; }
+
+  /* ---------- "Backend" ---------- */
+  function call(method, path, req, res) { logSteps.push({ method: method, path: path, req: req, res: res }); }
+  function startStep(title) { logSteps = []; logTitle = title; openReq = -1; }
+  function summaryDto(u) {
+    var p = PARTICIPANTS[u.id];
+    return { userId: u.id, email: u.email, roleName: u.role, participantName: p ? p.name : null, phone: p ? p.phone : null,
+      registrationCount: p ? REGS.filter(function (r) { return r.p === p.id && r.st === "R"; }).length : 0, createdAt: toInstant(u.created), status: u.st };
+  }
+  function detailDto(u) {
+    var p = PARTICIPANTS[u.id];
+    var regs = p ? REGS.filter(function (r) { return r.p === p.id; }).map(function (r) {
+      var c = COURSES[r.c];
+      return { courseParticipantId: r.id, courseId: r.c, trainingTitle: TRAININGS[c.t][ui.lang], startDate: c.start, endDate: c.end, isPast: c.end < TODAY, status: r.st, hasPaid: r.paid };
+    }).sort(function (a, b) { return a.startDate < b.startDate ? 1 : -1; }) : [];
+    return { userId: u.id, email: u.email, roleName: u.role, status: u.st, createdAt: toInstant(u.created),
+      participantId: p ? p.id : null, participantName: p ? p.name : null, profileEmail: p ? p.email : null, phone: p ? p.phone : null, registrations: regs };
+  }
+  function loadList() {
+    ui.list = db.filter(function (u) { return ui.includeDeleted || u.st === "A"; }).sort(function (a, b) { return b.created < a.created ? -1 : 1; }).map(summaryDto);
+    call("GET", "/api/admin-users?includeDeleted=" + ui.includeDeleted, null, ui.list);
+  }
+  function loadDetail(id) {
+    var u = user(id);
+    if (!u) { call("GET", "/api/admin-user/" + id + "?contentLang=" + ui.lang, null, { status: 404, errorCode: "PRIMARY_KEY_NOT_FOUND", message: "Ei leidnud primary keyd 'userId' väärtusega: " + id }); detail = { missing: true, userId: id }; return; }
+    detail = detailDto(u);
+    call("GET", "/api/admin-user/" + id + "?contentLang=" + ui.lang, null, detail);
+  }
+  function apiDeactivate(id) {
+    var path = "/api/admin-user/" + id + "?currentUserId=" + ME;
+    if (id === ME) { var err = { status: 403, errorCode: "CANNOT_DEACTIVATE_SELF", message: "Enda kontot ei saa deaktiveerida" }; call("DELETE", path, null, err); return err; }
+    user(id).st = "D"; call("DELETE", path, null, null); return null;
+  }
+  function apiRestore(id) { user(id).st = "A"; call("PUT", "/api/admin-user/" + id + "/restore", null, null); }
+
+  /* ---------- Navigeerimine ja tegevused ---------- */
+  function openList(title) { startStep(title); ui.route = "list"; detail = null; ui.success = ""; loadList(); renderAll(); }
+  function openDetail(id, title) { startStep(title); ui.route = "detail"; ui.success = ""; loadDetail(id); renderAll(); }
+  function confirmAction(id, restore) {
+    var u = user(id), label = (PARTICIPANTS[id] ? PARTICIPANTS[id].name + " (" + u.email + ")" : u.email);
+    document.getElementById("modal-root").innerHTML = '<div class="overlay"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="m-title"><h2 id="m-title">' + (restore ? "Taasta konto?" : "Deaktiveeri konto?") + '</h2><p>' +
+      (restore ? "„" + esc(label) + "“ saab jälle sisse logida." : "„" + esc(label) + "“ ei saa enam sisse logida. Andmed ja registreerumised jäävad alles, konto saab hiljem taastada.") +
+      '</p><div class="row"><button type="button" class="sbtn" id="m-no">Tühista</button><button type="button" class="sbtn ' + (restore ? "primary" : "danger") + '" id="m-yes">' + (restore ? "Taasta" : "Deaktiveeri") + '</button></div></div></div>';
+    document.getElementById("m-no").onclick = closeModal;
+    document.getElementById("m-yes").onclick = function () {
+      closeModal();
+      startStep((restore ? "„Taasta“" : "„Deaktiveeri“") + " → kinnitus (konto " + id + ")");
+      var err = restore ? (apiRestore(id), null) : apiDeactivate(id);
+      if (ui.route === "list") loadList(); else loadDetail(id);
+      ui.success = err ? "" : (restore ? "Konto taastatud" : "Konto deaktiveeritud");
+      renderAll();
+    };
+    document.getElementById("m-no").focus();
+  }
+  function closeModal() { document.getElementById("modal-root").innerHTML = ""; }
+  function switchLang(code) {
+    if (code === ui.lang) return;
+    ui.lang = code;
+    startStep("Keele vahetus navbaris → " + code);
+    if (ui.route === "detail" && !detail.missing) loadDetail(detail.userId);
+    renderAll();
+  }
+  function sortClick(key) {
+    if (ui.sortBy !== key) { ui.sortBy = key; ui.sortDir = "asc"; }
+    else if (ui.sortDir === "asc") { ui.sortDir = "desc"; }
+    else { ui.sortBy = null; ui.sortDir = "asc"; }
+    renderView(); renderKv();
+  }
+
+  var toastTimer = null;
+  function toast(msg) {
+    var old = document.querySelector(".toast"); if (old) old.remove();
+    var el = document.createElement("div"); el.className = "toast"; el.setAttribute("role", "status"); el.textContent = msg;
+    document.body.appendChild(el);
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { el.remove(); }, 2400);
+  }
+
+  /* ---------- Renderdamine ---------- */
+  var EYE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+  var BAN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg>';
+  var RESTORE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>';
+  var ROLE_LABEL = { admin: "Admin", participant: "Osaleja" };
+  var COLUMNS = [
+    { key: "createdAt", label: "Loodud" }, { key: "email", label: "E-post" }, { key: "participantName", label: "Nimi" }, { label: "Telefon" },
+    { key: "roleName", label: "Roll" }, { key: "registrationCount", label: "Registreerumisi", cls: "num" }, { key: "status", label: "Staatus" }, { label: "Tegevused" }
+  ];
+  function pin(noteId, label) { return '<button type="button" class="api-pin" data-note="' + noteId + '">' + esc(label) + '</button>'; }
+  // UserStatusBadge.vue (uus väike komponent)
+  function statusBadge(st) { return st === "A" ? '<span class="badge active">Aktiivne</span>' : '<span class="badge deleted">Deaktiveeritud</span>'; }
+  function roleBadge(r) { return '<span class="badge' + (r === "admin" ? " role-admin" : "") + '">' + ROLE_LABEL[r] + '</span>'; }
+  function check(v) { return v ? '<span class="tr-ok" aria-label="Jah">✓</span>' : '<span class="tr-bad" style="cursor:default" aria-label="Ei">✗</span>'; }
+  function dash(v) { return v == null ? '<span class="empty-inline">—</span>' : esc(v); }
+  function renderList() {
+    var s = ui.search.trim().toLowerCase();
+    var rows = ui.list.filter(function (r) { return (!ui.role || r.roleName === ui.role) && [r.email, r.participantName || "", r.phone || ""].some(function (v) { return v.toLowerCase().indexOf(s) !== -1; }); });
+    if (ui.sortBy) {
+      var dir = ui.sortDir === "asc" ? 1 : -1, k = ui.sortBy;
+      rows = rows.slice().sort(function (a, b) {
+        var va = a[k] == null ? "" : a[k], vb = b[k] == null ? "" : b[k];
+        return (typeof va === "string" ? va.localeCompare(vb, ui.lang) : Number(va) - Number(vb)) * dir;
+      });
+    }
+    var head = COLUMNS.map(function (c) {
+      var cls = c.cls ? ' class="' + c.cls + '"' : "";
+      if (!c.key) return "<th" + cls + ">" + c.label + "</th>";
+      var arrow = ui.sortBy === c.key ? (ui.sortDir === "asc" ? "▲" : "▼") : "";
+      return '<th' + cls + '><button type="button" class="sorth" data-sort="' + c.key + '">' + c.label + '<span class="arrow" aria-hidden="true">' + arrow + '</span></button></th>';
+    }).join("");
+    var body = rows.length ? rows.map(function (r) {
+      var act = r.status === "A" ? (r.userId === ME ? "" : '<button type="button" class="ibtn del" data-deactivate="' + r.userId + '" title="Deaktiveeri" aria-label="Deaktiveeri">' + BAN + '</button>')
+        : '<button type="button" class="ibtn" data-restore="' + r.userId + '" title="Taasta" aria-label="Taasta">' + RESTORE + '</button>';
+      return '<tr' + (r.status === "D" ? ' class="is-deleted"' : "") + '><td class="date">' + dateTime(r.createdAt) + '</td><td class="name-cell">' + esc(r.email) + (r.userId === ME ? '<span class="badge me">Sina</span>' : "") + '</td>' +
+        '<td>' + dash(r.participantName) + '</td><td>' + dash(r.phone) + '</td><td>' + roleBadge(r.roleName) + '</td><td class="num">' + r.registrationCount + '</td><td>' + statusBadge(r.status) + '</td>' +
+        '<td><div class="icons"><button type="button" class="ibtn" data-open="' + r.userId + '" title="Vaata" aria-label="Vaata">' + EYE + '</button>' + act + '</div></td></tr>';
+    }).join("") : '<tr class="empty-row"><td colspan="8">Kontosid ei leitud</td></tr>';
+    return '<div class="viewhead"><h2>Kontod</h2></div>' + (ui.success ? '<div class="ok-alert" role="status">' + esc(ui.success) + '</div>' : "") +
+      '<div class="searchrow"><input type="text" id="u-search" placeholder="Otsi e-posti, nime või telefoni järgi…" aria-label="Otsi" value="' + esc(ui.search) + '">' +
+      '<select id="u-role" aria-label="Roll"><option value="">Kõik rollid</option><option value="participant"' + (ui.role === "participant" ? " selected" : "") + '>Osalejad</option><option value="admin"' + (ui.role === "admin" ? " selected" : "") + '>Adminid</option></select></div>' +
+      '<div class="togglerow"><label class="switch"><input type="checkbox" id="u-deleted"' + (ui.includeDeleted ? " checked" : "") + '> Näita ka deaktiveeritud</label>' + pin("n-list", "GET /api/admin-users") + pin("n-delete", "DELETE /api/admin-user/{userId}") + pin("n-restore", "PUT …/restore") + '</div>' +
+      '<div class="tablewrap"><table><thead><tr>' + head + '</tr></thead><tbody>' + body + '</tbody></table></div>' +
+      '<div class="foot"><span class="total">Kokku ' + rows.length + (rows.length === 1 ? " konto" : " kontot") + '</span></div>';
+  }
+  function renderDetail() {
+    var back = '<div><button type="button" class="linkish" id="b-back">← Kõik kontod</button></div>';
+    if (detail.missing) return '<div class="ph"><h2>Midagi läks valesti</h2><p class="hint">Kontot ' + detail.userId + ' ei leitud — päris rakenduses üldine veavaade.</p>' + back + '</div>';
+    var d = detail, self = d.userId === ME;
+    function row(label, value) { return "<dt>" + label + "</dt><dd>" + value + "</dd>"; }
+    var regs = d.registrations.length ? '<div class="tablewrap"><table><thead><tr><th>Koolitus</th><th>Toimumisaeg</th><th>Staatus</th><th class="center">Tasunud</th><th></th></tr></thead><tbody>' +
+      d.registrations.map(function (r) {
+        return '<tr' + (r.status === "C" ? ' class="is-deleted"' : "") + '><td>' + esc(r.trainingTitle) + '</td><td class="date"><button type="button" class="linkish" data-course="' + r.courseId + '">' + dmy(r.startDate) + " – " + dmy(r.endDate) + '</button>' + (r.isPast ? '<span class="badge past">Toimunud</span>' : "") + '</td>' +
+          '<td>' + (r.status === "R" ? '<span class="badge active">Registreerunud</span>' : '<span class="badge draft">Loobunud</span>') + '</td><td class="center">' + check(r.hasPaid) + '</td>' +
+          '<td><button type="button" class="ibtn" data-reg="' + r.courseParticipantId + '" title="Vaata registreerumist" aria-label="Vaata registreerumist">' + EYE + '</button></td></tr>';
+      }).join("") + '</tbody></table></div>' : '<span class="empty-inline">Registreerumisi pole</span>';
+    var action = self ? '<span class="hint">See on sinu konto — enda kontot deaktiveerida ei saa.</span>'
+      : d.status === "A" ? '<button type="button" class="sbtn danger" data-deactivate="' + d.userId + '">Deaktiveeri konto</button>' + pin("n-delete", "DELETE /api/admin-user/{userId}")
+      : '<button type="button" class="sbtn primary" data-restore="' + d.userId + '">Taasta konto</button>' + pin("n-restore", "PUT /api/admin-user/{userId}/restore");
+    return back + '<div class="viewhead"><h2>Konto<span class="sub">' + esc(d.email) + (d.status === "D" ? ' <span class="badge deleted">Deaktiveeritud</span>' : "") + (self ? '<span class="badge me">Sina</span>' : "") + '</span></h2></div>' +
+      '<div class="pins">' + pin("n-detail", "GET /api/admin-user/{userId}") + '</div>' +
+      (ui.success ? '<div class="ok-alert" role="status">' + esc(ui.success) + '</div>' : "") +
+      '<div class="cardrow"><fieldset><legend>Konto</legend><dl class="dl">' + row("E-post", esc(d.email)) + row("Roll", roleBadge(d.roleName)) + row("Staatus", statusBadge(d.status)) + row("Loodud", dateTime(d.createdAt)) + '</dl></fieldset>' +
+      '<fieldset><legend>Osaleja</legend>' + (d.participantId === null ? '<span class="empty-inline">Kontol pole osaleja andmeid</span>' :
+        '<dl class="dl">' + row("Nimi", esc(d.participantName)) + (d.profileEmail !== d.email ? row("E-post", '<a href="mailto:' + esc(d.profileEmail) + '">' + esc(d.profileEmail) + '</a>') : "") + row("Telefon", '<a href="tel:' + esc(d.phone) + '">' + esc(d.phone) + '</a>') + '</dl>') + '</fieldset></div>' +
+      '<fieldset><legend>Registreerumised</legend>' + regs + '</fieldset>' +
+      '<div class="actions">' + action + '</div>';
+  }
+  function renderView() { document.getElementById("view").innerHTML = ui.route === "list" ? renderList() : renderDetail(); }
+  function renderKv() {
+    var rows = [["route", ui.route === "list" ? "AdminUsersView" : "AdminUserView"], ["currentUserId", ME + " (admin@vali-it.ee)"], ["contentLang", ui.lang]];
+    if (ui.route === "list") rows.push(["searchText", JSON.stringify(ui.search)], ["roleFilter", ui.role || "—"], ["includeDeleted", String(ui.includeDeleted)],
+      ["sortBy", ui.sortBy === null ? "null" : ui.sortBy + " (" + ui.sortDir + ")"], ["users.length", String(ui.list.length)]);
+    else rows.push(["userId", String(detail.userId)], ["registrations.length", detail.missing ? "—" : String(detail.registrations.length)]);
+    document.getElementById("statekv").innerHTML = rows.map(function (r) { return "<dt>" + esc(r[0]) + "</dt><dd>" + esc(r[1]) + "</dd>"; }).join("");
+    document.getElementById("urlbar").textContent = "https://bcskoolitus.ee" + (ui.route === "list" ? "/admin-users" : "/admin-user?userId=" + detail.userId);
+  }
+  function noteFor(method, path) {
+    if (method === "DELETE") return "n-delete";
+    if (method === "PUT") return "n-restore";
+    return path.split("?")[0] === "/api/admin-users" ? "n-list" : "n-detail";
+  }
+  var REQUESTS = {
+    list: [{ m: "GET", p: "/api/admin-users?includeDeleted=…", note: "n-list", when: "tabel (ka lüliti muutmisel ja pärast tegevust)" }],
+    detail: [{ m: "GET", p: "/api/admin-user/{userId}?contentLang={UI keel}", note: "n-detail", when: "konto andmed (ka keele vahetusel ja pärast tegevust)" }],
+    action: [{ m: "DELETE", p: "/api/admin-user/{userId}?currentUserId={sisseloginud admin}", note: "n-delete", when: "„Deaktiveeri“ → kinnitus" },
+      { m: "PUT", p: "/api/admin-user/{userId}/restore", note: "n-restore", when: "„Taasta“ → kinnitus" }]
+  };
+  function renderLog() {
+    var used = {};
+    function row(d) {
+      var idx = -1;
+      logSteps.forEach(function (r, i) { if (idx === -1 && !used[i] && noteFor(r.method, r.path) === d.note) idx = i; });
+      if (idx !== -1) used[idx] = true;
+      var ran = idx !== -1, open = ran && idx === openReq, body = "";
+      if (open) {
+        var r = logSteps[idx], isErr = r.res && r.res.errorCode;
+        body = '<div class="body"><span class="sub">Tegelik päring: <code>' + esc(r.method + " " + r.path) + '</code></span>' +
+          (r.req ? '<span class="sub">Request body</span><pre>' + esc(j(r.req)) + '</pre>' : "") +
+          '<span class="sub">' + (isErr ? "Response (" + r.res.status + ")" : "Response (200)" + (r.res === null ? ": NONE" : "")) + '</span>' + (r.res !== null ? '<pre>' + esc(j(r.res)) + '</pre>' : "") +
+          '<button type="button" class="linkish" data-note="' + d.note + '">Ava API märge</button></div>';
+      }
+      var attr = ran ? 'data-req="' + idx + '" aria-expanded="' + open + '"' : 'data-note="' + d.note + '" title="Ava API märge"';
+      return '<div class="req ' + (ran ? "done" : "idle") + '"><button type="button" ' + attr + '><span class="method m-' + d.m + '">' + d.m + '</span><span class="main"><span class="path">' + esc(d.p) + '</span><span class="when">' + esc(d.when) + '</span></span>' + (ran ? '<span class="ran">käivitati</span>' : "") + '</button>' + body + '</div>';
+    }
+    var html = '<div class="log-group">Nimekiri (AdminUsersView)</div>' + REQUESTS.list.map(row).join("") +
+      '<div class="log-group">Konto (AdminUserView)</div>' + REQUESTS.detail.map(row).join("") +
+      '<div class="log-group">Deaktiveeri / taasta (mõlemas vaates)</div>' + REQUESTS.action.map(row).join("");
+    if (logTitle) html += '<div class="log-step">Viimane samm: ' + esc(logTitle) + '. Rohelised päringud käivitati; klõpsa, et näha vastust.</div>';
+    document.getElementById("log").innerHTML = html;
+  }
+  function renderAll() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-ui-lang]"), function (b) { b.setAttribute("aria-pressed", String(b.dataset.uiLang === ui.lang)); });
+    renderView(); renderKv(); renderLog();
+    var vn = VIEW_NOTES[ui.route === "list" ? "admin-users" : "admin-user"];
+    document.getElementById("view-note-title").textContent = "Vaate märkmed — " + vn.title;
+    document.getElementById("view-note-text").textContent = vn.text;
+  }
+
+  /* ---------- Sündmused ---------- */
+  var viewEl = document.getElementById("view");
+  viewEl.addEventListener("input", function (e) {
+    if (e.target.id === "u-search") { ui.search = e.target.value; var pos = e.target.selectionStart; renderView(); renderKv(); var s = document.getElementById("u-search"); s.focus(); s.setSelectionRange(pos, pos); }
+  });
+  viewEl.addEventListener("change", function (e) {
+    var t = e.target;
+    if (t.id === "u-role") { ui.role = t.value; renderView(); renderKv(); return; }
+    if (t.id === "u-deleted") { ui.includeDeleted = t.checked; ui.success = ""; startStep("Lüliti „Näita ka deaktiveeritud“"); loadList(); renderAll(); return; }
+  });
+  viewEl.addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.note) { goNote(b.dataset.note); return; }
+    if (b.dataset.sort) { sortClick(b.dataset.sort); return; }
+    if (b.dataset.open) { openDetail(+b.dataset.open, "Silm → /admin-user?userId=" + b.dataset.open); return; }
+    if (b.dataset.deactivate) { confirmAction(+b.dataset.deactivate, false); return; }
+    if (b.dataset.restore) { confirmAction(+b.dataset.restore, true); return; }
+    if (b.dataset.course) { goRoute("/admin-course?courseId=" + b.dataset.course); return; }
+    if (b.dataset.reg) { goRoute("/admin-registration?courseParticipantId=" + b.dataset.reg + "&returnTo=" + encodeURIComponent("/admin-user?userId=" + detail.userId)); return; }
+    if (b.id === "b-back") { if (EMBED) goRoute("/admin-users"); else openList("„← Kõik kontod“ → /admin-users"); return; }
+  });
+  document.getElementById("log").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.note) { goNote(b.dataset.note); return; }
+    var i = +b.dataset.req; openReq = openReq === i ? -1 : i; renderLog();
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-ui-lang]"), function (b) { b.onclick = function () { switchLang(b.dataset.uiLang); }; });
+  document.getElementById("btn-reset").onclick = function () { db = freshDb(); ui = freshUi(); openList("Algus: /admin-users"); };
+  document.getElementById("btn-self").onclick = function () { openDetail(ME, "Enda konto → /admin-user?userId=" + ME); };
+  var adminBtn = document.getElementById("b-admin"), adminMenu = document.getElementById("admin-menu");
+  function setAdminMenu(open) { adminMenu.hidden = !open; adminBtn.setAttribute("aria-expanded", String(open)); }
+  adminBtn.onclick = function (e) { e.stopPropagation(); setAdminMenu(adminMenu.hidden); };
+  adminMenu.onclick = function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    setAdminMenu(false);
+    if (b.dataset.nav === "/admin-users") { openList("Admin ▾ → „Kontod“"); return; }
+    goRoute(b.dataset.nav, "Teise läbimängu vaade: " + b.dataset.nav);
+  };
+  document.addEventListener("click", function (e) { if (!e.target.closest(".admin")) setAdminMenu(false); });
+
+  function goNote(id) {
+    var n = document.getElementById(id); if (!n) return;
+    n.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
+    n.classList.remove("flash"); void n.offsetWidth; n.classList.add("flash");
+  }
+  document.getElementById("notes-count").textContent = NOTES.length;
+  document.getElementById("notes").innerHTML = NOTES.map(function (n) {
+    return '<div class="note" id="' + n.id + '"><div class="note-head"><strong>' + esc(n.title) + '</strong><span class="draft-tag">uus</span><button class="copy" type="button" data-copy="' + n.id + '">Kopeeri</button></div><pre>' + esc(n.text) + '</pre></div>';
+  }).join("");
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-copy]"); if (!b) return;
+    var key = b.dataset.copy;
+    var text = key === "view" ? document.getElementById("view-note-text").textContent : NOTES.filter(function (n) { return n.id === key; })[0].text;
+    var done = function () { b.textContent = "Kopeeritud"; setTimeout(function () { b.textContent = "Kopeeri"; }, 1400); };
+    try { navigator.clipboard.writeText(text).then(done, function () { selectPre(b); }); } catch (err) { selectPre(b); }
+  });
+  function selectPre(b) {
+    var pre = b.closest(".note").querySelector("pre");
+    var r = document.createRange(); r.selectNodeContents(pre);
+    var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+  }
+
+  /* ---------- Algus (kestast: ?view=admin-user&userId=) ---------- */
+  db = freshDb(); ui = freshUi();
+  if (SHELL_Q.get("view") === "admin-user") { var startId = +SHELL_Q.get("userId") || 2; openDetail(startId, "/admin-user?userId=" + startId); }
+  else openList("Algus: /admin-users");
+})();
+</script>

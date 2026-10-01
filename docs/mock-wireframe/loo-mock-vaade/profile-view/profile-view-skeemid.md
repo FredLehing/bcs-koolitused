@@ -16,25 +16,26 @@ Mõisted: **konto** = `"user"` rida (sisselogimise e-post ja parool). **Profiil*
 
   | Menüüpunkt | Vaade | Rada |
   |---|---|---|
-  | Minu andmed | `MyDetailsView.vue` | `/my-details` |
-  | Minu koolitused | `MyCoursesView.vue` | `/my-courses` |
-  | Tunnistused | `MyCertificatesView.vue` | `/my-certificates` |
+  | Minu andmed | `ParticipantDetailsView.vue` | `/participant-details` |
+  | Minu koolitused | `ParticipantCoursesView.vue` | `/participant-courses` |
+  | Tunnistused | `ParticipantCertificatesView.vue` | `/participant-certificates` |
   | Parool | `ChangePasswordView.vue` | `/change-password` |
 
-- Vaated on **kõigile sisseloginud kasutajatele, ka adminile** (admin saab muuta oma andmeid ja parooli). Sisselogimata kasutaja → `/login?redirect={vaate rada}` (nt `/login?redirect=/my-courses`); pärast sisselogimist jõuab ta samasse vaatesse tagasi.
+- **Nimed on andmebaasi järgi:** andmed (nimi, telefon, koolitused, tunnistused) kuuluvad osalejale (`participant`), seega `Participant…View`. Parool kuulub kontole (`"user"`), seega `ChangePasswordView`. Hilisem admini vaade ühe osaleja kohta saab projekti tava järgi `Admin` eesliite (nt `AdminParticipantView`), nii et nimed ei kattu.
+- Vaated on **kõigile sisseloginud kasutajatele, ka adminile** (admin saab muuta oma andmeid ja parooli). Sisselogimata kasutaja → `/login?redirect={vaate rada}` (nt `/login?redirect=/participant-courses`); pärast sisselogimist jõuab ta samasse vaatesse tagasi.
 - `userId` tuleb `sessionStorage`-ist (`SessionStorageService.getUserId()`), nagu teistes kasutaja teenustes. Päris autentimist projektis pole, seega backend usaldab path'i `userId`-d (teadaolev piirang, sama mis `GET /api/user/{userId}/participant` puhul).
 - Paigutus mockupi järgi: vasakul profiilimenüü **`ProfileMenu.vue`** (uus ühine komponent, samad neli `RouterLink`-i, aktiivne esile tõstetud; Bootstrap `list-group` / `nav-pills flex-column`), paremal vaate kaart. Kitsal ekraanil on menüü kaardi kohal horisontaalselt. Iga vaade laeb oma andmed ise.
 
 ### Navbar (`App.vue`)
 
 - Sisseloginud kasutajale (ka adminile) "Logi välja" kõrvale **rippmenüü "Minu profiil ▾"** (ikoon `PhUserCircle`, i18n `navbar.profile`, en "My profile"; Bootstrap `dropdown`, menüü avaneb paremale joondatult `dropdown-menu-end`):
-  - Minu andmed → `/my-details` (`navbar.myDetails`, en "My details");
-  - Minu koolitused → `/my-courses` (`navbar.myCourses`, en "My courses");
-  - Tunnistused → `/my-certificates` (`navbar.myCertificates`, en "Certificates");
+  - Minu andmed → `/participant-details` (`navbar.participantDetails`, en "My details");
+  - Minu koolitused → `/participant-courses` (`navbar.participantCourses`, en "My courses");
+  - Tunnistused → `/participant-certificates` (`navbar.participantCertificates`, en "Certificates");
   - Parool → `/change-password` (`navbar.changePassword`, en "Password").
 - Kui avatud on mõni neist vaadetest, on "Minu profiil ▾" esile tõstetud (nagu "Koolitused ▾").
 
-### Minu andmed — `MyDetailsView.vue` (`/my-details`)
+### Minu andmed — `ParticipantDetailsView.vue` (`/participant-details`)
 
 - Vaikimisi **ainult lugemiseks**: Eesnimi, Perekonnanimi, Telefon, E-post (mockupi 2×2 paigutus).
 - Nupp **"Muuda"** muudab väljad muudetavaks; nupud "Salvesta" ja "Tühista" (taastab laaditud väärtused ja lülitab tagasi lugemisrežiimi).
@@ -45,7 +46,7 @@ Mõisted: **konto** = `"user"` rida (sisselogimise e-post ja parool). **Profiil*
 - Salvestamisel uuendatakse ka `participant.name` (= eesnimi + perekonnanimi), nagu registreerumisel.
 - Edu korral teade "Andmed salvestatud" ja tagasi lugemisrežiimi.
 
-### Minu koolitused — `MyCoursesView.vue` (`/my-courses`)
+### Minu koolitused — `ParticipantCoursesView.vue` (`/participant-courses`)
 
 - Kasutaja oma osaleja kõik registreerumised kahes plokis:
   - **"Tulevased"**: `course.end_date >= täna`, alguse järgi kasvavalt;
@@ -56,7 +57,7 @@ Mõisted: **konto** = `"user"` rida (sisselogimise e-post ja parool). **Profiil*
 - Loobumist kasutaja ise tagasi võtta ei saa. Uuesti registreerumine käib tavapärase registreerumise kaudu (`/course-registration`), mis muudab `C` → `R` (olemasolev loogika).
 - Tühi nimekiri: "Sa pole veel ühelegi koolitusele registreerunud" + link "Vaata koolitusi" → `/courses`.
 
-### Tunnistused — `MyCertificatesView.vue` (`/my-certificates`)
+### Tunnistused — `ParticipantCertificatesView.vue` (`/participant-certificates`)
 
 - **Sisu jääb hilisemaks.** Vaade ja menüüpunkt on olemas, sisu on "Tunnistused tulevad varsti — siia ilmuvad sinu läbitud koolituste tunnistused".
 - Põhjus: `participant_certificate` tabelil pole seost toimumiskorraga ja tunnistusi keegi üles ei laadi. Hilisem ettepanek on jaotises 7.
@@ -102,9 +103,9 @@ flowchart LR
     Nav --> T
     Nav --> W
     Menu["ProfileMenu.vue<br/>(vasakul igas vaates)"] -.-> D & C & T & W
-    D["/my-details<br/>MyDetailsView<br/>vaata / Muuda"]
-    C["/my-courses<br/>MyCoursesView<br/>Tulevased / Toimunud / Loobu"]
-    T["/my-certificates<br/>MyCertificatesView<br/>(varsti)"]
+    D["/participant-details<br/>ParticipantDetailsView<br/>vaata / Muuda"]
+    C["/participant-courses<br/>ParticipantCoursesView<br/>Tulevased / Toimunud / Loobu"]
+    T["/participant-certificates<br/>ParticipantCertificatesView<br/>(varsti)"]
     W["/change-password<br/>ChangePasswordView<br/>praegune + uus + korda"]
     Login["sisselogimata"] -.->|"/login?redirect={rada}"| D
 ```
@@ -114,7 +115,7 @@ flowchart LR
 ```mermaid
 sequenceDiagram
     actor U as Kasutaja
-    participant V as MyDetailsView.vue
+    participant V as ParticipantDetailsView.vue
     participant BE as Backend
 
     U->>V: Minu profiil ▾ → Minu andmed
@@ -136,7 +137,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor U as Kasutaja
-    participant V as MyCoursesView.vue
+    participant V as ParticipantCoursesView.vue
     participant M as ConfirmModal
     participant BE as Backend
 
@@ -175,7 +176,7 @@ flowchart TD
 
 | Komponent | Olek | Kasutus |
 |---|---|---|
-| `MyDetailsView.vue`, `MyCoursesView.vue`, `MyCertificatesView.vue`, `ChangePasswordView.vue` | uus | neli vaadet (+ router, `meta` sisselogimise nõudega) |
+| `ParticipantDetailsView.vue`, `ParticipantCoursesView.vue`, `ParticipantCertificatesView.vue`, `ChangePasswordView.vue` | uus | neli vaadet (+ router, `meta` sisselogimise nõudega) |
 | `profile/ProfileMenu.vue` | uus | vasak profiilimenüü, kasutavad kõik neli vaadet |
 | `App.vue` navbar | muudatus | rippmenüü "Minu profiil ▾" |
 | `UserService.js` (api-services) | olemas/täiendus | uued päringud |
@@ -191,5 +192,5 @@ flowchart TD
 
 1. ~~Põhiotsused (e-post, loobumine, tunnistused, admin)~~ — tehtud.
 2. ~~Läbimäng `profile-view-labimang.html` + prototüübi kest (`../index.html`)~~ — tehtud: uus grupp "Sisseloginud kasutaja" nelja vaatega (`auth`: sisselogimata → `/login?redirect={rada}`), navbaris rippmenüü "Minu profiil ▾". Läbimäng on üks fail, vaade valitakse parameetriga `view=details|courses|certificates|password`.
-3. Märkmed `markmed/my-details-view-markmed.md`, `my-courses-view-markmed.md`, `my-certificates-view-markmed.md`, `change-password-view-markmed.md`.
+3. Märkmed `markmed/participant-details-view-markmed.md`, `participant-courses-view-markmed.md`, `participant-certificates-view-markmed.md`, `change-password-view-markmed.md`.
 4. Taskid (`docs/tasks/backend/`, `docs/tasks/frontend/`) ja tööde järjekord `profile-view-toode-jarjekord.md`.

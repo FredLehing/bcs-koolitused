@@ -167,9 +167,9 @@ code { font-family: var(--font-mono); font-size: .88em; }
     { key: "lecturer", path: "/lecturer", name: "Koolitaja", view: "LecturerView.vue", group: "public", sample: "/lecturer?lecturerId=1", file: "lecturers-view/lecturers-view-labimang.html", params: ["lecturerId", "returnTo"] },
     { key: "login", path: "/login", name: "Logi sisse", view: "LoginView.vue", group: "public", login: true },
     { key: "signup", path: "/signup", name: "Loo konto", view: "SignupView.vue", group: "public", file: "courses-view/course-registration-view-labimang.html", params: ["redirect"], extra: "view=signup" },
-    { key: "my-details", path: "/my-details", name: "Minu andmed", view: "MyDetailsView.vue", group: "user", file: "profile-view/profile-view-labimang.html", roleParam: true, auth: true, extra: "view=details" },
-    { key: "my-courses", path: "/my-courses", name: "Minu koolitused", view: "MyCoursesView.vue", group: "user", file: "profile-view/profile-view-labimang.html", roleParam: true, auth: true, extra: "view=courses" },
-    { key: "my-certificates", path: "/my-certificates", name: "Tunnistused", view: "MyCertificatesView.vue", group: "user", file: "profile-view/profile-view-labimang.html", roleParam: true, auth: true, extra: "view=certificates" },
+    { key: "participant-details", path: "/participant-details", name: "Minu andmed", view: "ParticipantDetailsView.vue", group: "user", file: "profile-view/profile-view-labimang.html", roleParam: true, auth: true, extra: "view=details" },
+    { key: "participant-courses", path: "/participant-courses", name: "Minu koolitused", view: "ParticipantCoursesView.vue", group: "user", file: "profile-view/profile-view-labimang.html", roleParam: true, auth: true, extra: "view=courses" },
+    { key: "participant-certificates", path: "/participant-certificates", name: "Tunnistused", view: "ParticipantCertificatesView.vue", group: "user", file: "profile-view/profile-view-labimang.html", roleParam: true, auth: true, extra: "view=certificates" },
     { key: "change-password", path: "/change-password", name: "Parool", view: "ChangePasswordView.vue", group: "user", file: "profile-view/profile-view-labimang.html", roleParam: true, auth: true, extra: "view=password" },
     { key: "admin-enquiries", path: "/admin-enquiries", name: "Koolituste päringud", view: "AdminEnquiriesView.vue", group: "admin", file: "admin-enquiries-view/admin-enquiries-view-labimang.html" },
     { key: "admin-enquiry", path: "/admin-enquiry", name: "Koolituse päring", view: "AdminEnquiryView.vue", group: "admin", sample: "/admin-enquiry?enquiryId=4", file: "admin-enquiries-view/admin-enquiries-view-labimang.html", params: ["enquiryId"], extra: "view=admin-enquiry" },
@@ -184,7 +184,9 @@ code { font-family: var(--font-mono); font-size: .88em; }
     { key: "admin-lecturers", path: "/admin-lecturers", name: "Koolitajad (haldus)", view: "AdminLecturersView.vue", group: "admin", file: "admin-lecturers-view/admin-lecturers-view-labimang.html" },
     { key: "lecturer-form", path: "/lecturer-form", name: "Koolitaja vorm", view: "LecturerFormView.vue", group: "admin", file: "admin-lecturers-view/admin-lecturers-view-labimang.html", params: ["lecturerId", "lecturerTranslationId", "languageId"], extra: "view=lecturer-form" },
     { key: "admin-rooms", path: "/admin-rooms", name: "Koolitusruumid", view: "AdminRoomsView.vue", group: "admin", file: "admin-rooms-view/admin-rooms-view-labimang.html" },
-    { key: "room-form", path: "/room-form", name: "Ruumi vorm", view: "RoomFormView.vue", group: "admin", file: "admin-rooms-view/admin-rooms-view-labimang.html", params: ["roomId"], extra: "view=room-form" }
+    { key: "room-form", path: "/room-form", name: "Ruumi vorm", view: "RoomFormView.vue", group: "admin", file: "admin-rooms-view/admin-rooms-view-labimang.html", params: ["roomId"], extra: "view=room-form" },
+    { key: "admin-users", path: "/admin-users", name: "Kontod", view: "AdminUsersView.vue", group: "admin", file: "admin-users-view/admin-users-view-labimang.html" },
+    { key: "admin-user", path: "/admin-user", name: "Konto", view: "AdminUserView.vue", group: "admin", sample: "/admin-user?userId=2", file: "admin-users-view/admin-users-view-labimang.html", params: ["userId"], extra: "view=admin-user" }
   ];
   var ROLE_NAMES = { public: "Külastaja", user: "Kasutaja", admin: "Admin" };
 
@@ -240,7 +242,8 @@ code { font-family: var(--font-mono); font-size: .88em; }
     var admin = state.role === "admin" ? '<span class="admin"><button type="button" id="b-admin" aria-expanded="false" aria-controls="admin-menu">Admin ▾</button><span class="menu" id="admin-menu" hidden>' +
       '<button type="button" data-go="/admin-enquiries">Koolituste päringud</button><button type="button" data-go="/admin-registrations">Registreerumised</button><hr>' +
       '<button type="button" data-go="/admin-trainings">Koolitused</button><button type="button" data-go="/admin-all-courses">Koolituste kalender</button><hr>' +
-      '<button type="button" data-go="/admin-lecturers">Koolitajad</button><button type="button" data-go="/admin-rooms">Koolitusruumid</button></span></span>' : "";
+      '<button type="button" data-go="/admin-lecturers">Koolitajad</button><button type="button" data-go="/admin-rooms">Koolitusruumid</button><hr>' +
+      '<button type="button" data-go="/admin-users">Kontod</button></span></span>' : "";
     var right = state.role === "public" ? '<button type="button" class="pill" data-go="/login">Logi sisse</button><button type="button" class="pill" data-go="/signup">Loo konto</button>'
       : '<span class="who">' + ROLE_NAMES[state.role] + '</span><span class="admin"><button type="button" id="b-pmenu" aria-expanded="false" aria-controls="p-menu"' + (cur && cur.group === "user" ? ' style="text-decoration:underline;text-underline-offset:3px;font-weight:700"' : "") + '>Minu profiil ▾</button><span class="menu" id="p-menu" hidden>' +
         VIEWS.filter(function (v) { return v.group === "user"; }).map(function (v) { return '<button type="button" data-go="' + v.path + '">' + esc(v.name) + '</button>'; }).join("") + '</span></span><button type="button" class="pill" id="b-logout">Logi välja</button>';
