@@ -20,6 +20,7 @@
     "@tiptap/starter-kit": "^3.31.3",
     "@tiptap/vue-3": "^3.31.3",
     "@vue-leaflet/vue-leaflet": "^0.10.1",
+    "@vueuse/motion": "^3.0.3",
     "axios": "1.15.2",
     "bootstrap": "^5.3.8",
     "dompurify": "^3.4.16",
