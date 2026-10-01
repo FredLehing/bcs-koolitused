@@ -52,10 +52,30 @@ export default {
       )
     },
 
-    statusConfirmMessage() {
+    isCancelling() {
       return this.registrationForm.status === 'C'
-        ? this.$t('adminRegistration.confirmCancel')
-        : this.$t('adminRegistration.confirmRestore')
+    },
+
+    statusConfirmTitle() {
+      return this.isCancelling
+        ? this.$t('adminRegistration.confirmCancelTitle')
+        : this.$t('adminRegistration.confirmRestoreTitle')
+    },
+
+    // Täis toimumiskorrale taastamine on lubatud, kuid admin saab sellest teada
+    statusConfirmMessage() {
+      const params = {
+        participantName: this.registration.participantName,
+        trainingTitle: this.registration.trainingTitle,
+        courseStartDate: FormatService.formatLocalDate(this.registration.courseStartDate),
+      }
+      if (this.isCancelling) {
+        return this.$t('adminRegistration.confirmCancelMessage', params)
+      }
+      const message = this.$t('adminRegistration.confirmRestoreMessage', params)
+      return this.registration.courseStatus === 'F'
+        ? `${message} ${this.$t('adminRegistration.courseFullNote')}`
+        : message
     },
   },
   watch: {
@@ -63,9 +83,9 @@ export default {
       this.loadView()
     },
 
-    // Keele vahetus → koolituse nimi uues keeles (vormi muutmata väärtused taastatakse)
+    // Keele vahetus → koolituse nimi uues keeles; vormi salvestamata muudatused jäävad alles
     contentLang() {
-      this.getAdminRegistration()
+      this.getAdminRegistration(true)
     },
   },
   methods: {
@@ -78,19 +98,21 @@ export default {
       this.getAdminRegistration()
     },
 
-    // Olematu registreerumine (404) → üldine veavaade
-    getAdminRegistration() {
+    // Olematu registreerumine (404) → üldine veavaade. keepForm: vormi väärtusi ei taastata
+    getAdminRegistration(keepForm = false) {
       CourseParticipantService.sendGetAdminRegistrationRequest(
         this.courseParticipantId,
         this.contentLang,
       )
-        .then((response) => this.handleGetAdminRegistrationResponse(response.data))
+        .then((response) => this.handleGetAdminRegistrationResponse(response.data, keepForm))
         .catch(() => NavigationService.navigateToErrorView())
     },
 
-    handleGetAdminRegistrationResponse(registration) {
+    handleGetAdminRegistrationResponse(registration, keepForm) {
       this.registration = registration
-      this.resetForm()
+      if (!keepForm) {
+        this.resetForm()
+      }
     },
 
     resetForm() {
@@ -205,6 +227,7 @@ export default {
                 <dd class="col-sm-8 mb-0">{{ registration.accountEmail }}</dd>
               </template>
             </dl>
+            <p class="form-text mb-0 mt-2">{{ $t('adminRegistration.participantHint') }}</p>
           </fieldset>
 
           <fieldset class="border rounded bg-body p-3 mb-4 text-start">
@@ -345,7 +368,7 @@ export default {
 
     <ConfirmModal
       :is-open="isStatusConfirmModalOpen"
-      :title="$t('adminRegistration.confirmTitle')"
+      :title="statusConfirmTitle"
       :message="statusConfirmMessage"
       :confirm-label="$t('adminRegistration.confirm')"
       @event-confirmed="handleStatusConfirmed"
