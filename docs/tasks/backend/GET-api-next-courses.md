@@ -51,7 +51,7 @@ View `public_course_summary`; `funding_type_translation` (rahastuse nimed). Näi
 
 ## Vastuvõtu kriteeriumid
 
-- [ ] Endpoint tagastab kuni `limit` avatud tulevast toimumiskorda (täis välja jäetud), esile tõstetud eespool, edasi alguse järgi
-- [ ] Vastuse kuju on sama mis `GET /api/courses` `courseSummaries` (sh `fundingTypes`)
-- [ ] `limit` vaikimisi 5; `limit` 0 või 21 ja puuduv `contentLang` → 400
-- [ ] Teenusel on automaattestid
+- [x] Endpoint tagastab kuni `limit` avatud tulevast toimumiskorda (täis välja jäetud), esile tõstetud eespool, edasi alguse järgi
+- [x] Vastuse kuju on sama mis `GET /api/courses` `courseSummaries` (sh `fundingTypes`)
+- [x] `limit` vaikimisi 5; `limit` 0 või 21 ja puuduv `contentLang` → 400
+- [x] Teenusel on automaattestid

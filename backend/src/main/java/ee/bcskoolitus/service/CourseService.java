@@ -11,6 +11,7 @@ import ee.bcskoolitus.controller.course.dto.CoursePageDto;
 import ee.bcskoolitus.controller.course.dto.CourseSummaryPageDto;
 import ee.bcskoolitus.controller.course.dto.PublicCourseFilterDto;
 import ee.bcskoolitus.controller.course.dto.PublicCourseSummaryItemDto;
+import ee.bcskoolitus.controller.course.dto.NextCourseFilterDto;
 import ee.bcskoolitus.controller.course.dto.CourseDto;
 import ee.bcskoolitus.controller.course.dto.CourseSummaryDto;
 import ee.bcskoolitus.controller.course.dto.CourseUpdateRequestDto;
@@ -165,8 +166,7 @@ public class CourseService {
 
     // Avalik kalender: publitseeritud koolituse avatud või täis tulevased toimumiskorrad, esile tõstetud eespool
     public CourseSummaryPageDto findPublicCourses(PublicCourseFilterDto publicCourseFilterDto) {
-        Pageable pageable = PageRequest.of(publicCourseFilterDto.getPage(), publicCourseFilterDto.getLimit(),
-                Sort.by(Sort.Order.desc("isPromoted"), Sort.Order.asc("startDate"), Sort.Order.asc("courseId")));
+        Pageable pageable = PageRequest.of(publicCourseFilterDto.getPage(), publicCourseFilterDto.getLimit(), createPublicCourseSort());
         Specification<PublicCourseSummary> publicCourseSummarySpecification = createPublicCourseSummarySpecification(publicCourseFilterDto);
         Page<PublicCourseSummary> publicCourseSummaryPage = publicCourseSummaryRepository.findAll(publicCourseSummarySpecification, pageable);
         List<PublicCourseSummaryItemDto> publicCourseSummaryItemDtos = publicCourseSummaryMapper.toPublicCourseSummaryItemDtos(publicCourseSummaryPage.getContent());
@@ -174,6 +174,25 @@ public class CourseService {
             handleAddFundingTypes(publicCourseSummaryItemDto, publicCourseFilterDto.getContentLang());
         }
         return new CourseSummaryPageDto(publicCourseSummaryPage.getTotalPages(), publicCourseSummaryPage.getTotalElements(), publicCourseSummaryItemDtos);
+    }
+
+    // Avaleht: järgmised avatud toimumiskorrad (täis välja jäetud), järjestus nagu avalikus kalendris
+    public List<PublicCourseSummaryItemDto> findNextCourses(NextCourseFilterDto nextCourseFilterDto) {
+        Pageable pageable = PageRequest.of(0, nextCourseFilterDto.getLimit(), createPublicCourseSort());
+        Specification<PublicCourseSummary> publicCourseSummarySpecification = Specification.allOf(
+                PublicCourseSummarySpecifications.hasContentLanguageCode(nextCourseFilterDto.getContentLang()),
+                PublicCourseSummarySpecifications.isFullIncluded(true));
+        List<PublicCourseSummary> publicCourseSummaries = publicCourseSummaryRepository.findAll(publicCourseSummarySpecification, pageable).getContent();
+        List<PublicCourseSummaryItemDto> publicCourseSummaryItemDtos = publicCourseSummaryMapper.toPublicCourseSummaryItemDtos(publicCourseSummaries);
+        for (PublicCourseSummaryItemDto publicCourseSummaryItemDto : publicCourseSummaryItemDtos) {
+            handleAddFundingTypes(publicCourseSummaryItemDto, nextCourseFilterDto.getContentLang());
+        }
+        return publicCourseSummaryItemDtos;
+    }
+
+    // Esile tõstetud eespool, edasi alguse järgi
+    private static Sort createPublicCourseSort() {
+        return Sort.by(Sort.Order.desc("isPromoted"), Sort.Order.asc("startDate"), Sort.Order.asc("courseId"));
     }
 
     private static Specification<PublicCourseSummary> createPublicCourseSummarySpecification(PublicCourseFilterDto publicCourseFilterDto) {

@@ -6,6 +6,8 @@ import ee.bcskoolitus.controller.course.dto.AdminCourseSummaryDto;
 import ee.bcskoolitus.controller.course.dto.CourseCreateRequestDto;
 import ee.bcskoolitus.controller.course.dto.CoursePageDto;
 import ee.bcskoolitus.controller.course.dto.CourseSummaryPageDto;
+import ee.bcskoolitus.controller.course.dto.NextCourseFilterDto;
+import ee.bcskoolitus.controller.course.dto.PublicCourseSummaryItemDto;
 import ee.bcskoolitus.controller.course.dto.PublicCourseFilterDto;
 import ee.bcskoolitus.controller.course.dto.CourseDto;
 import ee.bcskoolitus.controller.course.dto.CourseSummaryDto;
@@ -103,6 +105,22 @@ public class CourseController {
     })
     public CourseSummaryPageDto findPublicCourses(@Valid @ParameterObject PublicCourseFilterDto publicCourseFilterDto) {
         return courseService.findPublicCourses(publicCourseFilterDto);
+    }
+
+    @GetMapping("/next-courses")
+    @Operation(summary = "Avalehe järgmised toimumiskorrad",
+            description = "View public_course_summary: publitseeritud koolituse avatud (O) toimumiskorrad alates tänasest, ainult olemasoleva contentLang tõlkega; täis (F) jäetakse välja. "
+                    + "Järjestus: esile tõstetud eespool, siis alguse järgi. limit 1–20 (vaikimisi 5). Tühi list, kui toimumiskordi pole.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "contentLang puudub või limit väljaspool 1–20 -> 'errorCode:' INCORRECT_INPUT",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            )
+    })
+    public List<PublicCourseSummaryItemDto> findNextCourses(@Valid @ParameterObject NextCourseFilterDto nextCourseFilterDto) {
+        return courseService.findNextCourses(nextCourseFilterDto);
     }
 
     @GetMapping("/course-summary/{courseId}")
