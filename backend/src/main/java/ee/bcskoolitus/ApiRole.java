@@ -4,7 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum ApiRole {
-    ROLE_ADMIN ("admin");
+    ROLE_ADMIN ("admin"),
+    ROLE_PARTICIPANT ("participant");
 
     private final String name;
 

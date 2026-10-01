@@ -1,6 +1,8 @@
 package ee.bcskoolitus.controller.enquiry;
 
 import ee.bcskoolitus.controller.enquiry.dto.AdminEnquiryDto;
+import ee.bcskoolitus.controller.enquiry.dto.CourseEnquiryDto;
+import ee.bcskoolitus.controller.enquiry.dto.EnquiryCreateRequestDto;
 import ee.bcskoolitus.controller.enquiry.dto.AdminEnquirySummaryDto;
 import ee.bcskoolitus.infrastructure.error.ApiError;
 import ee.bcskoolitus.service.EnquiryService;
@@ -9,10 +11,13 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,6 +39,42 @@ public class EnquiryController {
     public List<AdminEnquirySummaryDto> findAdminEnquiries(@RequestParam String contentLang,
                                                            @RequestParam(required = false, defaultValue = "false") Boolean includeHandled) {
         return enquiryService.findAdminEnquiries(contentLang, includeHandled);
+    }
+
+    @PostMapping("/enquiry")
+    @Operation(summary = "Külastaja päring \"Küsi lisainfot\"",
+            description = "Sisselogimiseta. Loob uue profile rea (e-posti järgi ei otsita) ja enquiry rea (status U). Koolitus peab olema publitseeritud; "
+                    + "courseId korral selle koolituse avatud või täis toimumiskord. Tühi companyName → null.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Olematu või mitteavalik trainingId / courseId -> 'errorCode:' PRIMARY_KEY_NOT_FOUND",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Kohustuslik väli puudub, vigane e-post või liiga pikk väli -> 'errorCode:' INCORRECT_INPUT",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            )
+    })
+    public void addEnquiry(@Valid @RequestBody EnquiryCreateRequestDto enquiryCreateRequestDto) {
+        enquiryService.addEnquiry(enquiryCreateRequestDto);
+    }
+
+    @GetMapping("/course/{courseId}/enquiries")
+    @Operation(summary = "Toimumiskorraga seotud päringud (admin)",
+            description = "Kõik staatused (U, H), uusimad eespool. fullName ja email päringu profiilist.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Olematu courseId -> 'errorCode:' PRIMARY_KEY_NOT_FOUND",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            )
+    })
+    public List<CourseEnquiryDto> findCourseEnquiries(@PathVariable Integer courseId) {
+        return enquiryService.findCourseEnquiries(courseId);
     }
 
     @GetMapping("/admin-enquiry/{enquiryId}")

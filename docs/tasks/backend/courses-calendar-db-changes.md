@@ -56,5 +56,5 @@ Uued vaated loevad nimekirjad view'dest (arvud, tõlked, avalikkus), registreeru
 
 - [ ] `2_create.sql` ja `3_import.sql` käivituvad veata (kontrollib kasutaja)
 - [ ] `/admin-all-courses` näidisarvud: toimumiskord 1 → osalejaid 3, tasunud 2, huvilisi 1; 12 → 2 / 1 / 1
-- [ ] Entity'd, enum, repositooriumid ja view entity'd on olemas
-- [ ] Olemasolevad testid lähevad läbi (`course_summary` osalejate arv muutub ainult `C` rea võrra)
+- [x] Entity'd, enum, repositooriumid ja view entity'd on olemas
+- [x] Olemasolevad testid lähevad läbi (`course_summary` osalejate arv muutub ainult `C` rea võrra)
