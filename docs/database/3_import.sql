@@ -12,7 +12,7 @@ INSERT INTO "user" (id, role_id, email, password, status, created_at) VALUES
     (2, 2, 'kasutaja@vali-it.ee', 'parool123', 'A', '2026-09-05 09:00:00'),
     (3, 1, 'admin', '123', 'A', '2026-09-28 00:00:00'), -- lihtne testkonto (admin)
     -- osalejate kasutajad (igal osalejal oma kasutaja, participant.user_id on unikaalne); kasutaja 2 = Anna Saar
-    (4, 2, 'liis.kuusk@example.com', 'parool123', 'A', '2026-09-12 10:00:00'),
+    (4, 2, 'kasutaja', '123', 'A', '2026-09-12 10:00:00'),
     (5, 2, 'jaan.org@example.com', 'parool123', 'A', '2026-09-14 15:30:00'),
     (6, 2, 'mari.lepp@example.com', 'parool123', 'A', '2026-09-18 09:10:00'),
     (7, 2, 'toomas.rebane@example.com', 'parool123', 'A', '2026-09-22 13:45:00');
