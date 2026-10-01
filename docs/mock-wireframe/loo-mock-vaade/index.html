@@ -155,7 +155,7 @@ code { font-family: var(--font-mono); font-size: .88em; }
   /* ---------- Vaated ---------- */
   // file: läbimäng (suhteline tee), params(q): käivitusparameetrid; ph: tekstiline kohatäide
   var VIEWS = [
-    { key: "home", path: "/", name: "Avaleht", view: "HomeView.vue", group: "public", ph: "Avaleht: esile tõstetud koolitused, otsing ja lühitutvustus. Läbimängu veel pole." },
+    { key: "home", path: "/", name: "Avaleht", view: "HomeView.vue", group: "public", file: "home-view/home-view-labimang.html", roleParam: true },
     { key: "trainings", path: "/trainings", name: "Koolitused", view: "TrainingsView.vue", group: "public", file: "trainings-view/trainings-view-labimang.html", roleParam: true },
     { key: "training", path: "/training", name: "Koolitus", view: "TrainingView.vue", group: "public", sample: "/training?trainingId=1&trainingTranslationId=1", ph: "Ühe koolituse leht: kirjeldus ja paremas veerus koolituse andmed, koolitajate kaardid (LecturerCard) ja järgmised koolitused. Läbimängu veel pole." },
     { key: "courses", path: "/courses", name: "Koolituste kalender", view: "CoursesView.vue", group: "public", file: "courses-view/courses-view-labimang.html", roleParam: true },
