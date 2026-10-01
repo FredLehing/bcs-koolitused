@@ -44,11 +44,11 @@ Eeskuju:
 ### Koolitaja kaart — `LecturerCard.vue`
 
 - Kuvab: pilt (`LecturerAvatar`, pilt pilditeenusest `GET /api/lecturer/{lecturerId}/photo?v={photoVersion}` (vt `lecturers-view-skeemid.md`, "Pildid")), nimi, ametinimetus (`title`), lühikirjeldus (`shortDescription`) — kasutajaliidese keeles (store'i `contentLang`), puuduva tõlke korral põhikeeles.
-- Komponent laeb andmed ise: prop `lecturerId`, päring `GET /api/lecturer-summary/{lecturerId}?contentLang=` (ka `lecturerId` või keele muutumisel). `lecturerId = null` → kaarti ei kuvata.
-- Kustutatud või olematu koolitaja → 404 → kaarti ei kuvata (üldisele veavaatele ei suunata).
+- Komponent saab kohustusliku `lecturerSummary` prop-i `/course` või `/training` koondvastusest; JSON-päringuid ega oma laadimisolekut pole. Keelevahetusel laadib andmed uuesti vanemvaade.
+- Kustutatud koolitajad jäetakse backendis koondvastusest välja; tühi lecturers massiiv peidab jaotise.
 - Kasutab:
-  - `TrainingView.vue` (`/training`) — parema veeru olemasolev kohatäide "Koolitaja" (`trainingView.sidebar.lecturer`): koolituse koolitajad (iga koolitaja jaoks oma kaart);
-- Seepärast ei tagasta `GET /api/admin-training/{trainingId}` enam `defaultLecturerPhoto` / `defaultLecturerPhotoContentType` — pilt tuleb ainult `lecturer-summary` teenusest (admin-training-courses-view skeemid ja märkmed on uuendatud).
+  - `TrainingView.vue` (`/training`) — parema veeru "Koolitajad" (`trainingView.sidebar.lecturers`): koolituse aktiivsed koolitajad (iga koolitaja jaoks oma kaart);
+- Seepärast ei tagasta `GET /api/admin-training/{trainingId}` enam `defaultLecturerPhoto` / `defaultLecturerPhotoContentType` — kaardiandmed tulevad avaliku vaate koondteenusest, foto olemasolevast pilditeenusest (admin-training-courses-view skeemid ja märkmed on uuendatud).
 
 ### Koolitajate nimekiri — `AdminLecturersView.vue`
 
@@ -502,7 +502,7 @@ sequenceDiagram
 | vorm B | Tegevus | `PUT /api/lecturer/{lecturerId}` | "Salvesta" |
 | vorm C | Tegevus | `POST /api/lecturer/{lecturerId}/lecturer-translation` | "Lisa tõlge" → olek B |
 | vorm B (mitte-põhikeel), C | Tegevus | `GET /api/lecturer/{lecturerId}/ai-translation?languageId={id}` | "Tee AI tõlge" |
-| `LecturerCard` (TrainingView) | Laadimine | `GET /api/lecturer-summary/{lecturerId}?contentLang={UI keel}` | koolitaja kaart |
+| CourseView / TrainingView | Laadimine | `GET /api/course-summary/{courseId}` / `GET /api/training-summary/{trainingId}` koos contentLang-ga | kõik kaardiandmed koondvastuses, foto eraldi |
 
 Lipule klikkimine päringut ei tee — see teeb `router.replace`-i ja käivitab laadimise uuesti.
 
@@ -517,7 +517,7 @@ Lipule klikkimine päringut ei tee — see teeb `router.replace`-i ja käivitab 
 | `App.vue` (navbar) | muudetakse | menüüsse "Admin" link "Koolitajad" |
 | `router/index.js` | muudetakse | `/admin-lecturers` (`adminLecturersRoute`), `/lecturer-form` (`lecturerFormRoute`) |
 | `NavigationService.js` | muudetakse | `navigateToAdminLecturersView()`, `navigateToLecturerFormView(query)` |
-| `components/common/LecturerCard.vue` | uus, jagatud | prop `lecturerId`; laeb `GET /api/lecturer-summary/{id}` ise; pilt, nimi, ametinimetus, lühikirjeldus; 404 → ei kuvata. Kasutab TrainingView (admini kalender näitab ainult nimesid) |
+| `components/common/LecturerCard.vue` | uus, jagatud | prop `lecturerSummary`; ainult kuvamine: pilt, nimi, ametinimetus, lühikirjeldus. Kasutavad TrainingView ja CourseView; kustutatud koolitajaid filtreerib backend (admini kalender näitab ainult nimesid) |
 | `components/common/LecturerAvatar.vue` | uus (admin-training-courses-view mockist) | pilt või kohatäide (`PhUserCircle`); prop `size` |
 | `components/common/LecturerDeleteButton.vue` | uus | propsid `lecturerId`, `fullName`, `upcomingCourseCount`; `disabled` + tooltip, kui > 0; `ConfirmModal` + `DELETE`; emits `event-lecturer-deleted`, `event-delete-error` |
 | `components/common/LecturerRestoreButton.vue` | uus | "Taasta" + `ConfirmModal` + `PUT .../restore`; emit `event-lecturer-restored` (või üks ühine `LecturerStatusButton`, arendaja otsustada) |

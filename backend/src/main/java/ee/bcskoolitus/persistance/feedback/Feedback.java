@@ -2,6 +2,7 @@ package ee.bcskoolitus.persistance.feedback;
 
 import ee.bcskoolitus.persistance.course.participant.CourseParticipant;
 import jakarta.persistence.*;
+import ee.bcskoolitus.persistance.feedback.FeedbackTimestampConverter;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -37,11 +38,13 @@ public class Feedback {
 
     @NotNull
     @CreatedDate
+    @Convert(converter = FeedbackTimestampConverter.class)
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
     @NotNull
     @LastModifiedDate
+    @Convert(converter = FeedbackTimestampConverter.class)
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 }

@@ -1,7 +1,7 @@
 package ee.bcskoolitus.service;
 
 import ee.bcskoolitus.controller.feedback.dto.FeedbackAnswerDto;
-import ee.bcskoolitus.controller.feedback.dto.FeedbackCriteriaItemDto;
+import ee.bcskoolitus.controller.common.dto.FeedbackCriteriaItemDto;
 import ee.bcskoolitus.controller.feedback.dto.FeedbackRequestDto;
 import ee.bcskoolitus.controller.feedback.dto.ParticipantFeedbackDto;
 import ee.bcskoolitus.infrastructure.exception.DataNotFoundException;
@@ -209,7 +209,7 @@ class FeedbackServiceTest {
         FeedbackCriteria first = criteria(1, 1, "A");
         givenCriteria(first, criteria(2, 2, "A"));
         Feedback feedback = feedback("H");
-        when(feedbackRepository.findByCourseParticipantId(10)).thenReturn(Optional.of(feedback));
+        when(feedbackRepository.findFeedbackForUpdateByCourseParticipantId(10)).thenReturn(Optional.of(feedback));
         CourseParticipantFeedback existing = answer(feedback, first, 9, null);
         when(courseParticipantFeedbackRepository.findAllByFeedbackId(1)).thenReturn(List.of(existing));
 
@@ -228,7 +228,7 @@ class FeedbackServiceTest {
         FeedbackCriteria first = criteria(1, 1, "A");
         givenCriteria(first);
         Feedback feedback = feedback("N");
-        when(feedbackRepository.findByCourseParticipantId(2)).thenReturn(Optional.of(feedback));
+        when(feedbackRepository.findFeedbackForUpdateByCourseParticipantId(2)).thenReturn(Optional.of(feedback));
         when(courseParticipantFeedbackRepository.findAllByFeedbackId(1)).thenReturn(List.of(answer(feedback, first, 9, null)));
 
         feedbackService.updateParticipantFeedback(USER_ID, 2, request(new FeedbackAnswerDto(1, 3, null)));
@@ -243,7 +243,7 @@ class FeedbackServiceTest {
         FeedbackCriteria deleted = criteria(2, 2, "D");
         givenCriteria(criteria(1, 1, "A"), deleted);
         Feedback feedback = feedback("H");
-        when(feedbackRepository.findByCourseParticipantId(10)).thenReturn(Optional.of(feedback));
+        when(feedbackRepository.findFeedbackForUpdateByCourseParticipantId(10)).thenReturn(Optional.of(feedback));
         when(courseParticipantFeedbackRepository.findAllByFeedbackId(1))
                 .thenReturn(List.of(answer(feedback, criteria(1, 1, "A"), 9, null), answer(feedback, deleted, 7, null)));
 
@@ -253,7 +253,7 @@ class FeedbackServiceTest {
     @Test
     void updateParticipantFeedback_withoutFeedback_throwsFeedbackNotFound() {
         givenCourseParticipant(2, "R", LocalDate.now().minusDays(20), "O");
-        when(feedbackRepository.findByCourseParticipantId(2)).thenReturn(Optional.empty());
+        when(feedbackRepository.findFeedbackForUpdateByCourseParticipantId(2)).thenReturn(Optional.empty());
 
         DataNotFoundException exception = assertThrows(DataNotFoundException.class,
                 () -> feedbackService.updateParticipantFeedback(USER_ID, 2, request(new FeedbackAnswerDto(1, 9, null))));

@@ -12,7 +12,7 @@
   }
   var known = Object.keys(defaults).concat([
     '/', '/trainings', '/courses', '/lecturers', '/admin-trainings', '/admin-lecturers',
-    '/admin-rooms', '/admin-all-courses', '/admin-enquiries', '/admin-registrations',
+    '/admin-rooms', '/admin-all-courses', '/admin-enquiries', '/admin-registrations', '/admin-feedbacks',
     '/admin-users', '/participant-courses', '/participant-details', '/participant-certificates',
     '/change-password', '/login', '/signup', '/error', '/not-authorized', '/test',
   ])
@@ -79,7 +79,10 @@
     var url = new URL(path, root)
     if (lastPath) {
       var old = new URL(lastPath, root), previous = returnTo(lastPath)
-      if (previous && identity(path) === identity(previous)) path = previous
+      if (url.pathname === '/course' && old.pathname === '/course' && identity(path) !== identity(lastPath)) {
+        // Sama vaate toimumiskorra vahetus asendab URL-i ilma tagasiteeta.
+        path = '/course?courseId=' + url.searchParams.get('courseId')
+      } else if (previous && identity(path) === identity(previous)) path = previous
       else if (url.pathname === old.pathname && (identity(path) === identity(lastPath) || /-form$/.test(url.pathname))) {
         if (previous) { url.searchParams.set('returnTo', previous); path = fullPath(url) }
       } else if (defaults[url.pathname]) path = forward(path)

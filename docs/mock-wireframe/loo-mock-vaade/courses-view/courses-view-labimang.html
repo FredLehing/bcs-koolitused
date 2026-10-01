@@ -349,7 +349,7 @@ button.lcard { width: 100%; text-align: left; background: none; font: inherit; c
     <h1>Koolituste kalender (avalik) — läbimäng</h1>
     <p>CoursesView.vue (<code>/courses</code>, avalik toimumiskordade kalender: filtrid, otsing, kaardid <code>CourseCard.vue</code>, leheküljestus 5 kaarti lehel) ja CourseView.vue (<code>/course?courseId=</code>, ühe toimumiskorra leht). Paremal all näed backendi päringuid; kollased kastid on mockupi märkmed.</p>
     <p>Andmed on seed-andmete ettepanek (skeemide fail, jaotis 1; täna = 01/10/2026). Avalikult on näha ainult publitseeritud koolituste <strong>avatud</strong> ja <strong>täis</strong> tulevased toimumiskorrad (7 tk); mustand, tühistatud ja kustutatud annavad 404. Uute teenuste DTO-d on <strong>ettepanek</strong>. „Registreeru“ ja „Küsi lisainfot“ on kohatäited.</p>
-    <p>Detailide ja vormide avamisel säilib lähtevaate URL <code>returnTo</code> parameetris; „← Tagasi“ taastab lähtekoha. <a href="../return-to-navigation-skeemid.md">Tagasitee skeemid ja kaardistus</a>.</p>
+    <p>Detailide ja vormide avamisel säilib lähtevaate URL <code>returnTo</code> parameetris; „← Tagasi“ taastab lähtekoha. „Toimumiskorrad“ asendab URL-i ilma <code>returnTo</code>-ta ja laadib valitud toimumiskorra andmed uuesti. <a href="../return-to-navigation-skeemid.md">Tagasitee skeemid ja kaardistus</a>.</p>
     <div class="toolbar">
       <span class="lbl-soft">Kasutajaliidese keel (navbar):</span>
       <button class="tbtn" type="button" data-ui-lang="et">et</button>
@@ -417,7 +417,7 @@ button.lcard { width: 100%; text-align: left; background: none; font: inherit; c
   }
 
   /* ---------- Vahelehed (NavTabs.vue) — samad lingid mis navbari menüüs ---------- */
-  var ADMIN_TABS = [["/admin-enquiries", "Koolituste päringud"], ["/admin-registrations", "Registreerumised"], ["/admin-trainings", "Koolitused"], ["/admin-all-courses", "Koolituste kalender"], ["/admin-lecturers", "Koolitajad"], ["/admin-rooms", "Koolitusruumid"], ["/admin-users", "Kontod"]];
+  var ADMIN_TABS = [["/admin-enquiries", "Koolituste päringud"], ["/admin-registrations", "Registreerumised"], ["/admin-feedbacks", "Tagasisided"], ["/admin-trainings", "Koolitused"], ["/admin-all-courses", "Koolituste kalender"], ["/admin-lecturers", "Koolitajad"], ["/admin-rooms", "Koolitusruumid"], ["/admin-users", "Kontod"]];
   var TRAINING_TABS = [["/trainings", "Meie koolitused"], ["/courses", "Koolituste kalender"]];
   function viewTabs(tabs, current) {
     return '<nav class="vtabs" aria-label="Vahelehed">' + tabs.map(function (t) { return '<button type="button" data-vtab="' + t[0] + '"' + (t[0] === current ? ' aria-current="page"' : "") + '>' + t[1] + '</button>'; }).join("") + '</nav>';
@@ -449,8 +449,8 @@ button.lcard { width: 100%; text-align: left; background: none; font: inherit; c
       "",
       "Vaatega seotud lisainfo:",
       "Paigutus nagu /training. Vasakul kaart \"Koolitus\": pealkiri, toimumisaeg, lühikirjeldus, kirjeldus (RichTextContent) ja link \"Kõik selle koolituse toimumiskorrad\" → /training. Puuduva tõlke korral põhikeele tekst ja märkus.",
-      "Paremal kaart \"Toimumiskord\": Toimumisaeg, Päevi, Akad. tunde, Hind, Toimumisviis, Koolituse keel, Kategooria, Rahastus, märgis \"Täis\"; nupp \"Registreeru\" (sisse logimata → /login?redirect=/course-registration?courseId={id}; kasutaja → /course-registration?courseId={id}; juba registreerunud kasutajale nupu asemel märge \"✓ Oled sellele toimumiskorrale registreerunud\" — GET /api/course/{courseId}/participant-status?userId=; täis → keelatud \"Kohad on täis\") ja nupp ja \"Küsi lisainfot\" (avab päringu modali; möödunud toimumiskorral keelatud). Adminile neid kahte nuppu ei kuvata. Kaart \"Koolitajad\" (LecturerCard, GET /api/lecturer-summary/{lecturerId}) — ilma koolitajateta ei kuvata; iga koolitaja kaart on link → /lecturer?lecturerId={id}&returnTo=/course?courseId={id} (samas tabis).",
-      "Vasakus veerus kohe kaardi \"Koolitus\" all kaart \"Toimumiskorrad\": sama koolituse kõik avalikud tulevased toimumiskorrad üksteise all linkidena kujul \"12/10/2026 – 15/10/2026 · Kohapeal\" (täis korral lisaks märgis \"Täis\"), alguse järgi. Praegune toimumiskord on paksus kirjas (▸) ega ole link; teise lingi vajutus avab sama vaate: /course?courseId={id} (query muutus laadib vaate uuesti). Kui peale praeguse teisi toimumiskordi pole, sektsiooni ei kuvata.",
+      "Paremal kaart \"Toimumiskord\": Toimumisaeg, Päevi, Akad. tunde, Hind, Toimumisviis, Koolituse keel, Kategooria, Rahastus, märgis \"Täis\"; nupp \"Registreeru\" (sisse logimata → /login?redirect=/course-registration?courseId={id}; kasutaja → /course-registration?courseId={id}; juba registreerunud kasutajale nupu asemel märge \"✓ Oled sellele toimumiskorrale registreerunud\" — GET /api/course/{courseId}/participant-status?userId=; täis → keelatud \"Kohad on täis\") ja nupp ja \"Küsi lisainfot\" (avab päringu modali; möödunud toimumiskorral keelatud). Adminile neid kahte nuppu ei kuvata. Kaart \"Koolitajad\" (LecturerCard, andmed course-summary koondvastusest) — ilma koolitajateta ei kuvata; iga koolitaja kaart on link → /lecturer?lecturerId={id}&returnTo=/course?courseId={id} (samas tabis).",
+      "Paremas veerus kaardi \"Toimumiskord\" kohal kaart \"Toimumiskorrad\": sama koolituse kõik avalikud tulevased toimumiskorrad üksteise all linkidena kujul \"12/10/2026 – 15/10/2026 · Kohapeal\" (täis korral lisaks märgis \"Täis\"), alguse järgi. Praegune toimumiskord on paksus kirjas (▸) ega ole link; teise lingi vajutus avab sama vaate: /course?courseId={id} (query muutus laadib vaate uuesti). Kui peale praeguse teisi toimumiskordi pole, sektsiooni ei kuvata.",
       "Modal \"Küsi lisainfot\" (EnquiryModal.vue): all pealkirja koolitus ja toimumisaeg. Väljad: Eesnimi*, Perekonnanimi*, E-post*, Telefon*, Ettevõte, Sõnum* (kuni 255 märki, loendur); all väike tekst \"Kasutame sinu andmeid ainult päringule vastamiseks.\" \"Saada\" → frontendi kontroll (kohustuslikud väljad, e-posti kuju) → POST /api/enquiry → modal sulgub ja lehel eduteade \"Aitäh! Sinu päring on saadetud, võtame peagi ühendust.\" \"Tühista\", × või Esc sulgeb ilma saatmata.",
       "Möödunud toimumiskord avaneb märgisega \"Toimunud\" ja keelatud nuppudega. Mustand, tühistatud, kustutatud või olematu toimumiskord → üldine veavaade. Adminile pliiats → /course-form?courseId={id}. Keele vahetusel laaditakse uuesti."
     ].join("\n") }
@@ -487,7 +487,7 @@ button.lcard { width: 100%; text-align: left; background: none; font: inherit; c
       "Response (200):", "CoursePageDto.java",
       "{", "  \"courseId\": 9,", "  \"trainingId\": 3,", "  \"trainingTranslationId\": 5,", "  \"isMainLanguageFallback\": false,", "  \"title\": \"Spring Boot veebiarendus\",", "  \"shortDescription\": \"REST API-de loomine Spring Booti abil.\",", "  \"description\": \"<p>…</p>\",",
       "  \"categoryName\": \"Programmeerimine\",", "  \"trainingLanguageFlagIconCode\": \"fi-ee\",", "  \"fundingTypes\": [ ... ],", "  \"startDate\": \"2026-10-12\",", "  \"endDate\": \"2026-10-15\",", "  \"isPast\": false,", "  \"numberOfDays\": 4,", "  \"numberOfAcademicHours\": 32,", "  \"price\": 560.0,", "  \"status\": \"O\",",
-      "  \"isOnSite\": true,", "  \"isOnline\": false,", "  \"lecturers\": [ { \"lecturerId\": 1, \"lecturerName\": \"Rain Tüür\" } ],", "  \"upcomingCourses\": [", "    { \"courseId\": 1, \"startDate\": \"2026-10-05\", \"endDate\": \"2026-10-09\", \"status\": \"O\", \"isOnSite\": true, \"isOnline\": false },", "    { \"courseId\": 5, \"startDate\": \"2026-11-16\", \"endDate\": \"2026-11-20\", \"status\": \"F\", \"isOnSite\": false, \"isOnline\": true }", "  ]", "}", "",
+      "  \"isOnSite\": true,", "  \"isOnline\": false,", "  \"lecturers\": [ { \"lecturerId\": 1, \"fullName\": \"Rain Tüür\", \"title\": \"Lektor/konsultant\", \"shortDescription\": \"Java koolitaja.\", \"photoVersion\": 1784106000 } ],", "  \"upcomingCourses\": [", "    { \"courseId\": 1, \"startDate\": \"2026-10-05\", \"endDate\": \"2026-10-09\", \"status\": \"O\", \"isOnSite\": true, \"isOnline\": false },", "    { \"courseId\": 5, \"startDate\": \"2026-11-16\", \"endDate\": \"2026-11-20\", \"status\": \"F\", \"isOnSite\": false, \"isOnline\": true }", "  ]", "}", "",
       "API teenuse lisainfo:",
       "Leiab ainult toimumiskorra, mille status on \"O\" või \"F\" ja koolitus publitseeritud (\"P\"); muidu 404 (sama message nagu olematu ID korral). Möödunud toimumiskord leitakse (isPast = true). Tekst contentLang keeles, puudumisel põhikeeles (isMainLanguageFallback = true). lecturers course_lecturer sort_order järjekorras (võib olla tühi). upcomingCourses = sama koolituse kõik public_course_summary read (ka päritud toimumiskord ise, kui see on tulevane), alguse järgi — frontend tõstab praeguse esile.", "",
       "Veateated:", NOT_FOUND].join("\n") },
@@ -508,7 +508,7 @@ button.lcard { width: 100%; text-align: left; background: none; font: inherit; c
       "API teenuse lisainfo:",
       "Kasutaja oma osaleja (participant.user_id = userId) course_participant rea staatus: \"R\" = registreerunud, \"C\" = loobunud, null = pole registreerunud (ka siis, kui kasutajal osalejat veel pole). Kutsutakse ainult sisseloginud kasutaja korral.", "",
       "Veateated:", "HTTP: 404\nerrorCode: PRIMARY_KEY_NOT_FOUND\nmessage: \"Ei leidnud primary keyd 'courseId' väärtusega: 123\" (sama 'userId' kohta)"].join("\n") },
-    { id: "n-lecturer", old: true, title: "GET /api/lecturer-summary/{lecturerId}", text: "API: GET /api/lecturer-summary/{lecturerId}\n\nQuery parameetrid:\ncontentLang: String — ametinimetuse ja lühikirjelduse keel (\"et\"/\"en\")\n\nResponse (200):\nLecturerSummaryDto.java\n{\n  \"lecturerId\": 1,\n  \"fullName\": \"Rain Tüür\",\n  \"title\": \"Lektor/konsultant\",\n  \"shortDescription\": \"Tarkvaraarendus, Java, HTML, CSS, JavaScript, SQL, …\",\n  \"photoVersion\": 1759305600\n}\n\nAPI teenuse lisainfo:\nOlemasolev teenus — LecturerCard.vue laeb iga koolitaja kaardi ise (sama mis /training lehel), uuesti keele muutumisel. title ja shortDescription contentLang keeles, puudumisel põhikeeles. photoVersion = lecturer_photo.updated_at epoch-sekundites või null (pilti pole); pildi URL /api/lecturer/{lecturerId}/photo?v={photoVersion}. Kustutatud koolitaja → 404 (kaart jäetakse välja).\n\nVeateated:\nHTTP: 404\nerrorCode: PRIMARY_KEY_NOT_FOUND\nmessage: \"Ei leidnud primary keyd 'lecturerId' väärtusega: 123\"" }
+    { id: "n-photo", old: true, title: "GET /api/lecturer/{lecturerId}/photo", text: "API: GET /api/lecturer/{lecturerId}/photo\n\nQuery parameetrid:\nv: Long — photoVersion, pildi vahemälu jaoks (valikuline)\n\nResponse (200): pildi baidid (image/jpeg), mitte JSON\n\nAPI teenuse lisainfo:\nLecturerCard saab fullName, title, shortDescription ja photoVersion course-summary vastusest. Eraldi JSON-päringuid kaart ei tee. Pilt laaditakse ainult photoVersion olemasolul; muidu kohatäide. Kustutatud koolitajad jäetakse koondvastusest välja.\n\nVeateated:\nHTTP: 404\nerrorCode: PRIMARY_KEY_NOT_FOUND\nmessage: \"Ei leidnud primary keyd 'lecturerId' väärtusega: 123\"" }
   ];
 
   /* ---------- Andmed (seed-andmete ettepanek; täna = 2026-10-01) ---------- */
@@ -524,24 +524,29 @@ button.lcard { width: 100%; text-align: left; background: none; font: inherit; c
     5: { st: "P", cat: 2, lang: 1, fund: [1], et: [9, "UX disaini alused", "Kasutajakeskse disaini põhimõtted.", "Kursusel käsitletakse kasutajauuringuid, prototüüpimist ja kasutatavuse testimist."], en: [10, "UX Design Basics", "Principles of user-centred design.", "The course covers user research, prototyping and usability testing."] },
     7: { st: "P", cat: 3, lang: 1, fund: [2], et: [13, "Agiilne meeskonnajuhtimine", "Scrumi meeskonna juhtimine praktikas.", "Kursusel õpitakse agiilsete meeskondade juhtimist, retrospektiive ja tagasiside andmist."], en: [14, "Agile Team Leadership", "Leading a Scrum team in practice.", "The course covers leading agile teams, retrospectives and giving feedback."] }
   };
+  TRAININGS[8] = { st: "P", cat: 1, lang: 1, fund: [1], et: [15, "SQL ja andmebaasid", "Relatsiooniliste andmebaaside alused.", "Kursusel õpitakse SQL päringuid, tabelite disaini ja PostgreSQL-i kasutamist."], en: [16, "SQL and Databases", "Fundamentals of relational databases.", "The course covers SQL queries, table design and working with PostgreSQL."] };
+  TRAININGS[15] = {"st": "P", "cat": 1, "lang": 1, "fund": [1], "et": [26, "Vali-IT Noorem AI arendaja", "Seitsmenädalane praktiline full-stack ja AI-arenduse programm.", "<p>Noorem AI-arendaja ümberõppeprogramm on <strong>seitsmenädalane intensiivne kontaktõpe</strong>, kus ehitad tugeva full-stack arenduse baasi ja õpid kasutama tehisintellekti nii arendustöö abivahendina kui ka loodava rakenduse osana. Esimesed kuus nädalat keskenduvad full-stack arendusele ning seitsmendal nädalal spetsialiseerud AI-arendajaks. Programmi lõpuks valmib meeskonnatööna <strong><em>toimiv, testitud ja dokumenteeritud veebirakendus</em></strong>.</p><p>Koolitus sobib sulle, kui soovid teha karjääripööret IT-valdkonda või õppida praktiliselt, kuidas veebirakendus tervikuna üles ehitatakse. <strong>Varasem programmeerimiskogemus ei ole vajalik</strong> – programm algab alustest. Kõige olulisemad on huvi, järjepidevus ja valmisolek intensiivselt õppida ning praktilisi ülesandeid lahendada.</p><h4>Mida sa õpid?</h4><p>Õppe jooksul läbid kogu tarkvaraarenduse tsükli ideest kavandamise, arenduse ja testimiseni. Teooria kinnistub praktiliste ülesannete ja meeskondliku arendusprojektiga.</p><ul><li><p><strong>Front-end arendus:</strong> HTML, CSS, JavaScript ja Vue.js.</p><ul><li><p>Õpid looma veebirakenduse kasutajaliidest ja kasutama asünkroonse programmeerimise põhimõtteid.</p></li><li><p>Rakendad Vue.js-i päris arendusülesannetes.</p></li></ul></li><li><p><strong>Back-end ja andmed:</strong> Java, Spring, REST ja PostgreSQL.</p><ul><li><p>Õpid objektorienteeritud programmeerimist, API-de loomist ja Springi kasutamist.</p></li><li><p>Ühendad Java rakenduse PostgreSQL-andmebaasiga ning kasutad SQL-i.</p></li></ul></li><li><p><strong>AI arendustöös ja rakenduses:</strong> struktureeritud promptimine, grounding, RAG ja MCP.</p><ul><li><p>Kasutad AI-d koodi selgitaja, kirjutaja, ülevaataja ja õppimise abilisena.</p></li><li><p>Õpid vähendama AI hallutsinatsioone, genereerima masinloetavat väljundit ja lisama rakendusse AI-põhist funktsionaalsust.</p></li></ul></li></ul><h4>Kuidas õpe on üles ehitatud?</h4><p>Programm kestab <strong>7 nädalat ehk 35 õppepäeva</strong> ja sisaldab kokku 280 akadeemilist tundi. Iga päev ühendab loengu ja praktilise töö.</p><ol><li><p>Alustad programmeerimise, arendusprotsessi ja töövahendite põhimõtetest.</p></li><li><p>Õpid samm-sammult full-stack arendust.</p><ol><li><p>Front-end: HTML, CSS, JavaScript ja Vue.js.</p></li><li><p>Back-end: Java, Spring, REST, SQL ja PostgreSQL.</p></li></ol></li><li><p>Õpid rakendust testima ja kvaliteeti hindama.</p><ol><li><p>Kirjutad unit-teste ja testid back-end teenuseid.</p></li><li><p>Tuvastad vigu debugeri ja logide abil.</p></li></ol></li><li><p>Seitsmendal nädalal rakendad AI-arenduse töövõtteid oma meeskonna projektis ning lisad rakendusse AI-funktsionaalsuse.</p></li></ol><h4>Mida oskad pärast programmi?</h4><p>Programmi läbides oskad kavandada ja arendada terviklikku full-stack veebirakendust, ühendada front-end'i ja back-end'i API-de kaudu, töötada andmebaasiga ning loodud lahendust testida ja dokumenteerida. Samuti oskad <strong>kasutada AI-d teadlikult kogu arendusprotsessis</strong> ning luua AI-d kasutavaid funktsionaalsusi.</p><p>Õpe lõpeb meeskonnaprojekti kaitsmisega. Programmi edukal läbimisel saad omandatud oskusi kinnitava <em>mikrokvalifikatsiooni tunnistuse</em>.</p><p>Tutvu lähemalt <a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"https://vali-it.ee/nooremai-arendaja\">Noorem AI-arendaja programmiga</a> või vaata <a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"https://vali-it.ee/nooremai-arendaja#rec3553683003\">programmi õppekava ja ülesehitust</a>.</p>"], "en": [27, "Vali-IT Junior AI Developer", "Seven-week practical full-stack and AI development programme.", "<p>A seven-week intensive programme combining full-stack development, testing and team work with practical AI development.</p>"]};
   var LECTURERS = { 1: ["Rain Tüür", "Lektor/konsultant", "Lecturer/consultant"], 2: ["Merje Vaide", "Koolitaja", "Trainer"], 8: ["Meelis Teern", "Koolitaja", "Trainer"], 9: ["Tarmo Kallas", "Koolitaja", "Trainer"] };
   var COURSES = [
-    { id: 1, t: 1, start: "2026-10-05", end: "2026-10-09", days: 5, hours: 40, price: 490, st: "O", promo: true, room: true, link: false, lect: [1, 8] },
-    { id: 2, t: 2, start: "2026-11-02", end: "2026-11-04", days: 3, hours: 24, price: 350, st: "O", promo: false, room: false, link: true, lect: [2] },
-    { id: 3, t: 1, start: "2026-09-07", end: "2026-09-11", days: 5, hours: 40, price: 490, st: "O", promo: false, room: true, link: false, lect: [1] },
-    { id: 4, t: 1, start: "2026-10-19", end: "2026-10-23", days: 5, hours: 40, price: 490, st: "X", promo: false, room: true, link: false, lect: [8] },
-    { id: 5, t: 1, start: "2026-11-16", end: "2026-11-20", days: 5, hours: 40, price: 520, st: "F", promo: false, room: false, link: true, lect: [1] },
-    { id: 6, t: 1, start: "2026-12-07", end: "2026-12-11", days: 5, hours: 40, price: 520, st: "U", promo: false, room: true, link: false, lect: [] },
-    { id: 7, t: 1, start: "2026-06-08", end: "2026-06-12", days: 5, hours: 40, price: 450, st: "O", promo: false, room: true, link: true, lect: [8] },
-    { id: 8, t: 1, start: "2026-11-30", end: "2026-12-04", days: 5, hours: 40, price: 490, st: "D", promo: false, room: true, link: false, lect: [1] },
-    { id: 9, t: 3, start: "2026-10-12", end: "2026-10-15", days: 4, hours: 32, price: 560, st: "O", promo: true, room: true, link: false, lect: [1] },
-    { id: 10, t: 4, start: "2026-10-26", end: "2026-10-28", days: 3, hours: 24, price: 420, st: "O", promo: false, room: false, link: true, lect: [8] },
-    { id: 11, t: 5, start: "2026-11-09", end: "2026-11-10", days: 2, hours: 16, price: 300, st: "O", promo: true, room: true, link: true, lect: [9] },
-    { id: 12, t: 7, start: "2026-10-14", end: "2026-10-15", days: 2, hours: 16, price: 280, st: "F", promo: false, room: true, link: false, lect: [2] },
-    { id: 13, t: 2, start: "2027-01-11", end: "2027-01-13", days: 3, hours: 24, price: 350, st: "U", promo: false, room: false, link: false, lect: [] }
+    {"id": 1, "t": 1, "start": "2026-10-05", "end": "2026-10-09", "days": 5, "hours": 40, "price": 490, "st": "O", "promo": true, "room": true, "link": false, "lect": [1, 8]},
+    {"id": 2, "t": 2, "start": "2026-11-02", "end": "2026-11-04", "days": 3, "hours": 24, "price": 350, "st": "O", "promo": false, "room": false, "link": true, "lect": [2]},
+    {"id": 3, "t": 1, "start": "2026-09-07", "end": "2026-09-11", "days": 5, "hours": 40, "price": 490, "st": "O", "promo": false, "room": true, "link": false, "lect": [1]},
+    {"id": 4, "t": 1, "start": "2026-10-19", "end": "2026-10-23", "days": 5, "hours": 40, "price": 490, "st": "X", "promo": false, "room": true, "link": false, "lect": [8]},
+    {"id": 5, "t": 1, "start": "2026-11-16", "end": "2026-11-20", "days": 5, "hours": 40, "price": 520, "st": "F", "promo": false, "room": false, "link": true, "lect": [1]},
+    {"id": 6, "t": 1, "start": "2026-12-07", "end": "2026-12-11", "days": 5, "hours": 40, "price": 520, "st": "U", "promo": false, "room": true, "link": false, "lect": []},
+    {"id": 7, "t": 1, "start": "2026-06-08", "end": "2026-06-12", "days": 5, "hours": 40, "price": 450, "st": "O", "promo": false, "room": true, "link": true, "lect": [8]},
+    {"id": 8, "t": 1, "start": "2026-11-30", "end": "2026-12-04", "days": 5, "hours": 40, "price": 490, "st": "D", "promo": false, "room": true, "link": false, "lect": [1]},
+    {"id": 9, "t": 3, "start": "2026-10-12", "end": "2026-10-15", "days": 4, "hours": 32, "price": 560, "st": "O", "promo": true, "room": true, "link": false, "lect": [1]},
+    {"id": 10, "t": 4, "start": "2026-10-26", "end": "2026-10-28", "days": 3, "hours": 24, "price": 420, "st": "O", "promo": false, "room": false, "link": true, "lect": [8]},
+    {"id": 11, "t": 5, "start": "2026-11-09", "end": "2026-11-10", "days": 2, "hours": 16, "price": 300, "st": "O", "promo": true, "room": true, "link": true, "lect": [9]},
+    {"id": 12, "t": 7, "start": "2026-09-14", "end": "2026-09-15", "days": 2, "hours": 16, "price": 280, "st": "F", "promo": false, "room": true, "link": false, "lect": [2]},
+    {"id": 13, "t": 2, "start": "2027-01-11", "end": "2027-01-13", "days": 3, "hours": 24, "price": 350, "st": "U", "promo": false, "room": false, "link": false, "lect": []},
+    {"id": 14, "t": 8, "start": "2026-09-21", "end": "2026-09-23", "days": 3, "hours": 24, "price": 320, "st": "O", "promo": false, "room": true, "link": false, "lect": [1]},
+    {"id": 15, "t": 3, "start": "2026-09-28", "end": "2026-09-30", "days": 3, "hours": 24, "price": 480, "st": "O", "promo": false, "room": false, "link": true, "lect": [1]},
+    {"id": 16, "t": 15, "start": "2026-08-10", "end": "2026-09-25", "days": 35, "hours": 280, "price": 0, "st": "O", "promo": false, "room": true, "link": false, "lect": [1, 8]}
   ];
-  // Anna Saar (userId 2, participant 1) registreerunud toimumiskordadele 1 ja 3; ?registered=1 (registreerumise läbimängust) lisab praeguse
-  var MY_REG = { 1: "R", 3: "R" };
+  // Anna Saar (userId 2, participant 1) registreerunud toimumiskordadele 1, 3, 7, 12, 14 ja 15; ?registered=1 (registreerumise läbimängust) lisab praeguse
+  var MY_REG = { 1: "R", 3: "R", 7: "R", 12: "R", 14: "R", 15: "R", 16: "R" };
   if (SHELL_Q.get("registered") === "1" && SHELL_Q.get("courseId")) MY_REG[+SHELL_Q.get("courseId")] = "R";
   var LIMIT = 5;
   var EMPTY = { startDateFrom: "", startDateTo: "", attendance: "", hideFull: false, trainingLanguageId: 0, categoryId: 0, fundingTypeId: 0 };
@@ -616,14 +621,13 @@ button.lcard { width: 100%; text-align: left; background: none; font: inherit; c
     page = { courseId: c.id, trainingId: c.t, trainingTranslationId: x[0], isMainLanguageFallback: !t[ui.lang], title: x[1], shortDescription: x[2], description: "<p>" + x[3] + "</p>",
       categoryName: s.categoryName, trainingLanguageFlagIconCode: s.trainingLanguageFlagIconCode, fundingTypes: s.fundingTypes, startDate: c.start, endDate: c.end, isPast: c.end < TODAY,
       numberOfDays: c.days, numberOfAcademicHours: c.hours, price: c.price, status: c.st, isOnSite: c.room, isOnline: c.link,
-      lecturers: c.lect.map(function (l) { return { lecturerId: l, lecturerName: LECTURERS[l][0] }; }),
+      lecturers: c.lect.map(function (l) { var d = LECTURERS[l]; return { lecturerId: l, fullName: d[0], title: ui.lang === "en" ? d[2] : d[1], shortDescription: "Tarkvaraarenduse koolitaja.", photoVersion: l === 1 ? 1784106000 : null }; }),
       upcomingCourses: publicRows().filter(function (o) { return o.t === c.t; }).sort(function (a, b) { return a.start < b.start ? -1 : 1; }).map(function (o) { return { courseId: o.id, startDate: o.start, endDate: o.end, status: o.st, isOnSite: o.room, isOnline: o.link }; }) };
     call("GET", "/api/course-summary/" + id + "?contentLang=" + ui.lang, page);
     page.myStatus = null;
     if (ui.role === "user") { page.myStatus = MY_REG[id] || null; call("GET", "/api/course/" + id + "/participant-status?userId=2", { status: page.myStatus }); }
     page.lecturers.forEach(function (l) {
-      var d = LECTURERS[l.lecturerId];
-      call("GET", "/api/lecturer-summary/" + l.lecturerId + "?contentLang=" + ui.lang, { lecturerId: l.lecturerId, fullName: d[0], title: ui.lang === "en" ? d[2] : d[1], shortDescription: "…", photoVersion: null });
+      if (l.photoVersion !== null) call("GET", "/api/lecturer/" + l.lecturerId + "/photo?v=" + l.photoVersion, { contentType: "image/jpeg", body: "Pildi baidid (näidis, mitte JSON-teenus)" });
     });
   }
   function call(method, path, res, req) { logSteps.push({ method: method, path: path, res: res, req: req }); }
@@ -764,27 +768,27 @@ button.lcard { width: 100%; text-align: left; background: none; font: inherit; c
     function r(label, value) { return "<dt>" + label + "</dt><dd>" + value + "</dd>"; }
     var fund = p.fundingTypes.map(function (f) { return f.fundingTypeName; }).join(", ") || "—";
     var att = attendanceText(p.isOnSite, p.isOnline);
-    return (ui.success ? '<div class="ok-alert" role="status">' + esc(ui.success) + '</div>' : "") + '<div class="pins">' + pin("n-course", "GET /api/course-summary/{courseId}") + (p.lecturers.length ? pin("n-lecturer", "GET /api/lecturer-summary/{lecturerId}") : "") + '</div>' +
+    return (ui.success ? '<div class="ok-alert" role="status">' + esc(ui.success) + '</div>' : "") + '<div class="pins">' + pin("n-course", "GET /api/course-summary/{courseId}") + (p.lecturers.length ? pin("n-photo", "GET /api/lecturer/{lecturerId}/photo") : "") + '</div>' +
       '<div class="pagecols"><div class="leftcol"><div class="pcard"><span class="legend">Koolitus</span>' +
       (p.isMainLanguageFallback ? '<p class="fallback-note">Koolitust pole selles keeles, kuvatakse eestikeelne tekst.</p>' : "") +
       '<div class="t1"><span>' + esc(p.title) + '</span>' + (ui.role === "admin" ? '<button type="button" class="ibtn" data-edit="' + p.courseId + '" title="Muuda toimumiskorda" aria-label="Muuda toimumiskorda">' + PENCIL + '</button>' : "") + '</div>' +
       '<span class="when">' + dmy(p.startDate) + ' – ' + dmy(p.endDate) + (p.isPast ? ' <span class="badge past">Toimunud</span>' : "") + '</span>' +
       '<p><strong>' + esc(p.shortDescription) + '</strong></p><div>' + p.description + '</div>' +
-      '<button type="button" class="linkish" id="b-training" style="justify-self:start">Kõik selle koolituse toimumiskorrad</button></div>' + renderDates(p) + '</div>' +
-      '<div style="display:grid;gap:14px;min-width:0">' +
+      '<button type="button" class="linkish" id="b-training" style="justify-self:start">Kõik selle koolituse toimumiskorrad</button></div></div>' +
+      '<div style="display:grid;gap:14px;min-width:0">' + renderDates(p) +
       '<div class="pcard"><span class="legend">Toimumiskord</span><dl class="dl">' +
       r("Toimumisaeg", dmy(p.startDate) + " – " + dmy(p.endDate)) + r("Päevi", p.numberOfDays) + r("Akad. tunde", p.numberOfAcademicHours) + r("Hind", p.price + " €") +
       r("Toimumisviis", att) + r("Koolituse keel", FLAG_SVG[p.trainingLanguageFlagIconCode]) + r("Kategooria", esc(p.categoryName)) + r("Rahastus", esc(fund)) + '</dl>' +
       (full ? '<span class="badge full" style="justify-self:start">Täis</span>' : "") +
       (ui.role === "admin" ? "" : '<div class="actions">' + registerControl(p, full, disabled) + '<button type="button" class="sbtn" id="b-ask"' + (p.isPast ? " disabled" : "") + '>Küsi lisainfot</button></div>') + '</div>' +
       (p.lecturers.length ? '<div class="pcard"><span class="legend">Koolitajad</span>' + p.lecturers.map(function (l) {
-        var d = LECTURERS[l.lecturerId];
-        return '<button type="button" class="lcard" data-lecturer="' + l.lecturerId + '" title="Vaata koolitaja profiili"><span class="ph" aria-hidden="true">' + d[0].split(" ").map(function (w) { return w[0]; }).join("") + '</span><span><span class="nm">' + esc(d[0]) + '</span><br><span class="tt">' + esc(ui.lang === "en" ? d[2] : d[1]) + '</span></span></button>';
+        var d = [l.fullName, l.title, l.title];
+        return '<button type="button" class="lcard" data-lecturer="' + l.lecturerId + '" title="Vaata koolitaja profiili"><span class="ph" aria-hidden="true">' + d[0].split(" ").map(function (w) { return w[0]; }).join("") + '</span><span><span class="nm">' + esc(d[0]) + '</span><br><span class="tt">' + esc(ui.lang === "en" ? d[2] : d[1]) + '</span><br><span class="tt">' + esc(l.shortDescription || '') + '</span></span></button>';
       }).join("") + '</div>' : "") +
       '</div></div>';
   }
   function attendanceText(onSite, online) { return onSite && online ? "Kohapeal ja veebis" : onSite ? "Kohapeal" : online ? "Veebis" : "—"; }
-  // Vasakus veerus "Koolitus" kaardi all: sama koolituse toimumiskorrad nuppudena; praegune esile tõstetud, teised avavad sama vaate
+  // Paremas veerus: teise toimumiskorra valik asendab URL-i ilma returnTo-ta ja laadib andmed uuesti
   function renderDates(p) {
     var others = p.upcomingCourses.filter(function (o) { return o.courseId !== p.courseId; });
     if (!others.length) return "";
@@ -813,7 +817,7 @@ button.lcard { width: 100%; text-align: left; background: none; font: inherit; c
     if (p === "/api/categories") return "n-categories";
     if (p === "/api/funding-types") return "n-funding";
     if (p === "/api/languages") return "n-languages";
-    if (p.indexOf("/api/lecturer-summary/") === 0) return "n-lecturer";
+    if (p.indexOf("/api/lecturer/") === 0 && p.indexOf("/photo") !== -1) return "n-photo";
     if (p === "/api/enquiry") return "n-enquiry";
     if (/participant-status$/.test(p)) return "n-status";
     return "n-course";
@@ -826,7 +830,7 @@ button.lcard { width: 100%; text-align: left; background: none; font: inherit; c
       { m: "GET", p: "/api/languages", note: "n-languages", when: "filtri valikud (olemas)" }],
     detail: [
       { m: "GET", p: "/api/course-summary/{courseId}?contentLang={UI keel}", note: "n-course", when: "leht" },
-      { m: "GET", p: "/api/lecturer-summary/{lecturerId}", note: "n-lecturer", when: "LecturerCard iga koolitaja kohta (olemas)" },
+      { m: "GET", p: "/api/lecturer/{lecturerId}/photo?v={photoVersion}", note: "n-photo", when: "ainult photoVersion olemasolul; kaardi tekstid koondvastuses" },
       { m: "POST", p: "/api/enquiry", note: "n-enquiry", when: "modali „Saada“" },
       { m: "GET", p: "/api/course/{courseId}/participant-status?userId=", note: "n-status", when: "ainult sisseloginud kasutajale — kas juba registreerunud" }]
   };
@@ -882,7 +886,7 @@ button.lcard { width: 100%; text-align: left; background: none; font: inherit; c
     var b = e.target.closest("button"); if (!b) return;
     if (b.dataset.note) { goNote(b.dataset.note); return; }
     if (b.dataset.page) { var p = +b.dataset.page; if (p >= 0 && p < ui.result.totalPages && p !== ui.page) { ui.page = p; startStep("Lehe vahetus → page = " + p); loadCourses(); renderAll(); } return; }
-    if (b.dataset.view) { openPage(+b.dataset.view, (b.classList.contains("datebtn") ? "Toimumiskorra link" : "„Vaata lähemalt“") + " → /course?courseId=" + b.dataset.view); return; }
+    if (b.dataset.view) { openPage(+b.dataset.view, (b.classList.contains("datebtn") ? "Toimumiskorra link → router.replace ilma returnTo-ta; andmed laaditakse uuesti" : "„Vaata lähemalt“") + " → /course?courseId=" + b.dataset.view); return; }
     if (b.dataset.edit) { goRoute("/course-form?courseId=" + b.dataset.edit); return; }
     // Koolitaja kaart → /lecturer, returnTo = praegune toimumiskorra leht ("← Tagasi")
     if (b.dataset.lecturer) { goRoute("/lecturer?lecturerId=" + b.dataset.lecturer + "&returnTo=" + encodeURIComponent("/course?courseId=" + page.courseId)); return; }

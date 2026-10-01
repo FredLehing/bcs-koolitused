@@ -1,83 +1,42 @@
-# Jagatud koolitaja kaart (pilt, nimi, ametinimetus, lühikirjeldus)
+# Jagatud koolitaja kaart
 
-**Komponent:** `components/common/LecturerCard.vue` (uus) ja `components/common/LecturerAvatar.vue` (uus)
+**Komponent:** `components/common/LecturerCard.vue`; pilt: `LecturerAvatar.vue`.
+**Kasutavad vaated:** `/course` ja `/training`, parema veeru „Koolitajad“.
+**Roll:** kõik rollid.
 
-**Kasutavad vaated:** `TrainingView.vue` (`/training`, parem veerg "Koolitaja") — ainus kasutaja (admini kalender näitab koolitajaid ainult nimedena)
+## Andmed ja vastutus
 
-**Roll:** Kõik rollid (`/training` on avalik), admin (kalender)
-
-**Vaste mockupis:** `/training` läbimängu veel pole; kaardi välimus Balsamiq AI käsus (`admin-lecturers-view-skeemid.md`, jaotis 10 "LecturerCard") ja avaliku koolitajate lehe läbimängus (`lecturers-view-labimang.html`, sama pilt / kohatäide)
-
-> Mockupi pilt lisatakse hiljem (Balsamiq AI käsk: `admin-lecturers-view-skeemid.md`, jaotis 10 "LecturerCard").
-
-Otsus (`admin-lecturers-view-skeemid.md`, "Koolitaja kaart"): **komponent laeb andmed ise** `lecturerId` järgi — nii ei dubleeri kolm vaadet sama päringut.
-
-> **Uuendus (2026-09-30):** pilt tuleb pilditeenusest: `LecturerAvatar` propsid on `lecturerId`, `photoVersion`, `size`, `shape` (`<img src="{API}/lecturer/{lecturerId}/photo?v={photoVersion}">`, `null` → kohatäide) — mitte Base64. Koolitusel võib olla **mitu koolitajat** (`training-lecturers-multiple.md`): `/training` paremas veerus on jaotis "Koolitajad" ja iga `TrainingDto.lecturers` elemendi kohta üks `LecturerCard`. Admini kalender näitab koolitajaid ainult nimedena.
-
-## Kasutajavoog
-
-Külastaja avab koolituse lehe `/training`. Parema veeru kohatäite "Koolitaja" asemel näeb ta koolituse vaikimisi koolitaja kaarti: ümar pilt, nimi, ametinimetus ja lühikirjeldus kasutajaliidese keeles. Kui koolitusel pole vaikimisi koolitajat või koolitaja on kustutatud, kaarti (ja jaotist "Koolitaja") ei kuvata.
-
-## Kasutajaliidese elemendid
-
-| Element | Tüüp | Kirjeldus/käitumine |
-|---|---|---|
-| Pilt | `LecturerAvatar.vue` | `<img src="data:{photoContentType};base64,{photo}">`, ümar; pildi puudumisel kohatäide `PhUserCircle`. Prop `size` (kaardil nt 56 px, vormis 80 px) |
-| Nimi | tekst (bold) | `fullName` |
-| Ametinimetus | tekst (väiksem, hall) | `title` |
-| Lühikirjeldus | tekst | `shortDescription` |
-
-## Käitumine ja valideerimine
-
-1. Prop `lecturerId` (Number või `null`). `null` → komponent ei renderda midagi ega tee päringut.
-2. `lecturerId` olemas → `GET /api/lecturer-summary/{lecturerId}?contentLang={UI keel}`; päring uuesti, kui `lecturerId` või `contentLang` (Pinia `languageStore`) muutub.
-3. 404 (kustutatud või olematu koolitaja) → kaarti ei kuvata, **üldisele veavaatele ei suunata**; emit `event-lecturer-not-found` (vaade võib jaotise pealkirja peita). Muu viga → samuti ei kuvata (kaart on lisainfo, mitte vaate põhiosa).
-4. `TrainingView.vue`: parema veeru `sidebarSections`-ist "lecturer" asendub kohatäide `LecturerCard`-iga (`lecturerId` = koolituse `defaultLecturerId` — `GET /api/training/{trainingId}` vastusest või olemasolevast koolituse andmete päringust; täpsusta, kust `TrainingView` selle praegu saab). Ilma vaikimisi koolitajata jaotis peidetakse.
-
-## API kutsed
-
-### `GET /api/lecturer-summary/{lecturerId}`
-
-**Backend task:** `docs/tasks/backend/GET-api-lecturer-summary-lecturerId.md`
-
-`LecturerSummaryDto.java` — response (200):
+Kaart saab kohustusliku Object prop-i `lecturerSummary`:
 
 ```json
 {
   "lecturerId": 1,
   "fullName": "Rain Tüür",
   "title": "Lektor/konsultant",
-  "shortDescription": "Tarkvaraarendus, Java, HTML, CSS, JavaScript, SQL, Git, Spring Boot, REST API, PostgreSQL, JPA (Hibernate), MapStruct, JUnit, Swagger, Gradle, Confluence, Jira. Vali Tarkvaraarendus! programm.",
-  "photo": "iVBORw0KGgoAAAANSUhEUgAAACAAAAAg...",
-  "photoContentType": "image/png"
+  "shortDescription": "Java koolitaja.",
+  "photoVersion": 1784106000
 }
 ```
 
-**Veateated:**
+Andmed pärinevad `/api/course-summary/{courseId}` või
+`/api/training-summary/{trainingId}` vastuse `lecturers` massiivist.
+`LecturerSummaryDto` on jagatud `controller/common/dto` klass; sama DTO on
+kasutusel `/lecturers` nimekirja ning olemasoleva üksiku koolitaja teenuses.
 
-| Status code | errorCode | message | Frontend käitumine |
-|---|---|---|---|
-| 404 | `PRIMARY_KEY_NOT_FOUND` | "Ei leidnud primary keyd 'lecturerId' väärtusega: 123" | kaarti ei kuvata, emit `event-lecturer-not-found` |
+Komponent JSON-päringuid ei tee, ei hoia eraldi laadimisolekut ega väljasta
+`event-lecturer-not-found` sündmust. Vanemvaade laadib andmed keele või ID
+muutumisel. Backend jätab kustutatud koolitajad välja, säilitab seose
+sort_order järjekorra ja valib kaardi tekstid contentLang keeles, puudumisel
+põhikeeles. Tõlketa koolitaja nimi ning foto võivad olla olemas.
 
-## Mock-vastused
+## Kuvamine
 
-Kuni backend valmib: `MockDatabase.getLecturerSummary(lecturerId, contentLang)` koolitajate seed'i põhjal (`lecturer-db-changes.md`); Rain Tüüri pilt seed'i Base64-st.
+- `LecturerAvatar`: 56 px ümar pilt; olemasolev
+  `/api/lecturer/{lecturerId}/photo?v={photoVersion}` pilditeenus.
+- `photoVersion=null`: PhUser kohatäide, pildipäringut ei tehta.
+- Nimi paksus kirjas, ametinimetus väiksemas hallis kirjas, lühikirjeldus.
+- Kogu kaart on link `/lecturer?lecturerId={id}&returnTo={lähtevaate fullPath}`.
+- Vanemvaade peidab kogu jaotise, kui koondvastuse `lecturers` on tühi.
 
-## Komponendid ja failistruktuur
-
-| Fail | Uus / muudetakse | Sisu |
-|---|---|---|
-| `components/common/LecturerCard.vue` | uus | Prop `lecturerId`; päring, olek, kuvamine; emit `event-lecturer-not-found` |
-| `components/common/LecturerAvatar.vue` | uus | Propsid `photo`, `contentType`, `size`; kasutab ka `LecturerFormView` (`PhotoUpload`) |
-| `api-services/LecturerService.js` | muudetakse | + `sendGetLecturerSummaryRequest(lecturerId, contentLang)` |
-| `views/TrainingView.vue` | muudetakse | Parema veeru "Koolitaja" kohatäide → `LecturerCard` |
-| `locales/*.json` | vajadusel | kohatäite tekstid |
-
-## Vastuvõtu kriteeriumid
-
-- [ ] `LecturerCard` kuvab pildi, nime, ametinimetuse ja lühikirjelduse kasutajaliidese keeles
-- [ ] Pildita koolitajal kohatäite ikoon
-- [ ] `lecturerId = null` → midagi ei kuvata ega päringut ei tehta
-- [ ] Keele või `lecturerId` muutumisel laaditakse kaart uuesti
-- [ ] 404 → kaarti ei kuvata, veavaatele ei suunata
-- [ ] `/training` paremas veerus on vaikimisi koolitaja kaart; ilma koolitajata jaotis peidus
+Mockid: [koolituse detail](../../mock-wireframe/loo-mock-vaade/training-view/training-view-labimang.html),
+[toimumiskorra detail](../../mock-wireframe/loo-mock-vaade/courses-view/courses-view-labimang.html).

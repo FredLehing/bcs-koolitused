@@ -1,7 +1,8 @@
 package ee.bcskoolitus.controller.course.dto;
 
+import ee.bcskoolitus.controller.common.dto.UpcomingCourseDto;
 import ee.bcskoolitus.controller.common.dto.FundingTypeDto;
-import ee.bcskoolitus.controller.common.dto.LecturerDto;
+import ee.bcskoolitus.controller.common.dto.LecturerSummaryDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -35,7 +36,7 @@ public class CoursePageDto {
     private String status;
     private Boolean isOnSite;
     private Boolean isOnline;
-    private List<LecturerDto> lecturers;
+    private List<LecturerSummaryDto> lecturers;
     // Sama koolituse avalikud tulevased toimumiskorrad alguse järgi (praegune kaasa arvatud, kui tulevane)
     private List<UpcomingCourseDto> upcomingCourses;
 }

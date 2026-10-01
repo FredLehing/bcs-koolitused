@@ -6,7 +6,7 @@ import ee.bcskoolitus.controller.lecturer.dto.LecturerCreateRequestDto;
 import ee.bcskoolitus.controller.lecturer.dto.LecturerCreateResponseDto;
 import ee.bcskoolitus.controller.lecturer.dto.LecturerDetailDto;
 import ee.bcskoolitus.controller.lecturer.dto.LecturerProfileDto;
-import ee.bcskoolitus.controller.lecturer.dto.LecturerSummaryDto;
+import ee.bcskoolitus.controller.common.dto.LecturerSummaryDto;
 import ee.bcskoolitus.controller.lecturer.dto.LecturerTrainingDto;
 import ee.bcskoolitus.controller.lecturer.dto.LecturerTranslationCreateRequestDto;
 import ee.bcskoolitus.controller.lecturer.dto.LecturerTranslationUpdateDto;
@@ -47,6 +47,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -368,6 +369,49 @@ class LecturerServiceTest {
         List<LecturerSummaryDto> lecturerSummaryDtos = lecturerService.findLecturerSummaries("et");
 
         assertEquals(List.of(new LecturerSummaryDto(LECTURER_ID, "Kersti Laidvee", "Lektor", "Figma.", null)), lecturerSummaryDtos);
+    }
+
+    @Test
+    void findLecturerSummariesBy_preservesLinkOrderFiltersDeletedAndLoadsDetailsInBulk() {
+        Lecturer secondLecturer = new Lecturer();
+        secondLecturer.setId(8);
+        secondLecturer.setFullName("Meelis Teern");
+        secondLecturer.setStatus(LecturerStatus.ACTIVE.getCode());
+        Lecturer deletedLecturer = new Lecturer();
+        deletedLecturer.setId(9);
+        deletedLecturer.setStatus(LecturerStatus.DELETED.getCode());
+        LecturerTranslation secondTranslation = new LecturerTranslation();
+        secondTranslation.setLecturer(secondLecturer);
+        secondTranslation.setTitle("Lektor");
+        secondTranslation.setShortDescription("Java.");
+        when(lecturerTranslationRepository.findDisplayLecturerTranslationsBy(List.of(8, LECTURER_ID), "en"))
+                .thenReturn(List.of(createLecturerTranslation("Lecturer", "Figma."), secondTranslation));
+        when(lecturerPhotoService.findPhotoVersions(List.of(8, LECTURER_ID))).thenReturn(Map.of(LECTURER_ID, 100L));
+
+        List<LecturerSummaryDto> lecturerSummaryDtos = lecturerService.findLecturerSummariesBy(
+                List.of(secondLecturer, deletedLecturer, lecturer), "en");
+
+        assertEquals(List.of(
+                new LecturerSummaryDto(8, "Meelis Teern", "Lektor", "Java.", null),
+                new LecturerSummaryDto(LECTURER_ID, "Kersti Laidvee", "Lecturer", "Figma.", 100L)), lecturerSummaryDtos);
+        verify(lecturerTranslationRepository).findDisplayLecturerTranslationsBy(List.of(8, LECTURER_ID), "en");
+        verify(lecturerPhotoService).findPhotoVersions(List.of(8, LECTURER_ID));
+        verify(lecturerRepository, never()).findById(8);
+        verify(lecturerRepository, never()).findById(LECTURER_ID);
+    }
+
+    @Test
+    void findLecturerSummariesBy_noActiveLecturersMakesNoDetailQueries() {
+        lecturer.setStatus(LecturerStatus.DELETED.getCode());
+        assertTrue(lecturerService.findLecturerSummariesBy(List.of(), "et").isEmpty());
+        assertTrue(lecturerService.findLecturerSummariesBy(List.of(lecturer), "et").isEmpty());
+        verifyNoInteractions(lecturerTranslationRepository, lecturerPhotoService);
+    }
+
+    @Test
+    void findLecturerSummariesBy_missingTranslationStillReturnsNameAndPhoto() {
+        List<LecturerSummaryDto> lecturerSummaryDtos = lecturerService.findLecturerSummariesBy(List.of(lecturer), "ru");
+        assertEquals(List.of(new LecturerSummaryDto(LECTURER_ID, "Kersti Laidvee", null, null, null)), lecturerSummaryDtos);
     }
 
     @Test

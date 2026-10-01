@@ -94,7 +94,7 @@ public class CourseController {
     @Operation(summary = "Avalik koolituste kalender: filtrid ja leheküljestus",
             description = "View public_course_summary: publitseeritud koolituse avatud või täis (O, F) toimumiskorrad alates tänasest, ainult olemasoleva contentLang tõlkega. "
                     + "Järjestus: esile tõstetud eespool, siis alguse järgi. searchText otsib pealkirjast ja lühikirjeldusest (iga sõna peab esinema). "
-                    + "categoryId / trainingLanguageId / fundingTypeId 0 = kõik. attendance: ONSITE / ONLINE. hideFull=true → ilma täis toimumiskordadeta. Veebilinki ei tagastata.")
+                    + "categoryId / trainingLanguageId / fundingTypeId 0 = kõik. attendance: ONSITE / ONLINE. hideFull=true → ilma täis toimumiskordadeta. lecturers sisaldab aktiivsete koolitajate kaardiandmeid (fullName, title, shortDescription, photoVersion), kasutajaliidese keeles ja seoste järjekorras. Kaardid ei vaja eraldi JSON-päringuid. Veebilinki ei tagastata.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(
@@ -126,7 +126,7 @@ public class CourseController {
     @GetMapping("/course-summary/{courseId}")
     @Operation(summary = "Avalik toimumiskorra leht",
             description = "Toimumiskord peab olema avatud või täis (O, F) ja koolitus publitseeritud; möödunud avalik toimumiskord leitakse (isPast = true). "
-                    + "Tekstid contentLang keeles, puudumisel põhikeeles (isMainLanguageFallback = true). upcomingCourses = sama koolituse avalikud tulevased toimumiskorrad. Veebilinki ei tagastata.")
+                    + "Tekstid contentLang keeles, puudumisel põhikeeles (isMainLanguageFallback = true). upcomingCourses = sama koolituse avalikud tulevased toimumiskorrad. lecturers sisaldab aktiivsete koolitajate kaardiandmeid (fullName, title, shortDescription, photoVersion), kasutajaliidese keeles ja seoste järjekorras. Kaardid ei vaja eraldi JSON-päringuid. Veebilinki ei tagastata.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(

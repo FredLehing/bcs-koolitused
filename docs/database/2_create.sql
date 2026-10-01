@@ -96,7 +96,7 @@ CREATE TABLE course_participant_feedback
     feedback_id          int          NOT NULL,
     feedback_criteria_id int          NOT NULL,
     score                int          NOT NULL,
-    feedback_text        varchar(255) NULL,
+    feedback_text        text         NULL,
     created_at           timestamp    NOT NULL,
     updated_at           timestamp    NOT NULL,
     CONSTRAINT course_participant_feedback_pk PRIMARY KEY (id),
@@ -1076,5 +1076,14 @@ FROM course c
 WHERE t.status = 'P'
   AND c.status IN ('O', 'F')
   AND c.start_date >= current_date;
+
+-- Olemasoleva andmebaasi kommentaariveeru laiendamine.
+-- Käivita eraldi, kui andmebaas loodi vana varchar(255) skeemiga.
+-- Uuel andmebaasil on sama muudatus juba 2_create.sql failis.
+BEGIN;
+ALTER TABLE bcs_koolitused.course_participant_feedback
+    ALTER COLUMN feedback_text TYPE text;
+COMMIT;
+
 
 -- End of file.

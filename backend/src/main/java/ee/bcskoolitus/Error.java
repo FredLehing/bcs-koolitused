@@ -4,6 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum Error {
+    FEEDBACK_ANSWERS_CHANGED("Tagasiside vastused on vahepeal muutunud. Vaata vastused uuesti üle."),
     INCORRECT_CREDENTIALS("Vale email või parool"),
     TRANSLATION_EXISTS("Selles keeles tõlge on juba olemas"),
     TRAINING_DELETED("Kustutatud koolituse staatust ei saa muuta, taasta see enne"),

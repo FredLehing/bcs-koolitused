@@ -229,7 +229,9 @@ public class CourseService {
         coursePageDto.setCategoryName(getCategoryNameOrNull(training.getCategory().getId(), trainingTranslation.getLanguage().getId()));
         coursePageDto.setFundingTypes(fundingTypeTranslationMapper.toFundingTypeDtos(
                 fundingTypeTranslationRepository.findTrainingFundingTypeTranslationsBy(training.getId(), displayedLanguageCode)));
-        coursePageDto.setLecturers(courseLecturerMapper.toLecturerDtos(courseLecturerRepository.findCourseLecturersBy(courseId)));
+        coursePageDto.setLecturers(lecturerService.findLecturerSummariesBy(
+                courseLecturerRepository.findCourseLecturersBy(courseId).stream()
+                        .map(CourseLecturer::getLecturer).toList(), contentLang));
         coursePageDto.setUpcomingCourses(publicCourseSummaryMapper.toUpcomingCourseDtos(
                 publicCourseSummaryRepository.findAllByTrainingIdAndContentLanguageCodeOrderByStartDateAscCourseIdAsc(training.getId(), displayedLanguageCode)));
         return coursePageDto;

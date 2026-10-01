@@ -3,11 +3,12 @@ package ee.bcskoolitus.service;
 import ee.bcskoolitus.FeedbackCriteriaStatus;
 import ee.bcskoolitus.FeedbackStatus;
 import ee.bcskoolitus.controller.feedback.dto.FeedbackAnswerDto;
-import ee.bcskoolitus.controller.feedback.dto.FeedbackCriteriaItemDto;
+import ee.bcskoolitus.controller.common.dto.FeedbackCriteriaItemDto;
 import ee.bcskoolitus.controller.feedback.dto.FeedbackRequestDto;
 import ee.bcskoolitus.controller.feedback.dto.ParticipantFeedbackDto;
 import ee.bcskoolitus.infrastructure.exception.DataNotFoundException;
 import ee.bcskoolitus.infrastructure.exception.ForbiddenException;
+import ee.bcskoolitus.infrastructure.exception.PrimaryKeyNotFoundException;
 import ee.bcskoolitus.persistance.course.Course;
 import ee.bcskoolitus.persistance.course.participant.CourseParticipant;
 import ee.bcskoolitus.persistance.course.participant.feedback.CourseParticipantFeedback;
@@ -55,6 +56,11 @@ public class FeedbackService {
     private final TrainingTranslationService trainingTranslationService;
     private final LanguageService languageService;
 
+    public Feedback getValidFeedbackForUpdateBy(Integer feedbackId) {
+        return feedbackRepository.findFeedbackForUpdateBy(feedbackId)
+                .orElseThrow(() -> new PrimaryKeyNotFoundException("feedbackId", feedbackId));
+    }
+
     // Uus tagasiside: aktiivsed kriteeriumid ilma vastusteta; olemasolev: aktiivsed + kustutatud, millele on vastatud
     @Transactional(readOnly = true)
     public ParticipantFeedbackDto getParticipantFeedback(Integer userId, Integer courseParticipantId, String contentLang) {
@@ -100,7 +106,7 @@ public class FeedbackService {
     @Transactional
     public void updateParticipantFeedback(Integer userId, Integer courseParticipantId, FeedbackRequestDto feedbackRequestDto) {
         getValidFeedbackCourseParticipantBy(userId, courseParticipantId);
-        Feedback feedback = feedbackRepository.findByCourseParticipantId(courseParticipantId)
+        Feedback feedback = feedbackRepository.findFeedbackForUpdateByCourseParticipantId(courseParticipantId)
                 .orElseThrow(() -> new DataNotFoundException(FEEDBACK_NOT_FOUND.getMessage(), FEEDBACK_NOT_FOUND.name()));
         List<CourseParticipantFeedback> answers = courseParticipantFeedbackRepository.findAllByFeedbackId(feedback.getId());
         List<FeedbackCriteria> formCriteria = findFormCriteria(answers);

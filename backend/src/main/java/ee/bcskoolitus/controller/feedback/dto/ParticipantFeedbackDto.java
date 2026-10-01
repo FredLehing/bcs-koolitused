@@ -1,5 +1,6 @@
 package ee.bcskoolitus.controller.feedback.dto;
 
+import ee.bcskoolitus.controller.common.dto.FeedbackCriteriaItemDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

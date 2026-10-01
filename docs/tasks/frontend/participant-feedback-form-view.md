@@ -26,7 +26,7 @@ Osaleja vajutab "Minu koolitused" lehel "Anna tagasisidet" (uus) või "Vaata tag
 | Kriteeriumi nimi + (?) | tekst + tooltip | `title`; (?) hover/fookus → `description` |
 | Hinne | 10 raadionuppu (1–10) | kohustuslik; lugemisrežiimis *disabled* |
 | "+ Lisa kommentaar" / "− Peida kommentaar" | link | avab/peidab kommentaari kasti; peitmine teksti ei kustuta; lugemisrežiimis kommentaarita kriteeriumil linki pole |
-| Kommentaar | textarea, 3 rida, `maxlength="255"` | placeholder "Täpsusta soovi korral oma hinnangut"; all loendur "0 / 255"; olemasoleva kommentaariga kohe lahti; lugemisrežiimis *disabled* |
+| Kommentaar | textarea, 3 rida, `maxlength="10000"` | placeholder "Täpsusta soovi korral oma hinnangut"; all loendur "0 / 10000"; olemasoleva kommentaariga kohe lahti; lugemisrežiimis *disabled* |
 | "Lisa tagasiside" | nupp (primary) | uus olek → `POST` |
 | "Muuda" | nupp (primary) | muutmise olek, lugemisrežiim → väljad muudetavaks |
 | "Salvesta" / "Tühista" | nupud | pärast "Muuda": `PUT` / laaditud väärtused tagasi ja lugemisrežiim |

@@ -34,6 +34,13 @@ export default {
     return axios.post('/api/training', trainingCreateRequest)
   },
 
+  // Backend task: docs/tasks/backend/GET-api-training-summary-trainingId.md
+  sendGetTrainingSummaryRequest(trainingId, contentLang, trainingTranslationId) {
+    return axios.get(`/api/training-summary/${trainingId}`, {
+      params: { contentLang, trainingTranslationId },
+    })
+  },
+
   // Backend task: docs/tasks/backend/GET-api-training-trainingId.md (3. etapp)
   sendGetTrainingRequest(trainingId) {
     return axios.get(`/api/training/${trainingId}`)

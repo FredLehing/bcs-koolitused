@@ -101,10 +101,10 @@ Eeskujud: `admin-training-courses-view/` (ühe koolituse kalender, `course_summa
 - **Vasak veerg:** kaart "Koolitus" — pealkiri, alapealkirjana toimumisaeg `05/10/2026 – 09/10/2026`, lühikirjeldus ja pikk kirjeldus (`RichTextContent`); link "Kõik selle koolituse toimumiskorrad" → `/training?trainingId=…&trainingTranslationId=…`. Puuduva tõlke korral põhikeele tekst ja märkus (nagu `/training`).
 - **Parem veerg:**
   - kaart **"Toimumiskord"**: Toimumisaeg, Päevi, Akad. tunde, Hind, Toimumisviis (Kohapeal / Veebis / Kohapeal ja veebis), Koolituse keel (lipp), Kategooria, Rahastus, staatuse märgis "Täis" (ainult `F`); nupp **"Registreeru"** (vt "Registreerumine") ja **"Küsi lisainfot"** (avab päringu modali; ka täis toimumiskorral lubatud);
-  - kaart **"Koolitajad"**: `LecturerCard` iga toimumiskorra koolitaja kohta (`course_lecturer`, `sort_order`); ilma koolitajateta kaarti ei kuvata. Kogu koolitaja kaart on link → `/lecturer?lecturerId={id}&returnTo={praegune rada}` (samas tabis); `LecturerView` näitab `returnTo` korral nuppu "← Tagasi" (muidu "← Kõik koolitajad"). `returnTo` peab olema sisemine rada (algab `/`-ga, mitte `//`), muidu jäetakse tähelepanuta. Sama kehtib `/training` lehe koolitajate kaartidele.
-- **Vasakus veerus kohe kaardi "Koolitus" all kaart "Toimumiskorrad"**: sama koolituse kõik avalikud tulevased toimumiskorrad **üksteise all linkidena** (üks link rea kohta) kujul `12/10/2026 – 15/10/2026 · Kohapeal` (toimumisviis: Kohapeal / Veebis / Kohapeal ja veebis; täis korral lisaks märgis "Täis"), alguse järgi. Frontendis `<router-link>`.
+  - kaart **"Koolitajad"**: `LecturerCard` iga aktiivse toimumiskorra koolitaja kohta (`course_lecturer`, `sort_order`), andmed course-summary vastuse `lecturers` massiivist; kaart JSON-päringut ei tee; ilma koolitajateta kaarti ei kuvata. Kogu koolitaja kaart on link → `/lecturer?lecturerId={id}&returnTo={praegune rada}` (samas tabis); `LecturerView` näitab `returnTo` korral nuppu "← Tagasi" (muidu "← Kõik koolitajad"). `returnTo` peab olema sisemine rada (algab `/`-ga, mitte `//`), muidu jäetakse tähelepanuta. Sama kehtib `/training` lehe koolitajate kaartidele.
+- **Paremas veerus kaardi "Toimumiskord" kohal kaart "Toimumiskorrad"**: sama koolituse kõik avalikud tulevased toimumiskorrad **üksteise all linkidena** (üks link rea kohta) kujul `12/10/2026 – 15/10/2026 · Kohapeal` (toimumisviis: Kohapeal / Veebis / Kohapeal ja veebis; täis korral lisaks märgis "Täis"), alguse järgi. Frontendis `<router-link>`.
   - Praegune toimumiskord on reas paksus kirjas (▸ ees) ega ole link — nii on näha, kus see teiste seas asub.
-  - Teise lingi vajutus avab **sama vaate** teise toimumiskorraga: `router.push('/course?courseId={id}')`; vaade jälgib `$route.query` muutust ja laadib andmed uuesti (sama muster nagu `TrainingView.vue`).
+  - Teise lingi vajutus avab **sama vaate** teise toimumiskorraga: `router.replace('/course?courseId={id}')` ilma `returnTo` parameetrita; vaade jälgib `$route.query` muutust ja laadib andmed uuesti (sama muster nagu `TrainingView.vue`).
   - Kui peale praeguse teisi tulevasi toimumiskordi pole, sektsiooni ei kuvata. Leheküljestust ega piirangut pole (toimumiskordi on koolitusel vähe).
 - Admin näeb pealkirja kõrval pliiatsit → `/course-form?courseId={id}`.
 - Olematu, mitteavalik (`U`, `X`, `D`) või mittepublitseeritud koolituse toimumiskord → 404 → üldine veavaade. Möödunud `O`/`F` toimumiskord avaneb (nt vana link), märgisega "Toimunud" ja keelatud nuppudega.
@@ -328,7 +328,7 @@ INSERT INTO "user" (id, role_id, email, password, status, created_at) VALUES
     (7, 2, 'toomas.rebane@example.com', 'parool123', 'A', '2026-09-22 13:45:00');
 
 INSERT INTO participant (id, user_id, name, profile_id, created_at) VALUES
-    (1, 2, 'Anna Saar', 1, '2026-09-05 09:00:00'),
+    (1, 2, 'Anna Saar', 1, '2026-05-18 09:00:00'),
     (2, 4, 'Liis Kuusk', 5, '2026-09-12 10:00:00'),
     (3, 5, 'Jaan Org', 6, '2026-09-14 15:30:00'),
     (4, 6, 'Mari Lepp', 7, '2026-09-18 09:10:00'),
@@ -341,8 +341,8 @@ INSERT INTO course_participant (id, course_id, participant_id, notes, has_paid, 
     (3, 1, 2, '', false, false, 'R', '2026-09-12 10:05:00', '2026-09-12 10:05:00'),
     (4, 1, 3, 'Arve ettevõttele.', true, true, 'R', '2026-09-14 15:35:00', '2026-09-14 15:35:00'),
     (5, 1, 4, 'Loobus haiguse tõttu.', false, true, 'C', '2026-09-18 09:15:00', '2026-09-25 11:00:00'),
-    (6, 12, 2, '', true, false, 'R', '2026-09-20 08:00:00', '2026-09-20 08:00:00'),
-    (7, 12, 5, '', false, false, 'R', '2026-09-22 13:50:00', '2026-09-22 13:50:00'),
+    (6, 12, 2, '', true, false, 'R', '2026-09-12 10:10:00', '2026-09-12 10:10:00'),
+    (7, 12, 5, '', false, false, 'R', '2026-09-10 13:50:00', '2026-09-10 13:50:00'),
     (8, 5, 3, '', false, true, 'R', '2026-09-26 17:00:00', '2026-09-26 17:00:00'),
     (9, 9, 5, '', true, true, 'R', '2026-09-28 09:00:00', '2026-09-28 09:00:00');
 
@@ -426,17 +426,22 @@ sequenceDiagram
     Page->>BE: GET /api/course-summary/9?contentLang=et
     alt avalik (O/F, koolitus P)
         BE-->>Page: toimumiskord + koolituse tekst + koolitajad + upcomingCourses
-        loop iga koolitaja
-            Page->>BE: GET /api/lecturer-summary/{lecturerId} (LecturerCard)
+        opt koolitajal on photoVersion
+            Page->>BE: GET /api/lecturer/{lecturerId}/photo?v={photoVersion}
+            BE-->>Page: pildi binaarsisu
         end
     else olematu / mustand / tühistatud / kustutatud
         BE-->>Page: 404 PRIMARY_KEY_NOT_FOUND
         Page-->>K: üldine veavaade
     end
+    K->>Page: vali teine toimumiskord
+    Page->>Page: router.replace /course?courseId=5 (ilma returnTo-ta)
+    Page->>BE: GET /api/course-summary/5?contentLang=et
+    BE-->>Page: valitud toimumiskorra koondandmed
     K->>Page: koolitaja kaart (LecturerCard)
-    Page->>Lect: /lecturer?lecturerId=1&returnTo=/course?courseId=9
+    Page->>Lect: /lecturer?lecturerId=1&returnTo=/course?courseId=5
     K->>Lect: "← Tagasi"
-    Lect->>Page: /course?courseId=9 (returnTo)
+    Lect->>Page: /course?courseId=5 (returnTo)
     K->>Page: "Registreeru" (vt "Registreerumine" allpool)
     K->>Page: "Küsi lisainfot" → täidab vormi → "Saada"
     Note over Page: frontendi kontroll: kohustuslikud väljad, e-post
@@ -502,7 +507,7 @@ sequenceDiagram
 | `/courses` | Laadimine | `GET /api/courses?...` | kaardid |
 | `/courses` | Laadimine | `GET /api/categories`, `GET /api/languages`, `GET /api/funding-types` | filtrite valikud (olemas) |
 | `/course` | Laadimine | `GET /api/course-summary/{courseId}?contentLang=` | leht |
-| `/course` | Laadimine | `GET /api/lecturer-summary/{lecturerId}` | `LecturerCard` (olemas) |
+| `/course` | Foto olemasolul | `GET /api/lecturer/{lecturerId}/photo?v={photoVersion}` | `LecturerAvatar`; kaardi tekst tuleb koondvastusest |
 | `/course` | Tegevus | `POST /api/enquiry` | modali "Saada" |
 | `/course` | Laadimine | `GET /api/course/{courseId}/participant-status?userId=` | ainult sisseloginud kasutajale — "Registreeru" või märge |
 | `/course-registration` | Laadimine | `GET /api/course-summary/{courseId}`, `…/participant-status?userId=`, `GET /api/user/{userId}/participant` | kokkuvõte, olek, eeltäitmine |
@@ -598,7 +603,7 @@ Right column cards:
 Card "Toimumiskord": list Toimumisaeg 12/10/2026 – 15/10/2026; Päevi 4; Akad. tunde 32; Hind 560 €; Toimumisviis Kohapeal; Koolituse keel (Estonian flag); Kategooria Programmeerimine; Rahastus Töötukassa, EL rahastus; primary button "Registreeru" and secondary button "Küsi lisainfot".
 Also show an open modal dialog "Küsi lisainfot" over the page: subtitle "Spring Boot veebiarendus · 12/10/2026 – 15/10/2026"; two-column inputs "Eesnimi *", "Perekonnanimi *", "E-post *", "Telefon *"; full-width input "Ettevõte"; textarea "Sõnum *" with counter "0 / 255"; small grey text "Kasutame sinu andmeid ainult päringule vastamiseks."; buttons "Tühista" and primary "Saada".
 Card "Koolitajad": one lecturer card with a round photo, name "Rain Tüür", title "Lektor/konsultant" and a short text.
-Left column, directly below the card "Koolitus": a card "Toimumiskorrad" with a vertical list of text links: "▸ 05/10/2026 – 09/10/2026 · Kohapeal" (bold, current, not a link), "16/11/2026 – 20/11/2026 · Veebis" (underlined link) with a small badge "Täis".
+Right column, directly above the card "Toimumiskord": a card "Toimumiskorrad" with a vertical list of text links: "▸ 05/10/2026 – 09/10/2026 · Kohapeal" (bold, current, not a link), "16/11/2026 – 20/11/2026 · Veebis" (underlined link) with a small badge "Täis".
 ```
 
 ### CourseRegistrationView
@@ -623,3 +628,28 @@ Inputs: "Eesnimi *" and "Perekonnanimi *" side by side, "E-post *", "Telefon *",
 ## Vaadetevaheline tagasitee
 
 Detailide ja vormide avamisel antakse kaasa lähtevaate täielik URL `returnTo` parameetrina. Ühine „← Tagasi“ link taastab selle URL-i; otselingi korral kasutatakse vaate varusihti. Peamenüü ja vahelehed tagasiteed ei loo. Oleku- ja tõlkevahetus säilitab senise tagasitee. Kõigi avamiskohtade, erandite ja varusihtide [ühine skeem](../return-to-navigation-skeemid.md).
+
+## Koolitajate koondlaadimine avalikel detailvaadetel
+
+```mermaid
+sequenceDiagram
+    participant View as CourseView või TrainingView
+    participant API as course-summary või training-summary
+    participant Lecturers as LecturerService
+    participant DB as Andmebaas
+    participant Card as LecturerCard
+    View->>API: Üks JSON-päring contentLang-ga
+    API->>DB: Seotud koolitajad sort_order järjekorras
+    API->>Lecturers: Koosta aktiivsete koolitajate kaardiandmed
+    Lecturers->>DB: Kõigi ID-de sobivad tõlked hulgi
+    Lecturers->>DB: Kõigi ID-de foto versioonid hulgi
+    API-->>View: Koondvastus koos lecturers massiiviga
+    View->>Card: lecturerSummary prop
+    Note over Card: JSON-päringuid ei tee; keel ja andmed tulevad vaate vastusest
+    opt photoVersion olemas
+        Card->>API: img: GET /api/lecturer/id/photo?v=photoVersion
+    end
+```
+
+Koolitaja tekstide keelevalik on kasutajaliidese contentLang, puudumisel põhikeel.
+Kustutatud koolitajad ei kuulu vastusesse. Pildibaite JSON-i ei lisata.

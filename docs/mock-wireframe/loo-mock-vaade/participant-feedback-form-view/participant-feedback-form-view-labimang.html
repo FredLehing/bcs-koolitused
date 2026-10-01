@@ -372,7 +372,7 @@ td .linkish { font-size: .84rem; }
 <div class="page">
   <header class="intro">
     <h1>Koolituse tagasiside — läbimäng</h1>
-    <p>Uus vaade <code>ParticipantFeedbackFormView.vue</code> (<code>/participant-feedback-form?courseParticipantId={id}</code>), kus osaleja annab toimunud koolitusele tagasisidet: iga kriteeriumi hinne <strong>1–10</strong> (kohustuslik) ja soovi korral kommentaar (kuni 255 märki). Vorm avaneb lehelt <strong>„Minu koolitused“</strong> (<code>ParticipantCoursesView.vue</code>) nupuga „Anna tagasisidet“ (uus tagasiside → <code>POST</code>) või „Vaata tagasisidet“ (olemasolev → lugemisrežiim, „Muuda“ → <code>PUT</code>). Kriteeriumi nime kõrval (?) näitab hõljumisel kirjeldust. Paremal all näed päringuid ja backendi vastuseid; kollased sildid viivad API märkmete juurde.</p>
+    <p>Uus vaade <code>ParticipantFeedbackFormView.vue</code> (<code>/participant-feedback-form?courseParticipantId={id}</code>), kus osaleja annab toimunud koolitusele tagasisidet: iga kriteeriumi hinne <strong>1–10</strong> (kohustuslik) ja soovi korral kommentaar (kuni 10 000 märki). Vorm avaneb lehelt <strong>„Minu koolitused“</strong> (<code>ParticipantCoursesView.vue</code>) nupuga „Anna tagasisidet“ (uus tagasiside → <code>POST</code>) või „Vaata tagasisidet“ (olemasolev → lugemisrežiim, „Muuda“ → <code>PUT</code>). Kriteeriumi nime kõrval (?) näitab hõljumisel kirjeldust. Paremal all näed päringuid ja backendi vastuseid; kollased sildid viivad API märkmete juurde.</p>
     <p>Andmed on plaanitud seed'ist (<code>participant-feedback-form-view-skeemid.md</code>, jaotis 1; täna = 01/10/2026). Kasutaja on Anna Saar (<code>userId = 2</code>, osaleja 1): registreerumine <strong>2</strong> (Java algkursus 07.–11.09, tagasisidet pole), <strong>10</strong> (Java algkursus 08.–12.06, tagasiside olemas, staatus H) ja <strong>1</strong> (tulevane, nuppu pole). Nupud „Admin …“ simuleerivad kriteeriumide muutmist teisest kohast — proovi neid, kui vorm on lahti, ja vajuta siis „Salvesta“. Kriteeriumide keel järgib kasutajaliidese keelt (puuduva tõlke korral põhikeel). Muudatused kehtivad ainult selles läbimängus.</p>
     <div class="toolbar">
       <span class="lbl-soft">Kes on sisse loginud:</span>
@@ -465,7 +465,7 @@ td .linkish { font-size: .84rem; }
       "Vaatega seotud lisainfo:",
       "Avatakse \"Minu koolitused\" nupust \"Anna tagasisidet\" / \"Vaata tagasisidet\". Vasakul ProfileMenu.vue (aktiivne \"Minu koolitused\"), kaardi ülaosas link \"← Tagasi minu koolituste juurde\" (/participant-courses). Sisselogimata → /login?redirect={rada koos parameetriga}; courseParticipantId puudub → ErrorView. GET /api/user/{userId}/registration/{courseParticipantId}/feedback?contentLang={UI keel} (ka keele vahetusel).",
       "Päis: \"Tagasiside\", koolituse nimi · toimumisaeg dd/MM/yyyy – dd/MM/yyyy; olemasoleval tagasisidel \"Esitatud dd/MM/yyyy\" ja muudetul \"Muudetud dd/MM/yyyy\" (updatedAt kuupäev ≠ createdAt kuupäev). Staatust (N/U/H) osalejale ei näidata. Vihje \"Hinda iga väidet skaalal 1–10 (1 = ei nõustu üldse, 10 = nõustun täielikult)\".",
-      "Iga kriteerium (FeedbackCriteriaItem.vue): title + (?) — hover/fookus → tooltip description; raadionupud 1–10 (kohustuslik); link \"+ Lisa kommentaar\" / \"− Peida kommentaar\" avab/peidab textarea (3 rida, placeholder \"Täpsusta soovi korral oma hinnangut\", loendur \"0 / 255\"). Peitmine ei kustuta teksti. Olemasoleva kommentaariga kast on kohe lahti; lugemisrežiimis kommentaarita kriteeriumil linki pole.",
+      "Iga kriteerium (FeedbackCriteriaItem.vue): title + (?) — hover/fookus → tooltip description; raadionupud 1–10 (kohustuslik); link \"+ Lisa kommentaar\" / \"− Peida kommentaar\" avab/peidab textarea (3 rida, placeholder \"Täpsusta soovi korral oma hinnangut\", loendur \"0 / 10000\"). Peitmine ei kustuta teksti. Olemasoleva kommentaariga kast on kohe lahti; lugemisrežiimis kommentaarita kriteeriumil linki pole.",
       "Olek selgub hasFeedback väärtusest. false → väljad kohe täidetavad, nupp \"Lisa tagasiside\" → POST. true → väljad disabled, nupp \"Muuda\" → väljad muudetavaks, nupud \"Salvesta\" (PUT) ja \"Tühista\" (laaditud väärtused tagasi, lugemisrežiim).",
       "Enne saatmist: kui mõni hinne puudub → \"Hinda kõiki kriteeriume\" (InlineAlerts.vue nuppude kõrval), hindamata kriteeriumid punase äärisega, päringut ei tehta. Tühi kommentaar saadetakse null-ina. Edu → \"Tagasiside salvestatud\", GET uuesti, lugemisrežiim (nupp \"Muuda\"). 403 FEEDBACK_ALREADY_EXISTS / FEEDBACK_CRITERIA_CHANGED ja 404 FEEDBACK_NOT_FOUND → backendi teade ja GET uuesti.",
       "GET-i 403 FEEDBACK_NOT_ALLOWED / 404 REGISTRATION_NOT_FOUND → kaardil punane teade backendi tekstiga, vormi pole, link tagasi."].join("\n") }
@@ -477,7 +477,7 @@ td .linkish { font-size: .84rem; }
   var BAD_INPUT = "HTTP: 400\nerrorCode: INCORRECT_INPUT\nmessage: \"answers[0].score: must be less than or equal to 10\"";
   var REQUEST_BODY = ["Request body:", "FeedbackRequestDto.java",
     "{", "  \"answers\": [", "    {", "      \"feedbackCriteriaId\": 1,", "      \"score\": 9,", "      \"feedbackText\": \"Praktilisi näiteid oleks võinud olla rohkem\"", "    },", "    ...", "  ]", "}", "",
-    "Väljad: answers* (@NotEmpty, @Valid), feedbackCriteriaId*, score* (@Min(1) @Max(10)), feedbackText (@Size(max = 255), valikuline)", ""];
+    "Väljad: answers* (@NotEmpty, @Valid), feedbackCriteriaId*, score* (@Min(1) @Max(10)), feedbackText (@Size(max = 10000), valikuline)", ""];
   var NOTES = [
     { id: "n-regs", title: "GET /api/user/{userId}/registrations", tag: "olemas, muutub", text: [
       "API: GET /api/user/{userId}/registrations", "",
@@ -763,8 +763,8 @@ td .linkish { font-size: .84rem; }
     }
     var comment = "";
     if (!ro) comment = '<button type="button" class="linkish small" data-toggle="' + id + '" aria-expanded="' + f.open + '" style="justify-self:start">' + (f.open ? "− Peida kommentaar" : "+ Lisa kommentaar") + '</button>';
-    if (f.open) comment += '<div class="comment"><label class="visually-hidden" for="t-' + id + '">Kommentaar: ' + esc(c.title) + '</label><textarea id="t-' + id + '" rows="3" maxlength="255" data-text="' + id + '" placeholder="Täpsusta soovi korral oma hinnangut"' + (ro ? " disabled" : "") + '>' + esc(f.text) + '</textarea>' +
-      '<span class="count" id="cnt-' + id + '">' + f.text.length + ' / 255</span></div>';
+    if (f.open) comment += '<div class="comment"><label class="visually-hidden" for="t-' + id + '">Kommentaar: ' + esc(c.title) + '</label><textarea id="t-' + id + '" rows="3" maxlength="10000" data-text="' + id + '" placeholder="Täpsusta soovi korral oma hinnangut"' + (ro ? " disabled" : "") + '>' + esc(f.text) + '</textarea>' +
+      '<span class="count" id="cnt-' + id + '">' + f.text.length + ' / 10000</span></div>';
     return '<div class="crit' + (inv ? " invalid" : "") + '"><div class="crit-head"><span class="ctitle" id="ct-' + id + '">' + esc(c.title) + '</span>' +
       '<span class="tip"><button type="button" class="qmark" aria-label="Selgitus: ' + esc(c.title) + '" aria-describedby="tt-' + id + '">?</button><span role="tooltip" id="tt-' + id + '">' + esc(c.description) + '</span></span>' +
       (crit && crit.st === "D" ? '<span class="proto-tag" title="Osalejale seda märget ei näidata">läbimäng: kriteerium kustutatud (D), aga sellele on vastatud</span>' : "") +
@@ -889,7 +889,7 @@ td .linkish { font-size: .84rem; }
   viewEl.addEventListener("input", function (e) {
     var id = e.target.dataset.text; if (!id || !ui.form) return;
     ui.form[id].text = e.target.value;
-    document.getElementById("cnt-" + id).textContent = e.target.value.length + " / 255";
+    document.getElementById("cnt-" + id).textContent = e.target.value.length + " / 10000";
   });
   viewEl.addEventListener("click", function (e) {
     var b = e.target.closest("button"); if (!b) return;

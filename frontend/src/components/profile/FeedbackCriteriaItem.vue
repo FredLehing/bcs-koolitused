@@ -3,7 +3,7 @@ import { Tooltip } from 'bootstrap'
 import { PhQuestion } from '@phosphor-icons/vue'
 
 const SCORES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-const FEEDBACK_TEXT_MAX_LENGTH = 255
+const FEEDBACK_TEXT_MAX_LENGTH = 10000
 
 // Tagasiside vormi üks kriteerium: nimi + (?) kirjeldusega, hinne 1–10 ja valikuline kommentaar.
 // Kommentaari kast on vaikimisi peidus; olemasoleva kommentaariga kohe lahti. Peitmine teksti ei kustuta.

@@ -58,7 +58,7 @@ Osaleja muudab olemasolevat tagasisidet. Ühes transaktsioonis:
 | Loobunud, toimumiskord pole lõppenud või on tühistatud/kustutatud | 403 Forbidden | `{ "message": "Sellele koolitusele ei saa tagasisidet anda", "errorCode": "FEEDBACK_NOT_ALLOWED" }` |
 | Tagasisidet pole | 404 Not Found | `{ "message": "Tagasisidet ei leitud", "errorCode": "FEEDBACK_NOT_FOUND" }` |
 | `answers` ei vasta vormi kriteeriumidele | 403 Forbidden | `{ "message": "Tagasiside küsimused on vahepeal muutunud, laadi leht uuesti", "errorCode": "FEEDBACK_CRITERIA_CHANGED" }` |
-| Hinne puudub / väljaspool 1–10, kommentaar > 255, `answers` tühi | 400 Bad Request | `INCORRECT_INPUT` |
+| Hinne puudub / väljaspool 1–10, kommentaar > 10000, `answers` tühi | 400 Bad Request | `INCORRECT_INPUT` |
 
 ## Vastuvõtu kriteeriumid
 

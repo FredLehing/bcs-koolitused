@@ -1,7 +1,7 @@
 package ee.bcskoolitus.persistance.view.publiccoursesummary;
 
 import ee.bcskoolitus.controller.course.dto.PublicCourseSummaryItemDto;
-import ee.bcskoolitus.controller.course.dto.UpcomingCourseDto;
+import ee.bcskoolitus.controller.common.dto.UpcomingCourseDto;
 import org.mapstruct.*;
 
 import java.util.List;

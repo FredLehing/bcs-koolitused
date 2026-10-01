@@ -6,7 +6,7 @@ import ee.bcskoolitus.controller.lecturer.dto.LecturerCreateRequestDto;
 import ee.bcskoolitus.controller.lecturer.dto.LecturerCreateResponseDto;
 import ee.bcskoolitus.controller.lecturer.dto.LecturerDetailDto;
 import ee.bcskoolitus.controller.lecturer.dto.LecturerProfileDto;
-import ee.bcskoolitus.controller.lecturer.dto.LecturerSummaryDto;
+import ee.bcskoolitus.controller.common.dto.LecturerSummaryDto;
 import ee.bcskoolitus.controller.lecturer.dto.LecturerTranslationCreateRequestDto;
 import ee.bcskoolitus.controller.lecturer.dto.LecturerTranslationCreateResponseDto;
 import ee.bcskoolitus.controller.lecturer.dto.LecturerTranslationItemDto;

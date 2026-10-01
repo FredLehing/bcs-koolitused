@@ -18,7 +18,7 @@ Andmebaasi ettepanek failist `docs/mock-wireframe/loo-mock-vaade/participant-fee
 
 - Uued tabelid `feedback_criteria` (`sequence`, `status` A/D, auditiveerud) ja `feedback_criteria_translation` (`title` varchar(50), `description` varchar(255), `UNIQUE (feedback_criteria_id, language_id)`).
 - Olemasolev tabel `feedback` (seni ainult `id`) saab veerud `course_participant_id` (`UNIQUE`), `status` varchar(1) (N/U/H), `created_at`, `updated_at`.
-- Uus tabel `course_participant_feedback`: `feedback_id`, `feedback_criteria_id`, `score` (`CHECK (score BETWEEN 1 AND 10)`), `feedback_text` varchar(255) NULL, auditiveerud, `UNIQUE (feedback_id, feedback_criteria_id)`.
+- Uus tabel `course_participant_feedback`: `feedback_id`, `feedback_criteria_id`, `score` (`CHECK (score BETWEEN 1 AND 10)`), `feedback_text` text NULL, auditiveerud, `UNIQUE (feedback_id, feedback_criteria_id)`.
 - Viis välisvõtit (skeemide tabel "Viited") faili lõpus, olemasoleva `ALTER TABLE … ADD CONSTRAINT … FOREIGN KEY` mustri järgi.
 - `course_participant` **ei muutu**.
 

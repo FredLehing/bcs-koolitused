@@ -41,12 +41,12 @@ Koolitus vastas ootustele (?)                 ← title; (?) hover/fookus → to
 ┌───────────────────────────────────────────┐
 │ Täpsusta soovi korral oma hinnangut        │  textarea, 3 rida
 └───────────────────────────────────────────┘
-                                     0 / 255
+                                     0 / 10000
 ```
 
 - Kuvatakse ainult **`title`**, selle kõrval **(?)** — hover'il / klaviatuuri fookusel tooltip kriteeriumi **`description`**-iga.
 - **Hinne 1–10** raadionuppudena, kohustuslik.
-- **Kommentaar** (`feedback_text`) on iga kriteeriumi juures eraldi, valikuline, kuni 255 märki, loendur "0 / 255" kasti all.
+- **Kommentaar** (`feedback_text`) on iga kriteeriumi juures eraldi, valikuline, kuni 10 000 märki, loendur "0 / 10000" kasti all.
 - Kommentaari kast on vaikimisi **peidus**, raadionuppude all link **"+ Lisa kommentaar"** / **"− Peida kommentaar"** (en "+ Add a comment" / "− Hide comment"), placeholder "Täpsusta soovi korral oma hinnangut" (en "Feel free to elaborate on your rating").
   - Kui kommentaar on juba olemas (muutmise olek), on kast **kohe lahti**.
   - "Peida kommentaar" ainult peidab — tekst jääb alles ja salvestatakse. Kommentaari eemaldamiseks tühjenda kast.
@@ -172,7 +172,7 @@ Tee järgib olemasolevat profiilimustrit (`/api/user/{userId}/registration/{cour
 }
 ```
 
-Väljad: `answers*` (`@NotEmpty`, `@Valid`), `feedbackCriteriaId*`, `score*` (`@Min(1) @Max(10)`), `feedbackText` (`@Size(max = 255)`, valikuline). Response (200): NONE.
+Väljad: `answers*` (`@NotEmpty`, `@Valid`), `feedbackCriteriaId*`, `score*` (`@Min(1) @Max(10)`), `feedbackText` (`@Size(max = 10000)`, valikuline). Response (200): NONE.
 
 **Uued `Error` väärtused:**
 
@@ -183,7 +183,7 @@ Väljad: `answers*` (`@NotEmpty`, `@Valid`), `feedbackCriteriaId*`, `score*` (`@
 | `FEEDBACK_NOT_FOUND` | 404 | "Tagasisidet ei leitud" |
 | `FEEDBACK_CRITERIA_CHANGED` | 403 | "Tagasiside küsimused on vahepeal muutunud, laadi leht uuesti" |
 
-Olemasolevad: `REGISTRATION_NOT_FOUND` (404, võõras registreerumine), `PRIMARY_KEY_NOT_FOUND` (404, olematu `userId` või `courseParticipantId`), `INCORRECT_INPUT` (400, DTO valideerimine: hinne puudub või väljaspool 1–10, kommentaar > 255).
+Olemasolevad: `REGISTRATION_NOT_FOUND` (404, võõras registreerumine), `PRIMARY_KEY_NOT_FOUND` (404, olematu `userId` või `courseParticipantId`), `INCORRECT_INPUT` (400, DTO valideerimine: hinne puudub või väljaspool 1–10, kommentaar > 10000).
 
 **Tehniline täpsustus (arutelu järel):** arutelus oli "answers ei kata täpselt vormi kriteeriume → 400 `INCORRECT_INPUT`". Koodis tekib `INCORRECT_INPUT` ainult DTO valideerimisest (`RestExceptionHandler`), teenus seda visata ei saa. Seepärast on kriteeriumide komplekti kontroll (puudub mõni vormi kriteerium, üleliigne või tundmatu `feedbackCriteriaId`, sama kriteerium kaks korda) eraldi äriviga **403 `FEEDBACK_CRITERIA_CHANGED`** — praktikas juhtub see siis, kui admin muudab kriteeriume ajal, mil vorm on lahti.
 
@@ -245,7 +245,7 @@ CREATE TABLE course_participant_feedback
     feedback_id          int          NOT NULL,
     feedback_criteria_id int          NOT NULL,
     score                int          NOT NULL,
-    feedback_text        varchar(255) NULL,
+    feedback_text        text NULL,
     created_at           timestamp    NOT NULL,
     updated_at           timestamp    NOT NULL,
     CONSTRAINT course_participant_feedback_pk PRIMARY KEY (id),
@@ -356,7 +356,7 @@ erDiagram
         int feedback_id FK
         int feedback_criteria_id FK
         int score "1-10"
-        varchar feedback_text "NULL, max 255"
+        text feedback_text "NULL, sisendi piir 10000"
         timestamp created_at
         timestamp updated_at
     }
@@ -493,7 +493,7 @@ Below the header a hint text "Hinda iga väidet skaalal 1–10 (1 = ei nõustu �
 Then five criterion blocks stacked vertically, each with: a bold label followed by a small circled question mark icon with a tooltip, a row of ten radio buttons labelled 1 to 10, and below them a small link "+ Lisa kommentaar".
 Criterion labels: "Koolitus vastas ootustele", "Koolitaja oli pädev", "Õppematerjalid olid asjakohased", "Õpikeskkond ja korraldus olid sobivad", "Soovitaksin koolitust kolleegidele".
 Show the tooltip of the first question mark open with the text "Koolituse sisu, tase ja maht vastasid koolituse kirjelduse põhjal tekkinud ootustele."
-In the second criterion the comment is open: the link reads "− Peida kommentaar", below it a three-line text area with placeholder "Täpsusta soovi korral oma hinnangut" and a small counter "0 / 255" under its right corner.
+In the second criterion the comment is open: the link reads "− Peida kommentaar", below it a three-line text area with placeholder "Täpsusta soovi korral oma hinnangut" and a small counter "0 / 10000" under its right corner.
 At the bottom of the card a primary button "Lisa tagasiside".
 Style: low-fidelity wireframe, black and white with one blue accent, no images.
 ```

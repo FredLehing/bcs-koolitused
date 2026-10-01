@@ -322,7 +322,7 @@ tr.is-new td { font-weight: 700; }
     <nav class="sitenav" aria-label="Navbar (wireframe)">
       <span class="logo" aria-hidden="true"></span><span>Koolitused</span><span>Teenused</span><span>Ettevõttest</span><span>Kontakt</span>
       <span class="admin"><button type="button" id="b-admin" aria-expanded="false" aria-controls="admin-menu">Admin ▾</button>
-        <span class="menu" id="admin-menu" hidden><button type="button" class="cur" data-nav="/admin-enquiries" id="m-enquiries">Koolituste päringud</button><button type="button" data-nav="/admin-registrations">Registreerumised</button><hr><button type="button" data-nav="/admin-trainings">Koolitused</button><button type="button" data-nav="/admin-all-courses">Koolituste kalender</button><hr><button type="button" data-nav="/admin-lecturers">Koolitajad</button><button type="button" data-nav="/admin-rooms">Koolitusruumid</button><hr><button type="button" data-nav="/admin-users">Kontod</button></span></span>
+        <span class="menu" id="admin-menu" hidden><button type="button" class="cur" data-nav="/admin-enquiries" id="m-enquiries">Koolituste päringud</button><button type="button" data-nav="/admin-registrations">Registreerumised</button><button type="button" data-nav="/admin-feedbacks">Tagasisided</button><hr><button type="button" data-nav="/admin-trainings">Koolitused</button><button type="button" data-nav="/admin-all-courses">Koolituste kalender</button><hr><button type="button" data-nav="/admin-lecturers">Koolitajad</button><button type="button" data-nav="/admin-rooms">Koolitusruumid</button><hr><button type="button" data-nav="/admin-users">Kontod</button></span></span>
       <span class="out" title="Minu profiil ▾ — adminil ainult &quot;Parool&quot; (/change-password)">👤 ▾</span>
       <span class="out">Logi välja</span>
     </nav>
@@ -369,7 +369,7 @@ tr.is-new td { font-weight: 700; }
   }
 
   /* ---------- Vahelehed (NavTabs.vue) — samad lingid mis navbari menüüs ---------- */
-  var ADMIN_TABS = [["/admin-enquiries", "Koolituste päringud"], ["/admin-registrations", "Registreerumised"], ["/admin-trainings", "Koolitused"], ["/admin-all-courses", "Koolituste kalender"], ["/admin-lecturers", "Koolitajad"], ["/admin-rooms", "Koolitusruumid"], ["/admin-users", "Kontod"]];
+  var ADMIN_TABS = [["/admin-enquiries", "Koolituste päringud"], ["/admin-registrations", "Registreerumised"], ["/admin-feedbacks", "Tagasisided"], ["/admin-trainings", "Koolitused"], ["/admin-all-courses", "Koolituste kalender"], ["/admin-lecturers", "Koolitajad"], ["/admin-rooms", "Koolitusruumid"], ["/admin-users", "Kontod"]];
   var TRAINING_TABS = [["/trainings", "Meie koolitused"], ["/courses", "Koolituste kalender"]];
   function viewTabs(tabs, current) {
     return '<nav class="vtabs" aria-label="Vahelehed">' + tabs.map(function (t) { return '<button type="button" data-vtab="' + t[0] + '"' + (t[0] === current ? ' aria-current="page"' : "") + '>' + t[1] + '</button>'; }).join("") + '</nav>';
@@ -387,7 +387,7 @@ tr.is-new td { font-weight: 700; }
       "Frontend rada: /admin-enquiries",
       "",
       "Vaatega seotud lisainfo:",
-      "Ülal vahelehed (AdminTabs.vue): Koolituste päringud | Registreerumised | Koolitused | Koolituste kalender | Koolitajad | Koolitusruumid | Kontod — samad lingid ja järjekord mis menüüs \"Admin\", selle vaate vaheleht on aktiivne. Kitsal ekraanil on vahelehed ühel keritaval real, aktiivne keritakse keskele.",
+      "Ülal vahelehed (AdminTabs.vue): Koolituste päringud | Registreerumised | Tagasisided | Koolitused | Koolituste kalender | Koolitajad | Koolitusruumid | Kontod — samad lingid ja järjekord mis menüüs \"Admin\", selle vaate vaheleht on aktiivne. Kitsal ekraanil on vahelehed ühel keritaval real, aktiivne keritakse keskele.",
       "Avaneb navbari menüüst \"Admin\" → \"Koolituste päringud\". Tabelis Saabunud | Nimi | E-post | Ettevõte | Koolitus | Toimumiskord | Staatus | Tegevused; uusimad üleval, uue päringu rida paksus kirjas. Koolituse nimi on kasutajaliidese keeles (puudumisel põhikeeles), keele vahetusel laaditakse nimekiri uuesti. Toimumiskord \"—\", kui päring on koolituse kohta üldiselt.",
       "Lüliti \"Näita ka käsitletud\" (vaikimisi väljas) → includeHandled=true. Otsinguväli filtreerib frontendis nime, e-posti, ettevõtte ja koolituse järgi; veerud Saabunud, Nimi, Koolitus ja Staatus on sorteeritavad frontendis (1. klõps kasvav, 2. kahanev, 3. vaikimisi). All \"Kokku N päringut\".",
       "Silma ikoon \"Vaata\" → /admin-enquiry?enquiryId={id}."

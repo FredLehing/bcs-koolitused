@@ -1,5 +1,7 @@
 {
-  "navigation": { "back": "Tagasi" },
+  "navigation": {
+    "back": "Tagasi"
+  },
   "common": {
     "close": "Sulge"
   },
@@ -78,7 +80,8 @@
     "participantCourses": "Minu koolitused",
     "participantCertificates": "Tunnistused",
     "changePassword": "Parool",
-    "manageUsers": "Kontod"
+    "manageUsers": "Kontod",
+    "manageFeedbacks": "Tagasisided"
   },
   "error": {
     "message": "Midagi läks valesti, proovi hiljem uuesti!",
@@ -249,9 +252,16 @@
       "trainingData": "Koolituse andmed",
       "lecturers": "Koolitajad",
       "upcomingCourses": "Järgmised koolitused",
-      "calendar": "Kalender",
-      "placeholder": "Sisu lisandub peagi."
-    }
+      "calendar": "Kalender"
+    },
+    "location": "Asukoht",
+    "orderable": "Tellitav koolitus",
+    "yes": "Jah",
+    "no": "Ei",
+    "loading": "Laadin koolitust…",
+    "loadError": "Koolitust ei õnnestunud laadida.",
+    "noUpcomingCourses": "Järgmisi koolitusi praegu ei ole.",
+    "allCourses": "Vaata koolituste kalendrit"
   },
   "trainingStatusButton": {
     "buttons": {
@@ -968,6 +978,61 @@
     },
     "messages": {
       "saved": "Tagasiside salvestatud"
+    }
+  },
+  "adminFeedbacks": {
+    "title": "Tagasisided",
+    "total": "Tagasisidede arv",
+    "needsReview": "Vajab ülevaatust",
+    "lowScores": "Madal hinne (≤ 5)",
+    "average": "Üldkeskmine",
+    "responseRate": "Vastanud / registreerunud",
+    "searchPlaceholder": "Otsi koolituse või osaleja nimest",
+    "search": "Otsi",
+    "showFilters": "Ava otsingu filtrid",
+    "hideFilters": "Peida otsingu filtrid",
+    "clearFilters": "Tühjenda filtrid",
+    "course": "Toimumiskord",
+    "all": "Kõik",
+    "withComments": "Sisaldab kommentaari",
+    "noComments": "Kommentaarid puuduvad",
+    "from": "Toimumine alates",
+    "until": "Toimumine kuni",
+    "low": "Vähemalt üks hinne ≤",
+    "filter": "Filtreeri",
+    "loading": "Laadin…",
+    "retry": "Proovi uuesti",
+    "criteriaAverages": "Kriteeriumide keskmised",
+    "answerCount": "Vastuseid: {count}",
+    "invalidDates": "Alguskuupäev ei tohi olla lõppkuupäevast hilisem.",
+    "reviewSuccess": "Tagasiside märgitud üle vaadatuks",
+    "loadError": "Andmete laadimine ebaõnnestus. Proovi uuesti.",
+    "statuses": {
+      "N": "Uus",
+      "U": "Muudetud",
+      "H": "Üle vaadatud"
+    },
+    "updatedHint": "Osaleja muutis vastuseid pärast admini ülevaatust",
+    "hideAnswers": "Peida vastused",
+    "openAnswers": "Ava vastused",
+    "review": "Märgi üle vaadatuks",
+    "reviewHint": "Ava ja loe kõigepealt vastused",
+    "answers": "vastused",
+    "criterion": "Kriteerium",
+    "score": "Hinne",
+    "comment": "Kommentaar",
+    "noAnswers": "Selle tagasiside vastused puuduvad.",
+    "noResults": "Tagasisidesid ei leitud. Muuda otsingut või tühjenda filtrid.",
+    "columns": {
+      "createdAt": "Esitatud",
+      "answersUpdatedAt": "Vastuseid muudetud",
+      "trainingTitle": "Koolitus / toimumine",
+      "participantName": "Osaleja",
+      "averageScore": "Keskmine",
+      "minimumScore": "Madalaim",
+      "commentCount": "Kommentaarid",
+      "status": "Staatus",
+      "actions": "Tegevused"
     }
   }
 }

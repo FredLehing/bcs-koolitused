@@ -9,7 +9,7 @@ import ee.bcskoolitus.controller.lecturer.dto.LecturerCreateRequestDto;
 import ee.bcskoolitus.controller.lecturer.dto.LecturerCreateResponseDto;
 import ee.bcskoolitus.controller.lecturer.dto.LecturerDetailDto;
 import ee.bcskoolitus.controller.lecturer.dto.LecturerProfileDto;
-import ee.bcskoolitus.controller.lecturer.dto.LecturerSummaryDto;
+import ee.bcskoolitus.controller.common.dto.LecturerSummaryDto;
 import ee.bcskoolitus.controller.lecturer.dto.LecturerTrainingDto;
 import ee.bcskoolitus.controller.lecturer.dto.LecturerTranslationCreateRequestDto;
 import ee.bcskoolitus.controller.lecturer.dto.LecturerTranslationCreateResponseDto;
@@ -227,7 +227,20 @@ public class LecturerService {
         return createLecturerSummaryDtos(lecturers, contentLang);
     }
 
+    // Seotud koolitajad on juba sortOrder järjekorras ja join fetch abil laetud.
+    // Tõlked ja fotode versioonid loetakse hulgi; kustutatud koolitaja kaarti ei kuvata.
+    @Transactional(readOnly = true)
+    public List<LecturerSummaryDto> findLecturerSummariesBy(List<Lecturer> lecturers, String contentLang) {
+        List<Lecturer> activeLecturers = lecturers.stream()
+                .filter(lecturer -> LecturerStatus.ACTIVE.getCode().equals(lecturer.getStatus()))
+                .toList();
+        return createLecturerSummaryDtos(activeLecturers, contentLang);
+    }
+
     private List<LecturerSummaryDto> createLecturerSummaryDtos(List<Lecturer> lecturers, String contentLang) {
+        if (lecturers.isEmpty()) {
+            return List.of();
+        }
         List<Integer> lecturerIds = lecturers.stream().map(Lecturer::getId).toList();
         Map<Integer, LecturerTranslation> displayTranslations = findDisplayTranslations(lecturerIds, contentLang);
         Map<Integer, Long> photoVersions = lecturerPhotoService.findPhotoVersions(lecturerIds);

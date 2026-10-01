@@ -48,7 +48,7 @@ Eeskuju: `docs/mock-wireframe/loo-mock-vaade/admin-trainings-view/` (skeemid, l�
 - **Miks:** JPA laeb `bytea` välja entity'ga alati kaasa (laisk laadimine vajaks bytecode enhancement'it). Eraldi tabeliga ei loeta pilte näiteks "Vali koolitaja" otsingus ega teistes koolitajate päringutes. Kaob ka `NOT NULL` + `''::bytea` kohatäide.
 - `content_type` salvestatakse koos pildiga (normaliseeritud pildil `image/jpeg`); pilditeenus saadab selle `Content-Type` päisena.
 - `GET /api/lecturers` → `LecturerDto` ilma `lecturerPhoto`-ta (`{ lecturerId, lecturerName }`). Muutub olemasolev kood: `Lecturer` entity (`photo` väli kaob), `LecturerMapper` (`bytesToBase64` liigub pildi mapperisse), `LecturerDto`, `MockDatabase.js`.
-- Kalender ja toimumiskorra vorm pilte ei kuva (koolitajad on nimedena). Pilti kuvab avalikul koolituse lehel koolitaja kaart (`LecturerCard.vue`, teenus `GET /api/lecturer-summary/{lecturerId}` — vt `docs/mock-wireframe/loo-mock-vaade/admin-lecturers-view/admin-lecturers-view-skeemid.md`). `GET /api/admin-training/{trainingId}` pilti **ei** tagasta.
+- Kalender ja toimumiskorra vorm pilte ei kuva (koolitajad on nimedena). Pilti kuvab avalikul koolituse lehel koolitaja kaart (`LecturerCard.vue`, andmed `GET /api/training-summary/{trainingId}` vastusest, foto eraldi pilditeenusest — vt `docs/mock-wireframe/loo-mock-vaade/admin-lecturers-view/admin-lecturers-view-skeemid.md`). `GET /api/admin-training/{trainingId}` pilti **ei** tagasta.
 - **Uuendus (avalik koolitajate leht):** pilt tuleb pilditeenusest `GET /api/lecturer/{lecturerId}/photo?v={photoVersion}` ja DTO-d tagastavad Base64 asemel `photoVersion`; üleslaadimisel pilt normaliseeritakse (400×400 JPEG). Vt `docs/mock-wireframe/loo-mock-vaade/lecturers-view/lecturers-view-skeemid.md`, "Pildid".
 
 ### Staatused (`course.status`, ingliskeelsed ühetähelised koodid)
@@ -115,7 +115,7 @@ ALTER TABLE lecturer_photo
 
 Seed: koolitajad (9) ja pildid on `admin-lecturers-view-skeemid.md` jaotises 1 ning taskis `docs/tasks/backend/lecturer-db-changes.md` — Rain Tüüril (1) on näidispilt, teistel pilti pole.
 
-Backend: uus entity `persistance/lecturer/photo/LecturerPhoto` (`@ManyToOne` / `@OneToOne` väli `lecturer`) ja `LecturerPhotoRepository.findByLecturerId(Integer)` → `Optional`. Pildi loeb ainult `GET /api/lecturer-summary/{lecturerId}` (ja koolitaja vormi `GET /api/lecturer/{lecturerId}`).
+Backend: uus entity `persistance/lecturer/photo/LecturerPhoto` (`@ManyToOne` / `@OneToOne` väli `lecturer`) ja `LecturerPhotoRepository.findByLecturerId(Integer)` → `Optional`. Pildi baite loeb olemasolev `GET /api/lecturer/{lecturerId}/photo` teenus; koondvastused sisaldavad ainult photoVersion metainfot.
 
 ---
 

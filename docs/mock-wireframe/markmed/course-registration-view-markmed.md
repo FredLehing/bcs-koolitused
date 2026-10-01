@@ -47,7 +47,7 @@ CoursePageDto.java
   "status": "O",
   "isOnSite": true,
   "isOnline": false,
-  "lecturers": [ { "lecturerId": 1, "lecturerName": "Rain Tüür" } ],
+  "lecturers": [ { "lecturerId": 1, "fullName": "Rain Tüür", "title": "Lektor/konsultant", "shortDescription": "Java koolitaja.", "photoVersion": 1784106000 } ],
   "upcomingCourses": [
     { "courseId": 1, "startDate": "2026-10-05", "endDate": "2026-10-09", "status": "O", "isOnSite": true, "isOnline": false },
     { "courseId": 5, "startDate": "2026-11-16", "endDate": "2026-11-20", "status": "F", "isOnSite": false, "isOnline": true }

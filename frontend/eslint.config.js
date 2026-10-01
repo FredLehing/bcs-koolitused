@@ -21,6 +21,11 @@ export default defineConfig([
     },
   },
 
+  {
+    files: ['tests/**/*.cjs'],
+    languageOptions: { sourceType: 'commonjs', globals: globals.node },
+  },
+
   js.configs.recommended,
   ...pluginVue.configs['flat/essential'],
 

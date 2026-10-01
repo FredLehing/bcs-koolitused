@@ -1,6 +1,6 @@
 # CourseView.vue — märkmed
 
-Avalik toimumiskorra leht koos "Küsi lisainfot" modaliga ja registreerumise nupuga. Otsused, andmebaasi ettepanek ja skeemid: `docs/mock-wireframe/loo-mock-vaade/courses-view/courses-view-skeemid.md`. Interaktiivne läbimäng: `courses-view-labimang.html`. Uute teenuste DTO-d on ettepanek; olemas: `GET /api/lecturer-summary/{lecturerId}`.
+Avalik toimumiskorra leht koos "Küsi lisainfot" modaliga ja registreerumise nupuga. Otsused, andmebaasi ettepanek ja skeemid: `docs/mock-wireframe/loo-mock-vaade/courses-view/courses-view-skeemid.md`. Interaktiivne läbimäng: `courses-view-labimang.html`. Koondteenus tagastab ka koolitajakaartide andmed; fotod laaditakse olemasolevast pilditeenusest.
 
 ## Vaate märkmed
 
@@ -11,8 +11,8 @@ Frontend rada: /course?courseId={id}
 
 Vaatega seotud lisainfo:
 Paigutus nagu /training. Vasakul kaart "Koolitus": pealkiri, toimumisaeg, lühikirjeldus, kirjeldus (RichTextContent) ja link "Kõik selle koolituse toimumiskorrad" → /training. Puuduva tõlke korral põhikeele tekst ja märkus.
-Paremal kaart "Toimumiskord": Toimumisaeg, Päevi, Akad. tunde, Hind, Toimumisviis, Koolituse keel, Kategooria, Rahastus, märgis "Täis"; nupp "Registreeru" (sisse logimata → /login?redirect=/course-registration?courseId={id}; kasutaja → /course-registration?courseId={id}; juba registreerunud kasutajale nupu asemel märge "✓ Oled sellele toimumiskorrale registreerunud" — GET /api/course/{courseId}/participant-status?userId=; täis → keelatud "Kohad on täis") ja nupp ja "Küsi lisainfot" (avab päringu modali; möödunud toimumiskorral keelatud). Adminile neid kahte nuppu ei kuvata. Kaart "Koolitajad" (LecturerCard, GET /api/lecturer-summary/{lecturerId}) — ilma koolitajateta ei kuvata; iga koolitaja kaart on link → /lecturer?lecturerId={id}&returnTo=/course?courseId={id} (samas tabis).
-Vasakus veerus kohe kaardi "Koolitus" all kaart "Toimumiskorrad": sama koolituse kõik avalikud tulevased toimumiskorrad üksteise all linkidena kujul "12/10/2026 – 15/10/2026 · Kohapeal" (täis korral lisaks märgis "Täis"), alguse järgi. Praegune toimumiskord on paksus kirjas (▸) ega ole link; teise lingi vajutus avab sama vaate: /course?courseId={id} (query muutus laadib vaate uuesti). Kui peale praeguse teisi toimumiskordi pole, sektsiooni ei kuvata.
+Paremal kaart "Toimumiskord": Toimumisaeg, Päevi, Akad. tunde, Hind, Toimumisviis, Koolituse keel, Kategooria, Rahastus, märgis "Täis"; nupp "Registreeru" (sisse logimata → /login?redirect=/course-registration?courseId={id}; kasutaja → /course-registration?courseId={id}; juba registreerunud kasutajale nupu asemel märge "✓ Oled sellele toimumiskorrale registreerunud" — GET /api/course/{courseId}/participant-status?userId=; täis → keelatud "Kohad on täis") ja nupp ja "Küsi lisainfot" (avab päringu modali; möödunud toimumiskorral keelatud). Adminile neid kahte nuppu ei kuvata. Kaart "Koolitajad" (LecturerCard, andmed course-summary koondvastusest) — ilma koolitajateta ei kuvata; iga koolitaja kaart on link → /lecturer?lecturerId={id}&returnTo=/course?courseId={id} (samas tabis).
+Paremas veerus kaardi "Toimumiskord" kohal kaart "Toimumiskorrad": sama koolituse kõik avalikud tulevased toimumiskorrad üksteise all linkidena kujul "12/10/2026 – 15/10/2026 · Kohapeal" (täis korral lisaks märgis "Täis"), alguse järgi. Praegune toimumiskord on paksus kirjas (▸) ega ole link; teise lingi vajutus avab sama vaate: /course?courseId={id} (query muutus laadib vaate uuesti). Kui peale praeguse teisi toimumiskordi pole, sektsiooni ei kuvata.
 Modal "Küsi lisainfot" (EnquiryModal.vue): all pealkirja koolitus ja toimumisaeg. Väljad: Eesnimi*, Perekonnanimi*, E-post*, Telefon*, Ettevõte, Sõnum* (kuni 255 märki, loendur); all väike tekst "Kasutame sinu andmeid ainult päringule vastamiseks." "Saada" → frontendi kontroll (kohustuslikud väljad, e-posti kuju) → POST /api/enquiry → modal sulgub ja lehel eduteade "Aitäh! Sinu päring on saadetud, võtame peagi ühendust." "Tühista", × või Esc sulgeb ilma saatmata.
 Möödunud toimumiskord avaneb märgisega "Toimunud" ja keelatud nuppudega. Mustand, tühistatud, kustutatud või olematu toimumiskord → üldine veavaade. Adminile pliiats → /course-form?courseId={id}. Keele vahetusel laaditakse uuesti.
 ```
@@ -47,7 +47,7 @@ CoursePageDto.java
   "status": "O",
   "isOnSite": true,
   "isOnline": false,
-  "lecturers": [ { "lecturerId": 1, "lecturerName": "Rain Tüür" } ],
+  "lecturers": [ { "lecturerId": 1, "fullName": "Rain Tüür", "title": "Lektor/konsultant", "shortDescription": "Java koolitaja.", "photoVersion": 1784106000 } ],
   "upcomingCourses": [
     { "courseId": 1, "startDate": "2026-10-05", "endDate": "2026-10-09", "status": "O", "isOnSite": true, "isOnline": false },
     { "courseId": 5, "startDate": "2026-11-16", "endDate": "2026-11-20", "status": "F", "isOnSite": false, "isOnline": true }
@@ -63,26 +63,20 @@ errorCode: PRIMARY_KEY_NOT_FOUND
 message: "Ei leidnud primary keyd 'courseId' väärtusega: 123"
 ```
 
-## API märkmed — GET /api/lecturer-summary/{lecturerId}
+## API märkmed — GET /api/lecturer/{lecturerId}/photo
 
 ```text
-API: GET /api/lecturer-summary/{lecturerId}
+API: GET /api/lecturer/{lecturerId}/photo
 
 Query parameetrid:
-contentLang: String — ametinimetuse ja lühikirjelduse keel ("et"/"en")
+v: Long — photoVersion, pildi vahemälu jaoks (valikuline)
 
-Response (200):
-LecturerSummaryDto.java
-{
-  "lecturerId": 1,
-  "fullName": "Rain Tüür",
-  "title": "Lektor/konsultant",
-  "shortDescription": "Tarkvaraarendus, Java, HTML, CSS, JavaScript, SQL, …",
-  "photoVersion": 1759305600
-}
+Response (200): pildi baidid (image/jpeg), mitte JSON
 
 API teenuse lisainfo:
-Olemasolev teenus — LecturerCard.vue laeb iga koolitaja kaardi ise (sama mis /training lehel), uuesti keele muutumisel. title ja shortDescription contentLang keeles, puudumisel põhikeeles. photoVersion = lecturer_photo.updated_at epoch-sekundites või null (pilti pole); pildi URL /api/lecturer/{lecturerId}/photo?v={photoVersion}. Kustutatud koolitaja → 404 (kaart jäetakse välja).
+LecturerCard saab fullName, title, shortDescription ja photoVersion course-summary vastusest.
+Kaardi JSON-päringud puuduvad. Pilditeenus kutsutakse ainult photoVersion olemasolul;
+pildi puudumisel kohatäide. Kustutatud koolitajad filtreerib koondteenus enne vastust.
 
 Veateated:
 HTTP: 404
@@ -148,3 +142,10 @@ message: "Ei leidnud primary keyd 'courseId' väärtusega: 123" (sama 'trainingI
 ## Tagasitee — täiendatud navigatsioon
 
 Vaade võtab vastu valikulise `returnTo` query parameetri ja kuvab lingi „← Tagasi“ (`BackLink.vue`). Avamislingid annavad kaasa lähtevaate täieliku URL-i. Tagasilingi puuduv, väline, tundmatu või iseendale osutav siht asendatakse vaate varusihtkohaga. Oleku- ja tõlkevahetus ei kaota tagasiteed. Eraldi nimega nimekirja-/kalendrinupud säilitavad oma sihtkoha. Täpne [kaardistus ja varusihtkohad](../../tasks/frontend/return-to-navigation.md) ning [skeemid](../loo-mock-vaade/return-to-navigation-skeemid.md).
+
+## Toimumiskorra vahetus samas vaates
+
+`/course` kaardi „Toimumiskorrad“ lingid kasutavad `router.replace` ja annavad
+kaasa ainult uue `courseId`. `returnTo` eemaldatakse; URL ei pikene ega teki
+uut ajalookirjet. Vaade laadib koondandmed ja vajadusel osalemise oleku uuesti.
+„← Tagasi“ kasutab seejärel varusihti `/courses`.
