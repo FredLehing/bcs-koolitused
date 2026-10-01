@@ -6,6 +6,8 @@ Eeskuju: `docs/mock-wireframe/loo-mock-vaade/admin-lecturers-view/admin-lecturer
 
 ## Otsused
 
+- **Vahelehed** (2026-10-01): admini nimekirjavaadete ülaosas vahelehed kõigi admin-menüü linkidega (`AdminTabs.vue` / `NavTabs.vue`), selle vaate vaheleht aktiivne — vt `docs/tasks/frontend/view-tabs.md`.
+
 ### Üldine
 
 - **Termin kasutajaliideses on "koolitusruum"** (liitsõna; inglise keeles "Training room"). Lühidalt tabelis ja vormis "Ruum" / "Nimi". Koodis ja andmebaasis jääb `room`.
@@ -288,6 +290,7 @@ sequenceDiagram
 ```text
 Create a desktop wireframe of an admin page "Koolitusruumid" in a web app.
 Top: site navigation bar with logo and links (Koolitused, Teenused, Ettevõttest, Kontakt), an open dropdown "Admin ▾" with items "Koolituste päringud", "Registreerumised", a divider, "Koolitused", "Koolituste kalender", a divider, "Koolitajad" and "Koolitusruumid" (highlighted), and "Logi välja" on the right.
+Below the navigation bar: a tab bar "Koolituste päringud | Registreerumised | Koolitused | Koolituste kalender | Koolitajad | Koolitusruumid" with "Koolitusruumid" as the active tab.
 Header row: page title "Koolitusruumid" on the left and a primary button "+ Lisa uus ruum" on the right.
 Below the header: a search text input "Otsi nime järgi…" and a toggle switch "Näita kustutatud" (on).
 Main area: a data table with sortable columns "Nimi ▲", "Tulevasi toimumiskordi", "Toimumiskordi kokku", "Uuendatud" and a column "Tegevused".

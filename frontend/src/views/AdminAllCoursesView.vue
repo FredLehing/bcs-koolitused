@@ -9,6 +9,7 @@ import CategoryService from '@/api-services/CategoryService.js'
 import FormatService from '@/services/FormatService.js'
 import NavigationService from '@/services/NavigationService.js'
 import SessionStorageService from '@/services/SessionStorageService.js'
+import AdminTabs from '@/components/common/AdminTabs.vue'
 import CheckMark from '@/components/common/CheckMark.vue'
 import CourseDeleteButton from '@/components/common/CourseDeleteButton.vue'
 import CourseStatusBadge from '@/components/common/CourseStatusBadge.vue'
@@ -35,6 +36,7 @@ function createDefaultFilters() {
 export default {
   name: 'AdminAllCoursesView',
   components: {
+    AdminTabs,
     PhCalendarBlank,
     PhEye,
     PhPencilSimple,
@@ -265,6 +267,8 @@ export default {
 
 <template>
   <div class="container">
+    <AdminTabs />
+
     <h1 class="h3 mb-3">{{ $t('adminAllCourses.title') }}</h1>
 
     <div class="input-group mb-2">

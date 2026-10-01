@@ -6,6 +6,8 @@ Eeskuju: `admin-rooms-view-skeemid.md` (nimekiri, otsing, frontendi sorteerimine
 
 ## Otsused
 
+- **Vahelehed** (2026-10-01): admini nimekirjavaadete ülaosas vahelehed kõigi admin-menüü linkidega (`AdminTabs.vue` / `NavTabs.vue`), selle vaate vaheleht aktiivne — vt `docs/tasks/frontend/view-tabs.md`.
+
 ### Üldine
 
 - **Päring** = huvilise saadetud päring koolituse kohta (tabel `enquiry` + kontaktandmed `profile`). Päringu **loomise** modal on avalikul toimumiskorra lehel (`/course`, vt `courses-view/courses-view-skeemid.md`).
@@ -189,6 +191,7 @@ sequenceDiagram
 ```text
 Create a desktop wireframe of an admin page "Koolituste päringud" in a web app.
 Top: site navigation bar with logo and links, an open dropdown "Admin ▾" with items "Koolituste päringud" (highlighted), "Registreerumised", a divider, "Koolitused", "Koolituste kalender", a divider, "Koolitajad" and "Koolitusruumid", and "Logi välja" on the right.
+Below the navigation bar: a tab bar "Koolituste päringud | Registreerumised | Koolitused | Koolituste kalender | Koolitajad | Koolitusruumid" with "Koolituste päringud" as the active tab.
 Header: page title "Koolituste päringud".
 Below: a search input "Otsi nime, e-posti, ettevõtte või koolituse järgi…" and a toggle switch "Näita ka käsitletud" (on).
 Main area: a data table with columns "Saabunud ▼", "Nimi", "E-post", "Ettevõte", "Koolitus", "Toimumiskord", "Staatus", "Tegevused".

@@ -10,6 +10,8 @@ Mõisted: **registreerumine** = üks `course_participant` rida (osaleja + toimum
 
 ## Otsused
 
+- **Vahelehed** (2026-10-01): admini nimekirjavaadete ülaosas vahelehed kõigi admin-menüü linkidega (`AdminTabs.vue` / `NavTabs.vue`), selle vaate vaheleht aktiivne — vt `docs/tasks/frontend/view-tabs.md`.
+
 ### Üldine
 
 - Registreerumisi hallatakse eraldi vaates, mitte `/admin-course` tabeli real (rida jääb ainult lugemiseks).

@@ -10,6 +10,7 @@ Failinimi: AdminTrainingsView.vue
 Frontend rada: /admin-trainings
 
 Vaatega seotud lisainfo:
+Ülal vahelehed (AdminTabs.vue): Koolituste päringud | Registreerumised | Koolitused | Koolituste kalender | Koolitajad | Koolitusruumid — samad lingid ja järjekord mis menüüs "Admin", selle vaate vaheleht on aktiivne. Kitsal ekraanil on vahelehed ühel keritaval real, aktiivne keritakse keskele.
 Tabeli rida = üks koolitus; vaikimisi ainult aktiivsed (status "U" ja "P"), kustutatud ("D") näeb staatuse filtriga "Kustutatud". Nimi ja kategooria kuvatakse kasutajaliidese keeles (store'i contentLang); kui selles keeles tõlget pole, kuvatakse põhikeele oma. Keele vahetamisel navbaris laaditakse tabel, kategooriad, rahastustüübid ja nimede ettepanekud uuesti; otsing, filtrid, sorteerimine ja leht jäävad alles.
 Otsinguväli otsib ainult koolituse nimest; trükkimise ajal pakub datalist nimesid (GET /api/training-titles). Otsing käivitub nupu "Otsi" või Enteri peale. Nupu kõrval on küsimärgi ikoon, mille tooltip selgitab: otsitakse nimest, iga sõna peab esinema, käändeid ei kohandata; nimede valikus on ainult aktiivsed koolitused — kustutatud koolituse leidmiseks vali filtrites Staatus "Kustutatud".
 Kaart "Otsingu filtrid" on vaikimisi peidus (link "▾ Ava otsingu filtrid" / "▴ Peida otsingu filtrid"). Filtrid rakenduvad nupuga "Filtreeri" ja jäävad kehtima ka peidetud kaardiga (märk "N filtrit aktiivne"); "Tühjenda filtrid" taastab vaikimisi väärtused.

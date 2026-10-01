@@ -5,6 +5,7 @@ import { useLanguageStore } from '@/stores/languageStore.js'
 import LecturerService from '@/api-services/LecturerService.js'
 import NavigationService from '@/services/NavigationService.js'
 import SessionStorageService from '@/services/SessionStorageService.js'
+import AdminTabs from '@/components/common/AdminTabs.vue'
 import InlineAlerts from '@/components/common/InlineAlerts.vue'
 import LecturerDeleteButton from '@/components/common/LecturerDeleteButton.vue'
 import LecturerRestoreButton from '@/components/common/LecturerRestoreButton.vue'
@@ -27,6 +28,7 @@ function padTwoDigits(number) {
 export default {
   name: 'AdminLecturersView',
   components: {
+    AdminTabs,
     PhCheck,
     PhPencilSimple,
     PhPlus,
@@ -188,6 +190,8 @@ export default {
 
 <template>
   <div class="container">
+    <AdminTabs />
+
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
       <h1 class="h3 mb-0">{{ $t('adminLecturers.title') }}</h1>
       <button

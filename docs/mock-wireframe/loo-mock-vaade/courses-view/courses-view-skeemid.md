@@ -17,6 +17,9 @@ Eeskujud: `admin-training-courses-view/` (ühe koolituse kalender, `course_summa
 
 ## Otsused
 
+- **Vahelehed** (2026-10-01): admini nimekirjavaadete ülaosas vahelehed kõigi admin-menüü linkidega (`AdminTabs.vue` / `NavTabs.vue`), selle vaate vaheleht aktiivne — vt `docs/tasks/frontend/view-tabs.md`.
+- **Vahelehed** (2026-10-01): `/trainings` ja `/courses` ülaosas vahelehed "Meie koolitused | Koolituste kalender" (`TrainingsTabs.vue` / `NavTabs.vue`) — vt `docs/tasks/frontend/view-tabs.md`.
+
 ### Üldine
 
 - **Toimumiskorra staatused** jäävad samaks (`CourseStatus`): `U` mustand, `O` avatud, `F` täis, `X` tühistatud, `D` kustutatud (vt `admin-training-courses-view-skeemid.md`).
@@ -549,6 +552,7 @@ sequenceDiagram
 ```text
 Create a desktop wireframe of an admin page "Koolituste kalender" in a web app.
 Top: site navigation bar with logo, a dropdown "Koolitused ▾", other links, an open dropdown "Admin ▾" with items "Koolituste päringud", "Registreerumised", a divider, "Koolitused", "Koolituste kalender" (highlighted), a divider, "Koolitajad" and "Koolitusruumid", and "Logi välja" on the right.
+Below the navigation bar: a tab bar "Koolituste päringud | Registreerumised | Koolitused | Koolituste kalender | Koolitajad | Koolitusruumid" with "Koolituste kalender" as the active tab.
 Header: page title "Koolituste kalender".
 Below: a search input "Otsi koolituse nime järgi…" with a button "Otsi", a link "▾ Ava otsingu filtrid" with a small badge "1 filter aktiivne", and a toggle switch "Näita ka möödunud" (off).
 Main area: a data table with columns "Algus", "Päevi", "Koolitus", "Hind", "Staatus", "Osalejad", "Tasunud", "Veebilink", "Huvilisi", "Tegevused" (eye, pencil, calendar and trash icons).
@@ -576,6 +580,7 @@ Card "Huvilised": sortable column headers, no filters; a table with columns "Saa
 ```text
 Create a desktop wireframe of a public page "Koolituste kalender" in a training company web app.
 Top: site navigation bar with logo, an open dropdown "Koolitused ▾" with items "Meie koolitused" and "Koolituste kalender" (highlighted), links "Meie koolitajad", "Teenused", "Kontakt", and "Logi sisse" on the right.
+Below the navigation bar: a tab bar "Meie koolitused | Koolituste kalender" with "Koolituste kalender" as the active tab.
 Left column "Filtrid": date inputs "Alates" and "Kuni"; radio group "Toimumisviis" (Kõik, Kohapeal, Veebis); a toggle "Peida täis"; dropdowns "Koolituse keel" and "Koolituse kategooria"; radio group "Rahastus" (Kõik, Töötukassa, EL rahastus); link "Tühjenda filtrid".
 Right column: a search input "Otsi koolitust" with a button "Otsi" and a "?" help icon.
 Below: a list of course cards. Each card: on the left a date block "05.–09. OKT 2026" and "5 päeva · 40 t"; in the middle a bold title, a short description, a category tag, a funding line with a € icon, lecturer names and tags "Kohapeal" / "Veebis"; on the right a flag, a price "490 €" and a button "Vaata lähemalt".

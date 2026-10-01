@@ -35,6 +35,8 @@ Eemaldatakse: "Lisa uus koolitus" (`/training-form`) ja "Lisa uus koolitaja" (`/
 - **Sisselogimine adminina** (`LoginView.vue`): ilma `redirect` parameetrita → `/admin-enquiries` (menüü esimene punkt, `NavigationService.navigateToAdminEnquiriesView`); `redirect` olemasolul (nt registreerumise link) minnakse sinna nagu varem. Teised rollid → `redirect` või avaleht.
 - **Prototüübi kest:** sama suunamine; külgriba admini vaated on menüü järjekorras.
 
+Samad lingid on admini nimekirjavaadetes ka vahelehtedena — vt `view-tabs.md`.
+
 ## Komponendid ja failistruktuur
 
 - `App.vue`, `views/LoginView.vue`, `locales/et.json`, `locales/en.json` (muudetakse)

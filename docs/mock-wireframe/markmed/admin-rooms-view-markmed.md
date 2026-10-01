@@ -10,6 +10,7 @@ Failinimi: AdminRoomsView.vue
 Frontend rada: /admin-rooms
 
 Vaatega seotud lisainfo:
+Ülal vahelehed (AdminTabs.vue): Koolituste päringud | Registreerumised | Koolitused | Koolituste kalender | Koolitajad | Koolitusruumid — samad lingid ja järjekord mis menüüs "Admin", selle vaate vaheleht on aktiivne. Kitsal ekraanil on vahelehed ühel keritaval real, aktiivne keritakse keskele.
 Avaneb navbari menüüst "Admin" → "Koolitusruumid". Pealkirja real nupp "+ Lisa uus ruum" → /room-form. Tabelis Nimi | Tulevasi toimumiskordi | Toimumiskordi kokku | Uuendatud | Tegevused. Järjestus nime järgi; veerupäistel sorteerimine frontendis (1. klõps kasvav, 2. kahanev, 3. vaikimisi). Otsinguväli "Otsi nime järgi…" filtreerib frontendis (API kutset ei tehta); all "Kokku N ruumi". Vormist tulles näidatakse eduteadet ("Ruum lisatud" / "Salvestatud").
 "Muuda" → /room-form?roomId={id}. Prügikast (RoomDeleteButton.vue) küsib kinnitust ja teeb DELETE (soft delete); kui ruumis on tulevasi toimumiskordi, on prügikast keelatud ja tooltip selgitab põhjust (backend: 403 ROOM_HAS_UPCOMING_COURSES → backendi message, nimekiri uuesti).
 Lüliti "Näita kustutatud" (vaikimisi väljas) → includeDeleted=true: kustutatud read on tuhmimad, märgisega "Kustutatud" ja ainult nupuga "Taasta" (kinnitus → PUT /api/room/{roomId}/restore).
