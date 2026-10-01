@@ -1,5 +1,6 @@
 package ee.bcskoolitus.persistance.course.participant;
 
+import ee.bcskoolitus.controller.courseparticipant.dto.AdminRegistrationUpdateRequestDto;
 import ee.bcskoolitus.controller.courseparticipant.dto.CourseParticipantDto;
 import org.mapstruct.*;
 
@@ -20,4 +21,11 @@ public interface CourseParticipantMapper {
     CourseParticipantDto toCourseParticipantDto(CourseParticipant courseParticipant);
 
     List<CourseParticipantDto> toCourseParticipantDtos(List<CourseParticipant> courseParticipants);
+
+    // Admin muudab ainult registreerumise enda välju; adminNotes (tühi → null) määrab CourseParticipantService
+    @Mapping(source = "status", target = "status")
+    @Mapping(source = "hasPaid", target = "hasPaid")
+    @Mapping(source = "requiresLaptop", target = "requiresLaptop")
+    @Mapping(target = "adminNotes", ignore = true)
+    void updateCourseParticipant(AdminRegistrationUpdateRequestDto adminRegistrationUpdateRequestDto, @MappingTarget CourseParticipant courseParticipant);
 }
