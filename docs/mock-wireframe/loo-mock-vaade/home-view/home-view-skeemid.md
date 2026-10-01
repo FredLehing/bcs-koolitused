@@ -17,6 +17,8 @@ Eeskuju: `courses-view/courses-view-skeemid.md` (avalik kalender, `CourseCard.vu
 5. **"Kliendid meist"** `HomeTestimonials.vue` — olemas (kolm tagasiside kaarti, tekstid tõlkefailist), ei muutu.
 6. **Turunduslause ja link** (lehe lõpus, pärast tagasisidet — kokkulepe 2026-10-01: üleskutse sobib arvustuste järele): "Leia endale sobiv koolitus — uusi toimumiskordi lisandub pidevalt." ja nupp "Vaata kõiki toimuvaid koolitusi →" → `/courses`.
 
+- **Sektsioonide vahel on joon** (`border-top`, sama mis turunduslause ees): suunavate kaartide, "Meie järgmised 5 koolitust", "Kliendid meist" ja turunduslause ees. Otsingu ja galerii vahel joont pole — need on koos lehe päis (kokkulepe 2026-10-01).
+
 ### Järgmised toimumiskorrad
 
 - Andmed: view `public_course_summary` (publitseeritud koolitus, staatus `O`/`F`, `start_date >= täna`, ainult olemasoleva `contentLang` tõlkega) — sama mis `GET /api/courses`.
