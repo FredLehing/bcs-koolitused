@@ -14,6 +14,7 @@ export default {
         { routeName: 'adminAllCoursesRoute', label: this.$t('navbar.manageCourses') },
         { routeName: 'adminLecturersRoute', label: this.$t('navbar.manageLecturers') },
         { routeName: 'adminRoomsRoute', label: this.$t('navbar.manageRooms') },
+        { routeName: 'adminUsersRoute', label: this.$t('navbar.manageUsers') },
       ]
     },
   },

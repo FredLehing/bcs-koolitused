@@ -71,7 +71,13 @@
     "manageCourses": "Koolituste kalender",
     "ourTrainings": "Meie koolitused",
     "coursesCalendar": "Koolituste kalender",
-    "signup": "Loo konto"
+    "signup": "Loo konto",
+    "profile": "Minu profiil",
+    "participantDetails": "Minu andmed",
+    "participantCourses": "Minu koolitused",
+    "participantCertificates": "Tunnistused",
+    "changePassword": "Parool",
+    "manageUsers": "Kontod"
   },
   "error": {
     "message": "Midagi läks valesti, proovi hiljem uuesti!",
@@ -801,5 +807,108 @@
   },
   "lecturerCard": {
     "viewProfile": "Vaata koolitaja profiili: {name}"
+  },
+  "participantDetails": {
+    "edit": "Muuda",
+    "save": "Salvesta",
+    "cancel": "Tühista",
+    "emailHint": "Selle e-postiga logid ka sisse",
+    "messages": {
+      "saved": "Andmed salvestatud"
+    }
+  },
+  "participantCourses": {
+    "upcoming": "Tulevased",
+    "past": "Toimunud",
+    "noUpcoming": "Tulevasi koolitusi pole.",
+    "empty": "Sa pole veel ühelegi koolitusele registreerunud.",
+    "browseCourses": "Vaata koolitusi",
+    "paid": "Tasutud",
+    "notPaid": "Tasumata",
+    "cancel": "Loobu",
+    "cancelModal": {
+      "title": "Koolitusest loobumine",
+      "message": "Kas soovid koolitusest „{title}“ loobuda?",
+      "confirm": "Jah, loobu"
+    },
+    "messages": {
+      "cancelled": "Oled koolitusest loobunud"
+    }
+  },
+  "participantCertificates": {
+    "comingSoon": "Tunnistused tulevad varsti — siia ilmuvad sinu läbitud koolituste tunnistused."
+  },
+  "changePassword": {
+    "currentPassword": "Praegune parool",
+    "newPassword": "Uus parool",
+    "newPasswordRepeat": "Korda uut parooli",
+    "save": "Salvesta",
+    "validation": {
+      "sameAsCurrent": "Uus parool ei tohi olla sama mis praegune"
+    },
+    "messages": {
+      "changed": "Parool muudetud"
+    }
+  },
+  "userStatus": {
+    "A": "Aktiivne",
+    "D": "Deaktiveeritud"
+  },
+  "roles": {
+    "admin": "Admin",
+    "participant": "Osaleja"
+  },
+  "userStatusButton": {
+    "deactivate": "Deaktiveeri",
+    "restore": "Taasta",
+    "deactivateTitle": "Deaktiveeri konto?",
+    "deactivateMessage": "„{name}“ ei saa enam sisse logida. Andmed ja registreerumised jäävad alles, konto saab hiljem taastada.",
+    "restoreTitle": "Taasta konto?",
+    "restoreMessage": "„{name}“ saab jälle sisse logida."
+  },
+  "adminUsers": {
+    "title": "Kontod",
+    "searchPlaceholder": "Otsi e-posti, nime või telefoni järgi…",
+    "allRoles": "Kõik rollid",
+    "participants": "Osalejad",
+    "admins": "Adminid",
+    "showDeleted": "Näita ka deaktiveeritud",
+    "noResults": "Kontosid ei leitud",
+    "totalCount": "Kokku {n} kontot | Kokku {n} konto | Kokku {n} kontot",
+    "me": "Sina",
+    "view": "Vaata",
+    "columns": {
+      "createdAt": "Loodud",
+      "email": "E-post",
+      "participantName": "Nimi",
+      "phone": "Telefon",
+      "roleName": "Roll",
+      "registrationCount": "Registreerumisi",
+      "status": "Staatus",
+      "actions": "Tegevused"
+    },
+    "messages": {
+      "deactivated": "Konto deaktiveeritud",
+      "restored": "Konto taastatud"
+    }
+  },
+  "adminUser": {
+    "backToUsers": "Kõik kontod",
+    "title": "Konto",
+    "accountLegend": "Konto",
+    "participantLegend": "Osaleja",
+    "registrationsLegend": "Registreerumised",
+    "noParticipant": "Kontol pole osaleja andmeid",
+    "noRegistrations": "Registreerumisi pole",
+    "ownAccountHint": "See on sinu konto — enda kontot deaktiveerida ei saa.",
+    "deactivate": "Deaktiveeri konto",
+    "restore": "Taasta konto",
+    "viewRegistration": "Vaata registreerumist",
+    "columns": {
+      "training": "Koolitus",
+      "dates": "Toimumisaeg",
+      "status": "Staatus",
+      "hasPaid": "Tasunud"
+    }
   }
 }

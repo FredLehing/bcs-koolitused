@@ -71,7 +71,13 @@
     "manageCourses": "Course calendar",
     "ourTrainings": "Our trainings",
     "coursesCalendar": "Training calendar",
-    "signup": "Create account"
+    "signup": "Create account",
+    "profile": "My profile",
+    "participantDetails": "My details",
+    "participantCourses": "My courses",
+    "participantCertificates": "Certificates",
+    "changePassword": "Password",
+    "manageUsers": "Accounts"
   },
   "error": {
     "message": "Something went wrong, please try again later!",
@@ -801,5 +807,108 @@
   },
   "lecturerCard": {
     "viewProfile": "View lecturer profile: {name}"
+  },
+  "participantDetails": {
+    "edit": "Edit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "emailHint": "You also log in with this email",
+    "messages": {
+      "saved": "Details saved"
+    }
+  },
+  "participantCourses": {
+    "upcoming": "Upcoming",
+    "past": "Completed",
+    "noUpcoming": "No upcoming courses.",
+    "empty": "You have not registered for any course yet.",
+    "browseCourses": "Browse courses",
+    "paid": "Paid",
+    "notPaid": "Not paid",
+    "cancel": "Cancel",
+    "cancelModal": {
+      "title": "Cancel registration",
+      "message": "Do you want to cancel your registration for “{title}”?",
+      "confirm": "Yes, cancel"
+    },
+    "messages": {
+      "cancelled": "Your registration has been cancelled"
+    }
+  },
+  "participantCertificates": {
+    "comingSoon": "Certificates are coming soon — certificates of your completed courses will appear here."
+  },
+  "changePassword": {
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "newPasswordRepeat": "Repeat new password",
+    "save": "Save",
+    "validation": {
+      "sameAsCurrent": "The new password must differ from the current one"
+    },
+    "messages": {
+      "changed": "Password changed"
+    }
+  },
+  "userStatus": {
+    "A": "Active",
+    "D": "Deactivated"
+  },
+  "roles": {
+    "admin": "Admin",
+    "participant": "Participant"
+  },
+  "userStatusButton": {
+    "deactivate": "Deactivate",
+    "restore": "Restore",
+    "deactivateTitle": "Deactivate account?",
+    "deactivateMessage": "“{name}” will no longer be able to log in. Data and registrations are kept, the account can be restored later.",
+    "restoreTitle": "Restore account?",
+    "restoreMessage": "“{name}” will be able to log in again."
+  },
+  "adminUsers": {
+    "title": "Accounts",
+    "searchPlaceholder": "Search by email, name or phone…",
+    "allRoles": "All roles",
+    "participants": "Participants",
+    "admins": "Admins",
+    "showDeleted": "Show deactivated",
+    "noResults": "No accounts found",
+    "totalCount": "{n} accounts in total | {n} account in total | {n} accounts in total",
+    "me": "You",
+    "view": "View",
+    "columns": {
+      "createdAt": "Created",
+      "email": "Email",
+      "participantName": "Name",
+      "phone": "Phone",
+      "roleName": "Role",
+      "registrationCount": "Registrations",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "messages": {
+      "deactivated": "Account deactivated",
+      "restored": "Account restored"
+    }
+  },
+  "adminUser": {
+    "backToUsers": "All accounts",
+    "title": "Account",
+    "accountLegend": "Account",
+    "participantLegend": "Participant",
+    "registrationsLegend": "Registrations",
+    "noParticipant": "This account has no participant data",
+    "noRegistrations": "No registrations",
+    "ownAccountHint": "This is your account — you cannot deactivate your own account.",
+    "deactivate": "Deactivate account",
+    "restore": "Restore account",
+    "viewRegistration": "View registration",
+    "columns": {
+      "training": "Training",
+      "dates": "Dates",
+      "status": "Status",
+      "hasPaid": "Paid"
+    }
   }
 }

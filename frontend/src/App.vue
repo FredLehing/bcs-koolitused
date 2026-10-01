@@ -44,7 +44,7 @@
                 {{ $t('navbar.admin') }}
               </a>
               <div class="dropdown-menu bg-bcs-primary">
-                <!-- Rühmad: igapäevane töö (päringud, registreerumised) | koolitused | koolitajad ja ruumid.
+                <!-- Rühmad: igapäevane töö (päringud, registreerumised) | koolitused | koolitajad ja ruumid | kontod.
                      "Lisa uus" nupud on nimekirja vaadetes -->
                 <RouterLink class="nav-link" :to="{ name: 'adminEnquiriesRoute' }">
                   {{ $t('navbar.manageEnquiries') }}
@@ -66,6 +66,10 @@
                 <RouterLink class="nav-link" :to="{ name: 'adminRoomsRoute' }">
                   {{ $t('navbar.manageRooms') }}
                 </RouterLink>
+                <hr class="dropdown-divider" />
+                <RouterLink class="nav-link" :to="{ name: 'adminUsersRoute' }">
+                  {{ $t('navbar.manageUsers') }}
+                </RouterLink>
               </div>
             </div>
           </div>
@@ -86,6 +90,37 @@
               >
                 <FlagIcon :flag-icon-code="uiLanguage.flagIconCode" />
               </button>
+            </div>
+            <!-- Minu profiil: osalejal neli vaadet, adminil ainult parool -->
+            <div v-if="userIsLoggedIn" class="dropdown">
+              <!-- Ainult ikoon (nimi title/aria-label-is), et navbar ei läheks kitsaks -->
+              <button
+                :class="{ 'border-primary': isProfileRouteActive }"
+                :title="$t('navbar.profile')"
+                :aria-label="$t('navbar.profile')"
+                class="btn btn-light border btn-sm dropdown-toggle d-inline-flex align-items-center gap-1"
+                type="button"
+                data-bs-toggle="dropdown"
+              >
+                <PhUserCircle :size="20" />
+              </button>
+              <div class="dropdown-menu dropdown-menu-end">
+                <h6 class="dropdown-header">{{ $t('navbar.profile') }}</h6>
+                <template v-if="!userIsAdmin">
+                  <RouterLink class="dropdown-item" :to="{ name: 'participantDetailsRoute' }">
+                    {{ $t('navbar.participantDetails') }}
+                  </RouterLink>
+                  <RouterLink class="dropdown-item" :to="{ name: 'participantCoursesRoute' }">
+                    {{ $t('navbar.participantCourses') }}
+                  </RouterLink>
+                  <RouterLink class="dropdown-item" :to="{ name: 'participantCertificatesRoute' }">
+                    {{ $t('navbar.participantCertificates') }}
+                  </RouterLink>
+                </template>
+                <RouterLink class="dropdown-item" :to="{ name: 'changePasswordRoute' }">
+                  {{ $t('navbar.changePassword') }}
+                </RouterLink>
+              </div>
             </div>
             <!-- Läbipaistmatu taust (btn-light): klaasja navbari all võib olla tume pilt -->
             <button
@@ -127,7 +162,8 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { PhUserCircle } from '@phosphor-icons/vue'
 import { useRoute } from 'vue-router'
 import FooterComponent from '@/components/FooterComponent.vue'
 import ConfirmModal from '@/components/modals/ConfirmModal.vue'
@@ -142,6 +178,14 @@ const languageStore = useLanguageStore()
 const userIsLoggedIn = ref(false)
 const userIsAdmin = ref(false)
 const isLogoutModalOpen = ref(false)
+
+const PROFILE_ROUTE_NAMES = [
+  'participantDetailsRoute',
+  'participantCoursesRoute',
+  'participantCertificatesRoute',
+  'changePasswordRoute',
+]
+const isProfileRouteActive = computed(() => PROFILE_ROUTE_NAMES.includes(route.name))
 
 // sessionStorage ei ole reaktiivne — seisund loetakse uuesti iga marsruudi muutusel
 // (nt pärast sisselogimist) ja väljalogimisel (avalehel olles marsruut ei pruugi muutuda)
