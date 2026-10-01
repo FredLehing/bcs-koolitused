@@ -38,6 +38,10 @@ public class CourseParticipant {
     @Column(name = "notes", nullable = false, length = Integer.MAX_VALUE)
     private String notes;
 
+    // Admini märkmed (osaleja enda lisainfo on notes); null = puudub
+    @Column(name = "admin_notes", length = Integer.MAX_VALUE)
+    private String adminNotes;
+
     @NotNull
     @Column(name = "has_paid", nullable = false)
     private Boolean hasPaid;

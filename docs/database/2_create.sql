@@ -76,6 +76,8 @@ CREATE TABLE course_participant
     course_id       int        NOT NULL,
     participant_id  int        NOT NULL,
     notes           text       NOT NULL,
+    -- admini märkmed (osaleja enda lisainfo on notes)
+    admin_notes     text       NULL,
     has_paid        boolean    NOT NULL,
     requires_laptop boolean    NOT NULL,
     -- R = registreerunud, C = loobunud
@@ -859,6 +861,37 @@ FROM enquiry e
          JOIN admin_training_summary ats ON ats.training_id = e.training_id AND ats.content_language_code = cl.code
          LEFT JOIN course c ON c.id = e.course_id
 WHERE cl.requires_translation;
+
+-- Registreerumised (admin): üks rida registreerumise ja tõlkekeele kohta; koolituse nimi puudumisel põhikeeles
+-- Kustutatud toimumiskorrad (course_status D) ja kustutatud koolitused (training_status D) välistab nimekirja päring
+CREATE VIEW admin_registration_summary AS
+SELECT row_number() OVER (ORDER BY cp.id, ats.content_language_code) AS id,
+       cp.id                                                         AS course_participant_id,
+       ats.content_language_code,
+       cp.status,
+       cp.has_paid,
+       cp.requires_laptop,
+       cp.notes,
+       cp.admin_notes,
+       cp.created_at,
+       cp.updated_at,
+       pa.name                                                       AS participant_name,
+       pr.email,
+       pr.phone,
+       u.email                                                       AS account_email,
+       c.id                                                          AS course_id,
+       ats.title                                                     AS training_title,
+       ats.status                                                    AS training_status,
+       c.start_date                                                  AS course_start_date,
+       c.end_date                                                    AS course_end_date,
+       c.status                                                      AS course_status,
+       c.end_date < current_date                                     AS is_past
+FROM course_participant cp
+         JOIN participant pa ON pa.id = cp.participant_id
+         JOIN profile pr ON pr.id = pa.profile_id
+         JOIN "user" u ON u.id = pa.user_id
+         JOIN course c ON c.id = cp.course_id
+         JOIN admin_training_summary ats ON ats.training_id = c.training_id;
 
 -- Koolituse kalender: toimumiskord koos koolitaja, ruumi ja osalejate arvuga
 CREATE VIEW course_summary AS
