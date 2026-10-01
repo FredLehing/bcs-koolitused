@@ -1,5 +1,7 @@
 {
-  "navigation": { "back": "Back" },
+  "navigation": {
+    "back": "Back"
+  },
   "common": {
     "close": "Close"
   },
@@ -249,9 +251,16 @@
       "trainingData": "Training details",
       "lecturers": "Trainers",
       "upcomingCourses": "Upcoming courses",
-      "calendar": "Calendar",
-      "placeholder": "Content coming soon."
-    }
+      "calendar": "Calendar"
+    },
+    "location": "Location",
+    "orderable": "Available on request",
+    "yes": "Yes",
+    "no": "No",
+    "loading": "Loading training…",
+    "loadError": "Unable to load this training.",
+    "noUpcomingCourses": "There are no upcoming courses at the moment.",
+    "allCourses": "View the course calendar"
   },
   "trainingStatusButton": {
     "buttons": {

@@ -2,7 +2,9 @@
 
 Kõigi avamiskohtade ja erandite [kaardistus](../../tasks/frontend/return-to-navigation.md).
 Ühine frontendi komponent on `BackLink.vue`; läbimängudes sama lepingut kirjeldav
-`return-navigation.js`. Peamenüü ja vahelehed ei loo tagasiteed.
+`return-navigation.js`. Peamenüü ja vahelehed ei loo tagasiteed. `/training` vaate „Järgmised koolitused“
+kaardi lingid avavad `/course?courseId={id}` ilma `returnTo`-ta; sealne „Tagasi“
+kasutab varusihti `/courses`.
 
 ```mermaid
 sequenceDiagram
@@ -55,3 +57,10 @@ Näited avamise kohta:
 
 `returnTo` ei salvesta lähtevaate ainult komponendi mälus olevaid filtreid,
 lehekülge ega salvestamata vormiteksti. Sihtvaated laevad andmed tavapäraselt.
+
+## Toimumiskorra vahetus samas vaates
+
+`/course` kaardi „Toimumiskorrad“ lingid kasutavad `router.replace` ja annavad
+kaasa ainult uue `courseId`. `returnTo` eemaldatakse; URL ei pikene ega teki
+uut ajalookirjet. Vaade laadib koondandmed ja vajadusel osalemise oleku uuesti.
+„← Tagasi“ kasutab seejärel varusihti `/courses`.

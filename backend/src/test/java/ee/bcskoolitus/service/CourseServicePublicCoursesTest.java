@@ -1,13 +1,13 @@
 package ee.bcskoolitus.service;
 
 import ee.bcskoolitus.controller.common.dto.FundingTypeDto;
-import ee.bcskoolitus.controller.common.dto.LecturerDto;
+import ee.bcskoolitus.controller.common.dto.LecturerSummaryDto;
 import ee.bcskoolitus.controller.course.dto.CoursePageDto;
 import ee.bcskoolitus.controller.course.dto.CourseSummaryPageDto;
 import ee.bcskoolitus.controller.course.dto.NextCourseFilterDto;
 import ee.bcskoolitus.controller.course.dto.PublicCourseFilterDto;
 import ee.bcskoolitus.controller.course.dto.PublicCourseSummaryItemDto;
-import ee.bcskoolitus.controller.course.dto.UpcomingCourseDto;
+import ee.bcskoolitus.controller.common.dto.UpcomingCourseDto;
 import ee.bcskoolitus.infrastructure.exception.PrimaryKeyNotFoundException;
 import ee.bcskoolitus.persistance.category.Category;
 import ee.bcskoolitus.persistance.category.translation.CategoryTranslation;
@@ -81,6 +81,8 @@ class CourseServicePublicCoursesTest {
     private CategoryTranslationRepository categoryTranslationRepository;
     @Mock
     private FundingTypeTranslationRepository fundingTypeTranslationRepository;
+    @Mock
+    private LecturerService lecturerService;
     @Mock
     private LanguageService languageService;
     @Spy
@@ -178,6 +180,8 @@ class CourseServicePublicCoursesTest {
         when(trainingTranslationRepository.findByTraining_IdAndLanguage_Code(3, "et")).thenReturn(Optional.of(createTrainingTranslation(5, ESTONIAN)));
         when(categoryTranslationRepository.findByCategory_IdAndLanguage_Id(1, 1)).thenReturn(Optional.of(createCategoryTranslation("Programmeerimine")));
         when(courseLecturerRepository.findCourseLecturersBy(9)).thenReturn(List.of(createCourseLecturer(1, "Rain Tüür")));
+        when(lecturerService.findLecturerSummariesBy(any(), any())).thenReturn(List.of(
+                new LecturerSummaryDto(1, "Rain Tüür", "Koolitaja", "Java", 100L)));
         when(publicCourseSummaryRepository.findAllByTrainingIdAndContentLanguageCodeOrderByStartDateAscCourseIdAsc(3, "et"))
                 .thenReturn(List.of(createPublicCourseSummary()));
 
@@ -195,7 +199,7 @@ class CourseServicePublicCoursesTest {
         assertTrue(coursePageDto.getIsOnSite());
         assertFalse(coursePageDto.getIsOnline());
         assertFalse(coursePageDto.getIsPast());
-        assertEquals(List.of(new LecturerDto(1, "Rain Tüür")), coursePageDto.getLecturers());
+        assertEquals(List.of(new LecturerSummaryDto(1, "Rain Tüür", "Koolitaja", "Java", 100L)), coursePageDto.getLecturers());
         assertEquals(List.of(new UpcomingCourseDto(9, LocalDate.of(2026, 10, 12), LocalDate.of(2026, 10, 15), "O", true, false)),
                 coursePageDto.getUpcomingCourses());
     }

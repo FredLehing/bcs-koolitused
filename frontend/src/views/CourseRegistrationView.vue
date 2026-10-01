@@ -56,7 +56,7 @@ export default {
     },
 
     lecturerNames() {
-      return this.coursePage.lecturers.map((lecturer) => lecturer.lecturerName).join(', ')
+      return this.coursePage.lecturers.map((lecturer) => lecturer.fullName).join(', ')
     },
 
     attendanceText() {

@@ -21,11 +21,11 @@ Külastaja avab toimumiskorra, loeb koolituse kirjeldust, vahetab lingiga sama k
 | Element | Tüüp | Kirjeldus/käitumine |
 |---|---|---|
 | Kaart "Koolitus" (vasak) | `fieldset` | pealkiri (+ admini pliiats → `/course-form?courseId=`), toimumisaeg (+ "Toimunud"), lühikirjeldus, `RichTextContent`, link "Kõik selle koolituse toimumiskorrad" → `/training`; põhikeele varuvariandi märkus |
-| Kaart "Toimumiskorrad" (vasak, "Koolitus" all) | lingid üksteise all | `12/10/2026 – 15/10/2026 · Kohapeal` (+ "Täis"); praegune paksus kirjas ▸, mitte link; teised `<router-link>` → `/course?courseId=`; peidus kui teisi pole |
+| Kaart "Toimumiskorrad" (parem, "Toimumiskord" kohal) | lingid üksteise all | `12/10/2026 – 15/10/2026 · Kohapeal` (+ "Täis"); praegune paksus kirjas ▸, mitte link; teised `<RouterLink replace>` → `/course?courseId=` ilma `returnTo`-ta; `$route.query` jälgija laadib andmed uuesti, ajalukku uut kirjet ei lisandu; peidus kui teisi pole |
 | Kaart "Toimumiskord" (parem) | `dl` | Toimumisaeg, Päevi, Akad. tunde, Hind, Toimumisviis, Koolituse keel (lipp), Kategooria, Rahastus, "Täis" märgis |
 | "Registreeru" | nupp | sisse logimata → `/login?redirect=/course-registration?courseId=`; kasutaja → `/course-registration?courseId=`; registreerunud (`participant-status` = `R`) → märge "✓ Oled sellele toimumiskorrale registreerunud"; täis → keelatud "Kohad on täis"; möödunud → keelatud; admin → peidus |
 | "Küsi lisainfot" | nupp | avab `EnquiryModal`; möödunud → keelatud; admin → peidus |
-| Kaart "Koolitajad" | `LecturerCard` iga koolitaja kohta | peidus kui pole |
+| Kaart "Koolitajad" | `LecturerCard` iga koondvastuse `lecturers` kirje kohta | prop `lecturerSummary`, kaardi JSON-päringud puuduvad; peidus kui pole |
 | Eduteade | `AlertSuccess` | "Registreerumine õnnestus! …" (registreerumise vaatest tulles) ja "Aitäh! Sinu päring on saadetud, võtame peagi ühendust." |
 
 ### Modal `EnquiryModal.vue` (`BaseModal` peal)
@@ -46,7 +46,7 @@ Propsid: `trainingId`, `courseId` (valikuline — hiljem `/training` lehel), `ti
 
 ## API kutsed
 
-- `GET /api/course-summary/{courseId}?contentLang=`, `GET /api/course/{courseId}/participant-status?userId=`, `POST /api/enquiry` (uued); `GET /api/lecturer-summary/{lecturerId}` (olemas, `LecturerCard`)
+- `GET /api/course-summary/{courseId}?contentLang=`, `GET /api/course/{courseId}/participant-status?userId=`, `POST /api/enquiry` (uued); `GET /api/lecturer/{lecturerId}/photo?v={photoVersion}` (olemas, ainult pilt; kaardi tekstid koondvastuses)
 
 ## Komponendid ja failistruktuur
 
@@ -59,3 +59,11 @@ Propsid: `trainingId`, `courseId` (valikuline — hiljem `/training` lehel), `ti
 - [ ] "Registreeru" kõik olekud rolliti; adminile nuppe pole
 - [ ] Modal: kontroll, saatmine, eduteade
 - [ ] Tekstid et/en, lint ja build puhtad
+
+## Koolitajakaartide päringud
+
+Koolitajate kaartide tekstid ja foto versioonid tulevad vaate koondvastuse
+`lecturers` massiivist. LecturerCard ei tee JSON-päringuid ega pea oma
+laadimisolekut. Keelevahetusel laadib andmed uuesti vaade. Kursuse
+registreerumisstaatus (ainult sisseloginud kasutajale) ja fotode failipäringud
+on endiselt eraldi. `/lecturers` ja `/lecturer` töötavad juba sama põhimõttega.

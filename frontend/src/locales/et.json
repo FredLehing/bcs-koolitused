@@ -1,5 +1,7 @@
 {
-  "navigation": { "back": "Tagasi" },
+  "navigation": {
+    "back": "Tagasi"
+  },
   "common": {
     "close": "Sulge"
   },
@@ -249,9 +251,16 @@
       "trainingData": "Koolituse andmed",
       "lecturers": "Koolitajad",
       "upcomingCourses": "Järgmised koolitused",
-      "calendar": "Kalender",
-      "placeholder": "Sisu lisandub peagi."
-    }
+      "calendar": "Kalender"
+    },
+    "location": "Asukoht",
+    "orderable": "Tellitav koolitus",
+    "yes": "Jah",
+    "no": "Ei",
+    "loading": "Laadin koolitust…",
+    "loadError": "Koolitust ei õnnestunud laadida.",
+    "noUpcomingCourses": "Järgmisi koolitusi praegu ei ole.",
+    "allCourses": "Vaata koolituste kalendrit"
   },
   "trainingStatusButton": {
     "buttons": {

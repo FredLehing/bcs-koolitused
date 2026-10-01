@@ -1,4 +1,4 @@
-package ee.bcskoolitus.controller.lecturer.dto;
+package ee.bcskoolitus.controller.common.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

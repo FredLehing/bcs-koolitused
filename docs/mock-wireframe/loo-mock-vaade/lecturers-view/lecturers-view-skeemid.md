@@ -43,7 +43,7 @@ Päris süsteemides hoitakse pilte objektisalvestuses (S3 jms) ja jagatakse CDN-
 
 | Teenus | Enne | Nüüd |
 |---|---|---|
-| `GET /api/lecturer-summary/{lecturerId}` (`LecturerCard`) | `photo` (Base64), `photoContentType` | `photoVersion` |
+| `GET /api/lecturer-summary/{lecturerId}` (üksikkirje teenus) | `photo` (Base64), `photoContentType` | `photoVersion` |
 | `GET /api/lecturer/{lecturerId}` (vorm) | `photo` (Base64), `photoContentType` | `photoVersion` |
 | `POST /api/lecturer` | salvestab pildi nagu on | pilt **normaliseeritakse** (400×400 JPEG) |
 | `PUT /api/lecturer/{lecturerId}` | pilt saadetakse alati praegusel kujul, `null` = eemalda | `photo` = **uus** pilt (Base64) või `null` = pilti ei muudeta; eraldi `isPhotoRemoved: true` = eemalda. Nii ei kodeerita sama pilti igal salvestamisel uuesti (kvaliteet ei lange) |

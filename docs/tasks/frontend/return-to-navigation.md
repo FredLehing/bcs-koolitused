@@ -22,10 +22,12 @@ Brauseri ajaloo asemel kasutatakse päris linki, mis toimib ka uues vahekaardis.
 | `/admin-trainings`: „Lisa uus“, silm ja kalender | `/training-form`, `/training`, `/admin-training-courses` | Lisa tagasitee |
 | `/lecturers`: koolitaja kaart (`LecturerTile`) | `/lecturer` | Lisa tagasitee; varusiht on sama nimekiri |
 | `/training`, `/course`: koolitaja kaart (`LecturerCard`) | `/lecturer` | Juba olemas; ühtlusta sihtvaate tagasilink ja valideerimine |
+| `/training`: „Järgmised koolitused“ kaardi kuupäevalingid | `/course` | Ilma `returnTo`-ta; toimumiskorra tagasilink kasutab varusihti `/courses` |
 | `/lecturer`: koolituse nimelink | `/training` | Lisa tagasitee koolitaja detaili |
 | Avalehe ja `/courses` kaart: detailnupp ja muutmise ikoon (`CourseCard`) | `/course`, `/course-form` | Lisa tagasitee; jagatud kaardi mõlemad kasutuskohad |
 | `/participant-courses`: registreerumise koolituse nimelink (`ParticipantRegistrationItem`) | `/course` | Lisa tagasitee kasutaja koolituste nimekirja |
-| `/course`: koolituse link, muu toimumiskorra link ja muutmise ikoon | `/training`, `/course`, `/course-form` | Lisa tagasitee praeguse toimumiskorra juurde |
+| `/course`: koolituse link ja muutmise ikoon | `/training`, `/course-form` | Lisa tagasitee praeguse toimumiskorra juurde |
+| `/course`: „Toimumiskorrad“ kaardi lingid | `/course` | `router.replace`, ainult uus `courseId`, ilma `returnTo`-ta; laadi andmed uuesti, tagasilink kasutab `/courses` varusihti |
 | `/course`: „Registreeru“ | `/course-registration` | Lisa tagasitee; sisse logimata kasutajal säilib registreerumise URL koos tagasiteega `redirect` sees |
 | `/admin-all-courses`: koolituse nimi/kalender, silm, muutmise ikoon | `/admin-training-courses`, `/admin-course`, `/course-form` | Lisa tagasitee kõigi toimumiskordade nimekirja |
 | `/admin-training-courses`: „Lisa uus“, muutmine, koolituse eelvaade ja muutmine | `/course-form`, `/training`, `/training-form` | Lisa tagasitee ühe koolituse kalendrisse |

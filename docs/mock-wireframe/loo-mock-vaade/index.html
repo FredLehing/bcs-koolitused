@@ -171,7 +171,7 @@ code { font-family: var(--font-mono); font-size: .88em; }
   var VIEWS = [
     { key: "home", path: "/", name: "Avaleht", view: "HomeView.vue", group: "public", file: "home-view/home-view-labimang.html", roleParam: true },
     { key: "trainings", path: "/trainings", name: "Koolitused", view: "TrainingsView.vue", group: "public", file: "trainings-view/trainings-view-labimang.html", roleParam: true },
-    { key: "training", path: "/training", name: "Koolitus", view: "TrainingView.vue", group: "public", sample: "/training?trainingId=1&trainingTranslationId=1", ph: "Ühe koolituse leht: kirjeldus ja paremas veerus koolituse andmed, koolitajate kaardid (LecturerCard) ja järgmised koolitused. Läbimängu veel pole." },
+    { key: "training", path: "/training", name: "Koolitus", view: "TrainingView.vue", group: "public", sample: "/training?trainingId=1", file: "training-view/training-view-labimang.html", params: ["trainingId", "trainingTranslationId"], roleParam: true },
     { key: "courses", path: "/courses", name: "Koolituste kalender", view: "CoursesView.vue", group: "public", file: "courses-view/courses-view-labimang.html", roleParam: true },
     { key: "course", path: "/course", name: "Toimumiskord", view: "CourseView.vue", group: "public", sample: "/course?courseId=9", file: "courses-view/courses-view-labimang.html", params: ["courseId", "registered"], extra: "view=course", roleParam: true },
     { key: "course-registration", path: "/course-registration", name: "Registreerumine", view: "CourseRegistrationView.vue", group: "public", sample: "/course-registration?courseId=9", file: "courses-view/course-registration-view-labimang.html", params: ["courseId"], extra: "view=course-registration", roleParam: true },

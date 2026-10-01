@@ -25,7 +25,7 @@ Eeldab taski `courses-calendar-db-changes.md`.
   "startDate": "2026-10-12", "endDate": "2026-10-15", "isPast": false,
   "numberOfDays": 4, "numberOfAcademicHours": 32, "price": 560.0, "status": "O",
   "isOnSite": true, "isOnline": false,
-  "lecturers": [ { "lecturerId": 1, "lecturerName": "Rain Tüür" } ],
+  "lecturers": [ { "lecturerId": 1, "fullName": "Rain Tüür", "title": "Lektor/konsultant", "shortDescription": "Java koolitaja.", "photoVersion": 1784106000 } ],
   "upcomingCourses": [
     { "courseId": 9, "startDate": "2026-10-12", "endDate": "2026-10-15", "status": "O", "isOnSite": true, "isOnline": false }
   ]
@@ -39,6 +39,22 @@ Toimumiskorra leht: koolituse tekst, toimumiskorra andmed, koolitajad ja sama ko
 ## Seotud andmebaasi tabelid
 
 `course` + `training` + `training_translation` (valitud keel, puudumisel põhikeel → `isMainLanguageFallback = true`) + `category_translation`, `training_funding_type`, `course_lecturer` (`sort_order`). `upcomingCourses` = sama koolituse kõik `public_course_summary` read (`content_language_code = contentLang`), alguse järgi (praegune kaasa arvatud, kui tulevane).
+
+## Koolitajate koondandmed
+
+`lecturers` on `List<LecturerSummaryDto>` (`controller/common/dto`): ID, fullName,
+title, shortDescription ja photoVersion. Aktiivsed koolitajad säilitavad
+course_lecturer sort_order järjekorra; kustutatud koolitajad jäetakse välja.
+Koolitajate tekstid valitakse kasutajaliidese `contentLang` keeles, puudumisel
+põhikeeles, sõltumata koolituse enda tõlke varuvariandist. Tõlketa koolitajal
+jäävad title ja shortDescription null, nimi ning võimalik foto säilivad.
+
+Teenuse `LecturerService.findLecturerSummariesBy` kaudu loetakse tõlked ja
+fotode versioonid kõigi seotud koolitajate jaoks kahe hulga-päringuga, mitte
+iga koolitaja kohta eraldi. Fotode baite koondvastus ei sisalda. Kaardid ei tee
+`GET /api/lecturer-summary/{id}` päringuid; fotod laeb brauser olemasolevast
+pilditeenusest ainult photoVersion olemasolul. Sama vastust kasutav
+registreerumisvorm loeb koolitaja nime `fullName` väljalt.
 
 ## Veaolukorrad
 
