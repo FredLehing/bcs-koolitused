@@ -1,10 +1,12 @@
 <script>
 import { PhX } from '@phosphor-icons/vue'
 import NavigationService from '@/services/NavigationService.js'
+import HomeGallery from '@/components/home/HomeGallery.vue'
+import HomeTestimonials from '@/components/home/HomeTestimonials.vue'
 
 export default {
   name: 'HomeView',
-  components: { PhX },
+  components: { PhX, HomeGallery, HomeTestimonials },
 
   data() {
     return {
@@ -62,5 +64,9 @@ export default {
         </div>
       </div>
     </section>
+
+    <HomeGallery />
+
+    <HomeTestimonials />
   </div>
 </template>
