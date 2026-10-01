@@ -70,8 +70,8 @@ Admin avab navbari menüüst "Admin" → "Registreerumised" nimekirja (vaikimisi
 
 ## Vastuvõtu kriteeriumid
 
-- [ ] Menüülink ja mõlemad vaated töötavad
-- [ ] Otsing, kaks lülitit, sorteerimine, "Kokku N registreerumist"
-- [ ] Salvestamine, staatuse muutmise kinnitus, "Tühista" ja eduteade
-- [ ] `/admin-course` silm ja "← Tagasi" `returnTo` kaudu
-- [ ] Tekstid et/en
+- [x] Menüülink ja mõlemad vaated töötavad
+- [x] Otsing, kaks lülitit, sorteerimine, "Kokku N registreerumist"
+- [x] Salvestamine, staatuse muutmise kinnitus, "Tühista" ja eduteade
+- [x] `/admin-course` silm ja "← Tagasi" `returnTo` kaudu
+- [x] Tekstid et/en

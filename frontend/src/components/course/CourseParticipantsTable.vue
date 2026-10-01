@@ -1,17 +1,21 @@
 <script>
 import { mapState } from 'pinia'
+import { PhEye } from '@phosphor-icons/vue'
 import { useLanguageStore } from '@/stores/languageStore.js'
 import FormatService from '@/services/FormatService.js'
 import SortService from '@/services/SortService.js'
 import CheckMark from '@/components/common/CheckMark.vue'
 import SortableColumnHeader from '@/components/common/SortableColumnHeader.vue'
+import CourseParticipantStatusBadge from '@/components/common/CourseParticipantStatusBadge.vue'
 
 // Toimumiskorra osalejate tabel (AdminCourseView), ainult lugemiseks. Loobunute lüliti ja
 // sorteerimine on frontendis (kogu nimekiri on laaditud).
 export default {
   name: 'CourseParticipantsTable',
-  components: { CheckMark, SortableColumnHeader },
+  components: { PhEye, CheckMark, SortableColumnHeader, CourseParticipantStatusBadge },
   props: {
+    // Silmaga avatud registreerumisest "← Tagasi" selle toimumiskorra juurde
+    courseId: Number,
     courseParticipants: Array,
   },
   data() {
@@ -115,6 +119,7 @@ export default {
               @event-sort-clicked="handleSortClick"
             />
             <th>{{ $t('adminCourse.participants.columns.notes') }}</th>
+            <th>{{ $t('adminCourse.participants.columns.actions') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -129,18 +134,27 @@ export default {
             <td class="text-nowrap">{{ formatDateTime(courseParticipant.registeredAt) }}</td>
             <td><CheckMark :value="courseParticipant.hasPaid" /></td>
             <td><CheckMark :value="courseParticipant.requiresLaptop" /></td>
-            <td>
-              <span
-                class="badge"
-                :class="courseParticipant.status === 'R' ? 'text-bg-success' : 'text-bg-secondary'"
-              >
-                {{ $t(`courseParticipantStatus.${courseParticipant.status}`) }}
-              </span>
-            </td>
+            <td><CourseParticipantStatusBadge :status="courseParticipant.status" /></td>
             <td class="notes">{{ courseParticipant.notes || '—' }}</td>
+            <td>
+              <RouterLink
+                :to="{
+                  name: 'adminRegistrationRoute',
+                  query: {
+                    courseParticipantId: courseParticipant.courseParticipantId,
+                    returnTo: `/admin-course?courseId=${courseId}`,
+                  },
+                }"
+                :title="$t('adminCourse.participants.view')"
+                :aria-label="$t('adminCourse.participants.view')"
+                class="btn btn-sm btn-outline-secondary d-inline-flex"
+              >
+                <PhEye :size="20" />
+              </RouterLink>
+            </td>
           </tr>
           <tr v-if="visibleCourseParticipants.length === 0">
-            <td colspan="8" class="text-center text-secondary py-4">
+            <td colspan="9" class="text-center text-secondary py-4">
               {{ $t('adminCourse.participants.empty') }}
             </td>
           </tr>
