@@ -704,7 +704,7 @@ textarea { min-height: 88px; resize: vertical; }
     var fill = st.mode === "C" ? '<span class="hint">Eeltäidetud eestikeelse tõlkega — tõlgi tekstid ' + { et: "eesti", en: "inglise" }[code] + ' keelde. ' + pin("n-get-translation", "GET /api/training-translation/{et id}") + '</span>' : "";
 
     document.getElementById("form").innerHTML =
-      '<div class="formhead"><h2>' + head + '</h2>' + badge + flags + '<span class="quick"><button type="button" class="sbtn" id="b-q-admin">Koolituste haldus</button>' + (st.mode !== "A" ? '<button type="button" class="sbtn" id="b-q-cal">Kalender</button>' : "") + '</span></div>' +
+      '<div class="formhead"><h2>' + head + '</h2>' + badge + flags + '<span class="quick"><button type="button" class="sbtn" id="b-q-admin">Koolitused</button>' + (st.mode !== "A" ? '<button type="button" class="sbtn" id="b-q-cal">Kalender</button>' : "") + '</span></div>' +
       '<div class="cols">' +
         '<fieldset class="data"><legend>Koolituse andmed' + (st.mode !== "A" ? " " + pin("n-get-training", "GET /api/training/{id}") : "") + '</legend>' +
           '<div class="fld"><span class="lbl">Kategooria ' + pin("n-categories", "GET /api/categories") + '</span><select id="f-cat"' + dis + '>' + catOpts + '</select></div>' +

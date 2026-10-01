@@ -12,7 +12,7 @@ Eeskuju: `docs/mock-wireframe/loo-mock-vaade/admin-trainings-view/` (skeemid, l�
 - Avaneb AdminTrainingsView rea uuest ikoonist "Kalender" ja TrainingFormView kiirnupust "Kalender".
 - Ülal koolituse andmed (suures pildis nagu `/training`): pealkiri, staatus, kategooria, õppekeel (lipp), toimumiskoht, koolitajad, rahastus, sätted. Koolitajad (`training_lecturer`, `sort_order` järjekorras) kuvatakse **ainult nimedena** komadega (koolitaja kaart `LecturerCard.vue` on avalikul koolituse lehel, mitte admini kalendris). Korduvad osad tehakse komponentideks, mida saab kasutada ka `/training` vaates.
   - Andmed kuvatakse kasutajaliidese keeles (store'i `contentLang`); puuduva tõlke korral põhikeeles (sama reegel nagu AdminTrainingsView-s). Keele vahetusel laaditakse koolituse andmed uuesti.
-  - Koolituse kaardil on lingid "Vaata" (`/training?...`) ja "Muuda" (`/training-form?...`) ning kiirnupp "Koolituste haldus" (`/admin-trainings`).
+  - Koolituse kaardil on lingid "Vaata" (`/training?...`) ja "Muuda" (`/training-form?...`) ning kiirnupp "Koolitused" (`/admin-trainings`).
 - Kaart "Kirjeldus" (pikk `description`, `RichTextContent`) on **vaikimisi peidus**, avatakse lingiga "▾ Näita kirjeldust" / "▴ Peida kirjeldus" (sama muster nagu AdminTrainingsView filtrikaart).
 - Kalendritabel: üks rida iga toimumiskorra (`course`) kohta. Veerud: Algus | Lõpp (`30/09/2026`) | Päevi | Akad. tunde | Hind (€) | Koolitajad | Ruum | Staatus | Osalejaid | Märkmed | Veebilink | Tegevused.
   - `notes` sisu ei kuvata — ainult `hasNotes` (✓/✗). Samamoodi `hasMeetingLink` (✓/✗).
@@ -301,7 +301,7 @@ Vormis (muutmise olek) on sama komponent; `event-course-deleted` järel suunatak
 | kalender | Laadimine | `GET /api/admin-training/{trainingId}?contentLang={UI keel}` | koolituse kaart ja kirjeldus (ka keele vahetusel) |
 | kalender | Laadimine | `GET /api/training/{trainingId}/courses?includePast=false` | tabel (lüliti muutmisel uuesti) |
 | kalender | Tegevus | `DELETE /api/course/{courseId}` | `CourseDeleteButton` → kinnitus → tabel uuesti |
-| kalender | Navigeerimine | — | "+ Lisa toimuv koolitus" → `/course-form?trainingId={id}`; pliiats → `/course-form?courseId={id}`; "Vaata" / "Muuda" koolitust; "Koolituste haldus" |
+| kalender | Navigeerimine | — | "+ Lisa toimuv koolitus" → `/course-form?trainingId={id}`; pliiats → `/course-form?courseId={id}`; "Vaata" / "Muuda" koolitust; "Koolitused" |
 | vorm | Laadimine | `GET /api/course/{courseId}` | ainult muutmise olekus; annab `trainingId` |
 | vorm | Laadimine | `GET /api/admin-training/{trainingId}?contentLang={UI keel}` | koolituse nimi ja koolitajad (uue toimumiskorra eeltäitmine) |
 | vorm | Laadimine | `GET /api/rooms` | ruumi rippmenüü |
@@ -352,7 +352,7 @@ Vormis (muutmise olek) on sama komponent; `event-course-deleted` järel suunatak
 ```text
 Create a desktop wireframe of an admin page "Koolituse kalender" in a web app.
 Top: site navigation bar with logo and links (Koolitused, Teenused, Ettevõttest, Kontakt), a dropdown "Admin ▾" and "Logi välja" on the right.
-Header row: page title "Koolituse kalender" on the left, a secondary button "Koolituste haldus" and a primary button "+ Lisa toimuv koolitus" on the right.
+Header row: page title "Koolituse kalender" on the left, a secondary button "Koolitused" and a primary button "+ Lisa toimuv koolitus" on the right.
 Below: a card with the training title "Java algkursus", a green badge "Publitseeritud" and small links "Vaata" and "Muuda". Inside the card a two-column list of label/value pairs: "Kategooria: Programmeerimine", "Õppekeel: Estonian flag", "Toimumiskoht: BCS Koolitus", "Koolitajad: Rain Tüür, Meelis Teern", "Rahastus: Töötukassa", "Sätted: • Tellitav • Esile tõstetud".
 Below the card: a small text link with a down arrow "▾ Näita kirjeldust" (the description card is collapsed).
 Below: a toggle switch "Näita ka möödunud" (off).

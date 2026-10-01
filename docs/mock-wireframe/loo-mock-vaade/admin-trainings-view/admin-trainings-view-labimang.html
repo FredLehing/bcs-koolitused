@@ -95,6 +95,7 @@ button { font: inherit; }
 .sitenav .menu button { background: none; border: 0; text-align: left; font: inherit; color: var(--ink); padding: 4px 8px; border-radius: 4px; cursor: pointer; white-space: nowrap; }
 .sitenav .menu button:hover { background: var(--accent-soft); }
 .sitenav .menu .cur { background: var(--accent-soft); font-weight: 700; }
+.sitenav .menu hr { border: 0; border-top: 1.5px dashed var(--line); margin: 3px 4px; }
 .viewhead { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; justify-content: space-between; }
 .sitenav .out { margin-left: auto; border: 1.5px solid var(--sketch); border-radius: 10px; padding: 0 8px; font-size: .78rem; }
 
@@ -255,7 +256,7 @@ td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
     <nav class="sitenav" aria-label="Navbar (wireframe)">
       <span class="logo" aria-hidden="true"></span><span>Koolitused</span><span>Teenused</span><span>Ettevõttest</span><span>Kontakt</span>
       <span class="admin"><button type="button" id="b-admin" aria-expanded="false" aria-controls="admin-menu">Admin ▾</button>
-        <span class="menu" id="admin-menu" hidden><button type="button" data-nav="/training-form">Lisa uus koolitus</button><button type="button" class="cur" data-nav="/admin-trainings" aria-current="page">Koolituste haldus</button></span></span>
+        <span class="menu" id="admin-menu" hidden><button type="button" data-nav="/admin-enquiries">Koolituste päringud</button><button type="button" data-nav="/admin-registrations">Registreerumised</button><hr><button type="button" class="cur" data-nav="/admin-trainings" aria-current="page">Koolitused</button><button type="button" data-nav="/admin-all-courses">Koolituste kalender</button><hr><button type="button" data-nav="/admin-lecturers">Koolitajad</button><button type="button" data-nav="/admin-rooms">Koolitusruumid</button></span></span>
       <span class="out">Logi välja</span>
     </nav>
     <div class="view" id="view"></div>
@@ -652,7 +653,7 @@ td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
     var n = activeFilterCount();
     var titles = titlesDto();
     document.getElementById("view").innerHTML =
-      '<div class="viewhead"><h2>Koolituste haldus</h2><button type="button" class="sbtn primary" id="b-new">+ Lisa uus koolitus</button></div>' +
+      '<div class="viewhead"><h2>Koolitused</h2><button type="button" class="sbtn primary" id="b-new">+ Lisa uus koolitus</button></div>' +
       '<div class="searchrow"><input type="text" id="f-search" list="titles" placeholder="Otsi koolituse nime järgi…" value="' + esc(ui.searchInput) + '" autocomplete="off" aria-label="Otsi koolituse nime järgi">' +
       '<datalist id="titles">' + titles.map(function (t) { return '<option value="' + esc(t.title) + '"></option>'; }).join("") + '</datalist>' +
       '<button type="button" class="sbtn primary" id="b-search">Otsi</button>' +
@@ -811,7 +812,7 @@ td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
     "Otsinguväli otsib ainult koolituse nimest; trükkimise ajal pakub datalist nimesid (GET /api/training-titles). Otsing käivitub nupu \"Otsi\" või Enteri peale. Nupu kõrval on küsimärgi ikoon, mille tooltip selgitab: otsitakse nimest, iga sõna peab esinema, käändeid ei kohandata; nimede valikus on ainult aktiivsed koolitused — kustutatud koolituse leidmiseks vali filtrites Staatus \"Kustutatud\".",
     "Kaart \"Otsingu filtrid\" on vaikimisi peidus (link \"▾ Ava otsingu filtrid\" / \"▴ Peida otsingu filtrid\"). Filtrid rakenduvad nupuga \"Filtreeri\" ja jäävad kehtima ka peidetud kaardiga (märk \"N filtrit aktiivne\"); \"Tühjenda filtrid\" taastab vaikimisi väärtused.",
     "Veeru pealkirja klõps sorteerib backendis (ka Staatus: Mustand → Publitseeritud → Kustutatud ja Tõlked: puuduvad eespool): uus veerg → kasvav, sama veerg uuesti → suund vahetub. Vaikimisi Lisatud kahanevalt. Otsing, filtrid ja sorteerimine alustavad alati lehelt 0; leheküljestus (PaginationNav.vue) 10 rida lehel.",
-    "Vaade avaneb navbari menüüst \"Admin\" → \"Koolituste haldus\" (\"Lisa uus koolitus\" all). Pealkirja real paremal on nupp \"Lisa uus koolitus\" → /training-form.",
+    "Vaade avaneb navbari menüüst \"Admin\" → \"Koolitused\". Pealkiri \"Koolitused\". Pealkirja real paremal on nupp \"Lisa uus koolitus\" → /training-form.",
     "Kuupäevad kuvatakse kujul 30/09/2026. \"Vaata\" → /training?trainingId={id}&trainingTranslationId={id}, \"Muuda\" → /training-form?trainingId={id}&trainingTranslationId={id}. Staatuse nupp (TrainingStatusButton.vue: \"Publitseeri\" / \"Liiguta mustandisse\" / \"Taasta\") ja kustutamise ikoon (TrainingDeleteButton.vue) küsivad kinnitust modaliga, teevad API kutse ise ja annavad vaatele sündmusega teada; vaade laadib tabeli uuesti. Kustutatud real on ainult nupp \"Taasta\" (Vaata/Muuda/Kustuta on peidus)."
   ].join("\n");
 

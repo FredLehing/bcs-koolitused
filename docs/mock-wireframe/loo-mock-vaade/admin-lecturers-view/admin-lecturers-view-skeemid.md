@@ -12,9 +12,7 @@ Eeskuju:
 ### Üldine
 
 - **Termin kasutajaliideses on "koolitaja"** (inglise keeles "Trainer") — kõikjal, ka olemasolevates tekstides: "Vali lektor" → "Vali koolitaja", "Vaikimisi lektor" → "Vaikimisi koolitaja", "— lektor puudub —" → "— koolitaja puudub —", navbari "Lektorid" → "Koolitajad"; en: "Lecturer(s)" → "Trainer(s)". Muutuvad `et.json` / `en.json` võtmed `navbar.lecturers`, `trainingForm.*` ja `trainingForm.lecturerModal.*` (võtmete nimed jäävad). Koodis ja andmebaasis jääb `lecturer`.
-- **Navbar → menüü "Admin"** (nähtav ainult adminile, `App.vue`): olemasolevate linkide järele eraldaja ja kaks uut linki:
-  - "Lisa uus koolitaja" → `/lecturer-form` (i18n `navbar.addLecturer`);
-  - "Koolitajad" → `/admin-lecturers` (i18n `navbar.manageLecturers`).
+- **Navbar → menüü "Admin"** (nähtav ainult adminile, `App.vue`): link "Koolitajad" → `/admin-lecturers` (i18n `navbar.manageLecturers`). Uus koolitaja lisatakse nimekirja nupust "+ Lisa uus koolitaja" (menüüs algselt olnud link "Lisa uus koolitaja" eemaldati). (Admin-menüü uuendatud 2026-10-01: vt `docs/tasks/frontend/admin-menu.md`.)
 - **Staatus** (`lecturer.status`, `varchar(1)`): `A` = aktiivne (`LecturerStatus.ACTIVE`), `D` = kustutatud (`LecturerStatus.DELETED`, soft delete). Mustandi/publitseerimise olekut koolitajal pole.
 
 ### Mitu koolitajat — `training_lecturer` ja `course_lecturer`
@@ -331,7 +329,7 @@ Ametid ja spetsialiseerumised on BCS Koolituse lektorite nimekirjast; `descripti
 
 ```mermaid
 stateDiagram-v2
-    [*] --> A_Uus: /lecturer-form<br/>(navbar "Lisa uus koolitaja",<br/>AdminLecturersView "+ Lisa uus koolitaja")
+    [*] --> A_Uus: /lecturer-form<br/>(AdminLecturersView "+ Lisa uus koolitaja")
     [*] --> B_Muutmine: ?lecturerId&lecturerTranslationId<br/>(AdminLecturersView "Muuda")
 
     A_Uus --> B_Muutmine: "Lisa"<br/>POST /api/lecturer<br/>router.replace
@@ -383,7 +381,7 @@ sequenceDiagram
     participant BE as Backend
     participant DB as Andmebaas
 
-    Admin->>FE: navbar "Admin" → "Lisa uus koolitaja"
+    Admin->>FE: AdminLecturersView "+ Lisa uus koolitaja"
     FE->>BE: GET /api/languages
     FE-->>Admin: tühi vorm (tõlge et)
 
@@ -514,7 +512,7 @@ Lipule klikkimine päringut ei tee — see teeb `router.replace`-i ja käivitab 
 |---|---|---|
 | `views/AdminLecturersView.vue` | uus | nimekiri; hoiab `lecturers`, `searchText`, `includeDeleted`; `computed: filteredLecturers` |
 | `views/LecturerFormView.vue` | uus | vorm, olekud `new-lecturer` / `update` / `new-translation` |
-| `App.vue` (navbar) | muudetakse | menüüsse "Admin" eraldaja + "Lisa uus koolitaja", "Koolitajad" |
+| `App.vue` (navbar) | muudetakse | menüüsse "Admin" link "Koolitajad" |
 | `router/index.js` | muudetakse | `/admin-lecturers` (`adminLecturersRoute`), `/lecturer-form` (`lecturerFormRoute`) |
 | `NavigationService.js` | muudetakse | `navigateToAdminLecturersView()`, `navigateToLecturerFormView(query)` |
 | `components/common/LecturerCard.vue` | uus, jagatud | prop `lecturerId`; laeb `GET /api/lecturer-summary/{id}` ise; pilt, nimi, ametinimetus, lühikirjeldus; 404 → ei kuvata. Kasutab TrainingView (admini kalender näitab ainult nimesid) |
@@ -542,7 +540,7 @@ Lipule klikkimine päringut ei tee — see teeb `router.replace`-i ja käivitab 
 
 ```text
 Create a desktop wireframe of an admin page "Koolitajad" in a web app.
-Top: site navigation bar with logo and links (Koolitused, Teenused, Ettevõttest, Kontakt), an open dropdown "Admin ▾" with items "Lisa uus koolitus", "Koolituste haldus", a divider, "Lisa uus koolitaja" and "Koolitajad" (highlighted), and "Logi välja" on the right.
+Top: site navigation bar with logo and links (Koolitused, Teenused, Ettevõttest, Kontakt), an open dropdown "Admin ▾" with items "Koolituste päringud", "Registreerumised", a divider, "Koolitused", "Koolituste kalender", a divider, "Koolitajad" (highlighted) and "Koolitusruumid", and "Logi välja" on the right.
 Header row: page title "Koolitajad" on the left and a primary button "+ Lisa uus koolitaja" on the right.
 Below the header: a search text input "Otsi nime järgi…" and a toggle switch "Näita kustutatud" (on).
 Main area: a data table with columns "Nimi", "Ametinimetus", "Tõlked", "Koolitusi", "Tulevasi toimumiskordi", "Uuendatud", "Tegevused". No photos.

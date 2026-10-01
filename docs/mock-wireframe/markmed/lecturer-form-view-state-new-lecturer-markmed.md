@@ -10,7 +10,7 @@ Failinimi: LecturerFormView.vue
 Frontend rada: /lecturer-form
 
 Vaatega seotud lisainfo:
-state: "new-lecturer" — query parameetreid pole. Avaneb navbari menüüst "Admin" → "Lisa uus koolitaja" või AdminLecturersView nupust. Pealkiri "Lisa uus koolitaja", lipukesi pole, kiirnupp "Koolitajad" → /admin-lecturers.
+state: "new-lecturer" — query parameetreid pole. Avaneb AdminLecturersView nupust "+ Lisa uus koolitaja". Pealkiri "Lisa uus koolitaja", lipukesi pole, kiirnupp "Koolitajad" → /admin-lecturers.
 Kaart "Koolitaja andmed": Täisnimi *, Pilt (valikuline: "Vali pilt" → eelvaade, "Eemalda"; PNG, JPEG või WebP kuni 2 MB, kontrollitakse enne saatmist). Kaart "Tõlge (et)": Ametinimetus *, Lühikirjeldus *, Kirjeldus * (RichTextEditor). Välja "Ametinimetus" sildi kõrval on "?" ikoon tooltip'iga: "Ametinimetus kuvatakse koolitaja kaardil nime all. Kirjuta lühidalt, millega koolitaja tegeleb, nt „Lektor/konsultant“ või „Projektijuht/lektor“. Iga keele jaoks eraldi tõlge." Lühikirjelduse all vihje "Kuvatakse koolitaja kaardil koolituse lehel ja toimumiskorra juures".
 Vead AlertDanger.vue-ga ("Täida kõik kohustuslikud väljad", pildi viga või backendi message). "Lisa" → POST /api/lecturer (userId localStorage'ist). Vastuse järgi router.replace → state "update", eduteade "Koolitaja lisatud".
 ```
