@@ -8,6 +8,7 @@ import SessionStorageService from '@/services/SessionStorageService.js'
 import FormatService from '@/services/FormatService.js'
 import CheckMark from '@/components/common/CheckMark.vue'
 import SortableColumnHeader from '@/components/common/SortableColumnHeader.vue'
+import AdminEnquiryRegistrationTabs from '@/components/common/AdminEnquiryRegistrationTabs.vue'
 import CourseParticipantStatusBadge from '@/components/common/CourseParticipantStatusBadge.vue'
 
 // Staatuse kasvav järjekord sorteerimisel: Registreerunud → Loobunud
@@ -26,7 +27,13 @@ const SORT_VALUES = {
 
 export default {
   name: 'AdminRegistrationsView',
-  components: { PhEye, CheckMark, SortableColumnHeader, CourseParticipantStatusBadge },
+  components: {
+    AdminEnquiryRegistrationTabs,
+    PhEye,
+    CheckMark,
+    SortableColumnHeader,
+    CourseParticipantStatusBadge,
+  },
   data() {
     return {
       searchText: '',
@@ -156,19 +163,7 @@ export default {
 
 <template>
   <div class="container">
-    <!-- PROTOTÜÜP: päringute ja registreerumiste vaheline lülitus nupugrupina -->
-    <div class="btn-group mb-3" role="group">
-      <RouterLink :to="{ name: 'adminEnquiriesRoute' }" class="btn btn-outline-primary">
-        {{ $t('navbar.manageEnquiries') }}
-      </RouterLink>
-      <RouterLink
-        :to="{ name: 'adminRegistrationsRoute' }"
-        class="btn btn-primary"
-        aria-current="page"
-      >
-        {{ $t('navbar.manageRegistrations') }}
-      </RouterLink>
-    </div>
+    <AdminEnquiryRegistrationTabs />
 
     <h1 class="h3 mb-3">{{ $t('adminRegistrations.title') }}</h1>
 
