@@ -3,6 +3,10 @@ import { mockResponse } from '@/api-services/mock/mockResponse.js'
 import MockDatabase from '@/api-services/mock/MockDatabase.js'
 
 export default {
+  getCurriculumUrl(trainingTranslationId) {
+    return `/api/training-translation/${trainingTranslationId}/curriculum`
+  },
+
   sendGetTrainingsRequest(
     categoryId,
     fundingTypeId,

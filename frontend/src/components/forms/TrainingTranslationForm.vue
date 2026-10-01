@@ -1,11 +1,15 @@
 <script>
+import CurriculumUpload from '@/components/forms/CurriculumUpload.vue'
 import RichTextEditor from '@/components/forms/RichTextEditor.vue'
 
 export default {
   name: 'TrainingTranslationForm',
-  components: { RichTextEditor },
+  components: { RichTextEditor, CurriculumUpload },
   props: {
     translation: Object,
+    newCurriculum: Object,
+    isCurriculumRemoved: Boolean,
+    isSaving: Boolean,
     languageName: String,
     showAiButton: {
       type: Boolean,
@@ -18,6 +22,10 @@ export default {
     aiTooltip: String,
   },
   emits: [
+    'event-curriculum-selected',
+    'event-curriculum-removed',
+    'event-curriculum-error',
+    'event-curriculum-loading',
     'event-new-title-input',
     'event-new-short-description-input',
     'event-new-description-input',
@@ -82,6 +90,19 @@ export default {
           label-id="descriptionLabel"
         />
       </div>
+      <CurriculumUpload
+        :key="`${translation.trainingTranslationId}-${translation.languageCode}`"
+        :training-translation-id="translation.trainingTranslationId"
+        :curriculum-file-name="translation.curriculumFileName"
+        :curriculum-file-size="translation.curriculumFileSize"
+        :new-curriculum="newCurriculum"
+        :is-curriculum-removed="isCurriculumRemoved"
+        :is-disabled="isSaving"
+        @event-curriculum-selected="$emit('event-curriculum-selected', $event)"
+        @event-curriculum-removed="$emit('event-curriculum-removed')"
+        @event-curriculum-error="$emit('event-curriculum-error', $event)"
+        @event-curriculum-loading="$emit('event-curriculum-loading', $event)"
+      />
     </div>
   </fieldset>
 </template>

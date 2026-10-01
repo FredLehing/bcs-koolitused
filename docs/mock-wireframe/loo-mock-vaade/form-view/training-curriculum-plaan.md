@@ -130,7 +130,7 @@ Backendi loogika salvestamisel (ühes transaktsioonis tõlkega):
 | 2 | DDL + entity + repository + `FileNameSanitizer` + `Error` koodid | `docs/tasks/backend/training-curriculum-db-changes.md` | lihtne | ✅ tehtud 2026-10-01 |
 | 3 | Salvestamine: `POST /api/training`, `PUT /api/training/{trainingId}`, `POST …/training-translation` | `docs/tasks/backend/training-curriculum-upload.md` | keskmine | ✅ kood tehtud 2026-10-01 |
 | 4 | `TrainingTranslationDto` väljad + `GET …/curriculum` | `docs/tasks/backend/GET-api-training-translation-trainingTranslationId-curriculum.md` | lihtne | ✅ kood tehtud 2026-10-01 |
-| 5 | Vormi väli `CurriculumUpload.vue` | `docs/tasks/frontend/training-form-curriculum.md` | keskmine | mockidega alustatav kohe; päris backendiga pärast 3–4 |
+| 5 | Vormi väli `CurriculumUpload.vue` | `docs/tasks/frontend/training-form-curriculum.md` | keskmine | ✅ kood tehtud 2026-10-01, haru `RAIN-training-curriculum-frontend` |
 | 6 | (Hiljem) `/training` failinimi + allalaadimine | — | lihtne | teenus 4 on olemas |
 
 Soovitus: 2 → 3 → 4 ühes harus järjest (sama andmemudel), 5 eraldi harus. Iga taski järel backend testid (`./gradlew test`), frontendi järel lint + build scratchpadis.
@@ -145,7 +145,15 @@ Soovitus: 2 → 3 → 4 ühes harus järjest (sama andmemudel), 5 eraldi harus. 
 - Testid: teenus, DTO valideerimine, controlleri päised, Jacksoni piir (~10,5 MB JSON loetakse → 403). `./gradlew test` roheline.
 - **Päris DB vastu pole testitud** (WSL-ist Windowsi Postgres pole kättesaadav) — kasutaja kontrollib Swaggeris: PUT `/api/training/1` failiga → GET tõlge (nimi + suurus) → allalaadimine brauseris → pealkirja muutus failita (nimi muutub) → `isCurriculumRemoved` → 404.
 
-**Järgmine samm:** task 5 `docs/tasks/frontend/training-form-curriculum.md` uues sessioonis, eraldi harus `RAIN-training-curriculum`-ist (vt `frontend/CLAUDE.md`, build scratchpadis).
+**Task 5 seis (2026-10-01):** kood valmis harus `RAIN-training-curriculum-frontend`, mis loodi harust `RAIN-training-curriculum`.
+- `CurriculumUpload.vue`: neli olekut, PDF MIME-tüübi ja 10 MB piiri kontroll, Base64 lugemine, vahetamine/eemaldamine ja tühistamine, faili nimi allalaadimislingina ning suurus.
+- Väli asub `TrainingTranslationForm.vue`-s kirjelduse järel; `TrainingFormView.vue` saadab kõigis salvestuspäringutes õppekava ja tõlkekeelse `curriculumLabel`-i, PUT-is ka eemaldamise lipu. Pärast PUT-i laaditakse tõlge uuesti. Uue tõlke eeltäitmine ja AI-tõlge faili ei kopeeri ega muuda.
+- Salvestamine on faili lugemise ja salvestuspäringu ajal blokeeritud. Teadaolevad õppekava 403 vead kuvatakse vormis. Lisatud et/en tekstid ja `TrainingService.getCurriculumUrl`.
+- `MockDatabase` jäi muutmata: vorm kasutab juba valmis päris backendit, ajutist näidisfaili ei vajata.
+- Kontrollid: `npm run lint` ja `npm run build` läbisid `/tmp` kontrollkoopias (ainult teadaolev suure bundle'i hoiatus). Ajutine DOM-/teenusekontroll läbis nelja oleku, tühistamise, tüübi/suuruse piiride, Base64, allalaadimislingi, POST/PUT väljade, tõlkekeelse sõna, salvestamisjärgse laadimise ja AI-st eraldatuse kontrollid.
+- Päris backendiga brauseri läbivtesti selles sessioonis ei tehtud; muudatused on commit'imata.
+
+**Järgmine samm:** kontrollida brauseris päris backendiga koolituse ja tõlke loomist PDF-iga, faili vahetamist, allalaadimist, pealkirja muutmisel faili ümbernimetamist ning eemaldamist. Task 6 (avaliku `/training` vaate link) jääb hilisemaks.
 
 **Uue sessiooni alguses loe:** see fail (otsused + failinime reegel), taskifail, `backend/CLAUDE.md` / `frontend/CLAUDE.md`. Eeskuju koodis: `LecturerPhotoService`, `LecturerPhoto*`, `PhotoUpload.vue`, `@ValidBase64`, `isPhotoRemoved` kontroll `LecturerUpdateRequestDto`-s.
 

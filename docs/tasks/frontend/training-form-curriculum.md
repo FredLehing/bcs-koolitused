@@ -95,3 +95,10 @@ JSON näidised: märkmete failid ja backend taskid. Kuni backend pole valmis, li
 - [ ] Pärast "Salvesta" on näha uus failinimi
 - [ ] Failinime link laadib faili alla
 - [ ] Tekstid et/en; `npm run lint` ja build lähevad läbi
+
+
+## Teostuse seis (2026-10-01)
+
+Taski kood on valmis harus `RAIN-training-curriculum-frontend` (`RAIN-training-curriculum` põhjal). Lint ja build läbisid kontrolli `/tmp` koopias. Ajutises DOM-/teenusekontrollis kontrolliti faili nelja olekut, tühistamist, valideerimist (ka täpselt 10 MB ja üks bait üle piiri), päringute sisu, tõlkekeelset `curriculumLabel`-i ning salvestamisjärgset laadimist. Päris backendiga brauseri vastuvõtukontroll jääb teha, mistõttu ülalolevad vastuvõtukriteeriumid on veel märkimata.
+
+Vorm kasutab juba päris backendit, seetõttu `MockDatabase` näidisfaili ei lisatud. Faili lugemise ja salvestamise ajal on salvestusnupud blokeeritud; lugemisvea jaoks lisati et/en võti `trainingForm.translation.curriculumReadError`.
