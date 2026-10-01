@@ -394,8 +394,8 @@ tr.is-past td, tr.is-cancelled td { color: var(--ink-soft); }
       "Vaatega seotud lisainfo:",
       "Pealkiri \"Toimumiskord\", all koolituse nimi. Kiirnupud \"Muuda\" (/course-form?courseId), \"Koolituse kalender\" (/admin-training-courses?trainingId), \"Koolituste kalender\" (/admin-all-courses).",
       "Kaart \"Toimumiskord\" (ainult lugemiseks): Koolitus (link /training), Toimumisaeg, Päevi, Akad. tunde, Hind, Koolitajad, Ruum, Veebilink, Staatus (+ \"Toimunud\"), Esile tõstetud, Märkmed. Avatud/täis toimumiskorral link \"Vaata avalikul lehel\" → /course?courseId.",
-      "Tabel \"Osalejad\" (frontendi filtrid): otsing nime/e-posti järgi, Tasumine (Kõik/Tasunud/Tasumata), lüliti \"Näita ka loobunud\". Veerud Nimi | E-post | Telefon | Registreerus | Tasunud | Sülearvuti | Staatus | Märkmed. All \"Kokku N osalejat, neist M tasunud\" (registreerunud osalejad).",
-      "Tabel \"Huvilised\" (frontendi filtrid): otsing nime/e-posti/ettevõtte järgi, Staatus (Kõik/Uued/Käsitletud). Veerud Saabunud | Nimi | E-post | Ettevõte | Staatus | silm → /admin-enquiry?enquiryId.",
+      "Tabel \"Osalejad\": lüliti \"Näita ka loobunud\" (vaikimisi väljas); veergude järgi sorteerimine frontendis (vaikimisi registreerumise järjekorras). Veerud Nimi | E-post | Telefon | Registreerus | Tasunud | Vajab sülearvutit | Staatus | Märkmed. All \"Kokku N osalejat, neist M tasunud\" (registreerunud osalejad).",
+      "Tabel \"Huvilised\": filtreid pole; veergude järgi sorteerimine frontendis (vaikimisi uusimad eespool). Veerud Saabunud | Nimi | E-post | Ettevõte | Staatus | silm → /admin-enquiry?enquiryId.",
       "Keele vahetusel laaditakse andmed uuesti. Olematu või kustutatud toimumiskord → üldine veavaade."
     ].join("\n") }
   };
@@ -509,7 +509,7 @@ tr.is-past td, tr.is-cancelled td { color: var(--ink-soft); }
   function freshUi() {
     return { lang: ui ? ui.lang : "et", route: "list", searchInput: "", appliedSearch: "", open: false, draft: Object.assign({}, EMPTY_FILTERS), applied: Object.assign({}, EMPTY_FILTERS),
       includePast: false, sortBy: null, sortDirection: "ASC", page: 0, result: { totalPages: 0, totalElements: 0, adminCourseSummaries: [] },
-      pSearch: "", pPaid: "", pShowCancelled: false, eSearch: "", eStatus: "", participants: [], enquiries: [] };
+      pShowCancelled: false, pSort: { key: "registeredAt", dir: "asc" }, eSort: { key: "createdAt", dir: "desc" }, participants: [], enquiries: [] };
   }
 
   function j(o) { return JSON.stringify(o, null, 2); }
@@ -620,7 +620,7 @@ tr.is-past td, tr.is-cancelled td { color: var(--ink-soft); }
     }
     renderAll();
   }
-  function openDetail(id, t) { startStep(t); ui.route = "detail"; ui.pSearch = ""; ui.pPaid = ""; ui.pShowCancelled = false; ui.eSearch = ""; ui.eStatus = ""; loadDetail(id); renderAll(); }
+  function openDetail(id, t) { startStep(t); ui.route = "detail"; ui.pShowCancelled = false; ui.pSort = { key: "registeredAt", dir: "asc" }; ui.eSort = { key: "createdAt", dir: "desc" }; loadDetail(id); renderAll(); }
   function reload(t) { startStep(t); loadList(); renderAll(); }
   function switchLang(code) {
     if (code === ui.lang) return;
@@ -740,40 +740,45 @@ tr.is-past td, tr.is-cancelled td { color: var(--ink-soft); }
       (isPublic ? '<button type="button" class="linkish" id="b-public" style="justify-self:start">Vaata avalikul lehel</button>' : '<span class="hint">Avalikul lehel ei kuvata (staatus ' + d.status + ').</span>') + '</fieldset>' +
       renderParticipants() + renderEnquiries();
   }
-  function renderParticipants() {
-    var s = ui.pSearch.trim().toLowerCase();
-    var reg = ui.participants.filter(function (p) { return p.status === "R"; });
-    var rows = ui.participants.filter(function (p) {
-      if (!ui.pShowCancelled && p.status === "C") return false;
-      if (ui.pPaid === "paid" && !p.hasPaid) return false;
-      if (ui.pPaid === "unpaid" && p.hasPaid) return false;
-      return !s || p.participantName.toLowerCase().indexOf(s) !== -1 || p.email.toLowerCase().indexOf(s) !== -1;
+  // Frontendi sorteerimine (SortService.sortRows): tekst tähestiku järgi, null lõpus; sama veerg uuesti → suund vahetub
+  function sortRows(rows, srt) {
+    var dir = srt.dir === "desc" ? -1 : 1;
+    return rows.slice().sort(function (a, b) {
+      var x = a[srt.key], y = b[srt.key];
+      if (x == null || y == null) return x == null ? (y == null ? 0 : 1) : -1;
+      return dir * (typeof x === "string" ? x.localeCompare(y, "et", { sensitivity: "base" }) : Number(x) - Number(y));
     });
+  }
+  function sortHead(kind, srt, cols) {
+    return cols.map(function (c) {
+      if (!c[0]) return '<th' + (c[2] || "") + '>' + c[1] + '</th>';
+      var arrow = srt.key === c[0] ? (srt.dir === "asc" ? "▲" : "▼") : "";
+      return '<th' + (c[2] || "") + '><button type="button" class="sorth" data-' + kind + '="' + c[0] + '">' + c[1] + '<span class="arrow" aria-hidden="true">' + arrow + '</span></button></th>';
+    }).join("");
+  }
+  function renderParticipants() {
+    var reg = ui.participants.filter(function (p) { return p.status === "R"; });
+    var rows = sortRows(ui.participants.filter(function (p) { return ui.pShowCancelled || p.status === "R"; }), ui.pSort);
     var body = rows.length ? rows.map(function (p) {
       return '<tr' + (p.status === "C" ? ' class="is-deleted"' : "") + '><td class="name-cell">' + esc(p.participantName) + '</td><td>' + esc(p.email) + '</td><td>' + esc(p.phone) + '</td><td class="date">' + dateTime(p.registeredAt).slice(0, 10) + '</td>' +
         '<td class="center">' + check(p.hasPaid) + '</td><td class="center">' + check(p.requiresLaptop) + '</td><td>' + (p.status === "R" ? '<span class="badge active">Registreerunud</span>' : '<span class="badge draft">Loobunud</span>') + '</td><td>' + esc(p.notes || "") + '</td></tr>';
     }).join("") : '<tr class="empty-row"><td colspan="8">Osalejaid pole</td></tr>';
     return '<fieldset class="subtbl"><legend>Osalejad</legend>' +
-      '<div class="searchrow"><input type="text" id="p-search" placeholder="Otsi nime või e-posti järgi…" aria-label="Otsi osalejat" value="' + esc(ui.pSearch) + '">' +
-      '<select id="p-paid" aria-label="Tasumine">' + opts([["", "Tasumine: Kõik"], ["paid", "Tasunud"], ["unpaid", "Tasumata"]], ui.pPaid) + '</select>' +
-      '<label class="switch"><input type="checkbox" id="p-cancelled"' + (ui.pShowCancelled ? " checked" : "") + '> Näita ka loobunud</label>' + pin("n-participants", "GET …/participants") + '</div>' +
-      '<div class="tablewrap"><table><thead><tr><th>Nimi</th><th>E-post</th><th>Telefon</th><th>Registreerus</th><th class="center">Tasunud</th><th class="center">Sülearvuti</th><th>Staatus</th><th>Märkmed</th></tr></thead><tbody>' + body + '</tbody></table></div>' +
+      '<div class="searchrow"><label class="switch"><input type="checkbox" id="p-cancelled"' + (ui.pShowCancelled ? " checked" : "") + '> Näita ka loobunud</label>' + pin("n-participants", "GET …/participants") + '</div>' +
+      '<div class="tablewrap"><table><thead><tr>' + sortHead("psort", ui.pSort, [["participantName", "Nimi"], ["email", "E-post"], ["phone", "Telefon"], ["registeredAt", "Registreerus"],
+        ["hasPaid", "Tasunud", ' class="center"'], ["requiresLaptop", "Vajab sülearvutit", ' class="center"'], ["status", "Staatus"], ["", "Märkmed"]]) + '</tr></thead><tbody>' + body + '</tbody></table></div>' +
       '<div class="foot"><span class="total">Kokku ' + reg.length + (reg.length === 1 ? " osaleja" : " osalejat") + ', neist ' + reg.filter(function (p) { return p.hasPaid; }).length + ' tasunud</span></div></fieldset>';
   }
   function renderEnquiries() {
-    var s = ui.eSearch.trim().toLowerCase();
-    var rows = ui.enquiries.filter(function (e) {
-      if (ui.eStatus && e.status !== ui.eStatus) return false;
-      return !s || [e.fullName, e.email, e.companyName || ""].some(function (v) { return v.toLowerCase().indexOf(s) !== -1; });
-    });
+    var rows = sortRows(ui.enquiries, ui.eSort);
     var body = rows.length ? rows.map(function (e) {
       return '<tr' + (e.status === "U" ? ' class="is-new"' : "") + '><td class="date">' + dateTime(e.createdAt) + '</td><td>' + esc(e.fullName) + '</td><td>' + esc(e.email) + '</td><td>' + esc(e.companyName || "—") + '</td>' +
         '<td>' + (e.status === "U" ? '<span class="badge active">Uus</span>' : '<span class="badge draft">Käsitletud</span>') + '</td><td><button type="button" class="ibtn" data-enquiry="' + e.enquiryId + '" title="Vaata" aria-label="Vaata">' + EYE + '</button></td></tr>';
     }).join("") : '<tr class="empty-row"><td colspan="6">Huvilisi pole</td></tr>';
     return '<fieldset class="subtbl"><legend>Huvilised</legend>' +
-      '<div class="searchrow"><input type="text" id="e-search" placeholder="Otsi nime, e-posti või ettevõtte järgi…" aria-label="Otsi huvilist" value="' + esc(ui.eSearch) + '">' +
-      '<select id="e-status" aria-label="Staatus">' + opts([["", "Staatus: Kõik"], ["U", "Uued"], ["H", "Käsitletud"]], ui.eStatus) + '</select>' + pin("n-enquiries", "GET …/enquiries") + '</div>' +
-      '<div class="tablewrap"><table><thead><tr><th>Saabunud</th><th>Nimi</th><th>E-post</th><th>Ettevõte</th><th>Staatus</th><th></th></tr></thead><tbody>' + body + '</tbody></table></div>' +
+      '<div class="searchrow">' + pin("n-enquiries", "GET …/enquiries") + '</div>' +
+      '<div class="tablewrap"><table><thead><tr>' + sortHead("esort", ui.eSort, [["createdAt", "Saabunud"], ["fullName", "Nimi"], ["email", "E-post"], ["companyName", "Ettevõte"], ["status", "Staatus"], ["", ""]]) +
+      '</tr></thead><tbody>' + body + '</tbody></table></div>' +
       '<div class="foot"><span class="total">Kokku ' + ui.enquiries.length + (ui.enquiries.length === 1 ? " päring" : " päringut") + '</span></div></fieldset>';
   }
   function renderView() { document.getElementById("view").innerHTML = ui.route === "list" ? renderList() : renderDetail(); }
@@ -781,7 +786,7 @@ tr.is-past td, tr.is-cancelled td { color: var(--ink-soft); }
     var rows = [["route", ui.route === "list" ? "AdminAllCoursesView" : "AdminCourseView"], ["contentLang", ui.lang]];
     if (ui.route === "list") rows.push(["searchText / applied", '"' + ui.searchInput + '" / "' + ui.appliedSearch + '"'], ["isFilterCardOpen", String(ui.open)], ["appliedFilters", JSON.stringify(ui.applied).replace(/"/g, "").replace(/,/g, ", ")],
       ["includePast", String(ui.includePast)], ["sortBy / sortDirection", (ui.sortBy || "null") + " / " + ui.sortDirection], ["page / totalPages", ui.page + " / " + ui.result.totalPages]);
-    else rows.push(["courseId", String(detail.courseId)], ["participants.length", String(ui.participants.length)], ["enquiries.length", String(ui.enquiries.length)], ["osalejate filtrid", JSON.stringify({ search: ui.pSearch, paid: ui.pPaid, showCancelled: ui.pShowCancelled })], ["huviliste filtrid", JSON.stringify({ search: ui.eSearch, status: ui.eStatus })]);
+    else rows.push(["courseId", String(detail.courseId)], ["participants.length", String(ui.participants.length)], ["enquiries.length", String(ui.enquiries.length)], ["osalejad", JSON.stringify({ showCancelled: ui.pShowCancelled, sort: ui.pSort })], ["huvilised", JSON.stringify({ sort: ui.eSort })]);
     document.getElementById("statekv").innerHTML = rows.map(function (r) { return "<dt>" + esc(r[0]) + "</dt><dd>" + esc(r[1]) + "</dd>"; }).join("");
     document.getElementById("urlbar").textContent = ui.route === "list" ? "https://bcskoolitus.ee/admin-all-courses" : "https://bcskoolitus.ee/admin-course?courseId=" + detail.courseId;
   }
@@ -843,8 +848,6 @@ tr.is-past td, tr.is-cancelled td { color: var(--ink-soft); }
   viewEl.addEventListener("input", function (e) {
     var t = e.target;
     if (t.id === "f-search") { ui.searchInput = t.value; renderKv(); }
-    if (t.id === "p-search") keepFocus("p-search", function () { ui.pSearch = t.value; });
-    if (t.id === "e-search") keepFocus("e-search", function () { ui.eSearch = t.value; });
   });
   viewEl.addEventListener("keydown", function (e) {
     if (e.target.id === "f-search" && e.key === "Enter") { ui.appliedSearch = ui.searchInput.trim(); ui.page = 0; reload("Otsing (Enter): „" + ui.appliedSearch + "“"); }
@@ -853,12 +856,12 @@ tr.is-past td, tr.is-cancelled td { color: var(--ink-soft); }
     var t = e.target;
     if (t.dataset.f) { ui.draft[t.dataset.f] = t.dataset.f === "categoryId" || t.dataset.f === "trainingLanguageId" ? +t.value : t.value; renderKv(); return; }
     if (t.id === "c-past") { ui.includePast = t.checked; ui.page = 0; reload("Lüliti „Näita ka möödunud“ → " + t.checked); return; }
-    if (t.id === "p-paid") { ui.pPaid = t.value; renderView(); renderKv(); return; }
     if (t.id === "p-cancelled") { ui.pShowCancelled = t.checked; renderView(); renderKv(); return; }
-    if (t.id === "e-status") { ui.eStatus = t.value; renderView(); renderKv(); return; }
   });
   viewEl.addEventListener("click", function (e) {
     var b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.psort || b.dataset.esort) { var srt = b.dataset.psort ? ui.pSort : ui.eSort, k = b.dataset.psort || b.dataset.esort;
+      if (srt.key === k) srt.dir = srt.dir === "asc" ? "desc" : "asc"; else { srt.key = k; srt.dir = "asc"; } renderView(); renderKv(); return; }
     if (b.dataset.note) { goNote(b.dataset.note); return; }
     if (b.dataset.sort) { sortClick(b.dataset.sort); return; }
     if (b.dataset.page) { ui.page = +b.dataset.page; reload("Leht " + (ui.page + 1)); return; }

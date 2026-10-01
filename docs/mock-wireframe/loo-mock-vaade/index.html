@@ -162,7 +162,7 @@ code { font-family: var(--font-mono); font-size: .88em; }
     { key: "course", path: "/course", name: "Toimumiskord", view: "CourseView.vue", group: "public", sample: "/course?courseId=9", file: "courses-view/courses-view-labimang.html", params: ["courseId", "registered"], extra: "view=course", roleParam: true },
     { key: "course-registration", path: "/course-registration", name: "Registreerumine", view: "CourseRegistrationView.vue", group: "public", sample: "/course-registration?courseId=9", file: "courses-view/course-registration-view-labimang.html", params: ["courseId"], extra: "view=course-registration", roleParam: true },
     { key: "lecturers", path: "/lecturers", name: "Meie koolitajad", view: "LecturersView.vue", group: "public", file: "lecturers-view/lecturers-view-labimang.html" },
-    { key: "lecturer", path: "/lecturer", name: "Koolitaja", view: "LecturerView.vue", group: "public", sample: "/lecturer?lecturerId=1", file: "lecturers-view/lecturers-view-labimang.html", params: ["lecturerId"] },
+    { key: "lecturer", path: "/lecturer", name: "Koolitaja", view: "LecturerView.vue", group: "public", sample: "/lecturer?lecturerId=1", file: "lecturers-view/lecturers-view-labimang.html", params: ["lecturerId", "returnTo"] },
     { key: "login", path: "/login", name: "Logi sisse", view: "LoginView.vue", group: "public", login: true },
     { key: "signup", path: "/signup", name: "Loo konto", view: "SignupView.vue", group: "public", file: "courses-view/course-registration-view-labimang.html", params: ["redirect"], extra: "view=signup" },
     { key: "admin-trainings", path: "/admin-trainings", name: "Koolituste haldus", view: "AdminTrainingsView.vue", group: "admin", file: "admin-trainings-view/admin-trainings-view-labimang.html" },

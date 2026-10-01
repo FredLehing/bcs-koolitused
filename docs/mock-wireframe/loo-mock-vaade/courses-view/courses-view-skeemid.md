@@ -65,12 +65,12 @@ Eeskujud: `admin-training-courses-view/` (ühe koolituse kalender, `course_summa
 - Rada `/admin-course?courseId={id}`. Pealkiri "Toimumiskord", selle all koolituse nimi. Paremal kiirnupud: "Muuda" → `/course-form?courseId={id}`, "Koolituse kalender" → `/admin-training-courses?trainingId={id}`, "Koolituste kalender" → `/admin-all-courses`.
 - **Kaart "Toimumiskord"** (sama info mis vormis, ainult lugemiseks): Koolitus (link avalikule koolituse lehele `/training`), Toimumisaeg `05/10/2026 – 09/10/2026`, Päevi, Akad. tunde, Hind, Koolitajad (nimed `sort_order` järjekorras või "—"), Ruum (või "—"), Veebilink (klikitav link või "—"), Staatus (märgis + "Toimunud"), Esile tõstetud (Jah/Ei), Märkmed (reavahetused säilivad; puudumisel "—"). Avaliku `O`/`F` toimumiskorra puhul link "Vaata avalikul lehel" → `/course?courseId={id}`.
 - **Tabel "Osalejad"** — ainult lugemiseks, filtreerimine frontendis:
-  - otsinguväli "Otsi nime või e-posti järgi…", rippmenüü Tasumine: Kõik / Tasunud / Tasumata, lüliti "Näita ka loobunud" (vaikimisi väljas);
-  - veerud: Nimi | E-post | Telefon | Registreerus | Tasunud ✓/✗ | Sülearvuti ✓/✗ | Staatus (Registreerunud / Loobunud) | Märkmed;
+  - pealkirja real paremal lüliti "Näita ka loobunud" (vaikimisi väljas); veerupäiste järgi sorteerimine frontendis (`SortableColumnHeader`, vaikimisi registreerumise järjekorras);
+  - veerud: Nimi | E-post | Telefon | Registreerus | Tasunud ✓/✗ | Vajab sülearvutit ✓/✗ | Staatus (Registreerunud / Loobunud) | Märkmed;
   - loobunu rida on tuhmim; tabeli all "Kokku N osalejat, neist M tasunud" (arvud kogu nimekirjast, `R` osalejad);
   - tühi: "Osalejaid pole".
 - **Tabel "Huvilised"** — päringud, mille `course_id` on see toimumiskord; ainult lugemiseks, filtreerimine frontendis:
-  - otsinguväli "Otsi nime, e-posti või ettevõtte järgi…", rippmenüü Staatus: Kõik / Uued / Käsitletud;
+  - filtreid pole; veerupäiste järgi sorteerimine frontendis (vaikimisi uusimad eespool);
   - veerud: Saabunud | Nimi | E-post | Ettevõte | Staatus (`EnquiryStatusBadge`) | silm → `/admin-enquiry?enquiryId={id}`;
   - tühi: "Huvilisi pole".
 - Osalejate haldus (lisamine, tasumise märkimine, loobumine) on **hiljem** eraldi töö.
@@ -98,7 +98,7 @@ Eeskujud: `admin-training-courses-view/` (ühe koolituse kalender, `course_summa
 - **Vasak veerg:** kaart "Koolitus" — pealkiri, alapealkirjana toimumisaeg `05/10/2026 – 09/10/2026`, lühikirjeldus ja pikk kirjeldus (`RichTextContent`); link "Kõik selle koolituse toimumiskorrad" → `/training?trainingId=…&trainingTranslationId=…`. Puuduva tõlke korral põhikeele tekst ja märkus (nagu `/training`).
 - **Parem veerg:**
   - kaart **"Toimumiskord"**: Toimumisaeg, Päevi, Akad. tunde, Hind, Toimumisviis (Kohapeal / Veebis / Kohapeal ja veebis), Koolituse keel (lipp), Kategooria, Rahastus, staatuse märgis "Täis" (ainult `F`); nupp **"Registreeru"** (vt "Registreerumine") ja **"Küsi lisainfot"** (avab päringu modali; ka täis toimumiskorral lubatud);
-  - kaart **"Koolitajad"**: `LecturerCard` iga toimumiskorra koolitaja kohta (`course_lecturer`, `sort_order`); ilma koolitajateta kaarti ei kuvata.
+  - kaart **"Koolitajad"**: `LecturerCard` iga toimumiskorra koolitaja kohta (`course_lecturer`, `sort_order`); ilma koolitajateta kaarti ei kuvata. Kogu koolitaja kaart on link → `/lecturer?lecturerId={id}&returnTo={praegune rada}` (samas tabis); `LecturerView` näitab `returnTo` korral nuppu "← Tagasi" (muidu "← Kõik koolitajad"). `returnTo` peab olema sisemine rada (algab `/`-ga, mitte `//`), muidu jäetakse tähelepanuta. Sama kehtib `/training` lehe koolitajate kaartidele.
 - **Vasakus veerus kohe kaardi "Koolitus" all kaart "Toimumiskorrad"**: sama koolituse kõik avalikud tulevased toimumiskorrad **üksteise all linkidena** (üks link rea kohta) kujul `12/10/2026 – 15/10/2026 · Kohapeal` (toimumisviis: Kohapeal / Veebis / Kohapeal ja veebis; täis korral lisaks märgis "Täis"), alguse järgi. Frontendis `<router-link>`.
   - Praegune toimumiskord on reas paksus kirjas (▸ ees) ega ole link — nii on näha, kus see teiste seas asub.
   - Teise lingi vajutus avab **sama vaate** teise toimumiskorraga: `router.push('/course?courseId={id}')`; vaade jälgib `$route.query` muutust ja laadib andmed uuesti (sama muster nagu `TrainingView.vue`).
@@ -408,6 +408,7 @@ sequenceDiagram
     actor K as Külastaja
     participant List as CoursesView.vue
     participant Page as CourseView.vue
+    participant Lect as LecturerView.vue
     participant BE as Backend
 
     K->>List: Koolitused ▾ → "Koolituste kalender"
@@ -429,8 +430,11 @@ sequenceDiagram
         BE-->>Page: 404 PRIMARY_KEY_NOT_FOUND
         Page-->>K: üldine veavaade
     end
-    K->>Page: "Registreeru"
-    Page-->>K: kohatäide "Tuleb hiljem"
+    K->>Page: koolitaja kaart (LecturerCard)
+    Page->>Lect: /lecturer?lecturerId=1&returnTo=/course?courseId=9
+    K->>Lect: "← Tagasi"
+    Lect->>Page: /course?courseId=9 (returnTo)
+    K->>Page: "Registreeru" (vt "Registreerumine" allpool)
     K->>Page: "Küsi lisainfot" → täidab vormi → "Saada"
     Note over Page: frontendi kontroll: kohustuslikud väljad, e-post
     Page->>BE: POST /api/enquiry
@@ -563,8 +567,8 @@ Create a desktop wireframe of an admin page "Toimumiskord" in a web app.
 Top: site navigation bar with logo, links, a dropdown "Admin ▾" and "Logi välja".
 Header row: title "Toimumiskord" with subtitle "Java algkursus", and buttons "Muuda", "Koolituse kalender", "Koolituste kalender" on the right.
 Card "Toimumiskord" as a two-column list: Koolitus link "Java algkursus"; Toimumisaeg 05/10/2026 – 09/10/2026; Päevi 5; Akad. tunde 40; Hind 490 €; Koolitajad Rain Tüür, Meelis Teern; Ruum Assauwe; Veebilink —; Staatus badge Avatud; Esile tõstetud Jah; Märkmed "Kaasa sülearvuti."; a link "Vaata avalikul lehel".
-Card "Osalejad": a search input "Otsi nime või e-posti järgi…", a dropdown "Tasumine: Kõik", a toggle "Näita ka loobunud" (on); a table with columns "Nimi", "E-post", "Telefon", "Registreerus", "Tasunud", "Sülearvuti", "Staatus", "Märkmed"; rows "Anna Saar | anna.saar@example.com | +37256789012 | 10/09/2026 | ✓ | ✓ | Registreerunud | Registreerus veebilehe kaudu.", "Liis Kuusk | … | ✗ | ✗ | Registreerunud", "Jaan Org | … | ✓ | ✓ | Registreerunud | Arve ettevõttele.", greyed row "Mari Lepp | … | ✗ | ✓ | Loobunud | Loobus haiguse tõttu."; below "Kokku 3 osalejat, neist 2 tasunud".
-Card "Huvilised": a search input and a dropdown "Staatus: Kõik"; a table with columns "Saabunud", "Nimi", "E-post", "Ettevõte", "Staatus", eye icon; row "15/09/2026 08:30 | Anna Saar | anna.saar@example.com | — | Auditoorne | badge Uus | eye".
+Card "Osalejad": on the title row right a toggle "Näita ka loobunud" (off); sortable column headers; a table with columns "Nimi", "E-post", "Telefon", "Registreerus", "Tasunud", "Vajab sülearvutit", "Staatus", "Märkmed"; rows "Anna Saar | anna.saar@example.com | +37256789012 | 10/09/2026 | ✓ | ✓ | Registreerunud | Registreerus veebilehe kaudu.", "Liis Kuusk | … | ✗ | ✗ | Registreerunud", "Jaan Org | … | ✓ | ✓ | Registreerunud | Arve ettevõttele."; below "Kokku 3 osalejat, neist 2 tasunud".
+Card "Huvilised": sortable column headers, no filters; a table with columns "Saabunud", "Nimi", "E-post", "Ettevõte", "Staatus", eye icon; row "15/09/2026 08:30 | Anna Saar | anna.saar@example.com | — | Auditoorne | badge Uus | eye".
 ```
 
 ### CoursesView

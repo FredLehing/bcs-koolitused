@@ -310,6 +310,8 @@ td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .dl dt { color: var(--ink-soft); }
 .dl dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
 .dl .flag svg, .dl dd svg { width: 26px; height: 17px; border: 1px solid var(--sketch); display: inline-block; vertical-align: middle; }
+button.lcard { width: 100%; text-align: left; background: none; font: inherit; color: inherit; cursor: pointer; }
+.lcard[data-lecturer]:hover, .lcard[data-lecturer]:focus-visible { border-color: var(--sketch); box-shadow: 0 2px 6px rgba(0,0,0,.12); }
 .lcard { display: flex; gap: 10px; align-items: center; border: 1.5px dashed var(--line); border-radius: 8px; padding: 8px; }
 .lcard .ph { width: 48px; height: 48px; border-radius: 50%; border: 1.5px solid var(--sketch); display: grid; place-items: center; font-weight: 700; background: var(--accent-soft); flex: none; }
 .lcard .nm { font-weight: 700; }
@@ -427,7 +429,7 @@ td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
       "",
       "Vaatega seotud lisainfo:",
       "Paigutus nagu /training. Vasakul kaart \"Koolitus\": pealkiri, toimumisaeg, lühikirjeldus, kirjeldus (RichTextContent) ja link \"Kõik selle koolituse toimumiskorrad\" → /training. Puuduva tõlke korral põhikeele tekst ja märkus.",
-      "Paremal kaart \"Toimumiskord\": Toimumisaeg, Päevi, Akad. tunde, Hind, Toimumisviis, Koolituse keel, Kategooria, Rahastus, märgis \"Täis\"; nupp \"Registreeru\" (sisse logimata → /login?redirect=/course-registration?courseId={id}; kasutaja → /course-registration?courseId={id}; juba registreerunud kasutajale nupu asemel märge \"✓ Oled sellele toimumiskorrale registreerunud\" — GET /api/course/{courseId}/participant-status?userId=; täis → keelatud \"Kohad on täis\") ja nupp ja \"Küsi lisainfot\" (avab päringu modali; möödunud toimumiskorral keelatud). Adminile neid kahte nuppu ei kuvata. Kaart \"Koolitajad\" (LecturerCard, GET /api/lecturer-summary/{lecturerId}) — ilma koolitajateta ei kuvata.",
+      "Paremal kaart \"Toimumiskord\": Toimumisaeg, Päevi, Akad. tunde, Hind, Toimumisviis, Koolituse keel, Kategooria, Rahastus, märgis \"Täis\"; nupp \"Registreeru\" (sisse logimata → /login?redirect=/course-registration?courseId={id}; kasutaja → /course-registration?courseId={id}; juba registreerunud kasutajale nupu asemel märge \"✓ Oled sellele toimumiskorrale registreerunud\" — GET /api/course/{courseId}/participant-status?userId=; täis → keelatud \"Kohad on täis\") ja nupp ja \"Küsi lisainfot\" (avab päringu modali; möödunud toimumiskorral keelatud). Adminile neid kahte nuppu ei kuvata. Kaart \"Koolitajad\" (LecturerCard, GET /api/lecturer-summary/{lecturerId}) — ilma koolitajateta ei kuvata; iga koolitaja kaart on link → /lecturer?lecturerId={id}&returnTo=/course?courseId={id} (samas tabis).",
       "Vasakus veerus kohe kaardi \"Koolitus\" all kaart \"Toimumiskorrad\": sama koolituse kõik avalikud tulevased toimumiskorrad üksteise all linkidena kujul \"12/10/2026 – 15/10/2026 · Kohapeal\" (täis korral lisaks märgis \"Täis\"), alguse järgi. Praegune toimumiskord on paksus kirjas (▸) ega ole link; teise lingi vajutus avab sama vaate: /course?courseId={id} (query muutus laadib vaate uuesti). Kui peale praeguse teisi toimumiskordi pole, sektsiooni ei kuvata.",
       "Modal \"Küsi lisainfot\" (EnquiryModal.vue): all pealkirja koolitus ja toimumisaeg. Väljad: Eesnimi*, Perekonnanimi*, E-post*, Telefon*, Ettevõte, Sõnum* (kuni 255 märki, loendur); all väike tekst \"Kasutame sinu andmeid ainult päringule vastamiseks.\" \"Saada\" → frontendi kontroll (kohustuslikud väljad, e-posti kuju) → POST /api/enquiry → modal sulgub ja lehel eduteade \"Aitäh! Sinu päring on saadetud, võtame peagi ühendust.\" \"Tühista\", × või Esc sulgeb ilma saatmata.",
       "Möödunud toimumiskord avaneb märgisega \"Toimunud\" ja keelatud nuppudega. Mustand, tühistatud, kustutatud või olematu toimumiskord → üldine veavaade. Adminile pliiats → /course-form?courseId={id}. Keele vahetusel laaditakse uuesti."
@@ -757,7 +759,7 @@ td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
       (ui.role === "admin" ? "" : '<div class="actions">' + registerControl(p, full, disabled) + '<button type="button" class="sbtn" id="b-ask"' + (p.isPast ? " disabled" : "") + '>Küsi lisainfot</button></div>') + '</div>' +
       (p.lecturers.length ? '<div class="pcard"><span class="legend">Koolitajad</span>' + p.lecturers.map(function (l) {
         var d = LECTURERS[l.lecturerId];
-        return '<div class="lcard"><span class="ph" aria-hidden="true">' + d[0].split(" ").map(function (w) { return w[0]; }).join("") + '</span><span><span class="nm">' + esc(d[0]) + '</span><br><span class="tt">' + esc(ui.lang === "en" ? d[2] : d[1]) + '</span></span></div>';
+        return '<button type="button" class="lcard" data-lecturer="' + l.lecturerId + '" title="Vaata koolitaja profiili"><span class="ph" aria-hidden="true">' + d[0].split(" ").map(function (w) { return w[0]; }).join("") + '</span><span><span class="nm">' + esc(d[0]) + '</span><br><span class="tt">' + esc(ui.lang === "en" ? d[2] : d[1]) + '</span></span></button>';
       }).join("") + '</div>' : "") +
       '</div></div>';
   }
@@ -861,6 +863,8 @@ td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
     if (b.dataset.page) { var p = +b.dataset.page; if (p >= 0 && p < ui.result.totalPages && p !== ui.page) { ui.page = p; startStep("Lehe vahetus → page = " + p); loadCourses(); renderAll(); } return; }
     if (b.dataset.view) { openPage(+b.dataset.view, (b.classList.contains("datebtn") ? "Toimumiskorra link" : "„Vaata lähemalt“") + " → /course?courseId=" + b.dataset.view); return; }
     if (b.dataset.edit) { goRoute("/course-form?courseId=" + b.dataset.edit); return; }
+    // Koolitaja kaart → /lecturer, returnTo = praegune toimumiskorra leht ("← Tagasi")
+    if (b.dataset.lecturer) { goRoute("/lecturer?lecturerId=" + b.dataset.lecturer + "&returnTo=" + encodeURIComponent("/course?courseId=" + page.courseId)); return; }
     switch (b.id) {
       case "b-search": doSearch(); break;
       case "b-x": case "b-cancel": case "b-show-all": clearSearch(); break;

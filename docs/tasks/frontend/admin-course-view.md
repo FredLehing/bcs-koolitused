@@ -23,8 +23,8 @@ Admin avab toimumiskorra `/admin-all-courses` silmast, vaatab andmeid, osalejaid
 | Pealkiri "Toimumiskord" + koolituse nimi | h1 + alapealkiri | |
 | Kiirnupud | nupud | "Muuda" → `/course-form?courseId=`, "Koolituse kalender" → `/admin-training-courses?trainingId=`, "Koolituste kalender" → `/admin-all-courses` |
 | Kaart "Toimumiskord" | `fieldset` + `dl` | Koolitus (link `trainingRoute`), Toimumisaeg, Päevi, Akad. tunde, Hind, Koolitajad / "—", Ruum / "—", Veebilink (link) / "—", Staatus (`CourseStatusBadge` + "Toimunud"), Esile tõstetud (Jah/Ei), Märkmed (`pre-wrap`) / "—"; `O`/`F` korral link "Vaata avalikul lehel" → `/course?courseId=` |
-| Tabel "Osalejad" | `CourseParticipantsTable.vue` | otsing (nimi/e-post), Tasumine (Kõik/Tasunud/Tasumata), lüliti "Näita ka loobunud"; Nimi \| E-post \| Telefon \| Registreerus \| Tasunud \| Sülearvuti \| Staatus \| Märkmed; loobunu rida tuhmim; "Kokku N osalejat, neist M tasunud" (`R` osalejad); tühi "Osalejaid pole" |
-| Tabel "Huvilised" | `CourseEnquiriesTable.vue` | otsing (nimi/e-post/ettevõte), Staatus (Kõik/Uued/Käsitletud); Saabunud \| Nimi \| E-post \| Ettevõte \| Staatus (`EnquiryStatusBadge`) \| silm → `/admin-enquiry?enquiryId=`; tühi "Huvilisi pole" |
+| Tabel "Osalejad" | `CourseParticipantsTable.vue` | lüliti "Näita ka loobunud" (vaikimisi väljas); sorteeritavad veerud frontendis (`SortableColumnHeader`, vaikimisi registreerumise järjekorras); Nimi \| E-post \| Telefon \| Registreerus \| Tasunud \| Vajab sülearvutit \| Staatus \| Märkmed; loobunu rida tuhmim; "Kokku N osalejat, neist M tasunud" (`R` osalejad); tühi "Osalejaid pole" |
+| Tabel "Huvilised" | `CourseEnquiriesTable.vue` | filtreid pole; sorteeritavad veerud frontendis (vaikimisi uusimad eespool); Saabunud \| Nimi \| E-post \| Ettevõte \| Staatus (`EnquiryStatusBadge`) \| silm → `/admin-enquiry?enquiryId=`; tühi "Huvilisi pole" |
 
 ## Käitumine
 
@@ -44,5 +44,5 @@ Admin avab toimumiskorra `/admin-all-courses` silmast, vaatab andmeid, osalejaid
 ## Vastuvõtu kriteeriumid
 
 - [ ] Kõik kaardi väljad ja lingid
-- [ ] Osalejate ja huviliste filtrid frontendis; kokkuvõtte rida
+- [ ] Loobunute lüliti ja veergude sorteerimine frontendis; kokkuvõtte rida
 - [ ] Tekstid et/en, lint ja build puhtad

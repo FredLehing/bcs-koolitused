@@ -10,7 +10,7 @@ Failinimi: LecturerView.vue
 Frontend rada: /lecturer?lecturerId={id}
 
 Vaatega seotud lisainfo:
-Avaneb "Meie koolitajad" kaardilt. Üleval link "← Kõik koolitajad" → /lecturers. Vasakul suur pilt (kuni 240 px; pilditeenusest, photoVersion = null → kohatäide), paremal nimi (h1), amet, lühikirjeldus sissejuhatusena ja kirjeldus rich text'ina (RichTextContent.vue).
+Avaneb "Meie koolitajad" kaardilt. Üleval link "← Kõik koolitajad" → /lecturers; kui URL-is on returnTo (nt koolitaja kaardilt /course või /training lehel), siis selle asemel "← Tagasi" → returnTo (ainult sisemine rada, algab "/"-ga, mitte "//"; muu väärtus jäetakse tähelepanuta). Vasakul suur pilt (kuni 240 px; pilditeenusest, photoVersion = null → kohatäide), paremal nimi (h1), amet, lühikirjeldus sissejuhatusena ja kirjeldus rich text'ina (RichTextContent.vue).
 Plokk "Koolitused": publitseeritud koolitused, mille koolitajate hulgas ta on (training_lecturer) — nimi lingina → /training?trainingId={id}&trainingTranslationId={id}; koolitusteta plokki ei kuvata. Tekstid kasutajaliidese keeles (puudumisel põhikeeles), keele vahetusel laaditakse uuesti. Kustutatud või olematu koolitaja (404) → üldine veavaade.
 ```
 
