@@ -1,6 +1,6 @@
 # HomeView.vue — märkmed
 
-Avaleht: otsing, kaks suunavat kaarti, järgmised toimumiskorrad ja turunduslause. Otsused ja skeemid: `docs/mock-wireframe/loo-mock-vaade/home-view/home-view-skeemid.md`. Interaktiivne läbimäng: `home-view-labimang.html`. Uue teenuse DTO on ettepanek.
+Avaleht: otsing, galerii, kaks suunavat kaarti, järgmised toimumiskorrad, "Kliendid meist" ja turunduslause. Galerii (`HomeGallery.vue`) ja "Kliendid meist" (`HomeTestimonials.vue`) on master'is olemas (tiimikaaslase töö). Otsused ja skeemid: `docs/mock-wireframe/loo-mock-vaade/home-view/home-view-skeemid.md`. Interaktiivne läbimäng: `home-view-labimang.html`. Uue teenuse DTO on ettepanek.
 
 ## Vaate märkmed
 
@@ -10,10 +10,11 @@ Failinimi: HomeView.vue
 Frontend rada: /
 
 Vaatega seotud lisainfo:
-Ülal pealkiri, alapealkiri ja otsing nagu praegu ("Otsi"/Enter → /trainings?searchText=, × ja Esc tühjendavad).
-Otsingu all kaks kõrvuti kaarti (kitsal ekraanil üksteise all), kogu kaart on link: "Meie koolitused" (raamatute ikoon, "Vaata kõiki meie koolitusi ja nende sisu.", "Vaata koolitusi →") → /trainings ja "Koolituste kalender" (kalendri ikoon, "Vali sobiv toimumisaeg ja registreeru.", "Vaata kalendrit →") → /courses.
+Järjestus: pealkiri ja otsing → galerii (HomeGallery.vue) → kaks suunavat kaarti → "Meie järgmised 5 koolitust" → "Kliendid meist" (HomeTestimonials.vue) → turunduslause.
+Otsing nagu praegu ("Otsi"/Enter → /trainings?searchText=, × ja Esc tühjendavad). Galerii: Bootstrapi karussell (pildid kaustast src/assets/images/gallery/, nooled ja indikaatorid, automaatset kerimist pole).
+Galerii all kaks kõrvuti kaarti (kitsal ekraanil üksteise all), kogu kaart on link: "Meie koolitused" (raamatute ikoon, "Vaata kõiki meie koolitusi ja nende sisu.", "Vaata koolitusi →") → /trainings ja "Koolituste kalender" (kalendri ikoon, "Vali sobiv toimumisaeg ja registreeru.", "Vaata kalendrit →") → /courses.
 Pealkiri "Meie järgmised 5 koolitust" ja kuni 5 kaarti CourseCard.vue (sama mis /courses; "Vaata lähemalt" → /course?courseId={id}). Ainult avatud (mitte täis) tulevased toimumiskorrad, esile tõstetud eespool, edasi alguse järgi; filtreid ja leheküljestust pole. Kui toimumiskordi pole (või päring ebaõnnestub), on see plokk peidetud.
-Lõpus lause "Leia endale sobiv koolitus — uusi toimumiskordi lisandub pidevalt." ja nupp "Vaata kõiki toimuvaid koolitusi →" → /courses. Keele vahetusel laaditakse toimumiskorrad uuesti.
+Pärast "Kliendid meist" (kolm tagasiside kaarti, tekstid tõlkefailist) lõpus lause "Leia endale sobiv koolitus — uusi toimumiskordi lisandub pidevalt." ja nupp "Vaata kõiki toimuvaid koolitusi →" → /courses. Keele vahetusel laaditakse toimumiskorrad uuesti.
 ```
 
 ## API märkmed — GET /api/next-courses
