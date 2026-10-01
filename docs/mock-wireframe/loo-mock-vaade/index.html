@@ -95,6 +95,16 @@ code { font-family: var(--font-mono); font-size: .88em; }
 .menu button:hover { background: var(--accent-soft); }
 .menu hr { border: 0; border-top: 1.5px dashed var(--line); margin: 3px 4px; }
 .menu .mhead { font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-soft); padding: 4px 8px 2px; }
+/* „Koolitused“ ja „Admin“ järgivad rakenduse praeguseid siniseid rippmenüüsid. */
+.sitenav .nav-dropdown { background: #86b7fe; border-radius: 999px; font-family: var(--font-ui); }
+.sitenav .nav-dropdown > button { border: 0; border-radius: 999px; padding: 8px 16px; color: #344761; font-family: inherit; font-weight: 600; }
+.sitenav .nav-dropdown > button:hover,
+.sitenav .nav-dropdown > button.cur,
+.sitenav .nav-dropdown > button[aria-expanded="true"] { background: rgba(0, 0, 0, .06); color: #000; }
+.nav-dropdown .menu { top: calc(100% + 2px); min-width: 160px; width: 160px; padding: 8px 0; background: #86b7fe; border: 1px solid #b9c0c9; border-radius: 6px; box-shadow: none; }
+.nav-dropdown .menu button { padding: 8px; color: #344761; border-radius: 0; white-space: normal; font-family: var(--font-ui); font-size: 1rem; font-weight: 600; }
+.nav-dropdown .menu button:hover { background: rgba(0, 0, 0, .06); color: #000; }
+.nav-dropdown .menu hr { border-top: 1px solid rgba(0, 0, 0, .15); margin: 8px 0; }
 /* "👤 ▾" (Minu profiil) rippmenüü on navbari paremas servas — avaneb vasakule, et ei läheks ekraanist välja */
 #p-menu { left: auto; right: 0; }
 
@@ -239,10 +249,10 @@ code { font-family: var(--font-mono); font-size: .88em; }
     var cur = viewFor(state.path);
     function lnk(path, label) { return '<button type="button" class="lnk' + (cur && cur.path === path ? " cur" : "") + '" data-go="' + path + '">' + label + '</button>'; }
     var kcur = cur && (cur.path === "/trainings" || cur.path === "/courses" || cur.path === "/training" || cur.path === "/course");
-    var kmenu = '<span class="admin"><button type="button" id="b-kmenu" aria-expanded="false" aria-controls="k-menu"' + (kcur ? ' style="text-decoration:underline;text-underline-offset:3px;font-weight:700"' : "") + '>Koolitused ▾</button><span class="menu" id="k-menu" hidden>' +
+    var kmenu = '<span class="admin nav-dropdown"><button type="button" id="b-kmenu" aria-expanded="false" aria-controls="k-menu"' + (kcur ? ' class="cur"' : "") + '>Koolitused ▾</button><span class="menu" id="k-menu" hidden>' +
       '<button type="button" data-go="/trainings">Meie koolitused</button><button type="button" data-go="/courses">Koolituste kalender</button></span></span>';
     var dead = function (label) { return '<button type="button" class="lnk dead" data-dead="1" title="Kohatäide (href=&quot;#&quot;)">' + label + '</button>'; };
-    var admin = state.role === "admin" ? '<span class="admin"><button type="button" id="b-admin" aria-expanded="false" aria-controls="admin-menu">Admin ▾</button><span class="menu" id="admin-menu" hidden>' +
+    var admin = state.role === "admin" ? '<span class="admin nav-dropdown"><button type="button" id="b-admin" aria-expanded="false" aria-controls="admin-menu">Admin ▾</button><span class="menu" id="admin-menu" hidden>' +
       '<button type="button" data-go="/admin-enquiries">Koolituste päringud</button><button type="button" data-go="/admin-registrations">Registreerumised</button><hr>' +
       '<button type="button" data-go="/admin-trainings">Koolitused</button><button type="button" data-go="/admin-all-courses">Koolituste kalender</button><hr>' +
       '<button type="button" data-go="/admin-lecturers">Koolitajad</button><button type="button" data-go="/admin-rooms">Koolitusruumid</button><hr>' +

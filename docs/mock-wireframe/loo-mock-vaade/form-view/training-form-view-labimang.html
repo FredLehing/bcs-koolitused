@@ -309,6 +309,7 @@ textarea { min-height: 88px; resize: vertical; }
     <p>Vajuta vormi nuppe ja lipukesi nagu päris vaates. URL, backendi päringud ja olek muutuvad kaasa. Kollased kastid on mockupi märkmed samas vormingus nagu <code>skill-uus-mockup-markmed</code> — neid saab otse Balsamiqi kopeerida.</p>
     <p>Keeled tulevad päringust <code>GET /api/languages</code> (<code>language</code> tabel): <code>et</code> (põhikeel), <code>en</code> ja <code>ru</code>. Tõlkelipud on ainult keeltel, mille <code>requiresTranslation = true</code> (<code>et</code>, <code>en</code>). <code>ru</code> on ainult õppekeel („Koolituse keel“ rippmenüüs), sellesse koolituse sisu ei tõlgita. Näidisandmed: koolitus 1 „Java algkursus“ on andmebaasist (<code>3_import.sql</code>), sellel on et ja en tõlge. Koolitus 9 „Exceli algkursus“ (õppekeel ru, ainult et tõlge, mustand) on samuti andmebaasist ja sobib olekule C. „Power BI edasijõudnutele“ on mockupi lk 7 põhjal uus koolitus, mis saab ID <code>15</code>. DTO-de väljad on <strong>ettepanek</strong> — need kinnitatakse plaanifailis.</p>
     <p><strong>Õppekava (PDF, 2026-10-01):</strong> igal tõlkel võib olla üks PDF-fail (kuni 10 MB). Fail salvestub koos tõlkega, failinime teeb backend pealkirjast ja sõnast „Õppekava“ tõlke keeles (<code>curriculumLabel</code>). Java algkursuse <code>et</code> tõlkel on õppekava olemas, <code>en</code> tõlkel mitte. Proovi: vali fail (või „näidisfail“), muuda pealkirja ja vaata, kuidas failinimi kaasa muutub. Plaan: <code>training-curriculum-plaan.md</code>.</p>
+    <p><strong>PDF + AI (TO BE IMPLEMENTED):</strong> olekutes <code>new-training</code> ja <code>new-translation</code> saadetakse valitud PDF backendile. Olekus <code>update</code> kasutatakse uut valitud faili, kui see on olemas; muidu backend loeb salvestatud õppekava. AI tulemus täidab vormi, kuid midagi ei salvestata enne „Lisa“, „Lisa tõlge“ või „Salvesta“ vajutamist.</p>
     <div class="toolbar">
       <button class="tbtn" id="btn-a" type="button" data-mode="A"><span>A. Alusta uue koolitusega</span><span class="tstate">state: "new-training"</span></button>
       <button class="tbtn" id="btn-b" type="button" data-mode="B"><span>B. Muuda koolitust (Java algkursus)</span><span class="tstate">state: "update"</span></button>
@@ -600,7 +601,7 @@ textarea { min-height: 88px; resize: vertical; }
     }
   }
   function runAi() {
-    startStep("„Tee AI tõlge“ → GET ai-translation (midagi ei salvestata)");
+    startStep("„Tee AI tõlge“ → POST AI translation (midagi ei salvestata)");
     var main = st.translations.filter(function (x) { return x.isMainLanguage; })[0];
     var srcTr = main ? db.translations[main.trainingTranslationId] : null;
     var targetId = langByCode(st.langCode).languageId;
@@ -608,7 +609,7 @@ textarea { min-height: 88px; resize: vertical; }
     var res = known || { title: "[AI " + st.langCode + "] " + srcTr.title, shortDescription: "[AI " + st.langCode + "] " + srcTr.shortDescription, description: "[AI " + st.langCode + "] " + srcTr.description };
     st.aiLoading = true; renderForm();
     setTimeout(function () {
-      call("GET", "/api/training/" + st.trainingId + "/ai-translation?languageId=" + targetId, null, res);
+      call("POST", "/api/ai-training/translation/" + st.trainingId + "?languageId=" + targetId, null, res);
       st.aiLoading = false;
       st.form.title = res.title; st.form.shortDescription = res.shortDescription; st.form.description = res.description; st.error = null;
       renderForm(); renderLog();
@@ -670,6 +671,15 @@ textarea { min-height: 88px; resize: vertical; }
     } else {
       row = '<button type="button" class="sbtn" id="b-cur-pick">Vali fail…</button><span class="hint">PDF, kuni 10 MB</span><button type="button" class="linkish" id="b-cur-sample">või näidisfail</button>';
     }
+    var canFillFromPdf = !c.removed && (((st.mode === "A" || st.mode === "C") && c.pending) || (st.mode === "B" && (c.pending || c.saved)));
+    if (canFillFromPdf) {
+      var tooltip = st.mode === "C"
+        ? "Valitud salvestamata PDF saadetakse backendile ja sealt Gemini AI-le. Vastus täidab uue tõlke tekstiväljad; midagi ei salvestata enne „Lisa tõlge“ vajutamist."
+        : st.mode === "A"
+        ? "Valitud salvestamata PDF saadetakse backendile ja sealt Gemini AI-le. Vastus täidab vormi väljad; midagi ei salvestata enne „Lisa“ vajutamist."
+        : "Uus vormis valitud PDF saadetakse backendile; selle puudumisel loetakse salvestatud õppekava. Gemini AI vastus täidab vormi väljad; midagi ei salvestata enne „Salvesta“ vajutamist.";
+      row += '<span class="tip"><button type="button" class="sbtn ai" id="b-ai-pdf" aria-describedby="ai-pdf-tip"' + (st.aiPdfLoading ? " disabled" : "") + '>' + (st.aiPdfLoading ? "PDF-i analüüsin…" : "Täida vorm PDF + AI abiga") + '</button><span role="tooltip" id="ai-pdf-tip">' + esc(tooltip) + '</span></span>' + pin(st.mode !== "B" ? "n-ai-pdf-new" : "n-ai-pdf-update", "POST PDF + AI");
+    }
     var preview = (c.pending || (c.saved && !c.removed)) ? '<span class="hint cur-name">Nimi pärast salvestamist: <code id="cur-preview">' + esc(curriculumNamePreview()) + '</code> (pealkiri + „' + esc(CURRICULUM_LABEL[st.langCode]) + '“ tõlke keeles)</span>' : "";
     return '<div class="fld"><span class="lbl">Õppekava (PDF)</span><div class="cur-row">' + row + '</div><input type="file" id="f-cur" accept="application/pdf,.pdf" hidden>' +
       (c.error ? '<span class="err">' + esc(c.error) + '</span>' : "") + preview + '</div>';
@@ -680,6 +690,40 @@ textarea { min-height: 88px; resize: vertical; }
     else if (file.size > CURRICULUM_MAX_BYTES) st.cur.error = "Fail on liiga suur, lubatud kuni 10 MB";
     else { st.cur.error = null; st.cur.pending = { name: file.name, size: file.size }; st.cur.removed = false; }
     renderForm();
+  }
+  function doAiPdfToTraining() {
+    if (st.cur.removed || (!st.cur.pending && (st.mode !== "B" || !st.cur.saved))) return;
+    if (textsOf(st.form) !== st.loaded) {
+      confirmModal("Asenda vorm PDF-i põhjal loodud tekstiga?", "Vormis on salvestamata muudatusi. PDF + AI tulemus kirjutab pealkirja, lühikirjelduse ja kirjelduse üle.", "Asenda", runAiPdfToTraining);
+    } else {
+      runAiPdfToTraining();
+    }
+  }
+  function runAiPdfToTraining() {
+    var pending = st.cur.pending;
+    var usesSelectedPdf = st.mode !== "B";
+    var path = usesSelectedPdf
+      ? "/api/ai-training/pdf"
+      : "/api/ai-training/pdf/" + st.trainingTranslationId;
+    var body = pending ? { curriculum: "PDF (" + pending.name + ", " + fmtSize(pending.size) + ")" } : null;
+    var result = {
+      title: "PDF-ist genereeritud pealkiri (TO BE IMPLEMENTED)",
+      shortDescription: "PDF-ist genereeritud lühikirjeldus (TO BE IMPLEMENTED)",
+      description: "PDF-ist genereeritud kirjeldus (TO BE IMPLEMENTED)"
+    };
+    startStep("„Täida vorm PDF + AI abiga“ → POST (andmebaasi ei salvestata)");
+    st.aiPdfLoading = true;
+    renderForm();
+    setTimeout(function () {
+      call("POST", path, body, result);
+      st.aiPdfLoading = false;
+      st.form.title = result.title;
+      st.form.shortDescription = result.shortDescription;
+      st.form.description = result.description;
+      st.error = null;
+      renderAll(false);
+      toast("PDF + AI tulemus on vormis — kontrolli ja salvesta ise");
+    }, 900);
   }
   function downloadCurriculum() {
     startStep("Klikk õppekava failinimel → allalaadimine");
@@ -790,7 +834,7 @@ textarea { min-height: 88px; resize: vertical; }
     var statusBtn = st.mode === "A" ? "" : '<button type="button" class="sbtn" id="b-status">' + (st.status === "U" ? "Publitseeri" : "Liiguta mustandisse") + '</button>' + (st.status === "U" ? pin("n-put-publish", "PUT …/publish") : pin("n-put-unpublish", "PUT …/unpublish"));
     var mainCode = lang(MAIN_LANGUAGE_ID).languageCode;
     var showAi = st.mode === "C" || (st.mode === "B" && code !== mainCode);
-    var aiBtn = showAi ? '<div class="ai-row"><span class="tip"><button type="button" class="sbtn ai" id="b-ai" aria-describedby="ai-tip"' + (st.aiLoading ? " disabled" : "") + '>' + (st.aiLoading ? "Tõlgin…" : "Tee AI tõlge") + '</button><span role="tooltip" id="ai-tip">Tõlge tehakse salvestatud põhikeele (' + mainCode + ') tekstist, mitte vormi sisust. Tulemus kuvatakse ainult vormis — see salvestub alles siis, kui vajutad „' + (st.mode === "C" ? "Lisa tõlge" : "Salvesta") + '“.</span></span>' + pin("n-ai-translation", "GET …/ai-translation") + '</div>' : "";
+    var aiBtn = showAi ? '<div class="ai-row"><span class="tip"><button type="button" class="sbtn ai" id="b-ai" aria-describedby="ai-tip"' + (st.aiLoading ? " disabled" : "") + '>' + (st.aiLoading ? "Tõlgin…" : "Tee AI tõlge") + '</button><span role="tooltip" id="ai-tip">Tõlge tehakse salvestatud põhikeele (' + mainCode + ') tekstist, mitte vormi sisust. Tulemus kuvatakse ainult vormis — see salvestub alles siis, kui vajutad „' + (st.mode === "C" ? "Lisa tõlge" : "Salvesta") + '“.</span></span>' + pin("n-ai-translation", "POST …/translation") + '</div>' : "";
     var fill = st.mode === "C" ? '<span class="hint">Eeltäidetud eestikeelse tõlkega — tõlgi tekstid ' + { et: "eesti", en: "inglise" }[code] + ' keelde. ' + pin("n-get-translation", "GET /api/training-translation/{et id}") + '</span>' : "";
 
     document.getElementById("form").innerHTML =
@@ -840,7 +884,9 @@ textarea { min-height: 88px; resize: vertical; }
     if (method === "GET" && p === "/api/categories") return "n-categories";
     if (method === "GET" && p === "/api/funding-types") return "n-funding";
     if (method === "GET" && p === "/api/lecturers") return "n-lecturers";
-    if (method === "GET" && /\/ai-translation$/.test(p)) return "n-ai-translation";
+    if (method === "POST" && /^\/api\/ai-training\/translation\/\d+$/.test(p)) return "n-ai-translation";
+    if (method === "POST" && p === "/api/ai-training/pdf") return "n-ai-pdf-new";
+    if (method === "POST" && /^\/api\/ai-training\/pdf\/\d+$/.test(p)) return "n-ai-pdf-update";
     if (method === "GET" && /\/training-translations$/.test(p)) return "n-translations";
     if (method === "GET" && /\/curriculum$/.test(p)) return "n-get-curriculum";
     if (method === "GET" && /^\/api\/training-translation\//.test(p)) return "n-get-translation";
@@ -864,6 +910,7 @@ textarea { min-height: 88px; resize: vertical; }
       ],
       actions: [
         { m: "GET", p: "/api/lecturers?search={otsingusõna}", note: "n-lecturers", when: "\"Vali koolitaja\" modalis otsides" },
+        { m: "POST", p: "/api/ai-training/pdf", note: "n-ai-pdf-new", when: "PDF-iga vormi täitmine — salvestamata fail, DB-sse ei kirjutata" },
         { m: "POST", p: "/api/training", note: "n-post-training", when: "\"Lisa\" (koos valitud õppekavaga) → router.replace olekusse update" }
       ]
     },
@@ -879,10 +926,11 @@ textarea { min-height: 88px; resize: vertical; }
       ],
       actions: [
         { m: "GET", p: "/api/lecturers?search={otsingusõna}", note: "n-lecturers", when: "\"Vali koolitaja\" modalis otsides" },
+        { m: "POST", p: "/api/ai-training/pdf/{trainingTranslationId}", note: "n-ai-pdf-update", when: "uus valitud PDF, selle puudumisel andmebaasi õppekava; DB-sse ei kirjutata" },
         { m: "PUT", p: "/api/training/{trainingId}", note: "n-put-training", when: "\"Salvesta\" (sh õppekava)" },
         { m: "GET", p: "/api/training-translation/{trainingTranslationId}", note: "n-get-translation", reload: true, when: "pärast \"Salvesta\" uuesti — õppekava failinimi" },
         { m: "GET", p: "/api/training-translation/{trainingTranslationId}/curriculum", note: "n-get-curriculum", when: "klikk õppekava failinimel → allalaadimine" },
-        { m: "GET", p: "/api/training/{trainingId}/ai-translation?languageId={id}", note: "n-ai-translation", when: "\"Tee AI tõlge\" (ainult mitte-põhikeele tõlkel)" },
+        { m: "POST", p: "/api/ai-training/translation/{trainingId}?languageId={id}", note: "n-ai-translation", when: "\"Tee AI tõlge\" (ainult mitte-põhikeele tõlkel)" },
         { m: "PUT", p: "/api/training/{trainingId}/publish", note: "n-put-publish", when: "\"Publitseeri\" (status U) → kinnitus" },
         { m: "PUT", p: "/api/training/{trainingId}/unpublish", note: "n-put-unpublish", when: "\"Liiguta mustandisse\" (status P) → kinnitus" }
       ]
@@ -898,7 +946,8 @@ textarea { min-height: 88px; resize: vertical; }
         { m: "GET", p: "/api/funding-types?contentLang={UI keel}", note: "n-funding", when: "rahastustüübid kasutajaliidese keeles (ka keele vahetusel)" }
       ],
       actions: [
-        { m: "GET", p: "/api/training/{trainingId}/ai-translation?languageId={id}", note: "n-ai-translation", when: "\"Tee AI tõlge\"" },
+        { m: "POST", p: "/api/ai-training/pdf", note: "n-ai-pdf-new", when: "valitud salvestamata PDF täidab uue tõlke tekstiväljad; DB-sse ei kirjutata" },
+        { m: "POST", p: "/api/ai-training/translation/{trainingId}?languageId={id}", note: "n-ai-translation", when: "\"Tee AI tõlge\"" },
         { m: "POST", p: "/api/training/{trainingId}/training-translation", note: "n-post-translation", when: "\"Lisa tõlge\" (koos valitud õppekavaga) → router.replace olekusse update" },
         { m: "PUT", p: "/api/training/{trainingId}/publish", note: "n-put-publish", when: "\"Publitseeri\" (status U) → kinnitus" },
         { m: "PUT", p: "/api/training/{trainingId}/unpublish", note: "n-put-unpublish", when: "\"Liiguta mustandisse\" (status P) → kinnitus" }
@@ -993,6 +1042,7 @@ textarea { min-height: 88px; resize: vertical; }
     else if (b.dataset.lremove !== undefined) { st.form.lecturerIds.splice(+b.dataset.lremove, 1); renderForm(); }
     else if (b.dataset.lmove) { var mv = b.dataset.lmove.split(":"), i = +mv[0], k = i + +mv[1], ids = st.form.lecturerIds; var tmp = ids[i]; ids[i] = ids[k]; ids[k] = tmp; renderForm(); }
     else if (b.id === "b-ai") doAiTranslate();
+    else if (b.id === "b-ai-pdf") doAiPdfToTraining();
     else if (b.id === "b-cur-pick") document.getElementById("f-cur").click();
     else if (b.id === "b-cur-sample") pickCurriculum({ name: SAMPLE_CURRICULUM.name, size: SAMPLE_CURRICULUM.size, type: "application/pdf" });
     else if (b.id === "b-cur-remove") { st.cur.removed = true; st.cur.error = null; renderForm(); }
@@ -1021,9 +1071,9 @@ textarea { min-height: 88px; resize: vertical; }
   /* ---------- Märkmete tekstid (struktuuridokumendi vorming) ---------- */
   // Vaate märkmed oleku kaupa (samad tekstid nagu markmed/training-form-view-state-*-markmed.md failides)
   var VIEW_NOTES = {
-      "A": "Roll: Admin\nFailinimi: TrainingFormView.vue\nFrontend rada: /training-form\n\nVaatega seotud lisainfo:\nstate: \"new-training\" — URL-is query parameetreid pole. Pealkiri \"Lisa uus koolitus\". Vorm on tühi; tõlke väljad (pealkiri, lühikirjeldus, kirjeldus) täidetakse põhikeeles (et); rippmenüüd (kategooriad, rahastustüübid) laaditakse kasutajaliidese keeles (store'i contentLang) ja laaditakse keele vahetamisel navbaris uuesti — vormi sisu jääb alles. Lipukesi ja staatuse nuppe pole.\nKoolitajad: valitud koolitajate nimekiri (× eemaldab, ↑ ↓ muudab järjekorda, esimene kuvatakse esimesena); \"+ Lisa koolitaja\" avab \"Vali koolitaja\" modali otsinguga (juba valitud koolitajaid ei pakuta). Võib jääda tühjaks. Rahastustüübid on checkboxid, \"Tellitav\" ja \"Esile tõstetud\" switchid.\nNupp \"Lisa\" → POST /api/training (userId localStorage'ist). Backend loob koolituse staatusega \"U\" koos põhikeele tõlkega. Vastuse trainingId ja trainingTranslationId järgi tehakse router.replace → state \"update\".\nÕppekava (PDF): tõlke väljade all valikuline PDF-fail (kuni 10 MB) — \"Vali fail…\"; valitud fail salvestub koos \"Lisa\" nupuga (curriculum = Base64, curriculumLabel = sõna \"Õppekava\" tõlke keeles i18n-ist). Failinime teeb backend: puhastatud pealkiri + sõna, nt power-bi-edasijoudnutele-oppekava.pdf.",
-      "B": "Roll: Admin\nFailinimi: TrainingFormView.vue\nFrontend rada: /training-form?trainingId={id}&trainingTranslationId={id}\n\nVaatega seotud lisainfo:\nstate: \"update\" — URL-is trainingId ja trainingTranslationId. Pealkiri \"Muuda koolitust\" koos staatuse märgisega (Mustand / Publitseeritud). Vorm on eeltäidetud; rippmenüüd (kategooriad, rahastustüübid) laaditakse kasutajaliidese keeles (store'i contentLang) ja laaditakse keele vahetamisel navbaris uuesti — vormi sisu jääb alles. Iga router.replace järel laaditakse andmed uuesti.\nLipukesed: tõlge olemas → värviline lipp (klikk avab selle tõlke), tõlge puudub → hall lipp (klikk → state \"new-translation\").\n\"Salvesta\" → PUT /api/training/{trainingId} (koolituse väljad + avatud tõlge ühes transaktsioonis). \"Tee AI tõlge\" on ainult mitte-põhikeele tõlkel: täidab vaid vormi, ei salvesta.\nstatus \"U\" → nupp \"Publitseeri\", status \"P\" → nupp \"Liiguta mustandisse\"; mõlemal kinnituse modal (PUT /api/training/{trainingId}/publish või /unpublish).\nÕppekava (PDF): olemas → failinimi lingina (klikk = allalaadimine) + suurus, nupud \"Vaheta\" ja \"Eemalda\" (kinnitust ei küsi — jõustub salvestamisel, \"Tühista\" võtab tagasi); puudub → \"Vali fail…\" (PDF, kuni 10 MB). \"Salvesta\" saadab curriculum / isCurriculumRemoved / curriculumLabel (sõna \"Õppekava\" avatud tõlke keeles, mitte kasutajaliidese keeles); backend arvutab failinime uuesti ka siis, kui muutus ainult pealkiri. Pärast salvestamist laaditakse tõlge uuesti (curriculumFileName).",
-      "C": "Roll: Admin\nFailinimi: TrainingFormView.vue\nFrontend rada: /training-form?trainingId={id}&languageId={id}\n\nVaatega seotud lisainfo:\nstate: \"new-translation\" — URL-is trainingId ja languageId (keel, mille tõlge puudub). Pealkiri \"Lisa koolituse tõlge\". Koolituse väljad on kirjutuskaitstud; rippmenüüd (kategooriad, rahastustüübid) laaditakse kasutajaliidese keeles (store'i contentLang) ja laaditakse keele vahetamisel navbaris uuesti — vormi sisu jääb alles.\nTõlke väljad eeltäidetakse salvestatud põhikeele (et) tõlkega, mida admin tõlgib. \"Tee AI tõlge\" tõlgib salvestatud põhikeele teksti ja täidab ainult vormi; salvestamata muudatuste korral küsitakse enne kinnitust.\n\"Lisa tõlge\" → POST /api/training/{trainingId}/training-translation. Vastuse trainingTranslationId järgi tehakse router.replace → state \"update\".\nStaatuse nupp (\"Publitseeri\" / \"Liiguta mustandisse\") nagu state \"update\" puhul.\nÕppekava (PDF): väli on tühi — põhikeele faili ei kopeerita ja AI tõlge faili ei puuduta. Valitud fail salvestub koos \"Lisa tõlge\" nupuga (curriculumLabel tõlke keeles, nt \"Curriculum\")."
+      "A": "Roll: Admin\nFailinimi: TrainingFormView.vue\nFrontend rada: /training-form\n\nVaatega seotud lisainfo:\nstate: \"new-training\" — URL-is query parameetreid pole. Pealkiri \"Lisa uus koolitus\". Vorm on tühi; tõlke väljad (pealkiri, lühikirjeldus, kirjeldus) täidetakse põhikeeles (et); rippmenüüd (kategooriad, rahastustüübid) laaditakse kasutajaliidese keeles (store'i contentLang) ja laaditakse keele vahetamisel navbaris uuesti — vormi sisu jääb alles. Lipukesi ja staatuse nuppe pole.\nKoolitajad: valitud koolitajate nimekiri (× eemaldab, ↑ ↓ muudab järjekorda, esimene kuvatakse esimesena); \"+ Lisa koolitaja\" avab \"Vali koolitaja\" modali otsinguga (juba valitud koolitajaid ei pakuta). Võib jääda tühjaks. Rahastustüübid on checkboxid, \"Tellitav\" ja \"Esile tõstetud\" switchid.\nNupp \"Lisa\" → POST /api/training (userId localStorage'ist). Backend loob koolituse staatusega \"U\" koos põhikeele tõlkega. Vastuse trainingId ja trainingTranslationId järgi tehakse router.replace → state \"update\".\nÕppekava (PDF): tõlke väljade all valikuline PDF-fail (kuni 10 MB) — \"Vali fail…\"; valitud fail salvestub koos \"Lisa\" nupuga (curriculum = Base64, curriculumLabel = sõna \"Õppekava\" tõlke keeles i18n-ist). Failinime teeb backend: puhastatud pealkiri + sõna, nt power-bi-edasijoudnutele-oppekava.pdf. Valitud faili kõrval nupp Täida vorm PDF + AI abiga saadab salvestamata PDF-i backendile → Gemini AI; vastus täidab kolm teksti välja, kuid DB-sse midagi ei salvestata enne Lisa vajutamist.",
+      "B": "Roll: Admin\nFailinimi: TrainingFormView.vue\nFrontend rada: /training-form?trainingId={id}&trainingTranslationId={id}\n\nVaatega seotud lisainfo:\nstate: \"update\" — URL-is trainingId ja trainingTranslationId. Pealkiri \"Muuda koolitust\" koos staatuse märgisega (Mustand / Publitseeritud). Vorm on eeltäidetud; rippmenüüd (kategooriad, rahastustüübid) laaditakse kasutajaliidese keeles (store'i contentLang) ja laaditakse keele vahetamisel navbaris uuesti — vormi sisu jääb alles. Iga router.replace järel laaditakse andmed uuesti.\nLipukesed: tõlge olemas → värviline lipp (klikk avab selle tõlke), tõlge puudub → hall lipp (klikk → state \"new-translation\").\n\"Salvesta\" → PUT /api/training/{trainingId} (koolituse väljad + avatud tõlge ühes transaktsioonis). \"Tee AI tõlge\" on ainult mitte-põhikeele tõlkel: täidab vaid vormi, ei salvesta.\nstatus \"U\" → nupp \"Publitseeri\", status \"P\" → nupp \"Liiguta mustandisse\"; mõlemal kinnituse modal (PUT /api/training/{trainingId}/publish või /unpublish).\nÕppekava (PDF): olemas → failinimi lingina (klikk = allalaadimine) + suurus, nupud \"Vaheta\" ja \"Eemalda\" (kinnitust ei küsi — jõustub salvestamisel, \"Tühista\" võtab tagasi); puudub → \"Vali fail…\" (PDF, kuni 10 MB). \"Salvesta\" saadab curriculum / isCurriculumRemoved / curriculumLabel (sõna \"Õppekava\" avatud tõlke keeles, mitte kasutajaliidese keeles); backend arvutab failinime uuesti ka siis, kui muutus ainult pealkiri. Pärast salvestamist laaditakse tõlge uuesti (curriculumFileName). Nupp Täida vorm PDF + AI abiga kasutab uut valitud faili, selle puudumisel salvestatud õppekava; Gemini AI vastus täidab vormi, DB-sse midagi ei salvestata enne Salvesta vajutamist.",
+      "C": "Roll: Admin\nFailinimi: TrainingFormView.vue\nFrontend rada: /training-form?trainingId={id}&languageId={id}\n\nVaatega seotud lisainfo:\nstate: \"new-translation\" — URL-is trainingId ja languageId (keel, mille tõlge puudub). Pealkiri \"Lisa koolituse tõlge\". Koolituse väljad on kirjutuskaitstud; rippmenüüd (kategooriad, rahastustüübid) laaditakse kasutajaliidese keeles (store'i contentLang) ja laaditakse keele vahetamisel navbaris uuesti — vormi sisu jääb alles.\nTõlke väljad eeltäidetakse salvestatud põhikeele (et) tõlkega, mida admin tõlgib. \"Tee AI tõlge\" tõlgib salvestatud põhikeele teksti ja täidab ainult vormi; salvestamata muudatuste korral küsitakse enne kinnitust.\n\"Lisa tõlge\" → POST /api/training/{trainingId}/training-translation. Vastuse trainingTranslationId järgi tehakse router.replace → state \"update\".\nStaatuse nupp (\"Publitseeri\" / \"Liiguta mustandisse\") nagu state \"update\" puhul.\nÕppekava (PDF): väli on tühi — põhikeele faili ei kopeerita ja AI tõlge faili ei puuduta. Valitud fail salvestub koos \"Lisa tõlge\" nupuga (curriculumLabel tõlke keeles, nt \"Curriculum\").\nNupp Täida vorm PDF + AI abiga ilmub valitud PDF-i kõrvale ja kasutab sama salvestamata faili voogu nagu new-training: POST /api/ai-training/pdf. Vastus täidab uue tõlke tekstiväljad; salvestamata tekstide ülekirjutamisel küsitakse kinnitust. DB-sse midagi ei salvestata enne Lisa tõlge vajutamist."
   };
   function viewNote() { return VIEW_NOTES[st.mode]; }
 
@@ -1073,15 +1123,14 @@ textarea { min-height: 88px; resize: vertical; }
       "Response (200):", "TrainingTranslationItemDto.java", "[", "  {", "    \"trainingTranslationId\": 1,", "    \"languageId\": 1,", "    \"languageCode\": \"et\",", "    \"isMainLanguage\": true", "  },", "  ...", "]", "",
       "API teenuse lisainfo:", "Koolituse olemasolevad tõlked. Frontend võrdleb languageCode väärtusi GET /api/languages tõlkekeeltega (requiresTranslation = true): tõlge olemas → värviline lipp, puudub → hall lipp. isMainLanguage tuleb language.is_main_language veerust; põhikeele tõlkega eeltäidetakse uue tõlke vorm. Kustutatud koolitus (status \"D\") on nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.", "",
       "Veateated:", PK("trainingId")] },
-    { id: "n-ai-translation", title: "GET /api/training/{id}/ai-translation", draft: true, text: [
-      "API: GET /api/training/{trainingId}/ai-translation", "",
+    { id: "n-ai-translation", title: "POST /api/ai-training/translation/{id}", draft: true, text: [
+      "API: POST /api/ai-training/translation/{trainingId}", "",
       "Query parameetrid:", "languageId: Integer — sihtkeel, kuhu tõlgitakse", "",
-      "Response (200):", "AiTranslationDto.java", "{", "  \"title\": \"Power BI for Advanced Users\",", "  \"shortDescription\": \"Data models, DAX and interactive reports.\",", "  \"description\": \"The course builds a data model in Power BI, writes DAX formulas and creates interactive reports.\"", "}", "",
-      "API teenuse lisainfo:", "Tõlgib alati andmebaasi salvestatud põhikeele (language.is_main_language = true) tõlke AI abil sihtkeelde — vormi sisu ei kasutata. Andmebaasi midagi ei salvestata. description HTML-märgendid säilitatakse. Vastusel päis Cache-Control: no-store. Kustutatud koolitus (status \"D\") on nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.", "",
-      "Veateated:", PK("trainingId"), "", PK("languageId"), "",
-      "HTTP: 403\nerrorCode: MAIN_LANGUAGE_NOT_TRANSLATABLE\nmessage: \"Põhikeelde ei saa AI tõlget teha\"", "",
-      "HTTP: 404\nerrorCode: MAIN_TRANSLATION_NOT_FOUND\nmessage: \"Koolitusel puudub põhikeele tõlge\"", "",
-      "HTTP: 503\nerrorCode: AI_SERVICE_UNAVAILABLE\nmessage: \"AI tõlketeenus ei ole hetkel kättesaadav\""] },
+      "Response (200):", "AiTrainingContentDto.java", "{", "  \"title\": \"AI-ga tõlgitud pealkiri (TO BE IMPLEMENTED)\",", "  \"shortDescription\": \"AI-ga tõlgitud lühikirjeldus (TO BE IMPLEMENTED)\",", "  \"description\": \"AI-ga tõlgitud kirjeldus (TO BE IMPLEMENTED)\"", "}", "",
+      "API teenuse lisainfo:", "TO BE IMPLEMENTED: AiTrainingController tagastab praegu fikseeritud placeholder-objekti. DB-d ega Gemini AI-d ei kasutata. Mock-vaade simuleerib lõplikku tõlke tulemust; allpool on lõpliku teostuse leping.", "Tõlgib alati andmebaasi salvestatud põhikeele (language.is_main_language = true) tõlke AI abil sihtkeelde — vormi sisu ei kasutata. Andmebaasi midagi ei salvestata. description HTML-märgendid säilitatakse. Vastusel päis Cache-Control: no-store. Kustutatud koolitus (status \"D\") on nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.", "",
+      "Veateated: —", "Praegune placeholder ei kontrolli DB ID-sid ega kutsu AI-d. Tulevased ärivead on backend taskis."] },
+    { id: "n-ai-pdf-new", title: "POST /api/ai-training/pdf", draft: true, text: ["API: POST /api/ai-training/pdf", "", "Request: multipart/form-data", "curriculum: kohustuslik PDF-fail (kuni 10 MB)", "", "Response (200): AiTrainingContentDto.java", "{", "  \"title\": \"PDF-ist genereeritud pealkiri (TO BE IMPLEMENTED)\",", "  \"shortDescription\": \"PDF-ist genereeritud lühikirjeldus (TO BE IMPLEMENTED)\",", "  \"description\": \"PDF-ist genereeritud kirjeldus (TO BE IMPLEMENTED)\"", "}", "", "API teenuse lisainfo:", "TO BE IMPLEMENTED: valitud salvestamata PDF saadetakse backendile, sealt Gemini AI-le ja vastuseks tulevad koolituse tekstiväljad. DB-sse midagi ei salvestata. Praegune controller tagastab lepingu jaoks placeholder-väärtused; vormi täitmise järel kontrollib ja salvestab admin ise nupuga Lisa või Lisa tõlge.", "", "Sama vastuse DTO sobib ka AI tõlkele: AiTrainingContentDto.", "", "Veateated: —", "PDF-i valideerimise ja AI teenuse tulevased vead on backend taskis."] },
+    { id: "n-ai-pdf-update", title: "POST /api/ai-training/pdf/{trainingTranslationId}", draft: true, text: ["API: POST /api/ai-training/pdf/{trainingTranslationId}", "", "Path parameeter:", "trainingTranslationId: Integer — vormis avatud tõlke ID", "", "Request: multipart/form-data", "curriculum: valikuline uus PDF-fail (kuni 10 MB). Kui osa puudub, kasutatakse tõlke salvestatud õppekava.", "", "Response (200): AiTrainingContentDto.java", "{", "  \"title\": \"PDF-ist genereeritud pealkiri (TO BE IMPLEMENTED)\",", "  \"shortDescription\": \"PDF-ist genereeritud lühikirjeldus (TO BE IMPLEMENTED)\",", "  \"description\": \"PDF-ist genereeritud kirjeldus (TO BE IMPLEMENTED)\"", "}", "", "API teenuse lisainfo:", "TO BE IMPLEMENTED: päringus olev curriculum osa tähendab, et kasutatakse vormis valitud salvestamata asendusfaili; selle puudumisel loetakse tõlke salvestatud õppekava. Fail saadetakse Gemini AI-le. DB-sse midagi ei kirjutata. Vastus täidab vormi; admin kontrollib ja vajutab ise Salvesta.", "", "Ühised vastuse väljad AI tõlkega: AiTrainingContentDto.", "", "Veateated: —", "Tõlke/õppekava otsingu ja AI teenuse tulevased vead on backend taskis."] },
     { id: "n-post-training", title: "POST /api/training", draft: true, text: [
       "API: POST /api/training", "",
       "Request body:", "TrainingCreateRequestDto.java", "{", "  \"userId\": 1,", "  \"categoryId\": 1,", "  \"trainingLanguageId\": 1,", "  \"locationId\": 2,", "  \"lecturerIds\": [", "    1,", "    ...", "  ],", "  \"isOrderable\": true,", "  \"isPromoted\": false,", "  \"fundingTypeIds\": [", "    1,", "    ...", "  ],", "  \"title\": \"Power BI edasijõudnutele\",", "  \"shortDescription\": \"Andmemudelid, DAX ja interaktiivsed aruanded.\",", "  \"description\": \"Kursusel ehitatakse Power BI-s andmemudel, kirjutatakse DAX-valemeid ja luuakse interaktiivseid aruandeid.\",", "  \"curriculum\": \"JVBERi0xLjcKJeLjz9MK...\",", "  \"curriculumLabel\": \"Õppekava\"", "}", "",

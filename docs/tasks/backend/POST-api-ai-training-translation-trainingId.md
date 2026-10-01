@@ -1,6 +1,6 @@
 # Koolituse tõlke tegemine AI abil
 
-**Teenus:** `GET /api/training/{trainingId}/ai-translation?languageId={id}`
+**Teenus:** `POST /api/ai-training/translation/{trainingId}?languageId={id}`
 
 **Kasutav vaade:** `TrainingFormView.vue` (`/training-form?trainingId={id}&languageId={id}`, `state: "new-translation"`; `/training-form?trainingId={id}&trainingTranslationId={id}`, `state: "update"`, kui avatud tõlge ei ole põhikeeles) — nupp "Tee AI tõlge" koos tooltip'iga
 
@@ -10,9 +10,22 @@
 
 | Osa | Seis |
 |---|---|
-| API leping (sisend, väljund, veaolukorrad) | **Valmis** — frontend kasutab seda juba (mock-vastusega), muuta ei tohi |
+| API leping (sisend, väljund, veaolukorrad) | **Uuendatud (2026-10-01)** — POST, ühine `/api/ai-training` prefiks ja `AiTrainingContentDto`; frontend kasutab päris POST-kutset ja placeholder-vastust |
 | Tõlgitava sisu kirjeldus (mida AI sisendiks saab) | **Valmis** — tuleneb kirjelduse richtext lahendusest |
+| Controller | **Placeholder valmis** — `AiTrainingController`; fikseeritud vastus, `Cache-Control: no-store`; DB lugemine ja AI kutse on TO BE IMPLEMENTED |
 | AI tehniline lahendus | **WIP** — suund on otsustatud (**Spring AI + Google Gemini**, Google AI Studio API võti), detailid täpsustuvad (vt "Avatud küsimused") |
+
+## Praegune placeholder-teostus
+
+Controller tagastab iga korrektse päringu korral järgmise objekti. Praegu ei kontrollita koolituse ega keele olemasolu, ei loeta andmebaasi ja ei kutsuta Gemini AI-d. Allpool kirjeldatud ärivead ja tõlkeloogika tuleb lisada tegeliku AI teostusega. Frontend kasutab selles etapis controlleri päris POST-kutset ja placeholder-vastust.
+
+```json
+{
+  "title": "AI-ga tõlgitud pealkiri (TO BE IMPLEMENTED)",
+  "shortDescription": "AI-ga tõlgitud lühikirjeldus (TO BE IMPLEMENTED)",
+  "description": "AI-ga tõlgitud kirjeldus (TO BE IMPLEMENTED)"
+}
+```
 
 ## Sisend
 
@@ -33,14 +46,14 @@ Request body puudub. Vormi sisu (admini sisestatud pealkiri, lühikirjeldus, kir
 Näide:
 
 ```
-GET /api/training/1/ai-translation?languageId=2
+POST /api/ai-training/translation/1?languageId=2
 ```
 
 Koolitus 1 = "Java algkursus", keel 2 = "English" (`3_import.sql`).
 
 ## Väljund
 
-**Response (200 OK):** `AiTranslationDto.java` — põhikeele tõlke tekstid sihtkeelde tõlgituna.
+**Response (200 OK):** `AiTrainingContentDto.java` — põhikeele tõlke tekstid sihtkeelde tõlgituna.
 
 | Väli | Tüüp | Kirjeldus |
 |---|---|---|
@@ -150,14 +163,14 @@ spring.ai.google.genai.chat.max-output-tokens=8192
 - **API võti ei tohi olla koodis ega git'is** (`application.properties` on repos) — ainult keskkonnamuutujast `GEMINI_API_KEY` (IntelliJ Run Configuration → Environment variables).
 - **Madal temperatuur** — tõlge peab olema täpne, mitte loominguline.
 
-**Struktureeritud väljund:** vastus küsitakse otse `AiTranslationDto` kujul:
+**Struktureeritud väljund:** vastus küsitakse otse `AiTrainingContentDto` kujul:
 
 ```java
-ResponseEntity<ChatResponse, AiTranslationDto> responseEntity = chatClient.prompt()
+ResponseEntity<ChatResponse, AiTrainingContentDto> responseEntity = chatClient.prompt()
         .system(...)
         .user(...)
         .call()
-        .responseEntity(AiTranslationDto.class);
+        .responseEntity(AiTrainingContentDto.class);
 ```
 
 `responseEntity(...)` (mitte `entity(...)`) annab ligipääsu ka `ChatResponse` metaandmetele — vaja lõpetamise põhjuse kontrolliks.
@@ -259,13 +272,13 @@ Kontrollide järjekord: `trainingId` → `languageId` → sihtkeel on põhikeel 
 | `languageId` ei leidu andmebaasist | 404 Not Found | `{ "message": "Ei leidnud primary keyd 'languageId' väärtusega: 123", "errorCode": "PRIMARY_KEY_NOT_FOUND" }` |
 | `languageId` on põhikeel (`is_main_language = true`) | 403 Forbidden | `{ "message": "Põhikeelde ei saa AI tõlget teha", "errorCode": "MAIN_LANGUAGE_NOT_TRANSLATABLE" }` |
 | Koolitusel puudub põhikeele `training_translation` rida | 404 Not Found | `{ "message": "Koolitusel puudub põhikeele tõlge", "errorCode": "MAIN_TRANSLATION_NOT_FOUND" }` |
-| AI teenus ei vasta või annab vea (nt kvoot/rate limit 429, 5xx, timeout, API võti puudub/vigane), keeldub (`SAFETY` jms), vastus on pooleli (`MAX_TOKENS`) või ei vasta `AiTranslationDto` kujule | 503 Service Unavailable | `{ "message": "AI tõlketeenus ei ole hetkel kättesaadav", "errorCode": "AI_SERVICE_UNAVAILABLE" }` |
+| AI teenus ei vasta või annab vea (nt kvoot/rate limit 429, 5xx, timeout, API võti puudub/vigane), keeldub (`SAFETY` jms), vastus on pooleli (`MAX_TOKENS`) või ei vasta `AiTrainingContentDto` kujule | 503 Service Unavailable | `{ "message": "AI tõlketeenus ei ole hetkel kättesaadav", "errorCode": "AI_SERVICE_UNAVAILABLE" }` |
 | `languageId` puudub või ei ole täisarv | 400 Bad Request | Springi standardne vea vastus (projekti globaalne handler seda eraldi ei vorminda) |
 | Ootamatu serveripoolne viga | 500 Internal Server Error | Standardne vea response body (vastavalt projekti globaalsele error handler'ile) |
 
 Märkused:
 
-- Kõik 404/403/503 read on mockupi märkmetest (`Veateated`) ja kasutaja kinnitatud. Frontend (`TrainingFormView.handleGetAiTranslationError()`) kuvab need kolm errorCode'i vormis — **nende kuju ei tohi muutuda**.
+- Kõik 404/403/503 read on mockupi märkmetest (`Veateated`) ja kasutaja kinnitatud. Frontend (`TrainingFormView.handleAiTrainingError()`) kuvab need kolm errorCode'i vormis — **nende kuju ei tohi muutuda**.
 - Kustutatud koolitus on nagu olematu (otsus `AdminTrainingsView` soft delete'i juures, vt `training-deleted-status.md`): kasuta aktiivse koolituse leiu-meetodit (nt `getValidActiveTrainingBy`), mitte `getValidTrainingBy`-d.
 - `PRIMARY_KEY_NOT_FOUND` read vastavad olemasolevale mustrile `PrimaryKeyNotFoundException` + `getValidTrainingBy(Integer trainingId)` / `getValidLanguageBy(Integer languageId)` (vt `backend/CLAUDE.md`). `PrimaryKeyNotFoundException` paneb `errorCode` ise, seda `Error` enumisse ei lisata.
 - 403 → olemasolev `ForbiddenException`; 404 `MAIN_TRANSLATION_NOT_FOUND` → olemasolev `DataNotFoundException`.
@@ -277,8 +290,8 @@ Märkused:
 
 ## Vastuvõtu kriteeriumid
 
-- [ ] Endpoint `GET /api/training/{trainingId}/ai-translation` on olemas ja võtab kohustusliku query parameetri `languageId`
-- [ ] Õnnestunud päring tagastab 200 OK ja `AiTranslationDto` (`title`, `shortDescription`, `description`)
+- [ ] Endpoint `POST /api/ai-training/translation/{trainingId}` on olemas ja võtab kohustusliku query parameetri `languageId`
+- [ ] Õnnestunud päring tagastab 200 OK ja `AiTrainingContentDto` (`title`, `shortDescription`, `description`)
 - [ ] Vastusel on päis `Cache-Control: no-store`
 - [ ] Lähtetekst on alati andmebaasi salvestatud põhikeele tõlge; põhikeele ID ega kood pole koodis kõvasti kirjas
 - [ ] Teenus ei loo ega muuda andmebaasis ühtegi rida
@@ -301,7 +314,22 @@ Märkused:
 2. **Mudel.** `gemini-2.5-flash` (vaikimisi) vs uuem Flash/Flash-Lite mudel — valida AI Studios implementeerimise ajal saadaoleva ja tasuta tasemel lubatu hulgast.
 3. **Thinking-režiim.** Gemini 2.5+ mudelid "mõtlevad" vaikimisi, mis lisab viivitust ja võib kulutada väljundi tokeneid (`MAX_TOKENS` risk). Tõlkeks pole seda vaja — kontrollida, kas Spring AI kaudu saab thinking-eelarve nulli/madalaks seada.
 4. **Timeout ja kordused.** Mis on mõistlik ooteaeg (nt 60 s) ja kas Spring AI vaikimisi kordused (retry) sobivad? Frontendi axios'el timeout'i pole.
-5. **`response-mime-type=application/json`.** Kas `responseEntity(AiTranslationDto.class)` vajab seda eraldi või piisab Spring AI väljundi konverteri juhistest? Kontrollida, et pikk HTML `description` JSON-stringis ei lähe katki (jutumärgid, reavahetused).
+5. **`response-mime-type=application/json`.** Kas `responseEntity(AiTrainingContentDto.class)` vajab seda eraldi või piisab Spring AI väljundi konverteri juhistest? Kontrollida, et pikk HTML `description` JSON-stringis ei lähe katki (jutumärgid, reavahetused).
 6. **Vene keele (`ru`) näide.** Mockupis on sihtkeelena vene keel, andmebaasis ainult `et` ja `en`. Kas lisada `language` tabelisse `ru` või piisab inglise keelest?
 7. **Autentimine ja kuritarvitus — teadaolev risk.** Backendil pole autentimist — igaüks, kes teab URL-i, saab kulutada AI kvooti. Arenduses aktsepteeritud; **enne avalikku kasutust** on vaja päringute piirangut või admin-rolli kontrolli.
 8. **`languageId` puudumise vorming.** Puuduv/vigane query parameeter annab Springi standardse 400 vastuse (mitte `ApiError` kuju). Kas lisada `RestExceptionHandler`-isse käsitlus (`INCORRECT_INPUT`)?
+
+
+## Selle etapi vastuvõtt: ühine placeholder-controller
+
+- [x] AI tõlke meetod paikneb `AiTrainingController` klassis rajal `POST /api/ai-training/translation/{trainingId}`.
+- [x] Kohustuslik sihtkeel antakse query parameetriga `languageId`.
+- [x] Vastus sisaldab kolme fikseeritud „AI-ga tõlgitud … (TO BE IMPLEMENTED)“ teksti ühises `AiTrainingContentDto` mudelis.
+- [x] Vastuse päis on `Cache-Control: no-store`.
+- [x] Swaggeri kokkuvõte algab `TO BE IMPLEMENTED` ning sisaldab placeholder-vastuse näidist.
+- [x] Meetod ei loe DB-d ega kutsu AI API-t.
+- [x] Frontend ühendub päris POST-kutsega ja tulemus täidab ainult vormi.
+
+Varasemad AI-teostuse vastuvõtu kriteeriumid kirjeldavad hilisemat Gemini integratsiooni; need jäävad selles etapis täitmata.
+
+**Kontroll (placeholder-etapp):** `AiTrainingControllerTest` kontrollib POST-rada, kohustuslikku sihtkeelt, DTO vastust ja `Cache-Control: no-store` päist. `./gradlew test` läbib.

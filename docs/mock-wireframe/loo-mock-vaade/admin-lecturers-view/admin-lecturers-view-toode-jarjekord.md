@@ -37,7 +37,7 @@ Koolituse kalender (`admin-training-courses-view`) sõltub sellest tööst: `lec
 | 1.9 | `PUT /api/lecturer/{lecturerId}` | `docs/tasks/backend/PUT-api-lecturer-lecturerId.md` | keskmine | pildi lisamine / asendamine / eemaldamine |
 | 1.10 | `POST /api/lecturer/{lecturerId}/lecturer-translation` | `docs/tasks/backend/POST-api-lecturer-lecturerId-lecturer-translation.md` | lihtne | `TRANSLATION_EXISTS` on olemas |
 | 1.11 | `GET /api/lecturer-summary/{lecturerId}` | `docs/tasks/backend/GET-api-lecturer-summary-lecturerId.md` | lihtne | vajalik ka kalendrile |
-| 1.12 | `GET /api/lecturer/{lecturerId}/ai-translation` | `docs/tasks/backend/GET-api-lecturer-lecturerId-ai-translation.md` | keerukas | **pärast koolituse AI tõlget** (`GET-api-training-trainingId-ai-translation.md`), sama lahendus |
+| 1.12 | `GET /api/lecturer/{lecturerId}/ai-translation` | `docs/tasks/backend/GET-api-lecturer-lecturerId-ai-translation.md` | keerukas | **pärast koolituse AI tõlget** (`POST-api-ai-training-translation-trainingId.md`), sama lahendus |
 
 1.5–1.7 ja 1.10 on väikesed lugemis- / lisamisteenused; 1.8–1.9 on vormi põhitöö. 1.12 võib jääda hilisemaks — frontend kasutab seni mocki.
 

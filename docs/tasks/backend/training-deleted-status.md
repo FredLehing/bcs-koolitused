@@ -43,7 +43,7 @@ Kui koolituse `status = 'D'`, annavad järgmised teenused sama vea nagu olematu 
 
 - `TrainingService`-isse lisatakse olemasoleva `getValidTrainingBy` kõrvale meetod, mis leiab ainult aktiivse koolituse (`status <> 'D'`), nt `getValidActiveTrainingBy(Integer trainingId)` (repositooriumis nt `findByIdAndStatusNot(...)` või `@Query`). Sõnum on sama: `Ei leidnud primary keyd 'trainingId' väärtusega: <id>`.
 - **`getValidTrainingBy` jääb alles** — seda kasutavad teenused, mis peavad leidma ka kustutatud koolituse: `DELETE /api/training/{trainingId}`, `PUT /api/training/{trainingId}/restore`, `PUT /api/training/{trainingId}/publish` ja `/unpublish` (viimased kaks keelduvad `403 TRAINING_DELETED`, vt nende taskid).
-- `GET /api/training/{trainingId}/ai-translation` pole veel implementeeritud — reegel on lisatud selle taski (`GET-api-training-trainingId-ai-translation.md`).
+- `POST /api/ai-training/translation/{trainingId}` on praegu placeholder — kustutatud koolituse kontroll tuleb lisada tegeliku teostusega selle taski järgi (`POST-api-ai-training-translation-trainingId.md`).
 
 Frontendis muudatusi pole vaja: `TrainingView` ja `TrainingFormView` suunavad 404 korral juba praegu üldisele veavaatele.
 

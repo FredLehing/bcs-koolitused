@@ -4,6 +4,7 @@
 
 ## Vaate märkmed
 
+AI tegevused on selles etapis ühendatud päris POST-teenustega AiTrainingController klassis; vastus on placeholder-objekt. AI päringu ajal on tekstide muutmine, faili vahetamine ja salvestamine keelatud; vea korral säilivad tekstid ja fail. Vaate vahetamisel vana AI tulemust ei rakendata.
 ```text
 Roll: Admin
 Failinimi: TrainingFormView.vue
@@ -14,7 +15,7 @@ state: "update" — URL-is trainingId ja trainingTranslationId. Pealkiri "Muuda 
 Lipukesed: tõlge olemas → värviline lipp (klikk avab selle tõlke), tõlge puudub → hall lipp (klikk → state "new-translation").
 "Salvesta" → PUT /api/training/{trainingId} (koolituse väljad + avatud tõlge ühes transaktsioonis). "Tee AI tõlge" on ainult mitte-põhikeele tõlkel: täidab vaid vormi, ei salvesta.
 status "U" → nupp "Publitseeri", status "P" → nupp "Liiguta mustandisse"; mõlemal kinnituse modal (PUT /api/training/{trainingId}/publish või /unpublish).
-Õppekava (PDF): olemas → failinimi lingina (klikk = allalaadimine) + suurus, nupud "Vaheta" ja "Eemalda" (kinnitust ei küsi — jõustub salvestamisel, "Tühista" võtab tagasi); puudub → "Vali fail…" (PDF, kuni 10 MB). "Salvesta" saadab curriculum / isCurriculumRemoved / curriculumLabel (sõna "Õppekava" avatud tõlke keeles, mitte kasutajaliidese keeles); backend arvutab failinime uuesti ka siis, kui muutus ainult pealkiri. Pärast salvestamist laaditakse tõlge uuesti (curriculumFileName).
+Õppekava (PDF): olemas → failinimi lingina (klikk = allalaadimine) + suurus, nupud "Vaheta" ja "Eemalda" (kinnitust ei küsi — jõustub salvestamisel, "Tühista" võtab tagasi); puudub → "Vali fail…" (PDF, kuni 10 MB). "Salvesta" saadab curriculum / isCurriculumRemoved / curriculumLabel (sõna "Õppekava" avatud tõlke keeles, mitte kasutajaliidese keeles); backend arvutab failinime uuesti ka siis, kui muutus ainult pealkiri. Pärast salvestamist laaditakse tõlge uuesti (curriculumFileName). Nupp "Täida vorm PDF + AI abiga" kasutab uut vormis valitud faili, selle puudumisel salvestatud õppekava. AI vastus täidab vormi, DB-sse midagi ei kirjutata enne "Salvesta" vajutamist. Salvestamata tekstide korral küsitakse ülekirjutamiseks kinnitust. Tooltip selgitab, millist PDF-i kasutatakse.
 ```
 
 ## API märkmed — GET /api/languages
@@ -298,45 +299,27 @@ errorCode: PRIMARY_KEY_NOT_FOUND
 message: "Ei leidnud primary keyd 'trainingTranslationId' väärtusega: 123"
 ```
 
-## API märkmed — GET /api/training/{trainingId}/ai-translation
+## API märkmed — POST /api/ai-training/translation/{trainingId}
 
 ```text
-API: GET /api/training/{trainingId}/ai-translation
+API: POST /api/ai-training/translation/{trainingId}
 
 Query parameetrid:
 languageId: Integer — sihtkeel, kuhu tõlgitakse
 
 Response (200):
-AiTranslationDto.java
+AiTrainingContentDto.java
 {
-  "title": "Power BI for Advanced Users",
-  "shortDescription": "Data models, DAX and interactive reports.",
-  "description": "The course builds a data model in Power BI, writes DAX formulas and creates interactive reports."
+  "title": "AI-ga tõlgitud pealkiri (TO BE IMPLEMENTED)",
+  "shortDescription": "AI-ga tõlgitud lühikirjeldus (TO BE IMPLEMENTED)",
+  "description": "AI-ga tõlgitud kirjeldus (TO BE IMPLEMENTED)"
 }
 
 API teenuse lisainfo:
+TO BE IMPLEMENTED: AiTrainingController tagastab praegu fikseeritud placeholder-objekti. Andmebaasi lugemist, Gemini kutset ega ärivigade kontrolli veel ei tehta. Järgnev andmevoog kirjeldab hilisemat AI teostust; planeeritud ärivead on backend taskis.
 Tõlgib alati andmebaasi salvestatud põhikeele (language.is_main_language = true) tõlke AI abil sihtkeelde — vormi sisu ei kasutata. Andmebaasi midagi ei salvestata. description HTML-märgendid säilitatakse. Vastusel päis Cache-Control: no-store. Kustutatud koolitus (status "D") on nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.
 
-Veateated:
-HTTP: 404
-errorCode: PRIMARY_KEY_NOT_FOUND
-message: "Ei leidnud primary keyd 'trainingId' väärtusega: 123"
-
-HTTP: 404
-errorCode: PRIMARY_KEY_NOT_FOUND
-message: "Ei leidnud primary keyd 'languageId' väärtusega: 123"
-
-HTTP: 403
-errorCode: MAIN_LANGUAGE_NOT_TRANSLATABLE
-message: "Põhikeelde ei saa AI tõlget teha"
-
-HTTP: 404
-errorCode: MAIN_TRANSLATION_NOT_FOUND
-message: "Koolitusel puudub põhikeele tõlge"
-
-HTTP: 503
-errorCode: AI_SERVICE_UNAVAILABLE
-message: "AI tõlketeenus ei ole hetkel kättesaadav"
+Veateated: —
 ```
 
 ## API märkmed — PUT /api/training/{trainingId}/publish
@@ -377,4 +360,31 @@ message: "Ei leidnud primary keyd 'trainingId' väärtusega: 123"
 HTTP: 403
 errorCode: TRAINING_DELETED
 message: "Kustutatud koolituse staatust ei saa muuta, taasta see enne"
+```
+
+
+## API märkmed — POST /api/ai-training/pdf/{trainingTranslationId} (TO BE IMPLEMENTED)
+
+```text
+API: POST /api/ai-training/pdf/{trainingTranslationId}
+
+Path parameeter:
+trainingTranslationId: Integer — avatud tõlke ID
+
+Request: multipart/form-data
+curriculum: valikuline uus PDF-fail (kuni 10 MB). Kui osa puudub, kasutatakse tõlke salvestatud õppekava.
+
+Response (200):
+AiTrainingContentDto.java
+{
+  "title": "PDF-ist genereeritud pealkiri (TO BE IMPLEMENTED)",
+  "shortDescription": "PDF-ist genereeritud lühikirjeldus (TO BE IMPLEMENTED)",
+  "description": "PDF-ist genereeritud kirjeldus (TO BE IMPLEMENTED)"
+}
+
+API teenuse lisainfo:
+TO BE IMPLEMENTED: controller tagastab praegu fikseeritud placeholder-väärtused; DB-d ei loeta ja Geminit ei kutsuta.
+Päringus olev uus PDF on eelistatud; selle puudumisel loetakse salvestatud õppekava. Tulevikus saadetakse PDF Gemini AI-le. DB-sse midagi ei salvestata; vastus täidab vormi ja admin salvestab selle eraldi "Salvesta" nupuga. Praegune controller tagastab placeholder-väärtused.
+
+Veateated: —
 ```

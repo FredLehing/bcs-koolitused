@@ -9,13 +9,15 @@ import SessionStorageService from '@/services/SessionStorageService.js'
 import SortService from '@/services/SortService.js'
 import AdminTabs from '@/components/common/AdminTabs.vue'
 import InlineAlerts from '@/components/common/InlineAlerts.vue'
+import PaginationNav from '@/components/common/PaginationNav.vue'
 import SortableColumnHeader from '@/components/common/SortableColumnHeader.vue'
 import UserStatusBadge from '@/components/common/UserStatusBadge.vue'
 import UserStatusButton from '@/components/common/UserStatusButton.vue'
 
 const USER_STATUS_DELETED = 'D'
+const LIMIT = 10
 
-// Kõik kontod (admin): /admin-users. Otsing, rolli filter ja sorteerimine frontendis;
+// Kõik kontod (admin): /admin-users. Otsing, rolli filter, sorteerimine ja leheküljestus frontendis;
 // "Näita ka deaktiveeritud" → uus päring (includeDeleted)
 export default {
   name: 'AdminUsersView',
@@ -23,6 +25,7 @@ export default {
     PhEye,
     AdminTabs,
     InlineAlerts,
+    PaginationNav,
     SortableColumnHeader,
     UserStatusBadge,
     UserStatusButton,
@@ -38,6 +41,7 @@ export default {
       // null = backendi järjestus (loodud, uusimad eespool)
       sortBy: null,
       sortDirection: 'asc',
+      page: 0,
       currentUserId: SessionStorageService.getUserId(),
       users: [],
     }
@@ -69,6 +73,14 @@ export default {
       )
     },
 
+    totalPages() {
+      return Math.ceil(this.sortedUsers.length / LIMIT)
+    },
+
+    pagedUsers() {
+      return this.sortedUsers.slice(this.page * LIMIT, (this.page + 1) * LIMIT)
+    },
+
     sortableColumns() {
       return [
         { sortKey: 'createdAt', label: this.$t('adminUsers.columns.createdAt') },
@@ -87,7 +99,23 @@ export default {
   },
   watch: {
     includeDeleted() {
+      this.page = 0
       this.getAdminUsers()
+    },
+
+    searchText() {
+      this.page = 0
+    },
+
+    roleName() {
+      this.page = 0
+    },
+
+    // Nt viimase lehe ainsa konto deaktiveerimisel jääks leht muidu tühjaks
+    totalPages(newTotalPages) {
+      if (this.page > 0 && this.page >= newTotalPages) {
+        this.page = newTotalPages - 1
+      }
     },
   },
   methods: {
@@ -108,6 +136,11 @@ export default {
         this.sortBy = null
         this.sortDirection = 'asc'
       }
+      this.page = 0
+    },
+
+    handlePageChanged(newPage) {
+      this.page = newPage
     },
 
     handleUserDeactivated() {
@@ -226,7 +259,7 @@ export default {
         </thead>
         <tbody>
           <tr
-            v-for="user in sortedUsers"
+            v-for="user in pagedUsers"
             :key="user.userId"
             :class="{ 'deleted-row': isDeleted(user) }"
           >
@@ -273,9 +306,17 @@ export default {
       </table>
     </div>
 
-    <p class="text-secondary mb-4">
-      {{ $t('adminUsers.totalCount', filteredUsers.length) }}
-    </p>
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
+      <span class="text-secondary">
+        {{ $t('adminUsers.totalCount', filteredUsers.length) }}
+      </span>
+      <PaginationNav
+        :page="page"
+        :total-pages="totalPages"
+        @event-page-changed="handlePageChanged"
+      />
+      <span></span>
+    </div>
   </div>
 </template>
 

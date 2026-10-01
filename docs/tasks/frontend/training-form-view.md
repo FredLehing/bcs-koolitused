@@ -4,7 +4,7 @@
 
 **Roll:** Admin
 
-**Vaste mockupis:** interaktiivne läbimäng `docs/mock-wireframe/loo-mock-vaade/training-form-view-labimang.html` — kolm olekut, iga oleku kohta eraldi pilt ja märkmete fail:
+**Vaste mockupis:** interaktiivne läbimäng `docs/mock-wireframe/loo-mock-vaade/form-view/training-form-view-labimang.html` — kolm olekut, iga oleku kohta eraldi pilt ja märkmete fail:
 
 | Olek (`state`) | URL | Pilt | Märkmed |
 |---|---|---|---|
@@ -18,7 +18,7 @@
 
 ![Mockup — new-translation](../../mock-wireframe/pdf-images/TrainingFormView-state-new-translation.png)
 
-Taustaks: skeemid ja otsused `docs/mock-wireframe/loo-mock-vaade/training-form-view-skeemid.md`, tööde järjekord `training-form-view-toode-jarjekord.md` (see task on **2. etapp**).
+Taustaks: skeemid ja otsused `docs/mock-wireframe/loo-mock-vaade/form-view/training-form-view-skeemid.md`, tööde järjekord `training-form-view-toode-jarjekord.md` (see task on **2. etapp**).
 
 ## Kasutajavoog
 
@@ -65,14 +65,14 @@ Koolituse andmete sektsioon on tõlke sektsiooni kohal (vertikaalne paigutus), o
 6. **Lipule klikk** → olemasolev tõlge: `router.replace({ trainingId, trainingTranslationId })`; puuduv: `router.replace({ trainingId, languageId })`.
 7. **"Lisa tõlge"** → `POST /api/training/{trainingId}/training-translation` → eduteade → `router.replace` olekusse `update`.
 8. **Staatus** → kinnituse modal → `PUT .../publish` või `.../unpublish` → `GET /api/training/{trainingId}` (uus staatus) → nupp vahetub.
-9. **"Tee AI tõlge"** → kui vormi tekst erineb viimati laaditust/salvestatust, küsitakse kinnitust → `GET .../ai-translation?languageId=` (nupp on laadimise ajal keelatud, "Tõlgin…") → tulemus ainult vormi, andmebaasi ei salvestata.
+9. **"Tee AI tõlge"** → kui vormi tekst erineb viimati laaditust/salvestatust, küsitakse kinnitust → `POST /api/ai-training/translation/{trainingId}?languageId=` (nupp on laadimise ajal keelatud, "Tõlgin…") → tulemus ainult vormi, andmebaasi ei salvestata.
 10. **Vead.** AI tõlke teadaolevad vead (`503 AI_SERVICE_UNAVAILABLE`, `403 MAIN_LANGUAGE_NOT_TRANSLATABLE`, `404 MAIN_TRANSLATION_NOT_FOUND`) kuvatakse `InlineAlerts` veateatena (backendi `message`), vormi sisu jääb alles. Muud API vead suunavad `ErrorView`-le; ülejäänud backendi veakoodide eraldi kuvamine lisatakse koos päris teenustega.
 
 ## API kutsed
 
 Kõik kutsed on failides `frontend/src/api-services/`. **Mock-vastuseid kasutavad kõik uued kutsed, välja arvatud need, mille backend on valmis** (vt "Mock-vastused" allpool). Päris kutsele vahetatud: `GET /api/languages`, `GET /api/locations`, `GET /api/lecturers`, `POST /api/training`, `GET /api/training/{trainingId}`, `GET /api/training/{trainingId}/training-translations`, `GET /api/training-translation/{trainingTranslationId}`, `PUT /api/training/{trainingId}`, `POST /api/training/{trainingId}/training-translation`.
 
-**NB! Segaolek:** koolitus ja selle tõlked luuakse, laaditakse ja salvestatakse päris andmebaasis, kuid publish/unpublish ja AI tõlge on veel mockid ning töötavad `MockDatabase` andmetega. Päris andmebaasis loodud koolituse puhul need nupud ei tööta (mockis pole sellist koolitust) ning koolituste 1–2 puhul lähevad muudatused ainult mocki. Vaheta need kutsed koos vastavate backend teenustega.
+**AI teenuste seis (2026-10-01):** kõik kolm AI POST-kutset kasutavad päris `AiTrainingController` teenuseid, mis tagastavad placeholder-objekte. AI jaoks ei kasutata `MockDatabase` andmeid; selle tõttu töötab vormi täitmine ka päris DB-s loodud koolitusel. Publish/unpublish kasutavad samuti päris backend-kutseid.
 
 | Teenus | Meetod `api-services`-is | Backend task | Etapp |
 |---|---|---|---|
@@ -89,7 +89,7 @@ Kõik kutsed on failides `frontend/src/api-services/`. **Mock-vastuseid kasutava
 | `PUT /api/training/{trainingId}/publish` | `TrainingService.sendPutTrainingPublishRequest(trainingId)` | `PUT-api-training-trainingId-publish.md` | 3 |
 | `PUT /api/training/{trainingId}/unpublish` | `TrainingService.sendPutTrainingUnpublishRequest(trainingId)` | `PUT-api-training-trainingId-unpublish.md` | 3 |
 | `POST /api/training/{trainingId}/training-translation` | `TrainingService.sendPostTrainingTranslationRequest(trainingId, request)` | `POST-api-training-trainingId-training-translation.md` | 3 |
-| `GET /api/training/{trainingId}/ai-translation?languageId=` | `TrainingService.sendGetAiTranslationRequest(trainingId, languageId)` | `GET-api-training-trainingId-ai-translation.md` | 3 |
+| `POST /api/ai-training/translation/{trainingId}?languageId=` | `AiTrainingService.sendPostTranslationRequest(trainingId, languageId)` | `POST-api-ai-training-translation-trainingId.md` | 3 |
 
 Täpsed request/response JSON näidised ja DTO nimed on märkmete failides (vt tabel taski alguses) ja 1. etapi backend taskides — neid siin ei dubleerita. Olulisemad kujud:
 
@@ -228,3 +228,81 @@ Kood on loodud (mustri eeskuju: Options API, `handle`-meetodid, props/emits `eve
 - [ ] "Tee AI tõlge" on nähtav ainult `new-translation` ja mitte-põhikeele `update` olekus, tooltip selgitab käitumist, salvestamata muudatuste korral küsitakse kinnitust, tulemus ei salvestu automaatselt
 - [ ] AI teenuse 503/403/404 teadaolev viga kuvatakse vormis, sisestatud tekst ei kao
 - [ ] Kogu voog töötab mock-vastustega; iga teenuse saab eraldi päris kutse vastu vahetada ilma vaate koodi muutmata
+
+
+## PDF + AI ja ühise AI-controlleri ühendamine (2026-10-01)
+
+Selle täienduse sisend on interaktiivne läbimäng, kolm oleku märkmete faili ja `AiTrainingController`. Rakendatakse placeholder-vastustega päris HTTP-kutsed; varasemat mälus olevat AI tõlke mocki selle vaate jaoks enam ei kasutata.
+
+### Kasutajaliidese elemendid
+
+| Element | Tüüp | Kirjeldus/käitumine |
+|---|---|---|
+| „Täida vorm PDF + AI abiga“ | Nupp valitud/salvestatud PDF-i kõrval | new-training ja new-translation: nähtav ainult uue faili valimisel; update: uus valitud fail või olemasolev eemaldamata PDF |
+| PDF + AI tooltip | `title` atribuut | new-training: valitud fail → backend → Gemini, salvestamine „Lisa“; new-translation: sama failivoog, salvestamine „Lisa tõlge“; update: uus fail eelistatud, muidu DB PDF, salvestamine „Salvesta“ |
+| Laadimine | Spinner ja „PDF-i analüüsin…“ / „Tõlgin…“ | AI tegevused, tekstide muutmine, faili vahetamine ja salvestus on päringu ajal keelatud |
+| Ülekirjutamise modal | `ConfirmModal` | Kui tekst erineb viimati laaditust/salvestatust, küsib vastav AI tegevus enne tekstide asendamist kinnitust |
+| AI tulemus/veateade | `InlineAlerts` | Tulemus täidab kolme tekstivälja; vea korral säilivad tekstid ja PDF |
+
+### Käitumine ja valideerimine
+
+1. `CurriculumUpload` säilitab valitud `File` objekti koos olemasoleva Base64 väärtusega. Base64 on tavapäraseks salvestamiseks, originaalfail saadetakse AI-le multipart-kujul.
+2. new-training ja new-translation kasutavad `/api/ai-training/pdf`; update kasutab `/api/ai-training/pdf/{trainingTranslationId}`. Uus valitud fail on update olekus eelistatud, selle puudumisel saadetakse multipart-päring ilma `curriculum` osata. Eemaldamiseks märgitud failiga nuppu ei näidata.
+3. Frontend kontrollib olemasoleva failivalija kaudu PDF tüüpi ja kuni 10 MB suurust. AI päring ei salvesta faili ega tekste. Salvestamata tekste ei kirjutata üle ilma modali kinnitamiseta.
+4. Vastus täidab ainult `title`, `shortDescription`, `description`; valitud fail, tõlke keel ja koolituse muud väljad säilivad. PDF + AI ei käivita teist AI-tõlke päringut.
+5. Üheaegne PDF + AI ja AI-tõlge on välistatud. Vaate või avatud tõlke vahetamise järel ei tohi vana AI vastus täita uue vormi tekste.
+6. 400/403/404/413/503 ja võrguvead kuvatakse vormis; backendi `message`/`detail` või tõlgitud üldteade. Vigane vastusekuju ei tohi vormi osaliselt muuta.
+
+### API kutsed
+
+**Backend allikas:** `controller/aitraining/AiTrainingController.java`, `controller/common/dto/AiTrainingContentDto.java`.
+
+| Teenus | Frontendi meetod | Backend task |
+|---|---|---|
+| `POST /api/ai-training/pdf` | `AiTrainingService.sendPostPdfRequest(file)` | `POST-api-ai-training-pdf.md` |
+| `POST /api/ai-training/pdf/{trainingTranslationId}` | `AiTrainingService.sendPostTranslationPdfRequest(id, file)` | `POST-api-ai-training-pdf-trainingTranslationId.md` |
+| `POST /api/ai-training/translation/{trainingId}?languageId=` | `AiTrainingService.sendPostTranslationRequest(trainingId, languageId)` | `POST-api-ai-training-translation-trainingId.md` |
+
+PDF-päringute request: `multipart/form-data`, osa `curriculum` = PDF binaarfail. Update olekus on osa valikuline. Brauser määrab multipart boundary; käsitsi Content-Type päist ei seata. Tõlkepäringul body puudub ning `languageId` on kohustuslik query parameeter.
+
+PDF-päringute response (200), `AiTrainingContentDto.java`:
+```json
+{
+  "title": "PDF-ist genereeritud pealkiri (TO BE IMPLEMENTED)",
+  "shortDescription": "PDF-ist genereeritud lühikirjeldus (TO BE IMPLEMENTED)",
+  "description": "PDF-ist genereeritud kirjeldus (TO BE IMPLEMENTED)"
+}
+```
+
+AI tõlke response (200), sama DTO:
+```json
+{
+  "title": "AI-ga tõlgitud pealkiri (TO BE IMPLEMENTED)",
+  "shortDescription": "AI-ga tõlgitud lühikirjeldus (TO BE IMPLEMENTED)",
+  "description": "AI-ga tõlgitud kirjeldus (TO BE IMPLEMENTED)"
+}
+```
+
+AI tõlke vastusel on `Cache-Control: no-store`. Placeholder-controller ei kontrolli DB ID-sid, ei loe PDF-i ega kutsu Geminit. Tulevased ärivead on backend taskides; praegused päringu sidumise vead on Springi standardvastused.
+
+### Komponendid ja failistruktuur
+
+- `views/TrainingFormView.vue`: nuppude tingimused, modaalid, API kutsete ja vastuste käsitlus.
+- `components/forms/TrainingTranslationForm.vue`: AI-nuppude props/emits ja tekstide muutmise lukustus.
+- `components/forms/CurriculumUpload.vue`: originaalfaili säilitamine ja nupp failinime kõrval.
+- `api-services/AiTrainingService.js`: kolme uue POST-kutse ühendus.
+- `locales/et.json`, `locales/en.json`: nupud, olekupõhised tooltip'id, modal ja teated.
+
+### Vastuvõtu kriteeriumid (placeholder-etapp)
+
+- [x] Kõigi kolme oleku PDF-nupu nähtavus ja õige HTTP-rada vastavad ülaltoodule.
+- [x] Update olekus saadetakse uus PDF eelistatult; failita multipart on lubatud.
+- [x] „Tee AI tõlge“ kasutab sama controlleri päris POST-teenust.
+- [x] Mõlemad AI tegevused täidavad ainult kolme teksti; DB salvestus toimub eraldi salvestusnupuga.
+- [x] Salvestamata tekstide korral küsitakse modaalis kinnitust, katkestamine säilitab vormi.
+- [x] Laadimisolek takistab samaaegseid AI päringuid ja salvestamist.
+- [x] Vana vaate vastus ei muuda uut vormi; vead jätavad senise sisu alles.
+- [x] Eesti ja inglise UI tekstid on olemas; tooltip kirjeldab õiget olekut.
+- [x] Lint, frontendi build ja backendi HTTP-lepingu kontroll läbivad.
+
+**Kontroll:** ESLint muudetud komponentidel; Vite tootmisbuild Linuxi ajutises koopias; eraldi Node-kontroll päris `AiTrainingService` ja vaate meetoditega (kõik kolm olekut, multipart-fail, update failita, modal, vead ja hilinenud vastus). Visuaalset brauseri kontrolli selles etapis ei tehtud.

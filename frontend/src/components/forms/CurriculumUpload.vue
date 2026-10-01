@@ -12,12 +12,16 @@ export default {
     newCurriculum: Object,
     isCurriculumRemoved: Boolean,
     isDisabled: Boolean,
+    showAiPdfButton: Boolean,
+    isAiPdfLoading: Boolean,
+    aiPdfTooltip: String,
   },
   emits: [
     'event-curriculum-selected',
     'event-curriculum-removed',
     'event-curriculum-error',
     'event-curriculum-loading',
+    'event-ai-pdf-clicked',
   ],
   data() {
     return { errorKey: '', fileReader: null }
@@ -47,6 +51,7 @@ export default {
       this.$emit('event-curriculum-loading', true)
       this.fileReader.onload = () => {
         this.$emit('event-curriculum-selected', {
+          file: file,
           curriculum: this.fileReader.result.split(',')[1],
           fileName: file.name,
           fileSize: file.size,
@@ -89,50 +94,62 @@ export default {
 <template>
   <fieldset class="mt-3" :disabled="isDisabled || fileReader !== null">
     <legend class="form-label fs-6">{{ $t('trainingForm.translation.curriculumField') }}</legend>
-    <div v-if="newCurriculum" class="text-break">
-      {{ newCurriculum.fileName }} ({{ formatSize(newCurriculum.fileSize) }})
-      <div class="form-text">{{ $t('trainingForm.translation.curriculumPending') }}</div>
-      <button type="button" class="btn btn-sm btn-outline-secondary mt-2" @click="undo">
-        {{ $t('trainingForm.translation.curriculumUndo') }}
-      </button>
-    </div>
-    <div v-else-if="isCurriculumRemoved" class="text-break">
-      <s>{{ curriculumFileName }}</s>
-      <div class="form-text">{{ $t('trainingForm.translation.curriculumRemoving') }}</div>
-      <button type="button" class="btn btn-sm btn-outline-secondary mt-2" @click="undo">
-        {{ $t('trainingForm.translation.curriculumUndo') }}
-      </button>
-    </div>
-    <div v-else>
-      <div v-if="curriculumFileName" class="mb-2 text-break">
-        <a :href="curriculumUrl">{{ curriculumFileName }}</a>
-        ({{ formatSize(curriculumFileSize) }})
-      </div>
-      <div class="d-flex flex-wrap gap-2">
-        <label class="btn btn-sm btn-outline-primary mb-0">
-          {{
-            $t(
-              `trainingForm.translation.${curriculumFileName ? 'curriculumChange' : 'curriculumSelect'}`,
-            )
-          }}
-          <input
-            type="file"
-            accept="application/pdf"
-            class="visually-hidden"
-            :aria-label="$t('trainingForm.translation.curriculumSelect')"
-            @change="handleFileSelected"
-          />
-        </label>
-        <button
-          v-if="curriculumFileName"
-          type="button"
-          class="btn btn-sm btn-outline-danger"
-          @click="remove"
-        >
-          {{ $t('trainingForm.translation.curriculumRemove') }}
+    <div class="d-flex flex-wrap align-items-start gap-2">
+      <div v-if="newCurriculum" class="text-break">
+        {{ newCurriculum.fileName }} ({{ formatSize(newCurriculum.fileSize) }})
+        <div class="form-text">{{ $t('trainingForm.translation.curriculumPending') }}</div>
+        <button type="button" class="btn btn-sm btn-outline-secondary mt-2" @click="undo">
+          {{ $t('trainingForm.translation.curriculumUndo') }}
         </button>
       </div>
-      <div class="form-text">{{ $t('trainingForm.translation.curriculumHint') }}</div>
+      <div v-else-if="isCurriculumRemoved" class="text-break">
+        <s>{{ curriculumFileName }}</s>
+        <div class="form-text">{{ $t('trainingForm.translation.curriculumRemoving') }}</div>
+        <button type="button" class="btn btn-sm btn-outline-secondary mt-2" @click="undo">
+          {{ $t('trainingForm.translation.curriculumUndo') }}
+        </button>
+      </div>
+      <div v-else>
+        <div v-if="curriculumFileName" class="mb-2 text-break">
+          <a :href="curriculumUrl">{{ curriculumFileName }}</a>
+          ({{ formatSize(curriculumFileSize) }})
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+          <label class="btn btn-sm btn-outline-primary mb-0">
+            {{
+              $t(
+                `trainingForm.translation.${curriculumFileName ? 'curriculumChange' : 'curriculumSelect'}`,
+              )
+            }}
+            <input
+              type="file"
+              accept="application/pdf"
+              class="visually-hidden"
+              :aria-label="$t('trainingForm.translation.curriculumSelect')"
+              @change="handleFileSelected"
+            />
+          </label>
+          <button
+            v-if="curriculumFileName"
+            type="button"
+            class="btn btn-sm btn-outline-danger"
+            @click="remove"
+          >
+            {{ $t('trainingForm.translation.curriculumRemove') }}
+          </button>
+        </div>
+        <div class="form-text">{{ $t('trainingForm.translation.curriculumHint') }}</div>
+      </div>
+      <button
+        v-if="showAiPdfButton"
+        type="button"
+        class="btn btn-sm btn-outline-primary"
+        :title="aiPdfTooltip"
+        @click="$emit('event-ai-pdf-clicked')"
+      >
+        <span v-if="isAiPdfLoading" class="spinner-border spinner-border-sm me-1"></span>
+        {{ $t(`trainingForm.translation.${isAiPdfLoading ? 'aiPdfLoading' : 'aiPdfButton'}`) }}
+      </button>
     </div>
     <div v-if="errorKey" class="text-danger mt-1" role="alert">
       {{ $t(`trainingForm.translation.${errorKey}`) }}

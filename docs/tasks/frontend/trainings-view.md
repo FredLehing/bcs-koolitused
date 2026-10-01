@@ -1,113 +1,78 @@
 # Koolituste sirvimine ja filtreerimine
 
-**Vaade:** `TrainingsView.vue`, route `/trainings`
+**Vaade:** `TrainingsView.vue`, rada `/trainings`. **Roll:** kõik, ka külastaja.
 
-**Roll:** Kõik rollid (sh külastajad, sisselogimist ei nõuta)
+Aluseks on [läbimäng](../../mock-wireframe/loo-mock-vaade/trainings-view/trainings-view-labimang.html), [skeemid](../../mock-wireframe/loo-mock-vaade/trainings-view/trainings-view-skeemid.md) ja [vaate märkmed](../../mock-wireframe/markmed/trainings-view-markmed.md). Varasem PDF on ajalooline; praeguse käitumise võrdluseks kasuta läbimängu ja skeeme.
 
-**Vaste mockupis:** "TrainingsView", lehekülg 1/1 (vt pilt `TrainingsView.png`)
+## Paigutus ja eeltäitmised
 
-![Mockup](../../mock-wireframe/pdf-images/TrainingsView.png)
+Ülal „Meie koolitused | Koolituste kalender“ vahelehed. Vasakul filtrid järgmises järjekorras, paremal otsing, kaardid ja leheküljestus. Kitsal ekraanil on filtrid kaartide kohal.
 
-## Kasutajavoog
-
-Kasutaja avab avalikult ligipääsetava koolituste nimekirja vaate (sisselogimist ei nõuta). Vaates kuvatakse leheküljestatud koolituste kaardid koos otsingu, kategooria- ja keelefiltriga. Otsingusõna sisestamisel ja "Otsi" nupule vajutamisel, samuti kategooria või keele filtri muutmisel, tehakse uus `GET /api/trainings` päring vastavate query parameetritega ning tulemus värskendatakse. Iga koolituse kaardi "Vaata lähemalt" nupule vajutades suunatakse kasutaja `CourseView` vaatele valitud koolituse kohta. Lehekülgede vahel liigutakse "Eelmine"/"Järgmine" nuppude ja otseste leheküljenumbrite abil.
-
-Mockupi "Vaatega seotud lisainfo" mainis lisaks ka sortimist ja kalendris kuupäeva muutmist, kuid kuna kumbki pole wireframe'il tegelikult nähtav ega backend kontraktis olemas (vt `docs/tasks/backend/GET-api-trainings.md` "Avatud küsimused"), on need sellest taskist teadlikult välja jäetud.
-
-## Kasutajaliidese elemendid
-
-| Element | Tüüp | Kirjeldus/käitumine |
+| Filter | Algvalik | Valikute allikas |
 |---|---|---|
-| Otsinguväli | Tekstisisend | Vabateksti otsing (nt "AI-Arendaja"), täidetakse enne "Otsi" nupule vajutamist |
-| "Otsi" nupp | Nupp | Käivitab uue `GET /api/trainings` päringu kehtiva otsingusõna ja filtritega |
-| Kategooria valik | Dropdown (select) | Väärtused vastavad `category` kirjetele (nt AI, Tarkvaraarendus, Andmebaasid, Graafika); valikul tehakse uus päring `categoryId`-ga |
-| Keel valik | Dropdown (select) | Väärtused `GET /api/languages` teenusest, vaikimisi valimata (`trainingLanguageId=0`); valikul tehakse uus päring `trainingLanguageId`-ga |
-| Koolituse kaart (`TrainingCard.vue`) | Korduv element | Kuvab koolituse pealkirja, keele märgist (nt "Eesti"), lühikirjeldust, kategooria/rahastustüübi silte ja "Vaata lähemalt" nuppu; kui `isPromoted` on `true`, kuvatakse lisaks täht-ikoon |
-| "Vaata lähemalt" nupp | Nupp | Suunab kasutaja `CourseView` vaatele, kandes kaasa valitud koolituse `trainingId` |
-| Lehekülje navigatsioon (Eelmine / leheküljenumbrid / Järgmine) | Navigatsioon | Liigub `trainingSummaries` lehtede vahel (`page` parameeter) |
+| Koolituse keel (select) | „Kõik keeled“, `trainingLanguageId=0` | `GET /api/languages`, kõik õppekeeled |
+| Koolituse kategooria (select) | „Kõik kategooriad“, `categoryId=0` | `GET /api/categories?contentLang=...` |
+| Rahastus (raadionupud) | Märgitud „Kõik“, `fundingTypeId=0` | `GET /api/funding-types?contentLang=...` |
 
-Wireframe'il nähtav ülemine peamenüü (Koolitused, Teenused, Ettevõttest ▾ Lektorid, Blogi, Kontakt, Tagasiside, "Võta ühendust") kuulub tõenäoliselt jagatud lehepäise/navigatsiooni komponendi (`frontend/src/navigation/`) alla, mitte `TrainingsView.vue` enda skoopi — see task ei kata peamenüü implementeerimist.
+`contentLang` tuleb `languageStore`-ist (salvestatud kasutajaliidese keel, vaikimisi `et`). Õppekeele filter on sellest sõltumatu; `requiresTranslation=false` keeled jäävad samuti valikutesse. Enne valikute API vastuseid näidatakse ainult „Kõik“ algvalikuid, tühje näidiskirjeid ei kuvata. Select-väljade pealkirjad on seotud väljadega, rahastusel on `fieldset`/`legend`. Tekstid on eesti ja inglise keeles.
 
-## Käitumine ja valideerimine
+Alguses on `page=0`, `limit=5`, otsing tühi (avalehelt tulles eeltäidetud query `searchText` väärtusega). Kasutajale kuvatakse esimene leht numbriga 1.
 
-1. Vaate avanemisel (`beforeMount`) tehakse esialgne `GET /api/trainings` päring ilma filtriteta (va vaikimisi leheküljestus), et kuvada esimene koolituste lehekülg.
-2. Kasutaja sisestab otsingusõna ja vajutab "Otsi" nupule, või muudab kategooria/keele filtrit → tehakse uus `GET /api/trainings` päring, mis asendab senise koolituste nimekirja ja lähtestab lehekülje (`page=0`).
-3. Kui tulemuseks on tühi `trainingSummaries` list, kuvatakse kasutajale sõbralik "Tulemusi ei leitud" teade (mitte viga — tühi tulemus on backend kontrakti järgi normaalne, mitte veaolukord).
-4. Lehekülje navigatsiooni nuppudel (Eelmine/Järgmine/leheküljenumber) tehakse uus `GET /api/trainings` päring sama otsingu/filtritega, aga muudetud `page` väärtusega.
-5. "Vaata lähemalt" nupule vajutades suunatakse kasutaja `CourseView` vaatele valitud koolituse `trainingId`-ga (täpne route muster sõltub `CourseView` taskist, mida veel pole loodud).
-6. Ootamatu vea korral (backend tagastab 400 või 500, vt "API kutsed" allpool) suunatakse kasutaja üldisele veavaatele, kuna teenusel pole hetkel ühtegi kasutajale kuvatavat spetsiifilist `errorCode`-i defineeritud.
+## Käitumine
 
-**Frontendipoolset sisendvalideerimist otsinguväljal ei ole** — tühja otsingusõnaga "Otsi" nupule vajutamine on lubatud (tagastab filtreerimata nimekirja).
+1. Avamisel küsitakse koolituste esimene leht ning kõigi kolme filtri valikud.
+2. Filtri muutmine rakendub kohe, säilitab teised filtrid ja rakendatud otsingu, seab `page=0`. Sama väärtuse uuesti valimine päringut ei käivita. Kõik filtrid rakenduvad koos.
+3. „Otsi“ või Enter seab `appliedSearchText=searchText.trim()`, lähtestab `page=0` ja küsib koolitused. Sisestatud ja rakendatud otsing on eraldi. Tühi otsing on lubatud. Kõik otsingusõnad peavad esinema tõstutundetult pealkirjas või lühikirjelduses; käändeid ei kohandata.
+4. Otsingu tühjendamine käsitsi, ×, Esc, „Tühista otsing“ või „Näita kõiki koolitusi“ eemaldab ainult otsingu, filtrid säilivad. Rakendatud otsingu eemaldamisel küsitakse uus esimene leht. × ja Esc järel saab otsinguväli fookuse.
+5. Lehekülje muutmine säilitab filtrid ja rakendatud otsingu.
+6. Kasutajaliidese keele vahetus laadib uuesti koolitused, kategooriad ja rahastuse ning uuendab otsingu tooltippi. Õppekeelte loendit uuesti ei küsita. Filtrite ID-d, otsing ja lehekülg säilivad; tulemuste piiridest välja jäänud lehe korral küsitakse viimane olemasolev leht (`max(0, totalPages-1)`).
+7. Vanem koolituste päring ei tohi asendada viimase valiku tulemust. Varasema kuvamiskeele kategooria- ja rahastusvastus ei asenda uue keele nimesid.
+8. Tühi tulemus ei ole viga: otsinguga kuvatakse otsinguteksti sisaldav teade, soovitus ja „Näita kõiki koolitusi“ nupp; ilma otsinguta „Valitud filtritele vastavaid koolitusi ei leitud“. Tühja tulemuse teadet ei kuvata päringu laadimise ajal.
+9. Ootamatu API viga suunab üldisele veavaatele (`NavigationService.navigateToErrorView()`).
+
+„Tühjenda filtrid“ link on nähtav ainult siis, kui õppekeele, kategooria või rahastuse filter on aktiivne. Vajutus seab kõik kolm filtri ID-d ja page väärtuse 0-ks ning küsib koolitused ühe päringuga. Sisestatud ja rakendatud otsing säilivad; ainult otsing ei tee filtrite tühjendamise linki nähtavaks.
+
+## Kaardid ja navigeerimine
+
+`TrainingCard.vue` kasutab `/courses` kaartidega kooskõlas kompaktset kujundust: pealkiri, lühikirjeldus, kategooria ja rahastus, õppekeele lipp ning „Vaata lähemalt“. `isOrderable=true` lisab „Tellitav“ märgise, `isPromoted=true` tähe ja kollaka tausta. Admin näeb muutmise ikooni.
+
+- Detailid → `trainingRoute`, `/training?trainingId={id}`.
+- Admini muutmine → `trainingFormRoute`, `/training-form?trainingId={id}&trainingTranslationId={id}`.
+- Kalender → `coursesRoute`, `/courses`.
 
 ## API kutsed
 
-### `GET /api/trainings`
+| Teenus | Parameetrid | Vastus |
+|---|---|---|
+| `GET /api/trainings` | `categoryId`, `fundingTypeId`, `trainingLanguageId` (0 = kõik), `contentLang`, `searchText`, `page`, `limit` | `TrainingSummaryDto`: `totalPages`, `totalElements`, `trainingSummaries` |
+| `GET /api/categories` | `contentLang` | `CategoryDto[]`: `categoryId`, `categoryName` |
+| `GET /api/funding-types` | `contentLang` | `FundingTypeDto[]`: `fundingTypeId`, `fundingTypeName` |
+| `GET /api/languages` | — | `SystemLanguageDto[]`: ID, kood, nimi, lipukood ja keele omadused |
 
-**Backend task:** vt `docs/tasks/backend/GET-api-trainings.md` (backend on olemas: `TrainingController.java` meetod `findFilteredTrainings`, vastus `TrainingSummaryDto.java`).
+Backend tagastab ainult publitseeritud koolitused, millel on `contentLang` tõlge. Järjestus: esile tõstetud eespool, seejärel pealkiri. Vastusenäited on [vaate märkmetes](../../mock-wireframe/markmed/trainings-view-markmed.md) ning [API taskis](../backend/GET-api-trainings.md). Kohandatud äriveateateid pole.
 
-Query parameetrid (kõik valikulised):
-
-| Parameeter | Kirjeldus |
-|---|---|
-| `categoryId` | Filtreerib kategooria järgi |
-| `fundingTypeId` | Filtreerib rahastustüübi järgi |
-| `limit` | Lehekülje suurus |
-| `page` | Lehekülje number, alates 0-st |
-| `trainingLanguageId` | Filtreerib õppekeele järgi (`language.id`), `0` = kõik |
-| `contentLang` | Määrab tõlgitud väljade keele (`et`/`en`) |
-
-`TrainingSummaryDto.java` — response (200):
-
-```json
-{
-  "totalPages": 1,
-  "totalElements": 2,
-  "trainingSummaries": [
-    {
-      "trainingId": 1,
-      "title": "Java algkursus",
-      "shortDescription": "Java programmeerimise alused algajatele.",
-      "categoryId": 1,
-      "categoryName": "Programmeerimine",
-      "isOrderable": true,
-      "isPromoted": true,
-      "fundingTypes": [
-        {
-          "fundingTypeId": 1,
-          "fundingTypeName": "Töötukassa"
-        }
-      ]
-    }
-  ]
-}
+```http
+GET /api/trainings?categoryId=0&fundingTypeId=0&limit=5&page=0&trainingLanguageId=0&contentLang=et&searchText=
 ```
 
-**Veateated:**
+## Failid
 
-| Status code | errorCode | message | Frontend käitumine |
-|---|---|---|---|
-| 400 Bad Request | — (pole hetkel defineeritud) | — | Suunatakse üldisele veavaatele (`NavigationService.navigateToErrorView()`) |
-| 500 Internal Server Error | — (pole hetkel defineeritud) | — | Suunatakse üldisele veavaatele (`NavigationService.navigateToErrorView()`) |
-
-**Lahtine ots — otsinguväli:** Wireframe'il on otsinguväli ("Otsi" nupuga) ja "Vaatega seotud lisainfo" tekst viitab, et otsingusõna muutmisel tehakse uus `GET /api/trainings` päring — aga backend taski (`docs/tasks/backend/GET-api-trainings.md`) query parameetrite loetelus **ei ole ühtegi otsingusõna/pealkirja-põhist parameetrit** (nt `search`/`keyword`/`title`). See task kirjeldab otsinguvälja kui UI elementi, aga selle täpne query parameeter tuleb backend taski täiendades kokku leppida (soovitavalt `skill-loo-backend-task` või käsitsi backend taski muutmisega), enne kui otsingufunktsionaalsus reaalselt juhtmestada saab.
-
-## Komponendid ja failistruktuur
-
-- **View:** `frontend/src/views/TrainingsView.vue` — ei eksisteeri veel (praegu on `frontend/src/views/` all ainult `HomeView.vue` ja `TestView.vue`).
-- **Router:** `frontend/src/router/index.js` ei sisalda veel `/trainings` rada — tuleb lisada `TrainingsView` importi ja marsruuti (router'it ennast selle taski käigus ei muudeta).
-- **Alamkomponendid (ettepanek):**
-  - `frontend/src/components/common/TrainingCard.vue` — korduv koolituse kaart (vastavalt mockupi `TrainingCard.vue` sildile)
-  - `frontend/src/components/forms/CategoryDropdown.vue` ja `frontend/src/components/forms/LanguageDropdown.vue` — filtri dropdown'id (või üks ühine filtrikomponent, arendaja otsustada)
-- **API teenus:** `frontend/src/api-services/TrainingService.js` — meetod nt `sendGetTrainingsRequest(searchParams)`, mis teeb `GET /api/trainings` päringu query parameetritega.
+- `frontend/src/views/TrainingsView.vue` — filtrite väärtused, laadimine ja sündmused.
+- `frontend/src/components/forms/LanguagesDropdown.vue`, `CategoriesDropdown.vue`, `FundingTypesRadio.vue` — filtrite väljad.
+- `frontend/src/components/TrainingCard.vue` — kaart.
+- `frontend/src/components/common/TrainingsTabs.vue`, `PaginationNav.vue` — navigatsioon.
+- `frontend/src/api-services/TrainingService.js`, `CategoryService.js`, `FundingTypeService.js`, `LanguageService.js` — API kutsed.
+- `frontend/src/locales/et.json`, `en.json` — tekstid.
 
 ## Vastuvõtu kriteeriumid
 
-- [ ] `/trainings` route on olemas ja avab `TrainingsView.vue`, ilma sisselogimisnõudeta
-- [ ] Vaate avanemisel laetakse ja kuvatakse esimene koolituste lehekülg
-- [ ] Kategooria ja keele filtri muutmine käivitab uue `GET /api/trainings` päringu ja värskendab nimekirja
-- [ ] Otsinguväli + "Otsi" nupp on olemas kasutajaliideses (täpne query parameeter täpsustatakse backend taski täienduses, vt "Lahtine ots")
-- [ ] Iga koolituse kaart kuvab pealkirja, lühikirjeldust, keelt, kategooriat, rahastustüüpe (kui olemas) ja "promoted" tähist (kui `isPromoted=true`)
-- [ ] "Vaata lähemalt" nupp suunab kasutaja `CourseView` vaatele valitud koolituse kohta
-- [ ] Lehekülje navigatsioon (Eelmine/Järgmine/leheküljenumbrid) töötab `page` parameetri põhjal
-- [ ] Tühja tulemuse korral kuvatakse kasutajale selge "Tulemusi ei leitud" teade, mitte tühi/katkine vaade
-- [ ] Ootamatu API vea korral (400/500) suunatakse kasutaja üldisele veavaatele
+- [ ] Filtrite pealkirjad, järjestus ja algvalikud vastavad läbimängule; tühje näidiskirjeid ei kuvata.
+- [ ] Rahastuse „Kõik“ on alguses märgitud; õppekeele filter on kasutajaliidese keelest sõltumatu.
+- [ ] „Tühjenda filtrid“ ilmub aktiivse filtri korral, lähtestab filtrid ja lehe ning säilitab otsingu.
+- [ ] Filter rakendub kohe koos teiste filtrite ja otsinguga ning seab `page=0`.
+- [ ] Otsing käivitub „Otsi“/Enteriga; tühjendamine säilitab filtrid.
+- [ ] Keele vahetus säilitab valikud ja korrigeerib vajadusel lehekülge.
+- [ ] Aegunud päring ei asenda uuema valiku tulemusi.
+- [ ] Lehel on kuni viis kaarti, tühja tulemuse teated ja toimiv leheküljestus.
+- [ ] Eesti ja inglise tekstid, seotud väljade pealkirjad ning õiged navigeerimislingid.
+- [ ] ESLint ja tootmisbuild läbivad kontrolli.

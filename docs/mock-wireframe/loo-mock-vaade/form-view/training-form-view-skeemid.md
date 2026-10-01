@@ -18,8 +18,9 @@ Selles failis on `TrainingFormView.vue` olekud ja andmevood skeemidena (Mermaid)
 - Koolitajate ja toimumiskohtade otsing/valik käib backendis (`GET /api/lecturers?search=`, `GET /api/locations`).
 - **Uuendus (2026-09-30): koolitusel võib olla mitu koolitajat** (tabel `training_lecturer`, veerg `sort_order`; `training.default_lecturer_id` eemaldatakse). Vormis on väli "Koolitajad": valitud koolitajate nimekiri (× eemaldab, ↑ ↓ muudab järjekorda), "+ Lisa koolitaja" avab "Vali koolitaja" modali (juba valitud koolitajaid ei pakuta). `TrainingDto.lecturers: [{ lecturerId, lecturerName }]`, request DTO-des `lecturerIds: [..]` (järjekord = `sort_order`). Vt `docs/mock-wireframe/loo-mock-vaade/admin-lecturers-view/admin-lecturers-view-skeemid.md`, "Mitu koolitajat".
 - Põhikeel on määratud andmebaasis (`language.is_main_language`, praegu `et`) ja frontendi store'is (`supportedLanguages[].isMainLanguage`). Uus koolitus luuakse põhikeele tõlkega ja uue tõlke vorm eeltäidetakse põhikeele tekstiga.
-- "Tee AI tõlge" nupp on olekus C ja olekus B, kui avatud tõlge pole põhikeeles. Nupp kutsub `GET /api/training/{trainingId}/ai-translation?languageId={id}`, mis tõlgib alati **salvestatud põhikeele tõlke** (mitte vormi sisu) ja tagastab `AiTranslationDto` (`title`, `shortDescription`, `description`). Tulemus kuvatakse ainult vormis — andmebaasi läheb see alles "Lisa tõlge" / "Salvesta" nupuga. Kui vormis on salvestamata muudatusi, küsitakse enne üle kirjutamist kinnitust. Nupu tooltip selgitab seda kasutajale.
+- "Tee AI tõlge" nupp on olekus C ja olekus B, kui avatud tõlge pole põhikeeles. Nupp kutsub `POST /api/ai-training/translation/{trainingId}?languageId={id}`, mis tõlgib alati **salvestatud põhikeele tõlke** (mitte vormi sisu) ja tagastab ühise `AiTrainingContentDto` (`title`, `shortDescription`, `description`). Tulemus kuvatakse ainult vormis — andmebaasi läheb see alles "Lisa tõlge" / "Salvesta" nupuga. Kui vormis on salvestamata muudatusi, küsitakse enne üle kirjutamist kinnitust. Nupu tooltip selgitab seda kasutajale.
 - **Uuendus (2026-10-01): õppekava (PDF) tõlke juures.** Igal tõlkel võib olla üks PDF-fail "Õppekava" (tabel `training_translation_curriculum`, 1:1 `training_translation`-iga). Fail saadetakse Base64-na samas päringus mis tõlge (`curriculum`, `isCurriculumRemoved`, `curriculumLabel`); failinime teeb backend: `<pealkiri>-<curriculumLabel>.pdf` puhastatuna (nt `tehisaru-toovahendid-arendajale-oppekava.pdf`). `curriculumLabel` = i18n sõna "Õppekava" **tõlke keeles** (mitte kasutajaliidese keeles); see saadetakse igal salvestamisel, et failinimi järgiks pealkirja. "Eemalda" kinnitust ei küsi (jõustub salvestamisel, "Tühista" võtab tagasi). Olekus C on väli tühi — põhikeele faili ei kopeerita, AI tõlge faili ei puuduta. Allalaadimine: `GET /api/training-translation/{trainingTranslationId}/curriculum`. Üksikasjad: `training-curriculum-plaan.md`, skeem 10.
+- **Uuendus (2026-10-01): PDF + AI täidab uue koolituse vormi.** Olekutes A (new-training) ja C (new-translation) ilmub valitud PDF-i kõrvale nupp "Täida vorm PDF + AI abiga". `POST /api/ai-training/pdf` võtab multipart/form-data väljal `curriculum` salvestamata PDF-i. Olekus B kasutab `POST /api/ai-training/pdf/{trainingTranslationId}` vormis valitud uut faili, kui see on olemas; muidu loeb backend salvestatud õppekava. Mõlemas voos tagastatakse `AiTrainingContentDto`; vastus täidab `title`, `shortDescription` ja `description`, kuid midagi ei salvestata enne "Lisa" / "Lisa tõlge" / "Salvesta" nuppu. Salvestamata tekstide ülekirjutamisel küsitakse kinnitust. Tooltip selgitab iga oleku andmevoogu. Praegu on controlleri meetodid dokumenteeritud Swaggeris ja tagastavad `TO BE IMPLEMENTED` placeholder-väärtused; PDF-i töötlust ega Gemini kutset veel ei tehta.
 - Olemasolevad tõlked kuvatakse lipukestena: frontendi store'i `supportedLanguages` (`et`, `en`, `ru`) võrreldakse `GET /api/training/{trainingId}/training-translations` vastusega — tõlge olemas → värviline lipp, puudub → hall lipp.
 
 ---
@@ -117,7 +118,7 @@ Iga oleku kõik võimalikud päringud. **Laadimine** käivitub vaate avamisel ja
 | Tegevus | `GET /api/lecturers?search={otsingusõna}` | "Vali koolitaja" modalis otsides |
 | Tegevus | `PUT /api/training/{trainingId}` | "Salvesta" (sh õppekava: uus fail / eemaldus / failinime uuendus) |
 | Tegevus | `GET /api/training-translation/{trainingTranslationId}/curriculum` | klikk õppekava failinimel → allalaadimine |
-| Tegevus | `GET /api/training/{trainingId}/ai-translation?languageId={id}` | "Tee AI tõlge" (ainult mitte-põhikeele tõlkel) |
+| Tegevus | `POST /api/ai-training/translation/{trainingId}?languageId={id}` | "Tee AI tõlge" (ainult mitte-põhikeele tõlkel) |
 | Tegevus | `PUT /api/training/{trainingId}/publish` | "Publitseeri" (status `U`) → kinnitus |
 | Tegevus | `PUT /api/training/{trainingId}/unpublish` | "Liiguta mustandisse" (status `P`) → kinnitus |
 
@@ -134,7 +135,8 @@ Lipule klikkimine päringut ei tee — see teeb `router.replace`-i ja käivitab 
 | Laadimine | `GET /api/training-translation/{põhikeele tõlke id}` | tekstide eeltäitmine põhikeelest |
 | Laadimine | `GET /api/categories?contentLang={UI keel}` | kategooriad kasutajaliidese keeles (ka keele vahetusel) |
 | Laadimine | `GET /api/funding-types?contentLang={UI keel}` | rahastustüübid kasutajaliidese keeles (ka keele vahetusel) |
-| Tegevus | `GET /api/training/{trainingId}/ai-translation?languageId={id}` | "Tee AI tõlge" |
+| Tegevus | `POST /api/ai-training/pdf` | "Täida vorm PDF + AI abiga" — valitud salvestamata fail, tulemus ainult vormi |
+| Tegevus | `POST /api/ai-training/translation/{trainingId}?languageId={id}` | "Tee AI tõlge" |
 | Tegevus | `POST /api/training/{trainingId}/training-translation` | "Lisa tõlge" (koos valitud õppekavaga) → `router.replace` olekusse `update` |
 | Tegevus | `PUT /api/training/{trainingId}/publish` | "Publitseeri" (status `U`) → kinnitus |
 | Tegevus | `PUT /api/training/{trainingId}/unpublish` | "Liiguta mustandisse" (status `P`) → kinnitus |
@@ -277,7 +279,9 @@ sequenceDiagram
 | `GET /api/training/{trainingId}` | koolituse väljad (olekud B, C) | — | `TrainingDto` |
 | `GET /api/training-translation/{trainingTranslationId}` | avatud tõlge (olek B), `et` tõlge eeltäitmiseks (olek C) | — | `TrainingTranslationDto` |
 | `GET /api/training/{trainingId}/training-translations` | lipukesed (olekud B, C), põhikeele leidmine | — | `TrainingTranslationItemDto[]` (sh `isMainLanguage`) |
-| `GET /api/training/{trainingId}/ai-translation?languageId=` | "Tee AI tõlge" (olek C, B mitte-põhikeel) | — | `AiTranslationDto` |
+| `POST /api/ai-training/pdf` | PDF + AI vormi täitmine (olekud A ja C, valitud PDF) | `multipart/form-data`: kohustuslik `curriculum` PDF | `AiTrainingContentDto` (praegu placeholder) |
+| `POST /api/ai-training/pdf/{trainingTranslationId}` | PDF + AI vormi täitmine (olek B) | valikuline `multipart/form-data` `curriculum`; puudumisel salvestatud PDF | `AiTrainingContentDto` (praegu placeholder) |
+| `POST /api/ai-training/translation/{trainingId}?languageId=` | "Tee AI tõlge" (olek C, B mitte-põhikeel) | — | `AiTrainingContentDto` |
 | `POST /api/training` | "Lisa" (olek A) | `TrainingCreateRequestDto` | `TrainingCreateResponseDto` |
 | `POST /api/training/{trainingId}/training-translation` | "Lisa tõlge" (olek C) | täpsustamisel | täpsustamisel |
 | `PUT /api/training/{trainingId}` | "Salvesta" (olek B) | täpsustamisel | NONE |
@@ -287,7 +291,7 @@ sequenceDiagram
 
 Õppekava väljad: request DTO-des `curriculum` (Base64), `isCurriculumRemoved` (ainult PUT), `curriculumLabel`; `TrainingTranslationDto`-s `curriculumFileName`, `curriculumFileSize`.
 
-DTO-de väljad täpsustatakse plaanifailis.
+PDF + AI controllerite Swaggeri kirjeldused ja placeholder-vastused on ajutised (`TO BE IMPLEMENTED`); Gemini töötlus ning PDF-i valideerimine lisatakse hiljem.
 
 ---
 
@@ -395,3 +399,60 @@ sequenceDiagram
 ```
 
 Kui pealkiri muutub ja faili ei vahetata, arvutab backend salvestamisel `file_name` uuesti (`curriculumLabel` tuleb igal salvestamisel kaasa).
+
+
+---
+
+## 11. PDF + AI abil vormi täitmine (olekud A, B ja C)
+
+Ühine vastusemudel `AiTrainingContentDto` sisaldab `title`, `shortDescription` ja `description` välju ning sobib ka senise AI tõlke vastusemudeliks. Mõlemad API meetodid kasutavad POST-i, sest need käivitavad AI töötluse. PDF-i või AI tulemust ei salvestata andmebaasi.
+
+```mermaid
+sequenceDiagram
+    actor Admin
+    participant FE as TrainingFormView.vue
+    participant BE as Backend controller
+    participant Gemini as Gemini AI
+    participant DB as Andmebaas
+
+    Admin->>FE: state A või C: valib PDF-i ja vajutab "Täida vorm PDF + AI abiga"
+    FE->>BE: POST /api/ai-training/pdf<br/>multipart curriculum = valitud PDF
+    Note over BE: TO BE IMPLEMENTED<br/>Praegu tagastab placeholder-vastuse
+    BE-->>FE: AiTrainingContentDto<br/>title, shortDescription, description
+    FE-->>Admin: täidetud väljad; kontrolli ja vajuta "Lisa" või "Lisa tõlge"
+    Note over FE,DB: AI päring ei salvesta midagi DB-sse
+
+    Admin->>FE: state B: vajutab sama nuppu
+    alt vormis on uus salvestamata PDF
+        FE->>BE: POST /api/ai-training/pdf/{trainingTranslationId}<br/>multipart curriculum = uus PDF
+        Note over BE: uus valitud PDF on eelistatud
+    else uut faili pole valitud
+        FE->>BE: POST /api/ai-training/pdf/{trainingTranslationId}<br/>multipart request ilma curriculum osata
+        BE->>DB: loe tõlke salvestatud õppekava
+        DB-->>BE: PDF baidid
+    end
+    BE->>Gemini: PDF → koolituse tekstiväljad
+    Gemini-->>BE: genereeritud tekstid
+    BE-->>FE: AiTrainingContentDto
+    FE-->>Admin: täidetud väljad; kontrolli ja vajuta "Salvesta"
+    Note over FE,DB: AI päring ise ei muuda DB-d
+```
+
+Kui vormi tekstiväljadel on salvestamata muudatusi, küsib frontend enne nende ülekirjutamist kinnitust. Mõlema nupu tooltip kirjeldab vastava oleku PDF-i allikat. Praegused controlleri meetodid ei kutsu Geminit ega loe veel andmebaasist PDF-i; nad tagastavad Swaggeri lepingu jaoks `TO BE IMPLEMENTED` tekstidega placeholder-objekti.
+
+
+## 12. Ühine AI controller ja placeholder-vastused
+
+`AiTrainingController` koondab kolm POST-meetodit prefiksi `/api/ai-training` alla:
+
+| Rada | Sisend | Praegune vastus |
+|---|---|---|
+| `/pdf` | olekud A ja C: kohustuslik multipart `curriculum` | PDF-ist genereeritud placeholder-tekstid |
+| `/pdf/{trainingTranslationId}` | avatud tõlke ID, valikuline multipart `curriculum` | PDF-ist genereeritud placeholder-tekstid |
+| `/translation/{trainingId}?languageId={id}` | koolituse ID, sihtkeele ID query parameetrina | AI-ga tõlgitud placeholder-tekstid |
+
+Kõik kasutavad `AiTrainingContentDto` mudelit. Swaggeri pealkirjades on `TO BE IMPLEMENTED`; tegelikku AI töötlust, DB lugemist ega ärivigade kontrolli veel ei tehta. AI tõlke vastusel on `Cache-Control: no-store`. Frontend kasutab selle etapi järel päris POST-kutseid ja controlleri placeholder-vastuseid. Tõlke salvestamine toimub eraldi olemasoleva `POST /api/training/{trainingId}/training-translation` või koolituse muutmise teenusega.
+
+Olekus C (`new-translation`) on PDF-i väli alguses tühi. PDF + AI nupp ilmub alles faili valimisel ning saadab selle salvestamata faili sama `/api/ai-training/pdf` teenusega nagu olekus A. Salvestatud põhikeele PDF-i selle toimingu jaoks ei loeta. Vastus täidab uue tõlke tekstiväljad; andmed ja fail salvestatakse alles „Lisa tõlge“ nupuga.
+
+**Teostuse ühendus (RAIN-ai-training):** PDF + AI ja AI tõlke kutsed on eraldi `AiTrainingService.js` failis. Originaal-PDF saadetakse multipart-kujul; olemasolev Base64 väärtus jääb tavalise salvestamise jaoks. AI päringu ajal on tekstide muutmine ja salvestus keelatud. Vea korral säilivad tekstid ja PDF; pärast vaate vahetust ei rakendata eelmise päringu vastust.

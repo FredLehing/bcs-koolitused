@@ -1,6 +1,4 @@
 import axios from 'axios'
-import { mockResponse } from '@/api-services/mock/mockResponse.js'
-import MockDatabase from '@/api-services/mock/MockDatabase.js'
 
 export default {
   getCurriculumUrl(trainingTranslationId) {
@@ -105,16 +103,5 @@ export default {
       `/api/training/${trainingId}/training-translation`,
       trainingTranslationCreateRequest,
     )
-  },
-
-  // Backend task: docs/tasks/backend/GET-api-training-trainingId-ai-translation.md (3. etapp)
-  sendGetAiTranslationRequest(trainingId, languageId) {
-    // MOCK — vaheta päris kutse vastu, kui teenus on valmis:
-    // return axios.get(`/api/training/${trainingId}/ai-translation`, {
-    //   params: {
-    //     languageId: languageId,
-    //   },
-    // })
-    return mockResponse(MockDatabase.getAiTranslation(trainingId, languageId), 1200)
   },
 }
