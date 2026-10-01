@@ -109,7 +109,7 @@ export default {
       <h1 class="mb-5 text-3xl font-extrabold tracking-tight">{{ $t('navbar.signup') }}</h1>
       <div v-if="redirect" class="alert alert-info mb-5">{{ $t('signup.redirectInfo') }}</div>
 
-      <form class="flex flex-col gap-5" @submit.prevent="addUser">
+      <form class="flex flex-col gap-5" novalidate @submit.prevent="addUser">
         <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <div>
             <label class="form-label" for="signup-first-name"

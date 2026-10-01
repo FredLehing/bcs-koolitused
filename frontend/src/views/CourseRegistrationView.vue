@@ -236,6 +236,7 @@ export default {
         <form
           v-else
           class="rounded-2xl border border-line bg-white p-5 sm:p-8"
+          novalidate
           @submit.prevent="registerCourseParticipant"
         >
           <h2 class="mb-1 text-xl font-bold">{{ $t('courseRegistration.participantData') }}</h2>

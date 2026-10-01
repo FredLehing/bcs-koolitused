@@ -70,7 +70,7 @@ export default {
         </div>
       </div>
 
-      <form class="flex flex-1 flex-col gap-5 p-6 sm:p-10" @submit.prevent="login">
+      <form class="flex flex-1 flex-col gap-5 p-6 sm:p-10" novalidate @submit.prevent="login">
         <h1 class="text-3xl font-extrabold tracking-tight">{{ $t('login.logIn') }}</h1>
         <div v-if="redirect" class="alert alert-info">{{ $t('login.redirectInfo') }}</div>
         <div v-if="errorMessage" class="alert alert-danger" role="alert">{{ errorMessage }}</div>
