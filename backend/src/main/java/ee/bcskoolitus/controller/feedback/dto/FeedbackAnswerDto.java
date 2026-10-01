@@ -22,6 +22,6 @@ public class FeedbackAnswerDto {
     private Integer score;
 
     // Valikuline; tühi → null (FeedbackService)
-    @Size(max = 255)
+    @Size(max = 10000)
     private String feedbackText;
 }

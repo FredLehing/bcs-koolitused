@@ -3,6 +3,7 @@ package ee.bcskoolitus.persistance.course.participant.feedback;
 import ee.bcskoolitus.persistance.feedback.Feedback;
 import ee.bcskoolitus.persistance.feedback.criteria.FeedbackCriteria;
 import jakarta.persistence.*;
+import ee.bcskoolitus.persistance.feedback.FeedbackTimestampConverter;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -40,17 +41,19 @@ public class CourseParticipantFeedback {
     private Integer score;
 
     // null = kommentaari pole
-    @Size(max = 255)
-    @Column(name = "feedback_text")
+    @Size(max = 10000)
+    @Column(name = "feedback_text", columnDefinition = "text")
     private String feedbackText;
 
     @NotNull
     @CreatedDate
+    @Convert(converter = FeedbackTimestampConverter.class)
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
     @NotNull
     @LastModifiedDate
+    @Convert(converter = FeedbackTimestampConverter.class)
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 }

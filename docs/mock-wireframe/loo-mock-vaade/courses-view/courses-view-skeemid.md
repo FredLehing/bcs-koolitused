@@ -328,7 +328,7 @@ INSERT INTO "user" (id, role_id, email, password, status, created_at) VALUES
     (7, 2, 'toomas.rebane@example.com', 'parool123', 'A', '2026-09-22 13:45:00');
 
 INSERT INTO participant (id, user_id, name, profile_id, created_at) VALUES
-    (1, 2, 'Anna Saar', 1, '2026-09-05 09:00:00'),
+    (1, 2, 'Anna Saar', 1, '2026-05-18 09:00:00'),
     (2, 4, 'Liis Kuusk', 5, '2026-09-12 10:00:00'),
     (3, 5, 'Jaan Org', 6, '2026-09-14 15:30:00'),
     (4, 6, 'Mari Lepp', 7, '2026-09-18 09:10:00'),
@@ -341,8 +341,8 @@ INSERT INTO course_participant (id, course_id, participant_id, notes, has_paid, 
     (3, 1, 2, '', false, false, 'R', '2026-09-12 10:05:00', '2026-09-12 10:05:00'),
     (4, 1, 3, 'Arve ettevõttele.', true, true, 'R', '2026-09-14 15:35:00', '2026-09-14 15:35:00'),
     (5, 1, 4, 'Loobus haiguse tõttu.', false, true, 'C', '2026-09-18 09:15:00', '2026-09-25 11:00:00'),
-    (6, 12, 2, '', true, false, 'R', '2026-09-20 08:00:00', '2026-09-20 08:00:00'),
-    (7, 12, 5, '', false, false, 'R', '2026-09-22 13:50:00', '2026-09-22 13:50:00'),
+    (6, 12, 2, '', true, false, 'R', '2026-09-12 10:10:00', '2026-09-12 10:10:00'),
+    (7, 12, 5, '', false, false, 'R', '2026-09-10 13:50:00', '2026-09-10 13:50:00'),
     (8, 5, 3, '', false, true, 'R', '2026-09-26 17:00:00', '2026-09-26 17:00:00'),
     (9, 9, 5, '', true, true, 'R', '2026-09-28 09:00:00', '2026-09-28 09:00:00');
 

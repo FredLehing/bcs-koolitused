@@ -52,6 +52,9 @@
                 <RouterLink class="nav-link" :to="{ name: 'adminRegistrationsRoute' }">
                   {{ $t('navbar.manageRegistrations') }}
                 </RouterLink>
+                <RouterLink class="nav-link" :to="{ name: 'adminFeedbacksRoute' }">
+                  {{ $t('navbar.manageFeedbacks') }}
+                </RouterLink>
                 <hr class="dropdown-divider" />
                 <RouterLink class="nav-link" :to="{ name: 'adminTrainingsRoute' }">
                   {{ $t('navbar.manageTrainings') }}

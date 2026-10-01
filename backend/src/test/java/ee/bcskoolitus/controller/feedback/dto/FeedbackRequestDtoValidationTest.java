@@ -14,7 +14,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-// Tagasiside: hinne 1–10 kohustuslik, kommentaar valikuline kuni 255 märki, vähemalt üks vastus
+// Tagasiside: hinne 1–10 kohustuslik, kommentaar valikuline kuni 10 000 märki, vähemalt üks vastus
 class FeedbackRequestDtoValidationTest {
 
     private static ValidatorFactory validatorFactory;
@@ -34,7 +34,7 @@ class FeedbackRequestDtoValidationTest {
     @Test
     void validRequest_commentMayBeNull() {
         assertTrue(validator.validate(request(new FeedbackAnswerDto(1, 1, null))).isEmpty());
-        assertTrue(validator.validate(request(new FeedbackAnswerDto(1, 10, "a".repeat(255)))).isEmpty());
+        assertTrue(validator.validate(request(new FeedbackAnswerDto(1, 10, "a".repeat(10000)))).isEmpty());
     }
 
     @Test
@@ -46,7 +46,7 @@ class FeedbackRequestDtoValidationTest {
 
     @Test
     void tooLongComment_missingCriteriaOrNoAnswers_isInvalid() {
-        assertOnlyViolation(request(new FeedbackAnswerDto(1, 5, "a".repeat(256))), "answers[0].feedbackText");
+        assertOnlyViolation(request(new FeedbackAnswerDto(1, 5, "a".repeat(10001))), "answers[0].feedbackText");
         assertOnlyViolation(request(new FeedbackAnswerDto(null, 5, null)), "answers[0].feedbackCriteriaId");
         assertOnlyViolation(new FeedbackRequestDto(List.of()), "answers");
     }

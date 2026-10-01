@@ -14,7 +14,7 @@ Avatakse "Minu koolitused" nupust "Anna tagasisidet" / "Vaata tagasisidet". Vasa
 
 Päis: "Tagasiside", koolituse nimi · toimumisaeg dd/MM/yyyy – dd/MM/yyyy; olemasoleval tagasisidel "Esitatud dd/MM/yyyy" ja muudetul "Muudetud dd/MM/yyyy" (updatedAt kuupäev ≠ createdAt kuupäev). Staatust (N/U/H) osalejale ei näidata. Vihje "Hinda iga väidet skaalal 1–10 (1 = ei nõustu üldse, 10 = nõustun täielikult)".
 
-Iga kriteerium (FeedbackCriteriaItem.vue): title + (?) → hover/fookus tooltip description; raadionupud 1–10 (kohustuslik); link "+ Lisa kommentaar" / "− Peida kommentaar" avab/peidab textarea (3 rida, placeholder "Täpsusta soovi korral oma hinnangut", loendur "0 / 255"). Peitmine teksti ei kustuta. Olemasoleva kommentaariga kast on kohe lahti; lugemisrežiimis kommentaarita kriteeriumil linki pole.
+Iga kriteerium (FeedbackCriteriaItem.vue): title + (?) → hover/fookus tooltip description; raadionupud 1–10 (kohustuslik); link "+ Lisa kommentaar" / "− Peida kommentaar" avab/peidab textarea (3 rida, placeholder "Täpsusta soovi korral oma hinnangut", loendur "0 / 10000"). Peitmine teksti ei kustuta. Olemasoleva kommentaariga kast on kohe lahti; lugemisrežiimis kommentaarita kriteeriumil linki pole.
 
 hasFeedback = false → väljad kohe täidetavad, nupp "Lisa tagasiside" → POST. hasFeedback = true → väljad disabled, nupp "Muuda" → väljad muudetavaks, nupud "Salvesta" (PUT) ja "Tühista" (laaditud väärtused tagasi, lugemisrežiim). Enne saatmist: hinne puudub → "Hinda kõiki kriteeriume" (InlineAlerts.vue nuppude kõrval), hindamata kriteeriumid punase äärisega, päringut ei tehta; tühi kommentaar saadetakse null-ina. Edu → "Tagasiside salvestatud", GET uuesti, lugemisrežiim. 403 FEEDBACK_ALREADY_EXISTS / FEEDBACK_CRITERIA_CHANGED, 404 FEEDBACK_NOT_FOUND → backendi teade ja GET uuesti.
 ```
@@ -91,7 +91,7 @@ FeedbackRequestDto.java
 Response (200): NONE
 
 API teenuse lisainfo:
-Loob feedback rea (status "N") ja iga vastuse kohta course_participant_feedback rea ühes transaktsioonis. answers* (@NotEmpty), feedbackCriteriaId*, score* (1–10), feedbackText (max 255, valikuline; tühi → NULL). answers peab sisaldama täpselt kõiki aktiivseid kriteeriume, igaüht üks kord. Tingimused nagu GET-il.
+Loob feedback rea (status "N") ja iga vastuse kohta course_participant_feedback rea ühes transaktsioonis. answers* (@NotEmpty), feedbackCriteriaId*, score* (1–10), feedbackText (max 10000, valikuline; tühi → NULL). answers peab sisaldama täpselt kõiki aktiivseid kriteeriume, igaüht üks kord. Tingimused nagu GET-il.
 
 Veateated:
 HTTP: 404

@@ -80,7 +80,8 @@
     "participantCourses": "My courses",
     "participantCertificates": "Certificates",
     "changePassword": "Password",
-    "manageUsers": "Accounts"
+    "manageUsers": "Accounts",
+    "manageFeedbacks": "Feedback"
   },
   "error": {
     "message": "Something went wrong, please try again later!",
@@ -977,6 +978,61 @@
     },
     "messages": {
       "saved": "Feedback saved"
+    }
+  },
+  "adminFeedbacks": {
+    "title": "Feedback",
+    "total": "Total feedback",
+    "needsReview": "Needs review",
+    "lowScores": "Low score (≤ 5)",
+    "average": "Overall average",
+    "responseRate": "Responded / registered",
+    "searchPlaceholder": "Search by training or participant name",
+    "search": "Search",
+    "showFilters": "Show search filters",
+    "hideFilters": "Hide search filters",
+    "clearFilters": "Clear filters",
+    "course": "Course occurrence",
+    "all": "All",
+    "withComments": "Contains comments",
+    "noComments": "No comments",
+    "from": "Course dates from",
+    "until": "Course dates until",
+    "low": "At least one score ≤",
+    "filter": "Apply filters",
+    "loading": "Loading…",
+    "retry": "Try again",
+    "criteriaAverages": "Criterion averages",
+    "answerCount": "Answers: {count}",
+    "invalidDates": "The start date cannot be later than the end date.",
+    "reviewSuccess": "Feedback marked as reviewed",
+    "loadError": "Could not load data. Please try again.",
+    "statuses": {
+      "N": "New",
+      "U": "Updated",
+      "H": "Reviewed"
+    },
+    "updatedHint": "The participant changed their answers after the administrator reviewed them",
+    "hideAnswers": "Hide answers",
+    "openAnswers": "Open answers",
+    "review": "Mark as reviewed",
+    "reviewHint": "Open and read the answers first",
+    "answers": "answers",
+    "criterion": "Criterion",
+    "score": "Score",
+    "comment": "Comment",
+    "noAnswers": "There are no answers for this feedback.",
+    "noResults": "No feedback found. Change the search or clear the filters.",
+    "columns": {
+      "createdAt": "Submitted",
+      "answersUpdatedAt": "Answers updated",
+      "trainingTitle": "Training / dates",
+      "participantName": "Participant",
+      "averageScore": "Average",
+      "minimumScore": "Lowest",
+      "commentCount": "Comments",
+      "status": "Status",
+      "actions": "Actions"
     }
   }
 }

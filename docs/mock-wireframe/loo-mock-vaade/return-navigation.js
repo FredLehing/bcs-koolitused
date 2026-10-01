@@ -12,7 +12,7 @@
   }
   var known = Object.keys(defaults).concat([
     '/', '/trainings', '/courses', '/lecturers', '/admin-trainings', '/admin-lecturers',
-    '/admin-rooms', '/admin-all-courses', '/admin-enquiries', '/admin-registrations',
+    '/admin-rooms', '/admin-all-courses', '/admin-enquiries', '/admin-registrations', '/admin-feedbacks',
     '/admin-users', '/participant-courses', '/participant-details', '/participant-certificates',
     '/change-password', '/login', '/signup', '/error', '/not-authorized', '/test',
   ])

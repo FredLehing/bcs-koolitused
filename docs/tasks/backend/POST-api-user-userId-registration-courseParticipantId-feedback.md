@@ -30,7 +30,7 @@ Eeldab taske `feedback-db-changes.md` ja `GET-api-user-userId-registration-cours
 - `answers` — kohustuslik (`@NotEmpty`, `@Valid`).
 - `feedbackCriteriaId` — kohustuslik.
 - `score` — kohustuslik, `@Min(1) @Max(10)`.
-- `feedbackText` — valikuline, `@Size(max = 255)`.
+- `feedbackText` — valikuline, `@Size(max = 10000)`.
 
 ## Väljund
 
@@ -60,7 +60,7 @@ Osaleja annab toimunud koolitusele esimest korda tagasiside. Ühes transaktsioon
 | Loobunud, toimumiskord pole lõppenud või on tühistatud/kustutatud | 403 Forbidden | `{ "message": "Sellele koolitusele ei saa tagasisidet anda", "errorCode": "FEEDBACK_NOT_ALLOWED" }` |
 | Tagasiside on juba antud | 403 Forbidden | `{ "message": "Tagasiside on juba antud", "errorCode": "FEEDBACK_ALREADY_EXISTS" }` |
 | `answers` ei vasta aktiivsetele kriteeriumidele | 403 Forbidden | `{ "message": "Tagasiside küsimused on vahepeal muutunud, laadi leht uuesti", "errorCode": "FEEDBACK_CRITERIA_CHANGED" }` |
-| Hinne puudub / väljaspool 1–10, kommentaar > 255, `answers` tühi | 400 Bad Request | `INCORRECT_INPUT` |
+| Hinne puudub / väljaspool 1–10, kommentaar > 10000, `answers` tühi | 400 Bad Request | `INCORRECT_INPUT` |
 
 ## Vastuvõtu kriteeriumid
 

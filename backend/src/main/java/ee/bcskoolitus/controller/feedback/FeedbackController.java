@@ -69,7 +69,7 @@ public class FeedbackController {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Hinne puudub või väljaspool 1–10, kommentaar üle 255 märgi, answers tühi -> 'errorCode:' INCORRECT_INPUT",
+                    description = "Hinne puudub või väljaspool 1–10, kommentaar üle 10 000 märgi, answers tühi -> 'errorCode:' INCORRECT_INPUT",
                     content = @Content(schema = @Schema(implementation = ApiError.class))
             )
     })
@@ -97,7 +97,7 @@ public class FeedbackController {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Hinne puudub või väljaspool 1–10, kommentaar üle 255 märgi, answers tühi -> 'errorCode:' INCORRECT_INPUT",
+                    description = "Hinne puudub või väljaspool 1–10, kommentaar üle 10 000 märgi, answers tühi -> 'errorCode:' INCORRECT_INPUT",
                     content = @Content(schema = @Schema(implementation = ApiError.class))
             )
     })

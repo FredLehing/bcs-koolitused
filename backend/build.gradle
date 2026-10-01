@@ -41,6 +41,7 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
     testImplementation 'org.springframework:spring-test'
+    testRuntimeOnly 'com.h2database:h2'
 
     // Swagger - Updated to compatible version for Spring Boot 3.5.x
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3'

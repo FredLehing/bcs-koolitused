@@ -187,6 +187,7 @@ code { font-family: var(--font-mono); font-size: .88em; }
     { key: "admin-enquiries", path: "/admin-enquiries", name: "Koolituste päringud", view: "AdminEnquiriesView.vue", group: "admin", file: "admin-enquiries-view/admin-enquiries-view-labimang.html" },
     { key: "admin-enquiry", path: "/admin-enquiry", name: "Koolituse päring", view: "AdminEnquiryView.vue", group: "admin", sample: "/admin-enquiry?enquiryId=4", file: "admin-enquiries-view/admin-enquiries-view-labimang.html", params: ["enquiryId"], extra: "view=admin-enquiry" },
     { key: "admin-registrations", path: "/admin-registrations", name: "Registreerumised", view: "AdminRegistrationsView.vue", group: "admin", file: "admin-registrations-view/admin-registrations-view-labimang.html" },
+    { key: "admin-feedbacks", path: "/admin-feedbacks", name: "Tagasisided", view: "AdminFeedbacksView.vue", group: "admin", file: "admin-feedbacks-view/admin-feedbacks-view-labimang.html" },
     { key: "admin-registration", path: "/admin-registration", name: "Registreerumine (admin)", view: "AdminRegistrationView.vue", group: "admin", sample: "/admin-registration?courseParticipantId=1", file: "admin-registrations-view/admin-registrations-view-labimang.html", params: ["courseParticipantId", "returnTo"], extra: "view=admin-registration" },
     { key: "admin-trainings", path: "/admin-trainings", name: "Koolitused (admin)", view: "AdminTrainingsView.vue", group: "admin", file: "admin-trainings-view/admin-trainings-view-labimang.html" },
     { key: "training-form", path: "/training-form", name: "Koolituse vorm", view: "TrainingFormView.vue", group: "admin", file: "form-view/training-form-view-labimang.html", params: ["trainingId", "trainingTranslationId", "languageId"] },
@@ -254,7 +255,7 @@ code { font-family: var(--font-mono); font-size: .88em; }
       '<button type="button" data-go="/trainings">Meie koolitused</button><button type="button" data-go="/courses">Koolituste kalender</button></span></span>';
     var dead = function (label) { return '<button type="button" class="lnk dead" data-dead="1" title="Kohatäide (href=&quot;#&quot;)">' + label + '</button>'; };
     var admin = state.role === "admin" ? '<span class="admin nav-dropdown"><button type="button" id="b-admin" aria-expanded="false" aria-controls="admin-menu">Admin ▾</button><span class="menu" id="admin-menu" hidden>' +
-      '<button type="button" data-go="/admin-enquiries">Koolituste päringud</button><button type="button" data-go="/admin-registrations">Registreerumised</button><hr>' +
+      '<button type="button" data-go="/admin-enquiries">Koolituste päringud</button><button type="button" data-go="/admin-registrations">Registreerumised</button><button type="button" data-go="/admin-feedbacks">Tagasisided</button><hr>' +
       '<button type="button" data-go="/admin-trainings">Koolitused</button><button type="button" data-go="/admin-all-courses">Koolituste kalender</button><hr>' +
       '<button type="button" data-go="/admin-lecturers">Koolitajad</button><button type="button" data-go="/admin-rooms">Koolitusruumid</button><hr>' +
       '<button type="button" data-go="/admin-users">Kontod</button></span></span>' : "";
