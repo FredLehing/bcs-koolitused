@@ -7,10 +7,11 @@ import TrainingCard from '@/components/TrainingCard.vue'
 import PaginationNav from '@/components/common/PaginationNav.vue'
 import { PhQuestion, PhX } from '@phosphor-icons/vue'
 import { Tooltip } from 'bootstrap'
+import TrainingsTabs from '@/components/common/TrainingsTabs.vue'
 
 export default {
   name: 'TrainingsView',
-  components: { TrainingCard, PaginationNav, PhQuestion, PhX },
+  components: { TrainingsTabs, TrainingCard, PaginationNav, PhQuestion, PhX },
   data() {
     return {
       categoryId: 0,
@@ -116,6 +117,8 @@ export default {
 
 <template>
   <div class="container d-flex flex-grow-1 flex-column">
+    <TrainingsTabs />
+
     <div class="row flex-grow-1">
       <div class="col-2">Siin on filtrid</div>
       <div class="col-10 d-flex flex-column">
