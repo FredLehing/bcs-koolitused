@@ -394,7 +394,7 @@ tr.is-past td, tr.is-cancelled td { color: var(--ink-soft); }
       "Vaatega seotud lisainfo:",
       "Pealkiri \"Toimumiskord\", all koolituse nimi. Kiirnupud \"Muuda\" (/course-form?courseId), \"Koolituse kalender\" (/admin-training-courses?trainingId), \"Koolituste kalender\" (/admin-all-courses).",
       "Kaart \"Toimumiskord\" (ainult lugemiseks): Koolitus (link /training), Toimumisaeg, Päevi, Akad. tunde, Hind, Koolitajad, Ruum, Veebilink, Staatus (+ \"Toimunud\"), Esile tõstetud, Märkmed. Avatud/täis toimumiskorral link \"Vaata avalikul lehel\" → /course?courseId.",
-      "Tabel \"Osalejad\": lüliti \"Näita ka loobunud\" (vaikimisi väljas); veergude järgi sorteerimine frontendis (vaikimisi registreerumise järjekorras). Veerud Nimi | E-post | Telefon | Registreerus | Tasunud | Vajab sülearvutit | Staatus | Märkmed. All \"Kokku N osalejat, neist M tasunud\" (registreerunud osalejad).",
+      "Tabel \"Osalejad\": lüliti \"Näita ka loobunud\" (vaikimisi väljas); veergude järgi sorteerimine frontendis (vaikimisi registreerumise järjekorras). Veerud Nimi | E-post | Telefon | Registreerus | Tasunud | Vajab sülearvutit | Staatus | Märkmed | Tegevused. Silma ikoon \"Vaata\" → /admin-registration?courseParticipantId={id}&returnTo=/admin-course?courseId={id} (registreerumise muutmine, \"← Tagasi\" toob siia tagasi). All \"Kokku N osalejat, neist M tasunud\" (registreerunud osalejad).",
       "Tabel \"Huvilised\": filtreid pole; veergude järgi sorteerimine frontendis (vaikimisi uusimad eespool). Veerud Saabunud | Nimi | E-post | Ettevõte | Staatus | silm → /admin-enquiry?enquiryId.",
       "Keele vahetusel laaditakse andmed uuesti. Olematu või kustutatud toimumiskord → üldine veavaade."
     ].join("\n") }
@@ -761,12 +761,13 @@ tr.is-past td, tr.is-cancelled td { color: var(--ink-soft); }
     var rows = sortRows(ui.participants.filter(function (p) { return ui.pShowCancelled || p.status === "R"; }), ui.pSort);
     var body = rows.length ? rows.map(function (p) {
       return '<tr' + (p.status === "C" ? ' class="is-deleted"' : "") + '><td class="name-cell">' + esc(p.participantName) + '</td><td>' + esc(p.email) + '</td><td>' + esc(p.phone) + '</td><td class="date">' + dateTime(p.registeredAt).slice(0, 10) + '</td>' +
-        '<td class="center">' + check(p.hasPaid) + '</td><td class="center">' + check(p.requiresLaptop) + '</td><td>' + (p.status === "R" ? '<span class="badge active">Registreerunud</span>' : '<span class="badge draft">Loobunud</span>') + '</td><td>' + esc(p.notes || "") + '</td></tr>';
-    }).join("") : '<tr class="empty-row"><td colspan="8">Osalejaid pole</td></tr>';
+        '<td class="center">' + check(p.hasPaid) + '</td><td class="center">' + check(p.requiresLaptop) + '</td><td>' + (p.status === "R" ? '<span class="badge active">Registreerunud</span>' : '<span class="badge draft">Loobunud</span>') + '</td><td>' + esc(p.notes || "") + '</td>' +
+        '<td><button type="button" class="ibtn" data-registration="' + p.courseParticipantId + '" title="Vaata" aria-label="Vaata">' + EYE + '</button></td></tr>';
+    }).join("") : '<tr class="empty-row"><td colspan="9">Osalejaid pole</td></tr>';
     return '<fieldset class="subtbl"><legend>Osalejad</legend>' +
       '<div class="searchrow"><label class="switch"><input type="checkbox" id="p-cancelled"' + (ui.pShowCancelled ? " checked" : "") + '> Näita ka loobunud</label>' + pin("n-participants", "GET …/participants") + '</div>' +
       '<div class="tablewrap"><table><thead><tr>' + sortHead("psort", ui.pSort, [["participantName", "Nimi"], ["email", "E-post"], ["phone", "Telefon"], ["registeredAt", "Registreerus"],
-        ["hasPaid", "Tasunud", ' class="center"'], ["requiresLaptop", "Vajab sülearvutit", ' class="center"'], ["status", "Staatus"], ["", "Märkmed"]]) + '</tr></thead><tbody>' + body + '</tbody></table></div>' +
+        ["hasPaid", "Tasunud", ' class="center"'], ["requiresLaptop", "Vajab sülearvutit", ' class="center"'], ["status", "Staatus"], ["", "Märkmed"], ["", "Tegevused"]]) + '</tr></thead><tbody>' + body + '</tbody></table></div>' +
       '<div class="foot"><span class="total">Kokku ' + reg.length + (reg.length === 1 ? " osaleja" : " osalejat") + ', neist ' + reg.filter(function (p) { return p.hasPaid; }).length + ' tasunud</span></div></fieldset>';
   }
   function renderEnquiries() {
@@ -870,6 +871,7 @@ tr.is-past td, tr.is-cancelled td { color: var(--ink-soft); }
     if (b.dataset.del) { askDelete(+b.dataset.del); return; }
     if (b.dataset.calendar) { goRoute("/admin-training-courses?trainingId=" + b.dataset.calendar); return; }
     if (b.dataset.enquiry) { goRoute("/admin-enquiry?enquiryId=" + b.dataset.enquiry); return; }
+    if (b.dataset.registration) { goRoute("/admin-registration?courseParticipantId=" + b.dataset.registration + "&returnTo=" + encodeURIComponent("/admin-course?courseId=" + detail.courseId)); return; }
     switch (b.id) {
       case "b-search": ui.appliedSearch = ui.searchInput.trim(); ui.page = 0; reload("„Otsi“: „" + ui.appliedSearch + "“"); break;
       case "b-toggle": ui.open = !ui.open; renderView(); renderKv(); break;

@@ -1,5 +1,8 @@
 package ee.bcskoolitus.service;
 
+import ee.bcskoolitus.controller.courseparticipant.dto.AdminRegistrationDto;
+import ee.bcskoolitus.controller.courseparticipant.dto.AdminRegistrationSummaryDto;
+import ee.bcskoolitus.controller.courseparticipant.dto.AdminRegistrationUpdateRequestDto;
 import ee.bcskoolitus.controller.courseparticipant.dto.CourseParticipantDto;
 import ee.bcskoolitus.controller.courseparticipant.dto.CourseParticipantStatusDto;
 import ee.bcskoolitus.controller.courseparticipant.dto.CourseRegistrationRequestDto;
@@ -16,6 +19,10 @@ import ee.bcskoolitus.persistance.profile.Profile;
 import ee.bcskoolitus.persistance.profile.ProfileMapper;
 import ee.bcskoolitus.persistance.profile.ProfileMapperImpl;
 import ee.bcskoolitus.persistance.user.User;
+import ee.bcskoolitus.persistance.view.adminregistrationsummary.AdminRegistrationSummary;
+import ee.bcskoolitus.persistance.view.adminregistrationsummary.AdminRegistrationSummaryMapper;
+import ee.bcskoolitus.persistance.view.adminregistrationsummary.AdminRegistrationSummaryMapperImpl;
+import ee.bcskoolitus.persistance.view.adminregistrationsummary.AdminRegistrationSummaryRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -23,6 +30,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -58,6 +66,10 @@ class CourseParticipantServiceTest {
     private CourseParticipantMapper courseParticipantMapper = new CourseParticipantMapperImpl();
     @Spy
     private ProfileMapper profileMapper = new ProfileMapperImpl();
+    @Mock
+    private AdminRegistrationSummaryRepository adminRegistrationSummaryRepository;
+    @Spy
+    private AdminRegistrationSummaryMapper adminRegistrationSummaryMapper = new AdminRegistrationSummaryMapperImpl();
 
     @InjectMocks
     private CourseParticipantService courseParticipantService;
@@ -229,10 +241,147 @@ class CourseParticipantServiceTest {
         verify(participantService, never()).updateParticipantName(any());
     }
 
+    @Test
+    void findAdminRegistrations_defaultReturnsOnlyRegisteredAndUpcoming() {
+        courseParticipantService.findAdminRegistrations("et", null, null);
+
+        verify(adminRegistrationSummaryRepository).findAdminRegistrationSummariesBy("et", false, false, "R", "D", "D");
+    }
+
+    @Test
+    void findAdminRegistrations_includeCancelledAndPast() {
+        courseParticipantService.findAdminRegistrations("en", true, true);
+
+        verify(adminRegistrationSummaryRepository).findAdminRegistrationSummariesBy("en", true, true, "R", "D", "D");
+    }
+
+    @Test
+    void findAdminRegistrations_mapsSummaryRow() {
+        when(adminRegistrationSummaryRepository.findAdminRegistrationSummariesBy("et", false, false, "R", "D", "D"))
+                .thenReturn(List.of(createAdminRegistrationSummary()));
+
+        AdminRegistrationSummaryDto adminRegistrationSummaryDto = courseParticipantService.findAdminRegistrations("et", false, false).getFirst();
+
+        assertEquals(1, adminRegistrationSummaryDto.getCourseParticipantId());
+        assertEquals(Instant.parse("2026-09-10T09:00:00Z"), adminRegistrationSummaryDto.getRegisteredAt());
+        assertEquals("Anna Saar", adminRegistrationSummaryDto.getParticipantName());
+        assertEquals("anna.saar@example.com", adminRegistrationSummaryDto.getEmail());
+        assertEquals(1, adminRegistrationSummaryDto.getCourseId());
+        assertEquals("Java algkursus", adminRegistrationSummaryDto.getTrainingTitle());
+        assertEquals(LocalDate.parse("2026-10-05"), adminRegistrationSummaryDto.getCourseStartDate());
+        assertEquals(LocalDate.parse("2026-10-09"), adminRegistrationSummaryDto.getCourseEndDate());
+        assertEquals(false, adminRegistrationSummaryDto.getIsPast());
+        assertEquals(true, adminRegistrationSummaryDto.getHasPaid());
+        assertEquals(true, adminRegistrationSummaryDto.getRequiresLaptop());
+        assertEquals("R", adminRegistrationSummaryDto.getStatus());
+    }
+
+    @Test
+    void getAdminRegistration_mapsParticipantAndCourse() {
+        when(courseParticipantRepository.findById(1)).thenReturn(Optional.of(createCourseParticipantWithStatus("R")));
+        when(adminRegistrationSummaryRepository.findByCourseParticipantIdAndContentLanguageCode(1, "et"))
+                .thenReturn(Optional.of(createAdminRegistrationSummary()));
+
+        AdminRegistrationDto adminRegistrationDto = courseParticipantService.getAdminRegistration(1, "et");
+
+        assertEquals(1, adminRegistrationDto.getCourseParticipantId());
+        assertEquals("R", adminRegistrationDto.getStatus());
+        assertEquals("Registreerus veebilehe kaudu.", adminRegistrationDto.getNotes());
+        assertNull(adminRegistrationDto.getAdminNotes());
+        assertEquals(Instant.parse("2026-09-10T09:00:00Z"), adminRegistrationDto.getCreatedAt());
+        assertEquals("+37256789012", adminRegistrationDto.getPhone());
+        assertEquals("kasutaja@vali-it.ee", adminRegistrationDto.getAccountEmail());
+        assertEquals("Java algkursus", adminRegistrationDto.getTrainingTitle());
+        assertEquals("O", adminRegistrationDto.getCourseStatus());
+        assertEquals(false, adminRegistrationDto.getIsPast());
+    }
+
+    @Test
+    void getAdminRegistration_unknownCourseParticipantThrows() {
+        when(courseParticipantRepository.findById(123)).thenReturn(Optional.empty());
+
+        PrimaryKeyNotFoundException exception = assertThrows(PrimaryKeyNotFoundException.class,
+                () -> courseParticipantService.getAdminRegistration(123, "et"));
+
+        assertEquals("Ei leidnud primary keyd 'courseParticipantId' väärtusega: 123", exception.getMessage());
+        verify(adminRegistrationSummaryRepository, never()).findByCourseParticipantIdAndContentLanguageCode(any(), any());
+    }
+
+    @Test
+    void getAdminRegistration_unknownContentLangThrows() {
+        when(courseParticipantRepository.findById(1)).thenReturn(Optional.of(createCourseParticipantWithStatus("R")));
+        when(adminRegistrationSummaryRepository.findByCourseParticipantIdAndContentLanguageCode(1, "xx")).thenReturn(Optional.empty());
+
+        assertThrows(PrimaryKeyNotFoundException.class, () -> courseParticipantService.getAdminRegistration(1, "xx"));
+    }
+
+    @Test
+    void updateAdminRegistration_changesOnlyRegistrationFields() {
+        CourseParticipant courseParticipant = createCourseParticipant();
+        Participant participant = courseParticipant.getParticipant();
+        when(courseParticipantRepository.findById(5)).thenReturn(Optional.of(courseParticipant));
+
+        courseParticipantService.updateAdminRegistration(5, new AdminRegistrationUpdateRequestDto("R", true, false, "  Taastas registreerumise  "));
+
+        CourseParticipant savedCourseParticipant = captureSavedCourseParticipant();
+        assertSame(courseParticipant, savedCourseParticipant);
+        assertEquals("R", savedCourseParticipant.getStatus());
+        assertEquals(true, savedCourseParticipant.getHasPaid());
+        assertEquals(false, savedCourseParticipant.getRequiresLaptop());
+        assertEquals("Taastas registreerumise", savedCourseParticipant.getAdminNotes());
+        assertEquals("Loobus haiguse tõttu.", savedCourseParticipant.getNotes());
+        assertSame(participant, savedCourseParticipant.getParticipant());
+        assertEquals("mari.lepp@example.com", savedCourseParticipant.getParticipant().getProfile().getEmail());
+    }
+
+    @Test
+    void updateAdminRegistration_blankAdminNotesBecomesNull() {
+        CourseParticipant courseParticipant = createCourseParticipant();
+        courseParticipant.setAdminNotes("Teatas telefoni teel 25.09.");
+        when(courseParticipantRepository.findById(5)).thenReturn(Optional.of(courseParticipant));
+
+        courseParticipantService.updateAdminRegistration(5, new AdminRegistrationUpdateRequestDto("C", false, true, "   "));
+
+        assertNull(captureSavedCourseParticipant().getAdminNotes());
+    }
+
+    @Test
+    void updateAdminRegistration_unknownCourseParticipantThrows() {
+        when(courseParticipantRepository.findById(123)).thenReturn(Optional.empty());
+
+        assertThrows(PrimaryKeyNotFoundException.class,
+                () -> courseParticipantService.updateAdminRegistration(123, new AdminRegistrationUpdateRequestDto("R", false, false, null)));
+        verify(courseParticipantRepository, never()).save(any());
+    }
+
     private CourseParticipant captureSavedCourseParticipant() {
         ArgumentCaptor<CourseParticipant> courseParticipantCaptor = ArgumentCaptor.forClass(CourseParticipant.class);
         verify(courseParticipantRepository).save(courseParticipantCaptor.capture());
         return courseParticipantCaptor.getValue();
+    }
+
+    // 3_import.sql course_participant 1 (Anna Saar, toimumiskord 1); konto e-post erineb profiili omast
+    private static AdminRegistrationSummary createAdminRegistrationSummary() {
+        AdminRegistrationSummary adminRegistrationSummary = new AdminRegistrationSummary();
+        ReflectionTestUtils.setField(adminRegistrationSummary, "courseParticipantId", 1);
+        ReflectionTestUtils.setField(adminRegistrationSummary, "contentLanguageCode", "et");
+        ReflectionTestUtils.setField(adminRegistrationSummary, "status", "R");
+        ReflectionTestUtils.setField(adminRegistrationSummary, "hasPaid", true);
+        ReflectionTestUtils.setField(adminRegistrationSummary, "requiresLaptop", true);
+        ReflectionTestUtils.setField(adminRegistrationSummary, "notes", "Registreerus veebilehe kaudu.");
+        ReflectionTestUtils.setField(adminRegistrationSummary, "createdAt", Instant.parse("2026-09-10T09:00:00Z"));
+        ReflectionTestUtils.setField(adminRegistrationSummary, "updatedAt", Instant.parse("2026-09-10T09:00:00Z"));
+        ReflectionTestUtils.setField(adminRegistrationSummary, "participantName", "Anna Saar");
+        ReflectionTestUtils.setField(adminRegistrationSummary, "email", "anna.saar@example.com");
+        ReflectionTestUtils.setField(adminRegistrationSummary, "phone", "+37256789012");
+        ReflectionTestUtils.setField(adminRegistrationSummary, "accountEmail", "kasutaja@vali-it.ee");
+        ReflectionTestUtils.setField(adminRegistrationSummary, "courseId", 1);
+        ReflectionTestUtils.setField(adminRegistrationSummary, "trainingTitle", "Java algkursus");
+        ReflectionTestUtils.setField(adminRegistrationSummary, "courseStartDate", LocalDate.parse("2026-10-05"));
+        ReflectionTestUtils.setField(adminRegistrationSummary, "courseEndDate", LocalDate.parse("2026-10-09"));
+        ReflectionTestUtils.setField(adminRegistrationSummary, "courseStatus", "O");
+        ReflectionTestUtils.setField(adminRegistrationSummary, "isPast", false);
+        return adminRegistrationSummary;
     }
 
     private static CourseRegistrationRequestDto createCourseRegistrationRequestDto(Boolean requiresLaptop, String notes) {

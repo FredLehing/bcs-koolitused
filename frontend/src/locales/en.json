@@ -21,6 +21,7 @@
     "manageLecturers": "Trainers",
     "manageRooms": "Training rooms",
     "manageEnquiries": "Training enquiries",
+    "manageRegistrations": "Registrations",
     "login": "Log in",
     "logout": "Log out",
     "logoutModal": {
@@ -605,9 +606,11 @@
         "hasPaid": "Paid",
         "requiresLaptop": "Needs a laptop",
         "status": "Status",
-        "notes": "Notes"
+        "notes": "Notes",
+        "actions": "Actions"
       },
-      "includeCancelled": "Show cancelled too"
+      "includeCancelled": "Show cancelled too",
+      "view": "View registration"
     },
     "enquiries": {
       "title": "Enquiries",
@@ -620,6 +623,62 @@
         "company": "Company",
         "status": "Status"
       }
+    }
+  },
+  "adminRegistrations": {
+    "title": "Registrations",
+    "searchPlaceholder": "Search by participant name, email or training…",
+    "showCancelled": "Show cancelled",
+    "showPast": "Show past",
+    "noResults": "No registrations found",
+    "totalCount": "{n} registrations in total | {n} registration in total | {n} registrations in total",
+    "view": "View",
+    "columns": {
+      "registeredAt": "Registered",
+      "participantName": "Participant",
+      "email": "Email",
+      "trainingTitle": "Training",
+      "courseDates": "Dates",
+      "hasPaid": "Paid",
+      "requiresLaptop": "Needs laptop",
+      "status": "Status",
+      "actions": "Actions"
+    }
+  },
+  "adminRegistration": {
+    "title": "Registration",
+    "back": "Back",
+    "backToRegistrations": "All registrations",
+    "participantLegend": "Participant",
+    "participantName": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "accountEmail": "Account email",
+    "participantHint": "Contact details are shared by all of the participant's registrations — read-only here.",
+    "courseLegend": "Course",
+    "training": "Training",
+    "courseDates": "Dates",
+    "courseStatus": "Status",
+    "openCourse": "Open course",
+    "registrationLegend": "Registration",
+    "status": "Status",
+    "hasPaid": "Paid",
+    "requiresLaptop": "Needs laptop",
+    "notes": "Participant's notes",
+    "adminNotes": "Admin notes",
+    "registeredAt": "Registered",
+    "updatedAt": "Last modified",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirmCancelTitle": "Mark the participant as cancelled?",
+    "confirmRestoreTitle": "Restore the registration?",
+    "confirmCancelMessage": "“{participantName}” will be marked as cancelled for the course “{trainingTitle} {courseStartDate}”. The payment value is kept.",
+    "confirmRestoreMessage": "“{participantName}” will be marked as registered again.",
+    "courseFullNote": "The course is full — restoring is still allowed.",
+    "confirm": "Confirm",
+    "messages": {
+      "saved": "Registration saved",
+      "saveFailed": "Saving failed"
     }
   },
   "courses": {

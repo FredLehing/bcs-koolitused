@@ -1,5 +1,8 @@
 package ee.bcskoolitus.controller.courseparticipant;
 
+import ee.bcskoolitus.controller.courseparticipant.dto.AdminRegistrationDto;
+import ee.bcskoolitus.controller.courseparticipant.dto.AdminRegistrationSummaryDto;
+import ee.bcskoolitus.controller.courseparticipant.dto.AdminRegistrationUpdateRequestDto;
 import ee.bcskoolitus.controller.courseparticipant.dto.CourseParticipantDto;
 import ee.bcskoolitus.controller.courseparticipant.dto.CourseParticipantStatusDto;
 import ee.bcskoolitus.controller.courseparticipant.dto.CourseRegistrationRequestDto;
@@ -15,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -41,6 +45,58 @@ public class CourseParticipantController {
     })
     public List<CourseParticipantDto> findCourseParticipants(@PathVariable Integer courseId) {
         return courseParticipantService.findCourseParticipants(courseId);
+    }
+
+    @GetMapping("/admin-registrations")
+    @Operation(summary = "Admini registreerumiste nimekiri",
+            description = "Uusimad eespool (created_at kahanevalt). Vaikimisi ainult registreerunud (R) ja toimumiskorrad, mis pole lõppenud; "
+                    + "includeCancelled=true → ka loobunud (C), includePast=true → ka toimunud. Kustutatud toimumiskorrad ja koolitused välja. "
+                    + "trainingTitle contentLang keeles, puudumisel põhikeeles. Tundmatu contentLang → tühi list.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK")
+    })
+    public List<AdminRegistrationSummaryDto> findAdminRegistrations(@RequestParam String contentLang,
+                                                                    @RequestParam(required = false, defaultValue = "false") Boolean includeCancelled,
+                                                                    @RequestParam(required = false, defaultValue = "false") Boolean includePast) {
+        return courseParticipantService.findAdminRegistrations(contentLang, includeCancelled, includePast);
+    }
+
+    @GetMapping("/admin-registration/{courseParticipantId}")
+    @Operation(summary = "Ühe registreerumise admini vaade",
+            description = "Registreerumise väljad, osaleja kontakt (profiil, accountEmail = kasutajakonto e-post) ja toimumiskord. "
+                    + "notes = osaleja lisainfo (tühi string, kui puudub), adminNotes = admini märkmed (null, kui puudub). trainingTitle contentLang keeles, puudumisel põhikeeles.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Olematu courseParticipantId või tundmatu contentLang -> 'errorCode:' PRIMARY_KEY_NOT_FOUND",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            )
+    })
+    public AdminRegistrationDto getAdminRegistration(@PathVariable Integer courseParticipantId, @RequestParam String contentLang) {
+        return courseParticipantService.getAdminRegistration(courseParticipantId, contentLang);
+    }
+
+    @PutMapping("/admin-registration/{courseParticipantId}")
+    @Operation(summary = "Admin muudab registreerumist",
+            description = "Muutuvad ainult status (R/C), hasPaid, requiresLaptop ja adminNotes (trimmitakse, tühi → null); updated_at uueneb. "
+                    + "Osaleja lisainfot (notes) ja profiili ei muudeta. Taastamine (C → R) on lubatud ka täis toimumiskorrale.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Olematu courseParticipantId -> 'errorCode:' PRIMARY_KEY_NOT_FOUND",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Kohustuslik väli puudub või status pole R/C -> 'errorCode:' INCORRECT_INPUT",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            )
+    })
+    public void updateAdminRegistration(@PathVariable Integer courseParticipantId,
+                                        @Valid @RequestBody AdminRegistrationUpdateRequestDto adminRegistrationUpdateRequestDto) {
+        courseParticipantService.updateAdminRegistration(courseParticipantId, adminRegistrationUpdateRequestDto);
     }
 
     @GetMapping("/course/{courseId}/participant-status")

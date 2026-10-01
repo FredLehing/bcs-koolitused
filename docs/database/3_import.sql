@@ -232,16 +232,16 @@ INSERT INTO course_lecturer (id, course_id, lecturer_id, sort_order) VALUES
     (12, 12, 2, 1);
 
 -- Table: course_participant (status: R = registreerunud, C = loobunud)
-INSERT INTO course_participant (id, course_id, participant_id, notes, has_paid, requires_laptop, status, created_at, updated_at) VALUES
-    (1, 1, 1, 'Registreerus veebilehe kaudu.', true, true, 'R', '2026-09-10 12:00:00', '2026-09-10 12:00:00'),
-    (2, 3, 1, 'Osales septembris.', true, true, 'R', '2026-09-01 12:00:00', '2026-09-01 12:00:00'),
-    (3, 1, 2, '', false, false, 'R', '2026-09-12 10:05:00', '2026-09-12 10:05:00'),
-    (4, 1, 3, 'Arve ettevõttele.', true, true, 'R', '2026-09-14 15:35:00', '2026-09-14 15:35:00'),
-    (5, 1, 4, 'Loobus haiguse tõttu.', false, true, 'C', '2026-09-18 09:15:00', '2026-09-25 11:00:00'),
-    (6, 12, 2, '', true, false, 'R', '2026-09-20 08:00:00', '2026-09-20 08:00:00'),
-    (7, 12, 5, '', false, false, 'R', '2026-09-22 13:50:00', '2026-09-22 13:50:00'),
-    (8, 5, 3, '', false, true, 'R', '2026-09-26 17:00:00', '2026-09-26 17:00:00'),
-    (9, 9, 5, '', true, true, 'R', '2026-09-28 09:00:00', '2026-09-28 09:00:00');
+INSERT INTO course_participant (id, course_id, participant_id, notes, admin_notes, has_paid, requires_laptop, status, created_at, updated_at) VALUES
+    (1, 1, 1, 'Registreerus veebilehe kaudu.', NULL, true, true, 'R', '2026-09-10 12:00:00', '2026-09-10 12:00:00'),
+    (2, 3, 1, 'Osales septembris.', NULL, true, true, 'R', '2026-09-01 12:00:00', '2026-09-01 12:00:00'),
+    (3, 1, 2, '', NULL, false, false, 'R', '2026-09-12 10:05:00', '2026-09-12 10:05:00'),
+    (4, 1, 3, 'Arve ettevõttele.', 'Arve saadetud 15.09.', true, true, 'R', '2026-09-14 15:35:00', '2026-09-14 15:35:00'),
+    (5, 1, 4, 'Loobus haiguse tõttu.', 'Teatas telefoni teel 25.09.', false, true, 'C', '2026-09-18 09:15:00', '2026-09-25 11:00:00'),
+    (6, 12, 2, '', NULL, true, false, 'R', '2026-09-20 08:00:00', '2026-09-20 08:00:00'),
+    (7, 12, 5, '', NULL, false, false, 'R', '2026-09-22 13:50:00', '2026-09-22 13:50:00'),
+    (8, 5, 3, '', NULL, false, true, 'R', '2026-09-26 17:00:00', '2026-09-26 17:00:00'),
+    (9, 9, 5, '', NULL, true, true, 'R', '2026-09-28 09:00:00', '2026-09-28 09:00:00');
 
 -- Table: enquiry (status: U = uus, H = käsitletud)
 INSERT INTO enquiry (id, training_id, profile_id, course_id, message, company_name, status, created_at, updated_at) VALUES
