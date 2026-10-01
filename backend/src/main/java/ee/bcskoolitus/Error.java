@@ -9,6 +9,8 @@ public enum Error {
     TRAINING_DELETED("Kustutatud koolituse staatust ei saa muuta, taasta see enne"),
     PHOTO_TYPE_NOT_ALLOWED("Lubatud on ainult PNG, JPEG või WebP pilt"),
     PHOTO_TOO_LARGE("Pilt on liiga suur, lubatud kuni 2 MB"),
+    CURRICULUM_TYPE_NOT_ALLOWED("Lubatud on ainult PDF-fail"),
+    CURRICULUM_TOO_LARGE("Õppekava on liiga suur, lubatud kuni 10 MB"),
     LECTURER_HAS_UPCOMING_COURSES("Koolitajal on tulevasi toimumiskordi, vali neile enne teine koolitaja"),
 
     COURSE_END_BEFORE_START("Lõppkuupäev ei saa olla varasem kui alguskuupäev"),
