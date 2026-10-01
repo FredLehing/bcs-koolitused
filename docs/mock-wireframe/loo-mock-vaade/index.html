@@ -165,20 +165,20 @@ code { font-family: var(--font-mono); font-size: .88em; }
     { key: "lecturer", path: "/lecturer", name: "Koolitaja", view: "LecturerView.vue", group: "public", sample: "/lecturer?lecturerId=1", file: "lecturers-view/lecturers-view-labimang.html", params: ["lecturerId", "returnTo"] },
     { key: "login", path: "/login", name: "Logi sisse", view: "LoginView.vue", group: "public", login: true },
     { key: "signup", path: "/signup", name: "Loo konto", view: "SignupView.vue", group: "public", file: "courses-view/course-registration-view-labimang.html", params: ["redirect"], extra: "view=signup" },
-    { key: "admin-trainings", path: "/admin-trainings", name: "Koolituste haldus", view: "AdminTrainingsView.vue", group: "admin", file: "admin-trainings-view/admin-trainings-view-labimang.html" },
-    { key: "admin-all-courses", path: "/admin-all-courses", name: "Koolituste kalender (admin)", view: "AdminAllCoursesView.vue", group: "admin", file: "courses-view/admin-all-courses-view-labimang.html" },
-    { key: "admin-course", path: "/admin-course", name: "Toimumiskord (admin)", view: "AdminCourseView.vue", group: "admin", sample: "/admin-course?courseId=1", file: "courses-view/admin-all-courses-view-labimang.html", params: ["courseId"], extra: "view=admin-course" },
-    { key: "training-form", path: "/training-form", name: "Koolituse vorm", view: "TrainingFormView.vue", group: "admin", file: "form-view/training-form-view-labimang.html", params: ["trainingId", "trainingTranslationId", "languageId"] },
-    { key: "admin-training-courses", path: "/admin-training-courses", name: "Koolituse kalender", view: "AdminTrainingCoursesView.vue", group: "admin", sample: "/admin-training-courses?trainingId=1", file: "admin-training-courses-view/admin-training-courses-view-labimang.html", params: ["trainingId"] },
-    { key: "course-form", path: "/course-form", name: "Toimumiskorra vorm", view: "CourseFormView.vue", group: "admin", sample: "/course-form?trainingId=1", file: "admin-training-courses-view/admin-training-courses-view-labimang.html", params: ["trainingId", "courseId"], extra: "view=course-form" },
-    { key: "admin-lecturers", path: "/admin-lecturers", name: "Koolitajad (haldus)", view: "AdminLecturersView.vue", group: "admin", file: "admin-lecturers-view/admin-lecturers-view-labimang.html" },
-    { key: "lecturer-form", path: "/lecturer-form", name: "Koolitaja vorm", view: "LecturerFormView.vue", group: "admin", file: "admin-lecturers-view/admin-lecturers-view-labimang.html", params: ["lecturerId", "lecturerTranslationId", "languageId"], extra: "view=lecturer-form" },
-    { key: "admin-rooms", path: "/admin-rooms", name: "Koolitusruumid", view: "AdminRoomsView.vue", group: "admin", file: "admin-rooms-view/admin-rooms-view-labimang.html" },
-    { key: "room-form", path: "/room-form", name: "Ruumi vorm", view: "RoomFormView.vue", group: "admin", file: "admin-rooms-view/admin-rooms-view-labimang.html", params: ["roomId"], extra: "view=room-form" },
     { key: "admin-enquiries", path: "/admin-enquiries", name: "Koolituste päringud", view: "AdminEnquiriesView.vue", group: "admin", file: "admin-enquiries-view/admin-enquiries-view-labimang.html" },
     { key: "admin-enquiry", path: "/admin-enquiry", name: "Koolituse päring", view: "AdminEnquiryView.vue", group: "admin", sample: "/admin-enquiry?enquiryId=4", file: "admin-enquiries-view/admin-enquiries-view-labimang.html", params: ["enquiryId"], extra: "view=admin-enquiry" },
     { key: "admin-registrations", path: "/admin-registrations", name: "Registreerumised", view: "AdminRegistrationsView.vue", group: "admin", file: "admin-registrations-view/admin-registrations-view-labimang.html" },
-    { key: "admin-registration", path: "/admin-registration", name: "Registreerumine (admin)", view: "AdminRegistrationView.vue", group: "admin", sample: "/admin-registration?courseParticipantId=1", file: "admin-registrations-view/admin-registrations-view-labimang.html", params: ["courseParticipantId", "returnTo"], extra: "view=admin-registration" }
+    { key: "admin-registration", path: "/admin-registration", name: "Registreerumine (admin)", view: "AdminRegistrationView.vue", group: "admin", sample: "/admin-registration?courseParticipantId=1", file: "admin-registrations-view/admin-registrations-view-labimang.html", params: ["courseParticipantId", "returnTo"], extra: "view=admin-registration" },
+    { key: "admin-trainings", path: "/admin-trainings", name: "Koolitused (admin)", view: "AdminTrainingsView.vue", group: "admin", file: "admin-trainings-view/admin-trainings-view-labimang.html" },
+    { key: "training-form", path: "/training-form", name: "Koolituse vorm", view: "TrainingFormView.vue", group: "admin", file: "form-view/training-form-view-labimang.html", params: ["trainingId", "trainingTranslationId", "languageId"] },
+    { key: "admin-training-courses", path: "/admin-training-courses", name: "Koolituse kalender", view: "AdminTrainingCoursesView.vue", group: "admin", sample: "/admin-training-courses?trainingId=1", file: "admin-training-courses-view/admin-training-courses-view-labimang.html", params: ["trainingId"] },
+    { key: "course-form", path: "/course-form", name: "Toimumiskorra vorm", view: "CourseFormView.vue", group: "admin", sample: "/course-form?trainingId=1", file: "admin-training-courses-view/admin-training-courses-view-labimang.html", params: ["trainingId", "courseId"], extra: "view=course-form" },
+    { key: "admin-all-courses", path: "/admin-all-courses", name: "Koolituste kalender (admin)", view: "AdminAllCoursesView.vue", group: "admin", file: "courses-view/admin-all-courses-view-labimang.html" },
+    { key: "admin-course", path: "/admin-course", name: "Toimumiskord (admin)", view: "AdminCourseView.vue", group: "admin", sample: "/admin-course?courseId=1", file: "courses-view/admin-all-courses-view-labimang.html", params: ["courseId"], extra: "view=admin-course" },
+    { key: "admin-lecturers", path: "/admin-lecturers", name: "Koolitajad (haldus)", view: "AdminLecturersView.vue", group: "admin", file: "admin-lecturers-view/admin-lecturers-view-labimang.html" },
+    { key: "lecturer-form", path: "/lecturer-form", name: "Koolitaja vorm", view: "LecturerFormView.vue", group: "admin", file: "admin-lecturers-view/admin-lecturers-view-labimang.html", params: ["lecturerId", "lecturerTranslationId", "languageId"], extra: "view=lecturer-form" },
+    { key: "admin-rooms", path: "/admin-rooms", name: "Koolitusruumid", view: "AdminRoomsView.vue", group: "admin", file: "admin-rooms-view/admin-rooms-view-labimang.html" },
+    { key: "room-form", path: "/room-form", name: "Ruumi vorm", view: "RoomFormView.vue", group: "admin", file: "admin-rooms-view/admin-rooms-view-labimang.html", params: ["roomId"], extra: "view=room-form" }
   ];
   var ROLE_NAMES = { public: "Külastaja", user: "Kasutaja", admin: "Admin" };
 
@@ -231,10 +231,9 @@ code { font-family: var(--font-mono); font-size: .88em; }
       '<button type="button" data-go="/trainings">Meie koolitused</button><button type="button" data-go="/courses">Koolituste kalender</button></span></span>';
     var dead = function (label) { return '<button type="button" class="lnk dead" data-dead="1" title="Kohatäide (href=&quot;#&quot;)">' + label + '</button>'; };
     var admin = state.role === "admin" ? '<span class="admin"><button type="button" id="b-admin" aria-expanded="false" aria-controls="admin-menu">Admin ▾</button><span class="menu" id="admin-menu" hidden>' +
-      '<button type="button" data-go="/training-form">Lisa uus koolitus</button><button type="button" data-go="/admin-trainings">Koolituste haldus</button><button type="button" data-go="/admin-all-courses">Koolituste kalender</button><hr>' +
-      '<button type="button" data-go="/lecturer-form">Lisa uus koolitaja</button><button type="button" data-go="/admin-lecturers">Koolitajad</button><hr>' +
-      '<button type="button" data-go="/admin-rooms">Koolitusruumid</button><hr>' +
-      '<button type="button" data-go="/admin-enquiries">Koolituste päringud</button><button type="button" data-go="/admin-registrations">Registreerumised</button></span></span>' : "";
+      '<button type="button" data-go="/admin-enquiries">Koolituste päringud</button><button type="button" data-go="/admin-registrations">Registreerumised</button><hr>' +
+      '<button type="button" data-go="/admin-trainings">Koolitused</button><button type="button" data-go="/admin-all-courses">Koolituste kalender</button><hr>' +
+      '<button type="button" data-go="/admin-lecturers">Koolitajad</button><button type="button" data-go="/admin-rooms">Koolitusruumid</button></span></span>' : "";
     var right = state.role === "public" ? '<button type="button" class="pill" data-go="/login">Logi sisse</button><button type="button" class="pill" data-go="/signup">Loo konto</button>'
       : '<span class="who">' + ROLE_NAMES[state.role] + '</span><button type="button" class="pill" id="b-logout">Logi välja</button>';
     document.getElementById("sitenav").innerHTML = '<button type="button" class="logo" data-go="/" aria-label="Avaleht"></button>' +
@@ -265,7 +264,7 @@ code { font-family: var(--font-mono); font-size: .88em; }
     if (!v.file) {
       var q = queryOf(state.path).toString();
       stage.innerHTML = '<div class="ph-page"><h2>' + esc(v.name) + '</h2><div class="box"><strong>Kohatäide — läbimäng puudub</strong><p>' + esc(v.ph) + '</p><p>Vaade: <code>' + esc(v.view) + '</code>, rada <code>' + esc(v.path) + '</code>' + (q ? ', parameetrid <code>' + esc(q) + '</code>' : "") + '.</p></div>' +
-        '<div class="row"><button type="button" class="sbtn" data-go="/trainings">Koolitused</button><button type="button" class="sbtn" data-go="/lecturers">Meie koolitajad</button>' + (state.role === "admin" ? '<button type="button" class="sbtn" data-go="/admin-trainings">Koolituste haldus</button>' : "") + '</div></div>';
+        '<div class="row"><button type="button" class="sbtn" data-go="/trainings">Koolitused</button><button type="button" class="sbtn" data-go="/lecturers">Meie koolitajad</button>' + (state.role === "admin" ? '<button type="button" class="sbtn" data-go="/admin-enquiries">Koolituste päringud</button>' : "") + '</div></div>';
       return;
     }
     var src = v.file + "?embed=1" + (v.extra ? "&" + v.extra : "") + (v.roleParam ? "&role=" + state.role : "");
@@ -293,7 +292,7 @@ code { font-family: var(--font-mono); font-size: .88em; }
     var b = e.target.closest("button"); if (!b) return;
     if (b.dataset.role) { setRole(b.dataset.role); return; }
     if (b.dataset.roleGo) { setRole(b.dataset.roleGo); return; }
-    if (b.dataset.login) { var rd = queryOf(state.path).get("redirect"); setRole(b.dataset.login); go(rd || (b.dataset.login === "admin" ? "/admin-trainings" : "/")); return; }
+    if (b.dataset.login) { var rd = queryOf(state.path).get("redirect"); setRole(b.dataset.login); go(rd || (b.dataset.login === "admin" ? "/admin-enquiries" : "/")); return; }
     if (b.id === "b-logout") { setRole("public"); go("/"); return; }
     if (b.id === "b-kmenu") { var km = document.getElementById("k-menu"); km.hidden = !km.hidden; b.setAttribute("aria-expanded", String(!km.hidden)); return; }
     if (b.id === "b-admin") { var m = document.getElementById("admin-menu"); m.hidden = !m.hidden; b.setAttribute("aria-expanded", String(!m.hidden)); return; }

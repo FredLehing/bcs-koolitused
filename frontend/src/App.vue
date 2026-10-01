@@ -44,9 +44,15 @@
                 {{ $t('navbar.admin') }}
               </a>
               <div class="dropdown-menu bg-bcs-primary">
-                <RouterLink class="nav-link" :to="{ name: 'trainingFormRoute' }">
-                  {{ $t('navbar.addTraining') }}
+                <!-- Rühmad: igapäevane töö (päringud, registreerumised) | koolitused | koolitajad ja ruumid.
+                     "Lisa uus" nupud on nimekirja vaadetes -->
+                <RouterLink class="nav-link" :to="{ name: 'adminEnquiriesRoute' }">
+                  {{ $t('navbar.manageEnquiries') }}
                 </RouterLink>
+                <RouterLink class="nav-link" :to="{ name: 'adminRegistrationsRoute' }">
+                  {{ $t('navbar.manageRegistrations') }}
+                </RouterLink>
+                <hr class="dropdown-divider" />
                 <RouterLink class="nav-link" :to="{ name: 'adminTrainingsRoute' }">
                   {{ $t('navbar.manageTrainings') }}
                 </RouterLink>
@@ -54,22 +60,11 @@
                   {{ $t('navbar.manageCourses') }}
                 </RouterLink>
                 <hr class="dropdown-divider" />
-                <RouterLink class="nav-link" :to="{ name: 'lecturerFormRoute' }">
-                  {{ $t('navbar.addLecturer') }}
-                </RouterLink>
                 <RouterLink class="nav-link" :to="{ name: 'adminLecturersRoute' }">
                   {{ $t('navbar.manageLecturers') }}
                 </RouterLink>
-                <hr class="dropdown-divider" />
                 <RouterLink class="nav-link" :to="{ name: 'adminRoomsRoute' }">
                   {{ $t('navbar.manageRooms') }}
-                </RouterLink>
-                <hr class="dropdown-divider" />
-                <RouterLink class="nav-link" :to="{ name: 'adminEnquiriesRoute' }">
-                  {{ $t('navbar.manageEnquiries') }}
-                </RouterLink>
-                <RouterLink class="nav-link" :to="{ name: 'adminRegistrationsRoute' }">
-                  {{ $t('navbar.manageRegistrations') }}
                 </RouterLink>
               </div>
             </div>
