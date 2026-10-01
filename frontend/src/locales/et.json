@@ -5,6 +5,32 @@
   "homeView": {
     "title": "Leia üle 100 koolituse seast endale sobiv!",
     "subtitle": "Praktilised IT-, disaini- ja juhtimiskoolitused oma ala parimatelt",
+    "gallery": {
+      "slide": "Slaid {number}",
+      "placeholder": "Pilt {number}",
+      "previous": "Eelmine",
+      "next": "Järgmine"
+    },
+    "testimonials": {
+      "title": "Kliendid meist",
+      "items": [
+        {
+          "text": "Enne Vali-IT! Tarkvaraarendaja koolitust ei olnud ma kunagi programmeerimisega kokku puutunud. Juba paari kuu pärast töötasin juuniorarendajana ja tunnen, et sain koolitusel tugeva vundamendi.",
+          "name": "Kaspar Tamm",
+          "company": ""
+        },
+        {
+          "text": "Suur aitäh BCS Koolituste meeskonnale ning eriti Tarmole, kelle käe all õppisin UX disainist nii mõndagi uut ja huvitavat.",
+          "name": "Mari Kask",
+          "company": "IT Firma OÜ"
+        },
+        {
+          "text": "Power BI koolitusel osalejad ütlesid, et see on olnud parim koolitus, kus nad kunagi käinud on. Aitäh!",
+          "name": "",
+          "company": "Näidis Firma OÜ"
+        }
+      ]
+    },
     "trainingsCard": {
       "title": "Meie koolitused",
       "text": "Vaata kõiki meie koolitusi ja nende sisu.",

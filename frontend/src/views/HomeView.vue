@@ -5,13 +5,15 @@ import { useLanguageStore } from '@/stores/languageStore.js'
 import CourseService from '@/api-services/CourseService.js'
 import NavigationService from '@/services/NavigationService.js'
 import CourseCard from '@/components/course/CourseCard.vue'
+import HomeGallery from '@/components/home/HomeGallery.vue'
+import HomeTestimonials from '@/components/home/HomeTestimonials.vue'
 
 // Avalehe "Meie järgmised 5 koolitust" ploki toimumiskordade arv
 const NEXT_COURSES_LIMIT = 5
 
 export default {
   name: 'HomeView',
-  components: { PhBooks, PhCalendarDots, PhX, CourseCard },
+  components: { PhBooks, PhCalendarDots, PhX, CourseCard, HomeGallery, HomeTestimonials },
 
   data() {
     return {
@@ -90,6 +92,8 @@ export default {
       </div>
     </section>
 
+    <HomeGallery />
+
     <!-- Suunavad kaardid: kogu kaart on link -->
     <section class="row g-4 mb-5">
       <div class="col-md-6">
@@ -126,6 +130,9 @@ export default {
       />
     </section>
 
+    <HomeTestimonials />
+
+    <!-- Lõpu üleskutse pärast tagasisidet -->
     <section class="text-center border-top pt-4 mb-5">
       <p class="fs-5 mb-3">{{ $t('homeView.marketingText') }}</p>
       <RouterLink :to="{ name: 'coursesRoute' }" class="btn btn-primary btn-lg">

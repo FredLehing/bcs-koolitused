@@ -5,6 +5,32 @@
   "homeView": {
     "title": "Choose from over 100 trainings to find yours",
     "subtitle": "Practical IT, design and management training from experienced trainers",
+    "gallery": {
+      "slide": "Slide {number}",
+      "placeholder": "Image {number}",
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "testimonials": {
+      "title": "What our clients say",
+      "items": [
+        {
+          "text": "Before the Vali-IT! software developer training, I had never had anything to do with programming. Within just a few months I was working as a junior developer, and I feel the training gave me a solid foundation.",
+          "name": "Kaspar Tamm",
+          "company": ""
+        },
+        {
+          "text": "A big thank you to the BCS Koolitus team, and especially to Tarmo, under whose guidance I learned many new and interesting things about UX design.",
+          "name": "Mari Kask",
+          "company": "IT Firma OÜ"
+        },
+        {
+          "text": "The participants of the Power BI training said it was the best training they had ever attended. Thank you!",
+          "name": "",
+          "company": "Näidis Firma OÜ"
+        }
+      ]
+    },
     "trainingsCard": {
       "title": "Our trainings",
       "text": "Browse all our trainings and what they cover.",
