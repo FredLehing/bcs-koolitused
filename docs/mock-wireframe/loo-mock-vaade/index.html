@@ -156,7 +156,7 @@ code { font-family: var(--font-mono); font-size: .88em; }
   "use strict";
 
   /* ---------- Vaated ---------- */
-  // file: läbimäng (suhteline tee), params(q): käivitusparameetrid; ph: tekstiline kohatäide
+  // file: läbimäng (suhteline tee), params(q): käivitusparameetrid; ph: tekstiline kohatäide; noMenu: ei kuvata navbari "👤 ▾" menüüs (avatakse teisest vaatest)
   var VIEWS = [
     { key: "home", path: "/", name: "Avaleht", view: "HomeView.vue", group: "public", file: "home-view/home-view-labimang.html", roleParam: true },
     { key: "trainings", path: "/trainings", name: "Koolitused", view: "TrainingsView.vue", group: "public", file: "trainings-view/trainings-view-labimang.html", roleParam: true },
@@ -170,6 +170,7 @@ code { font-family: var(--font-mono); font-size: .88em; }
     { key: "signup", path: "/signup", name: "Loo konto", view: "SignupView.vue", group: "public", file: "courses-view/course-registration-view-labimang.html", params: ["redirect"], extra: "view=signup" },
     { key: "participant-details", participantOnly: true, path: "/participant-details", name: "Minu andmed", view: "ParticipantDetailsView.vue", group: "user", file: "profile-view/profile-view-labimang.html", roleParam: true, auth: true, extra: "view=details" },
     { key: "participant-courses", participantOnly: true, path: "/participant-courses", name: "Minu koolitused", view: "ParticipantCoursesView.vue", group: "user", file: "profile-view/profile-view-labimang.html", roleParam: true, auth: true, extra: "view=courses" },
+    { key: "participant-feedback-form", participantOnly: true, noMenu: true, path: "/participant-feedback-form", name: "Tagasiside", view: "ParticipantFeedbackFormView.vue", group: "user", sample: "/participant-feedback-form?courseParticipantId=2", file: "participant-feedback-form-view/participant-feedback-form-view-labimang.html", params: ["courseParticipantId"], roleParam: true, auth: true },
     { key: "participant-certificates", participantOnly: true, path: "/participant-certificates", name: "Tunnistused", view: "ParticipantCertificatesView.vue", group: "user", file: "profile-view/profile-view-labimang.html", roleParam: true, auth: true, extra: "view=certificates" },
     { key: "change-password", path: "/change-password", name: "Parool", view: "ChangePasswordView.vue", group: "user", file: "profile-view/profile-view-labimang.html", roleParam: true, auth: true, extra: "view=password" },
     { key: "admin-enquiries", path: "/admin-enquiries", name: "Koolituste päringud", view: "AdminEnquiriesView.vue", group: "admin", file: "admin-enquiries-view/admin-enquiries-view-labimang.html" },
@@ -248,7 +249,7 @@ code { font-family: var(--font-mono); font-size: .88em; }
       '<button type="button" data-go="/admin-users">Kontod</button></span></span>' : "";
     var right = state.role === "public" ? '<button type="button" class="pill" data-go="/login">Logi sisse</button><button type="button" class="pill" data-go="/signup">Loo konto</button>'
       : '<span class="who">' + ROLE_NAMES[state.role] + '</span><span class="admin"><button type="button" id="b-pmenu" aria-expanded="false" aria-controls="p-menu"' + (cur && cur.group === "user" ? ' style="text-decoration:underline;text-underline-offset:3px;font-weight:700"' : "") + ' title="Minu profiil" aria-label="Minu profiil">👤 ▾</button><span class="menu" id="p-menu" hidden><b class="mhead">Minu profiil</b>' +
-        VIEWS.filter(function (v) { return v.group === "user" && !(v.participantOnly && state.role === "admin"); }).map(function (v) { return '<button type="button" data-go="' + v.path + '">' + esc(v.name) + '</button>'; }).join("") + '</span></span><button type="button" class="pill" id="b-logout">Logi välja</button>';
+        VIEWS.filter(function (v) { return v.group === "user" && !v.noMenu && !(v.participantOnly && state.role === "admin"); }).map(function (v) { return '<button type="button" data-go="' + v.path + '">' + esc(v.name) + '</button>'; }).join("") + '</span></span><button type="button" class="pill" id="b-logout">Logi välja</button>';
     document.getElementById("sitenav").innerHTML = '<button type="button" class="logo" data-go="/" aria-label="Avaleht"></button>' +
       kmenu + lnk("/lecturers", "Meie koolitajad") + dead("Teenused") + dead("Ettevõttest") + dead("Blogi") + dead("Kontakt") + dead("Tagasiside") +
       admin + '<span class="right">' + right + '</span>';

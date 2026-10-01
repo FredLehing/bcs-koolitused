@@ -3,7 +3,12 @@
 // Adminil seda menüüd pole — tal on ainult parooli vaade.
 const PROFILE_MENU_ITEMS = [
   { routeName: 'participantDetailsRoute', labelKey: 'navbar.participantDetails' },
-  { routeName: 'participantCoursesRoute', labelKey: 'navbar.participantCourses' },
+  // Tagasiside vorm on "Minu koolitused" alamvaade — menüüpunkt on ka seal aktiivne
+  {
+    routeName: 'participantCoursesRoute',
+    labelKey: 'navbar.participantCourses',
+    activeRouteNames: ['participantFeedbackFormRoute'],
+  },
   { routeName: 'participantCertificatesRoute', labelKey: 'navbar.participantCertificates' },
   { routeName: 'changePasswordRoute', labelKey: 'navbar.changePassword' },
 ]
@@ -25,6 +30,7 @@ export default {
       :key="profileMenuItem.routeName"
       :to="{ name: profileMenuItem.routeName }"
       active-class="active"
+      :class="{ active: profileMenuItem.activeRouteNames?.includes($route.name) }"
       class="nav-link text-start"
     >
       {{ $t(profileMenuItem.labelKey) }}

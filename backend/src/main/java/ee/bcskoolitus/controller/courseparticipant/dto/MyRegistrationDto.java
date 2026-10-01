@@ -28,4 +28,8 @@ public class MyRegistrationDto {
     private Boolean isPast;
     // R, toimumiskord pole alanud ega tühistatud
     private Boolean canCancel;
+    // R, toimumiskord on lõppenud või lõpeb täna, pole tühistatud ega kustutatud
+    private Boolean canGiveFeedback;
+    // Registreerumisel on tagasiside (feedback rida)
+    private Boolean hasFeedback;
 }

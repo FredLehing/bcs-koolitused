@@ -24,7 +24,7 @@ public interface CourseParticipantMapper {
 
     List<CourseParticipantDto> toCourseParticipantDtos(List<CourseParticipant> courseParticipants);
 
-    // trainingTitle (tõlge) ja canCancel määrab CourseParticipantService
+    // trainingTitle (tõlge), canCancel, canGiveFeedback ja hasFeedback määrab CourseParticipantService
     @Mapping(source = "id", target = "courseParticipantId")
     @Mapping(source = "course.id", target = "courseId")
     @Mapping(source = "course.startDate", target = "startDate")
@@ -37,6 +37,8 @@ public interface CourseParticipantMapper {
     @Mapping(expression = "java(courseParticipant.getCourse().getEndDate().isBefore(java.time.LocalDate.now()))", target = "isPast")
     @Mapping(target = "trainingTitle", ignore = true)
     @Mapping(target = "canCancel", ignore = true)
+    @Mapping(target = "canGiveFeedback", ignore = true)
+    @Mapping(target = "hasFeedback", ignore = true)
     MyRegistrationDto toMyRegistrationDto(CourseParticipant courseParticipant);
 
     // trainingTitle (tõlge) määrab AdminUserService

@@ -29,6 +29,7 @@ import SignupView from '@/views/SignupView.vue'
 import ParticipantDetailsView from '@/views/ParticipantDetailsView.vue'
 import ParticipantCoursesView from '@/views/ParticipantCoursesView.vue'
 import ParticipantCertificatesView from '@/views/ParticipantCertificatesView.vue'
+import ParticipantFeedbackFormView from '@/views/ParticipantFeedbackFormView.vue'
 import ChangePasswordView from '@/views/ChangePasswordView.vue'
 import AdminUsersView from '@/views/AdminUsersView.vue'
 import AdminUserView from '@/views/AdminUserView.vue'
@@ -108,6 +109,12 @@ const router = createRouter({
       path: '/participant-courses',
       name: 'participantCoursesRoute',
       component: ParticipantCoursesView,
+      beforeEnter: checkParticipantUser,
+    },
+    {
+      path: '/participant-feedback-form',
+      name: 'participantFeedbackFormRoute',
+      component: ParticipantFeedbackFormView,
       beforeEnter: checkParticipantUser,
     },
     {

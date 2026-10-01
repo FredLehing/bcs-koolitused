@@ -32,6 +32,32 @@ export default {
     return axios.put(`/api/user/${userId}/registration/${courseParticipantId}/cancel`)
   },
 
+  // Backend task: docs/tasks/backend/GET-api-user-userId-registration-courseParticipantId-feedback.md
+  sendGetFeedbackRequest(userId, courseParticipantId, contentLang) {
+    return axios.get(`/api/user/${userId}/registration/${courseParticipantId}/feedback`, {
+      params: {
+        contentLang: contentLang,
+      },
+    })
+  },
+
+  // Backend task: docs/tasks/backend/POST-api-user-userId-registration-courseParticipantId-feedback.md
+  // feedbackRequest: { answers: [{ feedbackCriteriaId, score, feedbackText }] }
+  sendPostFeedbackRequest(userId, courseParticipantId, feedbackRequest) {
+    return axios.post(
+      `/api/user/${userId}/registration/${courseParticipantId}/feedback`,
+      feedbackRequest,
+    )
+  },
+
+  // Backend task: docs/tasks/backend/PUT-api-user-userId-registration-courseParticipantId-feedback.md
+  sendPutFeedbackRequest(userId, courseParticipantId, feedbackRequest) {
+    return axios.put(
+      `/api/user/${userId}/registration/${courseParticipantId}/feedback`,
+      feedbackRequest,
+    )
+  },
+
   // Backend task: docs/tasks/backend/PUT-api-user-userId-password.md
   // passwordChangeRequest: { currentPassword, newPassword }
   sendPutPasswordRequest(userId, passwordChangeRequest) {

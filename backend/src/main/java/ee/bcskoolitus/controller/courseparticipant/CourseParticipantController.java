@@ -144,7 +144,8 @@ public class CourseParticipantController {
     @GetMapping("/user/{userId}/registrations")
     @Operation(summary = "Kasutaja oma registreerumised (Minu koolitused)",
             description = "Ka loobunud (C) ja toimunud, alguse järgi kasvavalt; kustutatud toimumiskorrad välja. trainingTitle contentLang keeles, "
-                    + "puudumisel põhikeeles. canCancel = R, toimumiskord pole alanud ega tühistatud. Osalejata kasutajal tühi list.")
+                    + "puudumisel põhikeeles. canCancel = R, toimumiskord pole alanud ega tühistatud. canGiveFeedback = R, end_date <= täna, "
+                    + "toimumiskord pole tühistatud ega kustutatud. hasFeedback = registreerumisel on tagasiside. Osalejata kasutajal tühi list.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(

@@ -25,7 +25,12 @@ public enum Error {
     INCORRECT_PASSWORD("Praegune parool on vale"),
     CANCEL_NOT_ALLOWED("Sellest registreerumisest ei saa enam loobuda"),
     REGISTRATION_NOT_FOUND("Registreerumist ei leitud"),
-    CANNOT_DEACTIVATE_SELF("Enda kontot ei saa deaktiveerida");
+    CANNOT_DEACTIVATE_SELF("Enda kontot ei saa deaktiveerida"),
+
+    FEEDBACK_NOT_ALLOWED("Sellele koolitusele ei saa tagasisidet anda"),
+    FEEDBACK_ALREADY_EXISTS("Tagasiside on juba antud"),
+    FEEDBACK_NOT_FOUND("Tagasisidet ei leitud"),
+    FEEDBACK_CRITERIA_CHANGED("Tagasiside küsimused on vahepeal muutunud, laadi leht uuesti");
 
     private final String message;
 

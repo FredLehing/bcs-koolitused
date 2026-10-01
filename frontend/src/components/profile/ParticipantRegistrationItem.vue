@@ -6,7 +6,8 @@ import CourseParticipantStatusBadge from '@/components/common/CourseParticipantS
 const PUBLIC_COURSE_STATUSES = ['O', 'F']
 const COURSE_STATUS_CANCELLED = 'X'
 
-// "Minu koolitused" üks rida: koolitus, toimumisaeg, vorm, märgised ja (canCancel korral) "Loobu"
+// "Minu koolitused" üks rida: koolitus, toimumisaeg, vorm, märgised, (canCancel korral) "Loobu"
+// ja (canGiveFeedback korral) "Anna tagasisidet" / "Vaata tagasisidet"
 export default {
   name: 'ParticipantRegistrationItem',
   components: { CourseParticipantStatusBadge },
@@ -72,6 +73,21 @@ export default {
         </span>
       </div>
     </div>
+    <RouterLink
+      v-if="registration.canGiveFeedback"
+      :to="{
+        name: 'participantFeedbackFormRoute',
+        query: { courseParticipantId: registration.courseParticipantId },
+      }"
+      class="btn btn-sm"
+      :class="registration.hasFeedback ? 'btn-outline-primary' : 'btn-primary'"
+    >
+      {{
+        registration.hasFeedback
+          ? $t('participantCourses.viewFeedback')
+          : $t('participantCourses.giveFeedback')
+      }}
+    </RouterLink>
     <button
       v-if="registration.canCancel"
       @click="$emit('event-cancel-clicked', registration)"

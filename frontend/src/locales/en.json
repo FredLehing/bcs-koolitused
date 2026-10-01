@@ -847,7 +847,9 @@
     },
     "messages": {
       "cancelled": "Your registration has been cancelled"
-    }
+    },
+    "giveFeedback": "Give feedback",
+    "viewFeedback": "View feedback"
   },
   "participantCertificates": {
     "comingSoon": "Certificates are coming soon — certificates of your completed courses will appear here."
@@ -923,6 +925,27 @@
       "dates": "Dates",
       "status": "Status",
       "hasPaid": "Paid"
+    }
+  },
+  "participantFeedback": {
+    "title": "Feedback",
+    "back": "Back to my courses",
+    "submitted": "Submitted {date}",
+    "updated": "Updated {date}",
+    "scaleHint": "Rate each statement on a scale of 1–10 (1 = strongly disagree, 10 = strongly agree)",
+    "addComment": "+ Add a comment",
+    "hideComment": "− Hide comment",
+    "commentLabel": "Comment",
+    "commentPlaceholder": "Feel free to elaborate on your rating",
+    "add": "Submit feedback",
+    "edit": "Edit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "validation": {
+      "scoreAll": "Please rate all criteria"
+    },
+    "messages": {
+      "saved": "Feedback saved"
     }
   }
 }

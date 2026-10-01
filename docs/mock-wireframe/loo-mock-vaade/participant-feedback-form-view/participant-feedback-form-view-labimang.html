@@ -1,0 +1,981 @@
+<meta charset="utf-8">
+<title>Tagasiside läbimäng</title>
+<meta name="description" content="Osaleja tagasiside vorm ParticipantFeedbackFormView (uus ja muutmise olek, hinded 1–10 ja kommentaarid) ning Minu koolitused nupud: API päringud ja mockupi märkmed interaktiivse läbimänguna.">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Sama visuaalne keel nagu profile-view-labimang.html: täppidega tahvel, Balsamiqi-stiilis wireframe, kollased märkmed */
+:root {
+  --board: #e9ecef;
+  --board-dots: #d3d8de;
+  --panel: #ffffff;
+  --ink: #23272e;
+  --ink-soft: #5b6470;
+  --line: #b9c0c9;
+  --sketch: #3b4048;
+  --field: #ffffff;
+  --field-off: #eef0f3;
+  --accent: #2f6fde;
+  --accent-soft: #dce7fb;
+  --note: #f2c94c;
+  --note-edge: #d9ad2b;
+  --note-ink: #2e2505;
+  --get: #1f7a5c;
+  --post: #2f6fde;
+  --put: #a56200;
+  --del: #b83a3a;
+  --ok: #1f7a5c;
+  --bad: #c0392b;
+  --shadow: 0 1px 2px rgba(20, 30, 45, .08), 0 4px 14px rgba(20, 30, 45, .06);
+  --font-ui: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-sketch: "Balsamiq Sans", "Comic Sans MS", "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --board: #15181d; --board-dots: #242931; --panel: #1d2127; --ink: #e6e9ee; --ink-soft: #9aa4b2;
+    --line: #3a414b; --sketch: #c9ced6; --field: #252a31; --field-off: #1a1e23; --accent: #7aa5f5; --accent-soft: #22324f;
+    --get: #5cc59e; --post: #7aa5f5; --put: #e0a24a; --del: #ef7d7d; --ok: #5cc59e; --bad: #ef7d7d;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --board: #15181d; --board-dots: #242931; --panel: #1d2127; --ink: #e6e9ee; --ink-soft: #9aa4b2;
+  --line: #3a414b; --sketch: #c9ced6; --field: #252a31; --field-off: #1a1e23; --accent: #7aa5f5; --accent-soft: #22324f;
+  --get: #5cc59e; --post: #7aa5f5; --put: #e0a24a; --del: #ef7d7d; --ok: #5cc59e; --bad: #ef7d7d;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.3);
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background-color: var(--board);
+  background-image: radial-gradient(var(--board-dots) 1px, transparent 1px);
+  background-size: 18px 18px;
+  color: var(--ink);
+  font: 15px/1.5 var(--font-ui);
+}
+.page { max-width: 1320px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 64px; display: grid; gap: 28px; }
+h1, h2, h3 { text-wrap: balance; margin: 0; line-height: 1.2; }
+h1 { font-size: 1.7rem; font-weight: 600; }
+h2 { font-size: 1.15rem; font-weight: 600; }
+h3 { font-size: .8rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft); }
+code, .mono { font-family: var(--font-mono); font-size: .88em; }
+button { font: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Päis */
+.intro { display: grid; gap: 10px; }
+.intro p { margin: 0; max-width: 78ch; color: var(--ink-soft); }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.toolbar .sep { width: 1px; align-self: stretch; background: var(--line); margin-inline: 4px; }
+.toolbar .lbl-soft { font-size: .82rem; color: var(--ink-soft); }
+.tbtn { border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+.tbtn:hover { border-color: var(--accent); }
+.tbtn[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 1px var(--accent); }
+
+/* Brauseri wireframe */
+.browser { background: var(--panel); border: 2px solid var(--sketch); border-radius: 10px; font-family: var(--font-sketch); box-shadow: var(--shadow); overflow: hidden; min-width: 0; }
+.chrome { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-bottom: 2px solid var(--sketch); background: var(--field-off); }
+.chrome .dots { display: flex; gap: 5px; }
+.chrome .dots span { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--sketch); }
+.urlbar { flex: 1; min-width: 0; border: 1.5px solid var(--sketch); border-radius: 14px; padding: 3px 12px; font-family: var(--font-mono); font-size: .8rem; background: var(--field); white-space: nowrap; overflow-x: auto; }
+.sitenav { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; padding: 8px 14px; border-bottom: 1.5px dashed var(--line); font-size: .85rem; }
+.sitenav .logo { width: 44px; height: 24px; border: 1.5px solid var(--sketch); position: relative; }
+.sitenav .logo::before, .sitenav .logo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top right, transparent calc(50% - .75px), var(--sketch) 50%, transparent calc(50% + .75px)); }
+.sitenav .logo::after { transform: scaleX(-1); }
+.sitenav .cur { text-decoration: underline; text-underline-offset: 3px; }
+.sitenav .admin { position: relative; }
+.sitenav .admin > button { background: none; border: 1.5px solid transparent; border-radius: 6px; font: inherit; color: var(--ink); padding: 0 6px; cursor: pointer; }
+.sitenav .admin > button:hover, .sitenav .admin > button[aria-expanded="true"] { border-color: var(--sketch); }
+.sitenav .menu { position: absolute; top: calc(100% + 4px); left: 0; z-index: 6; background: var(--panel); border: 1.5px solid var(--sketch); border-radius: 6px; box-shadow: 3px 3px 0 var(--sketch); display: grid; min-width: 180px; padding: 4px; }
+.sitenav .menu button { background: none; border: 0; text-align: left; font: inherit; color: var(--ink); padding: 4px 8px; border-radius: 4px; cursor: pointer; white-space: nowrap; }
+.sitenav .menu button:hover { background: var(--accent-soft); }
+.sitenav .menu .cur { background: var(--accent-soft); font-weight: 700; }
+.viewhead { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; justify-content: space-between; }
+.sitenav .out { margin-left: auto; border: 1.5px solid var(--sketch); border-radius: 10px; padding: 0 8px; font-size: .78rem; }
+
+.view { padding: 16px 18px 20px; display: grid; gap: 14px; min-width: 0; }
+.view h2 { font-family: var(--font-sketch); font-size: 1.35rem; font-weight: 700; }
+.searchrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.searchrow input { flex: 1 1 260px; min-width: 0; }
+input[type="text"], select { font-family: var(--font-sketch); font-size: .9rem; color: var(--ink); background: var(--field); border: 1.5px solid var(--sketch); border-radius: 5px; padding: 4px 8px; }
+select { width: 100%; }
+.sbtn { font-family: var(--font-sketch); font-size: .9rem; border: 1.5px solid var(--sketch); border-radius: 12px; background: var(--field); color: var(--ink); padding: 3px 14px; cursor: pointer; box-shadow: 1.5px 1.5px 0 var(--sketch); white-space: nowrap; }
+.sbtn:hover:not(:disabled) { background: var(--accent-soft); }
+.sbtn:active:not(:disabled) { transform: translate(1px, 1px); box-shadow: .5px .5px 0 var(--sketch); }
+.sbtn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.sbtn.danger { background: var(--del); border-color: var(--del); color: #fff; }
+.sbtn.small { font-size: .78rem; padding: 1px 10px; }
+.sbtn:disabled { opacity: .45; cursor: not-allowed; }
+.api-pin { font-family: var(--font-mono); font-size: .66rem; background: var(--note); color: var(--note-ink); border: 0; border-radius: 3px; padding: 0 5px; cursor: pointer; line-height: 1.6; white-space: nowrap; }
+.api-pin:hover { outline: 1.5px solid var(--note-edge); }
+.pins { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+
+.tip { position: relative; display: inline-flex; }
+.tip .qmark { width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--sketch); background: var(--field); color: var(--ink); font: 700 .8rem var(--font-sketch); cursor: help; padding: 0; }
+.tip [role="tooltip"] { position: absolute; right: 0; top: calc(100% + 8px); z-index: 5; width: min(300px, 80vw); background: var(--ink); color: var(--panel); font: .78rem/1.4 var(--font-ui); padding: 8px 10px; border-radius: 6px; opacity: 0; visibility: hidden; transition: opacity .12s; pointer-events: none; }
+.tip:hover [role="tooltip"], .tip:focus-within [role="tooltip"] { opacity: 1; visibility: visible; }
+.togglerow { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+.linkish { background: none; border: 0; color: var(--accent); text-decoration: underline; cursor: pointer; padding: 0; font-family: var(--font-sketch); font-size: .9rem; }
+.linkish.small { font-size: .8rem; }
+.badge { border: 1.5px solid var(--sketch); border-radius: 10px; padding: 0 8px; font-size: .75rem; white-space: nowrap; }
+.badge.draft { background: var(--field-off); }
+.badge.pub { background: var(--ok); color: #fff; border-color: var(--ok); }
+.badge.active { background: var(--accent-soft); border-color: var(--accent); }
+.badge.deleted { background: var(--del); color: #fff; border-color: var(--del); }
+tr.is-deleted td { color: var(--ink-soft); }
+tr.is-deleted td .flag, tr.is-deleted td .settings { opacity: .55; }
+
+fieldset { border: 1.5px solid var(--sketch); border-radius: 8px; margin: 0; padding: 10px 12px 12px; display: grid; gap: 12px; min-width: 0; }
+legend { padding: 0 6px; font-weight: 700; font-size: .9rem; }
+.fgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px 14px; }
+.fld { display: grid; gap: 3px; min-width: 0; }
+.lbl { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: .82rem; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.hint { font-size: .8rem; color: var(--ink-soft); }
+
+/* Tabel */
+.tablewrap { overflow-x: auto; border: 1.5px solid var(--sketch); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: .84rem; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px dashed var(--line); vertical-align: middle; }
+thead th { background: var(--field-off); border-bottom: 1.5px solid var(--sketch); font-weight: 700; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr:hover td { background: color-mix(in srgb, var(--accent-soft) 45%, transparent); }
+td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.sorth { background: none; border: 0; padding: 0; font: inherit; font-weight: 700; color: var(--ink); cursor: pointer; display: inline-flex; gap: 4px; align-items: center; }
+.sorth:hover { color: var(--accent); }
+.sorth .arrow { font-size: .75rem; color: var(--accent); min-width: .8em; }
+.th-pin { display: inline-flex; gap: 4px; align-items: center; }
+.title-cell { min-width: 170px; }
+.fallback { display: block; font-size: .7rem; color: var(--ink-soft); }
+.settings { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; min-width: 120px; }
+.settings li { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.settings li::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex: none; }
+.settings .none { color: var(--ink-soft); }
+.settings .none::before { display: none; }
+.tr-ok { color: var(--ok); font-weight: 700; font-size: 1.05rem; }
+.tr-bad { color: var(--bad); font-weight: 700; font-size: 1.05rem; cursor: help; }
+.icons { display: flex; gap: 4px; }
+.ibtn { width: 28px; height: 26px; display: inline-grid; place-items: center; border: 1.5px solid var(--sketch); border-radius: 6px; background: var(--field); color: var(--ink); cursor: pointer; padding: 0; }
+.ibtn:hover { background: var(--accent-soft); }
+.ibtn.del:hover { background: color-mix(in srgb, var(--del) 20%, transparent); }
+.ibtn svg { width: 16px; height: 16px; }
+.flag svg { width: 26px; height: 17px; border: 1.5px solid var(--sketch); display: block; }
+.empty-row td { text-align: center; padding: 20px; color: var(--ink-soft); }
+
+.foot { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; }
+.total { font-size: .85rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.pager { display: flex; flex-wrap: wrap; gap: 0; }
+.pager button { font-family: var(--font-sketch); font-size: .85rem; border: 1.5px solid var(--sketch); margin-left: -1.5px; background: var(--field); color: var(--accent); padding: 2px 10px; cursor: pointer; }
+.pager button:first-child { border-radius: 6px 0 0 6px; margin-left: 0; }
+.pager button:last-child { border-radius: 0 6px 6px 0; }
+.pager button[aria-current="page"] { background: var(--accent); color: #fff; border-color: var(--sketch); }
+.pager button:disabled { color: var(--ink-soft); cursor: not-allowed; opacity: .6; }
+
+/* Alumine rida */
+.below { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; box-shadow: var(--shadow); display: grid; gap: 10px; min-width: 0; }
+.kv { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 12px; font-size: .86rem; margin: 0; }
+.kv dt { color: var(--ink-soft); }
+.kv dd { margin: 0; font-family: var(--font-mono); font-size: .8rem; overflow-wrap: anywhere; }
+
+.note { background: var(--note); color: var(--note-ink); border-radius: 2px; box-shadow: 0 1px 0 var(--note-edge), 0 6px 16px rgba(80, 60, 0, .18); padding: 12px 14px 14px; display: grid; gap: 8px; min-width: 0; }
+.note.flash { animation: noteflash 1.4s ease-out; }
+@keyframes noteflash { 0%, 30% { box-shadow: 0 0 0 4px var(--accent), 0 6px 16px rgba(80,60,0,.18); } 100% { box-shadow: 0 1px 0 var(--note-edge), 0 6px 16px rgba(80,60,0,.18); } }
+.note-head { display: flex; align-items: center; gap: 8px; }
+.note-head strong { font-size: .82rem; font-weight: 600; letter-spacing: .03em; }
+.note-head .copy { margin-left: auto; font: 500 .75rem var(--font-ui); background: rgba(255,255,255,.55); color: var(--note-ink); border: 1px solid var(--note-edge); border-radius: 4px; padding: 1px 8px; cursor: pointer; }
+.note-head .copy:hover { background: #fff; }
+.note pre { margin: 0; font: .78rem/1.45 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+.note .draft-tag { font-size: .72rem; background: rgba(255,255,255,.55); border-radius: 3px; padding: 0 6px; }
+
+.log { display: grid; gap: 6px; }
+.log-step { font-size: .85rem; color: var(--ink-soft); }
+.log-group { font-size: .74rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft); margin-top: 6px; }
+.req { border: 1px solid var(--line); border-radius: 6px; background: var(--field); overflow: hidden; }
+.req.done { border-color: var(--ok); }
+.req > button { width: 100%; display: flex; gap: 8px; align-items: center; text-align: left; background: none; border: 0; color: var(--ink); padding: 6px 10px; cursor: pointer; }
+.req > button:hover { background: var(--field-off); }
+.req .main { display: grid; gap: 1px; flex: 1; min-width: 0; }
+.req .when { display: block; font-size: .74rem; color: var(--ink-soft); }
+.req .ran { font: 600 .68rem var(--font-ui); color: var(--ok); border: 1px solid var(--ok); border-radius: 10px; padding: 0 6px; flex: none; }
+.req.idle .method { opacity: .75; }
+.method { font: 600 .7rem var(--font-mono); padding: 1px 6px; border-radius: 3px; color: #fff; flex: none; }
+.m-GET { background: var(--get); } .m-POST { background: var(--post); } .m-PUT { background: var(--put); } .m-DELETE { background: var(--del); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .method { color: #111; } }
+:root[data-theme="dark"] .method { color: #111; }
+.req .path { font-family: var(--font-mono); font-size: .76rem; overflow-wrap: anywhere; }
+.req .body { border-top: 1px dashed var(--line); padding: 8px 10px; display: grid; gap: 6px; }
+.req .body pre { margin: 0; font: .74rem/1.4 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; max-height: 280px; overflow: auto; }
+.req .body .sub { font-size: .75rem; color: var(--ink-soft); }
+.req .body .linkish { font-size: .8rem; justify-self: start; }
+
+.notes-section { display: grid; gap: 14px; }
+.notes-section > p { margin: 0; color: var(--ink-soft); max-width: 72ch; }
+.notes-grid { columns: 3 340px; column-gap: 18px; }
+.notes-grid .note { break-inside: avoid; margin-bottom: 18px; }
+
+.overlay { position: fixed; inset: 0; background: rgba(15, 20, 28, .45); display: grid; place-items: center; padding: 16px; z-index: 20; }
+.modal { background: var(--panel); color: var(--ink); border: 2px solid var(--sketch); border-radius: 10px; width: min(440px, 100%); padding: 16px 18px; display: grid; gap: 12px; font-family: var(--font-sketch); box-shadow: 4px 4px 0 var(--sketch); }
+.modal h2 { font-family: var(--font-sketch); font-weight: 700; }
+.modal .row { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--panel); padding: 8px 16px; border-radius: 6px; font-size: .9rem; z-index: 30; max-width: calc(100% - 32px); }
+
+@media (max-width: 1100px) { .below { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .below .note { grid-column: 1 / -1; } }
+@media (max-width: 700px) { .below { grid-template-columns: minmax(0, 1fr); } .page { padding-inline: 16px; } }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+/* Nimekirja ja vormi lisad (koolitajate läbimängust) */
+.viewhead .sub { display: block; font-size: .9rem; color: var(--ink-soft); font-weight: 400; margin-top: 2px; }
+.headbtns { display: flex; flex-wrap: wrap; gap: 8px; }
+.sitenav .menu hr { border: 0; border-top: 1.5px dashed var(--line); margin: 3px 4px; }
+.menu .mhead { font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-soft); padding: 4px 8px 2px; }
+.flags { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.flagbtn { display: inline-flex; gap: 6px; align-items: center; font-family: var(--font-sketch); font-size: .85rem; border: 1.5px solid var(--line); border-radius: 6px; background: var(--field); color: var(--ink); padding: 2px 8px; cursor: pointer; }
+.flagbtn:hover { border-color: var(--accent); }
+.flagbtn.missing svg { filter: grayscale(1); opacity: .4; }
+.flagbtn.missing { color: var(--ink-soft); border-style: dashed; }
+.flagbtn[aria-current="true"] { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.flagbtn svg, .lbl .flag svg { width: 22px; height: 14px; border: 1px solid var(--sketch); display: block; }
+.lbl .flag { display: inline-flex; }
+.formgrid { display: grid; gap: 12px; }
+.fld input[type="text"] { width: 100%; }
+.fld input[readonly], .fld textarea[readonly] { background: var(--field-off); color: var(--ink-soft); }
+textarea { font-family: var(--font-sketch); font-size: .9rem; color: var(--ink); background: var(--field); border: 1.5px solid var(--sketch); border-radius: 5px; padding: 6px 8px; width: 100%; min-height: 90px; resize: vertical; }
+.photo-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.photo-row .btns { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.avatar { border-radius: 50%; border: 1.5px solid var(--sketch); object-fit: cover; flex: none; width: 80px; height: 80px; }
+.avatar.ph { display: inline-grid; place-items: center; color: var(--ink-soft); border-style: dashed; }
+.avatar.ph svg { width: 60px; height: 60px; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.alert { border: 1.5px solid var(--del); background: color-mix(in srgb, var(--del) 14%, transparent); color: var(--ink); border-radius: 6px; padding: 6px 10px; font-size: .88rem; }
+.req-star { color: var(--del); }
+td.num { text-align: right; font-variant-numeric: tabular-nums; }
+th.num { text-align: right; }
+td.center, th.center { text-align: center; }
+.name-cell { min-width: 160px; font-weight: 700; }
+.switch { display: inline-flex; gap: 8px; align-items: center; cursor: pointer; font-size: .9rem; }
+.switch input { appearance: none; width: 34px; height: 18px; border: 1.5px solid var(--sketch); border-radius: 10px; background: var(--field-off); position: relative; cursor: pointer; margin: 0; }
+.switch input::after { content: ""; position: absolute; top: 2px; left: 2px; width: 11px; height: 11px; border-radius: 50%; background: var(--sketch); transition: left .12s; }
+.switch input:checked { background: var(--accent); border-color: var(--accent); }
+.switch input:checked::after { left: 18px; background: #fff; }
+tr.is-deleted td { color: var(--ink-soft); }
+.ibtn:disabled { opacity: .35; cursor: not-allowed; }
+.cards { display: grid; gap: 14px; }
+.rte { border: 1.5px solid var(--sketch); border-radius: 5px; background: var(--field); }
+.rte .bar { display: flex; gap: 4px; padding: 3px 6px; border-bottom: 1px dashed var(--line); font-family: var(--font-sketch); font-size: .8rem; color: var(--ink-soft); }
+.rte .bar span { border: 1px solid var(--line); border-radius: 4px; padding: 0 6px; }
+.rte .area { min-height: 80px; padding: 6px 8px; font-family: var(--font-sketch); font-size: .9rem; outline: none; }
+.rte .area p { margin: 0 0 6px; }
+.rte.readonly .area { background: var(--field-off); }
+.tip [role="tooltip"] { left: 0; right: auto; }
+.tip .qmark { width: 20px; height: 20px; font-size: .72rem; }
+.stack { display: inline-flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.lect-legend { display: inline-flex; gap: 6px; align-items: center; }
+.lect-legend .flag svg { width: 22px; height: 14px; border: 1px solid var(--sketch); display: block; }
+.helper { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.embed .sitenav { display: none; }
+/* AdminRoomsView ja RoomFormView lisad */
+.ok-alert { border: 1.5px solid var(--ok); background: color-mix(in srgb, var(--ok) 14%, transparent); color: var(--ink); border-radius: 6px; padding: 6px 10px; font-size: .88rem; }
+.err-alert { border: 1.5px solid var(--del); background: color-mix(in srgb, var(--del) 12%, transparent); color: var(--ink); border-radius: 6px; padding: 6px 10px; font-size: .88rem; }
+.fld .val { padding: 4px 0; font-family: var(--font-sketch); font-size: .95rem; }
+.ok-alert .x, .alert .x { float: right; background: none; border: 0; color: var(--ink); cursor: pointer; font-size: 1rem; line-height: 1; padding: 0 2px; }
+.ph { display: grid; gap: 10px; justify-items: start; padding: 20px 0; }
+.view fieldset input[type="text"] { max-width: 420px; }
+/* AdminEnquiriesView ja AdminEnquiryView lisad */
+tr.is-new td { font-weight: 700; }
+.dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 16px; margin: 0; font-size: .9rem; }
+.dl dt { color: var(--ink-soft); }
+.dl dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.dl a { color: var(--accent); }
+.msg { white-space: pre-wrap; }
+/* AdminRegistrationsView ja AdminRegistrationView lisad */
+.badge.past { background: var(--field-off); border-color: var(--line); color: var(--ink-soft); margin-left: 4px; }
+.badge.full { background: color-mix(in srgb, var(--put) 22%, transparent); border-color: var(--put); }
+.badge.cancel { background: color-mix(in srgb, var(--del) 16%, transparent); border-color: var(--del); }
+.cardrow { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+.switch input.radio { appearance: auto; width: auto; height: auto; border: 0; background: none; accent-color: var(--accent); }
+.switch input.radio::after { display: none; }
+td .linkish { font-size: .84rem; }
+/* hidden-atribuut peab peitma ka elemendid, millel on oma display (nt .menu { display: grid }) */
+[hidden] { display: none !important; }
+#p-menu { left: auto; right: 0; }
+/* ProfileView lisad: vasak menüü (mockupi järgi) ja paremal valitud osa kaart */
+.sitenav .who { font-size: .78rem; color: var(--ink-soft); }
+.sitenav .right { margin-left: auto; display: inline-flex; gap: 8px; align-items: center; }
+.sitenav .pillbtn { border: 1.5px solid var(--sketch); border-radius: 10px; padding: 0 8px; font: inherit; font-size: .78rem; background: var(--field); color: var(--ink); cursor: pointer; }
+.sitenav .pillbtn.cur { background: var(--accent-soft); border-color: var(--accent); }
+.profile-layout { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 0; align-items: start; }
+.pmenu { display: grid; gap: 0; padding-top: 14px; }
+.pmenu button { font-family: var(--font-sketch); font-size: .95rem; text-align: left; border: 1.5px solid var(--sketch); border-right: 0; margin-top: -1.5px; background: var(--field-off); color: var(--ink); padding: 4px 10px; cursor: pointer; }
+.pmenu button:first-child { margin-top: 0; }
+.pmenu button:hover { background: var(--accent-soft); }
+.pmenu button[aria-current="page"] { background: var(--panel); font-weight: 700; position: relative; }
+.pmenu button[aria-current="page"]::after { content: ""; position: absolute; right: -2px; top: 0; bottom: 0; width: 3px; background: var(--panel); }
+.pcard { border: 1.5px solid var(--sketch); border-radius: 4px; background: var(--panel); padding: 14px 16px 18px; display: grid; gap: 14px; min-width: 0; }
+.pcard .viewhead h2 { font-size: 1.5rem; }
+.pgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 28px; }
+.pgrid .fld input { width: 100%; font-family: var(--font-sketch); font-size: .95rem; color: var(--ink); background: var(--field); border: 1.5px solid var(--sketch); border-radius: 3px; padding: 6px 8px; }
+.pgrid .fld input[readonly] { background: var(--field-off); color: var(--ink); }
+.fld input[type="password"] { width: 100%; max-width: 360px; font-family: var(--font-sketch); font-size: .95rem; color: var(--ink); background: var(--field); border: 1.5px solid var(--sketch); border-radius: 3px; padding: 6px 8px; }
+.fld input.invalid { border-color: var(--del); box-shadow: 0 0 0 1px var(--del); }
+.ferr { font-size: .8rem; color: var(--del); }
+.info { border: 1.5px dashed var(--line); background: var(--field-off); border-radius: 6px; padding: 8px 10px; font-size: .88rem; }
+.pwgrid { display: grid; gap: 12px; }
+.regs { display: grid; gap: 10px; }
+.reg { border: 1.5px solid var(--sketch); border-radius: 8px; padding: 8px 12px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: center; }
+.reg .t { font-weight: 700; }
+.reg .meta { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; font-size: .85rem; }
+.reg .meta .date { font-variant-numeric: tabular-nums; }
+.reg .act { grid-row: 1 / span 2; grid-column: 2; align-self: center; }
+.badge.paid { background: color-mix(in srgb, var(--ok) 16%, transparent); border-color: var(--ok); }
+.badge.unpaid { background: var(--field-off); border-style: dashed; }
+.sec-title { font-family: var(--font-sketch); font-size: 1.05rem; font-weight: 700; margin: 4px 0 0; }
+.empty { color: var(--ink-soft); display: grid; gap: 6px; justify-items: start; }
+@media (max-width: 700px) {
+  .profile-layout { grid-template-columns: minmax(0, 1fr); }
+  .pmenu { display: flex; flex-wrap: wrap; padding-top: 0; }
+  .pmenu button { border-right: 1.5px solid var(--sketch); margin: 0 -1.5px -1.5px 0; }
+  .pmenu button[aria-current="page"]::after { display: none; }
+  .pgrid { grid-template-columns: minmax(0, 1fr); }
+  .reg { grid-template-columns: minmax(0, 1fr); }
+  .reg .act { grid-row: auto; grid-column: 1; justify-self: start; }
+}
+/* ParticipantFeedbackFormView lisad */
+.backlink { justify-self: start; }
+.fb-meta { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; font-size: .9rem; color: var(--ink-soft); }
+.fb-meta .date { font-variant-numeric: tabular-nums; }
+.crits { display: grid; gap: 12px; }
+.crit { border: 1.5px solid var(--sketch); border-radius: 8px; padding: 10px 12px; display: grid; gap: 8px; min-width: 0; }
+.crit.invalid { border-color: var(--del); box-shadow: 0 0 0 1px var(--del); }
+.crit-head { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; }
+.crit-head .ctitle { font-weight: 700; }
+.crit .ferr { margin-top: -4px; }
+.scale { display: flex; flex-wrap: wrap; gap: 4px 10px; border: 0; margin: 0; padding: 0; }
+.scale label { display: inline-flex; flex-direction: column; align-items: center; gap: 1px; font-size: .82rem; cursor: pointer; min-width: 24px; }
+.scale label.off { cursor: default; color: var(--ink-soft); }
+.scale label.sel { color: var(--ink); font-weight: 700; }
+.scale input { accent-color: var(--accent); margin: 0; width: 16px; height: 16px; cursor: inherit; }
+.comment { display: grid; gap: 3px; }
+.comment textarea { min-height: 66px; }
+.comment textarea:disabled { background: var(--field-off); color: var(--ink); opacity: 1; }
+.comment .count { justify-self: end; font-size: .75rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.proto-tag { font: .7rem var(--font-ui); border: 1px dashed var(--put); color: var(--put); border-radius: 3px; padding: 0 5px; }
+.denied-box { display: grid; gap: 10px; justify-items: start; }
+.badge.fbstat { font-family: var(--font-mono); }
+</style>
+
+<div class="page">
+  <header class="intro">
+    <h1>Koolituse tagasiside — läbimäng</h1>
+    <p>Uus vaade <code>ParticipantFeedbackFormView.vue</code> (<code>/participant-feedback-form?courseParticipantId={id}</code>), kus osaleja annab toimunud koolitusele tagasisidet: iga kriteeriumi hinne <strong>1–10</strong> (kohustuslik) ja soovi korral kommentaar (kuni 255 märki). Vorm avaneb lehelt <strong>„Minu koolitused“</strong> (<code>ParticipantCoursesView.vue</code>) nupuga „Anna tagasisidet“ (uus tagasiside → <code>POST</code>) või „Vaata tagasisidet“ (olemasolev → lugemisrežiim, „Muuda“ → <code>PUT</code>). Kriteeriumi nime kõrval (?) näitab hõljumisel kirjeldust. Paremal all näed päringuid ja backendi vastuseid; kollased sildid viivad API märkmete juurde.</p>
+    <p>Andmed on plaanitud seed'ist (<code>participant-feedback-form-view-skeemid.md</code>, jaotis 1; täna = 01/10/2026). Kasutaja on Anna Saar (<code>userId = 2</code>, osaleja 1): registreerumine <strong>2</strong> (Java algkursus 07.–11.09, tagasisidet pole), <strong>10</strong> (Java algkursus 08.–12.06, tagasiside olemas, staatus H) ja <strong>1</strong> (tulevane, nuppu pole). Nupud „Admin …“ simuleerivad kriteeriumide muutmist teisest kohast — proovi neid, kui vorm on lahti, ja vajuta siis „Salvesta“. Kriteeriumide keel järgib kasutajaliidese keelt (puuduva tõlke korral põhikeel). Muudatused kehtivad ainult selles läbimängus.</p>
+    <div class="toolbar">
+      <span class="lbl-soft">Kes on sisse loginud:</span>
+      <button class="tbtn" type="button" data-as="user">Kasutaja (Anna Saar)</button>
+      <button class="tbtn" type="button" data-as="admin">Admin</button>
+      <button class="tbtn" type="button" data-as="public">Sisselogimata</button>
+      <span class="sep" aria-hidden="true"></span>
+      <span class="lbl-soft">Kasutajaliidese keel:</span>
+      <button class="tbtn" type="button" data-ui-lang="et">et</button>
+      <button class="tbtn" type="button" data-ui-lang="en">en</button>
+      <button class="tbtn" type="button" data-ui-lang="ru">ru</button>
+    </div>
+    <div class="toolbar">
+      <span class="lbl-soft">Ava URL-iga:</span>
+      <button class="tbtn" type="button" data-open="2">?courseParticipantId=2</button>
+      <button class="tbtn" type="button" data-open="10">?courseParticipantId=10</button>
+      <button class="tbtn" type="button" data-open="1">?courseParticipantId=1 (tulevane)</button>
+      <button class="tbtn" type="button" data-open="3">?courseParticipantId=3 (võõras)</button>
+      <span class="sep" aria-hidden="true"></span>
+      <span class="lbl-soft">Admin (teisest kohast):</span>
+      <button class="tbtn" type="button" id="btn-del4" aria-pressed="false">kustutas kriteeriumi 4</button>
+      <button class="tbtn" type="button" id="btn-add6" aria-pressed="false">lisas kriteeriumi 6</button>
+      <button class="tbtn" type="button" id="btn-seen">märkis tagasisided nähtuks (H)</button>
+      <span class="sep" aria-hidden="true"></span>
+      <button class="tbtn" type="button" id="btn-reset">Alusta algusest</button>
+    </div>
+  </header>
+
+  <div class="browser" aria-label="Wireframe">
+    <div class="chrome">
+      <div class="dots" aria-hidden="true"><span></span><span></span><span></span></div>
+      <div class="urlbar" id="urlbar"></div>
+    </div>
+    <nav class="sitenav" aria-label="Navbar (wireframe)" id="sitenav"></nav>
+    <div class="view" id="view"></div>
+  </div>
+
+  <div class="below">
+    <div class="card">
+      <h3>Vaate olek</h3>
+      <dl class="kv" id="statekv"></dl>
+    </div>
+    <div class="card">
+      <h3>Päringud</h3>
+      <div class="log" id="log"></div>
+    </div>
+    <div class="note" id="note-view">
+      <div class="note-head"><strong id="view-note-title">Vaate märkmed</strong><button class="copy" type="button" data-copy="view">Kopeeri</button></div>
+      <pre id="view-note-text"></pre>
+    </div>
+  </div>
+
+  <section class="notes-section">
+    <h2>API märkmed (<span id="notes-count"></span>)</h2>
+    <p>Iga backendi kutse kohta üks kast. Vajuta wireframe'il kollasele sildile või päringute logis päringule, et hüpata vastava märkme juurde.</p>
+    <div class="notes-grid" id="notes"></div>
+  </section>
+</div>
+
+<div id="modal-root"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- Prototüübi kest (../index.html): embed-režiim ja vaadete vaheline navigeerimine ---------- */
+  var SHELL_Q = new URLSearchParams(location.search);
+  var EMBED = SHELL_Q.get("embed") === "1" && window.parent !== window;
+  if (EMBED) document.documentElement.classList.add("embed");
+  function goRoute(path, standaloneMessage) {
+    if (EMBED) { window.parent.postMessage({ type: "bcs-navigate", path: path }, "*"); return; }
+    toast(standaloneMessage || "router.push → " + path);
+  }
+
+  /* ---------- Märkmed (hiljem faili markmed/participant-feedback-form-view-markmed.md) ---------- */
+  var VIEW_NOTES = {
+    courses: { title: "ParticipantCoursesView.vue (muutus)", text: [
+      "Roll: Kasutaja (osaleja); admin → /not-authorized",
+      "Failinimi: ParticipantCoursesView.vue",
+      "Frontend rada: /participant-courses",
+      "",
+      "Vaatega seotud lisainfo:",
+      "Olemasolev vaade, muutub ainult registreerumise rida (ParticipantRegistrationItem.vue). Kui canGiveFeedback = true, on rea paremas servas nupp \"Anna tagasisidet\" (hasFeedback = false) või \"Vaata tagasisidet\" (hasFeedback = true) → /participant-feedback-form?courseParticipantId={id}. Nupp on samas kohas kui \"Loobu\" (mõlemat korraga ei esine).",
+      "Tavaliselt on nupp plokis \"Toimunud\"; viimasel koolituspäeval (end_date = täna) on rida veel plokis \"Tulevased\", kuid nupp kuvatakse ka seal. Loobunud, tühistatud ja tulevase koolituse real nuppu pole."].join("\n") },
+    form: { title: "ParticipantFeedbackFormView.vue", text: [
+      "Roll: Kasutaja (osaleja); admin → /not-authorized",
+      "Failinimi: ParticipantFeedbackFormView.vue",
+      "Frontend rada: /participant-feedback-form?courseParticipantId={id}",
+      "",
+      "Vaatega seotud lisainfo:",
+      "Avatakse \"Minu koolitused\" nupust \"Anna tagasisidet\" / \"Vaata tagasisidet\". Vasakul ProfileMenu.vue (aktiivne \"Minu koolitused\"), kaardi ülaosas link \"← Tagasi minu koolituste juurde\" (/participant-courses). Sisselogimata → /login?redirect={rada koos parameetriga}; courseParticipantId puudub → ErrorView. GET /api/user/{userId}/registration/{courseParticipantId}/feedback?contentLang={UI keel} (ka keele vahetusel).",
+      "Päis: \"Tagasiside\", koolituse nimi · toimumisaeg dd/MM/yyyy – dd/MM/yyyy; olemasoleval tagasisidel \"Esitatud dd/MM/yyyy\" ja muudetul \"Muudetud dd/MM/yyyy\" (updatedAt kuupäev ≠ createdAt kuupäev). Staatust (N/U/H) osalejale ei näidata. Vihje \"Hinda iga väidet skaalal 1–10 (1 = ei nõustu üldse, 10 = nõustun täielikult)\".",
+      "Iga kriteerium (FeedbackCriteriaItem.vue): title + (?) — hover/fookus → tooltip description; raadionupud 1–10 (kohustuslik); link \"+ Lisa kommentaar\" / \"− Peida kommentaar\" avab/peidab textarea (3 rida, placeholder \"Täpsusta soovi korral oma hinnangut\", loendur \"0 / 255\"). Peitmine ei kustuta teksti. Olemasoleva kommentaariga kast on kohe lahti; lugemisrežiimis kommentaarita kriteeriumil linki pole.",
+      "Olek selgub hasFeedback väärtusest. false → väljad kohe täidetavad, nupp \"Lisa tagasiside\" → POST. true → väljad disabled, nupp \"Muuda\" → väljad muudetavaks, nupud \"Salvesta\" (PUT) ja \"Tühista\" (laaditud väärtused tagasi, lugemisrežiim).",
+      "Enne saatmist: kui mõni hinne puudub → \"Hinda kõiki kriteeriume\" (InlineAlerts.vue nuppude kõrval), hindamata kriteeriumid punase äärisega, päringut ei tehta. Tühi kommentaar saadetakse null-ina. Edu → \"Tagasiside salvestatud\", GET uuesti, lugemisrežiim (nupp \"Muuda\"). 403 FEEDBACK_ALREADY_EXISTS / FEEDBACK_CRITERIA_CHANGED ja 404 FEEDBACK_NOT_FOUND → backendi teade ja GET uuesti.",
+      "GET-i 403 FEEDBACK_NOT_ALLOWED / 404 REGISTRATION_NOT_FOUND → kaardil punane teade backendi tekstiga, vormi pole, link tagasi."].join("\n") }
+  };
+  var USER_NOT_FOUND = "HTTP: 404\nerrorCode: PRIMARY_KEY_NOT_FOUND\nmessage: \"Ei leidnud primary keyd 'userId' väärtusega: 123\"";
+  var REG_NOT_FOUND = "HTTP: 404\nerrorCode: PRIMARY_KEY_NOT_FOUND\nmessage: \"Ei leidnud primary keyd 'courseParticipantId' väärtusega: 123\"\n\nHTTP: 404\nerrorCode: REGISTRATION_NOT_FOUND\nmessage: \"Registreerumist ei leitud\"";
+  var NOT_ALLOWED = "HTTP: 403\nerrorCode: FEEDBACK_NOT_ALLOWED\nmessage: \"Sellele koolitusele ei saa tagasisidet anda\"";
+  var CRIT_CHANGED = "HTTP: 403\nerrorCode: FEEDBACK_CRITERIA_CHANGED\nmessage: \"Tagasiside küsimused on vahepeal muutunud, laadi leht uuesti\"";
+  var BAD_INPUT = "HTTP: 400\nerrorCode: INCORRECT_INPUT\nmessage: \"answers[0].score: must be less than or equal to 10\"";
+  var REQUEST_BODY = ["Request body:", "FeedbackRequestDto.java",
+    "{", "  \"answers\": [", "    {", "      \"feedbackCriteriaId\": 1,", "      \"score\": 9,", "      \"feedbackText\": \"Praktilisi näiteid oleks võinud olla rohkem\"", "    },", "    ...", "  ]", "}", "",
+    "Väljad: answers* (@NotEmpty, @Valid), feedbackCriteriaId*, score* (@Min(1) @Max(10)), feedbackText (@Size(max = 255), valikuline)", ""];
+  var NOTES = [
+    { id: "n-regs", title: "GET /api/user/{userId}/registrations", tag: "olemas, muutub", text: [
+      "API: GET /api/user/{userId}/registrations", "",
+      "Query parameetrid:", "contentLang: String — koolituse nime keel (\"et\"/\"en\")", "",
+      "Response (200):", "MyRegistrationDto.java",
+      "[", "  {", "    \"courseParticipantId\": 2,", "    \"courseId\": 3,", "    \"trainingTitle\": \"Java algkursus\",", "    \"startDate\": \"2026-09-07\",", "    \"endDate\": \"2026-09-11\",",
+      "    \"isOnSite\": true,", "    \"isOnline\": false,", "    \"courseStatus\": \"O\",", "    \"status\": \"R\",", "    \"hasPaid\": true,", "    \"isPast\": true,", "    \"canCancel\": false,", "    \"canGiveFeedback\": true,", "    \"hasFeedback\": false", "  },", "  ...", "]", "",
+      "API teenuse lisainfo:",
+      "Olemasolev teenus, lisanduvad väljad canGiveFeedback ja hasFeedback. canGiveFeedback = status \"R\" ja end_date <= täna ja courseStatus ei ole \"X\" ega \"D\" (tasumine ei loe). hasFeedback = registreerumisel on feedback rida. Ülejäänud käitumine muutumatu.", "",
+      "Veateated:", USER_NOT_FOUND].join("\n") },
+    { id: "n-get", title: "GET /api/user/{userId}/registration/{courseParticipantId}/feedback", text: [
+      "API: GET /api/user/{userId}/registration/{courseParticipantId}/feedback", "",
+      "Query parameetrid:", "contentLang: String — kriteeriumide ja koolituse nime keel (\"et\"/\"en\")", "",
+      "Response (200):", "ParticipantFeedbackDto.java",
+      "{", "  \"courseParticipantId\": 10,", "  \"trainingTitle\": \"Java algkursus\",", "  \"startDate\": \"2026-06-08\",", "  \"endDate\": \"2026-06-12\",", "  \"hasFeedback\": true,",
+      "  \"createdAt\": \"2026-06-12T16:40:00\",", "  \"updatedAt\": \"2026-06-12T16:40:00\",", "  \"criteria\": [", "    {", "      \"feedbackCriteriaId\": 1,", "      \"title\": \"Koolitus vastas ootustele\",",
+      "      \"description\": \"Koolituse sisu, tase ja maht vastasid koolituse kirjelduse põhjal tekkinud ootustele.\",", "      \"score\": 9,", "      \"feedbackText\": null", "    },", "    ...", "  ]", "}", "",
+      "API teenuse lisainfo:",
+      "Üks päring mõlemale olekule. hasFeedback = false → criteria = aktiivsed (A) kriteeriumid; score, feedbackText, createdAt, updatedAt on null. hasFeedback = true → criteria = aktiivsed + kustutatud (D), millele on vastatud; hiljem lisatud kriteeriumi score = null. Järjestus sequence, id. title/description contentLang keeles, puudumisel põhikeeles; trainingTitle samuti. updatedAt = vastuste MAX(updated_at). Kontrollid nagu POST-il (registreerumine kuulub kasutajale, status R, end_date <= täna, toimumiskord pole X ega D).", "",
+      "Veateated:", USER_NOT_FOUND, "", REG_NOT_FOUND, "", NOT_ALLOWED].join("\n") },
+    { id: "n-post", title: "POST /api/user/{userId}/registration/{courseParticipantId}/feedback", text: [
+      "API: POST /api/user/{userId}/registration/{courseParticipantId}/feedback", ""].concat(REQUEST_BODY, [
+      "Response (200): NONE", "",
+      "API teenuse lisainfo:",
+      "Loob feedback rea (status \"N\") ja iga vastuse kohta course_participant_feedback rea, ühes transaktsioonis. answers peab sisaldama täpselt kõiki aktiivseid kriteeriume, igaüht ühe korra. Tühi või ainult tühikutest feedbackText salvestatakse NULL-ina. Tingimused: registreerumine kuulub kasutaja osalejale, status \"R\", end_date <= täna, toimumiskord pole \"X\" ega \"D\".", "",
+      "Veateated:", USER_NOT_FOUND, "", REG_NOT_FOUND, "", NOT_ALLOWED, "",
+      "HTTP: 403\nerrorCode: FEEDBACK_ALREADY_EXISTS\nmessage: \"Tagasiside on juba antud\"", "", CRIT_CHANGED, "", BAD_INPUT]).join("\n") },
+    { id: "n-put", title: "PUT /api/user/{userId}/registration/{courseParticipantId}/feedback", text: [
+      "API: PUT /api/user/{userId}/registration/{courseParticipantId}/feedback", ""].concat(REQUEST_BODY, [
+      "Response (200): NONE", "",
+      "API teenuse lisainfo:",
+      "Uuendab olemasolevad vastused ja lisab puuduvad (hiljem lisatud kriteerium). answers peab sisaldama täpselt aktiivsed kriteeriumid + kustutatud, millele on vastatud. Staatus: \"H\" → \"U\"; \"N\" ja \"U\" jäävad. Tühi feedbackText → NULL. Tingimused nagu POST-il; tähtaega pole.", "",
+      "Veateated:", USER_NOT_FOUND, "", REG_NOT_FOUND, "", NOT_ALLOWED, "",
+      "HTTP: 404\nerrorCode: FEEDBACK_NOT_FOUND\nmessage: \"Tagasisidet ei leitud\"", "", CRIT_CHANGED, "", BAD_INPUT]).join("\n") }
+  ];
+
+  /* ---------- Andmed (plaanitud seed: 3_import.sql + skeemide jaotis 1) ---------- */
+  var TODAY = "2026-10-01";
+  var NOW = "2026-10-01T10:30:00";
+  var TRAININGS = { 1: { et: "Java algkursus", en: "Java Basics" } };
+  var COURSES = {
+    1: { t: 1, start: "2026-10-05", end: "2026-10-09", st: "O", room: true, link: false },
+    3: { t: 1, start: "2026-09-07", end: "2026-09-11", st: "O", room: true, link: false },
+    7: { t: 1, start: "2026-06-08", end: "2026-06-12", st: "O", room: false, link: true }
+  };
+  var CRITERIA_6 = { id: 6, seq: 6, st: "A", tr: { et: ["Praktilisi harjutusi oli piisavalt", "Koolitusel oli piisavalt praktilisi harjutusi teooria kinnistamiseks."], en: ["There was enough hands-on practice", "The training included enough practical exercises to reinforce the theory."] } };
+  var ROLE_USER = { user: 2, admin: 1 };
+  var ROLE_NAMES = { user: "Kasutaja", admin: "Admin", public: "Sisselogimata" };
+  var STATUS_NAMES = { N: "N — uus", U: "U — muudetud pärast ülevaatust", H: "H — üle vaadatud" };
+  function freshDb() {
+    return {
+      regs: [
+        { id: 1, c: 1, p: 1, paid: true, st: "R" },
+        { id: 2, c: 3, p: 1, paid: true, st: "R" },
+        { id: 3, c: 1, p: 2, paid: false, st: "R" },
+        { id: 10, c: 7, p: 1, paid: true, st: "R" }
+      ],
+      criteria: [
+        { id: 1, seq: 1, st: "A", tr: { et: ["Koolitus vastas ootustele", "Koolituse sisu, tase ja maht vastasid koolituse kirjelduse põhjal tekkinud ootustele."], en: ["The training met my expectations", "The content, level and scope matched the expectations set by the training description."] } },
+        { id: 2, seq: 2, st: "A", tr: { et: ["Koolitaja oli pädev", "Koolitaja valdas teemat põhjalikult ning selgitas seda arusaadavalt ja näidetega."], en: ["The trainer was competent", "The trainer had a thorough command of the subject and explained it clearly with examples."] } },
+        { id: 3, seq: 3, st: "A", tr: { et: ["Õppematerjalid olid asjakohased", "Õppematerjalid ja harjutused toetasid teema omandamist ning on kasutatavad ka pärast koolitust."], en: ["The materials were relevant", "The materials and exercises supported learning and remain useful after the training."] } },
+        { id: 4, seq: 4, st: "A", tr: { et: ["Õpikeskkond ja korraldus olid sobivad", "Koolitusruum või veebikeskkond, ajakava ja info edastamine toetasid õppimist."], en: ["Venue and organisation were suitable", "The training room or online environment, schedule and communication supported learning."] } },
+        { id: 5, seq: 5, st: "A", tr: { et: ["Soovitaksin koolitust kolleegidele", "Julgeksin seda koolitust soovitada kolleegidele või teistele samade vajadustega inimestele."], en: ["I would recommend this training to colleagues", "I would recommend this training to colleagues or others with similar needs."] } }
+      ],
+      feedbacks: [
+        { id: 1, cp: 10, st: "H", created: "2026-06-12T16:40:00", updated: "2026-06-15T09:00:00", answers: [
+          { c: 1, score: 9, text: null, updated: "2026-06-12T16:40:00" },
+          { c: 2, score: 10, text: "Selged selgitused ja palju praktilisi näiteid.", updated: "2026-06-12T16:40:00" },
+          { c: 3, score: 8, text: null, updated: "2026-06-12T16:40:00" },
+          { c: 4, score: 7, text: "Veebikeskkonnas oli esimesel päeval helikvaliteet kõikuv.", updated: "2026-06-12T16:40:00" },
+          { c: 5, score: 9, text: null, updated: "2026-06-12T16:40:00" }
+        ] }
+      ],
+      nextFeedbackId: 2
+    };
+  }
+  var db, ui, logSteps = [], logTitle = "", openReq = -1;
+  function freshUi(role) {
+    return { lang: ui ? ui.lang : "et", role: role, screen: "courses", cpId: 0, regs: null, fb: null, denied: null,
+      edit: false, form: null, invalid: [], okMsg: "", errMsg: "" };
+  }
+  function userId() { return ROLE_USER[ui.role]; }
+
+  function j(o) { return JSON.stringify(o, null, 2); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c]; }); }
+  function dmy(iso) { var d = iso.slice(0, 10).split("-"); return d[2] + "/" + d[1] + "/" + d[0]; }
+  function participantIdOf(uid) { return uid === 2 ? 1 : null; }
+  function regById(id) { return db.regs.filter(function (r) { return r.id === id; })[0] || null; }
+  function feedbackOf(cpId) { return db.feedbacks.filter(function (f) { return f.cp === cpId; })[0] || null; }
+  function criteriaById(id) { return db.criteria.filter(function (c) { return c.id === id; })[0]; }
+  // Tõlge contentLang keeles, puudumisel põhikeeles (et)
+  function tr(c) { return c.tr[ui.lang] || c.tr.et; }
+  function trainingTitle(c) { return TRAININGS[c.t][ui.lang] || TRAININGS[c.t].et; }
+  function bySeq(a, b) { return a.seq - b.seq || a.id - b.id; }
+
+  /* ---------- "Backend" ---------- */
+  function call(method, path, req, res) { logSteps.push({ method: method, path: path, req: req, res: res }); }
+  function startStep(title) { logSteps = []; logTitle = title; openReq = -1; }
+  function canGiveFeedback(r) { var c = COURSES[r.c]; return r.st === "R" && c.end <= TODAY && c.st !== "X" && c.st !== "D"; }
+  function regDto(r) {
+    var c = COURSES[r.c];
+    return { courseParticipantId: r.id, courseId: r.c, trainingTitle: trainingTitle(c), startDate: c.start, endDate: c.end, isOnSite: c.room, isOnline: c.link,
+      courseStatus: c.st, status: r.st, hasPaid: r.paid, isPast: c.end < TODAY, canCancel: r.st === "R" && c.start > TODAY && c.st !== "X",
+      canGiveFeedback: canGiveFeedback(r), hasFeedback: !!feedbackOf(r.id) };
+  }
+  function apiGetRegs() {
+    var uid = userId(), pid = participantIdOf(uid);
+    var list = pid ? db.regs.filter(function (r) { return r.p === pid; }).map(regDto).sort(function (a, b) { return a.startDate < b.startDate ? -1 : 1; }) : [];
+    call("GET", "/api/user/" + uid + "/registrations?contentLang=" + ui.lang, null, list);
+    return list;
+  }
+  // Ühine kontroll (GET, POST, PUT): registreerumine kuulub kasutajale, tagasiside andmine lubatud
+  function checkRegistration(cpId) {
+    var r = regById(cpId);
+    if (!r) return { status: 404, errorCode: "PRIMARY_KEY_NOT_FOUND", message: "Ei leidnud primary keyd 'courseParticipantId' väärtusega: " + cpId };
+    if (r.p !== participantIdOf(userId())) return { status: 404, errorCode: "REGISTRATION_NOT_FOUND", message: "Registreerumist ei leitud" };
+    if (!canGiveFeedback(r)) return { status: 403, errorCode: "FEEDBACK_NOT_ALLOWED", message: "Sellele koolitusele ei saa tagasisidet anda" };
+    return null;
+  }
+  // Vormi kriteeriumid: aktiivsed + (olemasoleval tagasisidel) kustutatud, millele on vastatud
+  function formCriteria(fb) {
+    return db.criteria.filter(function (c) {
+      return c.st === "A" || (fb && fb.answers.some(function (a) { return a.c === c.id; }));
+    }).sort(bySeq);
+  }
+  function feedbackPath(cpId) { return "/api/user/" + userId() + "/registration/" + cpId + "/feedback"; }
+  function apiGetFeedback(cpId) {
+    var path = feedbackPath(cpId) + "?contentLang=" + ui.lang, err = checkRegistration(cpId);
+    if (err) { call("GET", path, null, err); return { err: err }; }
+    var r = regById(cpId), c = COURSES[r.c], fb = feedbackOf(cpId);
+    var maxUpd = fb ? fb.answers.reduce(function (m, a) { return a.updated > m ? a.updated : m; }, fb.created) : null;
+    var dto = { courseParticipantId: cpId, trainingTitle: trainingTitle(c), startDate: c.start, endDate: c.end, hasFeedback: !!fb,
+      createdAt: fb ? fb.created : null, updatedAt: maxUpd,
+      criteria: formCriteria(fb).map(function (cr) {
+        var a = fb ? fb.answers.filter(function (x) { return x.c === cr.id; })[0] : null;
+        return { feedbackCriteriaId: cr.id, title: tr(cr)[0], description: tr(cr)[1], score: a ? a.score : null, feedbackText: a ? a.text : null };
+      }) };
+    call("GET", path, null, dto);
+    return { dto: dto };
+  }
+  function criteriaMatch(answers, fb) {
+    var expected = formCriteria(fb).map(function (c) { return c.id; }).sort().join(",");
+    var got = answers.map(function (a) { return a.feedbackCriteriaId; }).sort().join(",");
+    return expected === got;
+  }
+  function apiSave(method, cpId, body) {
+    var path = feedbackPath(cpId), err = checkRegistration(cpId), fb = feedbackOf(cpId);
+    if (!err && method === "POST" && fb) err = { status: 403, errorCode: "FEEDBACK_ALREADY_EXISTS", message: "Tagasiside on juba antud" };
+    if (!err && method === "PUT" && !fb) err = { status: 404, errorCode: "FEEDBACK_NOT_FOUND", message: "Tagasisidet ei leitud" };
+    if (!err && !criteriaMatch(body.answers, method === "PUT" ? fb : null)) err = { status: 403, errorCode: "FEEDBACK_CRITERIA_CHANGED", message: "Tagasiside küsimused on vahepeal muutunud, laadi leht uuesti" };
+    if (err) { call(method, path, body, err); return err; }
+    function clean(t) { return t && t.trim() ? t.trim() : null; }
+    if (method === "POST") {
+      db.feedbacks.push({ id: db.nextFeedbackId++, cp: cpId, st: "N", created: NOW, updated: NOW,
+        answers: body.answers.map(function (a) { return { c: a.feedbackCriteriaId, score: a.score, text: clean(a.feedbackText), updated: NOW }; }) });
+    } else {
+      var changed = false;
+      body.answers.forEach(function (a) {
+        var old = fb.answers.filter(function (x) { return x.c === a.feedbackCriteriaId; })[0], text = clean(a.feedbackText);
+        if (!old) { fb.answers.push({ c: a.feedbackCriteriaId, score: a.score, text: text, updated: NOW }); changed = true; }
+        else if (old.score !== a.score || old.text !== text) { old.score = a.score; old.text = text; old.updated = NOW; changed = true; }
+      });
+      if (changed && fb.st === "H") { fb.st = "U"; fb.updated = NOW; }
+    }
+    call(method, path, body, null);
+    return null;
+  }
+
+  /* ---------- Tegevused ---------- */
+  var PATHS = { courses: "/participant-courses", form: "/participant-feedback-form" };
+  function urlPath() { return ui.screen === "form" ? PATHS.form + "?courseParticipantId=" + ui.cpId : PATHS.courses; }
+  function openCourses(title) {
+    startStep(title);
+    ui.screen = "courses"; ui.fb = null; ui.denied = null; ui.okMsg = ""; ui.errMsg = "";
+    if (ui.role === "user") ui.regs = apiGetRegs();
+    renderAll();
+  }
+  function loadFeedback() {
+    var res = apiGetFeedback(ui.cpId);
+    ui.denied = res.err || null; ui.fb = res.dto || null; ui.invalid = [];
+    ui.edit = !!(ui.fb && !ui.fb.hasFeedback);
+    ui.form = ui.fb ? formFrom(ui.fb) : null;
+  }
+  function formFrom(fb) {
+    var f = {};
+    fb.criteria.forEach(function (c) { f[c.feedbackCriteriaId] = { score: c.score, text: c.feedbackText || "", open: !!c.feedbackText }; });
+    return f;
+  }
+  function openForm(cpId, title) {
+    startStep(title);
+    ui.screen = "form"; ui.cpId = cpId; ui.okMsg = ""; ui.errMsg = "";
+    if (ui.role === "user") loadFeedback();
+    renderAll();
+  }
+  function startAs(role, title) {
+    var keep = ui ? { screen: ui.screen, cpId: ui.cpId } : null;
+    ui = freshUi(role);
+    if (keep && keep.screen === "form") openForm(keep.cpId, title); else openCourses(title);
+  }
+  function submit() {
+    var isPost = !ui.fb.hasFeedback;
+    ui.okMsg = "";
+    ui.invalid = ui.fb.criteria.filter(function (c) { return ui.form[c.feedbackCriteriaId].score == null; }).map(function (c) { return c.feedbackCriteriaId; });
+    if (ui.invalid.length) {
+      ui.errMsg = "Hinda kõiki kriteeriume";
+      startStep("„" + (isPost ? "Lisa tagasiside" : "Salvesta") + "“ — frontendi kontroll ei lasknud läbi (päringut ei tehtud)");
+      renderAll(); return;
+    }
+    ui.errMsg = "";
+    var body = { answers: ui.fb.criteria.map(function (c) {
+      var f = ui.form[c.feedbackCriteriaId];
+      return { feedbackCriteriaId: c.feedbackCriteriaId, score: f.score, feedbackText: f.text.trim() ? f.text.trim() : null };
+    }) };
+    startStep("„" + (isPost ? "Lisa tagasiside" : "Salvesta") + "“ (registreerumine " + ui.cpId + ")");
+    var err = apiSave(isPost ? "POST" : "PUT", ui.cpId, body), typed = ui.form;
+    loadFeedback();
+    if (err && err.errorCode === "FEEDBACK_CRITERIA_CHANGED" && ui.form) {
+      // Läbimängu mugavus: alles jäänud kriteeriumide sisestused jäävad vormi, uued on tühjad
+      Object.keys(ui.form).forEach(function (k) { if (typed[k]) ui.form[k] = typed[k]; });
+      ui.edit = true;
+    }
+    if (err) ui.errMsg = err.message;
+    else ui.okMsg = "Tagasiside salvestatud";
+    renderAll();
+  }
+  function switchLang(code) {
+    if (code === ui.lang) return;
+    ui.lang = code;
+    startStep("Keele vahetus navbaris → " + code);
+    if (ui.role === "user") {
+      if (ui.screen === "courses") ui.regs = apiGetRegs();
+      else {
+        // Vormi sisestatud väärtused jäävad alles, uuesti laaditakse ainult tekstid
+        var keepForm = ui.form, keepEdit = ui.edit;
+        loadFeedback();
+        if (keepForm && ui.form) { Object.keys(ui.form).forEach(function (k) { if (keepForm[k]) ui.form[k] = keepForm[k]; }); ui.edit = keepEdit; }
+      }
+    }
+    renderAll();
+  }
+
+  var toastTimer = null;
+  function toast(msg) {
+    var old = document.querySelector(".toast"); if (old) old.remove();
+    var el = document.createElement("div"); el.className = "toast"; el.setAttribute("role", "status"); el.textContent = msg;
+    document.body.appendChild(el);
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { el.remove(); }, 2400);
+  }
+
+  /* ---------- Renderdamine ---------- */
+  function pin(noteId, label) { return '<button type="button" class="api-pin" data-note="' + noteId + '">' + esc(label) + '</button>'; }
+  function inlineAlerts(ok, err) { return (ok ? '<span class="ok-alert" role="status">' + esc(ok) + '</span>' : "") + (err ? '<span class="err-alert" role="alert">' + esc(err) + '</span>' : ""); }
+  function renderNav() {
+    var right = ui.role === "public" ? '<span class="pillbtn">Logi sisse</span><span class="pillbtn">Loo konto</span>'
+      : '<span class="who">' + ROLE_NAMES[ui.role] + '</span><span class="pillbtn" style="font-weight:700" title="Minu profiil">👤 ▾</span><span class="pillbtn">Logi välja</span>';
+    document.getElementById("sitenav").innerHTML = '<span class="logo" aria-hidden="true"></span><span>Koolitused ▾</span><span>Meie koolitajad</span><span>Teenused</span><span>Ettevõttest</span><span>Kontakt</span>' +
+      (ui.role === "admin" ? "<span>Admin ▾</span>" : "") + '<span class="right">' + right + '</span>';
+  }
+  function attendance(r) { return [r.isOnSite ? "Kohapeal" : "", r.isOnline ? "Veebis" : ""].filter(Boolean).join(" + "); }
+  function regRow(r) {
+    var badges = (r.status === "R" ? '<span class="badge active">Registreerunud</span>' : '<span class="badge draft">Loobunud</span>') +
+      (r.courseStatus === "X" ? '<span class="badge cancel">Tühistatud</span>' : "") +
+      (r.hasPaid ? '<span class="badge paid">Tasutud</span>' : '<span class="badge unpaid">Tasumata</span>');
+    var act = r.canGiveFeedback ? '<div class="act"><button type="button" class="sbtn small' + (r.hasFeedback ? "" : " primary") + '" data-fb="' + r.courseParticipantId + '">' + (r.hasFeedback ? "Vaata tagasisidet" : "Anna tagasisidet") + '</button></div>'
+      : r.canCancel ? '<div class="act"><button type="button" class="sbtn small danger" data-dead="Loobumine — vt profiili läbimäng (profile-view)">Loobu</button></div>' : "";
+    var att = attendance(r);
+    return '<div class="reg"><span class="t">' + esc(r.trainingTitle) + '</span>' + act +
+      '<div class="meta"><span class="date">' + dmy(r.startDate) + " – " + dmy(r.endDate) + '</span>' + (att ? '<span>· ' + att + '</span>' : "") + badges + '</div></div>';
+  }
+  function renderCourses() {
+    var up = ui.regs.filter(function (r) { return !r.isPast; }), past = ui.regs.filter(function (r) { return r.isPast; }).reverse();
+    return '<div class="viewhead"><h2>Minu koolitused</h2></div><div class="pins">' + pin("n-regs", "GET /api/user/{userId}/registrations") + '<span class="proto-tag">muutub: canGiveFeedback, hasFeedback</span></div>' +
+      '<h3 class="sec-title">Tulevased</h3>' + (up.length ? '<div class="regs">' + up.map(regRow).join("") + '</div>' : '<span class="hint">Tulevasi koolitusi pole.</span>') +
+      (past.length ? '<h3 class="sec-title">Toimunud</h3><div class="regs">' + past.map(regRow).join("") + '</div>' : "");
+  }
+  // FeedbackCriteriaItem.vue
+  function critItem(c, idx) {
+    var id = c.feedbackCriteriaId, f = ui.form[id], ro = !ui.edit, inv = ui.invalid.indexOf(id) !== -1;
+    var crit = criteriaById(id);
+    var scale = "";
+    for (var s = 1; s <= 10; s++) {
+      scale += '<label class="' + (ro ? "off" : "") + (f.score === s ? " sel" : "") + '"><input type="radio" name="s-' + id + '" value="' + s + '" data-score="' + id + '"' + (f.score === s ? " checked" : "") + (ro ? " disabled" : "") + '>' + s + '</label>';
+    }
+    var comment = "";
+    if (!ro) comment = '<button type="button" class="linkish small" data-toggle="' + id + '" aria-expanded="' + f.open + '" style="justify-self:start">' + (f.open ? "− Peida kommentaar" : "+ Lisa kommentaar") + '</button>';
+    if (f.open) comment += '<div class="comment"><label class="visually-hidden" for="t-' + id + '">Kommentaar: ' + esc(c.title) + '</label><textarea id="t-' + id + '" rows="3" maxlength="255" data-text="' + id + '" placeholder="Täpsusta soovi korral oma hinnangut"' + (ro ? " disabled" : "") + '>' + esc(f.text) + '</textarea>' +
+      '<span class="count" id="cnt-' + id + '">' + f.text.length + ' / 255</span></div>';
+    return '<div class="crit' + (inv ? " invalid" : "") + '"><div class="crit-head"><span class="ctitle" id="ct-' + id + '">' + esc(c.title) + '</span>' +
+      '<span class="tip"><button type="button" class="qmark" aria-label="Selgitus: ' + esc(c.title) + '" aria-describedby="tt-' + id + '">?</button><span role="tooltip" id="tt-' + id + '">' + esc(c.description) + '</span></span>' +
+      (crit && crit.st === "D" ? '<span class="proto-tag" title="Osalejale seda märget ei näidata">läbimäng: kriteerium kustutatud (D), aga sellele on vastatud</span>' : "") +
+      (ui.fb.hasFeedback && c.score == null ? '<span class="proto-tag" title="Osalejale seda märget ei näidata">läbimäng: lisatud pärast tagasiside andmist</span>' : "") +
+      '</div><fieldset class="scale" aria-labelledby="ct-' + id + '">' + scale + '</fieldset>' +
+      (inv ? '<span class="ferr">Vali hinne</span>' : "") + comment + '</div>';
+  }
+  function renderForm() {
+    var back = '<button type="button" class="linkish backlink" data-back="1">← Tagasi minu koolituste juurde</button>';
+    if (ui.denied) {
+      return back + '<div class="viewhead"><h2>Tagasiside</h2></div><div class="pins">' + pin("n-get", "GET …/registration/{courseParticipantId}/feedback") + '</div>' +
+        '<div class="denied-box"><div class="err-alert" role="alert">' + esc(ui.denied.message) + '</div><span class="hint">Vormi ei kuvata (' + ui.denied.status + ' ' + ui.denied.errorCode + ').</span></div>';
+    }
+    var fb = ui.fb, isPost = !fb.hasFeedback;
+    var meta = '<div class="fb-meta"><span>' + esc(fb.trainingTitle) + '</span><span class="date">· ' + dmy(fb.startDate) + " – " + dmy(fb.endDate) + '</span>' +
+      (fb.createdAt ? '<span class="date">· Esitatud ' + dmy(fb.createdAt) + '</span>' : "") +
+      (fb.updatedAt && dmy(fb.updatedAt) !== dmy(fb.createdAt) ? '<span class="date">· Muudetud ' + dmy(fb.updatedAt) + '</span>' : "") + '</div>';
+    var buttons = isPost ? '<button type="button" class="sbtn primary" id="b-submit">Lisa tagasiside</button>' + pin("n-post", "POST …/feedback")
+      : ui.edit ? '<button type="button" class="sbtn primary" id="b-submit">Salvesta</button><button type="button" class="sbtn" id="b-cancel-edit">Tühista</button>' + pin("n-put", "PUT …/feedback")
+      : '<button type="button" class="sbtn primary" id="b-edit">Muuda</button>';
+    return back + '<div class="viewhead"><h2>Tagasiside</h2></div>' + meta + '<div class="pins">' + pin("n-get", "GET …/registration/{courseParticipantId}/feedback") + '</div>' +
+      '<p class="hint" style="margin:0">Hinda iga väidet skaalal 1–10 (1 = ei nõustu üldse, 10 = nõustun täielikult)</p>' +
+      '<div class="crits">' + fb.criteria.map(critItem).join("") + '</div>' +
+      '<div class="actions">' + buttons + inlineAlerts(ui.okMsg, ui.errMsg) + '</div>';
+  }
+  function renderView() {
+    var view = document.getElementById("view");
+    if (ui.role === "public") {
+      var target = urlPath();
+      view.innerHTML = '<div class="ph"><h2>Sisselogimine nõutud</h2><p class="hint">Sisselogimata kasutaja suunatakse kohe <code>/login?redirect=' + esc(encodeURIComponent(target)) + '</code> — pärast sisselogimist jõuab ta samasse vaatesse tagasi.</p></div>';
+      return;
+    }
+    if (ui.role === "admin") {
+      view.innerHTML = '<div class="ph"><h2 class="denied">Puudub õigus</h2><p class="hint"><code>' + (ui.screen === "form" ? "ParticipantFeedbackFormView" : "ParticipantCoursesView") + '.vue</code> on ainult osalejale — admin suunatakse <code>/not-authorized</code>. Admin tagasisidet ei anna ega muuda.</p></div>';
+      return;
+    }
+    var body = ui.screen === "form" ? renderForm() : renderCourses();
+    var menu = ["Minu andmed", "Minu koolitused", "Tunnistused", "Parool"].map(function (k) { return '<button type="button"' + (k === "Minu koolitused" ? ' aria-current="page" data-back="1"' : ' data-dead="' + k + ' — vt profiili läbimäng (profile-view)"') + '>' + k + '</button>'; }).join("");
+    view.innerHTML = '<div class="profile-layout"><nav class="pmenu" aria-label="Profiili menüü (ProfileMenu.vue)">' + menu + '</nav><section class="pcard">' + body + '</section></div>';
+  }
+  function renderKv() {
+    var rows = [["route", ui.screen === "form" ? "ParticipantFeedbackFormView" : "ParticipantCoursesView"], ["kasutaja", ui.role === "public" ? "— (sisselogimata)" : ROLE_NAMES[ui.role] + " (userId " + userId() + ")"], ["contentLang", ui.lang]];
+    if (ui.role === "user" && ui.screen === "form") {
+      rows.push(["courseParticipantId", String(ui.cpId)]);
+      if (ui.fb) {
+        rows.push(["olek", ui.fb.hasFeedback ? (ui.edit ? "muutmine (Muuda vajutatud)" : "muutmine — lugemisrežiim") : "uus (POST)"], ["editMode", String(ui.edit)]);
+        rows.push(["hinded", ui.fb.criteria.map(function (c) { var s = ui.form[c.feedbackCriteriaId].score; return c.feedbackCriteriaId + ":" + (s == null ? "–" : s); }).join("  ")]);
+      }
+      var fbRow = feedbackOf(ui.cpId);
+      rows.push(["DB feedback.status", fbRow ? STATUS_NAMES[fbRow.st] : "— (rida puudub)"]);
+      if (ui.errMsg) rows.push(["errorMessage", ui.errMsg]);
+    }
+    if (ui.role === "user" && ui.screen === "courses" && ui.regs) rows.push(["registrations", ui.regs.map(function (r) { return r.courseParticipantId + (r.canGiveFeedback ? (r.hasFeedback ? " (vaata)" : " (anna)") : ""); }).join(", ")]);
+    rows.push(["kriteeriumid (admin)", db.criteria.slice().sort(bySeq).map(function (c) { return c.id + ":" + c.st; }).join(" ")]);
+    document.getElementById("statekv").innerHTML = rows.map(function (r) { return "<dt>" + esc(r[0]) + "</dt><dd>" + esc(r[1]) + "</dd>"; }).join("");
+    document.getElementById("urlbar").textContent = "https://bcskoolitus.ee" + (ui.role === "public" ? "/login?redirect=" + encodeURIComponent(urlPath()) : urlPath());
+  }
+  function noteFor(method, path) {
+    var p = path.split("?")[0];
+    if (/\/registrations$/.test(p)) return "n-regs";
+    if (method === "POST") return "n-post";
+    if (method === "PUT") return "n-put";
+    return "n-get";
+  }
+  var REQUESTS = [
+    ["Minu koolitused", [{ m: "GET", p: "/api/user/{userId}/registrations?contentLang={UI keel}", note: "n-regs", when: "vaate avamisel, keele vahetusel" }]],
+    ["Tagasiside vorm", [{ m: "GET", p: "/api/user/{userId}/registration/{courseParticipantId}/feedback?contentLang={UI keel}", note: "n-get", when: "vaate avamisel, keele vahetusel, pärast salvestamist" },
+      { m: "POST", p: "/api/user/{userId}/registration/{courseParticipantId}/feedback", note: "n-post", when: "„Lisa tagasiside“" },
+      { m: "PUT", p: "/api/user/{userId}/registration/{courseParticipantId}/feedback", note: "n-put", when: "„Muuda“ → „Salvesta“" }]]
+  ];
+  function renderLog() {
+    var used = {};
+    function row(d) {
+      var idx = -1;
+      logSteps.forEach(function (r, i) { if (idx === -1 && !used[i] && noteFor(r.method, r.path) === d.note) idx = i; });
+      if (idx !== -1) used[idx] = true;
+      var ran = idx !== -1, open = ran && idx === openReq, body = "";
+      if (open) {
+        var r = logSteps[idx], isErr = r.res && r.res.errorCode;
+        body = '<div class="body"><span class="sub">Tegelik päring: <code>' + esc(r.method + " " + r.path) + '</code></span>' +
+          (r.req ? '<span class="sub">Request body</span><pre>' + esc(j(r.req)) + '</pre>' : "") +
+          '<span class="sub">' + (isErr ? "Response (" + r.res.status + ")" : "Response (200)" + (r.res === null ? ": NONE" : "")) + '</span>' + (r.res !== null ? '<pre>' + esc(j(r.res)) + '</pre>' : "") +
+          '<button type="button" class="linkish" data-note="' + d.note + '">Ava API märge</button></div>';
+      }
+      var attr = ran ? 'data-req="' + idx + '" aria-expanded="' + open + '"' : 'data-note="' + d.note + '" title="Ava API märge"';
+      return '<div class="req ' + (ran ? "done" : "idle") + '"><button type="button" ' + attr + '><span class="method m-' + d.m + '">' + d.m + '</span><span class="main"><span class="path">' + esc(d.p) + '</span><span class="when">' + esc(d.when) + '</span></span>' + (ran ? '<span class="ran">käivitati</span>' : "") + '</button>' + body + '</div>';
+    }
+    var html = REQUESTS.map(function (g) { return '<div class="log-group">' + g[0] + '</div>' + g[1].map(row).join(""); }).join("");
+    if (logTitle) html += '<div class="log-step">Viimane samm: ' + esc(logTitle) + '. Rohelised päringud käivitati; klõpsa, et näha vastust.</div>';
+    document.getElementById("log").innerHTML = html;
+  }
+  function renderToolbar() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-ui-lang]"), function (b) { b.setAttribute("aria-pressed", String(b.dataset.uiLang === ui.lang)); });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-as]"), function (b) { b.setAttribute("aria-pressed", String(b.dataset.as === ui.role)); });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-open]"), function (b) { b.setAttribute("aria-pressed", String(ui.screen === "form" && +b.dataset.open === ui.cpId)); });
+    document.getElementById("btn-del4").setAttribute("aria-pressed", String(criteriaById(4).st === "D"));
+    document.getElementById("btn-add6").setAttribute("aria-pressed", String(!!criteriaById(6)));
+  }
+  function renderAll() {
+    renderToolbar(); renderNav(); renderView(); renderKv(); renderLog();
+    var vn = VIEW_NOTES[ui.screen];
+    document.getElementById("view-note-title").textContent = "Vaate märkmed — " + vn.title;
+    document.getElementById("view-note-text").textContent = vn.text;
+  }
+
+  /* ---------- Sündmused ---------- */
+  var viewEl = document.getElementById("view");
+  viewEl.addEventListener("change", function (e) {
+    var id = e.target.dataset.score; if (!id || !ui.form) return;
+    ui.form[id].score = +e.target.value;
+    // Ainult selle kriteeriumi märgistus — kogu vaadet ei joonistata uuesti (fookus jääb raadionupule)
+    var crit = e.target.closest(".crit");
+    Array.prototype.forEach.call(crit.querySelectorAll(".scale label"), function (l) { l.classList.toggle("sel", l.contains(e.target)); });
+    if (ui.invalid.indexOf(+id) !== -1) {
+      ui.invalid = ui.invalid.filter(function (x) { return x !== +id; });
+      crit.classList.remove("invalid");
+      var fe = crit.querySelector(".ferr"); if (fe) fe.remove();
+      if (!ui.invalid.length && ui.errMsg === "Hinda kõiki kriteeriume") { ui.errMsg = ""; var ea = viewEl.querySelector(".actions .err-alert"); if (ea) ea.remove(); }
+    }
+    renderKv();
+  });
+  viewEl.addEventListener("input", function (e) {
+    var id = e.target.dataset.text; if (!id || !ui.form) return;
+    ui.form[id].text = e.target.value;
+    document.getElementById("cnt-" + id).textContent = e.target.value.length + " / 255";
+  });
+  viewEl.addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.note) { goNote(b.dataset.note); return; }
+    if (b.dataset.dead) { toast(b.dataset.dead); return; }
+    if (b.dataset.back) { if (EMBED) goRoute(PATHS.courses); else openCourses("„← Tagasi minu koolituste juurde“ (" + PATHS.courses + ")"); return; }
+    if (b.dataset.fb) {
+      var p = PATHS.form + "?courseParticipantId=" + b.dataset.fb;
+      if (EMBED) goRoute(p); else openForm(+b.dataset.fb, "„" + b.textContent + "“ → " + p);
+      return;
+    }
+    if (b.dataset.toggle) {
+      var f = ui.form[b.dataset.toggle]; f.open = !f.open; renderView();
+      if (f.open) document.getElementById("t-" + b.dataset.toggle).focus();
+      return;
+    }
+    if (b.id === "b-edit") { ui.edit = true; ui.okMsg = ""; ui.errMsg = ""; renderView(); renderKv(); return; }
+    if (b.id === "b-cancel-edit") { ui.edit = false; ui.form = formFrom(ui.fb); ui.invalid = []; ui.errMsg = ""; renderView(); renderKv(); toast("Muudatused tühistatud — laaditud väärtused jäävad"); return; }
+    if (b.id === "b-submit") { submit(); return; }
+  });
+  document.getElementById("log").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.note) { goNote(b.dataset.note); return; }
+    var i = +b.dataset.req; openReq = openReq === i ? -1 : i; renderLog();
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-ui-lang]"), function (b) { b.onclick = function () { switchLang(b.dataset.uiLang); }; });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-as]"), function (b) {
+    b.onclick = function () {
+      startAs(b.dataset.as, "Sisse logitud: " + ROLE_NAMES[b.dataset.as]);
+      if (EMBED && b.dataset.as !== "public") window.parent.postMessage({ type: "bcs-set-role", role: b.dataset.as }, "*");
+    };
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-open]"), function (b) {
+    b.onclick = function () { openForm(+b.dataset.open, "Avatud URL-iga " + PATHS.form + "?courseParticipantId=" + b.dataset.open); };
+  });
+  // Admini muudatused "teisest kohast": avatud vormi ei laadita uuesti — "Salvesta" näitab FEEDBACK_CRITERIA_CHANGED
+  document.getElementById("btn-del4").onclick = function () {
+    var c = criteriaById(4); c.st = c.st === "A" ? "D" : "A";
+    toast(c.st === "D" ? "Admin kustutas kriteeriumi 4 (status D) — ava vorm uuesti või proovi salvestada" : "Kriteerium 4 taastatud (status A)");
+    renderToolbar(); renderKv();
+  };
+  document.getElementById("btn-add6").onclick = function () {
+    var c = criteriaById(6);
+    if (c) db.criteria = db.criteria.filter(function (x) { return x.id !== 6; });
+    else db.criteria.push(JSON.parse(JSON.stringify(CRITERIA_6)));
+    toast(c ? "Kriteerium 6 eemaldatud" : "Admin lisas kriteeriumi 6 — ava vorm uuesti või proovi salvestada");
+    renderToolbar(); renderKv();
+  };
+  document.getElementById("btn-seen").onclick = function () {
+    var n = 0;
+    db.feedbacks.forEach(function (f) { if (f.st !== "H") { f.st = "H"; f.updated = NOW; n++; } });
+    toast(n ? "Admin märkis " + n + " tagasisidet nähtuks (H) — admini raport tehakse hiljem" : "Kõik tagasisided on juba H");
+    renderKv();
+  };
+  document.getElementById("btn-reset").onclick = function () {
+    db = freshDb(); var role = ui.role, screen = ui.screen, cp = ui.cpId; ui = freshUi(role);
+    if (screen === "form") openForm(cp, "Algus: " + PATHS.form + "?courseParticipantId=" + cp); else openCourses("Algus: " + PATHS.courses);
+  };
+
+  function goNote(id) {
+    var n = document.getElementById(id); if (!n) return;
+    n.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
+    n.classList.remove("flash"); void n.offsetWidth; n.classList.add("flash");
+  }
+  document.getElementById("notes-count").textContent = NOTES.length;
+  document.getElementById("notes").innerHTML = NOTES.map(function (n) {
+    return '<div class="note" id="' + n.id + '"><div class="note-head"><strong>' + esc(n.title) + '</strong><span class="draft-tag">' + (n.tag || "uus") + '</span><button class="copy" type="button" data-copy="' + n.id + '">Kopeeri</button></div><pre>' + esc(n.text) + '</pre></div>';
+  }).join("");
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-copy]"); if (!b) return;
+    var key = b.dataset.copy;
+    var text = key === "view" ? document.getElementById("view-note-text").textContent : NOTES.filter(function (n) { return n.id === key; })[0].text;
+    var done = function () { b.textContent = "Kopeeritud"; setTimeout(function () { b.textContent = "Kopeeri"; }, 1400); };
+    try { navigator.clipboard.writeText(text).then(done, function () { selectPre(b); }); } catch (err) { selectPre(b); }
+  });
+  function selectPre(b) {
+    var pre = b.closest(".note").querySelector("pre");
+    var r = document.createRange(); r.selectNodeContents(pre);
+    var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+  }
+
+  /* ---------- Algus (kestast: ?role=user|admin|public&courseParticipantId={id} või &view=courses) ---------- */
+  db = freshDb();
+  ui = freshUi(ROLE_NAMES[SHELL_Q.get("role")] ? SHELL_Q.get("role") : "user");
+  var startCp = +(SHELL_Q.get("courseParticipantId") || 0);
+  if (startCp) openForm(startCp, "Algus: " + PATHS.form + "?courseParticipantId=" + startCp);
+  else openCourses("Algus: " + PATHS.courses);
+})();
+</script>

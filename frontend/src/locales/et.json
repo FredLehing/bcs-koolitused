@@ -847,7 +847,9 @@
     },
     "messages": {
       "cancelled": "Oled koolitusest loobunud"
-    }
+    },
+    "giveFeedback": "Anna tagasisidet",
+    "viewFeedback": "Vaata tagasisidet"
   },
   "participantCertificates": {
     "comingSoon": "Tunnistused tulevad varsti — siia ilmuvad sinu läbitud koolituste tunnistused."
@@ -923,6 +925,27 @@
       "dates": "Toimumisaeg",
       "status": "Staatus",
       "hasPaid": "Tasunud"
+    }
+  },
+  "participantFeedback": {
+    "title": "Tagasiside",
+    "back": "Tagasi minu koolituste juurde",
+    "submitted": "Esitatud {date}",
+    "updated": "Muudetud {date}",
+    "scaleHint": "Hinda iga väidet skaalal 1–10 (1 = ei nõustu üldse, 10 = nõustun täielikult)",
+    "addComment": "+ Lisa kommentaar",
+    "hideComment": "− Peida kommentaar",
+    "commentLabel": "Kommentaar",
+    "commentPlaceholder": "Täpsusta soovi korral oma hinnangut",
+    "add": "Lisa tagasiside",
+    "edit": "Muuda",
+    "save": "Salvesta",
+    "cancel": "Tühista",
+    "validation": {
+      "scoreAll": "Hinda kõiki kriteeriume"
+    },
+    "messages": {
+      "saved": "Tagasiside salvestatud"
     }
   }
 }

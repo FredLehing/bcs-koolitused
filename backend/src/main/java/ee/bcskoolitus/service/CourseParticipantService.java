@@ -17,6 +17,7 @@ import ee.bcskoolitus.persistance.course.Course;
 import ee.bcskoolitus.persistance.course.participant.CourseParticipant;
 import ee.bcskoolitus.persistance.course.participant.CourseParticipantMapper;
 import ee.bcskoolitus.persistance.course.participant.CourseParticipantRepository;
+import ee.bcskoolitus.persistance.feedback.FeedbackRepository;
 import ee.bcskoolitus.persistance.participant.Participant;
 import ee.bcskoolitus.persistance.participant.ParticipantRepository;
 import ee.bcskoolitus.persistance.profile.ProfileMapper;
@@ -31,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static ee.bcskoolitus.Error.ALREADY_REGISTERED;
 import static ee.bcskoolitus.Error.CANCEL_NOT_ALLOWED;
@@ -52,6 +54,7 @@ public class CourseParticipantService {
     private final AdminRegistrationSummaryRepository adminRegistrationSummaryRepository;
     private final AdminRegistrationSummaryMapper adminRegistrationSummaryMapper;
     private final TrainingTranslationService trainingTranslationService;
+    private final FeedbackRepository feedbackRepository;
 
     public CourseParticipant getValidCourseParticipantBy(Integer courseParticipantId) {
         return courseParticipantRepository.findById(courseParticipantId)
@@ -136,8 +139,9 @@ public class CourseParticipantService {
         }
         List<CourseParticipant> courseParticipants = courseParticipantRepository.findParticipantCourseParticipantsBy(
                 participant.get().getId(), CourseStatus.DELETED.getCode());
+        Set<Integer> feedbackCourseParticipantIds = findFeedbackCourseParticipantIds(courseParticipants);
         return courseParticipants.stream()
-                .map(courseParticipant -> createMyRegistrationDto(courseParticipant, contentLang))
+                .map(courseParticipant -> createMyRegistrationDto(courseParticipant, contentLang, feedbackCourseParticipantIds))
                 .toList();
     }
 
@@ -156,11 +160,31 @@ public class CourseParticipantService {
         courseParticipantRepository.save(courseParticipant);
     }
 
-    private MyRegistrationDto createMyRegistrationDto(CourseParticipant courseParticipant, String contentLang) {
+    // Tagasiside: registreerunud (R), toimumiskord on lõppenud või lõpeb täna, pole tühistatud ega kustutatud; tasumine ei loe
+    public static boolean isFeedbackAllowed(CourseParticipant courseParticipant) {
+        Course course = courseParticipant.getCourse();
+        return CourseParticipantStatus.REGISTERED.getCode().equals(courseParticipant.getStatus())
+                && !course.getEndDate().isAfter(LocalDate.now())
+                && !CourseStatus.CANCELLED.getCode().equals(course.getStatus())
+                && !CourseStatus.DELETED.getCode().equals(course.getStatus());
+    }
+
+    private Set<Integer> findFeedbackCourseParticipantIds(List<CourseParticipant> courseParticipants) {
+        if (courseParticipants.isEmpty()) {
+            return Set.of();
+        }
+        List<Integer> courseParticipantIds = courseParticipants.stream().map(CourseParticipant::getId).toList();
+        return Set.copyOf(feedbackRepository.findFeedbackCourseParticipantIdsBy(courseParticipantIds));
+    }
+
+    private MyRegistrationDto createMyRegistrationDto(CourseParticipant courseParticipant, String contentLang,
+                                                      Set<Integer> feedbackCourseParticipantIds) {
         MyRegistrationDto myRegistrationDto = courseParticipantMapper.toMyRegistrationDto(courseParticipant);
         myRegistrationDto.setTrainingTitle(
                 trainingTranslationService.getTrainingTitle(courseParticipant.getCourse().getTraining().getId(), contentLang));
         myRegistrationDto.setCanCancel(isCancelAllowed(courseParticipant));
+        myRegistrationDto.setCanGiveFeedback(isFeedbackAllowed(courseParticipant));
+        myRegistrationDto.setHasFeedback(feedbackCourseParticipantIds.contains(courseParticipant.getId()));
         return myRegistrationDto;
     }
 

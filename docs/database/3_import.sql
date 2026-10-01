@@ -241,7 +241,9 @@ INSERT INTO course_participant (id, course_id, participant_id, notes, admin_note
     (6, 12, 2, '', NULL, true, false, 'R', '2026-09-20 08:00:00', '2026-09-20 08:00:00'),
     (7, 12, 5, '', NULL, false, false, 'R', '2026-09-22 13:50:00', '2026-09-22 13:50:00'),
     (8, 5, 3, '', NULL, false, true, 'R', '2026-09-26 17:00:00', '2026-09-26 17:00:00'),
-    (9, 9, 5, '', NULL, true, true, 'R', '2026-09-28 09:00:00', '2026-09-28 09:00:00');
+    (9, 9, 5, '', NULL, true, true, 'R', '2026-09-28 09:00:00', '2026-09-28 09:00:00'),
+    -- Anna Saar osales juunis Java algkursusel (toimumiskord 7, veebis); tagasiside olemas (feedback 1)
+    (10, 7, 1, '', NULL, true, false, 'R', '2026-05-20 10:00:00', '2026-05-20 10:00:00');
 
 -- Table: enquiry (status: U = uus, H = käsitletud)
 INSERT INTO enquiry (id, training_id, profile_id, course_id, message, company_name, status, created_at, updated_at) VALUES
@@ -264,9 +266,38 @@ INSERT INTO newsletter (id, email, first_name, last_name, status) VALUES
     (1, 'uudiskiri1@example.com', 'Liis', 'Org', 'A'),
     (2, 'uudiskiri2@example.com', 'Toomas', 'Vaher', 'A');
 
--- Table: feedback
-INSERT INTO feedback DEFAULT VALUES;
-INSERT INTO feedback DEFAULT VALUES;
+-- Table: feedback_criteria (status: A = aktiivne, D = kustutatud)
+INSERT INTO feedback_criteria (id, sequence, status, created_at, updated_at) VALUES
+    (1, 1, 'A', '2026-05-01 09:00:00', '2026-05-01 09:00:00'),
+    (2, 2, 'A', '2026-05-01 09:00:00', '2026-05-01 09:00:00'),
+    (3, 3, 'A', '2026-05-01 09:00:00', '2026-05-01 09:00:00'),
+    (4, 4, 'A', '2026-05-01 09:00:00', '2026-05-01 09:00:00'),
+    (5, 5, 'A', '2026-05-01 09:00:00', '2026-05-01 09:00:00');
+
+-- Table: feedback_criteria_translation (language_id: 1 = et, 2 = en)
+INSERT INTO feedback_criteria_translation (id, feedback_criteria_id, language_id, title, description, created_at, updated_at) VALUES
+    (1, 1, 1, 'Koolitus vastas ootustele', 'Koolituse sisu, tase ja maht vastasid koolituse kirjelduse põhjal tekkinud ootustele.', '2026-05-01 09:00:00', '2026-05-01 09:00:00'),
+    (2, 1, 2, 'The training met my expectations', 'The content, level and scope matched the expectations set by the training description.', '2026-05-01 09:00:00', '2026-05-01 09:00:00'),
+    (3, 2, 1, 'Koolitaja oli pädev', 'Koolitaja valdas teemat põhjalikult ning selgitas seda arusaadavalt ja näidetega.', '2026-05-01 09:00:00', '2026-05-01 09:00:00'),
+    (4, 2, 2, 'The trainer was competent', 'The trainer had a thorough command of the subject and explained it clearly with examples.', '2026-05-01 09:00:00', '2026-05-01 09:00:00'),
+    (5, 3, 1, 'Õppematerjalid olid asjakohased', 'Õppematerjalid ja harjutused toetasid teema omandamist ning on kasutatavad ka pärast koolitust.', '2026-05-01 09:00:00', '2026-05-01 09:00:00'),
+    (6, 3, 2, 'The materials were relevant', 'The materials and exercises supported learning and remain useful after the training.', '2026-05-01 09:00:00', '2026-05-01 09:00:00'),
+    (7, 4, 1, 'Õpikeskkond ja korraldus olid sobivad', 'Koolitusruum või veebikeskkond, ajakava ja info edastamine toetasid õppimist.', '2026-05-01 09:00:00', '2026-05-01 09:00:00'),
+    (8, 4, 2, 'Venue and organisation were suitable', 'The training room or online environment, schedule and communication supported learning.', '2026-05-01 09:00:00', '2026-05-01 09:00:00'),
+    (9, 5, 1, 'Soovitaksin koolitust kolleegidele', 'Julgeksin seda koolitust soovitada kolleegidele või teistele samade vajadustega inimestele.', '2026-05-01 09:00:00', '2026-05-01 09:00:00'),
+    (10, 5, 2, 'I would recommend this training to colleagues', 'I would recommend this training to colleagues or others with similar needs.', '2026-05-01 09:00:00', '2026-05-01 09:00:00');
+
+-- Table: feedback (status: N = uus, U = muudetud pärast ülevaatust, H = üle vaadatud)
+INSERT INTO feedback (id, course_participant_id, status, created_at, updated_at) VALUES
+    (1, 10, 'H', '2026-06-12 16:40:00', '2026-06-15 09:00:00');
+
+-- Table: course_participant_feedback
+INSERT INTO course_participant_feedback (id, feedback_id, feedback_criteria_id, score, feedback_text, created_at, updated_at) VALUES
+    (1, 1, 1, 9, NULL, '2026-06-12 16:40:00', '2026-06-12 16:40:00'),
+    (2, 1, 2, 10, 'Selged selgitused ja palju praktilisi näiteid.', '2026-06-12 16:40:00', '2026-06-12 16:40:00'),
+    (3, 1, 3, 8, NULL, '2026-06-12 16:40:00', '2026-06-12 16:40:00'),
+    (4, 1, 4, 7, 'Veebikeskkonnas oli esimesel päeval helikvaliteet kõikuv.', '2026-06-12 16:40:00', '2026-06-12 16:40:00'),
+    (5, 1, 5, 9, NULL, '2026-06-12 16:40:00', '2026-06-12 16:40:00');
 
 -- ID-jadade sünkroniseerimine käsitsi sisestatud väärtustega, et järgnevad
 -- rakenduse tehtud INSERT laused (ilma id-d määramata) ei põrkaks olemasolevate ID-dega
@@ -291,6 +322,10 @@ SELECT setval(pg_get_serial_sequence('training_lecturer', 'id'), (SELECT MAX(id)
 SELECT setval(pg_get_serial_sequence('course', 'id'), (SELECT MAX(id) FROM course));
 SELECT setval(pg_get_serial_sequence('course_lecturer', 'id'), (SELECT MAX(id) FROM course_lecturer));
 SELECT setval(pg_get_serial_sequence('course_participant', 'id'), (SELECT MAX(id) FROM course_participant));
+SELECT setval(pg_get_serial_sequence('feedback_criteria', 'id'), (SELECT MAX(id) FROM feedback_criteria));
+SELECT setval(pg_get_serial_sequence('feedback_criteria_translation', 'id'), (SELECT MAX(id) FROM feedback_criteria_translation));
+SELECT setval(pg_get_serial_sequence('feedback', 'id'), (SELECT MAX(id) FROM feedback));
+SELECT setval(pg_get_serial_sequence('course_participant_feedback', 'id'), (SELECT MAX(id) FROM course_participant_feedback));
 SELECT setval(pg_get_serial_sequence('enquiry', 'id'), (SELECT MAX(id) FROM enquiry));
 SELECT setval(pg_get_serial_sequence('certificate_template', 'id'), (SELECT MAX(id) FROM certificate_template));
 SELECT setval(pg_get_serial_sequence('participant_certificate', 'id'), (SELECT MAX(id) FROM participant_certificate));
