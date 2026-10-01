@@ -618,3 +618,8 @@ Top: site navigation bar with "Logi sisse" and "Loo konto" on the right.
 A blue info box "Pärast konto loomist jätkad registreerumisega."
 Inputs: "Eesnimi *" and "Perekonnanimi *" side by side, "E-post *", "Telefon *", "Parool *" and "Parool uuesti *" side by side; small text "Parool vähemalt 8 märki."; primary button "Loo konto"; link "Mul on juba konto — logi sisse".
 ```
+
+
+## Vaadetevaheline tagasitee
+
+Detailide ja vormide avamisel antakse kaasa lähtevaate täielik URL `returnTo` parameetrina. Ühine „← Tagasi“ link taastab selle URL-i; otselingi korral kasutatakse vaate varusihti. Peamenüü ja vahelehed tagasiteed ei loo. Oleku- ja tõlkevahetus säilitab senise tagasitee. Kõigi avamiskohtade, erandite ja varusihtide [ühine skeem](../return-to-navigation-skeemid.md).

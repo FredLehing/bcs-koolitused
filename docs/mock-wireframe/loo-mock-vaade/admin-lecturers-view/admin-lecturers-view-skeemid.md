@@ -577,3 +577,8 @@ In the "new lecturer" version the title is "Lisa uus koolitaja", there are no fl
 ```text
 Create a small wireframe card titled "Koolitaja" for a right sidebar: a round photo (56 px) on the left; on the right the name "Rain Tüür" in bold, below it a smaller grey line "Lektor/konsultant", and below that one sentence "Tarkvaraarendus, Java, HTML, CSS, JavaScript, SQL, Git, Spring Boot, REST API, PostgreSQL, JPA (Hibernate), MapStruct, JUnit, Swagger, Gradle, Confluence, Jira. Vali Tarkvaraarendus! programm.".
 ```
+
+
+## Vaadetevaheline tagasitee
+
+Detailide ja vormide avamisel antakse kaasa lähtevaate täielik URL `returnTo` parameetrina. Ühine „← Tagasi“ link taastab selle URL-i; otselingi korral kasutatakse vaate varusihti. Peamenüü ja vahelehed tagasiteed ei loo. Oleku- ja tõlkevahetus säilitab senise tagasitee. Kõigi avamiskohtade, erandite ja varusihtide [ühine skeem](../return-to-navigation-skeemid.md).

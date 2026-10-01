@@ -379,3 +379,8 @@ Main area: a card titled "Toimumiskorra andmed" with a form in a two-column grid
 Bottom of the card: primary button "Salvesta" and secondary button "Tagasi".
 In the edit version of the page the title is "Toimumiskorra muutmine" and a trash icon button is next to "Salvesta".
 ```
+
+
+## Vaadetevaheline tagasitee
+
+Detailide ja vormide avamisel antakse kaasa lähtevaate täielik URL `returnTo` parameetrina. Ühine „← Tagasi“ link taastab selle URL-i; otselingi korral kasutatakse vaate varusihti. Peamenüü ja vahelehed tagasiteed ei loo. Oleku- ja tõlkevahetus säilitab senise tagasitee. Kõigi avamiskohtade, erandite ja varusihtide [ühine skeem](../return-to-navigation-skeemid.md).

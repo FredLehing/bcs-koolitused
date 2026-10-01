@@ -1,4 +1,5 @@
 <script>
+import BackLink from '@/components/common/BackLink.vue'
 import { mapState } from 'pinia'
 import { PhEye } from '@phosphor-icons/vue'
 import { useLanguageStore } from '@/stores/languageStore.js'
@@ -18,6 +19,7 @@ const USER_STATUS_DELETED = 'D'
 export default {
   name: 'AdminUserView',
   components: {
+    BackLink,
     PhEye,
     CheckMark,
     CourseParticipantStatusBadge,
@@ -57,11 +59,6 @@ export default {
       return this.user.participantName
         ? `${this.user.participantName} (${this.user.email})`
         : this.user.email
-    },
-
-    // AdminRegistrationView tagasilink viib siia tagasi
-    returnTo() {
-      return `/admin-user?userId=${this.userId}`
     },
   },
   watch: {
@@ -120,12 +117,9 @@ export default {
 
 <template>
   <div class="container">
+    <BackLink :fallback="{ name: 'adminUsersRoute' }" />
     <div class="row justify-content-center">
       <div class="col-lg-9 text-start">
-        <RouterLink :to="{ name: 'adminUsersRoute' }" class="d-inline-block mb-3">
-          ← {{ $t('adminUser.backToUsers') }}
-        </RouterLink>
-
         <template v-if="user">
           <h1 class="mb-1">{{ $t('adminUser.title') }}</h1>
           <p class="text-secondary fs-5 mb-3">
@@ -196,7 +190,7 @@ export default {
                       <RouterLink
                         :to="{
                           name: 'adminCourseRoute',
-                          query: { courseId: registration.courseId },
+                          query: { returnTo: $route.fullPath, courseId: registration.courseId },
                         }"
                       >
                         {{ formatDateRange(registration.startDate, registration.endDate) }}
@@ -213,7 +207,7 @@ export default {
                           name: 'adminRegistrationRoute',
                           query: {
                             courseParticipantId: registration.courseParticipantId,
-                            returnTo: returnTo,
+                            returnTo: $route.fullPath,
                           },
                         }"
                         :title="$t('adminUser.viewRegistration')"

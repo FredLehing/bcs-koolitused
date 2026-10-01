@@ -270,7 +270,10 @@ export default {
             <td>{{ registration.trainingTitle }}</td>
             <td class="text-nowrap">
               <RouterLink
-                :to="{ name: 'adminCourseRoute', query: { courseId: registration.courseId } }"
+                :to="{
+                  name: 'adminCourseRoute',
+                  query: { returnTo: $route.fullPath, courseId: registration.courseId },
+                }"
               >
                 {{ formatDateRange(registration) }}
               </RouterLink>
@@ -285,7 +288,10 @@ export default {
               <RouterLink
                 :to="{
                   name: 'adminRegistrationRoute',
-                  query: { courseParticipantId: registration.courseParticipantId },
+                  query: {
+                    returnTo: $route.fullPath,
+                    courseParticipantId: registration.courseParticipantId,
+                  },
                 }"
                 :title="$t('adminRegistrations.view')"
                 :aria-label="$t('adminRegistrations.view')"

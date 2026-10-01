@@ -12,11 +12,56 @@ function isInternalPath(path) {
     typeof path === 'string' &&
     path.startsWith('/') &&
     !path.startsWith('//') &&
-    !path.startsWith('/\\')
+    !/[\\\u0000-\u001f\u007f]/.test(path)
   )
 }
 
+function getReturnTo(returnTo, currentPath = router.currentRoute.value.fullPath) {
+  if (!isInternalPath(returnTo)) return ''
+  const target = router.resolve(returnTo)
+  if (target.matched.length === 0) return ''
+  const current = router.resolve(currentPath)
+  const queryWithoutReturnTo = (query) =>
+    Object.fromEntries(
+      Object.entries(query)
+        .filter(([key]) => key !== 'returnTo')
+        .sort(),
+    )
+  if (
+    target.path === current.path &&
+    JSON.stringify(queryWithoutReturnTo(target.query)) ===
+      JSON.stringify(queryWithoutReturnTo(current.query))
+  )
+    return ''
+  return target.fullPath
+}
+
+function withReturnTo(query = {}, returnTo = router.currentRoute.value.fullPath) {
+  return isInternalPath(returnTo) ? { ...query, returnTo } : { ...query }
+}
+
+function preserveReturnTo(query) {
+  const returnTo = getReturnTo(router.currentRoute.value.query.returnTo)
+  return returnTo ? { ...query, returnTo } : query
+}
+
 export default {
+  getReturnTo,
+  withReturnTo,
+
+  // Tagasi on päris sihtlink, mitte sõltuvus brauseri ajaloost. Edukas salvestamine võib kaasa
+  // anda teate; kustutamisel saab välistada detailvaate, mille kirjet enam pole.
+  navigateBack(fallback, successMessage, excludedRouteNames = []) {
+    const returnTo = getReturnTo(router.currentRoute.value.query.returnTo)
+    const target = router.resolve(returnTo || fallback)
+    const destination = excludedRouteNames.includes(target.name) ? router.resolve(fallback) : target
+    return router.push({
+      path: destination.path,
+      query: destination.query,
+      hash: destination.hash,
+      state: successMessage ? { successMessage } : undefined,
+    })
+  },
   // Kasutaja antud tagasitee (redirect, returnTo) tohib viia ainult sama rakenduse sisse
   isInternalPath(path) {
     return isInternalPath(path)
@@ -51,7 +96,7 @@ export default {
   },
 
   navigateToCourseRegistrationView(courseId) {
-    router.push({ name: 'courseRegistrationRoute', query: { courseId: courseId } })
+    router.push({ name: 'courseRegistrationRoute', query: withReturnTo({ courseId: courseId }) })
   },
 
   // Pärast sisselogimist / konto loomist: redirect (ainult sisemine rada, algab "/"-ga) või avaleht
@@ -72,7 +117,7 @@ export default {
   },
 
   navigateToTrainingFormView() {
-    router.push({ name: 'trainingFormRoute' })
+    router.push({ name: 'trainingFormRoute', query: withReturnTo() })
   },
 
   navigateToAdminLecturersView() {
@@ -81,26 +126,26 @@ export default {
 
   // query: {} (uus koolitaja) või { lecturerId, lecturerTranslationId }
   navigateToLecturerFormView(query) {
-    router.push({ name: 'lecturerFormRoute', query: query })
+    router.push({ name: 'lecturerFormRoute', query: withReturnTo(query) })
   },
 
   // Vahetab LecturerFormView oleku (query parameetrid) ilma brauseri ajalukku uut kirjet lisamata
   replaceLecturerFormView(query) {
-    router.replace({ name: 'lecturerFormRoute', query: query })
+    router.replace({ name: 'lecturerFormRoute', query: preserveReturnTo(query) })
   },
 
   // successMessage (valikuline) antakse kalendrile edasi history state'is — nt vormi eduteade
   navigateToAdminTrainingCoursesView(trainingId, successMessage) {
     router.push({
       name: 'adminTrainingCoursesRoute',
-      query: { trainingId: trainingId },
+      query: withReturnTo({ trainingId: trainingId }),
       state: successMessage ? { successMessage: successMessage } : undefined,
     })
   },
 
   // query: { trainingId } (uus toimumiskord) või { courseId } (muutmine)
   navigateToCourseFormView(query) {
-    router.push({ name: 'courseFormRoute', query: query })
+    router.push({ name: 'courseFormRoute', query: withReturnTo(query) })
   },
 
   // successMessage (valikuline) antakse nimekirjale edasi history state'is — nt vormi eduteade
@@ -113,7 +158,7 @@ export default {
 
   // query: {} (uus ruum) või { roomId } (muutmine)
   navigateToRoomFormView(query) {
-    router.push({ name: 'roomFormRoute', query: query })
+    router.push({ name: 'roomFormRoute', query: withReturnTo(query) })
   },
 
   navigateToAdminEnquiriesView() {
@@ -133,16 +178,19 @@ export default {
   navigateToTrainingView(trainingId, trainingTranslationId) {
     router.push({
       name: 'trainingRoute',
-      query: createTrainingViewQuery(trainingId, trainingTranslationId),
+      query: withReturnTo(createTrainingViewQuery(trainingId, trainingTranslationId)),
     })
   },
 
   replaceTrainingView(trainingId) {
-    router.replace({ name: 'trainingRoute', query: createTrainingViewQuery(trainingId) })
+    router.replace({
+      name: 'trainingRoute',
+      query: preserveReturnTo(createTrainingViewQuery(trainingId)),
+    })
   },
 
   // Vahetab TrainingFormView oleku (query parameetrid) ilma brauseri ajalukku uut kirjet lisamata
   replaceTrainingFormView(query) {
-    router.replace({ name: 'trainingFormRoute', query: query })
+    router.replace({ name: 'trainingFormRoute', query: preserveReturnTo(query) })
   },
 }

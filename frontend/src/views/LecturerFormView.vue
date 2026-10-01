@@ -1,4 +1,5 @@
 <script>
+import BackLink from '@/components/common/BackLink.vue'
 import LecturerService from '@/api-services/LecturerService.js'
 import LecturerTranslationService from '@/api-services/LecturerTranslationService.js'
 import LanguageService from '@/api-services/LanguageService.js'
@@ -28,6 +29,7 @@ function htmlHasText(html) {
 export default {
   name: 'LecturerFormView',
   components: {
+    BackLink,
     ConfirmModal,
     LecturerTranslationForm,
     PhotoUpload,
@@ -505,6 +507,7 @@ export default {
 
 <template>
   <div class="container">
+    <BackLink :fallback="{ name: 'adminLecturersRoute' }" />
     <div class="row justify-content-center">
       <div class="col-lg-10">
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">

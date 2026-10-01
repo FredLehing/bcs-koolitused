@@ -160,3 +160,8 @@ sequenceDiagram
 2. ~~Läbimäng `admin-registrations-view-labimang.html` + prototüübi kest (`../index.html`, uued vaated "Registreerumised", "Registreerumine")~~ — tehtud; `/admin-course` osalejate tabelis silm (`courses-view/admin-all-courses-view-labimang.html`, `markmed/admin-course-view-markmed.md`).
 3. Märkmed `markmed/admin-registrations-view-markmed.md`, `admin-registration-view-markmed.md`.
 4. Taskid (`docs/tasks/backend/`, `docs/tasks/frontend/`) ja tööde järjekord.
+
+
+## Vaadetevaheline tagasitee
+
+Detailide ja vormide avamisel antakse kaasa lähtevaate täielik URL `returnTo` parameetrina. Ühine „← Tagasi“ link taastab selle URL-i; otselingi korral kasutatakse vaate varusihti. Peamenüü ja vahelehed tagasiteed ei loo. Oleku- ja tõlkevahetus säilitab senise tagasitee. Kõigi avamiskohtade, erandite ja varusihtide [ühine skeem](../return-to-navigation-skeemid.md).

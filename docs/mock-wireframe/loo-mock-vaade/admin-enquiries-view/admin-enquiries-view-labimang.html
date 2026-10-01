@@ -304,6 +304,7 @@ tr.is-new td { font-weight: 700; }
     <h1>Koolituste päringud — läbimäng</h1>
     <p>AdminEnquiriesView.vue (huviliste päringute nimekiri) ja AdminEnquiryView.vue (üks päring). Otsi, sorteeri veerge (1. klõps kasvav, 2. kahanev, 3. vaikimisi), lülita sisse käsitletud päringud, ava päring ja märgi see käsitletuks või uueks. Paremal all näed, mis päringud tehti ja mida backend vastas; kollased sildid viivad API märkmete juurde.</p>
     <p>Andmed on seed-andmete ettepanek (skeemide fail, jaotis 1): 4 päringut, neist 1 käsitletud (Kadri Tamm). Uute teenuste DTO-d on <strong>ettepanek</strong>.</p>
+    <p>Detailide ja vormide avamisel säilib lähtevaate URL <code>returnTo</code> parameetris; „← Tagasi“ taastab lähtekoha. <a href="../return-to-navigation-skeemid.md">Tagasitee skeemid ja kaardistus</a>.</p>
     <div class="toolbar">
       <span class="lbl-soft">Kasutajaliidese keel (navbar):</span>
       <button class="tbtn" type="button" data-ui-lang="et">et</button>
@@ -352,6 +353,7 @@ tr.is-new td { font-weight: 700; }
 
 <div id="modal-root"></div>
 
+<script src="../return-navigation.js"></script>
 <script>
 (function () {
   "use strict";
@@ -360,7 +362,8 @@ tr.is-new td { font-weight: 700; }
   var SHELL_Q = new URLSearchParams(location.search);
   var EMBED = SHELL_Q.get("embed") === "1" && window.parent !== window;
   if (EMBED) document.documentElement.classList.add("embed");
-  function goRoute(path, standaloneMessage) {
+  function goRoute(path, standaloneMessage, isBack) {
+    if (!isBack) path = window.BcsReturnNavigation.forward(path);
     if (EMBED) { window.parent.postMessage({ type: "bcs-navigate", path: path }, "*"); return; }
     toast(standaloneMessage || "router.push → " + path);
   }
@@ -616,6 +619,7 @@ tr.is-new td { font-weight: 700; }
     var vn = VIEW_NOTES[ui.route === "list" ? "admin-enquiries" : "admin-enquiry"];
     document.getElementById("view-note-title").textContent = "Vaate märkmed — " + vn.title;
     document.getElementById("view-note-text").textContent = vn.text;
+    window.BcsReturnNavigation.render(goRoute);
   }
 
   /* ---------- Sündmused ---------- */
