@@ -29,4 +29,14 @@ export default {
   sendPutEnquiryReopenRequest(enquiryId) {
     return axios.put(`/api/enquiry/${enquiryId}/reopen`)
   },
+
+  // Backend task: docs/tasks/backend/GET-api-course-courseId-enquiries.md
+  sendGetCourseEnquiriesRequest(courseId) {
+    return axios.get(`/api/course/${courseId}/enquiries`)
+  },
+
+  // Backend task: docs/tasks/backend/POST-api-enquiry.md
+  sendPostEnquiryRequest(enquiryCreateRequest) {
+    return axios.post('/api/enquiry', enquiryCreateRequest)
+  },
 }

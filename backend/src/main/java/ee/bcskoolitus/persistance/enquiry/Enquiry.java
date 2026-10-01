@@ -1,7 +1,6 @@
 package ee.bcskoolitus.persistance.enquiry;
 
 import ee.bcskoolitus.persistance.course.Course;
-import ee.bcskoolitus.persistance.option.Option;
 import ee.bcskoolitus.persistance.profile.Profile;
 import ee.bcskoolitus.persistance.training.Training;
 import jakarta.persistence.*;
@@ -39,11 +38,6 @@ public class Enquiry {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id")
     private Course course;
-
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "option_id", nullable = false)
-    private Option option;
 
     @Size(max = 255)
     @NotNull

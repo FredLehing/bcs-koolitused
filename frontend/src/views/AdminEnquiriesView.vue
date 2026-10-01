@@ -40,14 +40,13 @@ export default {
           trainingTitle: '',
           courseStartDate: null,
           courseEndDate: null,
-          optionName: '',
           status: '',
         },
       ],
     }
   },
   computed: {
-    // Kasutajaliidese keel — koolituse ja vormi nimi selles keeles
+    // Kasutajaliidese keel — koolituse nimi selles keeles
     ...mapState(useLanguageStore, ['contentLang']),
 
     // Otsing frontendis: nimi, e-post, ettevõte või koolitus sisaldab otsingusõna (tõstutundetu)
@@ -190,7 +189,6 @@ export default {
               @event-sort-clicked="handleSortClick"
             />
             <th>{{ $t('adminEnquiries.columns.course') }}</th>
-            <th>{{ $t('adminEnquiries.columns.optionName') }}</th>
             <SortableColumnHeader
               :label="sortableColumns.status"
               sort-key="status"
@@ -213,7 +211,6 @@ export default {
             <td>{{ enquiry.companyName ?? '—' }}</td>
             <td>{{ enquiry.trainingTitle }}</td>
             <td class="text-nowrap">{{ formatCourse(enquiry) }}</td>
-            <td>{{ enquiry.optionName }}</td>
             <td><EnquiryStatusBadge :status="enquiry.status" /></td>
             <td>
               <RouterLink
@@ -227,7 +224,7 @@ export default {
             </td>
           </tr>
           <tr v-if="filteredEnquiries.length === 0">
-            <td colspan="9" class="text-center text-secondary py-4">
+            <td colspan="8" class="text-center text-secondary py-4">
               {{ $t('adminEnquiries.noResults') }}
             </td>
           </tr>

@@ -17,6 +17,12 @@ export default {
   },
   computed: {
     ...mapState(useLanguageStore, ['contentLang']),
+
+    // Tagasitee lehele, kust koolitaja kaardilt tuldi (nt /course?courseId=9); '' = koolitajate nimekiri
+    returnTo() {
+      const returnTo = this.$route.query.returnTo
+      return NavigationService.isInternalPath(returnTo) ? returnTo : ''
+    },
   },
   watch: {
     '$route.query'() {
@@ -52,7 +58,10 @@ export default {
 
 <template>
   <div class="container">
-    <RouterLink :to="{ name: 'lecturersRoute' }" class="d-inline-block mb-3">
+    <RouterLink v-if="returnTo" :to="returnTo" class="d-inline-block mb-3">
+      ← {{ $t('lecturer.back') }}
+    </RouterLink>
+    <RouterLink v-else :to="{ name: 'lecturersRoute' }" class="d-inline-block mb-3">
       ← {{ $t('lecturer.backToLecturers') }}
     </RouterLink>
 

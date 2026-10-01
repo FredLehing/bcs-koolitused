@@ -51,6 +51,7 @@ CREATE TABLE course
     end_date                 date          NOT NULL,
     notes                    text          NULL,
     meeting_link             varchar(255)  NULL,
+    is_promoted              boolean       NOT NULL DEFAULT false,
     created_at               timestamp     NOT NULL,
     updated_at               timestamp     NOT NULL,
     created_by               int           NOT NULL,
@@ -77,10 +78,13 @@ CREATE TABLE course_participant
     notes           text       NOT NULL,
     has_paid        boolean    NOT NULL,
     requires_laptop boolean    NOT NULL,
-    status          varchar(3) NOT NULL,
+    -- R = registreerunud, C = loobunud
+    status          varchar(1) NOT NULL,
     created_at      timestamp  NOT NULL,
     updated_at      timestamp  NOT NULL,
-    CONSTRAINT course_participant_pk PRIMARY KEY (id)
+    CONSTRAINT course_participant_pk PRIMARY KEY (id),
+    -- osalejal üks rida toimumiskorra kohta
+    CONSTRAINT course_participant_uq UNIQUE (course_id, participant_id)
 );
 
 -- Table: enquiry
@@ -90,7 +94,6 @@ CREATE TABLE enquiry
     training_id  int          NOT NULL,
     profile_id   int          NOT NULL,
     course_id    int          NULL,
-    option_id    int          NOT NULL,
     message      varchar(255) NOT NULL,
     company_name varchar(255) NULL,
     status       char(1)      NOT NULL,
@@ -210,29 +213,6 @@ CREATE TABLE newsletter
     CONSTRAINT newsletter_pk PRIMARY KEY (id)
 );
 
--- Table: option
-CREATE TABLE option
-(
-    id         serial     NOT NULL,
-    type       varchar(2) NOT NULL,
-    created_at timestamp  NOT NULL,
-    updated_at timestamp  NOT NULL,
-    CONSTRAINT option_pk PRIMARY KEY (id)
-);
-
--- Table: option_translation
-CREATE TABLE option_translation
-(
-    id          serial      NOT NULL,
-    option_id   int         NOT NULL,
-    language_id int         NOT NULL,
-    name        varchar(20) NOT NULL,
-    created_at  timestamp   NOT NULL,
-    updated_at  timestamp   NOT NULL,
-    CONSTRAINT option_translation_pk PRIMARY KEY (id),
-    CONSTRAINT option_translation_uq UNIQUE (option_id, language_id)
-);
-
 -- Table: participant
 CREATE TABLE participant
 (
@@ -241,7 +221,9 @@ CREATE TABLE participant
     name       varchar(255) NOT NULL,
     profile_id int          NOT NULL,
     created_at timestamp    NOT NULL,
-    CONSTRAINT participant_pk PRIMARY KEY (id)
+    CONSTRAINT participant_pk PRIMARY KEY (id),
+    -- kasutajal üks oma osaleja
+    CONSTRAINT participant_user_uq UNIQUE (user_id)
 );
 
 -- Table: participant_certificate
@@ -348,7 +330,8 @@ CREATE TABLE "user"
     password   varchar(255) NOT NULL,
     status     char(1)      NOT NULL,
     created_at timestamp    NOT NULL,
-    CONSTRAINT user_pk PRIMARY KEY (id)
+    CONSTRAINT user_pk PRIMARY KEY (id),
+    CONSTRAINT user_email_uq UNIQUE (email)
 );
 
 CREATE INDEX user_role_idx_1 on "user" (role_id ASC);
@@ -359,15 +342,6 @@ ALTER TABLE enquiry
     ADD CONSTRAINT application_course
         FOREIGN KEY (course_id)
             REFERENCES course (id)
-            NOT DEFERRABLE
-                INITIALLY IMMEDIATE
-;
-
--- Reference: application_option (table: enquiry)
-ALTER TABLE enquiry
-    ADD CONSTRAINT application_option
-        FOREIGN KEY (option_id)
-            REFERENCES option (id)
             NOT DEFERRABLE
                 INITIALLY IMMEDIATE
 ;
@@ -615,24 +589,6 @@ ALTER TABLE location
                 INITIALLY IMMEDIATE
 ;
 
--- Reference: option_translation_language (table: option_translation)
-ALTER TABLE option_translation
-    ADD CONSTRAINT option_translation_language
-        FOREIGN KEY (language_id)
-            REFERENCES language (id)
-            NOT DEFERRABLE
-                INITIALLY IMMEDIATE
-;
-
--- Reference: option_translation_option (table: option_translation)
-ALTER TABLE option_translation
-    ADD CONSTRAINT option_translation_option
-        FOREIGN KEY (option_id)
-            REFERENCES option (id)
-            NOT DEFERRABLE
-                INITIALLY IMMEDIATE
-;
-
 -- Reference: participant_profile (table: participant)
 ALTER TABLE participant
     ADD CONSTRAINT participant_profile
@@ -788,6 +744,39 @@ FROM training t
                                                  AND rtt.language_id = rl.id)) mt
 WHERE cl.requires_translation;
 
+-- Kõigi koolituste toimumiskorrad (admin): üks rida toimumiskorra ja tõlkekeele kohta; koolituse nimi puudumisel põhikeeles
+-- Kustutatud toimumiskorrad (status D) ja kustutatud koolitused (training_status D) välistab päring
+CREATE VIEW admin_course_summary AS
+SELECT row_number() OVER (ORDER BY c.id, ats.content_language_code)   AS id,
+       c.id                                                            AS course_id,
+       ats.content_language_code,
+       c.training_id,
+       ats.training_translation_id,
+       ats.title                                                       AS training_title,
+       ats.status                                                      AS training_status,
+       ats.category_id,
+       ats.training_language_id,
+       c.start_date,
+       c.end_date,
+       c.end_date < current_date                                       AS is_past,
+       -- sorteerimiseks: tulevased lähimast, möödunud hiliseimast
+       CASE WHEN c.end_date < current_date THEN current_date - c.start_date
+            ELSE c.start_date - current_date END                       AS days_from_today,
+       c.number_of_days,
+       c.price,
+       c.status,
+       CASE c.status WHEN 'U' THEN 1 WHEN 'O' THEN 2 WHEN 'F' THEN 3 ELSE 4 END AS status_order,
+       c.is_promoted,
+       c.room_id IS NOT NULL                                           AS is_on_site,
+       COALESCE(btrim(c.meeting_link), '') <> ''                       AS has_meeting_link,
+       (SELECT count(*) FROM course_participant cp
+        WHERE cp.course_id = c.id AND cp.status = 'R')                 AS participant_count,
+       (SELECT count(*) FROM course_participant cp
+        WHERE cp.course_id = c.id AND cp.status = 'R' AND cp.has_paid) AS paid_count,
+       (SELECT count(*) FROM enquiry e WHERE e.course_id = c.id)       AS enquiry_count
+FROM course c
+         JOIN admin_training_summary ats ON ats.training_id = c.training_id;
+
 -- Admini koolitajate nimekiri: üks rida koolitaja ja tõlkekeele kohta
 CREATE VIEW admin_lecturer_summary AS
 SELECT row_number() OVER (ORDER BY l.id, cl.id)                    AS id,
@@ -846,7 +835,7 @@ SELECT r.id                                          AS room_id,
        r.updated_at
 FROM room r;
 
--- Huviliste päringud (admin): üks rida päringu ja tõlkekeele kohta; koolituse ja vormi nimi puudumisel põhikeeles
+-- Huviliste päringud (admin): üks rida päringu ja tõlkekeele kohta; koolituse nimi puudumisel põhikeeles
 CREATE VIEW admin_enquiry_summary AS
 SELECT row_number() OVER (ORDER BY e.id, cl.id)                    AS id,
        e.id                                                        AS enquiry_id,
@@ -857,7 +846,6 @@ SELECT row_number() OVER (ORDER BY e.id, cl.id)                    AS id,
        e.course_id,
        c.start_date                                                AS course_start_date,
        c.end_date                                                  AS course_end_date,
-       COALESCE(ot.name, mot.name)                                 AS option_name,
        p.first_name || ' ' || p.last_name                          AS full_name,
        p.email,
        p.phone,
@@ -867,12 +855,9 @@ SELECT row_number() OVER (ORDER BY e.id, cl.id)                    AS id,
        e.created_at
 FROM enquiry e
          CROSS JOIN language cl
-         JOIN language ml ON ml.is_main_language
          JOIN profile p ON p.id = e.profile_id
          JOIN admin_training_summary ats ON ats.training_id = e.training_id AND ats.content_language_code = cl.code
          LEFT JOIN course c ON c.id = e.course_id
-         LEFT JOIN option_translation ot ON ot.option_id = e.option_id AND ot.language_id = cl.id
-         LEFT JOIN option_translation mot ON mot.option_id = e.option_id AND mot.language_id = ml.id
 WHERE cl.requires_translation;
 
 -- Koolituse kalender: toimumiskord koos koolitaja, ruumi ja osalejate arvuga
@@ -898,8 +883,47 @@ SELECT c.id                                                         AS course_id
        r.name                                                       AS room_name,
        COALESCE(btrim(c.notes), '') <> ''                           AS has_notes,
        COALESCE(btrim(c.meeting_link), '') <> ''                    AS has_meeting_link,
-       (SELECT count(*) FROM course_participant cp WHERE cp.course_id = c.id) AS participant_count
+       -- ainult registreerunud (R), loobunud (C) ei loe
+       (SELECT count(*) FROM course_participant cp
+        WHERE cp.course_id = c.id AND cp.status = 'R')              AS participant_count
 FROM course c
          LEFT JOIN room r ON r.id = c.room_id;
+
+-- Avalik koolituste kalender: üks rida toimumiskorra ja olemasoleva tõlke kohta (nagu training_summary);
+-- ainult publitseeritud koolituse avatud või täis tulevased toimumiskorrad
+CREATE VIEW public_course_summary AS
+SELECT row_number() OVER (ORDER BY c.id, tt.id)                        AS id,
+       c.id                                                            AS course_id,
+       tl.code                                                         AS content_language_code,
+       c.training_id,
+       tt.id                                                           AS training_translation_id,
+       tt.title,
+       tt.short_description,
+       t.category_id,
+       ct.name                                                         AS category_name,
+       t.training_language_id,
+       trl.flag_icon_code                                              AS training_language_flag_icon_code,
+       c.start_date,
+       c.end_date,
+       c.number_of_days,
+       c.number_of_academic_hours,
+       c.price,
+       c.status,
+       c.is_promoted,
+       c.room_id IS NOT NULL                                           AS is_on_site,
+       COALESCE(btrim(c.meeting_link), '') <> ''                       AS is_online,
+       (SELECT string_agg(l.full_name, ', ' ORDER BY crl.sort_order)
+        FROM course_lecturer crl
+                 JOIN lecturer l ON l.id = crl.lecturer_id
+        WHERE crl.course_id = c.id)                                    AS lecturer_names
+FROM course c
+         JOIN training t ON t.id = c.training_id
+         JOIN training_translation tt ON tt.training_id = t.id
+         JOIN language tl ON tl.id = tt.language_id
+         JOIN language trl ON trl.id = t.training_language_id
+         LEFT JOIN category_translation ct ON ct.category_id = t.category_id AND ct.language_id = tt.language_id
+WHERE t.status = 'P'
+  AND c.status IN ('O', 'F')
+  AND c.start_date >= current_date;
 
 -- End of file.

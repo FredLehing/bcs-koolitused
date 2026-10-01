@@ -84,7 +84,7 @@ Kui JPA Buddy / IntelliJ genereerib uue entiteedi andmebaasist, tuleb need annot
 
 ### Mitmekeelsus (i18n)
 
-Tõlgitav sisu (nt kategooria nimi, koolituse pealkiri/kirjeldus, lektori CV) hoitakse eraldi `*_translation` tabelites (`category_translation`, `training_translation`, `lecturer_translation`, `option_translation`), kus iga rida on ühe kirje tõlge ühte keelde (`language_id` viide `language` tabelile, unikaalsuspiirang `(<entiteet>_id, language_id)` kohta). Baastabelis endas (nt `category`, `training`) tõlgitavat teksti ei hoita.
+Tõlgitav sisu (nt kategooria nimi, koolituse pealkiri/kirjeldus, lektori CV) hoitakse eraldi `*_translation` tabelites (`category_translation`, `training_translation`, `lecturer_translation`), kus iga rida on ühe kirje tõlge ühte keelde (`language_id` viide `language` tabelile, unikaalsuspiirang `(<entiteet>_id, language_id)` kohta). Baastabelis endas (nt `category`, `training`) tõlgitavat teksti ei hoita.
 
 `training` tabelil on lisaks eraldi `training_language_id` veerg (viide `language` tabelile) — see väljendab koolituse **õppekeelt** (millises keeles koolitust läbi viiakse), mitte tõlget. See on äriatribuut, mitte tõlke valik, ja ei tohi segi minna tõlketabelite `language_id`-ga.
 

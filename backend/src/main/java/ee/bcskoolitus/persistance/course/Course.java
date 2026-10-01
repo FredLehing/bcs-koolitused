@@ -69,6 +69,11 @@ public class Course {
     @Column(name = "meeting_link")
     private String meetingLink;
 
+    // Esile tõstetud toimumiskord avalikus kalendris
+    @NotNull
+    @Column(name = "is_promoted", nullable = false)
+    private Boolean isPromoted;
+
     @NotNull
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)

@@ -26,6 +26,7 @@ public class CourseDto {
     // Ka kustutatud ruumi nimi — vorm näitab seda rippmenüüs "(kustutatud)"
     private String roomName;
     private String status;
+    private Boolean isPromoted;
     private String notes;
     private String meetingLink;
 }

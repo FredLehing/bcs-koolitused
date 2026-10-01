@@ -1,6 +1,7 @@
 package ee.bcskoolitus.persistance.course.participant;
 
 import ee.bcskoolitus.persistance.course.Course;
+import ee.bcskoolitus.persistance.participant.Participant;
 import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -29,6 +30,11 @@ public class CourseParticipant {
     private Course course;
 
     @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "participant_id", nullable = false)
+    private Participant participant;
+
+    @NotNull
     @Column(name = "notes", nullable = false, length = Integer.MAX_VALUE)
     private String notes;
 
@@ -40,9 +46,10 @@ public class CourseParticipant {
     @Column(name = "requires_laptop", nullable = false)
     private Boolean requiresLaptop;
 
-    @Size(max = 3)
+    // CourseParticipantStatus: R = registreerunud, C = loobunud
+    @Size(max = 1)
     @NotNull
-    @Column(name = "status", nullable = false, length = 3)
+    @Column(name = "status", nullable = false, length = 1)
     private String status;
 
     @NotNull

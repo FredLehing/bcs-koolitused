@@ -10,7 +10,7 @@ Failinimi: AdminEnquiryView.vue
 Frontend rada: /admin-enquiry?enquiryId={id}
 
 Vaatega seotud lisainfo:
-Kaart "Päring": Saabunud, Staatus, Koolitus (link avalikule lehele /training), Toimumiskord (või "Toimumiskorda pole valitud"), Vorm, Ettevõte, Sõnum. Kaart "Kontakt": Nimi, E-post (mailto), Telefon (tel). Keele vahetusel laaditakse päring uuesti.
+Kaart "Päring": Saabunud, Staatus, Koolitus (link avalikule lehele /training), Toimumiskord (või "Toimumiskorda pole valitud"), Ettevõte, Sõnum. Kaart "Kontakt": Nimi, E-post (mailto), Telefon (tel). Keele vahetusel laaditakse päring uuesti.
 Uue päringu korral nupp "Märgi käsitletuks" (PUT /api/enquiry/{enquiryId}/handle), käsitletu korral "Märgi uueks" (PUT /api/enquiry/{enquiryId}/reopen); pärast seda laaditakse päring uuesti ja näidatakse eduteadet.
 Kiirnupp "Koolituste päringud" → /admin-enquiries. Olematu päring → üldine veavaade.
 ```
@@ -21,7 +21,7 @@ Kiirnupp "Koolituste päringud" → /admin-enquiries. Olematu päring → üldin
 API: GET /api/admin-enquiry/{enquiryId}
 
 Query parameetrid:
-contentLang: String — koolituse ja vormi nime keel ("et"/"en")
+contentLang: String — koolituse nime keel ("et"/"en")
 
 Response (200):
 AdminEnquiryDto.java
@@ -35,7 +35,6 @@ AdminEnquiryDto.java
   "courseId": 5,
   "courseStartDate": "2026-11-16",
   "courseEndDate": "2026-11-20",
-  "optionName": "Veebipõhine",
   "companyName": null,
   "message": "Kas veebis osalejad saavad hiljem ka salvestust vaadata?",
   "fullName": "Martin Kask",

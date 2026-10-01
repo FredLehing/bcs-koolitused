@@ -8,31 +8,31 @@ Eeskuju: `admin-rooms-view-skeemid.md` (nimekiri, otsing, frontendi sorteerimine
 
 ### Üldine
 
-- **Päring** = huvilise saadetud päring koolituse kohta (tabel `enquiry` + kontaktandmed `profile`). Päringu **loomise** vorm avalikul koolituse lehel on eraldi töö ja siin ei käsitleta — seni tulevad päringud seed-andmetest.
+- **Päring** = huvilise saadetud päring koolituse kohta (tabel `enquiry` + kontaktandmed `profile`). Päringu **loomise** modal on avalikul toimumiskorra lehel (`/course`, vt `courses-view/courses-view-skeemid.md`).
 - **Rajad:** `/admin-enquiries` (nimekiri) ja `/admin-enquiry?enquiryId={id}` (üks päring). NB! Õige inglise mitmus on *enquiries* (mitte *enquires*).
 - **Navbar → menüü "Admin"** (`App.vue`): koolitusruumide lingi järele eraldaja ja link **"Koolituste päringud"** → `/admin-enquiries` (i18n `navbar.manageEnquiries`; en "Training enquiries").
 - **Staatus** (`enquiry.status`, `char(1)`): `U` = uus (`EnquiryStatus.NEW`, seni seed-andmetes kasutusel), `H` = käsitletud (`EnquiryStatus.HANDLED`). Admin muudab staatust päringu vaates. Kustutamist ega admini märkmeid praegu pole.
-- **Kuvamiskeel:** koolituse nimi ja osalemisvormi nimi (`option_translation`) tulevad kasutajaliidese keeles (`contentLang`), puuduva tõlke korral põhikeeles. Kontaktandmed ja sõnum ei ole tõlgitavad.
+- **Osalemisvorm eemaldatud (2026-10-01):** tabelid `option`, `option_translation` ja veerg `enquiry.option_id` on kustutatud — päringu vormis osalemisvormi ei küsita (toimumiskorra toimumisviis on teada). Veergu "Vorm" enam pole.
+- **Kuvamiskeel:** koolituse nimi tuleb kasutajaliidese keeles (`contentLang`), puuduva tõlke korral põhikeeles. Kontaktandmed ja sõnum ei ole tõlgitavad.
 
 ### Päringute nimekiri — `AdminEnquiriesView.vue`
 
 - Roll: Admin. Rada `/admin-enquiries`.
 - Päis: pealkiri "Koolituste päringud". Lisamise nuppu pole.
 - Otsinguväli "Otsi nime, e-posti, ettevõtte või koolituse järgi…" (frontendis, sisaldab, tõstutundetu) ja lüliti **"Näita ka käsitletud"** (vaikimisi väljas → ainult uued päringud; muutmisel uus päring `includeHandled`).
-- Veerud: **Saabunud | Nimi | E-post | Ettevõte | Koolitus | Toimumiskord | Vorm | Staatus | Tegevused**.
+- Veerud: **Saabunud | Nimi | E-post | Ettevõte | Koolitus | Toimumiskord | Staatus | Tegevused**.
   - **Saabunud** = `created_at` kujul `30/09/2026 14:20` (kasutaja ajavööndis).
   - **Toimumiskord** = valitud toimumiskorra kuupäevad `05/10/2026 – 09/10/2026` või "—" (üldine päring).
-  - **Vorm** = osalemisvorm (`option_translation.name`, nt "Auditoorne" / "Veebipõhine").
   - **Staatus** = märgis "Uus" (sinine) või "Käsitletud" (hall). Uue päringu rida on paksus kirjas.
   - **Tegevused** = silma ikoon "Vaata" → `/admin-enquiry?enquiryId={id}`.
 - Vaikimisi järjestus: uusimad üleval (`created_at` kahanevalt, backend). Frontendi sorteerimine (`SortableColumnHeader`, 3 klõpsu nagu `/admin-rooms`): Saabunud, Nimi, Koolitus, Staatus.
 - Tabeli all "Kokku N päringut". Tühi tulemus: "Päringuid ei leitud".
-- Keele vahetusel laaditakse nimekiri uuesti (koolituse ja vormi nimi sõltuvad keelest); otsingusõna ja lüliti jäävad.
+- Keele vahetusel laaditakse nimekiri uuesti (koolituse nimi sõltub keelest); otsingusõna ja lüliti jäävad.
 
 ### Päringu vaade — `AdminEnquiryView.vue`
 
 - Rada `/admin-enquiry?enquiryId={id}`. Pealkiri "Koolituse päring", paremal kiirnupp "Koolituste päringud" → `/admin-enquiries`.
-- **Kaart "Päring"**: Saabunud, Staatus (märgis), Koolitus (link avalikule koolituse lehele `/training?trainingId&trainingTranslationId`), Toimumiskord (kuupäevad või "Toimumiskorda pole valitud"), Vorm, Ettevõte (või "—"), **Sõnum** (tekst, reavahetused säilivad).
+- **Kaart "Päring"**: Saabunud, Staatus (märgis), Koolitus (link avalikule koolituse lehele `/training?trainingId&trainingTranslationId`), Toimumiskord (kuupäevad või "Toimumiskorda pole valitud"), Ettevõte (või "—"), **Sõnum** (tekst, reavahetused säilivad).
 - **Kaart "Kontakt"**: Nimi, E-post (`mailto:` link), Telefon (`tel:` link).
 - Nupp olenevalt staatusest:
   - `U` → **"Märgi käsitletuks"** → `PUT /api/enquiry/{enquiryId}/handle` → vaade laaditakse uuesti, eduteade "Päring märgitud käsitletuks";
@@ -54,7 +54,7 @@ Uusi `Error` väärtusi pole (ainult `404 PRIMARY_KEY_NOT_FOUND ('enquiryId')`).
 
 ## 1. Andmebaasi muudatused (ettepanek)
 
-**NB!** Ettepanek; `2_create.sql` ja `3_import.sql` muudetakse backend taski käigus, skripte käivitab kasutaja. Tabelid `enquiry`, `profile`, `option`, `option_translation` on olemas ja **ei muutu**.
+**NB!** Ettepanek; `2_create.sql` ja `3_import.sql` muudetakse backend taski käigus, skripte käivitab kasutaja. Tabelid `enquiry` ja `profile` on olemas ja **ei muutu**.
 
 ### View `admin_enquiry_summary`
 
@@ -71,7 +71,6 @@ SELECT row_number() OVER (ORDER BY e.id, cl.id)                    AS id,
        e.course_id,
        c.start_date                                                AS course_start_date,
        c.end_date                                                  AS course_end_date,
-       COALESCE(ot.name, mot.name)                                 AS option_name,
        p.first_name || ' ' || p.last_name                          AS full_name,
        p.email,
        p.phone,
@@ -81,12 +80,9 @@ SELECT row_number() OVER (ORDER BY e.id, cl.id)                    AS id,
        e.created_at
 FROM enquiry e
          CROSS JOIN language cl
-         JOIN language ml ON ml.is_main_language
          JOIN profile p ON p.id = e.profile_id
          JOIN admin_training_summary ats ON ats.training_id = e.training_id AND ats.content_language_code = cl.code
          LEFT JOIN course c ON c.id = e.course_id
-         LEFT JOIN option_translation ot ON ot.option_id = e.option_id AND ot.language_id = cl.id
-         LEFT JOIN option_translation mot ON mot.option_id = e.option_id AND mot.language_id = ml.id
 WHERE cl.requires_translation;
 ```
 
@@ -100,10 +96,10 @@ INSERT INTO profile (id, first_name, last_name, phone, email, created_at, update
     (3, 'Kadri', 'Tamm', '+37255512345', 'kadri.tamm@example.com', '2026-09-20 11:05:00', '2026-09-20 11:05:00'),
     (4, 'Martin', 'Kask', '+37253344556', 'martin.kask@example.com', '2026-09-28 16:40:00', '2026-09-28 16:40:00');
 
-INSERT INTO enquiry (id, training_id, profile_id, course_id, option_id, message, company_name, status, created_at, updated_at) VALUES
+INSERT INTO enquiry (id, training_id, profile_id, course_id, message, company_name, status, created_at, updated_at) VALUES
     ...
-    (3, 3, 3, NULL, 1, 'Soovime koolitust kaheksale arendajale meie kontoris, eelistatavalt novembris.', 'AS Tarkvaramaja', 'H', '2026-09-20 11:05:00', '2026-09-22 09:00:00'),
-    (4, 1, 4, 5, 2, 'Kas veebis osalejad saavad hiljem ka salvestust vaadata?', NULL, 'U', '2026-09-28 16:40:00', '2026-09-28 16:40:00');
+    (3, 3, 3, NULL, 'Soovime koolitust kaheksale arendajale meie kontoris, eelistatavalt novembris.', 'AS Tarkvaramaja', 'H', '2026-09-20 11:05:00', '2026-09-22 09:00:00'),
+    (4, 1, 4, 5, 'Kas veebis osalejad saavad hiljem ka salvestust vaadata?', NULL, 'U', '2026-09-28 16:40:00', '2026-09-28 16:40:00');
 ```
 
 ---
@@ -183,7 +179,7 @@ sequenceDiagram
 
 ## 6. Lahtised küsimused
 
-- Päringu loomise vorm avalikul koolituse lehel (`POST /api/enquiry`) — eraldi mock ja task hiljem.
+- Päringu loomise modal (`POST /api/enquiry`) — vt `courses-view/courses-view-skeemid.md`.
 - Admini märkmed päringule, e-kirja teavitus uuest päringust, kustutamine — praegu ei tehta.
 
 ## 7. Balsamiq AI käsud
@@ -195,11 +191,11 @@ Create a desktop wireframe of an admin page "Koolituste päringud" in a web app.
 Top: site navigation bar with logo and links, an open dropdown "Admin ▾" with items "Lisa uus koolitus", "Koolituste haldus", a divider, "Lisa uus koolitaja", "Koolitajad", a divider, "Koolitusruumid", a divider and "Koolituste päringud" (highlighted), and "Logi välja" on the right.
 Header: page title "Koolituste päringud".
 Below: a search input "Otsi nime, e-posti, ettevõtte või koolituse järgi…" and a toggle switch "Näita ka käsitletud" (on).
-Main area: a data table with columns "Saabunud ▼", "Nimi", "E-post", "Ettevõte", "Koolitus", "Toimumiskord", "Vorm", "Staatus", "Tegevused".
-Rows (new ones in bold): "28/09/2026 16:40 | Martin Kask | martin.kask@example.com | — | Java algkursus | 16/11/2026 – 20/11/2026 | Veebipõhine | badge Uus | eye icon",
-"20/09/2026 11:05 | Kadri Tamm | kadri.tamm@example.com | AS Tarkvaramaja | Spring Boot veebiarendus | — | Auditoorne | grey badge Käsitletud | eye icon",
-"16/09/2026 14:20 | Peeter Mets | peeter.mets@example.com | OÜ Näidisfirma | Projektijuhtimise põhitõed | — | Veebipõhine | badge Uus | eye icon",
-"15/09/2026 08:30 | Anna Saar | anna.saar@example.com | — | Java algkursus | 05/10/2026 – 09/10/2026 | Auditoorne | badge Uus | eye icon".
+Main area: a data table with columns "Saabunud ▼", "Nimi", "E-post", "Ettevõte", "Koolitus", "Toimumiskord", "Staatus", "Tegevused".
+Rows (new ones in bold): "28/09/2026 16:40 | Martin Kask | martin.kask@example.com | — | Java algkursus | 16/11/2026 – 20/11/2026 | badge Uus | eye icon",
+"20/09/2026 11:05 | Kadri Tamm | kadri.tamm@example.com | AS Tarkvaramaja | Spring Boot veebiarendus | — | grey badge Käsitletud | eye icon",
+"16/09/2026 14:20 | Peeter Mets | peeter.mets@example.com | OÜ Näidisfirma | Projektijuhtimise põhitõed | — | badge Uus | eye icon",
+"15/09/2026 08:30 | Anna Saar | anna.saar@example.com | — | Java algkursus | 05/10/2026 – 09/10/2026 | badge Uus | eye icon".
 Below the table: text "Kokku 4 päringut".
 ```
 
@@ -209,7 +205,7 @@ Below the table: text "Kokku 4 päringut".
 Create a desktop wireframe of an admin page "Koolituse päring" in a web app.
 Top: site navigation bar with logo, links, a dropdown "Admin ▾" and "Logi välja".
 Header row: title "Koolituse päring" and a secondary button "Koolituste päringud" on the right.
-Card "Päring" as a two-column list: Saabunud 28/09/2026 16:40; Staatus badge Uus; Koolitus link "Java algkursus"; Toimumiskord 16/11/2026 – 20/11/2026; Vorm Veebipõhine; Ettevõte —; Sõnum "Kas veebis osalejad saavad hiljem ka salvestust vaadata?".
+Card "Päring" as a two-column list: Saabunud 28/09/2026 16:40; Staatus badge Uus; Koolitus link "Java algkursus"; Toimumiskord 16/11/2026 – 20/11/2026; Ettevõte —; Sõnum "Kas veebis osalejad saavad hiljem ka salvestust vaadata?".
 Card "Kontakt": Nimi Martin Kask; E-post link martin.kask@example.com; Telefon link +37253344556.
 Bottom: primary button "Märgi käsitletuks".
 ```

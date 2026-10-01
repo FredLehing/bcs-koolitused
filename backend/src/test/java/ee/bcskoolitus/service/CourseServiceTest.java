@@ -43,6 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
@@ -196,11 +197,12 @@ class CourseServiceTest {
     void updateCourse_updatesFieldsAndReplacesLecturers() {
         when(courseLecturerRepository.findCourseLecturersBy(COURSE_ID)).thenReturn(List.of(createCourseLecturer(8, "Meelis Teern")));
         CourseUpdateRequestDto courseUpdateRequestDto = new CourseUpdateRequestDto(LocalDate.of(2026, 10, 19), LocalDate.of(2026, 10, 23),
-                5, 40, new BigDecimal("490.00"), List.of(8), null, "X", "Tühistatud.", " ");
+                5, 40, new BigDecimal("490.00"), List.of(8), null, "X", true, "Tühistatud.", " ");
 
         courseService.updateCourse(COURSE_ID, courseUpdateRequestDto);
 
         assertEquals("X", course.getStatus());
+        assertTrue(course.getIsPromoted());
         assertNull(course.getRoom());
         assertEquals("Tühistatud.", course.getNotes());
         assertNull(course.getMeetingLink());
@@ -216,7 +218,7 @@ class CourseServiceTest {
     void updateCourse_linkedRoomMayBeDeleted() {
         course.setRoom(createRoom(2));
         CourseUpdateRequestDto courseUpdateRequestDto = new CourseUpdateRequestDto(LocalDate.of(2026, 10, 19), LocalDate.of(2026, 10, 23),
-                5, 40, new BigDecimal("490.00"), List.of(), 2, "O", null, null);
+                5, 40, new BigDecimal("490.00"), List.of(), 2, "O", false, null, null);
 
         courseService.updateCourse(COURSE_ID, courseUpdateRequestDto);
 
@@ -227,7 +229,7 @@ class CourseServiceTest {
     @Test
     void updateCourse_newRoomWithoutLinkedRoomMustBeAssignable() {
         CourseUpdateRequestDto courseUpdateRequestDto = new CourseUpdateRequestDto(LocalDate.of(2026, 10, 19), LocalDate.of(2026, 10, 23),
-                5, 40, new BigDecimal("490.00"), List.of(), 3, "O", null, null);
+                5, 40, new BigDecimal("490.00"), List.of(), 3, "O", false, null, null);
 
         courseService.updateCourse(COURSE_ID, courseUpdateRequestDto);
 
@@ -267,7 +269,7 @@ class CourseServiceTest {
     }
 
     private static CourseCreateRequestDto createCourseCreateRequestDto(LocalDate startDate, LocalDate endDate) {
-        return new CourseCreateRequestDto(1, startDate, endDate, 5, 40, new BigDecimal("490.00"), List.of(1, 8), 2, "U", "", "");
+        return new CourseCreateRequestDto(1, startDate, endDate, 5, 40, new BigDecimal("490.00"), List.of(1, 8), 2, "U", false, "", "");
     }
 
     private CourseLecturer createCourseLecturer(Integer lecturerId, String fullName) {

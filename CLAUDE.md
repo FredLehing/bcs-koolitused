@@ -36,6 +36,16 @@ Claude Code terminal jookseb WSL2 Ubuntu sees, mitte Windowsi peal — Windowsi 
 - `node`, `npm` — Node.js LTS (NVM kaudu paigaldatud, eraldi versioon Windowsi Node'ist)
 - `claude` — Claude Code
 
+**Frontendi build WSL-ist:** `frontend/node_modules` on paigaldatud Windowsist (õpilane jooksutab `npm install`/`npm run dev` IntelliJ-s), seega puuduvad seal Linuxi natiivsed bindingud (nt `@rolldown/binding-linux-x64-gnu`) ja `npm run build` WSL-is feilib. **Ära proovi buildi otse `frontend/` kaustas ega jooksuta seal `npm install`/`npm ci`** — see rikuks Windowsi paigalduse. `npm run lint` töötab otse. Buildi kontrollimiseks kopeeri frontend kohe scratchpadi ja ehita seal värske Linuxi paigaldusega:
+
+```sh
+SP=<scratchpadi kaust>; rm -rf $SP/fe && mkdir -p $SP/fe \
+  && tar -C frontend --exclude=node_modules --exclude=dist -cf - . | tar -xf - -C $SP/fe \
+  && cd $SP/fe && npm ci --silent 2>&1 | tail -3; npx vite build 2>&1 | tail -5
+```
+
+Hoiatus "Some chunks are larger than 500 kB" on teada ja ei ole viga.
+
 Docker **puudub** WSL-i seest natiivselt (projekti kokkulepe) — ainult Windows Docker Desktopi kaudu, kui õpilane on selle käsitsi sisse lülitanud.
 
 ## Sub-agentide kasutamine

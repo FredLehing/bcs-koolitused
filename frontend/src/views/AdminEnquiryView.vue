@@ -28,7 +28,7 @@ export default {
     },
   },
   watch: {
-    // Keele vahetus → koolituse ja vormi nimi uues keeles
+    // Keele vahetus → koolituse nimi uues keeles
     contentLang() {
       this.getAdminEnquiry()
     },
@@ -141,9 +141,6 @@ export default {
                 </template>
                 <span v-else class="text-secondary">{{ $t('adminEnquiry.noCourse') }}</span>
               </dd>
-
-              <dt class="col-sm-4">{{ $t('adminEnquiry.option') }}</dt>
-              <dd class="col-sm-8">{{ enquiry.optionName }}</dd>
 
               <dt class="col-sm-4">{{ $t('adminEnquiry.companyName') }}</dt>
               <dd class="col-sm-8">{{ enquiry.companyName ?? '—' }}</dd>

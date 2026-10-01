@@ -56,6 +56,10 @@ public class CourseCreateRequestDto {
     @Pattern(regexp = "[UOFX]", message = "peab olema U, O, F või X")
     private String status;
 
+    // Esile tõstetud toimumiskord on avalikus kalendris eespool
+    @NotNull
+    private Boolean isPromoted;
+
     // Tühi → null
     private String notes;
 

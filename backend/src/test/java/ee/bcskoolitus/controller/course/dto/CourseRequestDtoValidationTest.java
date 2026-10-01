@@ -59,7 +59,7 @@ class CourseRequestDtoValidationTest {
     @Test
     void createRequest_missingUserId_isInvalid() {
         CourseCreateRequestDto courseCreateRequestDto = new CourseCreateRequestDto(null, LocalDate.of(2027, 1, 11), LocalDate.of(2027, 1, 15),
-                5, 40, new BigDecimal("490"), List.of(), null, "U", null, null);
+                5, 40, new BigDecimal("490"), List.of(), null, "U", false, null, null);
 
         Set<ConstraintViolation<CourseCreateRequestDto>> violations = validator.validate(courseCreateRequestDto);
 
@@ -75,6 +75,6 @@ class CourseRequestDtoValidationTest {
 
     private static CourseUpdateRequestDto createCourseUpdateRequestDto(String status, Integer numberOfDays, BigDecimal price, List<Integer> lecturerIds) {
         return new CourseUpdateRequestDto(LocalDate.of(2026, 10, 19), LocalDate.of(2026, 10, 23),
-                numberOfDays, 40, price, lecturerIds, 2, status, null, null);
+                numberOfDays, 40, price, lecturerIds, 2, status, true, null, null);
     }
 }

@@ -27,7 +27,11 @@
       "title": "Logging out",
       "message": "Are you sure you want to log out?"
     },
-    "register": "Register"
+    "register": "Register",
+    "manageCourses": "Course calendar",
+    "ourTrainings": "Our trainings",
+    "coursesCalendar": "Training calendar",
+    "signup": "Create account"
   },
   "error": {
     "message": "Something went wrong, please try again later!",
@@ -39,7 +43,6 @@
     "login": "Log in",
     "home": "Home"
   },
-
   "login": {
     "email": "Email",
     "password": "Password",
@@ -47,9 +50,10 @@
     "logIn": "LOGIN",
     "forgotPassword": "Forgot Password?",
     "errorMessage": "Please fill in all required fields",
-    "incorrectCredentials": "Incorrect email or password"
+    "incorrectCredentials": "Incorrect email or password",
+    "redirectInfo": "Log in or create an account to register.",
+    "noAccount": "No account yet?"
   },
-
   "trainings": {
     "searchPlaceholder": "Search trainings",
     "search": "Search",
@@ -422,7 +426,9 @@
     "messages": {
       "added": "Course added",
       "saved": "Course saved"
-    }
+    },
+    "isPromoted": "Highlighted",
+    "isPromotedHint": "Highlighted courses are shown first in the training calendar."
   },
   "lecturers": {
     "title": "Our trainers",
@@ -431,7 +437,8 @@
   },
   "lecturer": {
     "backToLecturers": "All trainers",
-    "trainings": "Trainings"
+    "trainings": "Trainings",
+    "back": "Back"
   },
   "dateInput": {
     "placeholder": "dd/mm/yyyy",
@@ -508,7 +515,6 @@
       "companyName": "Company",
       "trainingTitle": "Training",
       "course": "Course",
-      "optionName": "Format",
       "status": "Status",
       "actions": "Actions"
     }
@@ -522,7 +528,6 @@
     "training": "Training",
     "course": "Course",
     "noCourse": "No course selected",
-    "option": "Format",
     "companyName": "Company",
     "message": "Message",
     "fullName": "Name",
@@ -534,5 +539,169 @@
       "handled": "Enquiry marked as handled",
       "reopened": "Enquiry marked as new"
     }
+  },
+  "adminAllCourses": {
+    "title": "Course calendar",
+    "searchPlaceholder": "Search by training name",
+    "search": "Search",
+    "promoted": "Highlighted",
+    "view": "View",
+    "noResults": "No courses found",
+    "totalCount": "{n} courses in total | {n} course in total | {n} courses in total",
+    "columns": {
+      "startDate": "Start",
+      "numberOfDays": "Days",
+      "training": "Training",
+      "price": "Price",
+      "status": "Status",
+      "participants": "Participants",
+      "paid": "Paid",
+      "meetingLink": "Online link",
+      "enquiries": "Enquiries",
+      "actions": "Actions"
+    },
+    "filters": {
+      "title": "Search filters",
+      "show": "▾ Show search filters",
+      "hide": "▴ Hide search filters",
+      "activeCount": "{n} filters active | {n} filter active | {n} filters active",
+      "filter": "Filter",
+      "clear": "Clear filters",
+      "startDateFrom": "Start from",
+      "startDateTo": "Start until",
+      "category": "Category",
+      "trainingLanguage": "Training language",
+      "status": "Status",
+      "attendance": "Attendance",
+      "onSite": "On site",
+      "online": "Online",
+      "promoted": "Highlighted",
+      "all": "All",
+      "yes": "Yes",
+      "no": "No"
+    }
+  },
+  "courseParticipantStatus": {
+    "R": "Registered",
+    "C": "Cancelled"
+  },
+  "adminCourse": {
+    "title": "Course",
+    "legend": "Course",
+    "viewPublicPage": "View public page",
+    "fields": {
+      "training": "Training",
+      "dates": "Dates"
+    },
+    "participants": {
+      "title": "Participants",
+      "empty": "No participants",
+      "summary": "{count} participants in total, {paidCount} of them paid",
+      "columns": {
+        "name": "Name",
+        "email": "Email",
+        "phone": "Phone",
+        "registeredAt": "Registered",
+        "hasPaid": "Paid",
+        "requiresLaptop": "Needs a laptop",
+        "status": "Status",
+        "notes": "Notes"
+      },
+      "includeCancelled": "Show cancelled too"
+    },
+    "enquiries": {
+      "title": "Enquiries",
+      "view": "View enquiry",
+      "empty": "No enquiries",
+      "columns": {
+        "createdAt": "Received",
+        "name": "Name",
+        "email": "Email",
+        "company": "Company",
+        "status": "Status"
+      }
+    }
+  },
+  "courses": {
+    "title": "Training calendar",
+    "searchPlaceholder": "Search trainings",
+    "resultCount": "{n} courses | {n} course | {n} courses",
+    "noSearchResults": "No courses found for “{query}”.",
+    "showAllCourses": "Show all courses",
+    "noResults": "No courses match the selected filters.",
+    "duration": "{days} days · {hours} h",
+    "onSite": "On site",
+    "online": "Online",
+    "lecturer": "Lecturer",
+    "promoted": "Highlighted",
+    "editCourse": "Edit course",
+    "filters": {
+      "startDateFrom": "From",
+      "startDateTo": "Until",
+      "attendance": "Attendance",
+      "hideFull": "Hide full",
+      "trainingLanguage": "Training language",
+      "category": "Training category",
+      "fundingType": "Funding",
+      "all": "All",
+      "clear": "Clear filters"
+    }
+  },
+  "courseView": {
+    "course": "Course",
+    "courses": "Course dates",
+    "allTrainingCourses": "All dates of this training",
+    "register": "Register",
+    "full": "Course is full",
+    "registered": "You are registered for this course",
+    "messages": {
+      "enquirySent": "Thank you! Your enquiry has been sent, we will contact you soon."
+    }
+  },
+  "enquiryModal": {
+    "title": "Ask for more info",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "email": "Email",
+    "phone": "Phone",
+    "company": "Company",
+    "message": "Message",
+    "privacy": "We use your data only to answer your enquiry.",
+    "send": "Send",
+    "sendFailed": "Sending the enquiry failed, please try again later.",
+    "validation": {
+      "fillRequired": "Please fill in all required fields",
+      "invalidEmail": "Please check the email address"
+    }
+  },
+  "signup": {
+    "redirectInfo": "After creating an account you will continue with the registration.",
+    "passwordRepeat": "Repeat password",
+    "passwordHint": "At least {length} characters",
+    "haveAccount": "I already have an account — log in",
+    "validation": {
+      "fillRequired": "Please fill in all required fields",
+      "invalidEmail": "Please check the email address",
+      "passwordTooShort": "Password must be at least {length} characters long",
+      "passwordsDiffer": "Passwords do not match"
+    }
+  },
+  "courseRegistration": {
+    "title": "Registration",
+    "duration": "Duration",
+    "backToCourse": "Back to the course page",
+    "participantData": "Participant details",
+    "profileHint": "Details are filled in from your profile; changes are also saved to your profile.",
+    "requiresLaptop": "I need a laptop at the training",
+    "notes": "Additional info",
+    "cancel": "Cancel",
+    "alreadyRegistered": "You are already registered for this course.",
+    "full": "The course is full — ask for more info on the course page.",
+    "messages": {
+      "registered": "Registration successful! You are registered for this course."
+    }
+  },
+  "lecturerCard": {
+    "viewProfile": "View lecturer profile: {name}"
   }
 }
