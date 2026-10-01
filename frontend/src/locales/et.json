@@ -27,7 +27,11 @@
       "title": "Väljalogimine",
       "message": "Kas soovid kindlasti välja logida?"
     },
-    "register": "Registreeri"
+    "register": "Registreeri",
+    "manageCourses": "Koolituste kalender",
+    "ourTrainings": "Meie koolitused",
+    "coursesCalendar": "Koolituste kalender",
+    "signup": "Loo konto"
   },
   "error": {
     "message": "Midagi läks valesti, proovi hiljem uuesti!",
@@ -46,7 +50,9 @@
     "logIn": "Logi sisse",
     "forgotPassword": "Unustasid salasõna?",
     "errorMessage": "Täida kõik väljad",
-    "incorrectCredentials": "Vale email või parool"
+    "incorrectCredentials": "Vale email või parool",
+    "redirectInfo": "Registreerumiseks logi sisse või loo konto.",
+    "noAccount": "Pole veel kontot?"
   },
   "trainings": {
     "searchPlaceholder": "Otsi koolitust",
@@ -420,7 +426,9 @@
     "messages": {
       "added": "Toimumiskord lisatud",
       "saved": "Toimumiskord salvestatud"
-    }
+    },
+    "isPromoted": "Esile tõstetud",
+    "isPromotedHint": "Esile tõstetud toimumiskorrad on koolituste kalendris eespool."
   },
   "lecturers": {
     "title": "Meie koolitajad",
@@ -429,7 +437,8 @@
   },
   "lecturer": {
     "backToLecturers": "Kõik koolitajad",
-    "trainings": "Koolitused"
+    "trainings": "Koolitused",
+    "back": "Tagasi"
   },
   "dateInput": {
     "placeholder": "pp/kk/aaaa",
@@ -530,5 +539,169 @@
       "handled": "Päring märgitud käsitletuks",
       "reopened": "Päring märgitud uueks"
     }
+  },
+  "adminAllCourses": {
+    "title": "Koolituste kalender",
+    "searchPlaceholder": "Otsi koolituse nime järgi",
+    "search": "Otsi",
+    "promoted": "Esile tõstetud",
+    "view": "Vaata",
+    "noResults": "Toimumiskordi ei leitud",
+    "totalCount": "Kokku {n} toimumiskorda | Kokku {n} toimumiskord | Kokku {n} toimumiskorda",
+    "columns": {
+      "startDate": "Algus",
+      "numberOfDays": "Päevi",
+      "training": "Koolitus",
+      "price": "Hind",
+      "status": "Staatus",
+      "participants": "Osalejad",
+      "paid": "Tasunud",
+      "meetingLink": "Veebilink",
+      "enquiries": "Huvilisi",
+      "actions": "Tegevused"
+    },
+    "filters": {
+      "title": "Otsingu filtrid",
+      "show": "▾ Ava otsingu filtrid",
+      "hide": "▴ Peida otsingu filtrid",
+      "activeCount": "{n} filtrit aktiivne | {n} filter aktiivne | {n} filtrit aktiivne",
+      "filter": "Filtreeri",
+      "clear": "Tühjenda filtrid",
+      "startDateFrom": "Algus alates",
+      "startDateTo": "Algus kuni",
+      "category": "Kategooria",
+      "trainingLanguage": "Koolituse keel",
+      "status": "Staatus",
+      "attendance": "Toimumisviis",
+      "onSite": "Kohapeal",
+      "online": "Veebis",
+      "promoted": "Esile tõstetud",
+      "all": "Kõik",
+      "yes": "Jah",
+      "no": "Ei"
+    }
+  },
+  "courseParticipantStatus": {
+    "R": "Registreerunud",
+    "C": "Loobunud"
+  },
+  "adminCourse": {
+    "title": "Toimumiskord",
+    "legend": "Toimumiskord",
+    "viewPublicPage": "Vaata avalikul lehel",
+    "fields": {
+      "training": "Koolitus",
+      "dates": "Toimumisaeg"
+    },
+    "participants": {
+      "title": "Osalejad",
+      "empty": "Osalejaid pole",
+      "summary": "Kokku {count} osalejat, neist {paidCount} tasunud",
+      "columns": {
+        "name": "Nimi",
+        "email": "E-post",
+        "phone": "Telefon",
+        "registeredAt": "Registreerus",
+        "hasPaid": "Tasunud",
+        "requiresLaptop": "Vajab sülearvutit",
+        "status": "Staatus",
+        "notes": "Märkmed"
+      },
+      "includeCancelled": "Näita ka loobunud"
+    },
+    "enquiries": {
+      "title": "Huvilised",
+      "view": "Vaata päringut",
+      "empty": "Huvilisi pole",
+      "columns": {
+        "createdAt": "Saabunud",
+        "name": "Nimi",
+        "email": "E-post",
+        "company": "Ettevõte",
+        "status": "Staatus"
+      }
+    }
+  },
+  "courses": {
+    "title": "Koolituste kalender",
+    "searchPlaceholder": "Otsi koolitust",
+    "resultCount": "{n} toimumiskorda | {n} toimumiskord | {n} toimumiskorda",
+    "noSearchResults": "Otsingule „{query}“ ei leitud ühtegi toimumiskorda.",
+    "showAllCourses": "Näita kõiki toimumiskordi",
+    "noResults": "Valitud filtritele vastavaid toimumiskordi ei leitud.",
+    "duration": "{days} päeva · {hours} t",
+    "onSite": "Kohapeal",
+    "online": "Veebis",
+    "lecturer": "Koolitaja",
+    "promoted": "Esile tõstetud",
+    "editCourse": "Muuda toimumiskorda",
+    "filters": {
+      "startDateFrom": "Alates",
+      "startDateTo": "Kuni",
+      "attendance": "Toimumisviis",
+      "hideFull": "Peida täis",
+      "trainingLanguage": "Koolituse keel",
+      "category": "Koolituse kategooria",
+      "fundingType": "Rahastus",
+      "all": "Kõik",
+      "clear": "Tühjenda filtrid"
+    }
+  },
+  "courseView": {
+    "course": "Toimumiskord",
+    "courses": "Toimumiskorrad",
+    "allTrainingCourses": "Kõik selle koolituse toimumiskorrad",
+    "register": "Registreeru",
+    "full": "Kohad on täis",
+    "registered": "Oled sellele toimumiskorrale registreerunud",
+    "messages": {
+      "enquirySent": "Aitäh! Sinu päring on saadetud, võtame peagi ühendust."
+    }
+  },
+  "enquiryModal": {
+    "title": "Küsi lisainfot",
+    "firstName": "Eesnimi",
+    "lastName": "Perekonnanimi",
+    "email": "E-post",
+    "phone": "Telefon",
+    "company": "Ettevõte",
+    "message": "Sõnum",
+    "privacy": "Kasutame sinu andmeid ainult päringule vastamiseks.",
+    "send": "Saada",
+    "sendFailed": "Päringu saatmine ebaõnnestus, proovi hiljem uuesti.",
+    "validation": {
+      "fillRequired": "Täida kõik kohustuslikud väljad",
+      "invalidEmail": "Kontrolli e-posti aadressi"
+    }
+  },
+  "signup": {
+    "redirectInfo": "Pärast konto loomist jätkad registreerumisega.",
+    "passwordRepeat": "Parool uuesti",
+    "passwordHint": "Vähemalt {length} märki",
+    "haveAccount": "Mul on juba konto — logi sisse",
+    "validation": {
+      "fillRequired": "Täida kõik kohustuslikud väljad",
+      "invalidEmail": "Kontrolli e-posti aadressi",
+      "passwordTooShort": "Parool peab olema vähemalt {length} märki pikk",
+      "passwordsDiffer": "Paroolid ei ühti"
+    }
+  },
+  "courseRegistration": {
+    "title": "Registreerumine",
+    "duration": "Kestus",
+    "backToCourse": "Tagasi toimumiskorra lehele",
+    "participantData": "Osaleja andmed",
+    "profileHint": "Andmed on täidetud sinu profiilist; muudatused salvestatakse ka profiili.",
+    "requiresLaptop": "Vajan koolitusel sülearvutit",
+    "notes": "Lisainfo",
+    "cancel": "Tühista",
+    "alreadyRegistered": "Oled sellele toimumiskorrale juba registreerunud.",
+    "full": "Kohad on täis — küsi lisainfot toimumiskorra lehelt.",
+    "messages": {
+      "registered": "Registreerumine õnnestus! Oled sellele toimumiskorrale registreerunud."
+    }
+  },
+  "lecturerCard": {
+    "viewProfile": "Vaata koolitaja profiili: {name}"
   }
 }

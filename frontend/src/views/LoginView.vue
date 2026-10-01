@@ -11,6 +11,12 @@ export default {
       errorMessage: '',
     }
   },
+  computed: {
+    // Rada, kuhu pärast sisselogimist minnakse (nt registreerumine); '' = avaleht
+    redirect() {
+      return this.$route.query.redirect ?? ''
+    },
+  },
   methods: {
     login() {
       this.errorMessage = ''
@@ -26,7 +32,7 @@ export default {
     handleLoginResponse(loginResponse) {
       sessionStorage.setItem('userId', loginResponse.userId)
       sessionStorage.setItem('roleName', loginResponse.roleName)
-      NavigationService.navigateToHomeView()
+      NavigationService.navigateToRedirectOrHomeView(this.redirect)
     },
 
     handleLoginError(loginError) {
@@ -47,6 +53,9 @@ export default {
         <img class="img-fluid" src="@/assets/programming.gif" alt="koodimine">
       </div>
       <div class="col-6 text-center">
+        <div v-if="redirect" class="alert alert-info w-75 mx-auto">
+          {{ $t('login.redirectInfo') }}
+        </div>
         <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
 
         <div class="form-floating mb-3 w-75 mx-auto">
@@ -82,6 +91,12 @@ export default {
         <button @click="login" type="button" class="btn btn-primary w-75 mx-auto text-uppercase">
           {{ $t('login.logIn') }}
         </button>
+        <p class="mt-3">
+          {{ $t('login.noAccount') }}
+          <RouterLink :to="{ name: 'signupRoute', query: redirect ? { redirect: redirect } : {} }">
+            {{ $t('navbar.signup') }}
+          </RouterLink>
+        </p>
       </div>
     </div>
   </div>

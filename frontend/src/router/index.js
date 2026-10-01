@@ -18,6 +18,24 @@ import AdminTrainingCoursesView from '@/views/AdminTrainingCoursesView.vue'
 import CourseFormView from '@/views/CourseFormView.vue'
 import LecturersView from '@/views/LecturersView.vue'
 import LecturerView from '@/views/LecturerView.vue'
+import AdminAllCoursesView from '@/views/AdminAllCoursesView.vue'
+import AdminCourseView from '@/views/AdminCourseView.vue'
+import CoursesView from '@/views/CoursesView.vue'
+import CourseView from '@/views/CourseView.vue'
+import CourseRegistrationView from '@/views/CourseRegistrationView.vue'
+import SignupView from '@/views/SignupView.vue'
+import SessionStorageService from '@/services/SessionStorageService.js'
+
+// Registreerumine: sisse logimata → login (pärast tagasi siia), admin ei registreeru
+function checkParticipantUser(to) {
+  if (!SessionStorageService.userIsLoggedIn()) {
+    return { name: 'loginRoute', query: { redirect: to.fullPath } }
+  }
+  if (SessionStorageService.userIsAdmin()) {
+    return { name: 'notAuthorizedRoute' }
+  }
+  return true
+}
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -41,6 +59,27 @@ const router = createRouter({
       path: '/trainings',
       name: 'trainingsRoute',
       component: TrainingsView,
+    },
+    {
+      path: '/courses',
+      name: 'coursesRoute',
+      component: CoursesView,
+    },
+    {
+      path: '/course',
+      name: 'courseRoute',
+      component: CourseView,
+    },
+    {
+      path: '/course-registration',
+      name: 'courseRegistrationRoute',
+      component: CourseRegistrationView,
+      beforeEnter: checkParticipantUser,
+    },
+    {
+      path: '/signup',
+      name: 'signupRoute',
+      component: SignupView,
     },
     {
       path: '/training',
@@ -96,6 +135,16 @@ const router = createRouter({
       path: '/course-form',
       name: 'courseFormRoute',
       component: CourseFormView,
+    },
+    {
+      path: '/admin-all-courses',
+      name: 'adminAllCoursesRoute',
+      component: AdminAllCoursesView,
+    },
+    {
+      path: '/admin-course',
+      name: 'adminCourseRoute',
+      component: AdminCourseView,
     },
     {
       path: '/lecturers',
