@@ -60,7 +60,7 @@ Mõisted: **registreerumine** = üks `course_participant` rida (osaleja + toimum
 |---|---|
 | `GET /api/admin-registrations?contentLang=&includeCancelled=&includePast=` | nimekiri (`AdminRegistrationSummaryDto` list); otsing ja sorteerimine frontendis |
 | `GET /api/admin-registration/{courseParticipantId}?contentLang=` | üks registreerumine koos osaleja ja toimumiskorra infoga (`AdminRegistrationDto`) |
-| `PUT /api/admin-registration/{courseParticipantId}` | `AdminRegistrationUpdateRequest`: `status`* (`R`/`C`), `hasPaid`*, `requiresLaptop`*, `adminNotes` (tühi → `null`) |
+| `PUT /api/admin-registration/{courseParticipantId}` | `AdminRegistrationUpdateRequestDto`: `status`* (`R`/`C`), `hasPaid`*, `requiresLaptop`*, `adminNotes` (tühi → `null`) |
 
 Olemasolev `GET /api/course/{courseId}/participants` saab vastusesse lisaks `courseParticipantId` (juba olemas) — muudatust pole vaja.
 

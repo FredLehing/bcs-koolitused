@@ -62,7 +62,7 @@ message: "Ei leidnud primary keyd 'courseParticipantId' väärtusega: 123"
 API: PUT /api/admin-registration/{courseParticipantId}
 
 Request body:
-AdminRegistrationUpdateRequest.java
+AdminRegistrationUpdateRequestDto.java
 {
   "status": "C",
   "hasPaid": false,
