@@ -1,6 +1,6 @@
 <script>
 import { mapState } from 'pinia'
-import { PhEye } from '@phosphor-icons/vue'
+import { PhEye, PhMagnifyingGlass } from '@phosphor-icons/vue'
 import { useLanguageStore } from '@/stores/languageStore.js'
 import CourseParticipantService from '@/api-services/CourseParticipantService.js'
 import NavigationService from '@/services/NavigationService.js'
@@ -30,6 +30,7 @@ export default {
   components: {
     AdminTabs,
     PhEye,
+    PhMagnifyingGlass,
     CheckMark,
     SortableColumnHeader,
     CourseParticipantStatusBadge,
@@ -162,20 +163,30 @@ export default {
 </script>
 
 <template>
-  <div class="container">
+  <div class="mx-auto w-full max-w-7xl px-6 py-8">
     <AdminTabs />
 
-    <h1 class="h3 mb-3">{{ $t('adminRegistrations.title') }}</h1>
+    <div class="mb-6 flex items-end justify-between gap-4">
+      <h1 class="text-3xl font-extrabold tracking-tight">{{ $t('adminRegistrations.title') }}</h1>
+      <span class="text-muted">{{
+        $t('adminRegistrations.totalCount', filteredRegistrations.length)
+      }}</span>
+    </div>
 
-    <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
-      <input
-        v-model="searchText"
-        :placeholder="$t('adminRegistrations.searchPlaceholder')"
-        :aria-label="$t('adminRegistrations.searchPlaceholder')"
-        class="form-control search-input"
-        type="search"
-      />
-      <div class="form-check form-switch mb-0">
+    <div class="mb-4 flex flex-wrap items-center gap-x-6 gap-y-3">
+      <div
+        class="flex min-h-11 max-w-xl flex-1 items-center gap-2 rounded-lg border border-brand-200 bg-white px-3 focus-within:border-brand-600 focus-within:ring-3 focus-within:ring-brand-600/15"
+      >
+        <PhMagnifyingGlass :size="18" class="shrink-0 text-muted" />
+        <input
+          v-model="searchText"
+          :placeholder="$t('adminRegistrations.searchPlaceholder')"
+          :aria-label="$t('adminRegistrations.searchPlaceholder')"
+          class="min-w-0 flex-1 bg-transparent outline-none"
+          type="search"
+        />
+      </div>
+      <div class="form-check form-switch">
         <input
           v-model="includeCancelled"
           id="includeCancelled"
@@ -187,7 +198,7 @@ export default {
           {{ $t('adminRegistrations.showCancelled') }}
         </label>
       </div>
-      <div class="form-check form-switch mb-0">
+      <div class="form-check form-switch">
         <input
           v-model="includePast"
           id="includePast"
@@ -201,128 +212,124 @@ export default {
       </div>
     </div>
 
-    <div class="table-responsive">
-      <table class="table table-hover align-middle">
-        <thead>
-          <tr>
-            <SortableColumnHeader
-              :label="sortableColumns.registeredAt"
-              sort-key="registeredAt"
-              :sort-by="sortBy"
-              :sort-direction="sortDirection"
-              @event-sort-clicked="handleSortClick"
-            />
-            <SortableColumnHeader
-              :label="sortableColumns.participantName"
-              sort-key="participantName"
-              :sort-by="sortBy"
-              :sort-direction="sortDirection"
-              @event-sort-clicked="handleSortClick"
-            />
-            <th>{{ $t('adminRegistrations.columns.email') }}</th>
-            <SortableColumnHeader
-              :label="sortableColumns.trainingTitle"
-              sort-key="trainingTitle"
-              :sort-by="sortBy"
-              :sort-direction="sortDirection"
-              @event-sort-clicked="handleSortClick"
-            />
-            <SortableColumnHeader
-              :label="sortableColumns.courseStartDate"
-              sort-key="courseStartDate"
-              :sort-by="sortBy"
-              :sort-direction="sortDirection"
-              @event-sort-clicked="handleSortClick"
-            />
-            <SortableColumnHeader
-              :label="sortableColumns.hasPaid"
-              sort-key="hasPaid"
-              :sort-by="sortBy"
-              :sort-direction="sortDirection"
-              @event-sort-clicked="handleSortClick"
-            />
-            <SortableColumnHeader
-              :label="sortableColumns.requiresLaptop"
-              sort-key="requiresLaptop"
-              :sort-by="sortBy"
-              :sort-direction="sortDirection"
-              @event-sort-clicked="handleSortClick"
-            />
-            <SortableColumnHeader
-              :label="sortableColumns.status"
-              sort-key="status"
-              :sort-by="sortBy"
-              :sort-direction="sortDirection"
-              @event-sort-clicked="handleSortClick"
-            />
-            <th>{{ $t('adminRegistrations.columns.actions') }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="registration in sortedRegistrations"
-            :key="registration.courseParticipantId"
-            :class="{ 'cancelled-row': registration.status === 'C' }"
-          >
-            <td class="text-nowrap">{{ formatDateTime(registration.registeredAt) }}</td>
-            <td>{{ registration.participantName }}</td>
-            <td>{{ registration.email }}</td>
-            <td>{{ registration.trainingTitle }}</td>
-            <td class="text-nowrap">
-              <RouterLink
-                :to="{
-                  name: 'adminCourseRoute',
-                  query: { returnTo: $route.fullPath, courseId: registration.courseId },
-                }"
-              >
-                {{ formatDateRange(registration) }}
-              </RouterLink>
-              <span v-if="registration.isPast" class="badge text-bg-light border ms-1">
-                {{ $t('courseStatus.past') }}
-              </span>
-            </td>
-            <td><CheckMark :value="registration.hasPaid" /></td>
-            <td><CheckMark :value="registration.requiresLaptop" /></td>
-            <td><CourseParticipantStatusBadge :status="registration.status" /></td>
-            <td>
-              <RouterLink
-                :to="{
-                  name: 'adminRegistrationRoute',
-                  query: {
-                    returnTo: $route.fullPath,
-                    courseParticipantId: registration.courseParticipantId,
-                  },
-                }"
-                :title="$t('adminRegistrations.view')"
-                :aria-label="$t('adminRegistrations.view')"
-                class="btn btn-sm btn-outline-secondary d-inline-flex"
-              >
-                <PhEye :size="20" />
-              </RouterLink>
-            </td>
-          </tr>
-          <tr v-if="filteredRegistrations.length === 0">
-            <td colspan="9" class="text-center text-secondary py-4">
-              {{ $t('adminRegistrations.noResults') }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="overflow-hidden rounded-2xl border border-line bg-white">
+      <div class="overflow-x-auto">
+        <table class="table table-hover">
+          <thead class="bg-surface">
+            <tr>
+              <SortableColumnHeader
+                :label="sortableColumns.registeredAt"
+                sort-key="registeredAt"
+                :sort-by="sortBy"
+                :sort-direction="sortDirection"
+                @event-sort-clicked="handleSortClick"
+              />
+              <SortableColumnHeader
+                :label="sortableColumns.participantName"
+                sort-key="participantName"
+                :sort-by="sortBy"
+                :sort-direction="sortDirection"
+                @event-sort-clicked="handleSortClick"
+              />
+              <th>{{ $t('adminRegistrations.columns.email') }}</th>
+              <SortableColumnHeader
+                :label="sortableColumns.trainingTitle"
+                sort-key="trainingTitle"
+                :sort-by="sortBy"
+                :sort-direction="sortDirection"
+                @event-sort-clicked="handleSortClick"
+              />
+              <SortableColumnHeader
+                :label="sortableColumns.courseStartDate"
+                sort-key="courseStartDate"
+                :sort-by="sortBy"
+                :sort-direction="sortDirection"
+                @event-sort-clicked="handleSortClick"
+              />
+              <SortableColumnHeader
+                :label="sortableColumns.hasPaid"
+                sort-key="hasPaid"
+                :sort-by="sortBy"
+                :sort-direction="sortDirection"
+                @event-sort-clicked="handleSortClick"
+              />
+              <SortableColumnHeader
+                :label="sortableColumns.requiresLaptop"
+                sort-key="requiresLaptop"
+                :sort-by="sortBy"
+                :sort-direction="sortDirection"
+                @event-sort-clicked="handleSortClick"
+              />
+              <SortableColumnHeader
+                :label="sortableColumns.status"
+                sort-key="status"
+                :sort-by="sortBy"
+                :sort-direction="sortDirection"
+                @event-sort-clicked="handleSortClick"
+              />
+              <th class="text-right">{{ $t('adminRegistrations.columns.actions') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="registration in sortedRegistrations"
+              :key="registration.courseParticipantId"
+              :class="{ 'cancelled-row': registration.status === 'C' }"
+            >
+              <td class="whitespace-nowrap">{{ formatDateTime(registration.registeredAt) }}</td>
+              <td>{{ registration.participantName }}</td>
+              <td>{{ registration.email }}</td>
+              <td>{{ registration.trainingTitle }}</td>
+              <td class="whitespace-nowrap">
+                <RouterLink
+                  :to="{
+                    name: 'adminCourseRoute',
+                    query: { returnTo: $route.fullPath, courseId: registration.courseId },
+                  }"
+                >
+                  {{ formatDateRange(registration) }}
+                </RouterLink>
+                <span v-if="registration.isPast" class="badge text-bg-light ml-1">
+                  {{ $t('courseStatus.past') }}
+                </span>
+              </td>
+              <td><CheckMark :value="registration.hasPaid" /></td>
+              <td><CheckMark :value="registration.requiresLaptop" /></td>
+              <td><CourseParticipantStatusBadge :status="registration.status" /></td>
+              <td>
+                <div class="flex justify-end">
+                  <RouterLink
+                    :to="{
+                      name: 'adminRegistrationRoute',
+                      query: {
+                        returnTo: $route.fullPath,
+                        courseParticipantId: registration.courseParticipantId,
+                      },
+                    }"
+                    :title="$t('adminRegistrations.view')"
+                    :aria-label="$t('adminRegistrations.view')"
+                    class="btn btn-sm btn-icon btn-outline-secondary"
+                  >
+                    <PhEye :size="20" />
+                  </RouterLink>
+                </div>
+              </td>
+            </tr>
+            <tr v-if="filteredRegistrations.length === 0">
+              <td colspan="9" class="py-10 text-center text-muted">
+                {{ $t('adminRegistrations.noResults') }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-
-    <p class="text-secondary mb-4">
-      {{ $t('adminRegistrations.totalCount', filteredRegistrations.length) }}
-    </p>
   </div>
 </template>
 
 <style scoped>
-.search-input {
-  max-width: 28rem;
-}
-
 /* Loobunud registreerumine: tuhmim rida */
 .cancelled-row td {
-  color: var(--bs-secondary-color);
+  color: var(--color-muted);
 }
 </style>

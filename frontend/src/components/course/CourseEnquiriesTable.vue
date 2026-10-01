@@ -64,11 +64,11 @@ export default {
 
 <template>
   <div>
-    <h2 class="h4 mb-2">{{ $t('adminCourse.enquiries.title') }}</h2>
+    <h2 class="mb-3 text-lg font-bold">{{ $t('adminCourse.enquiries.title') }}</h2>
 
-    <div class="table-responsive">
-      <table class="table table-hover align-middle">
-        <thead>
+    <div class="overflow-x-auto rounded-2xl border border-line bg-white">
+      <table class="table table-hover">
+        <thead class="bg-surface">
           <tr>
             <SortableColumnHeader
               v-for="sortableColumn in sortableColumns"
@@ -84,7 +84,7 @@ export default {
         </thead>
         <tbody>
           <tr v-for="courseEnquiry in sortedCourseEnquiries" :key="courseEnquiry.enquiryId">
-            <td class="text-nowrap">{{ formatDateTime(courseEnquiry.createdAt) }}</td>
+            <td class="whitespace-nowrap">{{ formatDateTime(courseEnquiry.createdAt) }}</td>
             <td>{{ courseEnquiry.fullName }}</td>
             <td>{{ courseEnquiry.email }}</td>
             <td>{{ courseEnquiry.companyName ?? '—' }}</td>
@@ -97,14 +97,14 @@ export default {
                 }"
                 :title="$t('adminCourse.enquiries.view')"
                 :aria-label="$t('adminCourse.enquiries.view')"
-                class="btn btn-sm btn-outline-secondary d-inline-flex"
+                class="btn btn-outline-secondary btn-sm btn-icon"
               >
                 <PhEye :size="20" />
               </RouterLink>
             </td>
           </tr>
           <tr v-if="sortedCourseEnquiries.length === 0">
-            <td colspan="6" class="text-center text-secondary py-4">
+            <td colspan="6" class="py-4 text-center text-muted">
               {{ $t('adminCourse.enquiries.empty') }}
             </td>
           </tr>

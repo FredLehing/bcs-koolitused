@@ -1,6 +1,6 @@
 <script>
 import { mapState } from 'pinia'
-import { PhEye } from '@phosphor-icons/vue'
+import { PhEye, PhMagnifyingGlass } from '@phosphor-icons/vue'
 import { useLanguageStore } from '@/stores/languageStore.js'
 import EnquiryService from '@/api-services/EnquiryService.js'
 import NavigationService from '@/services/NavigationService.js'
@@ -23,7 +23,7 @@ const SORT_VALUES = {
 
 export default {
   name: 'AdminEnquiriesView',
-  components: { AdminTabs, PhEye, SortableColumnHeader, EnquiryStatusBadge },
+  components: { AdminTabs, PhEye, PhMagnifyingGlass, SortableColumnHeader, EnquiryStatusBadge },
   data() {
     return {
       searchText: '',
@@ -137,20 +137,30 @@ export default {
 </script>
 
 <template>
-  <div class="container">
+  <div class="mx-auto w-full max-w-7xl px-6 py-8">
     <AdminTabs />
 
-    <h1 class="h3 mb-3">{{ $t('adminEnquiries.title') }}</h1>
+    <div class="mb-6 flex items-end justify-between gap-4">
+      <h1 class="text-3xl font-extrabold tracking-tight">{{ $t('adminEnquiries.title') }}</h1>
+      <span class="text-muted">{{
+        $t('adminEnquiries.totalCount', filteredEnquiries.length)
+      }}</span>
+    </div>
 
-    <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
-      <input
-        v-model="searchText"
-        :placeholder="$t('adminEnquiries.searchPlaceholder')"
-        :aria-label="$t('adminEnquiries.searchPlaceholder')"
-        class="form-control search-input"
-        type="search"
-      />
-      <div class="form-check form-switch mb-0">
+    <div class="mb-4 flex flex-wrap items-center gap-x-6 gap-y-3">
+      <div
+        class="flex min-h-11 max-w-xl flex-1 items-center gap-2 rounded-lg border border-brand-200 bg-white px-3 focus-within:border-brand-600 focus-within:ring-3 focus-within:ring-brand-600/15"
+      >
+        <PhMagnifyingGlass :size="18" class="shrink-0 text-muted" />
+        <input
+          v-model="searchText"
+          :placeholder="$t('adminEnquiries.searchPlaceholder')"
+          :aria-label="$t('adminEnquiries.searchPlaceholder')"
+          class="min-w-0 flex-1 bg-transparent outline-none"
+          type="search"
+        />
+      </div>
+      <div class="form-check form-switch">
         <input
           v-model="includeHandled"
           id="includeHandled"
@@ -164,88 +174,82 @@ export default {
       </div>
     </div>
 
-    <div class="table-responsive">
-      <table class="table table-hover align-middle">
-        <thead>
-          <tr>
-            <SortableColumnHeader
-              :label="sortableColumns.createdAt"
-              sort-key="createdAt"
-              :sort-by="sortBy"
-              :sort-direction="sortDirection"
-              @event-sort-clicked="handleSortClick"
-            />
-            <SortableColumnHeader
-              :label="sortableColumns.fullName"
-              sort-key="fullName"
-              :sort-by="sortBy"
-              :sort-direction="sortDirection"
-              @event-sort-clicked="handleSortClick"
-            />
-            <th>{{ $t('adminEnquiries.columns.email') }}</th>
-            <th>{{ $t('adminEnquiries.columns.companyName') }}</th>
-            <SortableColumnHeader
-              :label="sortableColumns.trainingTitle"
-              sort-key="trainingTitle"
-              :sort-by="sortBy"
-              :sort-direction="sortDirection"
-              @event-sort-clicked="handleSortClick"
-            />
-            <th>{{ $t('adminEnquiries.columns.course') }}</th>
-            <SortableColumnHeader
-              :label="sortableColumns.status"
-              sort-key="status"
-              :sort-by="sortBy"
-              :sort-direction="sortDirection"
-              @event-sort-clicked="handleSortClick"
-            />
-            <th>{{ $t('adminEnquiries.columns.actions') }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="enquiry in sortedEnquiries"
-            :key="enquiry.enquiryId"
-            :class="{ 'fw-semibold': enquiry.status === 'U' }"
-          >
-            <td class="text-nowrap">{{ formatDateTime(enquiry.createdAt) }}</td>
-            <td>{{ enquiry.fullName }}</td>
-            <td>{{ enquiry.email }}</td>
-            <td>{{ enquiry.companyName ?? '—' }}</td>
-            <td>{{ enquiry.trainingTitle }}</td>
-            <td class="text-nowrap">{{ formatCourse(enquiry) }}</td>
-            <td><EnquiryStatusBadge :status="enquiry.status" /></td>
-            <td>
-              <RouterLink
-                :to="{
-                  name: 'adminEnquiryRoute',
-                  query: { returnTo: $route.fullPath, enquiryId: enquiry.enquiryId },
-                }"
-                :title="$t('adminEnquiries.view')"
-                :aria-label="$t('adminEnquiries.view')"
-                class="btn btn-sm btn-outline-secondary d-inline-flex"
-              >
-                <PhEye :size="20" />
-              </RouterLink>
-            </td>
-          </tr>
-          <tr v-if="filteredEnquiries.length === 0">
-            <td colspan="8" class="text-center text-secondary py-4">
-              {{ $t('adminEnquiries.noResults') }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="overflow-hidden rounded-2xl border border-line bg-white">
+      <div class="overflow-x-auto">
+        <table class="table table-hover">
+          <thead class="bg-surface">
+            <tr>
+              <SortableColumnHeader
+                :label="sortableColumns.createdAt"
+                sort-key="createdAt"
+                :sort-by="sortBy"
+                :sort-direction="sortDirection"
+                @event-sort-clicked="handleSortClick"
+              />
+              <SortableColumnHeader
+                :label="sortableColumns.fullName"
+                sort-key="fullName"
+                :sort-by="sortBy"
+                :sort-direction="sortDirection"
+                @event-sort-clicked="handleSortClick"
+              />
+              <th>{{ $t('adminEnquiries.columns.email') }}</th>
+              <th>{{ $t('adminEnquiries.columns.companyName') }}</th>
+              <SortableColumnHeader
+                :label="sortableColumns.trainingTitle"
+                sort-key="trainingTitle"
+                :sort-by="sortBy"
+                :sort-direction="sortDirection"
+                @event-sort-clicked="handleSortClick"
+              />
+              <th>{{ $t('adminEnquiries.columns.course') }}</th>
+              <SortableColumnHeader
+                :label="sortableColumns.status"
+                sort-key="status"
+                :sort-by="sortBy"
+                :sort-direction="sortDirection"
+                @event-sort-clicked="handleSortClick"
+              />
+              <th class="text-right">{{ $t('adminEnquiries.columns.actions') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="enquiry in sortedEnquiries"
+              :key="enquiry.enquiryId"
+              :class="{ 'font-semibold': enquiry.status === 'U' }"
+            >
+              <td class="whitespace-nowrap">{{ formatDateTime(enquiry.createdAt) }}</td>
+              <td>{{ enquiry.fullName }}</td>
+              <td>{{ enquiry.email }}</td>
+              <td>{{ enquiry.companyName ?? '—' }}</td>
+              <td>{{ enquiry.trainingTitle }}</td>
+              <td class="whitespace-nowrap">{{ formatCourse(enquiry) }}</td>
+              <td><EnquiryStatusBadge :status="enquiry.status" /></td>
+              <td>
+                <div class="flex justify-end">
+                  <RouterLink
+                    :to="{
+                      name: 'adminEnquiryRoute',
+                      query: { returnTo: $route.fullPath, enquiryId: enquiry.enquiryId },
+                    }"
+                    :title="$t('adminEnquiries.view')"
+                    :aria-label="$t('adminEnquiries.view')"
+                    class="btn btn-sm btn-icon btn-outline-secondary"
+                  >
+                    <PhEye :size="20" />
+                  </RouterLink>
+                </div>
+              </td>
+            </tr>
+            <tr v-if="filteredEnquiries.length === 0">
+              <td colspan="8" class="py-10 text-center text-muted">
+                {{ $t('adminEnquiries.noResults') }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-
-    <p class="text-secondary mb-4">
-      {{ $t('adminEnquiries.totalCount', filteredEnquiries.length) }}
-    </p>
   </div>
 </template>
-
-<style scoped>
-.search-input {
-  max-width: 28rem;
-}
-</style>

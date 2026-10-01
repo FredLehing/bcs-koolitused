@@ -7,6 +7,11 @@ export default {
   components: { PhQuestion },
   props: {
     text: String,
+    // Mis servast tekst avaneb: 'right' (ikoon rea lõpus) või 'left' (ikoon rea alguses)
+    align: {
+      type: String,
+      default: 'right',
+    },
   },
   data() {
     return {
@@ -29,8 +34,11 @@ export default {
       <PhQuestion :size="22" />
     </button>
     <span
-      :class="isOpen ? 'block' : 'hidden group-hover:block'"
-      class="absolute top-full right-0 z-20 mt-2 w-72 rounded-xl bg-navy p-3 text-sm text-white shadow-xl"
+      :class="[
+        isOpen ? 'block' : 'hidden group-hover:block',
+        align === 'left' ? 'left-0' : 'right-0',
+      ]"
+      class="absolute top-full z-20 mt-2 w-72 rounded-xl bg-navy p-3 text-sm text-white shadow-xl"
       role="tooltip"
     >
       {{ text }}

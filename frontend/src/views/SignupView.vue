@@ -102,13 +102,15 @@ export default {
 </script>
 
 <template>
-  <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-md-8 col-lg-5">
-        <h1 class="h3 mb-3">{{ $t('navbar.signup') }}</h1>
-        <div v-if="redirect" class="alert alert-info">{{ $t('signup.redirectInfo') }}</div>
+  <div class="flex flex-1 items-center justify-center px-4 py-10 sm:py-16">
+    <div
+      class="w-full max-w-2xl rounded-3xl border border-line bg-white p-6 shadow-xl shadow-navy/5 sm:p-10"
+    >
+      <h1 class="mb-5 text-3xl font-extrabold tracking-tight">{{ $t('navbar.signup') }}</h1>
+      <div v-if="redirect" class="alert alert-info mb-5">{{ $t('signup.redirectInfo') }}</div>
 
-        <div class="d-flex flex-column gap-3 text-start">
+      <form class="flex flex-col gap-5" @submit.prevent="addUser">
+        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <div>
             <label class="form-label" for="signup-first-name"
               >{{ $t('enquiryModal.firstName') }} *</label
@@ -182,32 +184,33 @@ export default {
               type="password"
               maxlength="255"
               autocomplete="new-password"
-              @keyup.enter="addUser"
             />
           </div>
+        </div>
 
-          <div>
-            <AlertDanger :error-message="errorMessage" />
-            <RouterLink
-              v-if="isEmailTaken"
-              :to="{ name: 'loginRoute', query: redirect ? { redirect: redirect } : {} }"
-              class="d-inline-block mb-3"
-            >
-              {{ $t('navbar.login') }}
-            </RouterLink>
-          </div>
+        <div v-if="errorMessage" class="flex flex-col items-start gap-2">
+          <AlertDanger :error-message="errorMessage" class="w-full" />
+          <RouterLink
+            v-if="isEmailTaken"
+            :to="{ name: 'loginRoute', query: redirect ? { redirect: redirect } : {} }"
+            class="inline-flex min-h-11 items-center font-semibold"
+          >
+            {{ $t('navbar.login') }}
+          </RouterLink>
+        </div>
 
-          <button @click="addUser" :disabled="isSending" class="btn btn-primary" type="button">
-            {{ $t('navbar.signup') }}
-          </button>
+        <button :disabled="isSending" class="btn btn-primary btn-lg w-full" type="submit">
+          {{ $t('navbar.signup') }}
+        </button>
+        <p class="text-center">
           <RouterLink
             :to="{ name: 'loginRoute', query: redirect ? { redirect: redirect } : {} }"
-            class="text-center mb-5"
+            class="font-semibold"
           >
             {{ $t('signup.haveAccount') }}
           </RouterLink>
-        </div>
-      </div>
+        </p>
+      </form>
     </div>
   </div>
 </template>

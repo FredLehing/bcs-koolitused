@@ -3,30 +3,23 @@
 Haru `alternative-frontend-design`: frontendi uus kujundus Tailwind CSS v4-ga, ilma Bootstrapita.
 Kujunduse eeskuju on lõuend „BCS Koolitus uus kujundus“ (https://claude.ai/artifact/C1sfDJHmJ9sJUriG4yc4oa).
 
-## Prototüübi seis (02.10.2026)
+## Seis (02.10.2026)
 
-Uues stiilis on seitse vaadet:
+Kõik vaated on Tailwindis, Bootstrapi pakett (`bootstrap`, `@popperjs/core`) on eemaldatud.
+Bootstrapi JS-i asendused: karussell, päise rippmenüüd ja mobiilimenüü on Vue olekuga, tooltip'id
+`HelpTip.vue`.
 
-| Vaade | Rada | Paigutus |
+| Rühm | Vaated | Paigutus |
 |---|---|---|
-| `HomeView` | `/` | mobile first |
-| `CoursesView` | `/courses` | mobile first, filtrid kitsal ekraanil nupu „Filtrid“ taga |
-| `CourseView` | `/course?courseId=` | mobile first, kitsal ekraanil andmed ja „Registreeru“ enne kirjeldust |
-| `CourseRegistrationView` | `/course-registration?courseId=` | mobile first |
-| `LoginView` | `/login` | mobile first |
-| `AdminAllCoursesView` | `/admin-all-courses` | desktop |
-| `AdminFeedbacksView` | `/admin-feedbacks` | desktop |
+| Avalikud | `HomeView`, `TrainingsView`, `TrainingView`, `CoursesView`, `CourseView`, `CourseRegistrationView`, `LecturersView`, `LecturerView`, `LoginView`, `SignupView`, `ErrorView`, `NotAuthorizedView` | mobile first |
+| Osaleja | `ParticipantDetailsView`, `ParticipantCoursesView`, `ParticipantCertificatesView`, `ParticipantFeedbackFormView`, `ChangePasswordView` | mobile first |
+| Admini nimekirjad | `AdminEnquiriesView`, `AdminRegistrationsView`, `AdminFeedbacksView`, `AdminTrainingsView`, `AdminAllCoursesView`, `AdminLecturersView`, `AdminRoomsView`, `AdminUsersView` | desktop |
+| Admini detailid | `AdminCourseView`, `AdminEnquiryView`, `AdminRegistrationView`, `AdminUserView`, `AdminTrainingCoursesView` | desktop |
+| Admini vormid | `TrainingFormView`, `CourseFormView`, `LecturerFormView`, `RoomFormView` | desktop |
 
-Ülejäänud vaated töötavad, aga on ümber kujundamata: Bootstrapi CSS-i enam ei laeta, seega nende
-paigutus (`row`/`col-*`, `d-flex` jms) puudub. Nupud, väljad, tabelid, märgised, teated ja modaalid
-näevad ka seal uued välja, sest need klassid on `main.css`-is uuesti defineeritud (vt allpool).
-Päises ja admini vahelehtedel (`AdminTabs`) on ainult uues stiilis vaated; teised avanevad otselingiga.
+`TestView` / `TestComponent` on õppenäide ja jäi muutmata.
 
-Bootstrapi npm-pakett on alles, sest ümber kujundamata failid impordivad sealt `Tooltip`-i
-(`TrainingsView`, `AdminTrainingsView`, `LecturerTranslationForm`, `FeedbackCriteriaItem`).
-Uues stiilis vaadetes Bootstrapi JS-i pole: karussell, rippmenüüd ja abitekstid on Vue komponendid.
-
-**Käivitamine:** haru vahetuse järel `npm install` (lisandusid `tailwindcss` ja `@tailwindcss/vite`), siis `npm run dev`.
+**Käivitamine:** haru vahetuse järel `npm install` (Tailwind lisandus, Bootstrap eemaldati), siis `npm run dev`.
 
 ## Seadistus
 
@@ -82,9 +75,10 @@ Paigutus, vahed ja tüpograafia tehakse Tailwindi utiliitidega, mitte uute CSS-k
 - **Esile tõstetud:** `border-brand-200 bg-brand-50` ja märgis `badge text-bg-primary` tähega (mitte kollane taust).
 - **Kategooria märgis:** `rounded-md bg-brand-100 px-2.5 py-0.5 font-semibold text-brand-700`.
 - **Otsinguväli:** valge kast ikooni ja `focus-within:ring-3 focus-within:ring-brand-600/15`-ga, Enter = `<form @submit.prevent>`.
+- **Admini vorm:** osad kaartidena (`section` + `h2`), väljad `grid gap-4 md:grid-cols-2`, salvestusnupurida kleepub alla (`sticky bottom-0`).
 - **Admini tabel:** tabel kastis `overflow-hidden rounded-2xl border border-line bg-white`, päis `bg-surface`, numbrid `tabular-nums`, tegevusnupud `btn btn-outline-secondary btn-sm btn-icon` paremas servas.
 - **Modaal:** `BaseModal.vue` (Teleport `body`-sse, telefonis alt üles avanev leht).
-- **Abitekst:** `HelpTip.vue` (Bootstrapi tooltip'i asemel; töötab ka puutega).
+- **Abitekst:** `HelpTip.vue` (Bootstrapi tooltip'i asemel; töötab ka puutega). Ikoon rea alguses → `align="left"`.
 - **Lipp:** `FlagIcon.vue`, suurus teksti suuruse klassiga (nt `class="text-xl"`).
 
 ## Mobile first

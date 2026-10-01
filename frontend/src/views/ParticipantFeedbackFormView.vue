@@ -212,37 +212,41 @@ export default {
 </script>
 
 <template>
-  <div class="container">
-    <div class="row g-4 text-start mb-5">
-      <div class="col-lg-3">
-        <ProfileMenu />
-      </div>
+  <div class="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 sm:py-10">
+    <div class="lg:grid lg:grid-cols-[14rem_1fr] lg:items-start lg:gap-8">
+      <ProfileMenu />
 
-      <div class="col-lg-9">
-        <RouterLink :to="{ name: 'participantCoursesRoute' }" class="d-inline-block mb-3">
+      <div class="min-w-0">
+        <RouterLink
+          :to="{ name: 'participantCoursesRoute' }"
+          class="mb-2 inline-flex min-h-11 items-center font-semibold"
+        >
           ← {{ $t('participantFeedback.back') }}
         </RouterLink>
 
-        <fieldset v-if="loadErrorMessage" class="border rounded bg-body p-3">
-          <legend class="float-none w-auto px-2 fs-5">{{ $t('participantFeedback.title') }}</legend>
+        <section v-if="loadErrorMessage" class="rounded-2xl border border-line bg-white p-5 sm:p-6">
+          <h1 class="mb-4 text-xl sm:text-2xl">{{ $t('participantFeedback.title') }}</h1>
           <div class="alert alert-danger mb-0" role="alert">{{ loadErrorMessage }}</div>
-        </fieldset>
+        </section>
 
-        <fieldset v-else-if="participantFeedback" class="border rounded bg-body p-3">
-          <legend class="float-none w-auto px-2 fs-5">{{ $t('participantFeedback.title') }}</legend>
+        <section
+          v-else-if="participantFeedback"
+          class="rounded-2xl border border-line bg-white p-5 sm:p-6"
+        >
+          <h1 class="mb-4 text-xl sm:text-2xl">{{ $t('participantFeedback.title') }}</h1>
 
-          <div class="mb-3">
-            <div class="fw-semibold">{{ participantFeedback.trainingTitle }}</div>
-            <div class="small text-secondary">
+          <div class="mb-4">
+            <div class="font-semibold text-navy">{{ participantFeedback.trainingTitle }}</div>
+            <div class="text-sm text-muted">
               {{ dateRangeText }}
               <template v-if="participantFeedback.createdAt"> · {{ submittedText }}</template>
               <template v-if="updatedText"> · {{ updatedText }}</template>
             </div>
           </div>
 
-          <p class="text-secondary">{{ $t('participantFeedback.scaleHint') }}</p>
+          <p class="text-muted">{{ $t('participantFeedback.scaleHint') }}</p>
 
-          <div class="d-grid gap-3">
+          <div class="grid gap-4">
             <FeedbackCriteriaItem
               v-for="criteria in participantFeedback.criteria"
               :key="criteria.feedbackCriteriaId"
@@ -257,12 +261,12 @@ export default {
             />
           </div>
 
-          <div class="d-flex flex-wrap align-items-center gap-2 mt-3">
+          <div class="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
             <button
               v-if="!participantFeedback.hasFeedback"
               @click="saveFeedback"
               :disabled="isSending"
-              class="btn btn-primary"
+              class="btn btn-primary w-full sm:w-auto"
               type="button"
             >
               {{ $t('participantFeedback.add') }}
@@ -270,7 +274,7 @@ export default {
             <button
               v-else-if="!isEditing"
               @click="startEditing"
-              class="btn btn-primary"
+              class="btn btn-primary w-full sm:w-auto"
               type="button"
             >
               {{ $t('participantFeedback.edit') }}
@@ -279,12 +283,16 @@ export default {
               <button
                 @click="saveFeedback"
                 :disabled="isSending"
-                class="btn btn-success"
+                class="btn btn-success w-full sm:w-auto"
                 type="button"
               >
                 {{ $t('participantFeedback.save') }}
               </button>
-              <button @click="cancelEditing" class="btn btn-outline-secondary" type="button">
+              <button
+                @click="cancelEditing"
+                class="btn btn-outline-secondary w-full sm:w-auto"
+                type="button"
+              >
                 {{ $t('participantFeedback.cancel') }}
               </button>
             </template>
@@ -295,7 +303,7 @@ export default {
               @event-error-message-closed="errorMessage = ''"
             />
           </div>
-        </fieldset>
+        </section>
       </div>
     </div>
   </div>

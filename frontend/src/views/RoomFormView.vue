@@ -91,41 +91,37 @@ export default {
 </script>
 
 <template>
-  <div class="container">
+  <div class="mx-auto w-full max-w-6xl px-6 py-8">
     <BackLink :fallback="{ name: 'adminRoomsRoute' }" />
-    <div class="row justify-content-center">
-      <div class="col-lg-8">
-        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
-          <h1 class="mb-0">
-            {{ isNew ? $t('roomForm.title.new') : $t('roomForm.title.update') }}
-          </h1>
-          <button @click="navigateToAdminRoomsView" class="btn btn-outline-secondary" type="button">
-            {{ $t('navbar.manageRooms') }}
-          </button>
-        </div>
+    <div class="max-w-2xl">
+      <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <h1 class="text-3xl font-extrabold tracking-tight">
+          {{ isNew ? $t('roomForm.title.new') : $t('roomForm.title.update') }}
+        </h1>
+        <button @click="navigateToAdminRoomsView" class="btn btn-outline-secondary" type="button">
+          {{ $t('navbar.manageRooms') }}
+        </button>
+      </div>
 
-        <fieldset class="border rounded p-3 mb-4">
-          <legend class="float-none w-auto px-2 fs-5">{{ $t('roomForm.legend') }}</legend>
-          <div class="text-start">
-            <label class="form-label" for="roomName">{{ $t('roomForm.roomName') }} *</label>
-            <input
-              v-model="roomName"
-              @keyup.enter="saveRoom"
-              id="roomName"
-              class="form-control"
-              type="text"
-              maxlength="255"
-            />
-          </div>
-        </fieldset>
+      <section class="rounded-2xl border border-line bg-white p-6" aria-labelledby="room-heading">
+        <h2 id="room-heading" class="mb-4 text-lg font-bold">{{ $t('roomForm.legend') }}</h2>
+        <label class="form-label" for="roomName">{{ $t('roomForm.roomName') }} *</label>
+        <input
+          v-model="roomName"
+          @keyup.enter="saveRoom"
+          id="roomName"
+          class="form-control"
+          type="text"
+          maxlength="255"
+        />
+      </section>
 
-        <AlertDanger :error-message="errorMessage" />
+      <AlertDanger :error-message="errorMessage" class="mt-6" />
 
-        <div class="d-flex flex-wrap align-items-center gap-3 mb-5">
-          <button @click="saveRoom" :disabled="isSending" class="btn btn-success" type="button">
-            {{ isNew ? $t('roomForm.buttons.add') : $t('roomForm.buttons.save') }}
-          </button>
-        </div>
+      <div class="mt-6 flex flex-wrap items-center gap-3">
+        <button @click="saveRoom" :disabled="isSending" class="btn btn-primary" type="button">
+          {{ isNew ? $t('roomForm.buttons.add') : $t('roomForm.buttons.save') }}
+        </button>
       </div>
     </div>
   </div>

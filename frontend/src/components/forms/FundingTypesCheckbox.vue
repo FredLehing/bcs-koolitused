@@ -23,7 +23,7 @@ export default {
 </script>
 
 <template>
-  <div class="d-flex flex-wrap gap-3">
+  <div class="flex flex-wrap gap-x-6 gap-y-1">
     <div v-for="fundingType in fundingTypes" :key="fundingType.fundingTypeId" class="form-check">
       <input
         @change="

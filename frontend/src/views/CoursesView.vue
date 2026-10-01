@@ -11,6 +11,7 @@ import PaginationNav from '@/components/common/PaginationNav.vue'
 import CourseCard from '@/components/course/CourseCard.vue'
 import CourseFilters from '@/components/forms/CourseFilters.vue'
 import HelpTip from '@/components/common/HelpTip.vue'
+import TrainingsTabs from '@/components/common/TrainingsTabs.vue'
 
 const LIMIT = 5
 
@@ -32,6 +33,7 @@ export default {
   name: 'CoursesView',
   components: {
     HelpTip,
+    TrainingsTabs,
     PhFunnel,
     PhMagnifyingGlass,
     PhX,
@@ -177,6 +179,7 @@ export default {
 
 <template>
   <div class="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 py-8 sm:px-6 sm:py-10">
+    <TrainingsTabs />
     <h1 class="mb-6 text-3xl font-extrabold tracking-tight sm:text-4xl">
       {{ $t('courses.title') }}
     </h1>

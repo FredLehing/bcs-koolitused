@@ -69,20 +69,28 @@ export default {
 
 <template>
   <div>
-    <ol v-if="lecturers.length > 0" class="list-group list-group-numbered mb-2">
+    <ol
+      v-if="lecturers.length > 0"
+      class="mb-3 divide-y divide-line overflow-hidden rounded-xl border border-line bg-white"
+    >
       <li
         v-for="(lecturer, index) in lecturers"
         :key="lecturer.lecturerId"
-        class="list-group-item d-flex align-items-center gap-2"
+        class="flex min-h-13 items-center gap-2 px-3 py-2"
       >
-        <span class="me-auto">{{ lecturer.lecturerName }}</span>
+        <span
+          class="flex size-7 shrink-0 items-center justify-center rounded-full bg-brand-100 text-sm font-bold text-brand-700 tabular-nums"
+        >
+          {{ index + 1 }}
+        </span>
+        <span class="mr-auto font-semibold">{{ lecturer.lecturerName }}</span>
         <template v-if="!isDisabled">
           <button
             @click="moveLecturer(index, -1)"
             :disabled="index === 0"
             :title="$t('lecturersPicker.moveUp')"
             :aria-label="$t('lecturersPicker.moveUp')"
-            class="btn btn-sm btn-outline-secondary d-inline-flex"
+            class="btn btn-outline-secondary btn-sm btn-icon"
             type="button"
           >
             <PhArrowUp :size="16" />
@@ -92,7 +100,7 @@ export default {
             :disabled="index === lecturers.length - 1"
             :title="$t('lecturersPicker.moveDown')"
             :aria-label="$t('lecturersPicker.moveDown')"
-            class="btn btn-sm btn-outline-secondary d-inline-flex"
+            class="btn btn-outline-secondary btn-sm btn-icon"
             type="button"
           >
             <PhArrowDown :size="16" />
@@ -101,7 +109,7 @@ export default {
             @click="removeLecturer(index)"
             :title="$t('lecturersPicker.remove')"
             :aria-label="$t('lecturersPicker.remove')"
-            class="btn btn-sm btn-outline-danger d-inline-flex"
+            class="btn btn-outline-danger btn-sm btn-icon"
             type="button"
           >
             <PhX :size="16" />
@@ -109,11 +117,11 @@ export default {
         </template>
       </li>
     </ol>
-    <p v-else class="text-secondary mb-2">{{ $t('lecturersPicker.empty') }}</p>
+    <p v-else class="mb-3 text-muted">{{ $t('lecturersPicker.empty') }}</p>
     <button
       v-if="!isDisabled"
       @click="openModal"
-      class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1"
+      class="btn btn-outline-primary btn-sm"
       type="button"
     >
       <PhPlus :size="16" />

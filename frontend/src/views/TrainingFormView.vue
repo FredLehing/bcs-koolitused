@@ -745,143 +745,142 @@ export default {
 </script>
 
 <template>
-  <div class="container">
+  <div class="mx-auto w-full max-w-6xl px-6 py-8">
     <BackLink :fallback="{ name: 'adminTrainingsRoute' }" />
-    <div class="row justify-content-center">
-      <div class="col-lg-10">
-        <div class="d-flex flex-wrap align-items-center gap-3 mb-4">
-          <h1 class="mb-0">{{ pageTitle }}</h1>
-          <span
-            v-if="!isNewTraining && training.status !== ''"
-            class="badge"
-            :class="isPublished ? 'text-bg-success' : 'text-bg-secondary'"
-          >
-            {{
-              isPublished
-                ? $t('trainingForm.status.published')
-                : $t('trainingForm.status.unpublished')
-            }}
-          </span>
-        </div>
+    <div class="mb-6 flex flex-wrap items-center gap-3">
+      <h1 class="text-3xl font-extrabold tracking-tight">{{ pageTitle }}</h1>
+      <span
+        v-if="!isNewTraining && training.status !== ''"
+        class="badge"
+        :class="isPublished ? 'text-bg-success' : 'text-bg-secondary'"
+      >
+        {{
+          isPublished ? $t('trainingForm.status.published') : $t('trainingForm.status.unpublished')
+        }}
+      </span>
+    </div>
 
-        <fieldset v-if="!isNewTraining" class="border rounded bg-body p-3 mb-4">
-          <legend class="float-none w-auto px-2 fs-5">
-            {{ $t('trainingForm.translations.legend') }}
-          </legend>
-          <TranslationFlags
-            :translation-languages="translationLanguages"
-            :existing-translations="trainingTranslations"
-            :current-language-code="translation.languageCode"
-            @event-translation-flag-clicked="handleTranslationFlagClicked"
-          />
-        </fieldset>
-
-        <TrainingDataForm
-          :training="training"
-          :categories="categories"
-          :languages="languages"
-          :locations="locations"
-          :funding-types="fundingTypes"
-          :is-disabled="isNewTranslation"
-          @event-new-category-selected="training.categoryId = $event"
-          @event-new-training-language-selected="training.trainingLanguageId = $event"
-          @event-new-location-selected="training.locationId = $event"
-          @event-lecturers-changed="training.lecturers = $event"
-          @event-funding-type-checkbox-updated="updateFundingTypeIds"
-          @event-is-orderable-changed="training.isOrderable = $event"
-          @event-is-promoted-changed="training.isPromoted = $event"
+    <div class="flex flex-col gap-6">
+      <section
+        v-if="!isNewTraining"
+        class="rounded-2xl border border-line bg-white p-6"
+        aria-labelledby="training-translations-heading"
+      >
+        <h2 id="training-translations-heading" class="mb-4 text-lg font-bold">
+          {{ $t('trainingForm.translations.legend') }}
+        </h2>
+        <TranslationFlags
+          :translation-languages="translationLanguages"
+          :existing-translations="trainingTranslations"
+          :current-language-code="translation.languageCode"
+          @event-translation-flag-clicked="handleTranslationFlagClicked"
         />
+      </section>
 
-        <TrainingTranslationForm
-          :key="$route.fullPath"
-          :translation="translation"
-          :new-curriculum="newCurriculum"
-          :is-curriculum-removed="isCurriculumRemoved"
-          :is-saving="isSaving"
-          :is-disabled="isAiActionDisabled"
-          :show-ai-pdf-button="showAiPdfButton"
-          :is-ai-pdf-loading="isAiPdfLoading"
-          :ai-pdf-tooltip="aiPdfTooltip"
-          @event-ai-pdf-clicked="handleAiPdfClicked"
-          @event-curriculum-selected="handleCurriculumSelected"
-          @event-curriculum-removed="handleCurriculumRemoved"
-          @event-curriculum-loading="isCurriculumLoading = $event"
-          :language-name="translationLanguageName"
-          :show-ai-button="showAiButton"
-          :is-ai-loading="isAiLoading"
-          :ai-tooltip="aiTooltip"
-          @event-new-title-input="translation.title = $event"
-          @event-new-short-description-input="translation.shortDescription = $event"
-          @event-new-description-input="translation.description = $event"
-          @event-ai-translation-clicked="handleAiTranslationClicked"
-        />
+      <TrainingDataForm
+        :training="training"
+        :categories="categories"
+        :languages="languages"
+        :locations="locations"
+        :funding-types="fundingTypes"
+        :is-disabled="isNewTranslation"
+        @event-new-category-selected="training.categoryId = $event"
+        @event-new-training-language-selected="training.trainingLanguageId = $event"
+        @event-new-location-selected="training.locationId = $event"
+        @event-lecturers-changed="training.lecturers = $event"
+        @event-funding-type-checkbox-updated="updateFundingTypeIds"
+        @event-is-orderable-changed="training.isOrderable = $event"
+        @event-is-promoted-changed="training.isPromoted = $event"
+      />
 
-        <div class="d-flex flex-wrap align-items-center gap-3 mb-5">
-          <button
-            v-if="isNewTraining"
-            :disabled="isAiActionDisabled"
-            @click="addTraining"
-            class="btn btn-success"
-            type="button"
-          >
-            {{ $t('trainingForm.buttons.add') }}
-          </button>
-          <button
-            v-if="isUpdate"
-            :disabled="isAiActionDisabled"
-            @click="updateTraining"
-            class="btn btn-success"
-            type="button"
-          >
-            {{ $t('trainingForm.buttons.save') }}
-          </button>
-          <button
-            v-if="isNewTranslation"
-            :disabled="isAiActionDisabled"
-            @click="addTrainingTranslation"
-            class="btn btn-success"
-            type="button"
-          >
-            {{ $t('trainingForm.buttons.addTranslation') }}
-          </button>
-          <TrainingStatusButton
-            v-if="!isNewTraining && training.status !== ''"
-            :training-id="trainingId"
-            :status="training.status"
-            @event-status-changed="handleChangeTrainingStatusResponse"
-            @event-status-error="handleChangeTrainingStatusError"
-          />
-          <button
-            v-if="!isNewTraining"
-            @click="navigateToTrainingView"
-            class="btn btn-outline-secondary"
-            type="button"
-          >
-            {{ $t('trainingForm.buttons.view') }}
-          </button>
-          <button
-            v-if="!isNewTraining"
-            @click="navigateToAdminTrainingCoursesView"
-            class="btn btn-outline-secondary"
-            type="button"
-          >
-            {{ $t('trainingForm.buttons.calendar') }}
-          </button>
-          <button
-            @click="navigateToAdminTrainingsView"
-            class="btn btn-outline-secondary"
-            type="button"
-          >
-            {{ $t('navbar.manageTrainings') }}
-          </button>
-          <InlineAlerts
-            :success-message="successMessage"
-            :error-message="errorMessage"
-            @event-success-message-closed="successMessage = ''"
-            @event-error-message-closed="errorMessage = ''"
-          />
-        </div>
-      </div>
+      <TrainingTranslationForm
+        :key="$route.fullPath"
+        :translation="translation"
+        :new-curriculum="newCurriculum"
+        :is-curriculum-removed="isCurriculumRemoved"
+        :is-saving="isSaving"
+        :is-disabled="isAiActionDisabled"
+        :show-ai-pdf-button="showAiPdfButton"
+        :is-ai-pdf-loading="isAiPdfLoading"
+        :ai-pdf-tooltip="aiPdfTooltip"
+        @event-ai-pdf-clicked="handleAiPdfClicked"
+        @event-curriculum-selected="handleCurriculumSelected"
+        @event-curriculum-removed="handleCurriculumRemoved"
+        @event-curriculum-loading="isCurriculumLoading = $event"
+        :language-name="translationLanguageName"
+        :show-ai-button="showAiButton"
+        :is-ai-loading="isAiLoading"
+        :ai-tooltip="aiTooltip"
+        @event-new-title-input="translation.title = $event"
+        @event-new-short-description-input="translation.shortDescription = $event"
+        @event-new-description-input="translation.description = $event"
+        @event-ai-translation-clicked="handleAiTranslationClicked"
+      />
+    </div>
+
+    <!-- Kleepuv nupurida: salvestamine on pika vormi juures alati käeulatuses -->
+    <div
+      class="sticky bottom-0 z-10 -mx-6 mt-6 flex flex-wrap items-center gap-3 border-t border-line bg-surface/95 px-6 py-4 backdrop-blur"
+    >
+      <button
+        v-if="isNewTraining"
+        :disabled="isAiActionDisabled"
+        @click="addTraining"
+        class="btn btn-primary"
+        type="button"
+      >
+        {{ $t('trainingForm.buttons.add') }}
+      </button>
+      <button
+        v-if="isUpdate"
+        :disabled="isAiActionDisabled"
+        @click="updateTraining"
+        class="btn btn-primary"
+        type="button"
+      >
+        {{ $t('trainingForm.buttons.save') }}
+      </button>
+      <button
+        v-if="isNewTranslation"
+        :disabled="isAiActionDisabled"
+        @click="addTrainingTranslation"
+        class="btn btn-primary"
+        type="button"
+      >
+        {{ $t('trainingForm.buttons.addTranslation') }}
+      </button>
+      <TrainingStatusButton
+        v-if="!isNewTraining && training.status !== ''"
+        :training-id="trainingId"
+        :status="training.status"
+        @event-status-changed="handleChangeTrainingStatusResponse"
+        @event-status-error="handleChangeTrainingStatusError"
+      />
+      <button
+        v-if="!isNewTraining"
+        @click="navigateToTrainingView"
+        class="btn btn-outline-secondary"
+        type="button"
+      >
+        {{ $t('trainingForm.buttons.view') }}
+      </button>
+      <button
+        v-if="!isNewTraining"
+        @click="navigateToAdminTrainingCoursesView"
+        class="btn btn-outline-secondary"
+        type="button"
+      >
+        {{ $t('trainingForm.buttons.calendar') }}
+      </button>
+      <button @click="navigateToAdminTrainingsView" class="btn btn-outline-secondary" type="button">
+        {{ $t('navbar.manageTrainings') }}
+      </button>
+      <InlineAlerts
+        :success-message="successMessage"
+        :error-message="errorMessage"
+        @event-success-message-closed="successMessage = ''"
+        @event-error-message-closed="errorMessage = ''"
+      />
     </div>
 
     <ConfirmModal

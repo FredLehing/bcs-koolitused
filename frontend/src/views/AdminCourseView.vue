@@ -90,7 +90,7 @@ export default {
 </script>
 
 <template>
-  <div class="container">
+  <div class="mx-auto w-full max-w-7xl px-6 py-8">
     <BackLink
       :fallback="
         course
@@ -99,9 +99,9 @@ export default {
       "
     />
     <template v-if="course">
-      <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-1">
-        <h1 class="h3 mb-0">{{ $t('adminCourse.title') }}</h1>
-        <div class="d-flex flex-wrap gap-2">
+      <div class="mb-1 flex flex-wrap items-center justify-between gap-2">
+        <h1 class="text-3xl font-extrabold tracking-tight">{{ $t('adminCourse.title') }}</h1>
+        <div class="flex flex-wrap gap-2">
           <RouterLink
             :to="{
               name: 'courseFormRoute',
@@ -125,13 +125,13 @@ export default {
           </RouterLink>
         </div>
       </div>
-      <p class="fs-5 text-secondary mb-4">{{ course.trainingTitle }}</p>
+      <p class="mb-6 text-lg text-muted">{{ course.trainingTitle }}</p>
 
-      <fieldset class="border rounded p-3 mb-4">
-        <legend class="float-none w-auto px-2 fs-5">{{ $t('adminCourse.legend') }}</legend>
-        <dl class="row mb-0">
-          <dt class="col-sm-4 col-lg-3">{{ $t('adminCourse.fields.training') }}</dt>
-          <dd class="col-sm-8 col-lg-9">
+      <section class="mb-6 rounded-2xl border border-line bg-white p-5 sm:p-6">
+        <h2 class="mb-4 text-lg font-bold">{{ $t('adminCourse.legend') }}</h2>
+        <dl class="grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-[12rem_1fr]">
+          <dt class="text-muted">{{ $t('adminCourse.fields.training') }}</dt>
+          <dd>
             <RouterLink
               :to="{
                 name: 'trainingRoute',
@@ -145,41 +145,41 @@ export default {
               {{ course.trainingTitle }}
             </RouterLink>
           </dd>
-          <dt class="col-sm-4 col-lg-3">{{ $t('adminCourse.fields.dates') }}</dt>
-          <dd class="col-sm-8 col-lg-9">{{ formatDateRange(course.startDate, course.endDate) }}</dd>
-          <dt class="col-sm-4 col-lg-3">{{ $t('adminTrainingCourses.columns.numberOfDays') }}</dt>
-          <dd class="col-sm-8 col-lg-9">{{ course.numberOfDays }}</dd>
-          <dt class="col-sm-4 col-lg-3">
+          <dt class="text-muted">{{ $t('adminCourse.fields.dates') }}</dt>
+          <dd>{{ formatDateRange(course.startDate, course.endDate) }}</dd>
+          <dt class="text-muted">{{ $t('adminTrainingCourses.columns.numberOfDays') }}</dt>
+          <dd>{{ course.numberOfDays }}</dd>
+          <dt class="text-muted">
             {{ $t('adminTrainingCourses.columns.numberOfAcademicHours') }}
           </dt>
-          <dd class="col-sm-8 col-lg-9">{{ course.numberOfAcademicHours }}</dd>
-          <dt class="col-sm-4 col-lg-3">{{ $t('adminTrainingCourses.columns.price') }}</dt>
-          <dd class="col-sm-8 col-lg-9">{{ formatPrice(course.price) }}</dd>
-          <dt class="col-sm-4 col-lg-3">{{ $t('adminTrainingCourses.columns.lecturers') }}</dt>
-          <dd class="col-sm-8 col-lg-9">{{ course.lecturerNames ?? '—' }}</dd>
-          <dt class="col-sm-4 col-lg-3">{{ $t('adminTrainingCourses.columns.room') }}</dt>
-          <dd class="col-sm-8 col-lg-9">{{ course.roomName ?? '—' }}</dd>
-          <dt class="col-sm-4 col-lg-3">{{ $t('adminTrainingCourses.columns.meetingLink') }}</dt>
-          <dd class="col-sm-8 col-lg-9 text-break">
+          <dd>{{ course.numberOfAcademicHours }}</dd>
+          <dt class="text-muted">{{ $t('adminTrainingCourses.columns.price') }}</dt>
+          <dd>{{ formatPrice(course.price) }}</dd>
+          <dt class="text-muted">{{ $t('adminTrainingCourses.columns.lecturers') }}</dt>
+          <dd>{{ course.lecturerNames ?? '—' }}</dd>
+          <dt class="text-muted">{{ $t('adminTrainingCourses.columns.room') }}</dt>
+          <dd>{{ course.roomName ?? '—' }}</dd>
+          <dt class="text-muted">{{ $t('adminTrainingCourses.columns.meetingLink') }}</dt>
+          <dd class="break-all">
             <a v-if="course.meetingLink" :href="course.meetingLink" target="_blank" rel="noopener">
               {{ course.meetingLink }}
             </a>
             <template v-else>—</template>
           </dd>
-          <dt class="col-sm-4 col-lg-3">{{ $t('adminTrainingCourses.columns.status') }}</dt>
-          <dd class="col-sm-8 col-lg-9">
+          <dt class="text-muted">{{ $t('adminTrainingCourses.columns.status') }}</dt>
+          <dd>
             <CourseStatusBadge :status="course.status" :is-past="course.isPast" />
           </dd>
-          <dt class="col-sm-4 col-lg-3">{{ $t('courseForm.isPromoted') }}</dt>
-          <dd class="col-sm-8 col-lg-9">
+          <dt class="text-muted">{{ $t('courseForm.isPromoted') }}</dt>
+          <dd>
             {{
               course.isPromoted
                 ? $t('adminAllCourses.filters.yes')
                 : $t('adminAllCourses.filters.no')
             }}
           </dd>
-          <dt class="col-sm-4 col-lg-3">{{ $t('adminTrainingCourses.columns.notes') }}</dt>
-          <dd class="col-sm-8 col-lg-9 notes">{{ course.notes ?? '—' }}</dd>
+          <dt class="text-muted">{{ $t('adminTrainingCourses.columns.notes') }}</dt>
+          <dd class="whitespace-pre-wrap">{{ course.notes ?? '—' }}</dd>
         </dl>
         <RouterLink
           v-if="isPublic"
@@ -187,25 +187,19 @@ export default {
             name: 'courseRoute',
             query: { returnTo: $route.fullPath, courseId: course.courseId },
           }"
-          class="d-inline-block mt-2"
+          class="mt-4 inline-block font-semibold"
         >
           {{ $t('adminCourse.viewPublicPage') }}
         </RouterLink>
-      </fieldset>
+      </section>
 
       <CourseParticipantsTable
         :course-id="courseId"
         :course-participants="courseParticipants"
-        class="mb-4"
+        class="mb-6"
       />
 
-      <CourseEnquiriesTable :course-enquiries="courseEnquiries" class="mb-5" />
+      <CourseEnquiriesTable :course-enquiries="courseEnquiries" class="mb-6" />
     </template>
   </div>
 </template>
-
-<style scoped>
-.notes {
-  white-space: pre-wrap;
-}
-</style>

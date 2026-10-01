@@ -40,61 +40,74 @@ export default {
 </script>
 
 <template>
-  <fieldset class="border rounded bg-body p-3 mb-4" :disabled="isDisabled">
-    <legend class="float-none w-auto px-2 fs-5">
-      {{ $t('trainingForm.translation.legend', { language: languageName }) }}
-    </legend>
-    <div class="text-start">
-      <div v-if="showAiButton" class="mb-3">
-        <button
-          @click="$emit('event-ai-translation-clicked')"
-          :disabled="isDisabled"
-          :title="aiTooltip"
-          class="btn btn-outline-primary btn-sm"
-          type="button"
-        >
-          <span v-if="isAiLoading" class="spinner-border spinner-border-sm me-1"></span>
-          {{
-            isAiLoading
-              ? $t('trainingForm.translation.aiLoading')
-              : $t('trainingForm.translation.aiButton')
-          }}
-        </button>
-      </div>
-      <div class="mb-3">
-        <label class="form-label" for="title">{{ $t('trainingForm.translation.title') }}</label>
-        <input
-          :value="translation.title"
-          @input="$emit('event-new-title-input', $event.target.value)"
-          id="title"
-          class="form-control"
-          type="text"
-          maxlength="255"
-        />
-      </div>
-      <div class="mb-3">
-        <label class="form-label" for="shortDescription">{{
-          $t('trainingForm.translation.shortDescription')
-        }}</label>
-        <input
-          :value="translation.shortDescription"
-          @input="$emit('event-new-short-description-input', $event.target.value)"
-          id="shortDescription"
-          class="form-control"
-          type="text"
-          maxlength="255"
-        />
-      </div>
-      <div>
-        <label class="form-label" id="descriptionLabel">{{
-          $t('trainingForm.translation.description')
-        }}</label>
-        <RichTextEditor
-          :html="translation.description"
-          :is-disabled="isDisabled"
-          @event-new-html-input="$emit('event-new-description-input', $event)"
-          label-id="descriptionLabel"
-        />
+  <section
+    class="rounded-2xl border border-line bg-white p-6"
+    aria-labelledby="training-translation-heading"
+  >
+    <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+      <h2 id="training-translation-heading" class="text-lg font-bold">
+        {{ $t('trainingForm.translation.legend', { language: languageName }) }}
+      </h2>
+      <button
+        v-if="showAiButton"
+        @click="$emit('event-ai-translation-clicked')"
+        :disabled="isDisabled"
+        :title="aiTooltip"
+        class="btn btn-outline-primary btn-sm"
+        type="button"
+      >
+        <span
+          v-if="isAiLoading"
+          class="inline-block size-4 animate-spin rounded-full border-2 border-current border-r-transparent"
+          aria-hidden="true"
+        ></span>
+        {{
+          isAiLoading
+            ? $t('trainingForm.translation.aiLoading')
+            : $t('trainingForm.translation.aiButton')
+        }}
+      </button>
+    </div>
+    <fieldset class="min-w-0" :disabled="isDisabled">
+      <legend class="sr-only">
+        {{ $t('trainingForm.translation.legend', { language: languageName }) }}
+      </legend>
+      <div class="grid gap-4 md:grid-cols-2">
+        <div>
+          <label class="form-label" for="title">{{ $t('trainingForm.translation.title') }}</label>
+          <input
+            :value="translation.title"
+            @input="$emit('event-new-title-input', $event.target.value)"
+            id="title"
+            class="form-control"
+            type="text"
+            maxlength="255"
+          />
+        </div>
+        <div>
+          <label class="form-label" for="shortDescription">{{
+            $t('trainingForm.translation.shortDescription')
+          }}</label>
+          <input
+            :value="translation.shortDescription"
+            @input="$emit('event-new-short-description-input', $event.target.value)"
+            id="shortDescription"
+            class="form-control"
+            type="text"
+            maxlength="255"
+          />
+        </div>
+        <div class="md:col-span-2">
+          <label class="form-label" id="descriptionLabel">{{
+            $t('trainingForm.translation.description')
+          }}</label>
+          <RichTextEditor
+            :html="translation.description"
+            :is-disabled="isDisabled"
+            @event-new-html-input="$emit('event-new-description-input', $event)"
+            label-id="descriptionLabel"
+          />
+        </div>
       </div>
       <CurriculumUpload
         :key="`${translation.trainingTranslationId}-${translation.languageCode}`"
@@ -113,6 +126,6 @@ export default {
         @event-curriculum-error="$emit('event-curriculum-error', $event)"
         @event-curriculum-loading="$emit('event-curriculum-loading', $event)"
       />
-    </div>
-  </fieldset>
+    </fieldset>
+  </section>
 </template>

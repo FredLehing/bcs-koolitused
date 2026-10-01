@@ -109,119 +109,122 @@ export default {
 </script>
 
 <template>
-  <div class="container">
-    <div class="row g-4 text-start mb-5">
-      <div class="col-lg-3">
-        <ProfileMenu />
-      </div>
+  <div class="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 sm:py-10">
+    <div class="lg:grid lg:grid-cols-[14rem_1fr] lg:items-start lg:gap-8">
+      <ProfileMenu />
 
-      <div class="col-lg-9">
-        <fieldset v-if="participant" class="border rounded bg-body p-3">
-          <legend class="float-none w-auto px-2 fs-5">
-            {{ $t('navbar.participantDetails') }}
-          </legend>
+      <section v-if="participant" class="rounded-2xl border border-line bg-white p-5 sm:p-6">
+        <h1 class="mb-4 text-xl sm:text-2xl">{{ $t('navbar.participantDetails') }}</h1>
 
-          <dl v-if="!isEditing" class="row mb-0">
-            <div class="col-sm-6 mb-3">
-              <dt>{{ $t('enquiryModal.firstName') }}</dt>
-              <dd class="mb-0">{{ participant.firstName || '—' }}</dd>
-            </div>
-            <div class="col-sm-6 mb-3">
-              <dt>{{ $t('enquiryModal.lastName') }}</dt>
-              <dd class="mb-0">{{ participant.lastName || '—' }}</dd>
-            </div>
-            <div class="col-sm-6 mb-3">
-              <dt>{{ $t('enquiryModal.phone') }}</dt>
-              <dd class="mb-0">{{ participant.phone || '—' }}</dd>
-            </div>
-            <div class="col-sm-6 mb-3">
-              <dt>{{ $t('enquiryModal.email') }}</dt>
-              <dd class="mb-0">{{ participant.email }}</dd>
-            </div>
-          </dl>
-
-          <div v-else class="row g-3">
-            <div class="col-sm-6">
-              <label class="form-label" for="participant-first-name">
-                {{ $t('enquiryModal.firstName') }} *
-              </label>
-              <input
-                v-model="participantForm.firstName"
-                id="participant-first-name"
-                class="form-control"
-                type="text"
-                maxlength="255"
-                autocomplete="given-name"
-              />
-            </div>
-            <div class="col-sm-6">
-              <label class="form-label" for="participant-last-name">
-                {{ $t('enquiryModal.lastName') }} *
-              </label>
-              <input
-                v-model="participantForm.lastName"
-                id="participant-last-name"
-                class="form-control"
-                type="text"
-                maxlength="255"
-                autocomplete="family-name"
-              />
-            </div>
-            <div class="col-sm-6">
-              <label class="form-label" for="participant-phone">
-                {{ $t('enquiryModal.phone') }} *
-              </label>
-              <input
-                v-model="participantForm.phone"
-                id="participant-phone"
-                class="form-control"
-                type="tel"
-                maxlength="20"
-                autocomplete="tel"
-              />
-            </div>
-            <div class="col-sm-6">
-              <label class="form-label" for="participant-email">
-                {{ $t('enquiryModal.email') }} *
-              </label>
-              <input
-                v-model="participantForm.email"
-                id="participant-email"
-                class="form-control"
-                type="email"
-                maxlength="255"
-                autocomplete="email"
-              />
-              <div class="form-text">{{ $t('participantDetails.emailHint') }}</div>
-            </div>
+        <dl v-if="!isEditing" class="mb-0 grid gap-4 sm:grid-cols-2">
+          <div>
+            <dt class="text-sm font-semibold text-muted">{{ $t('enquiryModal.firstName') }}</dt>
+            <dd class="mt-0.5 mb-0 break-words text-ink">{{ participant.firstName || '—' }}</dd>
           </div>
+          <div>
+            <dt class="text-sm font-semibold text-muted">{{ $t('enquiryModal.lastName') }}</dt>
+            <dd class="mt-0.5 mb-0 break-words text-ink">{{ participant.lastName || '—' }}</dd>
+          </div>
+          <div>
+            <dt class="text-sm font-semibold text-muted">{{ $t('enquiryModal.phone') }}</dt>
+            <dd class="mt-0.5 mb-0 break-words text-ink">{{ participant.phone || '—' }}</dd>
+          </div>
+          <div>
+            <dt class="text-sm font-semibold text-muted">{{ $t('enquiryModal.email') }}</dt>
+            <dd class="mt-0.5 mb-0 break-words text-ink">{{ participant.email }}</dd>
+          </div>
+        </dl>
 
-          <div class="d-flex flex-wrap align-items-center gap-2 mt-3">
-            <button v-if="!isEditing" @click="startEditing" class="btn btn-primary" type="button">
-              {{ $t('participantDetails.edit') }}
-            </button>
-            <template v-else>
-              <button
-                @click="updateProfile"
-                :disabled="isSending"
-                class="btn btn-success"
-                type="button"
-              >
-                {{ $t('participantDetails.save') }}
-              </button>
-              <button @click="cancelEditing" class="btn btn-outline-secondary" type="button">
-                {{ $t('participantDetails.cancel') }}
-              </button>
-            </template>
-            <InlineAlerts
-              :success-message="successMessage"
-              :error-message="errorMessage"
-              @event-success-message-closed="successMessage = ''"
-              @event-error-message-closed="errorMessage = ''"
+        <div v-else class="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label class="form-label" for="participant-first-name"
+              >{{ $t('enquiryModal.firstName') }} *</label
+            >
+            <input
+              v-model="participantForm.firstName"
+              id="participant-first-name"
+              class="form-control"
+              type="text"
+              maxlength="255"
+              autocomplete="given-name"
             />
           </div>
-        </fieldset>
-      </div>
+          <div>
+            <label class="form-label" for="participant-last-name"
+              >{{ $t('enquiryModal.lastName') }} *</label
+            >
+            <input
+              v-model="participantForm.lastName"
+              id="participant-last-name"
+              class="form-control"
+              type="text"
+              maxlength="255"
+              autocomplete="family-name"
+            />
+          </div>
+          <div>
+            <label class="form-label" for="participant-phone"
+              >{{ $t('enquiryModal.phone') }} *</label
+            >
+            <input
+              v-model="participantForm.phone"
+              id="participant-phone"
+              class="form-control"
+              type="tel"
+              maxlength="20"
+              autocomplete="tel"
+            />
+          </div>
+          <div>
+            <label class="form-label" for="participant-email"
+              >{{ $t('enquiryModal.email') }} *</label
+            >
+            <input
+              v-model="participantForm.email"
+              id="participant-email"
+              class="form-control"
+              type="email"
+              maxlength="255"
+              autocomplete="email"
+            />
+            <div class="form-text">{{ $t('participantDetails.emailHint') }}</div>
+          </div>
+        </div>
+
+        <div class="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+          <button
+            v-if="!isEditing"
+            @click="startEditing"
+            class="btn btn-primary w-full sm:w-auto"
+            type="button"
+          >
+            {{ $t('participantDetails.edit') }}
+          </button>
+          <template v-else>
+            <button
+              @click="updateProfile"
+              :disabled="isSending"
+              class="btn btn-success w-full sm:w-auto"
+              type="button"
+            >
+              {{ $t('participantDetails.save') }}
+            </button>
+            <button
+              @click="cancelEditing"
+              class="btn btn-outline-secondary w-full sm:w-auto"
+              type="button"
+            >
+              {{ $t('participantDetails.cancel') }}
+            </button>
+          </template>
+          <InlineAlerts
+            :success-message="successMessage"
+            :error-message="errorMessage"
+            @event-success-message-closed="successMessage = ''"
+            @event-error-message-closed="errorMessage = ''"
+          />
+        </div>
+      </section>
     </div>
   </div>
 </template>

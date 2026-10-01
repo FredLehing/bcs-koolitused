@@ -20,7 +20,7 @@ See on Vue 3 + Vite frontend (Vali-IT grupiprojekt).
 
 **Stack:** Vue 3 (Composition API), Vue Router 5, Pinia, Tailwind CSS 4, Axios, Phosphor Icons
 
-**Kujundus (haru `alternative-frontend-design`):** Bootstrap on asendatud Tailwindiga. Värvid, põhiklassid ja mustrid on kirjas `docs/structure/frontend-tailwind-stiilijuhend.md` — loe see enne vaate kujundamist. Prototüübis on uues stiilis ainult osa vaateid (vt sama faili jaotist „Prototüübi seis“).
+**Kujundus (haru `alternative-frontend-design`):** Bootstrap on asendatud Tailwindiga. Värvid, põhiklassid ja mustrid on kirjas `docs/structure/frontend-tailwind-stiilijuhend.md` — loe see enne vaate kujundamist.
 
 **Sisenemispunkt:** `index.html` laeb Vue rakenduse (`src/main.js` → `src/App.vue`).
 

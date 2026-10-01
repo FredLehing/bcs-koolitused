@@ -11,23 +11,17 @@ export default {
 </script>
 
 <template>
-  <div class="container">
-    <div class="row g-4 text-start mb-5">
-      <div class="col-lg-3">
-        <ProfileMenu />
-      </div>
+  <div class="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 sm:py-10">
+    <div class="lg:grid lg:grid-cols-[14rem_1fr] lg:items-start lg:gap-8">
+      <ProfileMenu />
 
-      <div class="col-lg-9">
-        <fieldset class="border rounded bg-body p-3">
-          <legend class="float-none w-auto px-2 fs-5">
-            {{ $t('navbar.participantCertificates') }}
-          </legend>
-          <div class="d-flex align-items-center gap-3 text-secondary">
-            <PhCertificate :size="40" />
-            <p class="mb-0">{{ $t('participantCertificates.comingSoon') }}</p>
-          </div>
-        </fieldset>
-      </div>
+      <section class="rounded-2xl border border-line bg-white p-5 sm:p-6">
+        <h1 class="mb-4 text-xl sm:text-2xl">{{ $t('navbar.participantCertificates') }}</h1>
+        <div class="flex items-center gap-3 text-muted">
+          <PhCertificate :size="40" class="shrink-0" />
+          <p class="mb-0">{{ $t('participantCertificates.comingSoon') }}</p>
+        </div>
+      </section>
     </div>
   </div>
 </template>
