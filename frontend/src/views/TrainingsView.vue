@@ -25,8 +25,8 @@ export default {
     PhX,
     LanguagesDropdown,
     CategoriesDropdown,
+    TrainingsTabs,
   },
-  components: { TrainingsTabs, TrainingCard, PaginationNav, PhQuestion, PhX },
   data() {
     return {
       categoryId: 0,
@@ -189,7 +189,7 @@ export default {
     <TrainingsTabs />
 
     <div class="row flex-grow-1">
-      <div class="col-2 d-flex flex-column gap-3">
+      <div class="col-md-4 col-lg-3 d-flex flex-column gap-4">
         <LanguagesDropdown
           :languages="languages"
           :languageId="trainingLanguageId"
@@ -209,7 +209,7 @@ export default {
           :firstOptionLabel="$t('trainings.showAllFundingTypes')"
         />
       </div>
-      <div class="col-10 d-flex flex-column">
+      <div class="col-md-8 col-lg-9 d-flex flex-column">
         <div class="d-flex align-items-center gap-2 mb-3">
           <div class="input-group">
             <input
