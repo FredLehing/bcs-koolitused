@@ -156,6 +156,20 @@ export default {
 
 <template>
   <div class="container">
+    <!-- PROTOTÜÜP: päringute ja registreerumiste vaheline lülitus nupugrupina -->
+    <div class="btn-group mb-3" role="group">
+      <RouterLink :to="{ name: 'adminEnquiriesRoute' }" class="btn btn-outline-primary">
+        {{ $t('navbar.manageEnquiries') }}
+      </RouterLink>
+      <RouterLink
+        :to="{ name: 'adminRegistrationsRoute' }"
+        class="btn btn-primary"
+        aria-current="page"
+      >
+        {{ $t('navbar.manageRegistrations') }}
+      </RouterLink>
+    </div>
+
     <h1 class="h3 mb-3">{{ $t('adminRegistrations.title') }}</h1>
 
     <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
