@@ -1,27 +1,24 @@
-package ee.bcskoolitus.controller.ask;
+package ee.bcskoolitus.controller.chatbot;
 
-import ee.bcskoolitus.controller.ask.dto.AskRequest;
-import ee.bcskoolitus.controller.ask.dto.AskResponse;
 import ee.bcskoolitus.controller.chatbot.dto.ChatbotRequest;
+import ee.bcskoolitus.controller.chatbot.dto.ChatbotResponse;
 import ee.bcskoolitus.service.ChatbotService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/ask")
+@RequestMapping("/api/chatbot")
 @RequiredArgsConstructor
-public class AskController {
+public class ChatbotController {
 
     private final ChatbotService chatbotService;
 
-    @PostMapping
-    public AskResponse ask(@Valid @RequestBody AskRequest request) {
-        String answer = chatbotService.ask(new ChatbotRequest(request.question(), "et")).answer();
-        return AskResponse.builder().answer(answer).build();
+    @PostMapping("/ask")
+    public ChatbotResponse ask(@Valid @RequestBody ChatbotRequest chatbotRequest) {
+        return chatbotService.ask(chatbotRequest);
     }
 }
