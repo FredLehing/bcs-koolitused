@@ -2,6 +2,8 @@ package ee.bcskoolitus.service;
 
 import ee.bcskoolitus.CourseParticipantStatus;
 import ee.bcskoolitus.CourseStatus;
+import ee.bcskoolitus.TrainingStatus;
+import ee.bcskoolitus.controller.courseparticipant.dto.AdminRegistrationSummaryDto;
 import ee.bcskoolitus.controller.courseparticipant.dto.CourseParticipantDto;
 import ee.bcskoolitus.controller.courseparticipant.dto.CourseParticipantStatusDto;
 import ee.bcskoolitus.controller.courseparticipant.dto.CourseRegistrationRequestDto;
@@ -14,6 +16,9 @@ import ee.bcskoolitus.persistance.participant.Participant;
 import ee.bcskoolitus.persistance.participant.ParticipantRepository;
 import ee.bcskoolitus.persistance.profile.ProfileMapper;
 import ee.bcskoolitus.persistance.user.User;
+import ee.bcskoolitus.persistance.view.adminregistrationsummary.AdminRegistrationSummary;
+import ee.bcskoolitus.persistance.view.adminregistrationsummary.AdminRegistrationSummaryMapper;
+import ee.bcskoolitus.persistance.view.adminregistrationsummary.AdminRegistrationSummaryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +42,8 @@ public class CourseParticipantService {
     private final CourseService courseService;
     private final UserService userService;
     private final ParticipantService participantService;
+    private final AdminRegistrationSummaryRepository adminRegistrationSummaryRepository;
+    private final AdminRegistrationSummaryMapper adminRegistrationSummaryMapper;
 
     // Toimumiskorra osalejad registreerumise järjekorras (ka loobunud); kontaktandmed profiilist
     @Transactional(readOnly = true)
@@ -44,6 +51,16 @@ public class CourseParticipantService {
         courseService.getValidActiveCourseBy(courseId);
         List<CourseParticipant> courseParticipants = courseParticipantRepository.findAllByCourseIdOrderByCreatedAtAsc(courseId);
         return courseParticipantMapper.toCourseParticipantDtos(courseParticipants);
+    }
+
+    // Admini nimekiri: uusimad eespool; vaikimisi ainult registreerunud (R) ja toimumiskorrad, mis pole lõppenud;
+    // kustutatud toimumiskorrad ja koolitused alati välja
+    @Transactional(readOnly = true)
+    public List<AdminRegistrationSummaryDto> findAdminRegistrations(String contentLang, Boolean includeCancelled, Boolean includePast) {
+        List<AdminRegistrationSummary> adminRegistrationSummaries = adminRegistrationSummaryRepository.findAdminRegistrationSummariesBy(
+                contentLang, Boolean.TRUE.equals(includeCancelled), Boolean.TRUE.equals(includePast),
+                CourseParticipantStatus.REGISTERED.getCode(), CourseStatus.DELETED.getCode(), TrainingStatus.DELETED.getCode());
+        return adminRegistrationSummaryMapper.toAdminRegistrationSummaryDtos(adminRegistrationSummaries);
     }
 
     // Kasutaja registreerumise olek: R / C; null = pole registreerunud (ka siis, kui kasutajal osalejat pole)

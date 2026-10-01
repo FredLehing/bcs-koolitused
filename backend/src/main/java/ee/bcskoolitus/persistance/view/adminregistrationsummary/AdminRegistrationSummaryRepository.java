@@ -13,13 +13,14 @@ public interface AdminRegistrationSummaryRepository extends JpaRepository<AdminR
     @Query("""
             select a from AdminRegistrationSummary a
             where a.contentLanguageCode = :contentLang
-              and a.courseStatus <> :deletedStatus
-              and a.trainingStatus <> :deletedStatus
+              and a.courseStatus <> :courseDeletedStatus
+              and a.trainingStatus <> :trainingDeletedStatus
               and (:includeCancelled = true or a.status = :registeredStatus)
               and (:includePast = true or a.isPast = false)
             order by a.createdAt desc, a.courseParticipantId desc""")
     List<AdminRegistrationSummary> findAdminRegistrationSummariesBy(String contentLang, boolean includeCancelled, boolean includePast,
-                                                                    String registeredStatus, String deletedStatus);
+                                                                    String registeredStatus, String courseDeletedStatus,
+                                                                    String trainingDeletedStatus);
 
     Optional<AdminRegistrationSummary> findByCourseParticipantIdAndContentLanguageCode(Integer courseParticipantId, String contentLang);
 }

@@ -1,5 +1,6 @@
 package ee.bcskoolitus.controller.courseparticipant;
 
+import ee.bcskoolitus.controller.courseparticipant.dto.AdminRegistrationSummaryDto;
 import ee.bcskoolitus.controller.courseparticipant.dto.CourseParticipantDto;
 import ee.bcskoolitus.controller.courseparticipant.dto.CourseParticipantStatusDto;
 import ee.bcskoolitus.controller.courseparticipant.dto.CourseRegistrationRequestDto;
@@ -41,6 +42,20 @@ public class CourseParticipantController {
     })
     public List<CourseParticipantDto> findCourseParticipants(@PathVariable Integer courseId) {
         return courseParticipantService.findCourseParticipants(courseId);
+    }
+
+    @GetMapping("/admin-registrations")
+    @Operation(summary = "Admini registreerumiste nimekiri",
+            description = "Uusimad eespool (created_at kahanevalt). Vaikimisi ainult registreerunud (R) ja toimumiskorrad, mis pole lõppenud; "
+                    + "includeCancelled=true → ka loobunud (C), includePast=true → ka toimunud. Kustutatud toimumiskorrad ja koolitused välja. "
+                    + "trainingTitle contentLang keeles, puudumisel põhikeeles. Tundmatu contentLang → tühi list.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK")
+    })
+    public List<AdminRegistrationSummaryDto> findAdminRegistrations(@RequestParam String contentLang,
+                                                                    @RequestParam(required = false, defaultValue = "false") Boolean includeCancelled,
+                                                                    @RequestParam(required = false, defaultValue = "false") Boolean includePast) {
+        return courseParticipantService.findAdminRegistrations(contentLang, includeCancelled, includePast);
     }
 
     @GetMapping("/course/{courseId}/participant-status")

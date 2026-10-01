@@ -1,5 +1,6 @@
 package ee.bcskoolitus.service;
 
+import ee.bcskoolitus.controller.courseparticipant.dto.AdminRegistrationSummaryDto;
 import ee.bcskoolitus.controller.courseparticipant.dto.CourseParticipantDto;
 import ee.bcskoolitus.controller.courseparticipant.dto.CourseParticipantStatusDto;
 import ee.bcskoolitus.controller.courseparticipant.dto.CourseRegistrationRequestDto;
@@ -16,6 +17,10 @@ import ee.bcskoolitus.persistance.profile.Profile;
 import ee.bcskoolitus.persistance.profile.ProfileMapper;
 import ee.bcskoolitus.persistance.profile.ProfileMapperImpl;
 import ee.bcskoolitus.persistance.user.User;
+import ee.bcskoolitus.persistance.view.adminregistrationsummary.AdminRegistrationSummary;
+import ee.bcskoolitus.persistance.view.adminregistrationsummary.AdminRegistrationSummaryMapper;
+import ee.bcskoolitus.persistance.view.adminregistrationsummary.AdminRegistrationSummaryMapperImpl;
+import ee.bcskoolitus.persistance.view.adminregistrationsummary.AdminRegistrationSummaryRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -23,6 +28,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -58,6 +64,10 @@ class CourseParticipantServiceTest {
     private CourseParticipantMapper courseParticipantMapper = new CourseParticipantMapperImpl();
     @Spy
     private ProfileMapper profileMapper = new ProfileMapperImpl();
+    @Mock
+    private AdminRegistrationSummaryRepository adminRegistrationSummaryRepository;
+    @Spy
+    private AdminRegistrationSummaryMapper adminRegistrationSummaryMapper = new AdminRegistrationSummaryMapperImpl();
 
     @InjectMocks
     private CourseParticipantService courseParticipantService;
@@ -229,10 +239,69 @@ class CourseParticipantServiceTest {
         verify(participantService, never()).updateParticipantName(any());
     }
 
+    @Test
+    void findAdminRegistrations_defaultReturnsOnlyRegisteredAndUpcoming() {
+        courseParticipantService.findAdminRegistrations("et", null, null);
+
+        verify(adminRegistrationSummaryRepository).findAdminRegistrationSummariesBy("et", false, false, "R", "D", "D");
+    }
+
+    @Test
+    void findAdminRegistrations_includeCancelledAndPast() {
+        courseParticipantService.findAdminRegistrations("en", true, true);
+
+        verify(adminRegistrationSummaryRepository).findAdminRegistrationSummariesBy("en", true, true, "R", "D", "D");
+    }
+
+    @Test
+    void findAdminRegistrations_mapsSummaryRow() {
+        when(adminRegistrationSummaryRepository.findAdminRegistrationSummariesBy("et", false, false, "R", "D", "D"))
+                .thenReturn(List.of(createAdminRegistrationSummary()));
+
+        AdminRegistrationSummaryDto adminRegistrationSummaryDto = courseParticipantService.findAdminRegistrations("et", false, false).getFirst();
+
+        assertEquals(1, adminRegistrationSummaryDto.getCourseParticipantId());
+        assertEquals(Instant.parse("2026-09-10T09:00:00Z"), adminRegistrationSummaryDto.getRegisteredAt());
+        assertEquals("Anna Saar", adminRegistrationSummaryDto.getParticipantName());
+        assertEquals("anna.saar@example.com", adminRegistrationSummaryDto.getEmail());
+        assertEquals(1, adminRegistrationSummaryDto.getCourseId());
+        assertEquals("Java algkursus", adminRegistrationSummaryDto.getTrainingTitle());
+        assertEquals(LocalDate.parse("2026-10-05"), adminRegistrationSummaryDto.getCourseStartDate());
+        assertEquals(LocalDate.parse("2026-10-09"), adminRegistrationSummaryDto.getCourseEndDate());
+        assertEquals(false, adminRegistrationSummaryDto.getIsPast());
+        assertEquals(true, adminRegistrationSummaryDto.getHasPaid());
+        assertEquals(true, adminRegistrationSummaryDto.getRequiresLaptop());
+        assertEquals("R", adminRegistrationSummaryDto.getStatus());
+    }
+
     private CourseParticipant captureSavedCourseParticipant() {
         ArgumentCaptor<CourseParticipant> courseParticipantCaptor = ArgumentCaptor.forClass(CourseParticipant.class);
         verify(courseParticipantRepository).save(courseParticipantCaptor.capture());
         return courseParticipantCaptor.getValue();
+    }
+
+    // 3_import.sql course_participant 1 (Anna Saar, toimumiskord 1); konto e-post erineb profiili omast
+    private static AdminRegistrationSummary createAdminRegistrationSummary() {
+        AdminRegistrationSummary adminRegistrationSummary = new AdminRegistrationSummary();
+        ReflectionTestUtils.setField(adminRegistrationSummary, "courseParticipantId", 1);
+        ReflectionTestUtils.setField(adminRegistrationSummary, "contentLanguageCode", "et");
+        ReflectionTestUtils.setField(adminRegistrationSummary, "status", "R");
+        ReflectionTestUtils.setField(adminRegistrationSummary, "hasPaid", true);
+        ReflectionTestUtils.setField(adminRegistrationSummary, "requiresLaptop", true);
+        ReflectionTestUtils.setField(adminRegistrationSummary, "notes", "Registreerus veebilehe kaudu.");
+        ReflectionTestUtils.setField(adminRegistrationSummary, "createdAt", Instant.parse("2026-09-10T09:00:00Z"));
+        ReflectionTestUtils.setField(adminRegistrationSummary, "updatedAt", Instant.parse("2026-09-10T09:00:00Z"));
+        ReflectionTestUtils.setField(adminRegistrationSummary, "participantName", "Anna Saar");
+        ReflectionTestUtils.setField(adminRegistrationSummary, "email", "anna.saar@example.com");
+        ReflectionTestUtils.setField(adminRegistrationSummary, "phone", "+37256789012");
+        ReflectionTestUtils.setField(adminRegistrationSummary, "accountEmail", "kasutaja@vali-it.ee");
+        ReflectionTestUtils.setField(adminRegistrationSummary, "courseId", 1);
+        ReflectionTestUtils.setField(adminRegistrationSummary, "trainingTitle", "Java algkursus");
+        ReflectionTestUtils.setField(adminRegistrationSummary, "courseStartDate", LocalDate.parse("2026-10-05"));
+        ReflectionTestUtils.setField(adminRegistrationSummary, "courseEndDate", LocalDate.parse("2026-10-09"));
+        ReflectionTestUtils.setField(adminRegistrationSummary, "courseStatus", "O");
+        ReflectionTestUtils.setField(adminRegistrationSummary, "isPast", false);
+        return adminRegistrationSummary;
     }
 
     private static CourseRegistrationRequestDto createCourseRegistrationRequestDto(Boolean requiresLaptop, String notes) {
