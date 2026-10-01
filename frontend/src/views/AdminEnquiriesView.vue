@@ -7,7 +7,7 @@ import NavigationService from '@/services/NavigationService.js'
 import SessionStorageService from '@/services/SessionStorageService.js'
 import FormatService from '@/services/FormatService.js'
 import SortableColumnHeader from '@/components/common/SortableColumnHeader.vue'
-import AdminEnquiryRegistrationTabs from '@/components/common/AdminEnquiryRegistrationTabs.vue'
+import AdminTabs from '@/components/common/AdminTabs.vue'
 import EnquiryStatusBadge from '@/components/common/EnquiryStatusBadge.vue'
 
 // Staatuse kasvav järjekord sorteerimisel: Uus → Käsitletud
@@ -23,7 +23,7 @@ const SORT_VALUES = {
 
 export default {
   name: 'AdminEnquiriesView',
-  components: { AdminEnquiryRegistrationTabs, PhEye, SortableColumnHeader, EnquiryStatusBadge },
+  components: { AdminTabs, PhEye, SortableColumnHeader, EnquiryStatusBadge },
   data() {
     return {
       searchText: '',
@@ -138,7 +138,7 @@ export default {
 
 <template>
   <div class="container">
-    <AdminEnquiryRegistrationTabs />
+    <AdminTabs />
 
     <h1 class="h3 mb-3">{{ $t('adminEnquiries.title') }}</h1>
 

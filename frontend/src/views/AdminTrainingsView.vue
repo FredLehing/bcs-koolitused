@@ -9,6 +9,7 @@ import CategoryService from '@/api-services/CategoryService.js'
 import FundingTypeService from '@/api-services/FundingTypeService.js'
 import NavigationService from '@/services/NavigationService.js'
 import SessionStorageService from '@/services/SessionStorageService.js'
+import AdminTabs from '@/components/common/AdminTabs.vue'
 import FlagIcon from '@/components/common/FlagIcon.vue'
 import InlineAlerts from '@/components/common/InlineAlerts.vue'
 import EditTrainingLink from '@/components/common/EditTrainingLink.vue'
@@ -42,6 +43,7 @@ function padTwoDigits(number) {
 export default {
   name: 'AdminTrainingsView',
   components: {
+    AdminTabs,
     PhCalendarBlank,
     PhCheck,
     PhEye,
@@ -352,6 +354,8 @@ export default {
 
 <template>
   <div class="container">
+    <AdminTabs />
+
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
       <h1 class="h3 mb-0">{{ $t('adminTrainings.title') }}</h1>
       <button
