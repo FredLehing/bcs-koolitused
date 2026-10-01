@@ -1,5 +1,6 @@
 package ee.bcskoolitus.controller.courseparticipant;
 
+import ee.bcskoolitus.controller.courseparticipant.dto.AdminRegistrationDto;
 import ee.bcskoolitus.controller.courseparticipant.dto.AdminRegistrationSummaryDto;
 import ee.bcskoolitus.controller.courseparticipant.dto.CourseParticipantDto;
 import ee.bcskoolitus.controller.courseparticipant.dto.CourseParticipantStatusDto;
@@ -56,6 +57,22 @@ public class CourseParticipantController {
                                                                     @RequestParam(required = false, defaultValue = "false") Boolean includeCancelled,
                                                                     @RequestParam(required = false, defaultValue = "false") Boolean includePast) {
         return courseParticipantService.findAdminRegistrations(contentLang, includeCancelled, includePast);
+    }
+
+    @GetMapping("/admin-registration/{courseParticipantId}")
+    @Operation(summary = "Ühe registreerumise admini vaade",
+            description = "Registreerumise väljad, osaleja kontakt (profiil, accountEmail = kasutajakonto e-post) ja toimumiskord. "
+                    + "notes = osaleja lisainfo (tühi string, kui puudub), adminNotes = admini märkmed (null, kui puudub). trainingTitle contentLang keeles, puudumisel põhikeeles.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Olematu courseParticipantId või tundmatu contentLang -> 'errorCode:' PRIMARY_KEY_NOT_FOUND",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            )
+    })
+    public AdminRegistrationDto getAdminRegistration(@PathVariable Integer courseParticipantId, @RequestParam String contentLang) {
+        return courseParticipantService.getAdminRegistration(courseParticipantId, contentLang);
     }
 
     @GetMapping("/course/{courseId}/participant-status")

@@ -3,11 +3,13 @@ package ee.bcskoolitus.service;
 import ee.bcskoolitus.CourseParticipantStatus;
 import ee.bcskoolitus.CourseStatus;
 import ee.bcskoolitus.TrainingStatus;
+import ee.bcskoolitus.controller.courseparticipant.dto.AdminRegistrationDto;
 import ee.bcskoolitus.controller.courseparticipant.dto.AdminRegistrationSummaryDto;
 import ee.bcskoolitus.controller.courseparticipant.dto.CourseParticipantDto;
 import ee.bcskoolitus.controller.courseparticipant.dto.CourseParticipantStatusDto;
 import ee.bcskoolitus.controller.courseparticipant.dto.CourseRegistrationRequestDto;
 import ee.bcskoolitus.infrastructure.exception.ForbiddenException;
+import ee.bcskoolitus.infrastructure.exception.PrimaryKeyNotFoundException;
 import ee.bcskoolitus.persistance.course.Course;
 import ee.bcskoolitus.persistance.course.participant.CourseParticipant;
 import ee.bcskoolitus.persistance.course.participant.CourseParticipantMapper;
@@ -45,6 +47,11 @@ public class CourseParticipantService {
     private final AdminRegistrationSummaryRepository adminRegistrationSummaryRepository;
     private final AdminRegistrationSummaryMapper adminRegistrationSummaryMapper;
 
+    public CourseParticipant getValidCourseParticipantBy(Integer courseParticipantId) {
+        return courseParticipantRepository.findById(courseParticipantId)
+                .orElseThrow(() -> new PrimaryKeyNotFoundException("courseParticipantId", courseParticipantId));
+    }
+
     // Toimumiskorra osalejad registreerumise järjekorras (ka loobunud); kontaktandmed profiilist
     @Transactional(readOnly = true)
     public List<CourseParticipantDto> findCourseParticipants(Integer courseId) {
@@ -61,6 +68,16 @@ public class CourseParticipantService {
                 contentLang, Boolean.TRUE.equals(includeCancelled), Boolean.TRUE.equals(includePast),
                 CourseParticipantStatus.REGISTERED.getCode(), CourseStatus.DELETED.getCode(), TrainingStatus.DELETED.getCode());
         return adminRegistrationSummaryMapper.toAdminRegistrationSummaryDtos(adminRegistrationSummaries);
+    }
+
+    // Üks registreerumine koos osaleja ja toimumiskorraga (ka kustutatud toimumiskorra oma); tundmatu contentLang → 404
+    @Transactional(readOnly = true)
+    public AdminRegistrationDto getAdminRegistration(Integer courseParticipantId, String contentLang) {
+        getValidCourseParticipantBy(courseParticipantId);
+        AdminRegistrationSummary adminRegistrationSummary = adminRegistrationSummaryRepository
+                .findByCourseParticipantIdAndContentLanguageCode(courseParticipantId, contentLang)
+                .orElseThrow(() -> new PrimaryKeyNotFoundException("courseParticipantId", courseParticipantId));
+        return adminRegistrationSummaryMapper.toAdminRegistrationDto(adminRegistrationSummary);
     }
 
     // Kasutaja registreerumise olek: R / C; null = pole registreerunud (ka siis, kui kasutajal osalejat pole)

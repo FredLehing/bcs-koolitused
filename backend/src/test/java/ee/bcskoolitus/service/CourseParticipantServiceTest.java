@@ -1,5 +1,6 @@
 package ee.bcskoolitus.service;
 
+import ee.bcskoolitus.controller.courseparticipant.dto.AdminRegistrationDto;
 import ee.bcskoolitus.controller.courseparticipant.dto.AdminRegistrationSummaryDto;
 import ee.bcskoolitus.controller.courseparticipant.dto.CourseParticipantDto;
 import ee.bcskoolitus.controller.courseparticipant.dto.CourseParticipantStatusDto;
@@ -272,6 +273,45 @@ class CourseParticipantServiceTest {
         assertEquals(true, adminRegistrationSummaryDto.getHasPaid());
         assertEquals(true, adminRegistrationSummaryDto.getRequiresLaptop());
         assertEquals("R", adminRegistrationSummaryDto.getStatus());
+    }
+
+    @Test
+    void getAdminRegistration_mapsParticipantAndCourse() {
+        when(courseParticipantRepository.findById(1)).thenReturn(Optional.of(createCourseParticipantWithStatus("R")));
+        when(adminRegistrationSummaryRepository.findByCourseParticipantIdAndContentLanguageCode(1, "et"))
+                .thenReturn(Optional.of(createAdminRegistrationSummary()));
+
+        AdminRegistrationDto adminRegistrationDto = courseParticipantService.getAdminRegistration(1, "et");
+
+        assertEquals(1, adminRegistrationDto.getCourseParticipantId());
+        assertEquals("R", adminRegistrationDto.getStatus());
+        assertEquals("Registreerus veebilehe kaudu.", adminRegistrationDto.getNotes());
+        assertNull(adminRegistrationDto.getAdminNotes());
+        assertEquals(Instant.parse("2026-09-10T09:00:00Z"), adminRegistrationDto.getCreatedAt());
+        assertEquals("+37256789012", adminRegistrationDto.getPhone());
+        assertEquals("kasutaja@vali-it.ee", adminRegistrationDto.getAccountEmail());
+        assertEquals("Java algkursus", adminRegistrationDto.getTrainingTitle());
+        assertEquals("O", adminRegistrationDto.getCourseStatus());
+        assertEquals(false, adminRegistrationDto.getIsPast());
+    }
+
+    @Test
+    void getAdminRegistration_unknownCourseParticipantThrows() {
+        when(courseParticipantRepository.findById(123)).thenReturn(Optional.empty());
+
+        PrimaryKeyNotFoundException exception = assertThrows(PrimaryKeyNotFoundException.class,
+                () -> courseParticipantService.getAdminRegistration(123, "et"));
+
+        assertEquals("Ei leidnud primary keyd 'courseParticipantId' väärtusega: 123", exception.getMessage());
+        verify(adminRegistrationSummaryRepository, never()).findByCourseParticipantIdAndContentLanguageCode(any(), any());
+    }
+
+    @Test
+    void getAdminRegistration_unknownContentLangThrows() {
+        when(courseParticipantRepository.findById(1)).thenReturn(Optional.of(createCourseParticipantWithStatus("R")));
+        when(adminRegistrationSummaryRepository.findByCourseParticipantIdAndContentLanguageCode(1, "xx")).thenReturn(Optional.empty());
+
+        assertThrows(PrimaryKeyNotFoundException.class, () -> courseParticipantService.getAdminRegistration(1, "xx"));
     }
 
     private CourseParticipant captureSavedCourseParticipant() {
