@@ -4,7 +4,20 @@
   },
   "homeView": {
     "title": "Choose from over 100 trainings to find yours",
-    "subtitle": "Practical IT, design and management training from experienced trainers"
+    "subtitle": "Practical IT, design and management training from experienced trainers",
+    "trainingsCard": {
+      "title": "Our trainings",
+      "text": "Browse all our trainings and what they cover.",
+      "link": "View trainings →"
+    },
+    "coursesCard": {
+      "title": "Training calendar",
+      "text": "Pick a suitable date and register.",
+      "link": "View calendar →"
+    },
+    "nextCoursesTitle": "Our next 5 courses",
+    "marketingText": "Find the training that suits you — new courses are added all the time.",
+    "allCoursesLink": "View all upcoming courses →"
   },
   "navbar": {
     "trainings": "Trainings",

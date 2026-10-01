@@ -44,8 +44,8 @@ Külastaja avab avalehe, näeb otsingut ja kahte suurt kaarti ("Meie koolitused"
 
 ## Vastuvõtu kriteeriumid
 
-- [ ] Kaks suunavat kaarti viivad `/trainings` ja `/courses` vaatesse
-- [ ] Kuni 5 järgmist avatud toimumiskorda `CourseCard`-idena; tühjal vastusel plokk peidetud
-- [ ] Keele vahetusel kaardid uues keeles
-- [ ] Turunduslause ja nupp `/courses` vaatesse
-- [ ] Tekstid et/en
+- [x] Kaks suunavat kaarti viivad `/trainings` ja `/courses` vaatesse
+- [x] Kuni 5 järgmist avatud toimumiskorda `CourseCard`-idena; tühjal vastusel plokk peidetud
+- [x] Keele vahetusel kaardid uues keeles
+- [x] Turunduslause ja nupp `/courses` vaatesse
+- [x] Tekstid et/en

@@ -4,7 +4,20 @@
   },
   "homeView": {
     "title": "Leia üle 100 koolituse seast endale sobiv!",
-    "subtitle": "Praktilised IT-, disaini- ja juhtimiskoolitused oma ala parimatelt"
+    "subtitle": "Praktilised IT-, disaini- ja juhtimiskoolitused oma ala parimatelt",
+    "trainingsCard": {
+      "title": "Meie koolitused",
+      "text": "Vaata kõiki meie koolitusi ja nende sisu.",
+      "link": "Vaata koolitusi →"
+    },
+    "coursesCard": {
+      "title": "Koolituste kalender",
+      "text": "Vali sobiv toimumisaeg ja registreeru.",
+      "link": "Vaata kalendrit →"
+    },
+    "nextCoursesTitle": "Meie järgmised 5 koolitust",
+    "marketingText": "Leia endale sobiv koolitus — uusi toimumiskordi lisandub pidevalt.",
+    "allCoursesLink": "Vaata kõiki toimuvaid koolitusi →"
   },
   "navbar": {
     "trainings": "Koolitused",

@@ -63,6 +63,16 @@ export default {
     })
   },
 
+  // Backend task: docs/tasks/backend/GET-api-next-courses.md
+  sendGetNextCoursesRequest(contentLang, limit) {
+    return axios.get('/api/next-courses', {
+      params: {
+        contentLang: contentLang,
+        limit: limit,
+      },
+    })
+  },
+
   // Backend task: docs/tasks/backend/GET-api-course-summary-courseId.md
   sendGetCourseSummaryRequest(courseId, contentLang) {
     return axios.get(`/api/course-summary/${courseId}`, {
