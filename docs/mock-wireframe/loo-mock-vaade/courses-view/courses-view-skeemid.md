@@ -32,7 +32,7 @@ Eeskujud: `admin-training-courses-view/` (ühe koolituse kalender, `course_summa
 
 - Paremal sisse logimata kasutajale **"Logi sisse"** ja **"Loo konto"** → `/signup` (seni kohatäide "Registreeru" nimetatakse ümber, et see ei läheks segi toimumiskorrale registreerumisega).
 - **"Koolitused" muutub rippmenüüks** (sama muster nagu "Admin"): "Meie koolitused" → `/trainings`, "Koolituste kalender" → `/courses`. i18n `navbar.trainings` (menüü), `navbar.ourTrainings`, `navbar.coursesCalendar`.
-- **Menüü "Admin"**: "Koolituste haldus" alla link **"Koolituste kalender"** → `/admin-all-courses` (i18n `navbar.manageCourses`; en "Course calendar"). Ühe koolituse kalender (`/admin-training-courses`) jääb pealkirjaga "Koolituse kalender".
+- **Menüü "Admin"**: "Koolitused" alla link **"Koolituste kalender"** → `/admin-all-courses` (i18n `navbar.manageCourses`; en "Course calendar"). Ühe koolituse kalender (`/admin-training-courses`) jääb pealkirjaga "Koolituse kalender". (Admin-menüü uuendatud 2026-10-01: vt `docs/tasks/frontend/admin-menu.md`.)
 
 ### Kõigi toimumiskordade tabel — `AdminAllCoursesView.vue`
 
@@ -548,7 +548,7 @@ sequenceDiagram
 
 ```text
 Create a desktop wireframe of an admin page "Koolituste kalender" in a web app.
-Top: site navigation bar with logo, a dropdown "Koolitused ▾", other links, an open dropdown "Admin ▾" with items "Lisa uus koolitus", "Koolituste haldus", "Koolituste kalender" (highlighted), a divider, "Lisa uus koolitaja", "Koolitajad", a divider, "Koolitusruumid", a divider and "Koolituste päringud", and "Logi välja" on the right.
+Top: site navigation bar with logo, a dropdown "Koolitused ▾", other links, an open dropdown "Admin ▾" with items "Koolituste päringud", "Registreerumised", a divider, "Koolitused", "Koolituste kalender" (highlighted), a divider, "Koolitajad" and "Koolitusruumid", and "Logi välja" on the right.
 Header: page title "Koolituste kalender".
 Below: a search input "Otsi koolituse nime järgi…" with a button "Otsi", a link "▾ Ava otsingu filtrid" with a small badge "1 filter aktiivne", and a toggle switch "Näita ka möödunud" (off).
 Main area: a data table with columns "Algus", "Päevi", "Koolitus", "Hind", "Staatus", "Osalejad", "Tasunud", "Veebilink", "Huvilisi", "Tegevused" (eye, pencil, calendar and trash icons).

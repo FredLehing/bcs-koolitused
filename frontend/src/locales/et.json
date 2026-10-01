@@ -55,7 +55,7 @@
     "feedback": "Tagasiside",
     "admin": "Admin",
     "addTraining": "Lisa uus koolitus",
-    "manageTrainings": "Koolituste haldus",
+    "manageTrainings": "Koolitused",
     "addLecturer": "Lisa uus koolitaja",
     "manageLecturers": "Koolitajad",
     "manageRooms": "Koolitusruumid",
@@ -241,7 +241,7 @@
     "confirm": "Kustuta"
   },
   "adminTrainings": {
-    "title": "Koolituste haldus",
+    "title": "Koolitused",
     "search": "Otsi",
     "searchPlaceholder": "Otsi koolituse nime järgi…",
     "searchHelp": "Otsitakse koolituse nimest. Iga sõna peab nimes esinema, käändeid ei kohandata. Nimede valikus on ainult aktiivsed koolitused — kustutatud koolituse leidmiseks vali filtrites Staatus „Kustutatud“.",

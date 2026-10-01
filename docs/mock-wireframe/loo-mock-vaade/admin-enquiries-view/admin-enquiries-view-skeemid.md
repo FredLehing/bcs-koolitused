@@ -188,7 +188,7 @@ sequenceDiagram
 
 ```text
 Create a desktop wireframe of an admin page "Koolituste päringud" in a web app.
-Top: site navigation bar with logo and links, an open dropdown "Admin ▾" with items "Lisa uus koolitus", "Koolituste haldus", a divider, "Lisa uus koolitaja", "Koolitajad", a divider, "Koolitusruumid", a divider and "Koolituste päringud" (highlighted), and "Logi välja" on the right.
+Top: site navigation bar with logo and links, an open dropdown "Admin ▾" with items "Koolituste päringud" (highlighted), "Registreerumised", a divider, "Koolitused", "Koolituste kalender", a divider, "Koolitajad" and "Koolitusruumid", and "Logi välja" on the right.
 Header: page title "Koolituste päringud".
 Below: a search input "Otsi nime, e-posti, ettevõtte või koolituse järgi…" and a toggle switch "Näita ka käsitletud" (on).
 Main area: a data table with columns "Saabunud ▼", "Nimi", "E-post", "Ettevõte", "Koolitus", "Toimumiskord", "Staatus", "Tegevused".
