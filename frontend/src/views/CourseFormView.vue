@@ -60,6 +60,7 @@ export default {
         lecturers: [],
         roomId: null,
         status: 'U',
+        isPromoted: false,
         notes: '',
         meetingLink: '',
       },
@@ -173,6 +174,7 @@ export default {
         lecturers: courseDto.lecturers,
         roomId: courseDto.roomId,
         status: courseDto.status,
+        isPromoted: courseDto.isPromoted,
         notes: courseDto.notes ?? '',
         meetingLink: courseDto.meetingLink ?? '',
       }
@@ -222,6 +224,7 @@ export default {
         lecturerIds: this.course.lecturers.map((lecturer) => lecturer.lecturerId),
         roomId: this.course.roomId,
         status: this.course.status,
+        isPromoted: this.course.isPromoted,
         notes: this.course.notes,
         meetingLink: this.course.meetingLink,
       }
@@ -277,6 +280,7 @@ export default {
         lecturers: [],
         roomId: null,
         status: 'U',
+        isPromoted: false,
         notes: '',
         meetingLink: '',
       }
@@ -388,6 +392,19 @@ export default {
                   {{ $t(`courseStatus.${courseStatus}`) }}
                 </option>
               </select>
+              <div class="form-check form-switch mt-2">
+                <input
+                  v-model="course.isPromoted"
+                  id="isPromoted"
+                  class="form-check-input"
+                  type="checkbox"
+                  role="switch"
+                />
+                <label class="form-check-label" for="isPromoted">{{
+                  $t('courseForm.isPromoted')
+                }}</label>
+              </div>
+              <div class="form-text">{{ $t('courseForm.isPromotedHint') }}</div>
             </div>
             <div class="col-md-6">
               <label class="form-label fw-bold">{{ $t('trainingForm.data.lecturers') }}</label>

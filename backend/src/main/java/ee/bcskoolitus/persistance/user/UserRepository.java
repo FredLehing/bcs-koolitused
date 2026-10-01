@@ -9,4 +9,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     @Query("select u from User u where u.email = :email and u.password = :password and u.status = :status")
     Optional<User> findUserBy(String email, String password, String status);
 
+    // E-post on unikaalne tõstutundetult
+    boolean existsByEmailIgnoreCase(String email);
+
 }

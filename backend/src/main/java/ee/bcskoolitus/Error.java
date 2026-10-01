@@ -13,7 +13,12 @@ public enum Error {
 
     COURSE_END_BEFORE_START("Lõppkuupäev ei saa olla varasem kui alguskuupäev"),
     ROOM_HAS_UPCOMING_COURSES("Ruumis on tulevasi toimumiskordi, vali neile enne teine ruum"),
-    ROOM_NAME_EXISTS("Sellise nimega ruum on juba olemas");
+    ROOM_NAME_EXISTS("Sellise nimega ruum on juba olemas"),
+
+    EMAIL_TAKEN("Selle e-posti aadressiga konto on juba olemas"),
+    COURSE_FULL("Toimumiskord on täis"),
+    ALREADY_REGISTERED("Oled sellele toimumiskorrale juba registreerunud"),
+    REGISTRATION_CLOSED("Registreerumine on lõppenud");
 
     private final String message;
 

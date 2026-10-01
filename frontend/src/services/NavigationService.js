@@ -6,9 +6,24 @@ function createTrainingViewQuery(trainingId, trainingTranslationId) {
     : { trainingId: trainingId }
 }
 
+// Ainult sama rakenduse rada ("/..."), mitte välisaadress ("//...", "/\\..." või "https://...")
+function isInternalPath(path) {
+  return (
+    typeof path === 'string' &&
+    path.startsWith('/') &&
+    !path.startsWith('//') &&
+    !path.startsWith('/\\')
+  )
+}
+
 export default {
-  navigateToTrainingsView() {
-    router.push({ name: 'trainingsRoute' })
+  // Kasutaja antud tagasitee (redirect, returnTo) tohib viia ainult sama rakenduse sisse
+  isInternalPath(path) {
+    return isInternalPath(path)
+  },
+
+  navigateToTrainingsView(query) {
+    router.push({ name: 'trainingsRoute', query: query })
   },
 
   navigateToErrorView() {
@@ -20,8 +35,36 @@ export default {
     router.push({ name: 'homeRoute' })
   },
 
-  navigateToLoginView() {
-    router.push({ name: 'loginRoute' })
+  // redirect (valikuline): rada, kuhu pärast sisselogimist või konto loomist minnakse,
+  // nt "/course-registration?courseId=9"
+  navigateToLoginView(redirect) {
+    router.push({ name: 'loginRoute', query: redirect ? { redirect: redirect } : {} })
+  },
+
+  // successMessage (valikuline) antakse lehele edasi history state'is — nt registreerumise eduteade
+  navigateToCourseView(courseId, successMessage) {
+    router.push({
+      name: 'courseRoute',
+      query: { courseId: courseId },
+      state: successMessage ? { successMessage: successMessage } : undefined,
+    })
+  },
+
+  navigateToCourseRegistrationView(courseId) {
+    router.push({ name: 'courseRegistrationRoute', query: { courseId: courseId } })
+  },
+
+  // Pärast sisselogimist / konto loomist: redirect (ainult sisemine rada, algab "/"-ga) või avaleht
+  navigateToRedirectOrHomeView(redirect) {
+    if (isInternalPath(redirect)) {
+      router.push(redirect)
+    } else {
+      router.push({ name: 'homeRoute' })
+    }
+  },
+
+  navigateToSignupView(redirect) {
+    router.push({ name: 'signupRoute', query: redirect ? { redirect: redirect } : {} })
   },
 
   navigateToAdminTrainingsView() {
@@ -71,6 +114,10 @@ export default {
   // query: {} (uus ruum) või { roomId } (muutmine)
   navigateToRoomFormView(query) {
     router.push({ name: 'roomFormRoute', query: query })
+  },
+
+  navigateToAdminEnquiriesView() {
+    router.push({ name: 'adminEnquiriesRoute' })
   },
 
   navigateToLecturersView() {

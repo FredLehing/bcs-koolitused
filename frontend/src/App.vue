@@ -14,8 +14,20 @@
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navMenu">
-          <div class="navbar-nav gap-4 mx-auto bg-primary bg-opacity-50 rounded-pill px-3">
-            <RouterLink class="nav-link" to="/trainings">{{ $t('navbar.trainings') }}</RouterLink>
+          <div class="navbar-nav gap-4 mx-auto bg-bcs-primary rounded-pill px-3">
+            <div class="dropdown">
+              <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                {{ $t('navbar.trainings') }}
+              </a>
+              <div class="dropdown-menu bg-bcs-primary">
+                <RouterLink class="nav-link" :to="{ name: 'trainingsRoute' }">
+                  {{ $t('navbar.ourTrainings') }}
+                </RouterLink>
+                <RouterLink class="nav-link" :to="{ name: 'coursesRoute' }">
+                  {{ $t('navbar.coursesCalendar') }}
+                </RouterLink>
+              </div>
+            </div>
             <RouterLink class="nav-link" :to="{ name: 'lecturersRoute' }">
               {{ $t('navbar.ourLecturers') }}
             </RouterLink>
@@ -31,12 +43,15 @@
               <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                 {{ $t('navbar.admin') }}
               </a>
-              <div class="dropdown-menu bg-primary bg-opacity-50">
+              <div class="dropdown-menu bg-bcs-primary">
                 <RouterLink class="nav-link" :to="{ name: 'trainingFormRoute' }">
                   {{ $t('navbar.addTraining') }}
                 </RouterLink>
                 <RouterLink class="nav-link" :to="{ name: 'adminTrainingsRoute' }">
                   {{ $t('navbar.manageTrainings') }}
+                </RouterLink>
+                <RouterLink class="nav-link" :to="{ name: 'adminAllCoursesRoute' }">
+                  {{ $t('navbar.manageCourses') }}
                 </RouterLink>
                 <hr class="dropdown-divider" />
                 <RouterLink class="nav-link" :to="{ name: 'lecturerFormRoute' }">
@@ -48,6 +63,13 @@
                 <hr class="dropdown-divider" />
                 <RouterLink class="nav-link" :to="{ name: 'adminRoomsRoute' }">
                   {{ $t('navbar.manageRooms') }}
+                </RouterLink>
+                <hr class="dropdown-divider" />
+                <RouterLink class="nav-link" :to="{ name: 'adminEnquiriesRoute' }">
+                  {{ $t('navbar.manageEnquiries') }}
+                </RouterLink>
+                <RouterLink class="nav-link" :to="{ name: 'adminRegistrationsRoute' }">
+                  {{ $t('navbar.manageRegistrations') }}
                 </RouterLink>
               </div>
             </div>
@@ -81,9 +103,13 @@
             <RouterLink v-else class="btn btn-outline-secondary btn-sm" to="/login">
               {{ $t('navbar.login') }}
             </RouterLink>
-            <a v-if="!userIsLoggedIn" class="btn btn-outline-secondary btn-sm" href="#">{{
-              $t('navbar.register')
-            }}</a>
+            <RouterLink
+              v-if="!userIsLoggedIn"
+              class="btn btn-outline-secondary btn-sm"
+              :to="{ name: 'signupRoute' }"
+            >
+              {{ $t('navbar.signup') }}
+            </RouterLink>
           </div>
         </div>
       </div>

@@ -4,9 +4,11 @@ import { useLanguageStore } from '@/stores/languageStore.js'
 import LecturerService from '@/api-services/LecturerService.js'
 import LecturerAvatar from '@/components/common/LecturerAvatar.vue'
 
-// Koolitaja kaart (pilt, nimi, ametinimetus, lühikirjeldus). Laeb andmed ise lecturerId järgi ja uuesti
-// keele või lecturerId muutumisel. Kaart on lisainfo: vea korral (nt 404 kustutatud koolitaja) seda
-// ei kuvata ega suunata veavaatele — vaade saab teada sündmusega event-lecturer-not-found.
+// Koolitaja kaart (pilt, nimi, ametinimetus, lühikirjeldus); kogu kaart on link /lecturer vaatesse
+// (returnTo = praegune rada, et sealt saaks tagasi tulla). Laeb andmed ise lecturerId järgi ja
+// uuesti keele või lecturerId muutumisel. Kaart on lisainfo: vea korral (nt 404 kustutatud
+// koolitaja) seda ei kuvata ega suunata veavaatele — vaade saab teada sündmusega
+// event-lecturer-not-found.
 export default {
   name: 'LecturerCard',
   components: { LecturerAvatar },
@@ -57,7 +59,15 @@ export default {
 </script>
 
 <template>
-  <div v-if="lecturerSummary" class="d-flex gap-3 align-items-start">
+  <RouterLink
+    v-if="lecturerSummary"
+    :to="{
+      name: 'lecturerRoute',
+      query: { lecturerId: lecturerSummary.lecturerId, returnTo: $route.fullPath },
+    }"
+    :aria-label="$t('lecturerCard.viewProfile', { name: lecturerSummary.fullName })"
+    class="d-flex gap-3 align-items-start rounded p-2 text-decoration-none text-body lecturer-card-link"
+  >
     <LecturerAvatar
       :lecturer-id="lecturerSummary.lecturerId"
       :photo-version="lecturerSummary.photoVersion"
@@ -69,5 +79,17 @@ export default {
       <div class="small text-secondary mb-1">{{ lecturerSummary.title }}</div>
       <div class="small">{{ lecturerSummary.shortDescription }}</div>
     </div>
-  </div>
+  </RouterLink>
 </template>
+
+<style scoped>
+/* Kogu kaart on link koolitaja detailvaatesse */
+.lecturer-card-link {
+  transition: box-shadow 0.15s ease;
+}
+
+.lecturer-card-link:hover,
+.lecturer-card-link:focus-visible {
+  box-shadow: var(--bs-box-shadow);
+}
+</style>

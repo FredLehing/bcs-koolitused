@@ -12,6 +12,8 @@ npm run lint       # Käivita oxlint ja eslint (mõlemad --fix lipuga)
 npm run format     # Prettieri formaatimine src/ kaustas
 ```
 
+**Claude Code WSL-is:** `node_modules` on Windowsi paigaldus, seega `npm run build` siin kaustas feilib — ehita scratchpadis koopiana (vt juurkausta CLAUDE.md jaotist "Frontendi build WSL-ist").
+
 ## Arhitektuur
 
 See on Vue 3 + Vite frontend (Vali-IT grupiprojekt).

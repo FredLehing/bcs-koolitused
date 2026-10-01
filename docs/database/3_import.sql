@@ -10,7 +10,12 @@ INSERT INTO role (id, name) VALUES
 INSERT INTO "user" (id, role_id, email, password, status, created_at) VALUES
     (1, 1, 'admin@vali-it.ee', 'parool123', 'A', '2026-01-01 00:00:00'),
     (2, 2, 'kasutaja@vali-it.ee', 'parool123', 'A', '2026-09-05 09:00:00'),
-    (3, 1, 'admin', '123', 'A', '2026-09-28 00:00:00'); -- lihtne testkonto (admin)
+    (3, 1, 'admin', '123', 'A', '2026-09-28 00:00:00'), -- lihtne testkonto (admin)
+    -- osalejate kasutajad (igal osalejal oma kasutaja, participant.user_id on unikaalne); kasutaja 2 = Anna Saar
+    (4, 2, 'liis.kuusk@example.com', 'parool123', 'A', '2026-09-12 10:00:00'),
+    (5, 2, 'jaan.org@example.com', 'parool123', 'A', '2026-09-14 15:30:00'),
+    (6, 2, 'mari.lepp@example.com', 'parool123', 'A', '2026-09-18 09:10:00'),
+    (7, 2, 'toomas.rebane@example.com', 'parool123', 'A', '2026-09-22 13:45:00');
 
 -- Table: language
 INSERT INTO language (id, code, name, is_main_language, requires_translation, flag_icon_code) VALUES
@@ -82,26 +87,24 @@ INSERT INTO room (id, name, status, created_at, updated_at, created_by) VALUES
     (5, 'Landskrone', 'A', '2026-07-15 09:00:00', '2026-07-15 09:00:00', 1),
     (6, 'Megede', 'A', '2026-07-15 09:00:00', '2026-07-15 09:00:00', 1);
 
--- Table: option
-INSERT INTO option (id, type, created_at, updated_at) VALUES
-    (1, 'FM', '2026-07-15 09:00:00', '2026-07-15 09:00:00'),
-    (2, 'FM', '2026-07-15 09:00:00', '2026-07-15 09:00:00');
-
--- Table: option_translation
-INSERT INTO option_translation (id, option_id, language_id, name, created_at, updated_at) VALUES
-    (1, 1, 1, 'Auditoorne', '2026-07-15 09:00:00', '2026-07-15 09:00:00'),
-    (2, 1, 2, 'In-person', '2026-07-15 09:00:00', '2026-07-15 09:00:00'),
-    (3, 2, 1, 'Veebipõhine', '2026-07-15 09:00:00', '2026-07-15 09:00:00'),
-    (4, 2, 2, 'Online', '2026-07-15 09:00:00', '2026-07-15 09:00:00');
-
 -- Table: profile
 INSERT INTO profile (id, first_name, last_name, phone, email, created_at, updated_at) VALUES
     (1, 'Anna', 'Saar', '+37256789012', 'anna.saar@example.com', '2026-09-05 09:00:00', '2026-09-05 09:00:00'),
-    (2, 'Peeter', 'Mets', '+37251234567', 'peeter.mets@example.com', '2026-09-16 14:15:00', '2026-09-16 14:15:00');
+    (2, 'Peeter', 'Mets', '+37251234567', 'peeter.mets@example.com', '2026-09-16 14:15:00', '2026-09-16 14:15:00'),
+    (3, 'Kadri', 'Tamm', '+37255512345', 'kadri.tamm@example.com', '2026-09-20 11:05:00', '2026-09-20 11:05:00'),
+    (4, 'Martin', 'Kask', '+37253344556', 'martin.kask@example.com', '2026-09-28 16:40:00', '2026-09-28 16:40:00'),
+    (5, 'Liis', 'Kuusk', '+37255001122', 'liis.kuusk@example.com', '2026-09-12 10:00:00', '2026-09-12 10:00:00'),
+    (6, 'Jaan', 'Org', '+37255003344', 'jaan.org@example.com', '2026-09-14 15:30:00', '2026-09-14 15:30:00'),
+    (7, 'Mari', 'Lepp', '+37255005566', 'mari.lepp@example.com', '2026-09-18 09:10:00', '2026-09-18 09:10:00'),
+    (8, 'Toomas', 'Rebane', '+37255007788', 'toomas.rebane@example.com', '2026-09-22 13:45:00', '2026-09-22 13:45:00');
 
 -- Table: participant
 INSERT INTO participant (id, user_id, name, profile_id, created_at) VALUES
-    (1, 2, 'Anna Saar', 1, '2026-09-05 09:00:00');
+    (1, 2, 'Anna Saar', 1, '2026-09-05 09:00:00'),
+    (2, 4, 'Liis Kuusk', 5, '2026-09-12 10:00:00'),
+    (3, 5, 'Jaan Org', 6, '2026-09-14 15:30:00'),
+    (4, 6, 'Mari Lepp', 7, '2026-09-18 09:10:00'),
+    (5, 7, 'Toomas Rebane', 8, '2026-09-22 13:45:00');
 
 -- Table: training
 INSERT INTO training (id, user_id, category_id, training_language_id, location_id, status, created_at, updated_at, is_orderable, is_promoted) VALUES
@@ -196,16 +199,22 @@ INSERT INTO training_translation (id, training_id, language_id, title, short_des
     (25, 14, 2, 'Photoshop Basics', 'Fundamentals of image editing in Photoshop.', 'The course covers layers, masks and the basic image editing tools.', '2026-08-25 12:00:00', '2026-08-25 12:00:00');
 
 -- Table: course
-INSERT INTO course (id, training_id, room_id, number_of_days, number_of_academic_hours, price, status, start_date, end_date, notes, meeting_link, created_at, updated_at, created_by) VALUES
-    (1, 1, 1, 5, 40, 490.0000, 'O', '2026-10-05', '2026-10-09', 'Kaasa sülearvuti.', NULL, '2026-08-02 10:00:00', '2026-08-02 10:00:00', 1),
-    (2, 2, NULL, 3, 24, 350.0000, 'O', '2026-11-02', '2026-11-04', NULL, 'https://meet.vali-it.ee/pm-kursus', '2026-08-06 11:00:00', '2026-08-06 11:00:00', 1),
+INSERT INTO course (id, training_id, room_id, number_of_days, number_of_academic_hours, price, status, start_date, end_date, notes, meeting_link, is_promoted, created_at, updated_at, created_by) VALUES
+    (1, 1, 1, 5, 40, 490.0000, 'O', '2026-10-05', '2026-10-09', 'Kaasa sülearvuti.', NULL, true, '2026-08-02 10:00:00', '2026-08-02 10:00:00', 1),
+    (2, 2, NULL, 3, 24, 350.0000, 'O', '2026-11-02', '2026-11-04', NULL, 'https://meet.vali-it.ee/pm-kursus', false, '2026-08-06 11:00:00', '2026-08-06 11:00:00', 1),
     -- Koolituse kalendri näidised (koolitus 1): möödunud (3, 7), tühistatud (4), täis ja veebis (5), mustand ilma koolitajata (6), kustutatud (8)
-    (3, 1, 1, 5, 40, 490.0000, 'O', '2026-09-07', '2026-09-11', 'Grupp oli täis, järgmine kord suurem ruum.', NULL, '2026-08-15 10:00:00', '2026-08-15 10:00:00', 1),
-    (4, 1, 2, 5, 40, 490.0000, 'X', '2026-10-19', '2026-10-23', 'Tühistatud koolitaja haiguse tõttu.', NULL, '2026-08-15 10:00:00', '2026-08-15 10:00:00', 1),
-    (5, 1, NULL, 5, 40, 520.0000, 'F', '2026-11-16', '2026-11-20', NULL, 'https://meet.vali-it.ee/java-nov', '2026-08-15 10:00:00', '2026-08-15 10:00:00', 1),
-    (6, 1, 1, 5, 40, 520.0000, 'U', '2026-12-07', '2026-12-11', NULL, NULL, '2026-08-15 10:00:00', '2026-08-15 10:00:00', 1),
-    (7, 1, 2, 5, 40, 450.0000, 'O', '2026-06-08', '2026-06-12', NULL, 'https://meet.vali-it.ee/java-jun', '2026-05-15 10:00:00', '2026-05-15 10:00:00', 1),
-    (8, 1, 1, 5, 40, 490.0000, 'D', '2026-11-30', '2026-12-04', NULL, NULL, '2026-08-15 10:00:00', '2026-08-15 10:00:00', 1);
+    (3, 1, 1, 5, 40, 490.0000, 'O', '2026-09-07', '2026-09-11', 'Grupp oli täis, järgmine kord suurem ruum.', NULL, false, '2026-08-15 10:00:00', '2026-08-15 10:00:00', 1),
+    (4, 1, 2, 5, 40, 490.0000, 'X', '2026-10-19', '2026-10-23', 'Tühistatud koolitaja haiguse tõttu.', NULL, false, '2026-08-15 10:00:00', '2026-08-15 10:00:00', 1),
+    (5, 1, NULL, 5, 40, 520.0000, 'F', '2026-11-16', '2026-11-20', NULL, 'https://meet.vali-it.ee/java-nov', false, '2026-08-15 10:00:00', '2026-08-15 10:00:00', 1),
+    (6, 1, 1, 5, 40, 520.0000, 'U', '2026-12-07', '2026-12-11', NULL, NULL, false, '2026-08-15 10:00:00', '2026-08-15 10:00:00', 1),
+    (7, 1, 2, 5, 40, 450.0000, 'O', '2026-06-08', '2026-06-12', NULL, 'https://meet.vali-it.ee/java-jun', false, '2026-05-15 10:00:00', '2026-05-15 10:00:00', 1),
+    (8, 1, 1, 5, 40, 490.0000, 'D', '2026-11-30', '2026-12-04', NULL, NULL, false, '2026-08-15 10:00:00', '2026-08-15 10:00:00', 1),
+    -- Toimumiskordade kalendri näidised: esile tõstetud kohapeal (9), veebis õppekeel en (10), hübriid esile tõstetud (11), täis (12), mustand (13)
+    (9, 3, 3, 4, 32, 560.0000, 'O', '2026-10-12', '2026-10-15', NULL, NULL, true, '2026-09-01 10:00:00', '2026-09-01 10:00:00', 1),
+    (10, 4, NULL, 3, 24, 420.0000, 'O', '2026-10-26', '2026-10-28', NULL, 'https://meet.vali-it.ee/vue-okt', false, '2026-09-01 10:00:00', '2026-09-01 10:00:00', 1),
+    (11, 5, 4, 2, 16, 300.0000, 'O', '2026-11-09', '2026-11-10', NULL, 'https://meet.vali-it.ee/ux-nov', true, '2026-09-01 10:00:00', '2026-09-01 10:00:00', 1),
+    (12, 7, 5, 2, 16, 280.0000, 'F', '2026-10-14', '2026-10-15', NULL, NULL, false, '2026-09-01 10:00:00', '2026-09-01 10:00:00', 1),
+    (13, 2, NULL, 3, 24, 350.0000, 'U', '2027-01-11', '2027-01-13', NULL, NULL, false, '2026-09-01 10:00:00', '2026-09-01 10:00:00', 1);
 
 -- Table: course_lecturer (toimumiskorra koolitajad; sort_order = kuvamise järjekord)
 INSERT INTO course_lecturer (id, course_id, lecturer_id, sort_order) VALUES
@@ -216,17 +225,31 @@ INSERT INTO course_lecturer (id, course_id, lecturer_id, sort_order) VALUES
     (5, 4, 8, 1),
     (6, 5, 1, 1),
     (7, 7, 8, 1),
-    (8, 8, 1, 1);
+    (8, 8, 1, 1),
+    (9, 9, 1, 1),
+    (10, 10, 8, 1),
+    (11, 11, 9, 1),
+    (12, 12, 2, 1);
 
--- Table: course_participant
-INSERT INTO course_participant (id, course_id, participant_id, notes, has_paid, requires_laptop, status, created_at, updated_at) VALUES
-    (1, 1, 1, 'Registreerus veebilehe kaudu.', true, true, 'REG', '2026-09-10 12:00:00', '2026-09-10 12:00:00'),
-    (2, 3, 1, 'Osales septembris.', true, true, 'REG', '2026-09-01 12:00:00', '2026-09-01 12:00:00');
+-- Table: course_participant (status: R = registreerunud, C = loobunud)
+INSERT INTO course_participant (id, course_id, participant_id, notes, admin_notes, has_paid, requires_laptop, status, created_at, updated_at) VALUES
+    (1, 1, 1, 'Registreerus veebilehe kaudu.', NULL, true, true, 'R', '2026-09-10 12:00:00', '2026-09-10 12:00:00'),
+    (2, 3, 1, 'Osales septembris.', NULL, true, true, 'R', '2026-09-01 12:00:00', '2026-09-01 12:00:00'),
+    (3, 1, 2, '', NULL, false, false, 'R', '2026-09-12 10:05:00', '2026-09-12 10:05:00'),
+    (4, 1, 3, 'Arve ettevõttele.', 'Arve saadetud 15.09.', true, true, 'R', '2026-09-14 15:35:00', '2026-09-14 15:35:00'),
+    (5, 1, 4, 'Loobus haiguse tõttu.', 'Teatas telefoni teel 25.09.', false, true, 'C', '2026-09-18 09:15:00', '2026-09-25 11:00:00'),
+    (6, 12, 2, '', NULL, true, false, 'R', '2026-09-20 08:00:00', '2026-09-20 08:00:00'),
+    (7, 12, 5, '', NULL, false, false, 'R', '2026-09-22 13:50:00', '2026-09-22 13:50:00'),
+    (8, 5, 3, '', NULL, false, true, 'R', '2026-09-26 17:00:00', '2026-09-26 17:00:00'),
+    (9, 9, 5, '', NULL, true, true, 'R', '2026-09-28 09:00:00', '2026-09-28 09:00:00');
 
--- Table: enquiry
-INSERT INTO enquiry (id, training_id, profile_id, course_id, option_id, message, company_name, status, created_at, updated_at) VALUES
-    (1, 1, 1, 1, 1, 'Huvitab, kas kursusele on veel vabu kohti.', NULL, 'U', '2026-09-15 08:30:00', '2026-09-15 08:30:00'),
-    (2, 2, 2, NULL, 2, 'Kas koolitust on võimalik tellida ka ettevõttele?', 'OÜ Näidisfirma', 'U', '2026-09-16 14:20:00', '2026-09-16 14:20:00');
+-- Table: enquiry (status: U = uus, H = käsitletud)
+INSERT INTO enquiry (id, training_id, profile_id, course_id, message, company_name, status, created_at, updated_at) VALUES
+    (1, 1, 1, 1, 'Huvitab, kas kursusele on veel vabu kohti.', NULL, 'U', '2026-09-15 08:30:00', '2026-09-15 08:30:00'),
+    (2, 2, 2, NULL, 'Kas koolitust on võimalik tellida ka ettevõttele?', 'OÜ Näidisfirma', 'U', '2026-09-16 14:20:00', '2026-09-16 14:20:00'),
+    (3, 3, 3, NULL, 'Soovime koolitust kaheksale arendajale meie kontoris, eelistatavalt novembris.', 'AS Tarkvaramaja', 'H', '2026-09-20 11:05:00', '2026-09-22 09:00:00'),
+    (4, 1, 4, 5, 'Kas veebis osalejad saavad hiljem ka salvestust vaadata?', NULL, 'U', '2026-09-28 16:40:00', '2026-09-28 16:40:00'),
+    (5, 7, 7, 12, 'Kas järgmisele korrale saab juba registreeruda?', NULL, 'H', '2026-09-24 10:20:00', '2026-09-25 09:00:00');
 
 -- Table: certificate_template
 INSERT INTO certificate_template (id, course_id, status, created_at, updated_at, created_by) VALUES
@@ -259,8 +282,6 @@ SELECT setval(pg_get_serial_sequence('lecturer', 'id'), (SELECT MAX(id) FROM lec
 SELECT setval(pg_get_serial_sequence('lecturer_translation', 'id'), (SELECT MAX(id) FROM lecturer_translation));
 SELECT setval(pg_get_serial_sequence('lecturer_photo', 'id'), (SELECT MAX(id) FROM lecturer_photo));
 SELECT setval(pg_get_serial_sequence('room', 'id'), (SELECT MAX(id) FROM room));
-SELECT setval(pg_get_serial_sequence('option', 'id'), (SELECT MAX(id) FROM option));
-SELECT setval(pg_get_serial_sequence('option_translation', 'id'), (SELECT MAX(id) FROM option_translation));
 SELECT setval(pg_get_serial_sequence('profile', 'id'), (SELECT MAX(id) FROM profile));
 SELECT setval(pg_get_serial_sequence('participant', 'id'), (SELECT MAX(id) FROM participant));
 SELECT setval(pg_get_serial_sequence('training', 'id'), (SELECT MAX(id) FROM training));

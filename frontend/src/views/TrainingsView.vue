@@ -100,6 +100,9 @@ export default {
     },
   },
   beforeMount() {
+    const appliedSearchText = this.$route.query.searchText ?? ''
+    this.appliedSearchText = appliedSearchText
+    this.searchText = appliedSearchText
     this.getTrainings()
   },
   mounted() {

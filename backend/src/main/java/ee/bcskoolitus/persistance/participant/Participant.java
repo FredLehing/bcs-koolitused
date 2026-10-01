@@ -1,5 +1,6 @@
 package ee.bcskoolitus.persistance.participant;
 
+import ee.bcskoolitus.persistance.profile.Profile;
 import ee.bcskoolitus.persistance.user.User;
 import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -31,6 +32,11 @@ public class Participant {
     @NotNull
     @Column(name = "name", nullable = false)
     private String name;
+
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "profile_id", nullable = false)
+    private Profile profile;
 
     @NotNull
     @CreatedDate

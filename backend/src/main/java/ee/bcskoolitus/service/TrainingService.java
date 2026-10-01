@@ -201,6 +201,15 @@ public class TrainingService {
         return training;
     }
 
+    // Avalik = publitseeritud (P); mustand ja kustutatud on nagu olematu → 404
+    public Training getValidPublishedTrainingBy(Integer trainingId) {
+        Training training = getValidTrainingBy(trainingId);
+        if (!TrainingStatus.PUBLISHED.getCode().equals(training.getStatus())) {
+            throw new PrimaryKeyNotFoundException("trainingId", trainingId);
+        }
+        return training;
+    }
+
     @Transactional(readOnly = true)
     public TrainingDto getTraining(Integer trainingId) {
         Training training = getValidActiveTrainingBy(trainingId);
