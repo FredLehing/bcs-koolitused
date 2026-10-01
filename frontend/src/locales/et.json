@@ -654,6 +654,7 @@
     "email": "E-post",
     "phone": "Telefon",
     "accountEmail": "Konto e-post",
+    "participantHint": "Kontaktandmed on ühised kõigile osaleja registreerumistele — siin ainult lugemiseks.",
     "courseLegend": "Toimumiskord",
     "training": "Koolitus",
     "courseDates": "Toimumisaeg",
@@ -669,10 +670,12 @@
     "updatedAt": "Viimati muudetud",
     "save": "Salvesta",
     "cancel": "Tühista",
-    "confirmTitle": "Staatuse muutmine",
+    "confirmCancelTitle": "Märgi osaleja loobunuks?",
+    "confirmRestoreTitle": "Taasta registreerumine?",
+    "confirmCancelMessage": "„{participantName}“ märgitakse toimumiskorralt „{trainingTitle} {courseStartDate}“ loobunuks. Tasumise väärtus jääb alles.",
+    "confirmRestoreMessage": "„{participantName}“ märgitakse uuesti registreerunuks.",
+    "courseFullNote": "Toimumiskord on täis — taastamine on siiski lubatud.",
     "confirm": "Kinnita",
-    "confirmCancel": "Märgi osaleja loobunuks?",
-    "confirmRestore": "Taasta registreerumine?",
     "messages": {
       "saved": "Registreerumine salvestatud",
       "saveFailed": "Salvestamine ebaõnnestus"

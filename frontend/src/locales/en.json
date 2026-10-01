@@ -654,6 +654,7 @@
     "email": "Email",
     "phone": "Phone",
     "accountEmail": "Account email",
+    "participantHint": "Contact details are shared by all of the participant's registrations — read-only here.",
     "courseLegend": "Course",
     "training": "Training",
     "courseDates": "Dates",
@@ -669,10 +670,12 @@
     "updatedAt": "Last modified",
     "save": "Save",
     "cancel": "Cancel",
-    "confirmTitle": "Change status",
+    "confirmCancelTitle": "Mark the participant as cancelled?",
+    "confirmRestoreTitle": "Restore the registration?",
+    "confirmCancelMessage": "“{participantName}” will be marked as cancelled for the course “{trainingTitle} {courseStartDate}”. The payment value is kept.",
+    "confirmRestoreMessage": "“{participantName}” will be marked as registered again.",
+    "courseFullNote": "The course is full — restoring is still allowed.",
     "confirm": "Confirm",
-    "confirmCancel": "Mark the participant as cancelled?",
-    "confirmRestore": "Restore the registration?",
     "messages": {
       "saved": "Registration saved",
       "saveFailed": "Saving failed"
