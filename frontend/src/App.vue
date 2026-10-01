@@ -92,20 +92,21 @@
                 <FlagIcon :flag-icon-code="uiLanguage.flagIconCode" />
               </button>
             </div>
+            <!-- Läbipaistmatu taust (btn-light): klaasja navbari all võib olla tume pilt -->
             <button
               v-if="userIsLoggedIn"
               @click="isLogoutModalOpen = true"
-              class="btn btn-outline-secondary btn-sm"
+              class="btn btn-light border btn-sm"
               type="button"
             >
               {{ $t('navbar.logout') }}
             </button>
-            <RouterLink v-else class="btn btn-outline-secondary btn-sm" to="/login">
+            <RouterLink v-else class="btn btn-light border btn-sm" to="/login">
               {{ $t('navbar.login') }}
             </RouterLink>
             <RouterLink
               v-if="!userIsLoggedIn"
-              class="btn btn-outline-secondary btn-sm"
+              class="btn btn-light border btn-sm"
               :to="{ name: 'signupRoute' }"
             >
               {{ $t('navbar.signup') }}
