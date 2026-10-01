@@ -94,34 +94,41 @@ export default {
 
     <HomeGallery />
 
+    <!-- Suured sektsioonid on eraldatud joonega (border-top), otsing ja galerii on koos lehe päis -->
+
     <!-- Suunavad kaardid: kogu kaart on link -->
-    <section class="row g-4 mb-5">
-      <div class="col-md-6">
-        <RouterLink
-          :to="{ name: 'trainingsRoute' }"
-          class="card h-100 nav-card text-decoration-none"
-        >
-          <div class="card-body p-4 text-start">
-            <PhBooks :size="48" class="text-primary mb-3" />
-            <h2 class="h4 card-title text-body">{{ $t('homeView.trainingsCard.title') }}</h2>
-            <p class="card-text text-secondary">{{ $t('homeView.trainingsCard.text') }}</p>
-            <span class="link-primary fw-semibold">{{ $t('homeView.trainingsCard.link') }}</span>
-          </div>
-        </RouterLink>
-      </div>
-      <div class="col-md-6">
-        <RouterLink :to="{ name: 'coursesRoute' }" class="card h-100 nav-card text-decoration-none">
-          <div class="card-body p-4 text-start">
-            <PhCalendarDots :size="48" class="text-primary mb-3" />
-            <h2 class="h4 card-title text-body">{{ $t('homeView.coursesCard.title') }}</h2>
-            <p class="card-text text-secondary">{{ $t('homeView.coursesCard.text') }}</p>
-            <span class="link-primary fw-semibold">{{ $t('homeView.coursesCard.link') }}</span>
-          </div>
-        </RouterLink>
+    <section class="border-top pt-5 mb-5">
+      <div class="row g-4">
+        <div class="col-md-6">
+          <RouterLink
+            :to="{ name: 'trainingsRoute' }"
+            class="card h-100 nav-card text-decoration-none"
+          >
+            <div class="card-body p-4 text-start">
+              <PhBooks :size="48" class="text-primary mb-3" />
+              <h2 class="h4 card-title text-body">{{ $t('homeView.trainingsCard.title') }}</h2>
+              <p class="card-text text-secondary">{{ $t('homeView.trainingsCard.text') }}</p>
+              <span class="link-primary fw-semibold">{{ $t('homeView.trainingsCard.link') }}</span>
+            </div>
+          </RouterLink>
+        </div>
+        <div class="col-md-6">
+          <RouterLink
+            :to="{ name: 'coursesRoute' }"
+            class="card h-100 nav-card text-decoration-none"
+          >
+            <div class="card-body p-4 text-start">
+              <PhCalendarDots :size="48" class="text-primary mb-3" />
+              <h2 class="h4 card-title text-body">{{ $t('homeView.coursesCard.title') }}</h2>
+              <p class="card-text text-secondary">{{ $t('homeView.coursesCard.text') }}</p>
+              <span class="link-primary fw-semibold">{{ $t('homeView.coursesCard.link') }}</span>
+            </div>
+          </RouterLink>
+        </div>
       </div>
     </section>
 
-    <section v-if="nextCourses.length > 0" class="mb-5 text-start">
+    <section v-if="nextCourses.length > 0" class="border-top pt-5 mb-5 text-start">
       <h2 class="h3 mb-3">{{ $t('homeView.nextCoursesTitle') }}</h2>
       <CourseCard
         v-for="nextCourse in nextCourses"
@@ -130,10 +137,12 @@ export default {
       />
     </section>
 
-    <HomeTestimonials />
+    <div class="border-top">
+      <HomeTestimonials />
+    </div>
 
     <!-- Lõpu üleskutse pärast tagasisidet -->
-    <section class="text-center border-top pt-4 mb-5">
+    <section class="text-center border-top pt-5 mb-5">
       <p class="fs-5 mb-3">{{ $t('homeView.marketingText') }}</p>
       <RouterLink :to="{ name: 'coursesRoute' }" class="btn btn-primary btn-lg">
         {{ $t('homeView.allCoursesLink') }}

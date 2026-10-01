@@ -25,6 +25,8 @@ Külastaja avab avalehe, näeb otsingut, galeriid ja selle all kahte suurt kaart
 5. "Kliendid meist" `HomeTestimonials` — olemas
 6. **Turunduslause ja nupp** — uus
 
+Suurte sektsioonide vahel on joon (`border-top`) — punktide 3, 4, 5 ja 6 ees; otsingu ja galerii vahel mitte. "Kliendid meist" saab joone ümbritseva `div`-iga (komponenti ei muudeta).
+
 ## Kasutajaliidese elemendid
 
 | Element | Tüüp | Kirjeldus/käitumine |
