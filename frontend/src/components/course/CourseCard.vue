@@ -68,7 +68,10 @@ export default {
             {{ course.title }}
             <RouterLink
               v-if="userIsAdmin"
-              :to="{ name: 'courseFormRoute', query: { courseId: course.courseId } }"
+              :to="{
+                name: 'courseFormRoute',
+                query: { returnTo: $route.fullPath, courseId: course.courseId },
+              }"
               :title="$t('courses.editCourse')"
               :aria-label="$t('courses.editCourse')"
               class="btn btn-sm btn-outline-secondary d-inline-flex flex-shrink-0"
@@ -112,7 +115,10 @@ export default {
             {{ $t('courseStatus.F') }}
           </span>
           <RouterLink
-            :to="{ name: 'courseRoute', query: { courseId: course.courseId } }"
+            :to="{
+              name: 'courseRoute',
+              query: { returnTo: $route.fullPath, courseId: course.courseId },
+            }"
             class="btn btn-primary"
           >
             {{ $t('trainingCard.viewDetails') }}

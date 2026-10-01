@@ -1,4 +1,5 @@
 <script>
+import BackLink from '@/components/common/BackLink.vue'
 import { mapState } from 'pinia'
 import { useLanguageStore } from '@/stores/languageStore.js'
 import LecturerService from '@/api-services/LecturerService.js'
@@ -8,7 +9,7 @@ import RichTextContent from '@/components/common/RichTextContent.vue'
 
 export default {
   name: 'LecturerView',
-  components: { LecturerAvatar, RichTextContent },
+  components: { BackLink, LecturerAvatar, RichTextContent },
   data() {
     return {
       lecturerId: 0,
@@ -17,12 +18,6 @@ export default {
   },
   computed: {
     ...mapState(useLanguageStore, ['contentLang']),
-
-    // Tagasitee lehele, kust koolitaja kaardilt tuldi (nt /course?courseId=9); '' = koolitajate nimekiri
-    returnTo() {
-      const returnTo = this.$route.query.returnTo
-      return NavigationService.isInternalPath(returnTo) ? returnTo : ''
-    },
   },
   watch: {
     '$route.query'() {
@@ -58,12 +53,7 @@ export default {
 
 <template>
   <div class="container">
-    <RouterLink v-if="returnTo" :to="returnTo" class="d-inline-block mb-3">
-      ← {{ $t('lecturer.back') }}
-    </RouterLink>
-    <RouterLink v-else :to="{ name: 'lecturersRoute' }" class="d-inline-block mb-3">
-      ← {{ $t('lecturer.backToLecturers') }}
-    </RouterLink>
+    <BackLink :fallback="{ name: 'lecturersRoute' }" />
 
     <div v-if="lecturerProfile" class="row g-4 mb-5 text-start">
       <div class="col-md-4 col-lg-3">
@@ -90,6 +80,7 @@ export default {
                 :to="{
                   name: 'trainingRoute',
                   query: {
+                    returnTo: $route.fullPath,
                     trainingId: training.trainingId,
                     trainingTranslationId: training.trainingTranslationId,
                   },

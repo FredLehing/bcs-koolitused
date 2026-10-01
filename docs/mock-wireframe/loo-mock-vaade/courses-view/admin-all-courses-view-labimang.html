@@ -317,6 +317,7 @@ tr.is-past td, tr.is-cancelled td { color: var(--ink-soft); }
     <h1>Koolituste kalender (admin) — läbimäng</h1>
     <p>AdminAllCoursesView.vue (kõigi koolituste toimumiskorrad) ja AdminCourseView.vue (üks toimumiskord koos osalejate ja huvilistega). Otsi, ava filtrid, sorteeri veerge (backendis: 1. klõps kasvav, järgmine vahetab suunda), lülita sisse möödunud, vaheta lehte, kustuta või ava toimumiskord. Paremal all näed, mis päringud tehti ja mida backend vastas; kollased sildid viivad API märkmete juurde.</p>
     <p>Andmed on seed-andmete ettepanek (skeemide fail, jaotis 1; täna = 01/10/2026): 13 toimumiskorda, neist 1 kustutatud ja 2 möödunud; 9 osalejat (1 loobunud) ja 3 toimumiskorraga seotud päringut. Uute teenuste DTO-d on <strong>ettepanek</strong>.</p>
+    <p>Detailide ja vormide avamisel säilib lähtevaate URL <code>returnTo</code> parameetris; „← Tagasi“ taastab lähtekoha. <a href="../return-to-navigation-skeemid.md">Tagasitee skeemid ja kaardistus</a>.</p>
     <div class="toolbar">
       <span class="lbl-soft">Kasutajaliidese keel (navbar):</span>
       <button class="tbtn" type="button" data-ui-lang="et">et</button>
@@ -365,6 +366,7 @@ tr.is-past td, tr.is-cancelled td { color: var(--ink-soft); }
 
 <div id="modal-root"></div>
 
+<script src="../return-navigation.js"></script>
 <script>
 (function () {
   "use strict";
@@ -373,7 +375,8 @@ tr.is-past td, tr.is-cancelled td { color: var(--ink-soft); }
   var SHELL_Q = new URLSearchParams(location.search);
   var EMBED = SHELL_Q.get("embed") === "1" && window.parent !== window;
   if (EMBED) document.documentElement.classList.add("embed");
-  function goRoute(path, standaloneMessage) {
+  function goRoute(path, standaloneMessage, isBack) {
+    if (!isBack) path = window.BcsReturnNavigation.forward(path);
     if (EMBED) { window.parent.postMessage({ type: "bcs-navigate", path: path }, "*"); return; }
     toast(standaloneMessage || "router.push → " + path);
   }
@@ -859,6 +862,7 @@ tr.is-past td, tr.is-cancelled td { color: var(--ink-soft); }
     var vn = VIEW_NOTES[ui.route];
     document.getElementById("view-note-title").textContent = "Vaate märkmed — " + vn.title;
     document.getElementById("view-note-text").textContent = vn.text;
+    window.BcsReturnNavigation.render(goRoute, ui.route === 'detail' && detail ? '/admin-training-courses?trainingId=' + detail.trainingId : undefined);
   }
 
   /* ---------- Sündmused ---------- */

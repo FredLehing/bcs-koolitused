@@ -24,7 +24,11 @@ export default {
     v-if="userIsAdmin"
     :to="{
       name: 'trainingFormRoute',
-      query: { trainingId: trainingId, trainingTranslationId: trainingTranslationId },
+      query: {
+        returnTo: $route.fullPath,
+        trainingId: trainingId,
+        trainingTranslationId: trainingTranslationId,
+      },
     }"
     :title="$t('trainingCard.edit')"
     :aria-label="$t('trainingCard.edit')"

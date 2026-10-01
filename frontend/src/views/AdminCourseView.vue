@@ -1,4 +1,5 @@
 <script>
+import BackLink from '@/components/common/BackLink.vue'
 import { mapState } from 'pinia'
 import { useLanguageStore } from '@/stores/languageStore.js'
 import CourseService from '@/api-services/CourseService.js'
@@ -13,7 +14,7 @@ import CourseParticipantsTable from '@/components/course/CourseParticipantsTable
 // Toimumiskorra ülevaade (admin), ainult lugemiseks: /admin-course?courseId={id}
 export default {
   name: 'AdminCourseView',
-  components: { CourseStatusBadge, CourseEnquiriesTable, CourseParticipantsTable },
+  components: { BackLink, CourseStatusBadge, CourseEnquiriesTable, CourseParticipantsTable },
   data() {
     return {
       courseId: 0,
@@ -90,18 +91,31 @@ export default {
 
 <template>
   <div class="container">
+    <BackLink
+      :fallback="
+        course
+          ? { name: 'adminTrainingCoursesRoute', query: { trainingId: course.trainingId } }
+          : { name: 'adminAllCoursesRoute' }
+      "
+    />
     <template v-if="course">
       <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-1">
         <h1 class="h3 mb-0">{{ $t('adminCourse.title') }}</h1>
         <div class="d-flex flex-wrap gap-2">
           <RouterLink
-            :to="{ name: 'courseFormRoute', query: { courseId: course.courseId } }"
+            :to="{
+              name: 'courseFormRoute',
+              query: { returnTo: $route.fullPath, courseId: course.courseId },
+            }"
             class="btn btn-primary"
           >
             {{ $t('adminTrainingCourses.edit') }}
           </RouterLink>
           <RouterLink
-            :to="{ name: 'adminTrainingCoursesRoute', query: { trainingId: course.trainingId } }"
+            :to="{
+              name: 'adminTrainingCoursesRoute',
+              query: { returnTo: $route.fullPath, trainingId: course.trainingId },
+            }"
             class="btn btn-outline-secondary"
           >
             {{ $t('adminTrainingCourses.title') }}
@@ -122,6 +136,7 @@ export default {
               :to="{
                 name: 'trainingRoute',
                 query: {
+                  returnTo: $route.fullPath,
                   trainingId: course.trainingId,
                   trainingTranslationId: course.trainingTranslationId,
                 },
@@ -168,7 +183,10 @@ export default {
         </dl>
         <RouterLink
           v-if="isPublic"
-          :to="{ name: 'courseRoute', query: { courseId: course.courseId } }"
+          :to="{
+            name: 'courseRoute',
+            query: { returnTo: $route.fullPath, courseId: course.courseId },
+          }"
           class="d-inline-block mt-2"
         >
           {{ $t('adminCourse.viewPublicPage') }}

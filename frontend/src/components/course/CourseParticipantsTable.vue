@@ -142,7 +142,7 @@ export default {
                   name: 'adminRegistrationRoute',
                   query: {
                     courseParticipantId: courseParticipant.courseParticipantId,
-                    returnTo: `/admin-course?courseId=${courseId}`,
+                    returnTo: $route.fullPath,
                   },
                 }"
                 :title="$t('adminCourse.participants.view')"

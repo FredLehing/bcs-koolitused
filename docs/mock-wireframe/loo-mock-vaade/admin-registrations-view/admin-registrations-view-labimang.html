@@ -312,6 +312,7 @@ td .linkish { font-size: .84rem; }
     <h1>Registreerumised — läbimäng</h1>
     <p>AdminRegistrationsView.vue (kõigi registreerumiste nimekiri) ja AdminRegistrationView.vue (üks registreerumine). Otsi, sorteeri veerge (1. klõps kasvav, 2. kahanev, 3. vaikimisi), lülita sisse loobunud ja toimunud, ava registreerumine, muuda staatust, tasumist, sülearvutit või admini märkmeid ja salvesta. Paremal all näed, mis päringud tehti ja mida backend vastas; kollased sildid viivad API märkmete juurde.</p>
     <p>Andmed on <code>3_import.sql</code>-ist (täna = 01/10/2026): 9 registreerumist, neist 1 loobunud (Mari Lepp) ja 1 toimunud toimumiskorral (Anna Saar, september). Uus veerg <code>admin_notes</code> ja uute teenuste DTO-d on <strong>ettepanek</strong> (skeemide fail, jaotis 1). Muudatused kehtivad ainult selles läbimängus — teised läbimängud kasutavad oma andmeid.</p>
+    <p>Detailide ja vormide avamisel säilib lähtevaate URL <code>returnTo</code> parameetris; „← Tagasi“ taastab lähtekoha. <a href="../return-to-navigation-skeemid.md">Tagasitee skeemid ja kaardistus</a>.</p>
     <div class="toolbar">
       <span class="lbl-soft">Kasutajaliidese keel (navbar):</span>
       <button class="tbtn" type="button" data-ui-lang="et">et</button>
@@ -361,6 +362,7 @@ td .linkish { font-size: .84rem; }
 
 <div id="modal-root"></div>
 
+<script src="../return-navigation.js"></script>
 <script>
 (function () {
   "use strict";
@@ -369,7 +371,8 @@ td .linkish { font-size: .84rem; }
   var SHELL_Q = new URLSearchParams(location.search);
   var EMBED = SHELL_Q.get("embed") === "1" && window.parent !== window;
   if (EMBED) document.documentElement.classList.add("embed");
-  function goRoute(path, standaloneMessage) {
+  function goRoute(path, standaloneMessage, isBack) {
+    if (!isBack) path = window.BcsReturnNavigation.forward(path);
     if (EMBED) { window.parent.postMessage({ type: "bcs-navigate", path: path }, "*"); return; }
     toast(standaloneMessage || "router.push → " + path);
   }
@@ -677,6 +680,7 @@ td .linkish { font-size: .84rem; }
     var vn = VIEW_NOTES[ui.route === "list" ? "admin-registrations" : "admin-registration"];
     document.getElementById("view-note-title").textContent = "Vaate märkmed — " + vn.title;
     document.getElementById("view-note-text").textContent = vn.text;
+    window.BcsReturnNavigation.render(goRoute);
   }
 
   /* ---------- Sündmused ---------- */

@@ -1,4 +1,5 @@
 <script>
+import BackLink from '@/components/common/BackLink.vue'
 import { mapState } from 'pinia'
 import { PhCheckCircle, PhPencilSimple } from '@phosphor-icons/vue'
 import { useLanguageStore } from '@/stores/languageStore.js'
@@ -16,6 +17,7 @@ import EnquiryModal from '@/components/modals/EnquiryModal.vue'
 export default {
   name: 'CourseView',
   components: {
+    BackLink,
     PhCheckCircle,
     PhPencilSimple,
     AlertSuccess,
@@ -117,7 +119,11 @@ export default {
       if (SessionStorageService.userIsLoggedIn()) {
         NavigationService.navigateToCourseRegistrationView(this.courseId)
       } else {
-        NavigationService.navigateToLoginView(`/course-registration?courseId=${this.courseId}`)
+        const registrationLocation = this.$router.resolve({
+          name: 'courseRegistrationRoute',
+          query: NavigationService.withReturnTo({ courseId: this.courseId }),
+        })
+        NavigationService.navigateToLoginView(registrationLocation.fullPath)
       }
     },
 
@@ -157,6 +163,7 @@ export default {
 
 <template>
   <div class="container">
+    <BackLink :fallback="{ name: 'coursesRoute' }" />
     <AlertSuccess :success-message="successMessage" />
 
     <div v-if="coursePage" class="row text-start">
@@ -173,7 +180,10 @@ export default {
             <div class="fs-4 fw-semibold">{{ coursePage.title }}</div>
             <RouterLink
               v-if="userIsAdmin"
-              :to="{ name: 'courseFormRoute', query: { courseId: coursePage.courseId } }"
+              :to="{
+                name: 'courseFormRoute',
+                query: { returnTo: $route.fullPath, courseId: coursePage.courseId },
+              }"
               :title="$t('courses.editCourse')"
               :aria-label="$t('courses.editCourse')"
               class="btn btn-sm btn-outline-secondary d-inline-flex"
@@ -193,6 +203,7 @@ export default {
             :to="{
               name: 'trainingRoute',
               query: {
+                returnTo: $route.fullPath,
                 trainingId: coursePage.trainingId,
                 trainingTranslationId: coursePage.trainingTranslationId,
               },
@@ -216,7 +227,10 @@ export default {
               </strong>
               <RouterLink
                 v-else
-                :to="{ name: 'courseRoute', query: { courseId: upcomingCourse.courseId } }"
+                :to="{
+                  name: 'courseRoute',
+                  query: { returnTo: $route.fullPath, courseId: upcomingCourse.courseId },
+                }"
               >
                 {{ formatDateRange(upcomingCourse.startDate, upcomingCourse.endDate) }} ·
                 {{ attendanceText(upcomingCourse) }}

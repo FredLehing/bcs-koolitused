@@ -1,4 +1,5 @@
 <script>
+import BackLink from '@/components/common/BackLink.vue'
 import { mapState } from 'pinia'
 import { useLanguageStore } from '@/stores/languageStore.js'
 import EnquiryService from '@/api-services/EnquiryService.js'
@@ -11,7 +12,7 @@ import EnquiryStatusBadge from '@/components/common/EnquiryStatusBadge.vue'
 // Üks huvilise päring: andmed, kontakt ja staatuse muutmine (uus ↔ käsitletud)
 export default {
   name: 'AdminEnquiryView',
-  components: { AlertSuccess, EnquiryStatusBadge },
+  components: { BackLink, AlertSuccess, EnquiryStatusBadge },
   data() {
     return {
       successMessage: '',
@@ -92,6 +93,7 @@ export default {
 
 <template>
   <div class="container">
+    <BackLink :fallback="{ name: 'adminEnquiriesRoute' }" />
     <div class="row justify-content-center">
       <div class="col-lg-8">
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
@@ -125,6 +127,7 @@ export default {
                   :to="{
                     name: 'trainingRoute',
                     query: {
+                      returnTo: $route.fullPath,
                       trainingId: enquiry.trainingId,
                       trainingTranslationId: enquiry.trainingTranslationId,
                     },

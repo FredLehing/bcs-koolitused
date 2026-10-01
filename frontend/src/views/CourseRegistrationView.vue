@@ -1,4 +1,5 @@
 <script>
+import BackLink from '@/components/common/BackLink.vue'
 import { mapState } from 'pinia'
 import { useLanguageStore } from '@/stores/languageStore.js'
 import CourseService from '@/api-services/CourseService.js'
@@ -15,7 +16,7 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 // (router guard: sisse logimata → login, admin → NotAuthorizedView)
 export default {
   name: 'CourseRegistrationView',
-  components: { AlertDanger, AlertSuccess },
+  components: { BackLink, AlertDanger, AlertSuccess },
   data() {
     return {
       courseId: 0,
@@ -36,6 +37,15 @@ export default {
   },
   computed: {
     ...mapState(useLanguageStore, ['contentLang']),
+
+    backDestination() {
+      return (
+        NavigationService.getReturnTo(this.$route.query.returnTo, this.$route.fullPath) || {
+          name: 'courseRoute',
+          query: { courseId: this.courseId },
+        }
+      )
+    },
 
     isRegistered() {
       return this.participantStatus === 'R'
@@ -125,8 +135,8 @@ export default {
         notes: this.registration.notes.trim(),
       })
         .then(() =>
-          NavigationService.navigateToCourseView(
-            this.courseId,
+          NavigationService.navigateBack(
+            { name: 'courseRoute', query: { courseId: this.courseId } },
             this.$t('courseRegistration.messages.registered'),
           ),
         )
@@ -159,7 +169,7 @@ export default {
     },
 
     navigateToCourseView() {
-      NavigationService.navigateToCourseView(this.courseId)
+      NavigationService.navigateBack({ name: 'courseRoute', query: { courseId: this.courseId } })
     },
 
     formatDateRange(startDate, endDate) {
@@ -178,6 +188,7 @@ export default {
 
 <template>
   <div class="container">
+    <BackLink :fallback="{ name: 'courseRoute', query: { courseId } }" />
     <h1 class="h3 mb-3">{{ $t('courseRegistration.title') }}</h1>
 
     <div v-if="coursePage" class="row text-start">
@@ -205,7 +216,7 @@ export default {
             <dt>{{ $t('adminTrainingCourses.columns.lecturers') }}</dt>
             <dd>{{ lecturerNames || '—' }}</dd>
           </dl>
-          <RouterLink :to="{ name: 'courseRoute', query: { courseId: courseId } }">
+          <RouterLink :to="backDestination">
             {{ $t('courseRegistration.backToCourse') }}
           </RouterLink>
         </fieldset>

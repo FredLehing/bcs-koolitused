@@ -101,3 +101,8 @@ First three cards highlighted (star, light yellow): "Java algkursus", "Spring Bo
 Below: section title "Kliendid meist" and three testimonial cards side by side, each with a quote icon, an italic quote and a name / company line ("Kaspar Tamm", "Mari Kask — IT Firma OÜ", "Näidis Firma OÜ").
 Bottom: centered text "Leia endale sobiv koolitus — uusi toimumiskordi lisandub pidevalt." and a button "Vaata kõiki toimuvaid koolitusi →".
 ```
+
+
+## Vaadetevaheline tagasitee
+
+Detailide ja vormide avamisel antakse kaasa lähtevaate täielik URL `returnTo` parameetrina. Ühine „← Tagasi“ link taastab selle URL-i; otselingi korral kasutatakse vaate varusihti. Peamenüü ja vahelehed tagasiteed ei loo. Oleku- ja tõlkevahetus säilitab senise tagasitee. Kõigi avamiskohtade, erandite ja varusihtide [ühine skeem](../return-to-navigation-skeemid.md).

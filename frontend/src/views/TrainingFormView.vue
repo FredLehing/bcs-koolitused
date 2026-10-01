@@ -1,4 +1,5 @@
 <script>
+import BackLink from '@/components/common/BackLink.vue'
 import { mapState } from 'pinia'
 import { useLanguageStore } from '@/stores/languageStore.js'
 import TrainingService from '@/api-services/TrainingService.js'
@@ -28,6 +29,7 @@ const STATE_NEW_TRANSLATION = 'new-translation'
 export default {
   name: 'TrainingFormView',
   components: {
+    BackLink,
     ConfirmModal,
     TrainingStatusButton,
     TrainingTranslationForm,
@@ -744,6 +746,7 @@ export default {
 
 <template>
   <div class="container">
+    <BackLink :fallback="{ name: 'adminTrainingsRoute' }" />
     <div class="row justify-content-center">
       <div class="col-lg-10">
         <div class="d-flex flex-wrap align-items-center gap-3 mb-4">

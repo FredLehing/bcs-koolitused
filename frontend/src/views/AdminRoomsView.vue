@@ -250,7 +250,10 @@ export default {
             <td>
               <div v-if="room.status !== 'D'" class="d-flex gap-1">
                 <RouterLink
-                  :to="{ name: 'roomFormRoute', query: { roomId: room.roomId } }"
+                  :to="{
+                    name: 'roomFormRoute',
+                    query: { returnTo: $route.fullPath, roomId: room.roomId },
+                  }"
                   :title="$t('adminRooms.edit')"
                   :aria-label="$t('adminRooms.edit')"
                   class="btn btn-sm btn-outline-secondary d-inline-flex"

@@ -212,3 +212,8 @@ Card "Päring" as a two-column list: Saabunud 28/09/2026 16:40; Staatus badge Uu
 Card "Kontakt": Nimi Martin Kask; E-post link martin.kask@example.com; Telefon link +37253344556.
 Bottom: primary button "Märgi käsitletuks".
 ```
+
+
+## Vaadetevaheline tagasitee
+
+Detailide ja vormide avamisel antakse kaasa lähtevaate täielik URL `returnTo` parameetrina. Ühine „← Tagasi“ link taastab selle URL-i; otselingi korral kasutatakse vaate varusihti. Peamenüü ja vahelehed tagasiteed ei loo. Oleku- ja tõlkevahetus säilitab senise tagasitee. Kõigi avamiskohtade, erandite ja varusihtide [ühine skeem](../return-to-navigation-skeemid.md).

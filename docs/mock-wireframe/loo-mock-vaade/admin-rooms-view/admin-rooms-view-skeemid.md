@@ -313,3 +313,8 @@ One card titled "Ruumi andmed" with a single text input "Nimi *" with value "Hel
 Bottom: primary button "Salvesta".
 In the "new room" version the title is "Lisa uus ruum", the field is empty and the button is "Lisa".
 ```
+
+
+## Vaadetevaheline tagasitee
+
+Detailide ja vormide avamisel antakse kaasa lähtevaate täielik URL `returnTo` parameetrina. Ühine „← Tagasi“ link taastab selle URL-i; otselingi korral kasutatakse vaate varusihti. Peamenüü ja vahelehed tagasiteed ei loo. Oleku- ja tõlkevahetus säilitab senise tagasitee. Kõigi avamiskohtade, erandite ja varusihtide [ühine skeem](../return-to-navigation-skeemid.md).

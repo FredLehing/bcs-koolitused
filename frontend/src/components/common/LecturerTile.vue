@@ -13,7 +13,10 @@ export default {
 
 <template>
   <RouterLink
-    :to="{ name: 'lecturerRoute', query: { lecturerId: lecturerSummary.lecturerId } }"
+    :to="{
+      name: 'lecturerRoute',
+      query: { returnTo: $route.fullPath, lecturerId: lecturerSummary.lecturerId },
+    }"
     class="card h-100 text-decoration-none text-body lecturer-tile"
   >
     <div class="card-body text-center">

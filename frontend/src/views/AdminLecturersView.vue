@@ -290,6 +290,7 @@ export default {
                   :to="{
                     name: 'lecturerFormRoute',
                     query: {
+                      returnTo: $route.fullPath,
                       lecturerId: lecturer.lecturerId,
                       lecturerTranslationId: lecturer.lecturerTranslationId,
                     },

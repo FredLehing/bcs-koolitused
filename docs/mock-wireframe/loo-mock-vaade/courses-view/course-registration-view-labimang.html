@@ -352,6 +352,7 @@ td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
     <h1>Registreerumine ja konto loomine — läbimäng</h1>
     <p>CourseRegistrationView.vue (<code>/course-registration?courseId=</code>, ainult sisseloginud kasutajale) ja SignupView.vue (<code>/signup?redirect=</code>, konto loomine). Kasutaja registreerib <strong>ainult iseennast</strong>: tal on üks osaleja (participant + profile), mille andmed täidavad vormi ette. Paremal all näed backendi päringuid; kollased kastid on mockupi märkmed.</p>
     <p>Andmed: seed-kasutaja Anna Saar (userId 2, participant 1) on registreerunud toimumiskordadele 1 ja 3; toimumiskord 12 on täis. Uute teenuste DTO-d on <strong>ettepanek</strong>.</p>
+    <p>Detailide ja vormide avamisel säilib lähtevaate URL <code>returnTo</code> parameetris; „← Tagasi“ taastab lähtekoha. <a href="../return-to-navigation-skeemid.md">Tagasitee skeemid ja kaardistus</a>.</p>
     <div class="toolbar">
       <span class="lbl-soft">Kasutaja:</span>
       <button class="tbtn" type="button" data-who="none">Pole sisse logitud</button>
@@ -399,6 +400,7 @@ td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
   </section>
 </div>
 
+<script src="../return-navigation.js"></script>
 <script>
 (function () {
   "use strict";
@@ -407,7 +409,8 @@ td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
   var SHELL_Q = new URLSearchParams(location.search);
   var EMBED = SHELL_Q.get("embed") === "1" && window.parent !== window;
   if (EMBED) document.documentElement.classList.add("embed");
-  function goRoute(path, standaloneMessage) {
+  function goRoute(path, standaloneMessage, isBack) {
+    if (!isBack) path = window.BcsReturnNavigation.forward(path);
     if (EMBED) { window.parent.postMessage({ type: "bcs-navigate", path: path }, "*"); return; }
     toast(standaloneMessage || "router.push → " + path);
   }
@@ -542,7 +545,9 @@ td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
     st.regs[ui.courseId] = "R";
     st.user.participant = Object.assign({}, st.user.participant, { firstName: f.firstName, lastName: f.lastName, email: f.email, phone: f.phone });
     renderLog();
-    goRoute("/course?courseId=" + ui.courseId + "&registered=1", "Registreerumine õnnestus → /course?courseId=" + ui.courseId + " (eduteade)");
+    var destination = new URL(window.BcsReturnNavigation.getBack("/course?courseId=" + ui.courseId), location.href);
+    destination.searchParams.set("registered", "1");
+    goRoute(destination.pathname + destination.search + destination.hash, "Registreerumine õnnestus (eduteade)", true);
     if (!EMBED) { ui.blocked = "registered"; ui.form = null; ui.justRegistered = true; renderView(); renderKv(); }
   }
   function submitSignup() {
@@ -668,6 +673,7 @@ td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
     var vn = VIEW_NOTES[ui.route === "signup" ? "signup" : "reg"];
     document.getElementById("view-note-title").textContent = "Vaate märkmed — " + vn.title;
     document.getElementById("view-note-text").textContent = vn.text;
+    window.BcsReturnNavigation.render(goRoute);
   }
 
   /* ---------- Sündmused ---------- */
@@ -681,7 +687,7 @@ td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
     var loginPath = "/login?redirect=" + encodeURIComponent(ui.route === "signup" ? ui.redirect : "/course-registration?courseId=" + ui.courseId);
     switch (b.id) {
       case "b-submit": submitReg(); break;
-      case "b-cancel": case "b-back": goRoute("/course?courseId=" + ui.courseId); break;
+      case "b-cancel": case "b-back": goRoute(window.BcsReturnNavigation.getBack("/course?courseId=" + ui.courseId), null, true); break;
       case "b-signup": submitSignup(); break;
       case "b-login": case "b-login2": case "b-login3": goRoute(loginPath); break;
       case "b-to-signup": if (EMBED) goRoute("/signup?redirect=" + encodeURIComponent("/course-registration?courseId=" + ui.courseId)); else openSignup("Loo konto", "/course-registration?courseId=" + ui.courseId); break;
