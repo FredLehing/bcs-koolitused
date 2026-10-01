@@ -55,7 +55,7 @@
     "feedback": "Feedback",
     "admin": "Admin",
     "addTraining": "Add new training",
-    "manageTrainings": "Manage trainings",
+    "manageTrainings": "Trainings",
     "addLecturer": "Add new trainer",
     "manageLecturers": "Trainers",
     "manageRooms": "Training rooms",
@@ -241,7 +241,7 @@
     "confirm": "Delete"
   },
   "adminTrainings": {
-    "title": "Manage trainings",
+    "title": "Trainings",
     "search": "Search",
     "searchPlaceholder": "Search by training title…",
     "searchHelp": "Searches the training title. Every word must appear in the title, word forms are not adjusted. The title suggestions contain only active trainings — to find a deleted training, choose Status \"Deleted\" in the filters.",
