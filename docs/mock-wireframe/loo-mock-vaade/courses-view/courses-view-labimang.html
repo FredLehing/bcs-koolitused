@@ -336,6 +336,11 @@ button.lcard { width: 100%; text-align: left; background: none; font: inherit; c
 @media (max-width: 760px) { .cc-body { grid-template-columns: minmax(0, 1fr); } .cc-right { justify-items: start; } .pagecols { grid-template-columns: minmax(0, 1fr); } }
 /* hidden-atribuut peab peitma ka elemendid, millel on oma display (nt .menu { display: grid }) */
 [hidden] { display: none !important; }
+/* Vahelehed (NavTabs.vue: AdminTabs / TrainingsTabs) — üks keritav rida */
+.vtabs { display: flex; gap: 2px; border-bottom: 1.5px solid var(--sketch); overflow-x: auto; font-family: var(--font-sketch); }
+.vtabs button { flex: none; white-space: nowrap; background: none; border: 1.5px solid transparent; border-bottom: 0; border-radius: 6px 6px 0 0; color: var(--accent); padding: 3px 12px; margin-bottom: -1.5px; cursor: pointer; font: inherit; font-size: .88rem; }
+.vtabs button:hover { border-color: var(--line); }
+.vtabs button[aria-current="page"] { color: var(--ink); font-weight: 700; background: var(--panel); border-color: var(--sketch); cursor: default; }
 </style>
 
 <div id="modal-root"></div>
@@ -408,6 +413,17 @@ button.lcard { width: 100%; text-align: left; background: none; font: inherit; c
     toast(standaloneMessage || "router.push → " + path);
   }
 
+  /* ---------- Vahelehed (NavTabs.vue) — samad lingid mis navbari menüüs ---------- */
+  var ADMIN_TABS = [["/admin-enquiries", "Koolituste päringud"], ["/admin-registrations", "Registreerumised"], ["/admin-trainings", "Koolitused"], ["/admin-all-courses", "Koolituste kalender"], ["/admin-lecturers", "Koolitajad"], ["/admin-rooms", "Koolitusruumid"]];
+  var TRAINING_TABS = [["/trainings", "Meie koolitused"], ["/courses", "Koolituste kalender"]];
+  function viewTabs(tabs, current) {
+    return '<nav class="vtabs" aria-label="Vahelehed">' + tabs.map(function (t) { return '<button type="button" data-vtab="' + t[0] + '"' + (t[0] === current ? ' aria-current="page"' : "") + '>' + t[1] + '</button>'; }).join("") + '</nav>';
+  }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-vtab]"); if (!b || b.getAttribute("aria-current")) return;
+    goRoute(b.dataset.vtab, "Vaheleht → " + b.dataset.vtab + " (teine läbimäng)");
+  });
+
   /* ---------- Märkmed (sama sisu failides markmed/courses-view-markmed.md ja course-view-markmed.md) ---------- */
   var VIEW_NOTES = {
     list: { title: "CoursesView.vue", text: [
@@ -416,6 +432,7 @@ button.lcard { width: 100%; text-align: left; background: none; font: inherit; c
       "Frontend rada: /courses",
       "",
       "Vaatega seotud lisainfo:",
+      "Ülal vahelehed (TrainingsTabs.vue): Meie koolitused | Koolituste kalender — samad lingid mis menüüs \"Koolitused\", selle vaate vaheleht on aktiivne.",
       "Avaneb navbari menüüst \"Koolitused\" → \"Koolituste kalender\" (menüüs ka \"Meie koolitused\" → /trainings). Pealkiri \"Koolituste kalender\". Näidatakse publitseeritud koolituste avatud ja täis toimumiskordi, mis algavad täna või hiljem.",
       "Vasakul filtrid (rakenduvad kohe, page = 0): Periood alates–kuni, Toimumisviis (Kõik/Kohapeal/Veebis), lüliti \"Peida täis\", Koolituse keel, Koolituse kategooria, Rahastus; link \"Tühjenda filtrid\", kui mõni filter on valitud. Valikud: GET /api/languages, GET /api/categories, GET /api/funding-types.",
       "Otsing nagu /trainings (pealkiri ja lühikirjeldus, \"Otsi\"/Enter, × tühjendab, tulemuste rida ja \"Tühista otsing\").",
@@ -730,7 +747,7 @@ button.lcard { width: 100%; text-align: left; background: none; font: inherit; c
     var pager = r.totalPages > 1 ? '<nav class="pager" aria-label="Leheküljed"><button type="button" data-page="' + (ui.page - 1) + '"' + (ui.page === 0 ? " disabled" : "") + '>Eelmine</button>' +
       Array.apply(null, { length: r.totalPages }).map(function (_, i) { return '<button type="button" data-page="' + i + '"' + (i === ui.page ? ' aria-current="page"' : "") + '>' + (i + 1) + '</button>'; }).join("") +
       '<button type="button" data-page="' + (ui.page + 1) + '"' + (ui.page >= r.totalPages - 1 ? " disabled" : "") + '>Järgmine</button></nav>' : "";
-    return '<h2>Koolituste kalender</h2><div class="cols">' + renderFilters() + '<div style="display:grid;gap:12px;min-width:0">' +
+    return viewTabs(TRAINING_TABS, "/courses") + '<h2>Koolituste kalender</h2><div class="cols">' + renderFilters() + '<div style="display:grid;gap:12px;min-width:0">' +
       '<div class="searchrow"><div class="ig"><input type="text" id="t-search" placeholder="Otsi koolitust" value="' + esc(ui.searchText) + '" aria-label="Otsi koolitust">' +
       (ui.searchText ? '<button type="button" class="x" id="b-x" title="Tühjenda otsing" aria-label="Tühjenda otsing">×</button>' : "") +
       '<button type="button" class="go" id="b-search">Otsi</button></div>' +

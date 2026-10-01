@@ -292,6 +292,11 @@ tr.is-new td { font-weight: 700; }
 .msg { white-space: pre-wrap; }
 /* hidden-atribuut peab peitma ka elemendid, millel on oma display (nt .menu { display: grid }) */
 [hidden] { display: none !important; }
+/* Vahelehed (NavTabs.vue: AdminTabs / TrainingsTabs) — üks keritav rida */
+.vtabs { display: flex; gap: 2px; border-bottom: 1.5px solid var(--sketch); overflow-x: auto; font-family: var(--font-sketch); }
+.vtabs button { flex: none; white-space: nowrap; background: none; border: 1.5px solid transparent; border-bottom: 0; border-radius: 6px 6px 0 0; color: var(--accent); padding: 3px 12px; margin-bottom: -1.5px; cursor: pointer; font: inherit; font-size: .88rem; }
+.vtabs button:hover { border-color: var(--line); }
+.vtabs button[aria-current="page"] { color: var(--ink); font-weight: 700; background: var(--panel); border-color: var(--sketch); cursor: default; }
 </style>
 
 <div class="page">
@@ -359,6 +364,17 @@ tr.is-new td { font-weight: 700; }
     toast(standaloneMessage || "router.push → " + path);
   }
 
+  /* ---------- Vahelehed (NavTabs.vue) — samad lingid mis navbari menüüs ---------- */
+  var ADMIN_TABS = [["/admin-enquiries", "Koolituste päringud"], ["/admin-registrations", "Registreerumised"], ["/admin-trainings", "Koolitused"], ["/admin-all-courses", "Koolituste kalender"], ["/admin-lecturers", "Koolitajad"], ["/admin-rooms", "Koolitusruumid"]];
+  var TRAINING_TABS = [["/trainings", "Meie koolitused"], ["/courses", "Koolituste kalender"]];
+  function viewTabs(tabs, current) {
+    return '<nav class="vtabs" aria-label="Vahelehed">' + tabs.map(function (t) { return '<button type="button" data-vtab="' + t[0] + '"' + (t[0] === current ? ' aria-current="page"' : "") + '>' + t[1] + '</button>'; }).join("") + '</nav>';
+  }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-vtab]"); if (!b || b.getAttribute("aria-current")) return;
+    goRoute(b.dataset.vtab, "Vaheleht → " + b.dataset.vtab + " (teine läbimäng)");
+  });
+
   /* ---------- Märkmed (sama sisu failides markmed/admin-enquiries-view-markmed.md ja admin-enquiry-view-markmed.md) ---------- */
   var VIEW_NOTES = {
     "admin-enquiries": { title: "AdminEnquiriesView.vue", text: [
@@ -367,6 +383,7 @@ tr.is-new td { font-weight: 700; }
       "Frontend rada: /admin-enquiries",
       "",
       "Vaatega seotud lisainfo:",
+      "Ülal vahelehed (AdminTabs.vue): Koolituste päringud | Registreerumised | Koolitused | Koolituste kalender | Koolitajad | Koolitusruumid — samad lingid ja järjekord mis menüüs \"Admin\", selle vaate vaheleht on aktiivne. Kitsal ekraanil on vahelehed ühel keritaval real, aktiivne keritakse keskele.",
       "Avaneb navbari menüüst \"Admin\" → \"Koolituste päringud\". Tabelis Saabunud | Nimi | E-post | Ettevõte | Koolitus | Toimumiskord | Staatus | Tegevused; uusimad üleval, uue päringu rida paksus kirjas. Koolituse nimi on kasutajaliidese keeles (puudumisel põhikeeles), keele vahetusel laaditakse nimekiri uuesti. Toimumiskord \"—\", kui päring on koolituse kohta üldiselt.",
       "Lüliti \"Näita ka käsitletud\" (vaikimisi väljas) → includeHandled=true. Otsinguväli filtreerib frontendis nime, e-posti, ettevõtte ja koolituse järgi; veerud Saabunud, Nimi, Koolitus ja Staatus on sorteeritavad frontendis (1. klõps kasvav, 2. kahanev, 3. vaikimisi). All \"Kokku N päringut\".",
       "Silma ikoon \"Vaata\" → /admin-enquiry?enquiryId={id}."
@@ -526,7 +543,7 @@ tr.is-new td { font-weight: 700; }
       return '<tr' + (r.status === "U" ? ' class="is-new"' : "") + '><td class="date">' + dateTime(r.createdAt) + '</td><td>' + esc(r.fullName) + '</td><td>' + esc(r.email) + '</td><td>' + esc(r.companyName || "—") + '</td><td>' + esc(r.trainingTitle) + '</td><td class="date">' + courseText(r.courseStartDate, r.courseEndDate) + '</td><td>' + badge(r.status) + '</td>' +
         '<td><button type="button" class="ibtn" data-open="' + r.enquiryId + '" title="Vaata" aria-label="Vaata">' + EYE + '</button></td></tr>';
     }).join("") : '<tr class="empty-row"><td colspan="8">Päringuid ei leitud</td></tr>';
-    return '<div class="viewhead"><h2>Koolituste päringud</h2></div>' +
+    return viewTabs(ADMIN_TABS, "/admin-enquiries") + '<div class="viewhead"><h2>Koolituste päringud</h2></div>' +
       '<div class="searchrow"><input type="text" id="e-search" placeholder="Otsi nime, e-posti, ettevõtte või koolituse järgi…" aria-label="Otsi" value="' + esc(ui.search) + '">' +
       '<label class="switch"><input type="checkbox" id="e-handled"' + (ui.includeHandled ? " checked" : "") + '> Näita ka käsitletud</label>' + pin("n-list", "GET /api/admin-enquiries") + '</div>' +
       '<div class="tablewrap"><table><thead><tr>' + head + '</tr></thead><tbody>' + body + '</tbody></table></div>' +

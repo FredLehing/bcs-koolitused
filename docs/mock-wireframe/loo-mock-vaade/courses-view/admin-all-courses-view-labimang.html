@@ -305,6 +305,11 @@ tr.is-past td, tr.is-cancelled td { color: var(--ink-soft); }
 .linkish.name { font-size: .84rem; text-align: left; }
 /* hidden-atribuut peab peitma ka elemendid, millel on oma display (nt .menu { display: grid }) */
 [hidden] { display: none !important; }
+/* Vahelehed (NavTabs.vue: AdminTabs / TrainingsTabs) — üks keritav rida */
+.vtabs { display: flex; gap: 2px; border-bottom: 1.5px solid var(--sketch); overflow-x: auto; font-family: var(--font-sketch); }
+.vtabs button { flex: none; white-space: nowrap; background: none; border: 1.5px solid transparent; border-bottom: 0; border-radius: 6px 6px 0 0; color: var(--accent); padding: 3px 12px; margin-bottom: -1.5px; cursor: pointer; font: inherit; font-size: .88rem; }
+.vtabs button:hover { border-color: var(--line); }
+.vtabs button[aria-current="page"] { color: var(--ink); font-weight: 700; background: var(--panel); border-color: var(--sketch); cursor: default; }
 </style>
 
 <div class="page">
@@ -372,6 +377,17 @@ tr.is-past td, tr.is-cancelled td { color: var(--ink-soft); }
     toast(standaloneMessage || "router.push → " + path);
   }
 
+  /* ---------- Vahelehed (NavTabs.vue) — samad lingid mis navbari menüüs ---------- */
+  var ADMIN_TABS = [["/admin-enquiries", "Koolituste päringud"], ["/admin-registrations", "Registreerumised"], ["/admin-trainings", "Koolitused"], ["/admin-all-courses", "Koolituste kalender"], ["/admin-lecturers", "Koolitajad"], ["/admin-rooms", "Koolitusruumid"]];
+  var TRAINING_TABS = [["/trainings", "Meie koolitused"], ["/courses", "Koolituste kalender"]];
+  function viewTabs(tabs, current) {
+    return '<nav class="vtabs" aria-label="Vahelehed">' + tabs.map(function (t) { return '<button type="button" data-vtab="' + t[0] + '"' + (t[0] === current ? ' aria-current="page"' : "") + '>' + t[1] + '</button>'; }).join("") + '</nav>';
+  }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-vtab]"); if (!b || b.getAttribute("aria-current")) return;
+    goRoute(b.dataset.vtab, "Vaheleht → " + b.dataset.vtab + " (teine läbimäng)");
+  });
+
   /* ---------- Märkmed (sama sisu failides markmed/admin-all-courses-view-markmed.md ja admin-course-view-markmed.md) ---------- */
   var VIEW_NOTES = {
     list: { title: "AdminAllCoursesView.vue", text: [
@@ -380,6 +396,7 @@ tr.is-past td, tr.is-cancelled td { color: var(--ink-soft); }
       "Frontend rada: /admin-all-courses",
       "",
       "Vaatega seotud lisainfo:",
+      "Ülal vahelehed (AdminTabs.vue): Koolituste päringud | Registreerumised | Koolitused | Koolituste kalender | Koolitajad | Koolitusruumid — samad lingid ja järjekord mis menüüs \"Admin\", selle vaate vaheleht on aktiivne. Kitsal ekraanil on vahelehed ühel keritaval real, aktiivne keritakse keskele.",
       "Avaneb navbari menüüst \"Admin\" → \"Koolituste kalender\". Kõigi koolituste toimumiskorrad ühes tabelis: Algus | Päevi | Koolitus | Hind | Staatus | Osalejad | Tasunud | Veebilink | Huvilisi | Tegevused. Koolituse nimi on kasutajaliidese keeles (puudumisel põhikeeles) ja viib koolituse kalendrisse /admin-training-courses?trainingId={id}; esile tõstetud toimumiskorral täht ☆. Tasunud = \"tasunud / osalejad\" (ainult registreerunud osalejad), kõik tasunud → roheline, 0 osalejat → \"—\". Huvilisi = kõik toimumiskorraga seotud päringud. Möödunud rida on tuhmim märgisega \"Toimunud\".",
       "Vaikimisi ainult tulevased toimumiskorrad; lüliti \"Näita ka möödunud\" → includePast=true. Kustutatud toimumiskordi ja kustutatud koolituste toimumiskordi ei kuvata.",
       "Otsing koolituse nimest (\"Otsi\"/Enter, iga sõna peab esinema, ettepanekud GET /api/training-titles). Kaart \"Otsingu filtrid\" (vaikimisi peidus): Periood alates–kuni, Kategooria, Koolituse keel, Staatus, Toimumisviis, Esile tõstetud; rakenduvad nupuga \"Filtreeri\", märk \"N filtrit aktiivne\", \"Tühjenda filtrid\".",
@@ -711,7 +728,7 @@ tr.is-past td, tr.is-cancelled td { color: var(--ink-soft); }
   }
   function renderList() {
     var n = activeFilterCount();
-    return '<div class="viewhead"><h2>Koolituste kalender</h2></div>' +
+    return viewTabs(ADMIN_TABS, "/admin-all-courses") + '<div class="viewhead"><h2>Koolituste kalender</h2></div>' +
       '<div class="searchrow"><input type="text" id="f-search" list="titles" placeholder="Otsi koolituse nime järgi…" value="' + esc(ui.searchInput) + '" autocomplete="off" aria-label="Otsi koolituse nime järgi">' +
       '<datalist id="titles">' + titles.map(function (t) { return '<option value="' + esc(t.title) + '"></option>'; }).join("") + '</datalist>' +
       '<button type="button" class="sbtn primary" id="b-search">Otsi</button>' + pin("n-titles", "GET /api/training-titles") + '</div>' +

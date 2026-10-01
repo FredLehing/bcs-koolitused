@@ -8,6 +8,7 @@ import SessionStorageService from '@/services/SessionStorageService.js'
 import FormatService from '@/services/FormatService.js'
 import CheckMark from '@/components/common/CheckMark.vue'
 import SortableColumnHeader from '@/components/common/SortableColumnHeader.vue'
+import AdminTabs from '@/components/common/AdminTabs.vue'
 import CourseParticipantStatusBadge from '@/components/common/CourseParticipantStatusBadge.vue'
 
 // Staatuse kasvav järjekord sorteerimisel: Registreerunud → Loobunud
@@ -26,7 +27,13 @@ const SORT_VALUES = {
 
 export default {
   name: 'AdminRegistrationsView',
-  components: { PhEye, CheckMark, SortableColumnHeader, CourseParticipantStatusBadge },
+  components: {
+    AdminTabs,
+    PhEye,
+    CheckMark,
+    SortableColumnHeader,
+    CourseParticipantStatusBadge,
+  },
   data() {
     return {
       searchText: '',
@@ -156,6 +163,8 @@ export default {
 
 <template>
   <div class="container">
+    <AdminTabs />
+
     <h1 class="h3 mb-3">{{ $t('adminRegistrations.title') }}</h1>
 
     <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
