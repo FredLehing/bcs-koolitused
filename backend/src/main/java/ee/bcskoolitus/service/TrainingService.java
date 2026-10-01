@@ -92,6 +92,7 @@ public class TrainingService {
     private final TrainingLecturerMapper trainingLecturerMapper;
     private final FundingTypeService fundingTypeService;
     private final TrainingTranslationService trainingTranslationService;
+    private final TrainingTranslationCurriculumService trainingTranslationCurriculumService;
     private final AdminTrainingSummaryRepository adminTrainingSummaryRepository;
     private final AdminTrainingSummaryMapper adminTrainingSummaryMapper;
 
@@ -258,7 +259,7 @@ public class TrainingService {
                 .toTrainingTranslationItemDtos(trainingTranslations);
     }
 
-    // Loob koolituse (status U), rahastustüüpide ja koolitajate seosed ning põhikeele tõlke ühes transaktsioonis
+    // Loob koolituse (status U), rahastustüüpide ja koolitajate seosed, põhikeele tõlke ja õppekava ühes transaktsioonis
     @Transactional
     public TrainingCreateResponseDto addTraining(TrainingCreateRequestDto trainingCreateRequestDto) {
         Training training = createTraining(trainingCreateRequestDto);
@@ -267,6 +268,8 @@ public class TrainingService {
         addTrainingLecturers(training, trainingCreateRequestDto.getLecturerIds(), List.of());
         TrainingTranslation trainingTranslation = createMainLanguageTrainingTranslation(training, trainingCreateRequestDto);
         trainingTranslationRepository.save(trainingTranslation);
+        trainingTranslationCurriculumService.handleAddCurriculum(trainingTranslation,
+                trainingCreateRequestDto.getCurriculum(), trainingCreateRequestDto.getCurriculumLabel());
         return new TrainingCreateResponseDto(training.getId(), trainingTranslation.getId());
     }
 
@@ -325,6 +328,8 @@ public class TrainingService {
         replaceTrainingLecturers(training, trainingUpdateRequestDto.getLecturerIds());
         updateTrainingTranslationTexts(trainingTranslation, trainingUpdateRequestDto);
         trainingTranslationRepository.save(trainingTranslation);
+        trainingTranslationCurriculumService.handleUpdateCurriculum(trainingTranslation, trainingUpdateRequestDto.getCurriculum(),
+                trainingUpdateRequestDto.getIsCurriculumRemoved(), trainingUpdateRequestDto.getCurriculumLabel());
     }
 
     private void updateTrainingData(Training training, TrainingUpdateRequestDto trainingUpdateRequestDto) {
@@ -361,6 +366,8 @@ public class TrainingService {
         validateTranslationDoesNotExist(trainingId, language.getId());
         TrainingTranslation trainingTranslation = createTrainingTranslation(training, language, trainingTranslationCreateRequestDto);
         trainingTranslationRepository.save(trainingTranslation);
+        trainingTranslationCurriculumService.handleAddCurriculum(trainingTranslation,
+                trainingTranslationCreateRequestDto.getCurriculum(), trainingTranslationCreateRequestDto.getCurriculumLabel());
         return new TrainingTranslationCreateResponseDto(trainingTranslation.getId());
     }
 

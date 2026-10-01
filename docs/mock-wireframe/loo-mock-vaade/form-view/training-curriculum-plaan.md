@@ -128,8 +128,8 @@ Backendi loogika salvestamisel (ühes transaktsioonis tõlkega):
 |---|---|---|---|---|
 | 1 | Plaan, skeemid, märkmed, läbimäng | see fail, `training-form-view-skeemid.md`, `markmed/training-form-view-state-*-markmed.md`, `training-form-view-labimang.html` | — | ✅ tehtud 2026-10-01, artifactid avaldatud |
 | 2 | DDL + entity + repository + `FileNameSanitizer` + `Error` koodid | `docs/tasks/backend/training-curriculum-db-changes.md` | lihtne | ✅ tehtud 2026-10-01 |
-| 3 | Salvestamine: `POST /api/training`, `PUT /api/training/{trainingId}`, `POST …/training-translation` | `docs/tasks/backend/training-curriculum-upload.md` | keskmine | **muudab töötavat koodi** (3 DTO-d, `TrainingService`, testid) |
-| 4 | `TrainingTranslationDto` väljad + `GET …/curriculum` | `docs/tasks/backend/GET-api-training-translation-trainingTranslationId-curriculum.md` | lihtne | pärast 2; testimiseks vaja 3 |
+| 3 | Salvestamine: `POST /api/training`, `PUT /api/training/{trainingId}`, `POST …/training-translation` | `docs/tasks/backend/training-curriculum-upload.md` | keskmine | ✅ kood tehtud 2026-10-01 |
+| 4 | `TrainingTranslationDto` väljad + `GET …/curriculum` | `docs/tasks/backend/GET-api-training-translation-trainingTranslationId-curriculum.md` | lihtne | ✅ kood tehtud 2026-10-01 |
 | 5 | Vormi väli `CurriculumUpload.vue` | `docs/tasks/frontend/training-form-curriculum.md` | keskmine | mockidega alustatav kohe; päris backendiga pärast 3–4 |
 | 6 | (Hiljem) `/training` failinimi + allalaadimine | — | lihtne | teenus 4 on olemas |
 
@@ -139,9 +139,13 @@ Soovitus: 2 → 3 → 4 ühes harus järjest (sama andmemudel), 5 eraldi harus. 
 
 ## Seis ja üleanne
 
-**Seis (2026-10-01):** haru `RAIN-training-curriculum` (master'ist). Valmis: plaan, skeemid, märkmed, läbimäng (artifactid https://claude.ai/artifact/3VjRgmnQK7Ck7qWVHuRK9b ja kest https://claude.ai/artifact/SqxcgWP1BoxUGZqFfSZCPY) ja taskid 2–5. Task 2 kood valmis (SQL, entity, repository + projektsioon `TrainingTranslationCurriculumInfo`, `FileNameSanitizer` + testid, `Error` koodid; `./gradlew test` roheline; DB skriptid jooksutatud ja `bootRun` töötab).
+**Seis (2026-10-01):** haru `RAIN-training-curriculum` (master'ist). Valmis: plaan, skeemid, märkmed, läbimäng (artifactid https://claude.ai/artifact/3VjRgmnQK7Ck7qWVHuRK9b ja kest https://claude.ai/artifact/SqxcgWP1BoxUGZqFfSZCPY) ja taskid 2–5. Task 2 kood valmis (SQL, entity, repository + projektsioon `TrainingTranslationCurriculumInfo`, `FileNameSanitizer` + testid, `Error` koodid; `./gradlew test` roheline; DB skriptid jooksutatud ja `bootRun` töötab). Taskid 3 ja 4 kood valmis (backendi faas lõpetatud):
+- `TrainingTranslationCurriculumService` (`handleAddCurriculum`, `handleUpdateCurriculum`, `getValidTrainingTranslationCurriculumBy`, `findCurriculumInfo`); `TrainingService` kutsub seda pärast tõlke salvestamist; failita PUT loeb faili baidid ainult siis, kui failinimi muutub.
+- DTO-de väljad `curriculum` / `isCurriculumRemoved` / `curriculumLabel`; `TrainingTranslationDto` väljad `curriculumFileName` / `curriculumFileSize`; `GET /api/training-translation/{id}/curriculum` (`TrainingTranslationController`).
+- Testid: teenus, DTO valideerimine, controlleri päised, Jacksoni piir (~10,5 MB JSON loetakse → 403). `./gradlew test` roheline.
+- **Päris DB vastu pole testitud** (WSL-ist Windowsi Postgres pole kättesaadav) — kasutaja kontrollib Swaggeris: PUT `/api/training/1` failiga → GET tõlge (nimi + suurus) → allalaadimine brauseris → pealkirja muutus failita (nimi muutub) → `isCurriculumRemoved` → 404.
 
-**Järgmine samm:** task 3 `training-curriculum-upload.md`, siis 4, siis 5.
+**Järgmine samm:** task 5 `docs/tasks/frontend/training-form-curriculum.md` uues sessioonis, eraldi harus `RAIN-training-curriculum`-ist (vt `frontend/CLAUDE.md`, build scratchpadis).
 
 **Uue sessiooni alguses loe:** see fail (otsused + failinime reegel), taskifail, `backend/CLAUDE.md` / `frontend/CLAUDE.md`. Eeskuju koodis: `LecturerPhotoService`, `LecturerPhoto*`, `PhotoUpload.vue`, `@ValidBase64`, `isPhotoRemoved` kontroll `LecturerUpdateRequestDto`-s.
 

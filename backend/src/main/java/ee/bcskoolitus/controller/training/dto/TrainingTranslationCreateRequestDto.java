@@ -1,6 +1,7 @@
 package ee.bcskoolitus.controller.training.dto;
 
 import ee.bcskoolitus.infrastructure.validation.HtmlNotBlank;
+import ee.bcskoolitus.infrastructure.validation.ValidBase64;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -29,4 +30,13 @@ public class TrainingTranslationCreateRequestDto implements Serializable {
     @NotBlank
     @HtmlNotBlank
     private String description;
+
+    // Uus õppekava (PDF) Base64 kujul; null = faili ei lisata / ei muudeta
+    @ValidBase64
+    private String curriculum;
+
+    // Sõna "õppekava" tõlke keeles (frontendi i18n-ist) — läheb failinimesse
+    @NotBlank
+    @Size(max = 50)
+    private String curriculumLabel;
 }

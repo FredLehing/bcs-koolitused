@@ -15,14 +15,31 @@ public class TrainingTranslationService {
 
     private final TrainingTranslationRepository trainingTranslationRepository;
     private final TrainingTranslationMapper trainingTranslationMapper;
+    private final TrainingTranslationCurriculumService trainingTranslationCurriculumService;
+
+    public TrainingTranslationDto getTrainingTranslation(Integer trainingTranslationId) {
+        TrainingTranslation trainingTranslation = getValidActiveTrainingTranslationBy(trainingTranslationId);
+        TrainingTranslationDto trainingTranslationDto = trainingTranslationMapper.toTrainingTranslationDto(trainingTranslation);
+        handleAddCurriculumInfo(trainingTranslationDto, trainingTranslationId);
+        return trainingTranslationDto;
+    }
+
+    // Õppekava nimi ja suurus ilma faili baitideta; õppekavata tõlkel jäävad väljad null
+    private void handleAddCurriculumInfo(TrainingTranslationDto trainingTranslationDto, Integer trainingTranslationId) {
+        trainingTranslationCurriculumService.findCurriculumInfo(trainingTranslationId)
+                .ifPresent(trainingTranslationCurriculumInfo -> {
+                    trainingTranslationDto.setCurriculumFileName(trainingTranslationCurriculumInfo.getFileName());
+                    trainingTranslationDto.setCurriculumFileSize(trainingTranslationCurriculumInfo.getFileSize());
+                });
+    }
 
     // Kustutatud koolituse (status D) tõlge on nagu olematu → 404
-    public TrainingTranslationDto getTrainingTranslation(Integer trainingTranslationId) {
+    public TrainingTranslation getValidActiveTrainingTranslationBy(Integer trainingTranslationId) {
         TrainingTranslation trainingTranslation = getValidTrainingTranslationBy(trainingTranslationId);
         if (TrainingStatus.DELETED.getCode().equals(trainingTranslation.getTraining().getStatus())) {
             throw new PrimaryKeyNotFoundException("trainingTranslationId", trainingTranslationId);
         }
-        return trainingTranslationMapper.toTrainingTranslationDto(trainingTranslation);
+        return trainingTranslation;
     }
 
     public TrainingTranslation getValidTrainingTranslationBy(Integer trainingTranslationId) {
