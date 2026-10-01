@@ -15,11 +15,19 @@ export default {
       ]
     },
   },
+  // Kitsal ekraanil keritakse rida nii, et aktiivne vaheleht on keskel — näha on ka naabrid
+  mounted() {
+    const tabList = this.$refs.tabList
+    const activeTab = tabList.querySelector('.active')
+    if (activeTab) {
+      tabList.scrollLeft = activeTab.offsetLeft - (tabList.clientWidth - activeTab.offsetWidth) / 2
+    }
+  },
 }
 </script>
 
 <template>
-  <ul class="nav nav-tabs admin-tabs mb-3">
+  <ul ref="tabList" class="nav nav-tabs admin-tabs mb-3">
     <li v-for="tab in tabs" :key="tab.routeName" class="nav-item">
       <RouterLink
         :to="{ name: tab.routeName }"
@@ -36,6 +44,7 @@ export default {
 <style scoped>
 /* Kõik vahelehed ühel real; kui ekraanile ei mahu, keritakse rida külgsuunas (ei murra kahele reale) */
 .admin-tabs {
+  position: relative;
   flex-wrap: nowrap;
   overflow-x: auto;
   overflow-y: hidden;
