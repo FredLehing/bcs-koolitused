@@ -12,7 +12,7 @@ Frontend rada: /admin-course?courseId={id}
 Vaatega seotud lisainfo:
 Pealkiri "Toimumiskord", all koolituse nimi. Kiirnupud "Muuda" (/course-form?courseId), "Koolituse kalender" (/admin-training-courses?trainingId), "Koolituste kalender" (/admin-all-courses).
 Kaart "Toimumiskord" (ainult lugemiseks): Koolitus (link /training), Toimumisaeg, Päevi, Akad. tunde, Hind, Koolitajad, Ruum, Veebilink, Staatus (+ "Toimunud"), Esile tõstetud, Märkmed. Avatud/täis toimumiskorral link "Vaata avalikul lehel" → /course?courseId.
-Tabel "Osalejad": lüliti "Näita ka loobunud" (vaikimisi väljas); veergude järgi sorteerimine frontendis (vaikimisi registreerumise järjekorras). Veerud Nimi | E-post | Telefon | Registreerus | Tasunud | Vajab sülearvutit | Staatus | Märkmed. All "Kokku N osalejat, neist M tasunud" (registreerunud osalejad).
+Tabel "Osalejad": lüliti "Näita ka loobunud" (vaikimisi väljas); veergude järgi sorteerimine frontendis (vaikimisi registreerumise järjekorras). Veerud Nimi | E-post | Telefon | Registreerus | Tasunud | Vajab sülearvutit | Staatus | Märkmed | Tegevused. Silma ikoon "Vaata" → /admin-registration?courseParticipantId={id}&returnTo=/admin-course?courseId={id} (registreerumise muutmine, "← Tagasi" toob siia tagasi). All "Kokku N osalejat, neist M tasunud" (registreerunud osalejad).
 Tabel "Huvilised": filtreid pole; veergude järgi sorteerimine frontendis (vaikimisi uusimad eespool). Veerud Saabunud | Nimi | E-post | Ettevõte | Staatus | silm → /admin-enquiry?enquiryId.
 Keele vahetusel laaditakse andmed uuesti. Olematu või kustutatud toimumiskord → üldine veavaade.
 ```

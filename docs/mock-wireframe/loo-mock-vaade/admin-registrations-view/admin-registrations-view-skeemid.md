@@ -2,7 +2,7 @@
 
 Planeerimisfail uutele vaadetele, mida mockupis veel pole: kõigi registreerumiste nimekiri ja ühe registreerumise vaatamine/muutmine. Järgneb epicule `courses-view` (toimumiskordade vaated ja registreerumine), vt `../courses-view/courses-view-skeemid.md`.
 
-**Seis:** ettepanek (2026-10-01). Lahtised küsimused jaotises 6 — enne läbimängu tegemist kokku leppida.
+**Seis:** otsused kokku lepitud ja läbimäng tehtud (2026-10-01). Järgmine samm: märkmed (jaotis 7).
 
 Mõisted: **registreerumine** = üks `course_participant` rida (osaleja + toimumiskord: staatus, tasumine, sülearvuti, märkmed). **Osaleja** = inimene (`participant` + `profile`), kellel võib olla mitu registreerumist.
 
@@ -144,17 +144,17 @@ sequenceDiagram
 | `CourseParticipantStatusBadge.vue` | uus (väike) | Registreerunud / Loobunud märgis — kasutavad ka `CourseParticipantsTable` ja nimekiri |
 | `SortableColumnHeader`, `SortService`, `CheckMark`, `CourseStatusBadge`, `ConfirmModal`, `InlineAlerts` | olemas | taaskasutus |
 
-## 6. Lahtised küsimused
+## 6. Kokkulepitud otsused (endised lahtised küsimused)
 
-1. **Leheküljestus:** nimekiri on nagu "Koolituste päringud" ilma leheküljestuseta (lülitid piiravad vaikimisi tulevaste `R` ridadeni). Kas piisab, või kohe backendi filtrid + leheküljestus nagu `/admin-all-courses`?
-2. **Taastamine täis toimumiskorrale** (`F`): lubada (soovitus — mahutavust veel ei modelleerita) või keelata `COURSE_FULL`?
-3. **Kontaktandmete muutmine:** praegu ainult lugemiseks. Kas adminil peab olema võimalus profiili parandada (nt vale telefon)? Siis eraldi "Muuda kontakti" koos hoiatusega, et muutus kehtib kõigile osaleja registreerumistele.
-4. **Filter toimumiskorra/koolituse järgi** nimekirjas — vajalik või piisab otsingust (`/admin-course` näitab nagunii ühe toimumiskorra osalejaid)?
-5. **Hiljem:** osaleja (inimese) vaade kõigi tema registreerumistega; osaleja lisamine admini poolt; e-kirja teavitus staatuse muutusel.
+1. **Leheküljestus:** puudub, nagu "Koolituste päringutel". Lülitid piiravad vaikimisi tulevaste `R` ridadeni, otsing ja sorteerimine toimuvad frontendis.
+2. **Taastamine täis toimumiskorrale** (`F`): lubatud. Mahutavust veel ei modelleerita ja `COURSE_FULL` kontrolli `PUT /api/admin-registration/{id}` ei tee.
+3. **Kontaktandmed:** registreerumise vaates ainult lugemiseks. Profiili muutmine tuleb hiljem osaleja (inimese) vaatesse (vt p 5).
+4. **Filter toimumiskorra/koolituse järgi:** eraldi filtrit ei tehta, piisab otsingust koolituse nime järgi. Ühe toimumiskorra osalejad on `/admin-course` vaates.
+5. **Hiljem:** osaleja (inimese) vaade kõigi tema registreerumistega (sh kontaktandmete muutmine), osaleja lisamine admini poolt ja e-kirja teavitus staatuse muutusel.
 
 ## 7. Järgmised sammud
 
-1. Lahtised küsimused kokku leppida ja see fail täiendada.
-2. Läbimäng `admin-registrations-view-labimang.html` + prototüübi kest (`../index.html`, uued vaated "Registreerumised", "Registreerumine").
+1. ~~Lahtised küsimused kokku leppida~~ — tehtud (jaotis 6).
+2. ~~Läbimäng `admin-registrations-view-labimang.html` + prototüübi kest (`../index.html`, uued vaated "Registreerumised", "Registreerumine")~~ — tehtud; `/admin-course` osalejate tabelis silm (`courses-view/admin-all-courses-view-labimang.html`, `markmed/admin-course-view-markmed.md`).
 3. Märkmed `markmed/admin-registrations-view-markmed.md`, `admin-registration-view-markmed.md`.
 4. Taskid (`docs/tasks/backend/`, `docs/tasks/frontend/`) ja tööde järjekord.
