@@ -414,7 +414,7 @@ button.lcard { width: 100%; text-align: left; background: none; font: inherit; c
   }
 
   /* ---------- Vahelehed (NavTabs.vue) — samad lingid mis navbari menüüs ---------- */
-  var ADMIN_TABS = [["/admin-enquiries", "Koolituste päringud"], ["/admin-registrations", "Registreerumised"], ["/admin-trainings", "Koolitused"], ["/admin-all-courses", "Koolituste kalender"], ["/admin-lecturers", "Koolitajad"], ["/admin-rooms", "Koolitusruumid"]];
+  var ADMIN_TABS = [["/admin-enquiries", "Koolituste päringud"], ["/admin-registrations", "Registreerumised"], ["/admin-trainings", "Koolitused"], ["/admin-all-courses", "Koolituste kalender"], ["/admin-lecturers", "Koolitajad"], ["/admin-rooms", "Koolitusruumid"], ["/admin-users", "Kontod"]];
   var TRAINING_TABS = [["/trainings", "Meie koolitused"], ["/courses", "Koolituste kalender"]];
   function viewTabs(tabs, current) {
     return '<nav class="vtabs" aria-label="Vahelehed">' + tabs.map(function (t) { return '<button type="button" data-vtab="' + t[0] + '"' + (t[0] === current ? ' aria-current="page"' : "") + '>' + t[1] + '</button>'; }).join("") + '</nav>';

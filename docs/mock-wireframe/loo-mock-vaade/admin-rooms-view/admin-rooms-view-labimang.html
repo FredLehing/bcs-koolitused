@@ -310,7 +310,8 @@ tr.is-deleted td { color: var(--ink-soft); }
     <nav class="sitenav" aria-label="Navbar (wireframe)">
       <span class="logo" aria-hidden="true"></span><span>Koolitused</span><span>Teenused</span><span>Ettevõttest</span><span>Kontakt</span>
       <span class="admin"><button type="button" id="b-admin" aria-expanded="false" aria-controls="admin-menu">Admin ▾</button>
-        <span class="menu" id="admin-menu" hidden><button type="button" data-nav="/admin-enquiries">Koolituste päringud</button><button type="button" data-nav="/admin-registrations">Registreerumised</button><hr><button type="button" data-nav="/admin-trainings">Koolitused</button><button type="button" data-nav="/admin-all-courses">Koolituste kalender</button><hr><button type="button" data-nav="/admin-lecturers">Koolitajad</button><button type="button" data-nav="/admin-rooms" id="m-rooms">Koolitusruumid</button></span></span>
+        <span class="menu" id="admin-menu" hidden><button type="button" data-nav="/admin-enquiries">Koolituste päringud</button><button type="button" data-nav="/admin-registrations">Registreerumised</button><hr><button type="button" data-nav="/admin-trainings">Koolitused</button><button type="button" data-nav="/admin-all-courses">Koolituste kalender</button><hr><button type="button" data-nav="/admin-lecturers">Koolitajad</button><button type="button" data-nav="/admin-rooms" id="m-rooms">Koolitusruumid</button><hr><button type="button" data-nav="/admin-users">Kontod</button></span></span>
+      <span class="out" title="Minu profiil ▾ — adminil ainult &quot;Parool&quot; (/change-password)">👤 ▾</span>
       <span class="out">Logi välja</span>
     </nav>
     <div class="view" id="view"></div>
@@ -354,7 +355,7 @@ tr.is-deleted td { color: var(--ink-soft); }
   }
 
   /* ---------- Vahelehed (NavTabs.vue) — samad lingid mis navbari menüüs ---------- */
-  var ADMIN_TABS = [["/admin-enquiries", "Koolituste päringud"], ["/admin-registrations", "Registreerumised"], ["/admin-trainings", "Koolitused"], ["/admin-all-courses", "Koolituste kalender"], ["/admin-lecturers", "Koolitajad"], ["/admin-rooms", "Koolitusruumid"]];
+  var ADMIN_TABS = [["/admin-enquiries", "Koolituste päringud"], ["/admin-registrations", "Registreerumised"], ["/admin-trainings", "Koolitused"], ["/admin-all-courses", "Koolituste kalender"], ["/admin-lecturers", "Koolitajad"], ["/admin-rooms", "Koolitusruumid"], ["/admin-users", "Kontod"]];
   var TRAINING_TABS = [["/trainings", "Meie koolitused"], ["/courses", "Koolituste kalender"]];
   function viewTabs(tabs, current) {
     return '<nav class="vtabs" aria-label="Vahelehed">' + tabs.map(function (t) { return '<button type="button" data-vtab="' + t[0] + '"' + (t[0] === current ? ' aria-current="page"' : "") + '>' + t[1] + '</button>'; }).join("") + '</nav>';
@@ -372,7 +373,7 @@ tr.is-deleted td { color: var(--ink-soft); }
       "Frontend rada: /admin-rooms",
       "",
       "Vaatega seotud lisainfo:",
-      "Ülal vahelehed (AdminTabs.vue): Koolituste päringud | Registreerumised | Koolitused | Koolituste kalender | Koolitajad | Koolitusruumid — samad lingid ja järjekord mis menüüs \"Admin\", selle vaate vaheleht on aktiivne. Kitsal ekraanil on vahelehed ühel keritaval real, aktiivne keritakse keskele.",
+      "Ülal vahelehed (AdminTabs.vue): Koolituste päringud | Registreerumised | Koolitused | Koolituste kalender | Koolitajad | Koolitusruumid | Kontod — samad lingid ja järjekord mis menüüs \"Admin\", selle vaate vaheleht on aktiivne. Kitsal ekraanil on vahelehed ühel keritaval real, aktiivne keritakse keskele.",
       "Avaneb navbari menüüst \"Admin\" → \"Koolitusruumid\". Pealkirja real nupp \"+ Lisa uus ruum\" → /room-form. Tabelis Nimi | Tulevasi toimumiskordi | Toimumiskordi kokku | Uuendatud | Tegevused. Järjestus nime järgi; veerupäistel sorteerimine frontendis (1. klõps kasvav, 2. kahanev, 3. vaikimisi). Otsinguväli \"Otsi nime järgi…\" filtreerib frontendis (API kutset ei tehta); all \"Kokku N ruumi\". Vormist tulles näidatakse eduteadet (\"Ruum lisatud\" / \"Salvestatud\").",
       "\"Muuda\" → /room-form?roomId={id}. Prügikast (RoomDeleteButton.vue) küsib kinnitust ja teeb DELETE (soft delete); kui ruumis on tulevasi toimumiskordi, on prügikast keelatud ja tooltip selgitab põhjust (backend: 403 ROOM_HAS_UPCOMING_COURSES → backendi message, nimekiri uuesti).",
       "Lüliti \"Näita kustutatud\" (vaikimisi väljas) → includeDeleted=true: kustutatud read on tuhmimad, märgisega \"Kustutatud\" ja ainult nupuga \"Taasta\" (kinnitus → PUT /api/room/{roomId}/restore)."

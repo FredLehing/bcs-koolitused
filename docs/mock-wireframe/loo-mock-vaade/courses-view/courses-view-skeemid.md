@@ -551,8 +551,8 @@ sequenceDiagram
 
 ```text
 Create a desktop wireframe of an admin page "Koolituste kalender" in a web app.
-Top: site navigation bar with logo, a dropdown "Koolitused ▾", other links, an open dropdown "Admin ▾" with items "Koolituste päringud", "Registreerumised", a divider, "Koolitused", "Koolituste kalender" (highlighted), a divider, "Koolitajad" and "Koolitusruumid", and "Logi välja" on the right.
-Below the navigation bar: a tab bar "Koolituste päringud | Registreerumised | Koolitused | Koolituste kalender | Koolitajad | Koolitusruumid" with "Koolituste kalender" as the active tab.
+Top: site navigation bar with logo, a dropdown "Koolitused ▾", other links, an open dropdown "Admin ▾" with items "Koolituste päringud", "Registreerumised", a divider, "Koolitused", "Koolituste kalender" (highlighted), a divider, "Koolitajad", "Koolitusruumid", a divider and "Kontod",, a user icon dropdown "👤 ▾" (Minu profiil) and "Logi välja" on the right.
+Below the navigation bar: a tab bar "Koolituste päringud | Registreerumised | Koolitused | Koolituste kalender | Koolitajad | Koolitusruumid | Kontod" with "Koolituste kalender" as the active tab.
 Header: page title "Koolituste kalender".
 Below: a search input "Otsi koolituse nime järgi…" with a button "Otsi", a link "▾ Ava otsingu filtrid" with a small badge "1 filter aktiivne", and a toggle switch "Näita ka möödunud" (off).
 Main area: a data table with columns "Algus", "Päevi", "Koolitus", "Hind", "Staatus", "Osalejad", "Tasunud", "Veebilink", "Huvilisi", "Tegevused" (eye, pencil, calendar and trash icons).
@@ -568,7 +568,7 @@ Below the table: text "Kokku 10 toimumiskorda" and a pagination "Eelmine 1 2 Jä
 
 ```text
 Create a desktop wireframe of an admin page "Toimumiskord" in a web app.
-Top: site navigation bar with logo, links, a dropdown "Admin ▾" and "Logi välja".
+Top: site navigation bar with logo, links, a dropdown "Admin ▾", a user icon dropdown "👤 ▾" (Minu profiil) and "Logi välja".
 Header row: title "Toimumiskord" with subtitle "Java algkursus", and buttons "Muuda", "Koolituse kalender", "Koolituste kalender" on the right.
 Card "Toimumiskord" as a two-column list: Koolitus link "Java algkursus"; Toimumisaeg 05/10/2026 – 09/10/2026; Päevi 5; Akad. tunde 40; Hind 490 €; Koolitajad Rain Tüür, Meelis Teern; Ruum Assauwe; Veebilink —; Staatus badge Avatud; Esile tõstetud Jah; Märkmed "Kaasa sülearvuti."; a link "Vaata avalikul lehel".
 Card "Osalejad": on the title row right a toggle "Näita ka loobunud" (off); sortable column headers; a table with columns "Nimi", "E-post", "Telefon", "Registreerus", "Tasunud", "Vajab sülearvutit", "Staatus", "Märkmed"; rows "Anna Saar | anna.saar@example.com | +37256789012 | 10/09/2026 | ✓ | ✓ | Registreerunud | Registreerus veebilehe kaudu.", "Liis Kuusk | … | ✗ | ✗ | Registreerunud", "Jaan Org | … | ✓ | ✓ | Registreerunud | Arve ettevõttele."; below "Kokku 3 osalejat, neist 2 tasunud".
@@ -605,7 +605,7 @@ Left column, directly below the card "Koolitus": a card "Toimumiskorrad" with a 
 
 ```text
 Create a desktop wireframe of a page "Registreerumine" in a training company web app; the user is logged in.
-Top: site navigation bar with logo, a dropdown "Koolitused ▾", links and "Logi välja" on the right.
+Top: site navigation bar with logo, a dropdown "Koolitused ▾", links, a user icon dropdown "👤 ▾" (Minu profiil) and "Logi välja" on the right.
 Left card "Toimumiskord": title "Spring Boot veebiarendus"; list Toimumisaeg 12/10/2026 – 15/10/2026; Päevi / tunde 4 / 32; Hind 560 €; Toimumisviis Kohapeal; Koolitajad Rain Tüür; link "Tagasi toimumiskorra lehele".
 Right card "Osaleja andmed": two-column inputs prefilled "Eesnimi *" Anna, "Perekonnanimi *" Saar, "E-post *" anna.saar@example.com, "Telefon *" +37256789012; small grey text "Andmed on täidetud sinu profiilist; muudatused salvestatakse ka profiili."; checkbox "Vajan koolitusel sülearvutit"; textarea "Lisainfo" with placeholder "Nt arve andmed või erisoovid"; buttons "Tühista" and primary "Registreeru".
 ```

@@ -16,12 +16,12 @@ Sama navbari menüü vaadete vahel saab liikuda ilma menüüd avamata ja on kohe
 
 | Komponent | Vahelehed (järjekord nagu menüüs) | Vaated |
 |---|---|---|
-| `AdminTabs.vue` | Koolituste päringud \| Registreerumised \| Koolitused \| Koolituste kalender \| Koolitajad \| Koolitusruumid | `AdminEnquiriesView`, `AdminRegistrationsView`, `AdminTrainingsView`, `AdminAllCoursesView`, `AdminLecturersView`, `AdminRoomsView` |
+| `AdminTabs.vue` | Koolituste päringud \| Registreerumised \| Koolitused \| Koolituste kalender \| Koolitajad \| Koolitusruumid \| Kontod | `AdminEnquiriesView`, `AdminRegistrationsView`, `AdminTrainingsView`, `AdminAllCoursesView`, `AdminLecturersView`, `AdminRoomsView`, `AdminUsersView` |
 | `TrainingsTabs.vue` | Meie koolitused \| Koolituste kalender | `TrainingsView` (`/trainings`), `CoursesView` (`/courses`) |
 
-- Tekstid on navbari i18n võtmed (`navbar.manageEnquiries` … `navbar.manageRooms`, `navbar.ourTrainings`, `navbar.coursesCalendar`) — uusi tõlkeid pole.
+- Tekstid on navbari i18n võtmed (`navbar.manageEnquiries` … `navbar.manageRooms`, `navbar.manageUsers`, `navbar.ourTrainings`, `navbar.coursesCalendar`) — uusi tõlkeid pole.
 - Vahelehed on vaate ülaosas, pealkirja kohal (`/trainings` vaates filtrite ja otsingu kohal).
-- Detaili- ja vormivaadetes (nt `/admin-enquiry`, `/training-form`, `/course`) vahelehti pole — seal on oma tagasilingid.
+- Detaili- ja vormivaadetes (nt `/admin-enquiry`, `/admin-user`, `/training-form`, `/course`) vahelehti pole — seal on oma tagasilingid.
 
 ## `NavTabs.vue`
 

@@ -110,6 +110,7 @@ select { width: 100%; }
 .sbtn:active:not(:disabled) { transform: translate(1px, 1px); box-shadow: .5px .5px 0 var(--sketch); }
 .sbtn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
 .sbtn.danger { background: var(--del); border-color: var(--del); color: #fff; }
+.sbtn.danger-outline { color: var(--del); border-color: var(--del); }
 .sbtn.small { font-size: .78rem; padding: 1px 10px; }
 .sbtn:disabled { opacity: .45; cursor: not-allowed; }
 .api-pin { font-family: var(--font-mono); font-size: .66rem; background: var(--note); color: var(--note-ink); border: 0; border-radius: 3px; padding: 0 5px; cursor: pointer; line-height: 1.6; white-space: nowrap; }
@@ -280,6 +281,7 @@ tr.is-deleted td { color: var(--ink-soft); }
 .embed .sitenav { display: none; }
 /* AdminRoomsView ja RoomFormView lisad */
 .ok-alert { border: 1.5px solid var(--ok); background: color-mix(in srgb, var(--ok) 14%, transparent); color: var(--ink); border-radius: 6px; padding: 6px 10px; font-size: .88rem; }
+.err-alert { border: 1.5px solid var(--del); background: color-mix(in srgb, var(--del) 12%, transparent); color: var(--ink); border-radius: 6px; padding: 6px 10px; font-size: .88rem; }
 .ok-alert .x, .alert .x { float: right; background: none; border: 0; color: var(--ink); cursor: pointer; font-size: 1rem; line-height: 1; padding: 0 2px; }
 .ph { display: grid; gap: 10px; justify-items: start; padding: 20px 0; }
 .view fieldset input[type="text"] { max-width: 420px; }
@@ -305,6 +307,10 @@ td .linkish { font-size: .84rem; }
 .badge.role-admin { background: color-mix(in srgb, var(--put) 22%, transparent); border-color: var(--put); }
 .searchrow select { width: auto; flex: 0 0 auto; }
 .empty-inline { color: var(--ink-soft); font-size: .88rem; }
+.vtabs { display: flex; gap: 2px; border-bottom: 1.5px solid var(--sketch); overflow-x: auto; font-family: var(--font-sketch); }
+.vtabs button { flex: none; white-space: nowrap; background: none; border: 1.5px solid transparent; border-bottom: 0; border-radius: 6px 6px 0 0; color: var(--accent); padding: 3px 12px; margin-bottom: -1.5px; cursor: pointer; font: inherit; font-size: .88rem; }
+.vtabs button:hover { border-color: var(--line); }
+.vtabs button[aria-current="page"] { color: var(--ink); font-weight: 700; background: var(--panel); border-color: var(--sketch); cursor: default; }
 </style>
 
 <div class="page">
@@ -331,6 +337,7 @@ td .linkish { font-size: .84rem; }
       <span class="logo" aria-hidden="true"></span><span>Koolitused</span><span>Meie koolitajad</span><span>Teenused</span><span>Kontakt</span>
       <span class="admin"><button type="button" id="b-admin" aria-expanded="false" aria-controls="admin-menu">Admin ▾</button>
         <span class="menu" id="admin-menu" hidden><button type="button" data-nav="/admin-enquiries">Koolituste päringud</button><button type="button" data-nav="/admin-registrations">Registreerumised</button><hr><button type="button" data-nav="/admin-trainings">Koolitused</button><button type="button" data-nav="/admin-all-courses">Koolituste kalender</button><hr><button type="button" data-nav="/admin-lecturers">Koolitajad</button><button type="button" data-nav="/admin-rooms">Koolitusruumid</button><hr><button type="button" data-nav="/admin-users" class="cur">Kontod</button></span></span>
+      <span class="out" title="Minu profiil ▾ — adminil ainult &quot;Parool&quot; (/change-password)">👤 ▾</span>
       <span class="out">Logi välja</span>
     </nav>
     <div class="view" id="view"></div>
@@ -373,6 +380,16 @@ td .linkish { font-size: .84rem; }
     toast(standaloneMessage || "router.push → " + path);
   }
 
+  var ADMIN_TABS = [["/admin-enquiries", "Koolituste päringud"], ["/admin-registrations", "Registreerumised"], ["/admin-trainings", "Koolitused"], ["/admin-all-courses", "Koolituste kalender"], ["/admin-lecturers", "Koolitajad"], ["/admin-rooms", "Koolitusruumid"], ["/admin-users", "Kontod"]];
+  var TRAINING_TABS = [["/trainings", "Meie koolitused"], ["/courses", "Koolituste kalender"]];
+  function viewTabs(tabs, current) {
+    return '<nav class="vtabs" aria-label="Vahelehed">' + tabs.map(function (t) { return '<button type="button" data-vtab="' + t[0] + '"' + (t[0] === current ? ' aria-current="page"' : "") + '>' + t[1] + '</button>'; }).join("") + '</nav>';
+  }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-vtab]"); if (!b || b.getAttribute("aria-current")) return;
+    goRoute(b.dataset.vtab, "Vaheleht → " + b.dataset.vtab + " (teine läbimäng)");
+  });
+
   /* ---------- Märkmed (hiljem failidesse markmed/admin-users-view-markmed.md ja admin-user-view-markmed.md) ---------- */
   var VIEW_NOTES = {
     "admin-users": { title: "AdminUsersView.vue", text: [
@@ -381,9 +398,10 @@ td .linkish { font-size: .84rem; }
       "Frontend rada: /admin-users",
       "",
       "Vaatega seotud lisainfo:",
-      "Avaneb navbari menüüst \"Admin\" → \"Kontod\" (uus, neljas rühm lõpus, eraldaja järel). Pealkiri \"Kontod\". Tabelis Loodud | E-post | Nimi | Telefon | Roll (Admin / Osaleja) | Registreerumisi | Staatus (Aktiivne / Deaktiveeritud) | Tegevused. Nimi ja telefon tulevad osalejalt, osaleja puudumisel \"—\". Registreerumisi = registreerunud (\"R\") registreerumiste arv. Sisse loginud admini real märgis \"Sina\". Deaktiveeritud rida on tuhmim.",
-      "Otsinguväli filtreerib frontendis e-posti, nime ja telefoni järgi. Rolli valik \"Kõik rollid\" / \"Osalejad\" / \"Adminid\" filtreerib frontendis. Lüliti \"Näita ka deaktiveeritud\" (vaikimisi väljas → ainult aktiivsed) → includeDeleted=true, muutmisel laaditakse nimekiri uuesti. Veerud Loodud, E-post, Nimi, Roll, Registreerumisi ja Staatus on sorteeritavad frontendis (1. klõps kasvav, 2. kahanev, 3. vaikimisi = loodud, uusimad eespool). Leheküljestust pole. All \"Kokku N kontot\".",
-      "Tegevused: silm \"Vaata\" → /admin-user?userId={id}. Aktiivsel kontol \"Deaktiveeri\" (ConfirmModal \"Deaktiveeri konto?\" → DELETE /api/admin-user/{userId}?currentUserId={sisseloginud admin}), enda real seda nuppu pole. Deaktiveeritud kontol \"Taasta\" (ConfirmModal \"Taasta konto?\" → PUT /api/admin-user/{userId}/restore). Pärast tegevust laaditakse nimekiri uuesti ja näidatakse teadet."
+      "Ülal vahelehed (AdminTabs.vue): Koolituste päringud | Registreerumised | Koolitused | Koolituste kalender | Koolitajad | Koolitusruumid | Kontod — samad lingid ja järjekord mis menüüs \"Admin\", selle vaate vaheleht on aktiivne.",
+      "Avaneb navbari menüüst \"Admin\" → \"Kontod\" (neljas rühm lõpus, eraldaja järel). Pealkiri \"Kontod\". Tabelis Loodud (dd/MM/yyyy HH:mm) | E-post | Nimi | Telefon | Roll (Admin / Osaleja) | Registreerumisi | Staatus (UserStatusBadge.vue: Aktiivne / Deaktiveeritud) | Tegevused. Nimi ja telefon tulevad osalejalt, osaleja puudumisel \"—\". Registreerumisi = registreerunud (\"R\") registreerumiste arv. Sisse loginud admini real märgis \"Sina\". Deaktiveeritud rida on tuhmim.",
+      "Otsinguväli filtreerib frontendis e-posti, nime ja telefoni järgi. Rolli valik \"Kõik rollid\" / \"Osalejad\" / \"Adminid\" filtreerib frontendis. Lüliti \"Näita ka deaktiveeritud\" (vaikimisi väljas → ainult aktiivsed) → includeDeleted=true, muutmisel laaditakse nimekiri uuesti. Veerud Loodud, E-post, Nimi, Roll, Registreerumisi ja Staatus on sorteeritavad frontendis (SortService; 1. klõps kasvav, 2. kahanev, 3. vaikimisi = loodud, uusimad eespool; tühjad väärtused lõpus). Leheküljestust pole. All \"Kokku N kontot\".",
+      "Tegevused: silm \"Vaata\" → /admin-user?userId={id}; UserStatusButton.vue — aktiivsel kontol nupp \"Deaktiveeri\" (ConfirmModal \"Deaktiveeri konto?\", \"„{nimi (e-post)}“ ei saa enam sisse logida…\" → DELETE /api/admin-user/{userId}?currentUserId={sisseloginud admin}), deaktiveeritud kontol \"Taasta\" (ConfirmModal \"Taasta konto?\" → PUT /api/admin-user/{userId}/restore). Enda real deaktiveerimise/taastamise nuppu pole. Pärast tegevust laaditakse nimekiri uuesti; teade (\"Konto deaktiveeritud\" / \"Konto taastatud\" või 403 CANNOT_DEACTIVATE_SELF backendi teade) filtrite all (InlineAlerts.vue)."
     ].join("\n") },
     "admin-user": { title: "AdminUserView.vue", text: [
       "Roll: Admin",
@@ -392,8 +410,8 @@ td .linkish { font-size: .84rem; }
       "",
       "Vaatega seotud lisainfo:",
       "Ülal tagasilink \"← Kõik kontod\" → /admin-users. Pealkiri \"Konto\", all konto e-post; deaktiveeritud kontol märgis \"Deaktiveeritud\".",
-      "Kaart \"Konto\": E-post, Roll, Staatus, Loodud. Kaart \"Osaleja\": Nimi, E-post (mailto; ainult kui erineb konto e-postist), Telefon (tel); osaleja puudumisel \"Kontol pole osaleja andmeid\". Kaart \"Registreerumised\": tabel Koolitus | Toimumisaeg (link → /admin-course?courseId={id}, toimunul märgis \"Toimunud\") | Staatus (Registreerunud / Loobunud) | Tasunud ✓/✗ | silm → /admin-registration?courseParticipantId={id}&returnTo=/admin-user?userId={id}. Uusimad toimumiskorrad eespool. Tühi: \"Registreerumisi pole\". Koolituse nimi kasutajaliidese keeles, keele vahetusel laaditakse uuesti.",
-      "Nupp \"Deaktiveeri konto\" (aktiivne) / \"Taasta konto\" (deaktiveeritud), kinnitusega (ConfirmModal). Enda kontol nuppu pole, selle asemel vihje \"See on sinu konto — enda kontot deaktiveerida ei saa.\" Edu korral teade \"Konto deaktiveeritud\" / \"Konto taastatud\" ja andmed laaditakse uuesti. Olematu konto → üldine veavaade."
+      "Kaart \"Konto\": E-post, Roll, Staatus, Loodud. Kaart \"Osaleja\": Nimi, E-post (mailto; ainult kui erineb konto e-postist), Telefon (tel); osaleja puudumisel \"Kontol pole osaleja andmeid\". Kaart \"Registreerumised\": tabel Koolitus | Toimumisaeg (link → /admin-course?courseId={id}, toimunul märgis \"Toimunud\") | Staatus (Registreerunud / Loobunud) | Tasunud ✓/✗ | silm → /admin-registration?courseParticipantId={id}&returnTo=/admin-user?userId={id}. Uusimad toimumiskorrad eespool. Tühi: \"Registreerumisi pole\". Koolituse nimi kasutajaliidese keeles, keele vahetusel laaditakse uuesti. Kaardid on üksteise all.",
+      "Nupp \"Deaktiveeri konto\" (aktiivne) / \"Taasta konto\" (deaktiveeritud), kinnitusega (ConfirmModal). Enda kontol nuppu pole, selle asemel vihje \"See on sinu konto — enda kontot deaktiveerida ei saa.\" Nupp (UserStatusButton.vue) ja teated (InlineAlerts.vue) on kaartide all. Edu korral teade \"Konto deaktiveeritud\" / \"Konto taastatud\" ja andmed laaditakse uuesti; 403 → backendi teade. Mitte-admin → /not-authorized; userId puudub või konto olematu → üldine veavaade."
     ].join("\n") }
   };
   var NOT_FOUND = "HTTP: 404\nerrorCode: PRIMARY_KEY_NOT_FOUND\nmessage: \"Ei leidnud primary keyd 'userId' väärtusega: 123\"";
@@ -404,7 +422,7 @@ td .linkish { font-size: .84rem; }
       "Response (200):", "AdminUserSummaryDto.java",
       "[", "  {", "    \"userId\": 7,", "    \"email\": \"toomas.rebane@example.com\",", "    \"roleName\": \"participant\",", "    \"participantName\": \"Toomas Rebane\",", "    \"phone\": \"+37255007788\",", "    \"registrationCount\": 2,", "    \"createdAt\": \"2026-09-22T10:45:00Z\",", "    \"status\": \"A\"", "  },", "  ...", "]", "",
       "API teenuse lisainfo:",
-      "\"user\" + role (name) + participant (name) + profile (phone) LEFT JOIN-iga — adminikontodel osalejat tavaliselt pole (participantName ja phone = null). registrationCount = osaleja course_participant ridade arv, kus status = \"R\" (ka toimunud toimumiskordadel; osaleja puudumisel 0). includeDeleted=false → ainult status = \"A\". Järjestus created_at kahanevalt. Otsing, rolli filter ja sorteerimine toimuvad frontendis; leheküljestust pole. Parooli ei tagastata. Kui päring läheb keerukaks, võib lisada view admin_user_summary.", "",
+      "JPQL konstruktori päring (UserRepository.findAdminUserSummariesBy, view'd pole): \"user\" + role (name) + participant (name) + profile (phone) LEFT JOIN-iga — adminikontodel osalejat tavaliselt pole (participantName ja phone = null). registrationCount = osaleja course_participant ridade arv, kus status = \"R\" (ka toimunud toimumiskordadel; osaleja puudumisel 0). includeDeleted=false → ainult status = \"A\". Järjestus created_at kahanevalt. Otsing, rolli filter ja sorteerimine toimuvad frontendis; leheküljestust pole. Parooli ei tagastata.", "",
       "Veateated: —"].join("\n") },
     { id: "n-detail", title: "GET /api/admin-user/{userId}", text: [
       "API: GET /api/admin-user/{userId}", "",
@@ -459,7 +477,7 @@ td .linkish { font-size: .84rem; }
     ];
   }
   var db, ui, detail = null, logSteps = [], logTitle = "", openReq = -1;
-  function freshUi() { return { lang: ui ? ui.lang : "et", route: "list", search: "", role: "", includeDeleted: false, sortBy: null, sortDir: "asc", list: [], success: "" }; }
+  function freshUi() { return { lang: ui ? ui.lang : "et", route: "list", search: "", role: "", includeDeleted: false, sortBy: null, sortDir: "asc", list: [], success: "", error: "" }; }
 
   function j(o) { return JSON.stringify(o, null, 2); }
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c]; }); }
@@ -504,23 +522,25 @@ td .linkish { font-size: .84rem; }
   function apiRestore(id) { user(id).st = "A"; call("PUT", "/api/admin-user/" + id + "/restore", null, null); }
 
   /* ---------- Navigeerimine ja tegevused ---------- */
-  function openList(title) { startStep(title); ui.route = "list"; detail = null; ui.success = ""; loadList(); renderAll(); }
-  function openDetail(id, title) { startStep(title); ui.route = "detail"; ui.success = ""; loadDetail(id); renderAll(); }
+  function openList(title) { startStep(title); ui.route = "list"; detail = null; ui.success = ""; ui.error = ""; loadList(); renderAll(); }
+  function openDetail(id, title) { startStep(title); ui.route = "detail"; ui.success = ""; ui.error = ""; loadDetail(id); renderAll(); }
   function confirmAction(id, restore) {
     var u = user(id), label = (PARTICIPANTS[id] ? PARTICIPANTS[id].name + " (" + u.email + ")" : u.email);
     document.getElementById("modal-root").innerHTML = '<div class="overlay"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="m-title"><h2 id="m-title">' + (restore ? "Taasta konto?" : "Deaktiveeri konto?") + '</h2><p>' +
       (restore ? "„" + esc(label) + "“ saab jälle sisse logida." : "„" + esc(label) + "“ ei saa enam sisse logida. Andmed ja registreerumised jäävad alles, konto saab hiljem taastada.") +
-      '</p><div class="row"><button type="button" class="sbtn" id="m-no">Tühista</button><button type="button" class="sbtn ' + (restore ? "primary" : "danger") + '" id="m-yes">' + (restore ? "Taasta" : "Deaktiveeri") + '</button></div></div></div>';
+      '</p><div class="row"><button type="button" class="sbtn primary" id="m-yes">' + (restore ? "Taasta" : "Deaktiveeri") + '</button><button type="button" class="sbtn" id="m-no">Sulge</button></div></div></div>';
     document.getElementById("m-no").onclick = closeModal;
     document.getElementById("m-yes").onclick = function () {
       closeModal();
       startStep((restore ? "„Taasta“" : "„Deaktiveeri“") + " → kinnitus (konto " + id + ")");
       var err = restore ? (apiRestore(id), null) : apiDeactivate(id);
-      if (ui.route === "list") loadList(); else loadDetail(id);
+      // Nimekiri laaditakse alati uuesti; konto vaade ainult edu korral
+      if (ui.route === "list") loadList(); else if (!err) loadDetail(id);
       ui.success = err ? "" : (restore ? "Konto taastatud" : "Konto deaktiveeritud");
+      ui.error = err ? err.message : "";
       renderAll();
     };
-    document.getElementById("m-no").focus();
+    document.getElementById("m-yes").focus();
   }
   function closeModal() { document.getElementById("modal-root").innerHTML = ""; }
   function switchLang(code) {
@@ -559,6 +579,8 @@ td .linkish { font-size: .84rem; }
   function statusBadge(st) { return st === "A" ? '<span class="badge active">Aktiivne</span>' : '<span class="badge deleted">Deaktiveeritud</span>'; }
   function roleBadge(r) { return '<span class="badge' + (r === "admin" ? " role-admin" : "") + '">' + ROLE_LABEL[r] + '</span>'; }
   function check(v) { return v ? '<span class="tr-ok" aria-label="Jah">✓</span>' : '<span class="tr-bad" style="cursor:default" aria-label="Ei">✗</span>'; }
+  // InlineAlerts.vue: eduteade ja veateade
+  function inlineAlerts() { return (ui.success ? '<span class="ok-alert" role="status">' + esc(ui.success) + '</span>' : "") + (ui.error ? '<span class="err-alert" role="alert">' + esc(ui.error) + '</span>' : ""); }
   function dash(v) { return v == null ? '<span class="empty-inline">—</span>' : esc(v); }
   function renderList() {
     var s = ui.search.trim().toLowerCase();
@@ -566,8 +588,9 @@ td .linkish { font-size: .84rem; }
     if (ui.sortBy) {
       var dir = ui.sortDir === "asc" ? 1 : -1, k = ui.sortBy;
       rows = rows.slice().sort(function (a, b) {
-        var va = a[k] == null ? "" : a[k], vb = b[k] == null ? "" : b[k];
-        return (typeof va === "string" ? va.localeCompare(vb, ui.lang) : Number(va) - Number(vb)) * dir;
+        var va = a[k], vb = b[k];
+        if (va == null || vb == null) return va == null ? (vb == null ? 0 : 1) : -1; // SortService: null alati lõpus
+        return (typeof va === "string" ? va.localeCompare(vb, ui.lang, { sensitivity: "base" }) : Number(va) - Number(vb)) * dir;
       });
     }
     var head = COLUMNS.map(function (c) {
@@ -577,16 +600,18 @@ td .linkish { font-size: .84rem; }
       return '<th' + cls + '><button type="button" class="sorth" data-sort="' + c.key + '">' + c.label + '<span class="arrow" aria-hidden="true">' + arrow + '</span></button></th>';
     }).join("");
     var body = rows.length ? rows.map(function (r) {
-      var act = r.status === "A" ? (r.userId === ME ? "" : '<button type="button" class="ibtn del" data-deactivate="' + r.userId + '" title="Deaktiveeri" aria-label="Deaktiveeri">' + BAN + '</button>')
-        : '<button type="button" class="ibtn" data-restore="' + r.userId + '" title="Taasta" aria-label="Taasta">' + RESTORE + '</button>';
+      // UserStatusButton.vue: aktiivsel "Deaktiveeri", deaktiveeritul "Taasta"; enda real nuppu pole
+      var act = r.userId === ME ? "" : r.status === "A" ? '<button type="button" class="sbtn small danger-outline" data-deactivate="' + r.userId + '">Deaktiveeri</button>'
+        : '<button type="button" class="sbtn small" data-restore="' + r.userId + '">Taasta</button>';
       return '<tr' + (r.status === "D" ? ' class="is-deleted"' : "") + '><td class="date">' + dateTime(r.createdAt) + '</td><td class="name-cell">' + esc(r.email) + (r.userId === ME ? '<span class="badge me">Sina</span>' : "") + '</td>' +
-        '<td>' + dash(r.participantName) + '</td><td>' + dash(r.phone) + '</td><td>' + roleBadge(r.roleName) + '</td><td class="num">' + r.registrationCount + '</td><td>' + statusBadge(r.status) + '</td>' +
+        '<td>' + dash(r.participantName) + '</td><td>' + dash(r.phone) + '</td><td>' + ROLE_LABEL[r.roleName] + '</td><td class="num">' + r.registrationCount + '</td><td>' + statusBadge(r.status) + '</td>' +
         '<td><div class="icons"><button type="button" class="ibtn" data-open="' + r.userId + '" title="Vaata" aria-label="Vaata">' + EYE + '</button>' + act + '</div></td></tr>';
     }).join("") : '<tr class="empty-row"><td colspan="8">Kontosid ei leitud</td></tr>';
-    return '<div class="viewhead"><h2>Kontod</h2></div>' + (ui.success ? '<div class="ok-alert" role="status">' + esc(ui.success) + '</div>' : "") +
+    return viewTabs(ADMIN_TABS, "/admin-users") + '<div class="viewhead"><h2>Kontod</h2></div>' +
       '<div class="searchrow"><input type="text" id="u-search" placeholder="Otsi e-posti, nime või telefoni järgi…" aria-label="Otsi" value="' + esc(ui.search) + '">' +
       '<select id="u-role" aria-label="Roll"><option value="">Kõik rollid</option><option value="participant"' + (ui.role === "participant" ? " selected" : "") + '>Osalejad</option><option value="admin"' + (ui.role === "admin" ? " selected" : "") + '>Adminid</option></select></div>' +
       '<div class="togglerow"><label class="switch"><input type="checkbox" id="u-deleted"' + (ui.includeDeleted ? " checked" : "") + '> Näita ka deaktiveeritud</label>' + pin("n-list", "GET /api/admin-users") + pin("n-delete", "DELETE /api/admin-user/{userId}") + pin("n-restore", "PUT …/restore") + '</div>' +
+      ((ui.success || ui.error) ? '<div class="actions">' + inlineAlerts() + '</div>' : "") +
       '<div class="tablewrap"><table><thead><tr>' + head + '</tr></thead><tbody>' + body + '</tbody></table></div>' +
       '<div class="foot"><span class="total">Kokku ' + rows.length + (rows.length === 1 ? " konto" : " kontot") + '</span></div>';
   }
@@ -597,21 +622,20 @@ td .linkish { font-size: .84rem; }
     function row(label, value) { return "<dt>" + label + "</dt><dd>" + value + "</dd>"; }
     var regs = d.registrations.length ? '<div class="tablewrap"><table><thead><tr><th>Koolitus</th><th>Toimumisaeg</th><th>Staatus</th><th class="center">Tasunud</th><th></th></tr></thead><tbody>' +
       d.registrations.map(function (r) {
-        return '<tr' + (r.status === "C" ? ' class="is-deleted"' : "") + '><td>' + esc(r.trainingTitle) + '</td><td class="date"><button type="button" class="linkish" data-course="' + r.courseId + '">' + dmy(r.startDate) + " – " + dmy(r.endDate) + '</button>' + (r.isPast ? '<span class="badge past">Toimunud</span>' : "") + '</td>' +
+        return '<tr><td>' + esc(r.trainingTitle) + '</td><td class="date"><button type="button" class="linkish" data-course="' + r.courseId + '">' + dmy(r.startDate) + " – " + dmy(r.endDate) + '</button>' + (r.isPast ? '<span class="badge past">Toimunud</span>' : "") + '</td>' +
           '<td>' + (r.status === "R" ? '<span class="badge active">Registreerunud</span>' : '<span class="badge draft">Loobunud</span>') + '</td><td class="center">' + check(r.hasPaid) + '</td>' +
           '<td><button type="button" class="ibtn" data-reg="' + r.courseParticipantId + '" title="Vaata registreerumist" aria-label="Vaata registreerumist">' + EYE + '</button></td></tr>';
       }).join("") + '</tbody></table></div>' : '<span class="empty-inline">Registreerumisi pole</span>';
     var action = self ? '<span class="hint">See on sinu konto — enda kontot deaktiveerida ei saa.</span>'
-      : d.status === "A" ? '<button type="button" class="sbtn danger" data-deactivate="' + d.userId + '">Deaktiveeri konto</button>' + pin("n-delete", "DELETE /api/admin-user/{userId}")
-      : '<button type="button" class="sbtn primary" data-restore="' + d.userId + '">Taasta konto</button>' + pin("n-restore", "PUT /api/admin-user/{userId}/restore");
-    return back + '<div class="viewhead"><h2>Konto<span class="sub">' + esc(d.email) + (d.status === "D" ? ' <span class="badge deleted">Deaktiveeritud</span>' : "") + (self ? '<span class="badge me">Sina</span>' : "") + '</span></h2></div>' +
+      : d.status === "A" ? '<button type="button" class="sbtn small danger-outline" data-deactivate="' + d.userId + '">Deaktiveeri konto</button>' + pin("n-delete", "DELETE /api/admin-user/{userId}")
+      : '<button type="button" class="sbtn small" data-restore="' + d.userId + '">Taasta konto</button>' + pin("n-restore", "PUT /api/admin-user/{userId}/restore");
+    return back + '<div class="viewhead"><h2>Konto<span class="sub">' + esc(d.email) + (d.status === "D" ? ' <span class="badge deleted">Deaktiveeritud</span>' : "") + '</span></h2></div>' +
       '<div class="pins">' + pin("n-detail", "GET /api/admin-user/{userId}") + '</div>' +
-      (ui.success ? '<div class="ok-alert" role="status">' + esc(ui.success) + '</div>' : "") +
-      '<div class="cardrow"><fieldset><legend>Konto</legend><dl class="dl">' + row("E-post", esc(d.email)) + row("Roll", roleBadge(d.roleName)) + row("Staatus", statusBadge(d.status)) + row("Loodud", dateTime(d.createdAt)) + '</dl></fieldset>' +
+      '<fieldset><legend>Konto</legend><dl class="dl">' + row("E-post", esc(d.email)) + row("Roll", ROLE_LABEL[d.roleName]) + row("Staatus", statusBadge(d.status)) + row("Loodud", dateTime(d.createdAt)) + '</dl></fieldset>' +
       '<fieldset><legend>Osaleja</legend>' + (d.participantId === null ? '<span class="empty-inline">Kontol pole osaleja andmeid</span>' :
-        '<dl class="dl">' + row("Nimi", esc(d.participantName)) + (d.profileEmail !== d.email ? row("E-post", '<a href="mailto:' + esc(d.profileEmail) + '">' + esc(d.profileEmail) + '</a>') : "") + row("Telefon", '<a href="tel:' + esc(d.phone) + '">' + esc(d.phone) + '</a>') + '</dl>') + '</fieldset></div>' +
+        '<dl class="dl">' + row("Nimi", esc(d.participantName)) + (d.profileEmail !== d.email ? row("E-post", '<a href="mailto:' + esc(d.profileEmail) + '">' + esc(d.profileEmail) + '</a>') : "") + row("Telefon", '<a href="tel:' + esc(d.phone) + '">' + esc(d.phone) + '</a>') + '</dl>') + '</fieldset>' +
       '<fieldset><legend>Registreerumised</legend>' + regs + '</fieldset>' +
-      '<div class="actions">' + action + '</div>';
+      '<div class="actions">' + action + inlineAlerts() + '</div>';
   }
   function renderView() { document.getElementById("view").innerHTML = ui.route === "list" ? renderList() : renderDetail(); }
   function renderKv() {

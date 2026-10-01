@@ -330,7 +330,8 @@ td .linkish { font-size: .84rem; }
     <nav class="sitenav" aria-label="Navbar (wireframe)">
       <span class="logo" aria-hidden="true"></span><span>Koolitused</span><span>Teenused</span><span>Ettevõttest</span><span>Kontakt</span>
       <span class="admin"><button type="button" id="b-admin" aria-expanded="false" aria-controls="admin-menu">Admin ▾</button>
-        <span class="menu" id="admin-menu" hidden><button type="button" data-nav="/admin-enquiries">Koolituste päringud</button><button type="button" class="cur" data-nav="/admin-registrations">Registreerumised</button><hr><button type="button" data-nav="/admin-trainings">Koolitused</button><button type="button" data-nav="/admin-all-courses">Koolituste kalender</button><hr><button type="button" data-nav="/admin-lecturers">Koolitajad</button><button type="button" data-nav="/admin-rooms">Koolitusruumid</button></span></span>
+        <span class="menu" id="admin-menu" hidden><button type="button" data-nav="/admin-enquiries">Koolituste päringud</button><button type="button" class="cur" data-nav="/admin-registrations">Registreerumised</button><hr><button type="button" data-nav="/admin-trainings">Koolitused</button><button type="button" data-nav="/admin-all-courses">Koolituste kalender</button><hr><button type="button" data-nav="/admin-lecturers">Koolitajad</button><button type="button" data-nav="/admin-rooms">Koolitusruumid</button><hr><button type="button" data-nav="/admin-users">Kontod</button></span></span>
+      <span class="out" title="Minu profiil ▾ — adminil ainult &quot;Parool&quot; (/change-password)">👤 ▾</span>
       <span class="out">Logi välja</span>
     </nav>
     <div class="view" id="view"></div>
@@ -374,7 +375,7 @@ td .linkish { font-size: .84rem; }
   }
 
   /* ---------- Vahelehed (NavTabs.vue) — samad lingid mis navbari menüüs ---------- */
-  var ADMIN_TABS = [["/admin-enquiries", "Koolituste päringud"], ["/admin-registrations", "Registreerumised"], ["/admin-trainings", "Koolitused"], ["/admin-all-courses", "Koolituste kalender"], ["/admin-lecturers", "Koolitajad"], ["/admin-rooms", "Koolitusruumid"]];
+  var ADMIN_TABS = [["/admin-enquiries", "Koolituste päringud"], ["/admin-registrations", "Registreerumised"], ["/admin-trainings", "Koolitused"], ["/admin-all-courses", "Koolituste kalender"], ["/admin-lecturers", "Koolitajad"], ["/admin-rooms", "Koolitusruumid"], ["/admin-users", "Kontod"]];
   var TRAINING_TABS = [["/trainings", "Meie koolitused"], ["/courses", "Koolituste kalender"]];
   function viewTabs(tabs, current) {
     return '<nav class="vtabs" aria-label="Vahelehed">' + tabs.map(function (t) { return '<button type="button" data-vtab="' + t[0] + '"' + (t[0] === current ? ' aria-current="page"' : "") + '>' + t[1] + '</button>'; }).join("") + '</nav>';
@@ -394,7 +395,7 @@ td .linkish { font-size: .84rem; }
       "Frontend rada: /admin-registrations",
       "",
       "Vaatega seotud lisainfo:",
-      "Ülal vahelehed (AdminTabs.vue): Koolituste päringud | Registreerumised | Koolitused | Koolituste kalender | Koolitajad | Koolitusruumid — samad lingid ja järjekord mis menüüs \"Admin\", selle vaate vaheleht on aktiivne. Kitsal ekraanil on vahelehed ühel keritaval real, aktiivne keritakse keskele.",
+      "Ülal vahelehed (AdminTabs.vue): Koolituste päringud | Registreerumised | Koolitused | Koolituste kalender | Koolitajad | Koolitusruumid | Kontod — samad lingid ja järjekord mis menüüs \"Admin\", selle vaate vaheleht on aktiivne. Kitsal ekraanil on vahelehed ühel keritaval real, aktiivne keritakse keskele.",
       "Avaneb navbari menüüst \"Admin\" → \"Registreerumised\" (kohe \"Koolituste päringud\" järel). Pealkiri \"Registreerumised\". Tabelis Registreerus | Osaleja | E-post | Koolitus | Toimumisaeg | Tasunud ✓/✗ | Vajab sülearvutit ✓/✗ | Staatus (Registreerunud / Loobunud) | Tegevused. Koolituse nimi on kasutajaliidese keeles (puudumisel põhikeeles), keele vahetusel laaditakse nimekiri uuesti. Toimumisaeg on link → /admin-course?courseId={id}; toimunud toimumiskorral märgis \"Toimunud\". Loobunu rida on tuhmim.",
       "Lüliti \"Näita ka loobunud\" (vaikimisi väljas → ainult registreerunud) → includeCancelled=true; lüliti \"Näita ka toimunud\" (vaikimisi väljas → ainult toimumiskorrad, mille lõpp on täna või hiljem) → includePast=true; lüliti muutmisel laaditakse nimekiri uuesti. Otsinguväli filtreerib frontendis osaleja nime, e-posti ja koolituse nime järgi. Veerud Registreerus, Osaleja, Koolitus, Toimumisaeg, Tasunud, Vajab sülearvutit ja Staatus on sorteeritavad frontendis (1. klõps kasvav, 2. kahanev, 3. vaikimisi = registreerumise aeg, uusimad eespool). Leheküljestust pole. All \"Kokku N registreerumist\".",
       "Silma ikoon \"Vaata\" → /admin-registration?courseParticipantId={id}."

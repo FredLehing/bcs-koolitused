@@ -261,7 +261,8 @@ td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
     <nav class="sitenav" aria-label="Navbar (wireframe)">
       <span class="logo" aria-hidden="true"></span><span>Koolitused</span><span>Teenused</span><span>Ettevõttest</span><span>Kontakt</span>
       <span class="admin"><button type="button" id="b-admin" aria-expanded="false" aria-controls="admin-menu">Admin ▾</button>
-        <span class="menu" id="admin-menu" hidden><button type="button" data-nav="/admin-enquiries">Koolituste päringud</button><button type="button" data-nav="/admin-registrations">Registreerumised</button><hr><button type="button" class="cur" data-nav="/admin-trainings" aria-current="page">Koolitused</button><button type="button" data-nav="/admin-all-courses">Koolituste kalender</button><hr><button type="button" data-nav="/admin-lecturers">Koolitajad</button><button type="button" data-nav="/admin-rooms">Koolitusruumid</button></span></span>
+        <span class="menu" id="admin-menu" hidden><button type="button" data-nav="/admin-enquiries">Koolituste päringud</button><button type="button" data-nav="/admin-registrations">Registreerumised</button><hr><button type="button" class="cur" data-nav="/admin-trainings" aria-current="page">Koolitused</button><button type="button" data-nav="/admin-all-courses">Koolituste kalender</button><hr><button type="button" data-nav="/admin-lecturers">Koolitajad</button><button type="button" data-nav="/admin-rooms">Koolitusruumid</button><hr><button type="button" data-nav="/admin-users">Kontod</button></span></span>
+      <span class="out" title="Minu profiil ▾ — adminil ainult &quot;Parool&quot; (/change-password)">👤 ▾</span>
       <span class="out">Logi välja</span>
     </nav>
     <div class="view" id="view"></div>
@@ -311,7 +312,7 @@ td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
   }
 
   /* ---------- Vahelehed (NavTabs.vue) — samad lingid mis navbari menüüs ---------- */
-  var ADMIN_TABS = [["/admin-enquiries", "Koolituste päringud"], ["/admin-registrations", "Registreerumised"], ["/admin-trainings", "Koolitused"], ["/admin-all-courses", "Koolituste kalender"], ["/admin-lecturers", "Koolitajad"], ["/admin-rooms", "Koolitusruumid"]];
+  var ADMIN_TABS = [["/admin-enquiries", "Koolituste päringud"], ["/admin-registrations", "Registreerumised"], ["/admin-trainings", "Koolitused"], ["/admin-all-courses", "Koolituste kalender"], ["/admin-lecturers", "Koolitajad"], ["/admin-rooms", "Koolitusruumid"], ["/admin-users", "Kontod"]];
   var TRAINING_TABS = [["/trainings", "Meie koolitused"], ["/courses", "Koolituste kalender"]];
   function viewTabs(tabs, current) {
     return '<nav class="vtabs" aria-label="Vahelehed">' + tabs.map(function (t) { return '<button type="button" data-vtab="' + t[0] + '"' + (t[0] === current ? ' aria-current="page"' : "") + '>' + t[1] + '</button>'; }).join("") + '</nav>';
@@ -824,7 +825,7 @@ td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
     "Frontend rada: /admin-trainings",
     "",
     "Vaatega seotud lisainfo:",
-    "Ülal vahelehed (AdminTabs.vue): Koolituste päringud | Registreerumised | Koolitused | Koolituste kalender | Koolitajad | Koolitusruumid — samad lingid ja järjekord mis menüüs \"Admin\", selle vaate vaheleht on aktiivne. Kitsal ekraanil on vahelehed ühel keritaval real, aktiivne keritakse keskele.",
+    "Ülal vahelehed (AdminTabs.vue): Koolituste päringud | Registreerumised | Koolitused | Koolituste kalender | Koolitajad | Koolitusruumid | Kontod — samad lingid ja järjekord mis menüüs \"Admin\", selle vaate vaheleht on aktiivne. Kitsal ekraanil on vahelehed ühel keritaval real, aktiivne keritakse keskele.",
     "Tabeli rida = üks koolitus; vaikimisi ainult aktiivsed (status \"U\" ja \"P\"), kustutatud (\"D\") näeb staatuse filtriga \"Kustutatud\". Nimi ja kategooria kuvatakse kasutajaliidese keeles (store'i contentLang); kui selles keeles tõlget pole, kuvatakse põhikeele oma. Keele vahetamisel navbaris laaditakse tabel, kategooriad, rahastustüübid ja nimede ettepanekud uuesti; otsing, filtrid, sorteerimine ja leht jäävad alles.",
     "Otsinguväli otsib ainult koolituse nimest; trükkimise ajal pakub datalist nimesid (GET /api/training-titles). Otsing käivitub nupu \"Otsi\" või Enteri peale. Nupu kõrval on küsimärgi ikoon, mille tooltip selgitab: otsitakse nimest, iga sõna peab esinema, käändeid ei kohandata; nimede valikus on ainult aktiivsed koolitused — kustutatud koolituse leidmiseks vali filtrites Staatus \"Kustutatud\".",
     "Kaart \"Otsingu filtrid\" on vaikimisi peidus (link \"▾ Ava otsingu filtrid\" / \"▴ Peida otsingu filtrid\"). Filtrid rakenduvad nupuga \"Filtreeri\" ja jäävad kehtima ka peidetud kaardiga (märk \"N filtrit aktiivne\"); \"Tühjenda filtrid\" taastab vaikimisi väärtused.",

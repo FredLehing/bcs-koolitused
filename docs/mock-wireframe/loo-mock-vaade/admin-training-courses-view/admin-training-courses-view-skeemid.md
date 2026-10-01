@@ -351,7 +351,7 @@ Vormis (muutmise olek) on sama komponent; `event-course-deleted` järel suunatak
 
 ```text
 Create a desktop wireframe of an admin page "Koolituse kalender" in a web app.
-Top: site navigation bar with logo and links (Koolitused, Teenused, Ettevõttest, Kontakt), a dropdown "Admin ▾" and "Logi välja" on the right.
+Top: site navigation bar with logo and links (Koolitused, Teenused, Ettevõttest, Kontakt), a dropdown "Admin ▾", a user icon dropdown "👤 ▾" (Minu profiil) and "Logi välja" on the right.
 Header row: page title "Koolituse kalender" on the left, a secondary button "Koolitused" and a primary button "+ Lisa toimuv koolitus" on the right.
 Below: a card with the training title "Java algkursus", a green badge "Publitseeritud" and small links "Vaata" and "Muuda". Inside the card a two-column list of label/value pairs: "Kategooria: Programmeerimine", "Õppekeel: Estonian flag", "Toimumiskoht: BCS Koolitus", "Koolitajad: Rain Tüür, Meelis Teern", "Rahastus: Töötukassa", "Sätted: • Tellitav • Esile tõstetud".
 Below the card: a small text link with a down arrow "▾ Näita kirjeldust" (the description card is collapsed).
@@ -367,7 +367,7 @@ Below the table: text "Kokku 4 toimumiskorda".
 
 ```text
 Create a desktop wireframe of an admin form page "Uus toimumiskord" in a web app.
-Top: site navigation bar with logo and links (Koolitused, Teenused, Ettevõttest, Kontakt), a dropdown "Admin ▾" and "Logi välja" on the right.
+Top: site navigation bar with logo and links (Koolitused, Teenused, Ettevõttest, Kontakt), a dropdown "Admin ▾", a user icon dropdown "👤 ▾" (Minu profiil) and "Logi välja" on the right.
 Header row: page title "Uus toimumiskord" with a subtitle "Java algkursus" below it, and a secondary button "Kalender" on the right.
 Main area: a card titled "Toimumiskorra andmed" with a form in a two-column grid:
 "Algus *" date input, "Lõpp *" date input,

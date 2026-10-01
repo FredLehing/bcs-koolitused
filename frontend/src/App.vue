@@ -19,7 +19,7 @@
               <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                 {{ $t('navbar.trainings') }}
               </a>
-              <div class="dropdown-menu bg-bcs-primary">
+              <div @click="closeNavbarDropdowns" class="dropdown-menu bg-bcs-primary">
                 <RouterLink class="nav-link" :to="{ name: 'trainingsRoute' }">
                   {{ $t('navbar.ourTrainings') }}
                 </RouterLink>
@@ -43,7 +43,7 @@
               <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                 {{ $t('navbar.admin') }}
               </a>
-              <div class="dropdown-menu bg-bcs-primary">
+              <div @click="closeNavbarDropdowns" class="dropdown-menu bg-bcs-primary">
                 <!-- Rühmad: igapäevane töö (päringud, registreerumised) | koolitused | koolitajad ja ruumid | kontod.
                      "Lisa uus" nupud on nimekirja vaadetes -->
                 <RouterLink class="nav-link" :to="{ name: 'adminEnquiriesRoute' }">
@@ -104,7 +104,7 @@
               >
                 <PhUserCircle :size="20" />
               </button>
-              <div class="dropdown-menu dropdown-menu-end">
+              <div @click="closeNavbarDropdowns" class="dropdown-menu dropdown-menu-end">
                 <h6 class="dropdown-header">{{ $t('navbar.profile') }}</h6>
                 <template v-if="!userIsAdmin">
                   <RouterLink class="dropdown-item" :to="{ name: 'participantDetailsRoute' }">
@@ -164,6 +164,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { PhUserCircle } from '@phosphor-icons/vue'
+import { Dropdown } from 'bootstrap'
 import { useRoute } from 'vue-router'
 import FooterComponent from '@/components/FooterComponent.vue'
 import ConfirmModal from '@/components/modals/ConfirmModal.vue'
@@ -194,7 +195,24 @@ function refreshSessionState() {
   userIsAdmin.value = SessionStorageService.userIsAdmin()
 }
 
-watch(() => route.fullPath, refreshSessionState, { immediate: true })
+// Navbari rippmenüü suletakse ise: menüüpunktile klõpsates (ka siis, kui see on juba avatud leht)
+// ja igal marsruudi muutusel. Bootstrapi enda sulgemine sõltub nupu .show klassist, mille Vue
+// :class-iga üle kirjutab; hide() vaatab menüü enda .show klassi.
+function closeNavbarDropdowns() {
+  document.querySelectorAll('.navbar .dropdown-menu.show').forEach((dropdownMenu) => {
+    const dropdownToggle = dropdownMenu.parentElement.querySelector('[data-bs-toggle="dropdown"]')
+    Dropdown.getOrCreateInstance(dropdownToggle).hide()
+  })
+}
+
+watch(
+  () => route.fullPath,
+  () => {
+    refreshSessionState()
+    closeNavbarDropdowns()
+  },
+  { immediate: true },
+)
 
 function logout() {
   isLogoutModalOpen.value = false

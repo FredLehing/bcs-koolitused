@@ -24,6 +24,8 @@ Menüü on lühem ja töö järgi järjestatud: ülal igapäevane töö (vastust
 | — | eraldaja | | | | |
 | 5 | Koolitajad | `/admin-lecturers` | `navbar.manageLecturers` | Koolitajad | Trainers |
 | 6 | Koolitusruumid | `/admin-rooms` | `navbar.manageRooms` | Koolitusruumid | Training rooms |
+| — | eraldaja | | | | |
+| 7 | Kontod | `/admin-users` | `navbar.manageUsers` | Kontod | Accounts |
 
 Eemaldatakse: "Lisa uus koolitus" (`/training-form`) ja "Lisa uus koolitaja" (`/lecturer-form`). i18n võtmed `navbar.addTraining` ja `navbar.addLecturer` jäävad — neid kasutavad `AdminTrainingsView` ja `AdminLecturersView` päise nupud.
 
@@ -36,6 +38,8 @@ Eemaldatakse: "Lisa uus koolitus" (`/training-form`) ja "Lisa uus koolitaja" (`/
 - **Prototüübi kest:** sama suunamine; külgriba admini vaated on menüü järjekorras.
 
 Samad lingid on admini nimekirjavaadetes ka vahelehtedena — vt `view-tabs.md`.
+
+**Täiendus 2026-10-01:** neljas rühm "Kontod" → `/admin-users` (kontode haldus, vt `docs/mock-wireframe/loo-mock-vaade/admin-users-view/admin-users-view-skeemid.md`). Admini profiiliikooni "👤 ▾" all on ainult "Parool" (vt `profile-view/profile-view-skeemid.md`). Kõik navbari rippmenüüd sulguvad menüüpunktile klõpsates ja lehe vahetusel (`closeNavbarDropdowns()` `App.vue`-s).
 
 ## Komponendid ja failistruktuur
 

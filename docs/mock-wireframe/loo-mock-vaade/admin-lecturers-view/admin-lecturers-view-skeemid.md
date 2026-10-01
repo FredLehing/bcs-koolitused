@@ -542,8 +542,8 @@ Lipule klikkimine päringut ei tee — see teeb `router.replace`-i ja käivitab 
 
 ```text
 Create a desktop wireframe of an admin page "Koolitajad" in a web app.
-Top: site navigation bar with logo and links (Koolitused, Teenused, Ettevõttest, Kontakt), an open dropdown "Admin ▾" with items "Koolituste päringud", "Registreerumised", a divider, "Koolitused", "Koolituste kalender", a divider, "Koolitajad" (highlighted) and "Koolitusruumid", and "Logi välja" on the right.
-Below the navigation bar: a tab bar "Koolituste päringud | Registreerumised | Koolitused | Koolituste kalender | Koolitajad | Koolitusruumid" with "Koolitajad" as the active tab.
+Top: site navigation bar with logo and links (Koolitused, Teenused, Ettevõttest, Kontakt), an open dropdown "Admin ▾" with items "Koolituste päringud", "Registreerumised", a divider, "Koolitused", "Koolituste kalender", a divider, "Koolitajad" (highlighted), "Koolitusruumid", a divider and "Kontod",, a user icon dropdown "👤 ▾" (Minu profiil) and "Logi välja" on the right.
+Below the navigation bar: a tab bar "Koolituste päringud | Registreerumised | Koolitused | Koolituste kalender | Koolitajad | Koolitusruumid | Kontod" with "Koolitajad" as the active tab.
 Header row: page title "Koolitajad" on the left and a primary button "+ Lisa uus koolitaja" on the right.
 Below the header: a search text input "Otsi nime järgi…" and a toggle switch "Näita kustutatud" (on).
 Main area: a data table with columns "Nimi", "Ametinimetus", "Tõlked", "Koolitusi", "Tulevasi toimumiskordi", "Uuendatud", "Tegevused". No photos.
@@ -559,7 +559,7 @@ Below the table: text "Kokku 9 koolitajat".
 
 ```text
 Create a desktop wireframe of an admin form page "Muuda koolitajat" in a web app.
-Top: site navigation bar with logo and links, a dropdown "Admin ▾" and "Logi välja" on the right.
+Top: site navigation bar with logo and links, a dropdown "Admin ▾", a user icon dropdown "👤 ▾" (Minu profiil) and "Logi välja" on the right.
 Header row: page title "Muuda koolitajat" with subtitle "Rain Tüür" on the left and a secondary button "Koolitajad" on the right.
 Below the header: a row of small language flag buttons "et" (colored, selected) and "en" (colored).
 First card titled "Koolitaja andmed": a text input "Täisnimi *" with value "Rain Tüür"; a field "Pilt" with a round photo preview (80 px), a button "Vali pilt", a button "Eemalda" and a small hint "PNG, JPEG või WebP, kuni 2 MB".

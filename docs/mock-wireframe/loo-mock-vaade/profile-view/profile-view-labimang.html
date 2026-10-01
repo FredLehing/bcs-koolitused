@@ -233,6 +233,7 @@ td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .viewhead .sub { display: block; font-size: .9rem; color: var(--ink-soft); font-weight: 400; margin-top: 2px; }
 .headbtns { display: flex; flex-wrap: wrap; gap: 8px; }
 .sitenav .menu hr { border: 0; border-top: 1.5px dashed var(--line); margin: 3px 4px; }
+.menu .mhead { font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-soft); padding: 4px 8px 2px; }
 .flags { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .flagbtn { display: inline-flex; gap: 6px; align-items: center; font-family: var(--font-sketch); font-size: .85rem; border: 1.5px solid var(--line); border-radius: 6px; background: var(--field); color: var(--ink); padding: 2px 8px; cursor: pointer; }
 .flagbtn:hover { border-color: var(--accent); }
@@ -280,6 +281,8 @@ tr.is-deleted td { color: var(--ink-soft); }
 .embed .sitenav { display: none; }
 /* AdminRoomsView ja RoomFormView lisad */
 .ok-alert { border: 1.5px solid var(--ok); background: color-mix(in srgb, var(--ok) 14%, transparent); color: var(--ink); border-radius: 6px; padding: 6px 10px; font-size: .88rem; }
+.err-alert { border: 1.5px solid var(--del); background: color-mix(in srgb, var(--del) 12%, transparent); color: var(--ink); border-radius: 6px; padding: 6px 10px; font-size: .88rem; }
+.fld .val { padding: 4px 0; font-family: var(--font-sketch); font-size: .95rem; }
 .ok-alert .x, .alert .x { float: right; background: none; border: 0; color: var(--ink); cursor: pointer; font-size: 1rem; line-height: 1; padding: 0 2px; }
 .ph { display: grid; gap: 10px; justify-items: start; padding: 20px 0; }
 .view fieldset input[type="text"] { max-width: 420px; }
@@ -325,7 +328,6 @@ td .linkish { font-size: .84rem; }
 .pwgrid { display: grid; gap: 12px; }
 .regs { display: grid; gap: 10px; }
 .reg { border: 1.5px solid var(--sketch); border-radius: 8px; padding: 8px 12px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: center; }
-.reg.is-cancelled { border-style: dashed; color: var(--ink-soft); }
 .reg .t { font-weight: 700; }
 .reg .meta { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; font-size: .85rem; }
 .reg .meta .date { font-variant-numeric: tabular-nums; }
@@ -348,8 +350,8 @@ td .linkish { font-size: .84rem; }
 <div class="page">
   <header class="intro">
     <h1>Minu profiil — läbimäng</h1>
-    <p>Sisseloginud kasutaja profiil mockupi järgi (<code>BCS.pdf</code> leht 14) <strong>nelja eraldi vaatena</strong>: <code>ParticipantDetailsView</code> (<code>/participant-details</code>), <code>ParticipantCoursesView</code> (<code>/participant-courses</code>), <code>ParticipantCertificatesView</code> (<code>/participant-certificates</code>) ja <code>ChangePasswordView</code> (<code>/change-password</code>). Neid avatakse navbari rippmenüüst <strong>„Minu profiil ▾“</strong> ja vasakult profiilimenüüst (<code>ProfileMenu.vue</code>). Proovi andmeid muuta (ka e-posti, nt <code>liis.kuusk@example.com</code> annab vea „juba kasutusel“), tulevasest koolitusest loobuda ja parooli muuta (praegune parool on <code>parool123</code>). Paremal all näed, mis päringud tehti ja mida backend vastas; kollased sildid viivad API märkmete juurde.</p>
-    <p>Andmed on <code>3_import.sql</code>-ist (täna = 01/10/2026). Kasutaja on Anna Saar (<code>userId = 2</code>, osaleja 1), admin on <code>admin@vali-it.ee</code> (<code>userId = 1</code>, osalejat pole) — adminil on „Minu profiil ▾“ all ainult „Parool“, osaleja vaated suunavad ta <code>/not-authorized</code>. Anna registreerumised 10 (Vue.js, veebis) ja 11 (Spring Boot, loobunud) on seed'i <strong>ettepanek</strong>. Uued teenused ja DTO-d on samuti ettepanek (vt <code>profile-view-skeemid.md</code>). Seed'is erinevad Anna profiili e-post (<code>anna.saar@example.com</code>) ja konto e-post (<code>kasutaja@vali-it.ee</code>); pärast esimest salvestust on need samad. Muudatused kehtivad ainult selles läbimängus.</p>
+    <p>Sisseloginud kasutaja profiil mockupi järgi (<code>BCS.pdf</code> leht 14) <strong>nelja eraldi vaatena</strong>: <code>ParticipantDetailsView</code> (<code>/participant-details</code>), <code>ParticipantCoursesView</code> (<code>/participant-courses</code>), <code>ParticipantCertificatesView</code> (<code>/participant-certificates</code>) ja <code>ChangePasswordView</code> (<code>/change-password</code>). Neid avatakse navbari profiiliikooni rippmenüüst <strong>„👤 ▾“</strong> (menüü pealkiri „Minu profiil“) ja vasakult profiilimenüüst (<code>ProfileMenu.vue</code>). Proovi andmeid muuta (ka e-posti, nt <code>liis.kuusk@example.com</code> annab vea „juba kasutusel“), tulevasest koolitusest loobuda ja parooli muuta (praegune parool on <code>parool123</code>). Paremal all näed, mis päringud tehti ja mida backend vastas; kollased sildid viivad API märkmete juurde.</p>
+    <p>Andmed on <code>3_import.sql</code>-ist (täna = 01/10/2026). Kasutaja on Anna Saar (<code>userId = 2</code>, osaleja 1), admin on <code>admin@vali-it.ee</code> (<code>userId = 1</code>, osalejat pole) — adminil on „👤 ▾“ (Minu profiil) all ainult „Parool“, osaleja vaated suunavad ta <code>/not-authorized</code>. Annal on kaks registreerumist: 1 (Java algkursus, tulevane — saab loobuda) ja 2 (toimunud). Läbimäng vastab koodile (teenused, DTO-d, tekstid ja käitumine; vt <code>profile-view-skeemid.md</code>). Seed'is erinevad Anna profiili e-post (<code>anna.saar@example.com</code>) ja konto e-post (<code>kasutaja@vali-it.ee</code>); pärast esimest salvestust on need samad. Muudatused kehtivad ainult selles läbimängus.</p>
     <div class="toolbar">
       <span class="lbl-soft">Kes on sisse loginud:</span>
       <button class="tbtn" type="button" data-as="user">Kasutaja (Anna Saar)</button>
@@ -411,19 +413,21 @@ td .linkish { font-size: .84rem; }
   }
 
   /* ---------- Märkmed (hiljem failidesse markmed/participant-details-view-markmed.md, participant-courses-view-markmed.md, participant-certificates-view-markmed.md, change-password-view-markmed.md) ---------- */
-  var COMMON_NOTE = "Avaneb navbari rippmenüüst \"Minu profiil ▾\" (\"Logi välja\" kõrval). Osalejal on menüüs Minu andmed, Minu koolitused, Tunnistused ja Parool; adminil ainult Parool. Osalejal on vasakul profiilimenüü (ProfileMenu.vue — samad neli linki, aktiivne esile tõstetud; kitsal ekraanil horisontaalselt sisu kohal), mockupi järgi; adminil profiilimenüüd pole. Sisselogimata kasutaja suunatakse /login?redirect={selle vaate rada}. userId tuleb sessionStorage'ist.";
+  var COMMON_NOTE = "Avaneb navbari profiiliikooni rippmenüüst \"👤 ▾\" (\"Logi välja\" kõrval; ikoon PhUserCircle, nimi \"Minu profiil\" on title/aria-label-is ja menüü pealkirjas). Osalejal on menüüs Minu andmed, Minu koolitused, Tunnistused ja Parool; adminil ainult Parool. Profiilivaates on ikooninupp sinise äärisega. Rippmenüü sulgub menüüpunktile klõpsates ja lehe vahetusel. Osalejal on vasakul profiilimenüü (ProfileMenu.vue — samad neli linki nav-pills stiilis, aktiivne esile tõstetud; kitsal ekraanil horisontaalselt sisu kohal); adminil profiilimenüüd pole. Sisselogimata kasutaja suunatakse /login?redirect={selle vaate rada} (router guard). userId tuleb sessionStorage'ist.";
   function viewNote(file, path, lines, role) { return { title: file, text: ["Roll: " + (role || "Kasutaja (osaleja); admin → /not-authorized"), "Failinimi: " + file, "Frontend rada: " + path, "", "Vaatega seotud lisainfo:", COMMON_NOTE].concat(lines).join("\n") }; }
   var VIEW_NOTES = {
     details: viewNote("ParticipantDetailsView.vue", "/participant-details", [
-      "Pealkiri \"Minu andmed\", paremal nupp \"Muuda\". Eesnimi, Perekonnanimi, Telefon, E-post 2×2 paigutuses, vaikimisi ainult lugemiseks (GET /api/user/{userId}/participant). \"Muuda\" → väljad muudetavad, nupud \"Salvesta\" ja \"Tühista\" (taastab laaditud väärtused). Kõik väljad kohustuslikud, e-post korrektne, telefon kuni 20 märki. E-posti all vihje \"Selle e-postiga logid ka sisse.\"",
-      "\"Salvesta\" → PUT /api/user/{userId}/profile; EMAIL_TAKEN → viga e-posti välja all, vorm jääb lahti; edu → teade \"Andmed salvestatud\", andmed laaditakse uuesti ja vorm läheb lugemisrežiimi. Kui kasutajal osalejat pole (erandjuht — konto loomine loob osaleja kohe): väljad tühjad, e-post = konto e-post ja teade \"Sinu kontol pole veel profiiliandmeid. Lisa need nupuga „Muuda“.\""]),
+      "Kaardi pealkiri \"Minu andmed\". GET /api/user/{userId}/participant. Vaikimisi ainult lugemiseks: Eesnimi, Perekonnanimi, Telefon, E-post 2×2 paigutuses (tühi väärtus → \"—\"), all nupp \"Muuda\". \"Muuda\" → väljad muudetavad (*), e-posti all vihje \"Selle e-postiga logid ka sisse\", nupud \"Salvesta\" ja \"Tühista\" (taastab laaditud väärtused).",
+      "Frontendi kontroll: kõik väljad täidetud (\"Täida kõik kohustuslikud väljad\"), e-posti kuju (\"Kontrolli e-posti aadressi\"); telefon on piiratud 20 märgiga. Teated näidatakse nuppude kõrval (InlineAlerts.vue). \"Salvesta\" → PUT /api/user/{userId}/profile (väärtused trimmitud); 403 EMAIL_TAKEN ja 400 → backendi teade, vorm jääb lahti; edu → \"Andmed salvestatud\" (hääbub ise), vaade võtab salvestatud väärtused ja läheb lugemisrežiimi (uuesti ei laadita).",
+      "Kui kasutajal osalejat pole (erandjuht — konto loomine loob osaleja kohe): nimed ja telefon \"—\", e-post = konto e-post; salvestamisel luuakse osaleja."]),
     courses: viewNote("ParticipantCoursesView.vue", "/participant-courses", [
-      "Pealkiri \"Minu koolitused\". GET /api/user/{userId}/registrations?contentLang={UI keel} (keele vahetusel uuesti). Plokid \"Tulevased\" (lõpp täna või hiljem, alguse järgi kasvavalt) ja \"Toimunud\" (uusimad eespool). Igal real koolituse nimi lingina → /course?courseId={id}, toimumisaeg dd/MM/yyyy – dd/MM/yyyy, vorm (Kohapeal / Veebis / Kohapeal + veebis), staatus (CourseParticipantStatusBadge: Registreerunud / Loobunud), Tasutud / Tasumata, tühistatud toimumiskorral \"Tühistatud\". Loobunud rida tuhmim.",
-      "Nupp \"Loobu\" ainult kui canCancel → ConfirmModal \"Kas soovid koolitusest loobuda?\" → PUT /api/user/{userId}/registration/{courseParticipantId}/cancel → teade \"Oled koolitusest loobunud\" ja nimekiri laaditakse uuesti. Tühi nimekiri: \"Sa pole veel ühelegi koolitusele registreerunud.\" + link \"Vaata koolituste kalendrit\" → /courses."]),
+      "Kaardi pealkiri \"Minu koolitused\". GET /api/user/{userId}/registrations?contentLang={UI keel} (keele vahetusel uuesti). Plokk \"Tulevased\" (lõpp täna või hiljem, alguse järgi kasvavalt; tühjana \"Tulevasi koolitusi pole.\") ja plokk \"Toimunud\" (uusimad eespool; ainult kui on toimunuid). Iga rida (ParticipantRegistrationItem.vue): koolituse nimi — avatud/täis toimumiskorral link → /course?courseId={id}, muidu tekst; toimumisaeg dd/MM/yyyy – dd/MM/yyyy · vorm (Kohapeal / Veebis / Kohapeal + Veebis); märgised Registreerunud / Loobunud (CourseParticipantStatusBadge), \"Tühistatud\" (tühistatud toimumiskord), Tasutud / Tasumata.",
+      "Nupp \"Loobu\" ainult kui canCancel → ConfirmModal \"Koolitusest loobumine\" / \"Kas soovid koolitusest „{koolitus}“ loobuda?\" (\"Jah, loobu\" / \"Sulge\") → PUT /api/user/{userId}/registration/{courseParticipantId}/cancel → \"Oled koolitusest loobunud\" ja nimekiri laaditakse uuesti. 403 CANCEL_NOT_ALLOWED / 404 → backendi teade, nimekiri laaditakse uuesti. Teated on kaardi ülaosas (InlineAlerts.vue). Tühi nimekiri: \"Sa pole veel ühelegi koolitusele registreerunud.\" + link \"Vaata koolitusi\" → /courses."]),
     certificates: viewNote("ParticipantCertificatesView.vue", "/participant-certificates", [
-      "Pealkiri \"Tunnistused\" ja tekst \"Tunnistused tulevad varsti — siia ilmuvad sinu läbitud koolituste tunnistused.\" Päringut pole (tunnistused tehakse hiljem)."]),
+      "Kaardi pealkiri \"Tunnistused\", ikoon (PhCertificate) ja tekst \"Tunnistused tulevad varsti — siia ilmuvad sinu läbitud koolituste tunnistused.\" Päringut pole (tunnistused tehakse hiljem)."]),
     password: viewNote("ChangePasswordView.vue", "/change-password", [
-      "Pealkiri \"Parool\". Praegune parool*, Uus parool* (vähemalt 8 märki), Korda uut parooli* (type=password). Frontendi kontroll: uus ≥ 8 märki, kordus klapib, uus ≠ praegune. \"Muuda parool\" → PUT /api/user/{userId}/password; INCORRECT_PASSWORD → viga välja \"Praegune parool\" all; edu → teade \"Parool muudetud\" ja väljad tühjaks."], "Kasutaja (osaleja) ja admin")
+      "Kaardi pealkiri \"Parool\". Praegune parool*, Uus parool* (vihje \"Vähemalt 8 märki\"), Korda uut parooli* (type=password). Adminil on ainult see kaart (kitsas, keskel), profiilimenüüd pole.",
+      "\"Salvesta\" (või Enter viimases väljas): frontendi kontroll järjest — kõik täidetud (\"Täida kõik kohustuslikud väljad\"), uus ≥ 8 märki (\"Parool peab olema vähemalt 8 märki pikk\"), kordus klapib (\"Paroolid ei ühti\"), uus ≠ praegune (\"Uus parool ei tohi olla sama mis praegune\"). → PUT /api/user/{userId}/password; 403 INCORRECT_PASSWORD ja 400 → backendi teade; edu → \"Parool muudetud\" ja väljad tühjaks. Teated nupu kõrval (InlineAlerts.vue)."], "Kasutaja (osaleja) ja admin")
   };
   var USER_NOT_FOUND = "HTTP: 404\nerrorCode: PRIMARY_KEY_NOT_FOUND\nmessage: \"Ei leidnud primary keyd 'userId' väärtusega: 123\"";
   var NOTES = [
@@ -441,7 +445,7 @@ td .linkish { font-size: .84rem; }
       "Väljad: firstName* (max 255), lastName* (max 255), email* (@Email, max 255), phone* (max 20)", "",
       "Response (200): NONE", "",
       "API teenuse lisainfo:",
-      "Väärtused trimmitakse. E-post on kasutaja jaoks üks: uuendatakse nii user.email (sisselogimine) kui ka profile.email. E-post ei tohi olla teisel kontol (tõstutundetu, enda konto välja arvatud). Osaleja olemasolul uuendatakse profile (first_name, last_name, phone, email, updated_at) ja participant.name = eesnimi + perekonnanimi. Kui kasutajal osalejat pole (nt admin), luuakse profile + participant (sama mis registreerumisel, ParticipantService.addParticipant). Ühes transaktsioonis.", "",
+      "Frontend saadab väärtused trimmituna, backend trimmib e-posti. E-post on kasutaja jaoks üks: uuendatakse nii user.email (sisselogimine) kui ka profile.email. E-post ei tohi olla teisel kontol (tõstutundetu, enda konto välja arvatud). Osaleja olemasolul uuendatakse profile (first_name, last_name, phone, email, updated_at) ja participant.name = eesnimi + perekonnanimi. Kui kasutajal osalejat pole (nt admin), luuakse profile + participant (sama mis registreerumisel, ParticipantService.addParticipant). Ühes transaktsioonis.", "",
       "Veateated:", USER_NOT_FOUND, "",
       "HTTP: 403\nerrorCode: EMAIL_TAKEN\nmessage: \"Selle e-posti aadressiga konto on juba olemas\"", "",
       "HTTP: 400\nerrorCode: INCORRECT_INPUT\nmessage: \"email: must be a well-formed email address\""].join("\n") },
@@ -452,13 +456,13 @@ td .linkish { font-size: .84rem; }
       "[", "  {", "    \"courseParticipantId\": 1,", "    \"courseId\": 1,", "    \"trainingTitle\": \"Java algkursus\",", "    \"startDate\": \"2026-10-05\",", "    \"endDate\": \"2026-10-09\",",
       "    \"isOnSite\": true,", "    \"isOnline\": false,", "    \"courseStatus\": \"O\",", "    \"status\": \"R\",", "    \"hasPaid\": true,", "    \"isPast\": false,", "    \"canCancel\": true", "  },", "  ...", "]", "",
       "API teenuse lisainfo:",
-      "Kasutaja osaleja (participant.user_id = userId) kõik course_participant read (ka loobunud). Kustutatud toimumiskordade (course.status = \"D\") ja kustutatud koolituste ridu ei tagastata. Koolituse nimi contentLang keeles, puudumisel põhikeeles. isOnSite = room_id olemas, isOnline = meeting_link olemas (hübriid = mõlemad). Veebilinki ennast ei tagastata. isPast = end_date < täna. canCancel = status \"R\" ja start_date > täna ja courseStatus ≠ \"X\". Järjestus start_date kasvavalt (frontend jagab tulevasteks ja toimunuteks). Osaleja puudumisel tühi list.", "",
+      "Kasutaja osaleja (participant.user_id = userId) kõik course_participant read (ka loobunud). Kustutatud toimumiskordade (course.status = \"D\") ridu ei tagastata. Koolituse nimi contentLang keeles, puudumisel põhikeeles. isOnSite = room_id olemas, isOnline = meeting_link olemas (hübriid = mõlemad). Veebilinki ennast ei tagastata. isPast = end_date < täna. canCancel = status \"R\" ja start_date > täna ja courseStatus ei ole \"X\" ega \"D\". Järjestus start_date kasvavalt (frontend jagab tulevasteks ja toimunuteks). Osaleja puudumisel tühi list. Tundmatu contentLang → põhikeele nimi.", "",
       "Veateated:", USER_NOT_FOUND].join("\n") },
     { id: "n-cancel", title: "PUT /api/user/{userId}/registration/{courseParticipantId}/cancel", text: [
       "API: PUT /api/user/{userId}/registration/{courseParticipantId}/cancel", "",
       "Response (200): NONE", "",
       "API teenuse lisainfo:",
-      "Kasutaja loobub ise: course_participant.status = \"C\", updated_at = nüüd. Registreerumine peab kuuluma kasutaja osalejale. Lubatud ainult kui status = \"R\", toimumiskord pole alanud (start_date > täna) ega tühistatud (status ≠ \"X\") — sama reegel mis canCancel. Tasumise väärtus jääb alles. Uuesti registreerumine käib POST /api/course/{courseId}/participant kaudu (C → R).", "",
+      "Kasutaja loobub ise: course_participant.status = \"C\", updated_at uueneb. Registreerumine peab kuuluma kasutaja osalejale. Lubatud ainult kui status = \"R\", toimumiskord pole alanud (start_date > täna) ega tühistatud/kustutatud (status ei ole \"X\" ega \"D\") — sama reegel mis canCancel. Tasumise väärtus jääb alles. Uuesti registreerumine käib POST /api/course/{courseId}/participant kaudu (C → R).", "",
       "Veateated:", USER_NOT_FOUND, "",
       "HTTP: 404\nerrorCode: REGISTRATION_NOT_FOUND\nmessage: \"Registreerumist ei leitud\"", "",
       "HTTP: 403\nerrorCode: CANCEL_NOT_ALLOWED\nmessage: \"Sellest registreerumisest ei saa enam loobuda\""].join("\n") },
@@ -475,14 +479,13 @@ td .linkish { font-size: .84rem; }
       "HTTP: 400\nerrorCode: INCORRECT_INPUT\nmessage: \"newPassword: size must be between 8 and 255\""].join("\n") }
   ];
 
-  /* ---------- Andmed (3_import.sql; registreerumised 10 ja 11 on seed'i ettepanek) ---------- */
+  /* ---------- Andmed (3_import.sql) ---------- */
   var TODAY = "2026-10-01";
-  var TRAININGS = { 1: { et: "Java algkursus", en: "Java Basics" }, 3: { et: "Spring Boot veebiarendus", en: "Spring Boot Web Development" }, 4: { et: "Vue.js esmaspetsialist", en: "Vue.js Essentials" } };
+  var TRAININGS = { 1: { et: "Java algkursus", en: "Java Basics" }, 3: { et: "Spring Boot veebiarendus", en: "Spring Boot Web Development" } };
   var COURSES = {
     1: { t: 1, start: "2026-10-05", end: "2026-10-09", st: "O", room: true, link: false },
     3: { t: 1, start: "2026-09-07", end: "2026-09-11", st: "O", room: true, link: false },
-    9: { t: 3, start: "2026-10-12", end: "2026-10-15", st: "O", room: true, link: false },
-    10: { t: 4, start: "2026-10-26", end: "2026-10-28", st: "O", room: false, link: true }
+    9: { t: 3, start: "2026-10-12", end: "2026-10-15", st: "O", room: true, link: false }
   };
   var ROLE_USER = { user: 2, admin: 1 };
   var ROLE_NAMES = { user: "Kasutaja", admin: "Admin", public: "Sisselogimata" };
@@ -497,16 +500,14 @@ td .linkish { font-size: .84rem; }
       nextParticipantId: 6,
       regs: [
         { id: 1, c: 1, p: 1, paid: true, st: "R" },
-        { id: 2, c: 3, p: 1, paid: true, st: "R" },
-        { id: 10, c: 10, p: 1, paid: false, st: "R" },
-        { id: 11, c: 9, p: 1, paid: false, st: "C" }
+        { id: 2, c: 3, p: 1, paid: true, st: "R" }
       ]
     };
   }
   var db, ui, logSteps = [], logTitle = "", openReq = -1;
   function freshUi(role) {
-    return { lang: ui ? ui.lang : "et", role: role, tab: "details", me: null, edit: false, form: null, errors: {}, success: "",
-      regs: null, coursesMsg: "", pw: { current: "", next: "", repeat: "" }, pwErrors: {}, pwMsg: "" };
+    return { lang: ui ? ui.lang : "et", role: role, tab: "details", me: null, edit: false, form: null, errMsg: "", success: "",
+      regs: null, coursesMsg: "", coursesErr: "", pw: { current: "", next: "", repeat: "" }, pwErr: "", pwMsg: "" };
   }
   function userId() { return ROLE_USER[ui.role]; }
 
@@ -573,7 +574,7 @@ td .linkish { font-size: .84rem; }
   function menuTabs() { return Object.keys(TAB_NAMES).filter(allowed); }
   function openTab(tab, title) {
     startStep(title);
-    ui.tab = tab; ui.success = ""; ui.coursesMsg = ""; ui.pwMsg = ""; ui.edit = false; ui.form = null; ui.errors = {}; ui.pwErrors = {};
+    ui.tab = tab; ui.success = ""; ui.coursesMsg = ""; ui.coursesErr = ""; ui.pwMsg = ""; ui.edit = false; ui.form = null; ui.errMsg = ""; ui.pwErr = "";
     ui.pw = { current: "", next: "", repeat: "" };
     if (ui.role !== "public" && allowed(tab)) {
       if (tab === "details") ui.me = apiGetParticipant();
@@ -583,30 +584,29 @@ td .linkish { font-size: .84rem; }
   }
   function startAs(role, title) { var keep = ui ? ui.tab : null; ui = freshUi(role); if (keep && !allowed(keep)) keep = "password"; openTab(keep || (TAB_NAMES[SHELL_Q.get("view")] ? SHELL_Q.get("view") : "details"), title); startAs.done = true; }
 
+  // Nagu ParticipantDetailsView.vue: esimene viga üldteatena nuppude kõrval (InlineAlerts)
   function validateProfile(f) {
-    var e = {};
-    if (!f.firstName.trim()) e.firstName = "Eesnimi on kohustuslik";
-    if (!f.lastName.trim()) e.lastName = "Perekonnanimi on kohustuslik";
-    if (!f.phone.trim()) e.phone = "Telefon on kohustuslik"; else if (f.phone.trim().length > 20) e.phone = "Telefon võib olla kuni 20 märki";
-    if (!f.email.trim()) e.email = "E-post on kohustuslik"; else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email.trim())) e.email = "Sisesta korrektne e-posti aadress";
-    return e;
+    if ([f.firstName, f.lastName, f.email, f.phone].some(function (v) { return !v.trim(); })) return "Täida kõik kohustuslikud väljad";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email.trim())) return "Kontrolli e-posti aadressi";
+    return "";
   }
   function saveProfile() {
     var f = ui.form;
-    ui.errors = validateProfile(f);
-    if (Object.keys(ui.errors).length) { startStep("„Salvesta“ — frontendi kontroll ei lasknud läbi (päringut ei tehtud)"); renderAll(); return; }
+    ui.success = ""; ui.errMsg = validateProfile(f);
+    if (ui.errMsg) { startStep("„Salvesta“ — frontendi kontroll ei lasknud läbi (päringut ei tehtud)"); renderAll(); return; }
     startStep("„Salvesta“ (Minu andmed)");
     var body = { firstName: f.firstName.trim(), lastName: f.lastName.trim(), email: f.email.trim(), phone: f.phone.trim() };
     var err = apiPutProfile(body);
-    if (err) { ui.errors = { email: err.message }; renderAll(); return; }
-    ui.me = apiGetParticipant(); ui.edit = false; ui.form = null; ui.success = "Andmed salvestatud";
+    if (err) { ui.errMsg = err.message; renderAll(); return; }
+    // Uuesti ei laadita — vaade võtab salvestatud väärtused (participant = { ...participant, ...body })
+    ui.me = Object.assign({}, ui.me, body); ui.edit = false; ui.form = null; ui.success = "Andmed salvestatud";
     renderAll();
   }
   function askCancel(id) {
     var r = ui.regs.filter(function (x) { return x.courseParticipantId === id; })[0];
-    document.getElementById("modal-root").innerHTML = '<div class="overlay"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="m-title"><h2 id="m-title">Kas soovid koolitusest loobuda?</h2><p>„' +
-      esc(r.trainingTitle) + "“ " + dmy(r.startDate) + " – " + dmy(r.endDate) + ". Loobumist ei saa ise tagasi võtta, aga võid hiljem uuesti registreeruda." + (r.hasPaid ? " Tasutud summa tagastamise osas võtab koolitaja sinuga ühendust." : "") +
-      '</p><div class="row"><button type="button" class="sbtn" id="m-no">Tühista</button><button type="button" class="sbtn danger" id="m-yes">Jah, loobu</button></div></div></div>';
+    ui.coursesMsg = ""; ui.coursesErr = "";
+    document.getElementById("modal-root").innerHTML = '<div class="overlay"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="m-title"><h2 id="m-title">Koolitusest loobumine</h2><p>Kas soovid koolitusest „' +
+      esc(r.trainingTitle) + '“ loobuda?</p><div class="row"><button type="button" class="sbtn danger" id="m-yes">Jah, loobu</button><button type="button" class="sbtn" id="m-no">Sulge</button></div></div></div>';
     document.getElementById("m-no").onclick = closeModal;
     document.getElementById("m-yes").onclick = function () {
       closeModal();
@@ -614,21 +614,24 @@ td .linkish { font-size: .84rem; }
       var err = apiCancel(id);
       ui.regs = apiGetRegs();
       ui.coursesMsg = err ? "" : "Oled koolitusest loobunud";
+      ui.coursesErr = err ? err.message : "";
       renderAll();
     };
-    document.getElementById("m-no").focus();
+    document.getElementById("m-yes").focus();
   }
   function closeModal() { document.getElementById("modal-root").innerHTML = ""; }
+  // Nagu ChangePasswordView.vue: kontrollid järjest, esimene viga üldteatena nupu kõrval
   function savePassword() {
-    var p = ui.pw, e = {};
-    if (!p.current) e.current = "Praegune parool on kohustuslik";
-    if (!p.next) e.next = "Uus parool on kohustuslik"; else if (p.next.length < 8) e.next = "Parool peab olema vähemalt 8 märki"; else if (p.next === p.current) e.next = "Uus parool peab erinema praegusest";
-    if (!e.next && p.repeat !== p.next) e.repeat = "Paroolid ei klapi";
-    ui.pwErrors = e; ui.pwMsg = "";
-    if (Object.keys(e).length) { startStep("„Muuda parool“ — frontendi kontroll ei lasknud läbi (päringut ei tehtud)"); renderAll(); return; }
-    startStep("„Muuda parool“");
+    var p = ui.pw, msg = "";
+    if (!p.current || !p.next || !p.repeat) msg = "Täida kõik kohustuslikud väljad";
+    else if (p.next.length < 8) msg = "Parool peab olema vähemalt 8 märki pikk";
+    else if (p.next !== p.repeat) msg = "Paroolid ei ühti";
+    else if (p.next === p.current) msg = "Uus parool ei tohi olla sama mis praegune";
+    ui.pwErr = msg; ui.pwMsg = "";
+    if (msg) { startStep("„Salvesta“ — frontendi kontroll ei lasknud läbi (päringut ei tehtud)"); renderAll(); return; }
+    startStep("„Salvesta“ (Parool)");
     var err = apiPassword({ currentPassword: p.current, newPassword: p.next });
-    if (err) { ui.pwErrors = { current: err.message }; renderAll(); return; }
+    if (err) { ui.pwErr = err.message; renderAll(); return; }
     ui.pw = { current: "", next: "", repeat: "" }; ui.pwMsg = "Parool muudetud";
     renderAll();
   }
@@ -651,60 +654,68 @@ td .linkish { font-size: .84rem; }
   /* ---------- Renderdamine ---------- */
   function pin(noteId, label) { return '<button type="button" class="api-pin" data-note="' + noteId + '">' + esc(label) + '</button>'; }
   function alertOk(msg) { return msg ? '<div class="ok-alert" role="status">' + esc(msg) + '</div>' : ""; }
+  // InlineAlerts.vue: eduteade (roheline) ja veateade (punane) nuppude kõrval
+  function inlineAlerts(ok, err) { return (ok ? '<span class="ok-alert" role="status">' + esc(ok) + '</span>' : "") + (err ? '<span class="err-alert" role="alert">' + esc(err) + '</span>' : ""); }
   function renderNav() {
     var right = ui.role === "public" ? '<span class="pillbtn">Logi sisse</span><span class="pillbtn">Loo konto</span>'
-      : '<span class="who">' + ROLE_NAMES[ui.role] + '</span><span class="admin"><button type="button" id="b-pmenu" aria-expanded="false" aria-controls="p-menu" style="font-weight:700">Minu profiil ▾</button><span class="menu" id="p-menu" hidden>' +
+      : '<span class="who">' + ROLE_NAMES[ui.role] + '</span><span class="admin"><button type="button" id="b-pmenu" aria-expanded="false" aria-controls="p-menu" style="font-weight:700" title="Minu profiil" aria-label="Minu profiil">👤 ▾</button><span class="menu" id="p-menu" hidden><b class="mhead">Minu profiil</b>' +
         menuTabs().map(function (k) { return '<button type="button" data-pnav="' + k + '"' + (ui.tab === k ? ' class="cur"' : "") + '>' + TAB_NAMES[k] + '</button>'; }).join("") + '</span></span><span class="pillbtn">Logi välja</span>';
     document.getElementById("sitenav").innerHTML = '<span class="logo" aria-hidden="true"></span><span>Koolitused ▾</span><span>Meie koolitajad</span><span>Teenused</span><span>Ettevõttest</span><span>Kontakt</span>' +
       (ui.role === "admin" ? "<span>Admin ▾</span>" : "") + '<span class="right">' + right + '</span>';
   }
   function field(id, label, value, opts) {
     opts = opts || {};
-    var err = opts.err ? '<span class="ferr" id="' + id + '-err">' + esc(opts.err) + '</span>' : "";
-    return '<div class="fld"><label class="lbl" for="' + id + '">' + label + (opts.edit ? ' <span class="req-star">*</span>' : "") + '</label>' +
-      '<input type="' + (opts.type || "text") + '" id="' + id + '" value="' + esc(value) + '"' + (opts.edit ? "" : " readonly") + (opts.err ? ' class="invalid" aria-invalid="true" aria-describedby="' + id + '-err"' : "") + (opts.auto ? ' autocomplete="' + opts.auto + '"' : "") + '>' +
-      err + (opts.hint ? '<span class="hint">' + opts.hint + '</span>' : "") + '</div>';
+    if (!opts.edit && opts.type !== "password") return '<div class="fld"><span class="lbl">' + label + '</span><span class="val">' + (value ? esc(value) : "—") + '</span></div>';
+    return '<div class="fld"><label class="lbl" for="' + id + '">' + label + ' <span class="req-star">*</span></label>' +
+      '<input type="' + (opts.type || "text") + '" id="' + id + '" value="' + esc(value) + '"' + (opts.auto ? ' autocomplete="' + opts.auto + '"' : "") + '>' +
+      (opts.hint ? '<span class="hint">' + opts.hint + '</span>' : "") + '</div>';
   }
   function renderDetails() {
-    var m = ui.me, edit = ui.edit, v = edit ? ui.form : m, e = ui.errors;
-    var head = '<div class="viewhead"><h2>Minu andmed</h2>' + (edit ? "" : '<button type="button" class="sbtn" id="b-edit">Muuda</button>') + '</div>';
-    return head + '<div class="pins">' + pin("n-get", "GET /api/user/{userId}/participant") + '</div>' + alertOk(ui.success) +
-      (!edit && m.participantId === null ? '<div class="info">Sinu kontol pole veel profiiliandmeid. Lisa need nupuga „Muuda“.</div>' : "") +
+    var m = ui.me, edit = ui.edit, v = edit ? ui.form : m;
+    return '<div class="viewhead"><h2>Minu andmed</h2></div><div class="pins">' + pin("n-get", "GET /api/user/{userId}/participant") + '</div>' +
       '<div class="pgrid">' +
-      field("p-first", "Eesnimi", v.firstName, { edit: edit, err: e.firstName, auto: "given-name" }) +
-      field("p-last", "Perekonnanimi", v.lastName, { edit: edit, err: e.lastName, auto: "family-name" }) +
-      field("p-phone", "Telefon", v.phone, { edit: edit, err: e.phone, type: "tel", auto: "tel" }) +
-      field("p-email", "E-post", v.email, { edit: edit, err: e.email, type: "email", auto: "email", hint: edit ? "Selle e-postiga logid ka sisse." : "" }) +
-      '</div>' +
-      (edit ? '<div class="actions"><button type="button" class="sbtn primary" id="b-save">Salvesta</button><button type="button" class="sbtn" id="b-cancel-edit">Tühista</button>' + pin("n-put", "PUT /api/user/{userId}/profile") + '</div>' : "");
+      field("p-first", "Eesnimi", v.firstName, { edit: edit, auto: "given-name" }) +
+      field("p-last", "Perekonnanimi", v.lastName, { edit: edit, auto: "family-name" }) +
+      field("p-phone", "Telefon", v.phone, { edit: edit, type: "tel", auto: "tel" }) +
+      field("p-email", "E-post", v.email, { edit: edit, type: "email", auto: "email", hint: edit ? "Selle e-postiga logid ka sisse" : "" }) +
+      '</div><div class="actions">' +
+      (edit ? '<button type="button" class="sbtn primary" id="b-save">Salvesta</button><button type="button" class="sbtn" id="b-cancel-edit">Tühista</button>' + pin("n-put", "PUT /api/user/{userId}/profile")
+        : '<button type="button" class="sbtn primary" id="b-edit">Muuda</button>') +
+      inlineAlerts(ui.success, ui.errMsg) + '</div>';
   }
-  function attendance(r) { return r.isOnSite && r.isOnline ? "Kohapeal + veebis" : r.isOnline ? "Veebis" : "Kohapeal"; }
+  // ParticipantRegistrationItem.vue: vorm ainult siis, kui on kohapeal ja/või veebis
+  function attendance(r) { return [r.isOnSite ? "Kohapeal" : "", r.isOnline ? "Veebis" : ""].filter(Boolean).join(" + "); }
   function regRow(r) {
     var badges = (r.status === "R" ? '<span class="badge active">Registreerunud</span>' : '<span class="badge draft">Loobunud</span>') +
-      (r.hasPaid ? '<span class="badge paid">Tasutud</span>' : '<span class="badge unpaid">Tasumata</span>') +
-      (r.courseStatus === "X" ? '<span class="badge cancel">Tühistatud</span>' : "");
-    return '<div class="reg' + (r.status === "C" ? " is-cancelled" : "") + '"><button type="button" class="linkish t" data-course="' + r.courseId + '" style="justify-self:start">' + esc(r.trainingTitle) + '</button>' +
-      (r.canCancel ? '<div class="act"><button type="button" class="sbtn small" data-cancel="' + r.courseParticipantId + '">Loobu</button></div>' : "") +
-      '<div class="meta"><span class="date">' + dmy(r.startDate) + " – " + dmy(r.endDate) + '</span><span>· ' + attendance(r) + '</span>' + badges + '</div></div>';
+      (r.courseStatus === "X" ? '<span class="badge cancel">Tühistatud</span>' : "") +
+      (r.hasPaid ? '<span class="badge paid">Tasutud</span>' : '<span class="badge unpaid">Tasumata</span>');
+    // Link ainult avalikule toimumiskorrale (O/F) — /course ei näita mustandit ega tühistatut
+    var isPublic = r.courseStatus === "O" || r.courseStatus === "F";
+    var title = isPublic ? '<button type="button" class="linkish t" data-course="' + r.courseId + '" style="justify-self:start">' + esc(r.trainingTitle) + '</button>' : '<span class="t">' + esc(r.trainingTitle) + '</span>';
+    var att = attendance(r);
+    return '<div class="reg">' + title +
+      (r.canCancel ? '<div class="act"><button type="button" class="sbtn small danger" data-cancel="' + r.courseParticipantId + '">Loobu</button></div>' : "") +
+      '<div class="meta"><span class="date">' + dmy(r.startDate) + " – " + dmy(r.endDate) + '</span>' + (att ? '<span>· ' + att + '</span>' : "") + badges + '</div></div>';
   }
   function renderCourses() {
     var up = ui.regs.filter(function (r) { return !r.isPast; }), past = ui.regs.filter(function (r) { return r.isPast; }).reverse();
-    var head = '<div class="viewhead"><h2>Minu koolitused</h2></div><div class="pins">' + pin("n-regs", "GET /api/user/{userId}/registrations") + pin("n-cancel", "PUT …/registration/{courseParticipantId}/cancel") + '</div>' + alertOk(ui.coursesMsg);
-    if (!ui.regs.length) return head + '<div class="empty"><span>Sa pole veel ühelegi koolitusele registreerunud.</span><button type="button" class="linkish" data-route="/courses">Vaata koolituste kalendrit</button></div>';
+    var head = '<div class="viewhead"><h2>Minu koolitused</h2></div><div class="pins">' + pin("n-regs", "GET /api/user/{userId}/registrations") + pin("n-cancel", "PUT …/registration/{courseParticipantId}/cancel") + '</div>' +
+      ((ui.coursesMsg || ui.coursesErr) ? '<div class="actions">' + inlineAlerts(ui.coursesMsg, ui.coursesErr) + '</div>' : "");
+    if (!ui.regs.length) return head + '<div class="empty"><span>Sa pole veel ühelegi koolitusele registreerunud.</span><button type="button" class="linkish" data-route="/courses">Vaata koolitusi</button></div>';
     return head + '<h3 class="sec-title">Tulevased</h3>' + (up.length ? '<div class="regs">' + up.map(regRow).join("") + '</div>' : '<span class="hint">Tulevasi koolitusi pole.</span>') +
-      '<h3 class="sec-title">Toimunud</h3>' + (past.length ? '<div class="regs">' + past.map(regRow).join("") + '</div>' : '<span class="hint">Toimunud koolitusi pole.</span>');
+      (past.length ? '<h3 class="sec-title">Toimunud</h3><div class="regs">' + past.map(regRow).join("") + '</div>' : "");
   }
   function renderCertificates() {
-    return '<div class="viewhead"><h2>Tunnistused</h2></div><div class="info">Tunnistused tulevad varsti — siia ilmuvad sinu läbitud koolituste tunnistused.</div>' +
+    return '<div class="viewhead"><h2>Tunnistused</h2></div><div class="info">📜 Tunnistused tulevad varsti — siia ilmuvad sinu läbitud koolituste tunnistused.</div>' +
       '<span class="hint">Päringut pole. Hilisem ettepanek: skeemide fail, jaotis 7.</span>';
   }
   function renderPassword() {
-    var p = ui.pw, e = ui.pwErrors;
-    return '<div class="viewhead"><h2>Parool</h2></div>' + alertOk(ui.pwMsg) + '<div class="pwgrid">' +
-      field("pw-current", "Praegune parool", p.current, { edit: true, type: "password", err: e.current, auto: "current-password" }) +
-      field("pw-next", "Uus parool", p.next, { edit: true, type: "password", err: e.next, auto: "new-password", hint: "Vähemalt 8 märki." }) +
-      field("pw-repeat", "Korda uut parooli", p.repeat, { edit: true, type: "password", err: e.repeat, auto: "new-password" }) +
-      '</div><div class="actions"><button type="button" class="sbtn primary" id="b-pw">Muuda parool</button>' + pin("n-password", "PUT /api/user/{userId}/password") + '</div>';
+    var p = ui.pw;
+    return '<div class="viewhead"><h2>Parool</h2></div><div class="pwgrid">' +
+      field("pw-current", "Praegune parool", p.current, { edit: true, type: "password", auto: "current-password" }) +
+      field("pw-next", "Uus parool", p.next, { edit: true, type: "password", auto: "new-password", hint: "Vähemalt 8 märki" }) +
+      field("pw-repeat", "Korda uut parooli", p.repeat, { edit: true, type: "password", auto: "new-password" }) +
+      '</div><div class="actions"><button type="button" class="sbtn primary" id="b-pw">Salvesta</button>' + pin("n-password", "PUT /api/user/{userId}/password") + inlineAlerts(ui.pwMsg, ui.pwErr) + '</div>';
   }
   function renderView() {
     if (ui.role === "public") {
@@ -713,7 +724,7 @@ td .linkish { font-size: .84rem; }
       return;
     }
     if (!allowed(ui.tab)) {
-      document.getElementById("view").innerHTML = '<div class="ph"><h2 class="denied">Puudub õigus</h2><p class="hint"><code>' + TAB_VIEWS[ui.tab] + '.vue</code> on ainult osalejale — admin suunatakse <code>/not-authorized</code>. Adminil on „Minu profiil ▾“ all ainult „Parool“.</p>' +
+      document.getElementById("view").innerHTML = '<div class="ph"><h2 class="denied">Puudub õigus</h2><p class="hint"><code>' + TAB_VIEWS[ui.tab] + '.vue</code> on ainult osalejale — admin suunatakse <code>/not-authorized</code>. Adminil on „👤 ▾“ (Minu profiil) all ainult „Parool“.</p>' +
         '<button type="button" class="sbtn" data-tab="password">Ava Parool</button></div>';
       return;
     }
@@ -729,7 +740,8 @@ td .linkish { font-size: .84rem; }
       if (ui.tab === "details") { rows.push(["editMode", String(ui.edit)], ["participant", JSON.stringify(ui.me)]); if (ui.form) rows.push(["form", JSON.stringify(ui.form)]); }
       if (ui.tab === "courses") rows.push(["registrations.length", String(ui.regs.length)], ["tulevased / toimunud", ui.regs.filter(function (r) { return !r.isPast; }).length + " / " + ui.regs.filter(function (r) { return r.isPast; }).length]);
       if (ui.tab === "password") rows.push(["väljad täidetud", [ui.pw.current, ui.pw.next, ui.pw.repeat].map(function (x) { return x ? "✓" : "–"; }).join(" ")]);
-      if (Object.keys(ui.errors).length || Object.keys(ui.pwErrors).length) rows.push(["errors", JSON.stringify(ui.tab === "password" ? ui.pwErrors : ui.errors)]);
+      var errNow = ui.tab === "password" ? ui.pwErr : ui.tab === "courses" ? ui.coursesErr : ui.errMsg;
+      if (errNow) rows.push(["errorMessage", errNow]);
     }
     document.getElementById("statekv").innerHTML = rows.map(function (r) { return "<dt>" + esc(r[0]) + "</dt><dd>" + esc(r[1]) + "</dd>"; }).join("");
     document.getElementById("urlbar").textContent = "https://bcskoolitus.ee" + (ui.role === "public" ? "/login?redirect=" + encodeURIComponent(TAB_PATHS[ui.tab]) : TAB_PATHS[ui.tab]);
@@ -743,11 +755,11 @@ td .linkish { font-size: .84rem; }
     return "n-password";
   }
   var REQUESTS = [
-    ["Minu andmed", [{ m: "GET", p: "/api/user/{userId}/participant", note: "n-get", when: "menüüpunkti avamisel ja pärast salvestamist" },
+    ["Minu andmed", [{ m: "GET", p: "/api/user/{userId}/participant", note: "n-get", when: "vaate avamisel" },
       { m: "PUT", p: "/api/user/{userId}/profile", note: "n-put", when: "„Salvesta“" }]],
     ["Minu koolitused", [{ m: "GET", p: "/api/user/{userId}/registrations?contentLang={UI keel}", note: "n-regs", when: "menüüpunkti avamisel, keele vahetusel, pärast loobumist" },
       { m: "PUT", p: "/api/user/{userId}/registration/{courseParticipantId}/cancel", note: "n-cancel", when: "„Loobu“ → kinnitus" }]],
-    ["Parool", [{ m: "PUT", p: "/api/user/{userId}/password", note: "n-password", when: "„Muuda parool“" }]]
+    ["Parool", [{ m: "PUT", p: "/api/user/{userId}/password", note: "n-password", when: "„Salvesta“" }]]
   ];
   function renderLog() {
     var used = {};
@@ -794,15 +806,15 @@ td .linkish { font-size: .84rem; }
     if (b.dataset.course) { goRoute("/course?courseId=" + b.dataset.course); return; }
     if (b.dataset.route) { goRoute(b.dataset.route); return; }
     if (b.dataset.cancel) { askCancel(+b.dataset.cancel); return; }
-    if (b.id === "b-edit") { ui.edit = true; ui.success = ""; ui.errors = {}; ui.form = { firstName: ui.me.firstName, lastName: ui.me.lastName, phone: ui.me.phone, email: ui.me.email }; renderView(); renderKv(); document.getElementById("p-first").focus(); return; }
-    if (b.id === "b-cancel-edit") { ui.edit = false; ui.form = null; ui.errors = {}; renderView(); renderKv(); toast("Muudatused tühistatud"); return; }
+    if (b.id === "b-edit") { ui.edit = true; ui.success = ""; ui.errMsg = ""; ui.form = { firstName: ui.me.firstName, lastName: ui.me.lastName, phone: ui.me.phone, email: ui.me.email }; renderView(); renderKv(); document.getElementById("p-first").focus(); return; }
+    if (b.id === "b-cancel-edit") { ui.edit = false; ui.form = null; ui.errMsg = ""; renderView(); renderKv(); toast("Muudatused tühistatud — laaditud väärtused jäävad"); return; }
     if (b.id === "b-save") { saveProfile(); return; }
     if (b.id === "b-pw") { savePassword(); return; }
   });
   document.getElementById("sitenav").addEventListener("click", function (e) {
     var b = e.target.closest("button"); if (!b) return;
     if (b.id === "b-pmenu") { var m = document.getElementById("p-menu"); m.hidden = !m.hidden; b.setAttribute("aria-expanded", String(!m.hidden)); return; }
-    if (b.dataset.pnav) openTab(b.dataset.pnav, "Navbar „Minu profiil ▾“ → „" + TAB_NAMES[b.dataset.pnav] + "“ (" + TAB_PATHS[b.dataset.pnav] + ")");
+    if (b.dataset.pnav) openTab(b.dataset.pnav, "Navbar „👤 ▾“ (Minu profiil) → „" + TAB_NAMES[b.dataset.pnav] + "“ (" + TAB_PATHS[b.dataset.pnav] + ")");
   });
   document.addEventListener("click", function (e) { var m = document.getElementById("p-menu"); if (m && !e.target.closest(".admin")) m.hidden = true; });
   document.getElementById("log").addEventListener("click", function (e) {

@@ -10,7 +10,7 @@ Failinimi: AdminEnquiriesView.vue
 Frontend rada: /admin-enquiries
 
 Vaatega seotud lisainfo:
-Ülal vahelehed (AdminTabs.vue): Koolituste päringud | Registreerumised | Koolitused | Koolituste kalender | Koolitajad | Koolitusruumid — samad lingid ja järjekord mis menüüs "Admin", selle vaate vaheleht on aktiivne. Kitsal ekraanil on vahelehed ühel keritaval real, aktiivne keritakse keskele.
+Ülal vahelehed (AdminTabs.vue): Koolituste päringud | Registreerumised | Koolitused | Koolituste kalender | Koolitajad | Koolitusruumid | Kontod — samad lingid ja järjekord mis menüüs "Admin", selle vaate vaheleht on aktiivne. Kitsal ekraanil on vahelehed ühel keritaval real, aktiivne keritakse keskele.
 Avaneb navbari menüüst "Admin" → "Koolituste päringud". Tabelis Saabunud | Nimi | E-post | Ettevõte | Koolitus | Toimumiskord | Staatus | Tegevused; uusimad üleval, uue päringu rida paksus kirjas. Koolituse nimi on kasutajaliidese keeles (puudumisel põhikeeles), keele vahetusel laaditakse nimekiri uuesti. Toimumiskord "—", kui päring on koolituse kohta üldiselt.
 Lüliti "Näita ka käsitletud" (vaikimisi väljas) → includeHandled=true. Otsinguväli filtreerib frontendis nime, e-posti, ettevõtte ja koolituse järgi; veerud Saabunud, Nimi, Koolitus ja Staatus on sorteeritavad frontendis (1. klõps kasvav, 2. kahanev, 3. vaikimisi). All "Kokku N päringut".
 Silma ikoon "Vaata" → /admin-enquiry?enquiryId={id}.

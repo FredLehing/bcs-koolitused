@@ -190,8 +190,8 @@ sequenceDiagram
 
 ```text
 Create a desktop wireframe of an admin page "Koolituste päringud" in a web app.
-Top: site navigation bar with logo and links, an open dropdown "Admin ▾" with items "Koolituste päringud" (highlighted), "Registreerumised", a divider, "Koolitused", "Koolituste kalender", a divider, "Koolitajad" and "Koolitusruumid", and "Logi välja" on the right.
-Below the navigation bar: a tab bar "Koolituste päringud | Registreerumised | Koolitused | Koolituste kalender | Koolitajad | Koolitusruumid" with "Koolituste päringud" as the active tab.
+Top: site navigation bar with logo and links, an open dropdown "Admin ▾" with items "Koolituste päringud" (highlighted), "Registreerumised", a divider, "Koolitused", "Koolituste kalender", a divider, "Koolitajad", "Koolitusruumid", a divider and "Kontod",, a user icon dropdown "👤 ▾" (Minu profiil) and "Logi välja" on the right.
+Below the navigation bar: a tab bar "Koolituste päringud | Registreerumised | Koolitused | Koolituste kalender | Koolitajad | Koolitusruumid | Kontod" with "Koolituste päringud" as the active tab.
 Header: page title "Koolituste päringud".
 Below: a search input "Otsi nime, e-posti, ettevõtte või koolituse järgi…" and a toggle switch "Näita ka käsitletud" (on).
 Main area: a data table with columns "Saabunud ▼", "Nimi", "E-post", "Ettevõte", "Koolitus", "Toimumiskord", "Staatus", "Tegevused".
@@ -206,7 +206,7 @@ Below the table: text "Kokku 4 päringut".
 
 ```text
 Create a desktop wireframe of an admin page "Koolituse päring" in a web app.
-Top: site navigation bar with logo, links, a dropdown "Admin ▾" and "Logi välja".
+Top: site navigation bar with logo, links, a dropdown "Admin ▾", a user icon dropdown "👤 ▾" (Minu profiil) and "Logi välja".
 Header row: title "Koolituse päring" and a secondary button "Koolituste päringud" on the right.
 Card "Päring" as a two-column list: Saabunud 28/09/2026 16:40; Staatus badge Uus; Koolitus link "Java algkursus"; Toimumiskord 16/11/2026 – 20/11/2026; Ettevõte —; Sõnum "Kas veebis osalejad saavad hiljem ka salvestust vaadata?".
 Card "Kontakt": Nimi Martin Kask; E-post link martin.kask@example.com; Telefon link +37253344556.

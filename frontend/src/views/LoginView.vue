@@ -71,6 +71,7 @@ export default {
             class="form-control"
             id="floatingInput"
             placeholder="Email"
+            @keyup.enter="login"
           />
           <label for="floatingInput">Email</label>
         </div>
@@ -81,6 +82,7 @@ export default {
             class="form-control"
             id="floatingPassword"
             placeholder="Parool"
+            @keyup.enter="login"
           />
           <label for="floatingPassword">{{ $t('login.password') }}</label>
         </div>

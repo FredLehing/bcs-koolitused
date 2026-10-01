@@ -298,8 +298,8 @@ Publitseerimine ja mustandisse liigutamine käib sama `TrainingStatusButton` kau
 
 ```text
 Create a desktop wireframe of an admin page "Koolitused" in a web app.
-Top: site navigation bar with logo and links (Koolitused, Teenused, Ettevõttest, Kontakt), an open dropdown "Admin ▾" with items "Koolituste päringud", "Registreerumised", a divider, "Koolitused" (highlighted), "Koolituste kalender", a divider, "Koolitajad" and "Koolitusruumid", and "Logi välja" on the right.
-Below the navigation bar: a tab bar "Koolituste päringud | Registreerumised | Koolitused | Koolituste kalender | Koolitajad | Koolitusruumid" with "Koolitused" as the active tab.
+Top: site navigation bar with logo and links (Koolitused, Teenused, Ettevõttest, Kontakt), an open dropdown "Admin ▾" with items "Koolituste päringud", "Registreerumised", a divider, "Koolitused" (highlighted), "Koolituste kalender", a divider, "Koolitajad", "Koolitusruumid", a divider and "Kontod",, a user icon dropdown "👤 ▾" (Minu profiil) and "Logi välja" on the right.
+Below the navigation bar: a tab bar "Koolituste päringud | Registreerumised | Koolitused | Koolituste kalender | Koolitajad | Koolitusruumid | Kontod" with "Koolitused" as the active tab.
 Header row: page title "Koolitused" on the left and a primary button "+ Lisa uus koolitus" on the right.
 Below the header: a search row with a text input "Otsi koolituse nime järgi…" and a button "Otsi".
 Below the search row: a small text link with a down arrow "▾ Ava otsingu filtrid" and a small badge "2 filtrit aktiivne".

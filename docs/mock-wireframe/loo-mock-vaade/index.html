@@ -94,7 +94,8 @@ code { font-family: var(--font-mono); font-size: .88em; }
 .menu button { background: none; border: 0; text-align: left; color: var(--accent); padding: 4px 8px; border-radius: 4px; cursor: pointer; white-space: nowrap; font-family: var(--font-sketch); }
 .menu button:hover { background: var(--accent-soft); }
 .menu hr { border: 0; border-top: 1.5px dashed var(--line); margin: 3px 4px; }
-/* "Minu profiil" rippmenüü on navbari paremas servas — avaneb vasakule, et ei läheks ekraanist välja */
+.menu .mhead { font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-soft); padding: 4px 8px 2px; }
+/* "👤 ▾" (Minu profiil) rippmenüü on navbari paremas servas — avaneb vasakule, et ei läheks ekraanist välja */
 #p-menu { left: auto; right: 0; }
 
 .stage { background: var(--board); }
@@ -246,7 +247,7 @@ code { font-family: var(--font-mono); font-size: .88em; }
       '<button type="button" data-go="/admin-lecturers">Koolitajad</button><button type="button" data-go="/admin-rooms">Koolitusruumid</button><hr>' +
       '<button type="button" data-go="/admin-users">Kontod</button></span></span>' : "";
     var right = state.role === "public" ? '<button type="button" class="pill" data-go="/login">Logi sisse</button><button type="button" class="pill" data-go="/signup">Loo konto</button>'
-      : '<span class="who">' + ROLE_NAMES[state.role] + '</span><span class="admin"><button type="button" id="b-pmenu" aria-expanded="false" aria-controls="p-menu"' + (cur && cur.group === "user" ? ' style="text-decoration:underline;text-underline-offset:3px;font-weight:700"' : "") + '>Minu profiil ▾</button><span class="menu" id="p-menu" hidden>' +
+      : '<span class="who">' + ROLE_NAMES[state.role] + '</span><span class="admin"><button type="button" id="b-pmenu" aria-expanded="false" aria-controls="p-menu"' + (cur && cur.group === "user" ? ' style="text-decoration:underline;text-underline-offset:3px;font-weight:700"' : "") + ' title="Minu profiil" aria-label="Minu profiil">👤 ▾</button><span class="menu" id="p-menu" hidden><b class="mhead">Minu profiil</b>' +
         VIEWS.filter(function (v) { return v.group === "user" && !(v.participantOnly && state.role === "admin"); }).map(function (v) { return '<button type="button" data-go="' + v.path + '">' + esc(v.name) + '</button>'; }).join("") + '</span></span><button type="button" class="pill" id="b-logout">Logi välja</button>';
     document.getElementById("sitenav").innerHTML = '<button type="button" class="logo" data-go="/" aria-label="Avaleht"></button>' +
       kmenu + lnk("/lecturers", "Meie koolitajad") + dead("Teenused") + dead("Ettevõttest") + dead("Blogi") + dead("Kontakt") + dead("Tagasiside") +
@@ -266,9 +267,9 @@ code { font-family: var(--font-mono); font-size: .88em; }
       return;
     }
     // Sisselogimist nõudev vaade (nt /profile): sisselogimata kasutaja suunatakse /login?redirect=...
-    // Osaleja vaated (Minu andmed, koolitused, tunnistused): admin → NotAuthorizedView; adminil on "Minu profiil ▾" all ainult "Parool"
+    // Osaleja vaated (Minu andmed, koolitused, tunnistused): admin → NotAuthorizedView; adminil on "👤 ▾" (Minu profiil) all ainult "Parool"
     if (v.participantOnly && state.role === "admin") {
-      stage.innerHTML = '<div class="ph-page"><h2 class="denied">Puudub õigus</h2><p>Vaade <strong>' + esc(v.name) + '</strong> (<code>' + esc(v.view) + '</code>) on ainult osalejale — päris rakenduses suunatakse admin <code>NotAuthorizedView</code>-le. Adminil on „Minu profiil ▾“ all ainult „Parool“.</p><div class="row"><button type="button" class="sbtn primary" data-go="/change-password">Parool</button><button type="button" class="sbtn" data-role-go="user">Vaheta roll: Kasutaja</button></div></div>';
+      stage.innerHTML = '<div class="ph-page"><h2 class="denied">Puudub õigus</h2><p>Vaade <strong>' + esc(v.name) + '</strong> (<code>' + esc(v.view) + '</code>) on ainult osalejale — päris rakenduses suunatakse admin <code>NotAuthorizedView</code>-le. Adminil on profiiliikooni „👤 ▾“ (Minu profiil) all ainult „Parool“.</p><div class="row"><button type="button" class="sbtn primary" data-go="/change-password">Parool</button><button type="button" class="sbtn" data-role-go="user">Vaheta roll: Kasutaja</button></div></div>';
       return;
     }
     if (v.auth && state.role === "public") { go("/login?redirect=" + encodeURIComponent(state.path), { replace: true }); return; }

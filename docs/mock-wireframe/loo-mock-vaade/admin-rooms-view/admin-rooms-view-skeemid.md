@@ -289,8 +289,8 @@ sequenceDiagram
 
 ```text
 Create a desktop wireframe of an admin page "Koolitusruumid" in a web app.
-Top: site navigation bar with logo and links (Koolitused, Teenused, Ettevõttest, Kontakt), an open dropdown "Admin ▾" with items "Koolituste päringud", "Registreerumised", a divider, "Koolitused", "Koolituste kalender", a divider, "Koolitajad" and "Koolitusruumid" (highlighted), and "Logi välja" on the right.
-Below the navigation bar: a tab bar "Koolituste päringud | Registreerumised | Koolitused | Koolituste kalender | Koolitajad | Koolitusruumid" with "Koolitusruumid" as the active tab.
+Top: site navigation bar with logo and links (Koolitused, Teenused, Ettevõttest, Kontakt), an open dropdown "Admin ▾" with items "Koolituste päringud", "Registreerumised", a divider, "Koolitused", "Koolituste kalender", a divider, "Koolitajad", "Koolitusruumid" (highlighted), a divider and "Kontod",, a user icon dropdown "👤 ▾" (Minu profiil) and "Logi välja" on the right.
+Below the navigation bar: a tab bar "Koolituste päringud | Registreerumised | Koolitused | Koolituste kalender | Koolitajad | Koolitusruumid | Kontod" with "Koolitusruumid" as the active tab.
 Header row: page title "Koolitusruumid" on the left and a primary button "+ Lisa uus ruum" on the right.
 Below the header: a search text input "Otsi nime järgi…" and a toggle switch "Näita kustutatud" (on).
 Main area: a data table with sortable columns "Nimi ▲", "Tulevasi toimumiskordi", "Toimumiskordi kokku", "Uuendatud" and a column "Tegevused".
@@ -307,7 +307,7 @@ Below the table: text "Kokku 6 ruumi".
 
 ```text
 Create a desktop wireframe of an admin form page "Muuda ruumi" in a web app.
-Top: site navigation bar with logo and links, a dropdown "Admin ▾" and "Logi välja" on the right.
+Top: site navigation bar with logo and links, a dropdown "Admin ▾", a user icon dropdown "👤 ▾" (Minu profiil) and "Logi välja" on the right.
 Header row: page title "Muuda ruumi" on the left and a secondary button "Koolitusruumid" on the right.
 One card titled "Ruumi andmed" with a single text input "Nimi *" with value "Hellemanni".
 Bottom: primary button "Salvesta".
