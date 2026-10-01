@@ -300,6 +300,11 @@ tr.is-new td { font-weight: 700; }
 td .linkish { font-size: .84rem; }
 /* hidden-atribuut peab peitma ka elemendid, millel on oma display (nt .menu { display: grid }) */
 [hidden] { display: none !important; }
+/* Vahelehed (NavTabs.vue: AdminTabs / TrainingsTabs) — üks keritav rida */
+.vtabs { display: flex; gap: 2px; border-bottom: 1.5px solid var(--sketch); overflow-x: auto; font-family: var(--font-sketch); }
+.vtabs button { flex: none; white-space: nowrap; background: none; border: 1.5px solid transparent; border-bottom: 0; border-radius: 6px 6px 0 0; color: var(--accent); padding: 3px 12px; margin-bottom: -1.5px; cursor: pointer; font: inherit; font-size: .88rem; }
+.vtabs button:hover { border-color: var(--line); }
+.vtabs button[aria-current="page"] { color: var(--ink); font-weight: 700; background: var(--panel); border-color: var(--sketch); cursor: default; }
 </style>
 
 <div class="page">
@@ -367,6 +372,17 @@ td .linkish { font-size: .84rem; }
     if (EMBED) { window.parent.postMessage({ type: "bcs-navigate", path: path }, "*"); return; }
     toast(standaloneMessage || "router.push → " + path);
   }
+
+  /* ---------- Vahelehed (NavTabs.vue) — samad lingid mis navbari menüüs ---------- */
+  var ADMIN_TABS = [["/admin-enquiries", "Koolituste päringud"], ["/admin-registrations", "Registreerumised"], ["/admin-trainings", "Koolitused"], ["/admin-all-courses", "Koolituste kalender"], ["/admin-lecturers", "Koolitajad"], ["/admin-rooms", "Koolitusruumid"]];
+  var TRAINING_TABS = [["/trainings", "Meie koolitused"], ["/courses", "Koolituste kalender"]];
+  function viewTabs(tabs, current) {
+    return '<nav class="vtabs" aria-label="Vahelehed">' + tabs.map(function (t) { return '<button type="button" data-vtab="' + t[0] + '"' + (t[0] === current ? ' aria-current="page"' : "") + '>' + t[1] + '</button>'; }).join("") + '</nav>';
+  }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-vtab]"); if (!b || b.getAttribute("aria-current")) return;
+    goRoute(b.dataset.vtab, "Vaheleht → " + b.dataset.vtab + " (teine läbimäng)");
+  });
   // NavigationService.isInternalPath: ainult sisemine rada (algab "/", mitte "//" ega "/\")
   function internalPath(r) { return r && r.charAt(0) === "/" && r.charAt(1) !== "/" && r.charAt(1) !== "\\" ? r : ""; }
 
@@ -378,6 +394,7 @@ td .linkish { font-size: .84rem; }
       "Frontend rada: /admin-registrations",
       "",
       "Vaatega seotud lisainfo:",
+      "Ülal vahelehed (AdminTabs.vue): Koolituste päringud | Registreerumised | Koolitused | Koolituste kalender | Koolitajad | Koolitusruumid — samad lingid ja järjekord mis menüüs \"Admin\", selle vaate vaheleht on aktiivne. Kitsal ekraanil on vahelehed ühel keritaval real, aktiivne keritakse keskele.",
       "Avaneb navbari menüüst \"Admin\" → \"Registreerumised\" (kohe \"Koolituste päringud\" järel). Pealkiri \"Registreerumised\". Tabelis Registreerus | Osaleja | E-post | Koolitus | Toimumisaeg | Tasunud ✓/✗ | Vajab sülearvutit ✓/✗ | Staatus (Registreerunud / Loobunud) | Tegevused. Koolituse nimi on kasutajaliidese keeles (puudumisel põhikeeles), keele vahetusel laaditakse nimekiri uuesti. Toimumisaeg on link → /admin-course?courseId={id}; toimunud toimumiskorral märgis \"Toimunud\". Loobunu rida on tuhmim.",
       "Lüliti \"Näita ka loobunud\" (vaikimisi väljas → ainult registreerunud) → includeCancelled=true; lüliti \"Näita ka toimunud\" (vaikimisi väljas → ainult toimumiskorrad, mille lõpp on täna või hiljem) → includePast=true; lüliti muutmisel laaditakse nimekiri uuesti. Otsinguväli filtreerib frontendis osaleja nime, e-posti ja koolituse nime järgi. Veerud Registreerus, Osaleja, Koolitus, Toimumisaeg, Tasunud, Vajab sülearvutit ja Staatus on sorteeritavad frontendis (1. klõps kasvav, 2. kahanev, 3. vaikimisi = registreerumise aeg, uusimad eespool). Leheküljestust pole. All \"Kokku N registreerumist\".",
       "Silma ikoon \"Vaata\" → /admin-registration?courseParticipantId={id}."
@@ -576,7 +593,7 @@ td .linkish { font-size: .84rem; }
         '<td class="center">' + check(r.hasPaid) + '</td><td class="center">' + check(r.requiresLaptop) + '</td><td>' + badge(r.status) + '</td>' +
         '<td><button type="button" class="ibtn" data-open="' + r.courseParticipantId + '" title="Vaata" aria-label="Vaata">' + EYE + '</button></td></tr>';
     }).join("") : '<tr class="empty-row"><td colspan="9">Registreerumisi ei leitud</td></tr>';
-    return '<div class="viewhead"><h2>Registreerumised</h2></div>' +
+    return viewTabs(ADMIN_TABS, "/admin-registrations") + '<div class="viewhead"><h2>Registreerumised</h2></div>' +
       '<div class="searchrow"><input type="text" id="r-search" placeholder="Otsi osaleja nime, e-posti või koolituse järgi…" aria-label="Otsi" value="' + esc(ui.search) + '"></div>' +
       '<div class="togglerow"><label class="switch"><input type="checkbox" id="r-cancelled"' + (ui.includeCancelled ? " checked" : "") + '> Näita ka loobunud</label>' +
       '<label class="switch"><input type="checkbox" id="r-past"' + (ui.includePast ? " checked" : "") + '> Näita ka toimunud</label>' + pin("n-list", "GET /api/admin-registrations") + '</div>' +

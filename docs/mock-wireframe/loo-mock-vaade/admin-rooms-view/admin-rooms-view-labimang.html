@@ -285,6 +285,11 @@ tr.is-deleted td { color: var(--ink-soft); }
 .view fieldset input[type="text"] { max-width: 420px; }
 /* hidden-atribuut peab peitma ka elemendid, millel on oma display (nt .menu { display: grid }) */
 [hidden] { display: none !important; }
+/* Vahelehed (NavTabs.vue: AdminTabs / TrainingsTabs) — üks keritav rida */
+.vtabs { display: flex; gap: 2px; border-bottom: 1.5px solid var(--sketch); overflow-x: auto; font-family: var(--font-sketch); }
+.vtabs button { flex: none; white-space: nowrap; background: none; border: 1.5px solid transparent; border-bottom: 0; border-radius: 6px 6px 0 0; color: var(--accent); padding: 3px 12px; margin-bottom: -1.5px; cursor: pointer; font: inherit; font-size: .88rem; }
+.vtabs button:hover { border-color: var(--line); }
+.vtabs button[aria-current="page"] { color: var(--ink); font-weight: 700; background: var(--panel); border-color: var(--sketch); cursor: default; }
 </style>
 
 <div class="page">
@@ -348,6 +353,17 @@ tr.is-deleted td { color: var(--ink-soft); }
     toast(standaloneMessage || "router.push → " + path);
   }
 
+  /* ---------- Vahelehed (NavTabs.vue) — samad lingid mis navbari menüüs ---------- */
+  var ADMIN_TABS = [["/admin-enquiries", "Koolituste päringud"], ["/admin-registrations", "Registreerumised"], ["/admin-trainings", "Koolitused"], ["/admin-all-courses", "Koolituste kalender"], ["/admin-lecturers", "Koolitajad"], ["/admin-rooms", "Koolitusruumid"]];
+  var TRAINING_TABS = [["/trainings", "Meie koolitused"], ["/courses", "Koolituste kalender"]];
+  function viewTabs(tabs, current) {
+    return '<nav class="vtabs" aria-label="Vahelehed">' + tabs.map(function (t) { return '<button type="button" data-vtab="' + t[0] + '"' + (t[0] === current ? ' aria-current="page"' : "") + '>' + t[1] + '</button>'; }).join("") + '</nav>';
+  }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-vtab]"); if (!b || b.getAttribute("aria-current")) return;
+    goRoute(b.dataset.vtab, "Vaheleht → " + b.dataset.vtab + " (teine läbimäng)");
+  });
+
   /* ---------- Märkmed (mustand; lõplik kuju markmed/admin-rooms-view-markmed.md ja room-form-view-markmed.md) ---------- */
   var VIEW_NOTES = {
     "admin-rooms": { title: "AdminRoomsView.vue", text: [
@@ -356,6 +372,7 @@ tr.is-deleted td { color: var(--ink-soft); }
       "Frontend rada: /admin-rooms",
       "",
       "Vaatega seotud lisainfo:",
+      "Ülal vahelehed (AdminTabs.vue): Koolituste päringud | Registreerumised | Koolitused | Koolituste kalender | Koolitajad | Koolitusruumid — samad lingid ja järjekord mis menüüs \"Admin\", selle vaate vaheleht on aktiivne. Kitsal ekraanil on vahelehed ühel keritaval real, aktiivne keritakse keskele.",
       "Avaneb navbari menüüst \"Admin\" → \"Koolitusruumid\". Pealkirja real nupp \"+ Lisa uus ruum\" → /room-form. Tabelis Nimi | Tulevasi toimumiskordi | Toimumiskordi kokku | Uuendatud | Tegevused. Järjestus nime järgi; veerupäistel sorteerimine frontendis (1. klõps kasvav, 2. kahanev, 3. vaikimisi). Otsinguväli \"Otsi nime järgi…\" filtreerib frontendis (API kutset ei tehta); all \"Kokku N ruumi\". Vormist tulles näidatakse eduteadet (\"Ruum lisatud\" / \"Salvestatud\").",
       "\"Muuda\" → /room-form?roomId={id}. Prügikast (RoomDeleteButton.vue) küsib kinnitust ja teeb DELETE (soft delete); kui ruumis on tulevasi toimumiskordi, on prügikast keelatud ja tooltip selgitab põhjust (backend: 403 ROOM_HAS_UPCOMING_COURSES → backendi message, nimekiri uuesti).",
       "Lüliti \"Näita kustutatud\" (vaikimisi väljas) → includeDeleted=true: kustutatud read on tuhmimad, märgisega \"Kustutatud\" ja ainult nupuga \"Taasta\" (kinnitus → PUT /api/room/{roomId}/restore)."
@@ -592,7 +609,7 @@ tr.is-deleted td { color: var(--ink-soft); }
           (blocked ? '<span role="tooltip">Ruumis on tulevasi toimumiskordi — vali neile enne teine ruum</span>' : "") + '</span></span>';
       return '<tr' + (deleted ? ' class="is-deleted"' : "") + '><td class="name-cell">' + esc(r.roomName) + '</td><td class="num">' + r.upcomingCourseCount + '</td><td class="num">' + r.courseCount + '</td><td class="date">' + ddmmyyyy(new Date(r.updatedAt).toLocaleString("sv-SE", { timeZone: "Europe/Tallinn" })) + '</td><td>' + actions + '</td></tr>';
     }).join("") : '<tr class="empty-row"><td colspan="5">Ruume ei leitud</td></tr>';
-    return '<div class="viewhead"><h2>Koolitusruumid</h2><div class="headbtns"><button type="button" class="sbtn primary" id="b-new">+ Lisa uus ruum</button></div></div>' +
+    return viewTabs(ADMIN_TABS, "/admin-rooms") + '<div class="viewhead"><h2>Koolitusruumid</h2><div class="headbtns"><button type="button" class="sbtn primary" id="b-new">+ Lisa uus ruum</button></div></div>' +
       '<div class="searchrow"><input type="text" id="r-search" placeholder="Otsi nime järgi…" aria-label="Otsi nime järgi" value="' + esc(ui.search) + '">' +
       '<label class="switch"><input type="checkbox" id="r-deleted"' + (ui.includeDeleted ? " checked" : "") + '> Näita kustutatud</label>' + pin("n-admin-rooms", "GET /api/admin-rooms") + '</div>' +
       inlineAlerts() +

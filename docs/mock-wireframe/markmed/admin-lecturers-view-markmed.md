@@ -10,6 +10,7 @@ Failinimi: AdminLecturersView.vue
 Frontend rada: /admin-lecturers
 
 Vaatega seotud lisainfo:
+Ülal vahelehed (AdminTabs.vue): Koolituste päringud | Registreerumised | Koolitused | Koolituste kalender | Koolitajad | Koolitusruumid — samad lingid ja järjekord mis menüüs "Admin", selle vaate vaheleht on aktiivne. Kitsal ekraanil on vahelehed ühel keritaval real, aktiivne keritakse keskele.
 Avaneb navbari menüüst "Admin" → "Koolitajad". Pealkirja real nupp "+ Lisa uus koolitaja" → /lecturer-form. Tabelis Nimi | Ametinimetus | Tõlked | Koolitusi | Tulevasi toimumiskordi | Uuendatud | Tegevused, pilte ei kuvata. Tõlked: ✓ kui tõlge on kõigis tõlkekeeltes, muidu ✗ ja tooltip "Puudub: en". Järjestus nime järgi; otsinguväli "Otsi nime järgi…" filtreerib frontendis (API kutset ei tehta); all "Kokku N koolitajat". Keele vahetusel laaditakse nimekiri uuesti.
 "Muuda" → /lecturer-form?lecturerId={id}&lecturerTranslationId={id}. Prügikast (LecturerDeleteButton.vue) küsib kinnitust ja teeb DELETE (soft delete); kui koolitajal on tulevasi toimumiskordi, on prügikast keelatud ja tooltip selgitab põhjust (backend: 403 LECTURER_HAS_UPCOMING_COURSES → backendi message, nimekiri uuesti).
 Lüliti "Näita kustutatud" (vaikimisi väljas) → includeDeleted=true: kustutatud read on tuhmimad, märgisega "Kustutatud" ja ainult nupuga "Taasta" (kinnitus → PUT /api/lecturer/{lecturerId}/restore).
