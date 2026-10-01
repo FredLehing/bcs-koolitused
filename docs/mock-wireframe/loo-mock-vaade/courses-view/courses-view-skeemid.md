@@ -539,7 +539,7 @@ sequenceDiagram
 ## 7. Lahtised küsimused / hiljem
 
 - Kolleegi registreerimine, registreerumise tühistamine kasutaja poolt, "Minu koolitused" vaade, e-kirja kinnitus.
-- Paroolide räsimine ja e-posti kinnitamine konto loomisel.
+- Paroolide räsimine; captcha ja e-posti kinnitamine konto loomisel (konto on seni loomisel kohe aktiivne, admin kontosid ei kinnita).
 - Päringu modal `/training` lehel (üldine päring ilma toimumiskorrata) — sama `EnquiryModal`, `courseId = null`.
 - Sisselogitud kasutaja andmete eeltäitmine päringu vormis, e-kirja teavitus uuest päringust, robotikaitse.
 - Osalejate haldus `/admin-course` vaates (tasumise märkimine, loobumine, lisamine).
