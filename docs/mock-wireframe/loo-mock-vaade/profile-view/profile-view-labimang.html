@@ -349,7 +349,7 @@ td .linkish { font-size: .84rem; }
   <header class="intro">
     <h1>Minu profiil — läbimäng</h1>
     <p>Sisseloginud kasutaja profiil mockupi järgi (<code>BCS.pdf</code> leht 14) <strong>nelja eraldi vaatena</strong>: <code>ParticipantDetailsView</code> (<code>/participant-details</code>), <code>ParticipantCoursesView</code> (<code>/participant-courses</code>), <code>ParticipantCertificatesView</code> (<code>/participant-certificates</code>) ja <code>ChangePasswordView</code> (<code>/change-password</code>). Neid avatakse navbari rippmenüüst <strong>„Minu profiil ▾“</strong> ja vasakult profiilimenüüst (<code>ProfileMenu.vue</code>). Proovi andmeid muuta (ka e-posti, nt <code>liis.kuusk@example.com</code> annab vea „juba kasutusel“), tulevasest koolitusest loobuda ja parooli muuta (praegune parool on <code>parool123</code>). Paremal all näed, mis päringud tehti ja mida backend vastas; kollased sildid viivad API märkmete juurde.</p>
-    <p>Andmed on <code>3_import.sql</code>-ist (täna = 01/10/2026). Kasutaja on Anna Saar (<code>userId = 2</code>, osaleja 1), admin on <code>admin@vali-it.ee</code> (<code>userId = 1</code>, osalejat pole). Anna registreerumised 10 (Vue.js, veebis) ja 11 (Spring Boot, loobunud) on seed'i <strong>ettepanek</strong>. Uued teenused ja DTO-d on samuti ettepanek (vt <code>profile-view-skeemid.md</code>). Seed'is erinevad Anna profiili e-post (<code>anna.saar@example.com</code>) ja konto e-post (<code>kasutaja@vali-it.ee</code>); pärast esimest salvestust on need samad. Muudatused kehtivad ainult selles läbimängus.</p>
+    <p>Andmed on <code>3_import.sql</code>-ist (täna = 01/10/2026). Kasutaja on Anna Saar (<code>userId = 2</code>, osaleja 1), admin on <code>admin@vali-it.ee</code> (<code>userId = 1</code>, osalejat pole) — adminil on „Minu profiil ▾“ all ainult „Parool“, osaleja vaated suunavad ta <code>/not-authorized</code>. Anna registreerumised 10 (Vue.js, veebis) ja 11 (Spring Boot, loobunud) on seed'i <strong>ettepanek</strong>. Uued teenused ja DTO-d on samuti ettepanek (vt <code>profile-view-skeemid.md</code>). Seed'is erinevad Anna profiili e-post (<code>anna.saar@example.com</code>) ja konto e-post (<code>kasutaja@vali-it.ee</code>); pärast esimest salvestust on need samad. Muudatused kehtivad ainult selles läbimängus.</p>
     <div class="toolbar">
       <span class="lbl-soft">Kes on sisse loginud:</span>
       <button class="tbtn" type="button" data-as="user">Kasutaja (Anna Saar)</button>
@@ -411,19 +411,19 @@ td .linkish { font-size: .84rem; }
   }
 
   /* ---------- Märkmed (hiljem failidesse markmed/participant-details-view-markmed.md, participant-courses-view-markmed.md, participant-certificates-view-markmed.md, change-password-view-markmed.md) ---------- */
-  var COMMON_NOTE = "Avaneb navbari rippmenüüst \"Minu profiil ▾\" (sisseloginud kasutajal, ka adminil; \"Logi välja\" kõrval): Minu andmed, Minu koolitused, Tunnistused, Parool. Vasakul profiilimenüü (ProfileMenu.vue — sama neli linki, aktiivne esile tõstetud; kitsal ekraanil horisontaalselt sisu kohal), mockupi järgi. Sisselogimata kasutaja suunatakse /login?redirect={selle vaate rada}. userId tuleb sessionStorage'ist.";
-  function viewNote(file, path, lines) { return { title: file, text: ["Roll: Kasutaja (ka admin)", "Failinimi: " + file, "Frontend rada: " + path, "", "Vaatega seotud lisainfo:", COMMON_NOTE].concat(lines).join("\n") }; }
+  var COMMON_NOTE = "Avaneb navbari rippmenüüst \"Minu profiil ▾\" (\"Logi välja\" kõrval). Osalejal on menüüs Minu andmed, Minu koolitused, Tunnistused ja Parool; adminil ainult Parool. Osalejal on vasakul profiilimenüü (ProfileMenu.vue — samad neli linki, aktiivne esile tõstetud; kitsal ekraanil horisontaalselt sisu kohal), mockupi järgi; adminil profiilimenüüd pole. Sisselogimata kasutaja suunatakse /login?redirect={selle vaate rada}. userId tuleb sessionStorage'ist.";
+  function viewNote(file, path, lines, role) { return { title: file, text: ["Roll: " + (role || "Kasutaja (osaleja); admin → /not-authorized"), "Failinimi: " + file, "Frontend rada: " + path, "", "Vaatega seotud lisainfo:", COMMON_NOTE].concat(lines).join("\n") }; }
   var VIEW_NOTES = {
     details: viewNote("ParticipantDetailsView.vue", "/participant-details", [
       "Pealkiri \"Minu andmed\", paremal nupp \"Muuda\". Eesnimi, Perekonnanimi, Telefon, E-post 2×2 paigutuses, vaikimisi ainult lugemiseks (GET /api/user/{userId}/participant). \"Muuda\" → väljad muudetavad, nupud \"Salvesta\" ja \"Tühista\" (taastab laaditud väärtused). Kõik väljad kohustuslikud, e-post korrektne, telefon kuni 20 märki. E-posti all vihje \"Selle e-postiga logid ka sisse.\"",
-      "\"Salvesta\" → PUT /api/user/{userId}/profile; EMAIL_TAKEN → viga e-posti välja all, vorm jääb lahti; edu → teade \"Andmed salvestatud\", andmed laaditakse uuesti ja vorm läheb lugemisrežiimi. Kui kasutajal osalejat pole (nt admin): väljad tühjad, e-post = konto e-post ja teade \"Sinu kontol pole veel profiiliandmeid. Lisa need nupuga „Muuda“.\""]),
+      "\"Salvesta\" → PUT /api/user/{userId}/profile; EMAIL_TAKEN → viga e-posti välja all, vorm jääb lahti; edu → teade \"Andmed salvestatud\", andmed laaditakse uuesti ja vorm läheb lugemisrežiimi. Kui kasutajal osalejat pole (erandjuht — konto loomine loob osaleja kohe): väljad tühjad, e-post = konto e-post ja teade \"Sinu kontol pole veel profiiliandmeid. Lisa need nupuga „Muuda“.\""]),
     courses: viewNote("ParticipantCoursesView.vue", "/participant-courses", [
       "Pealkiri \"Minu koolitused\". GET /api/user/{userId}/registrations?contentLang={UI keel} (keele vahetusel uuesti). Plokid \"Tulevased\" (lõpp täna või hiljem, alguse järgi kasvavalt) ja \"Toimunud\" (uusimad eespool). Igal real koolituse nimi lingina → /course?courseId={id}, toimumisaeg dd/MM/yyyy – dd/MM/yyyy, vorm (Kohapeal / Veebis / Kohapeal + veebis), staatus (CourseParticipantStatusBadge: Registreerunud / Loobunud), Tasutud / Tasumata, tühistatud toimumiskorral \"Tühistatud\". Loobunud rida tuhmim.",
       "Nupp \"Loobu\" ainult kui canCancel → ConfirmModal \"Kas soovid koolitusest loobuda?\" → PUT /api/user/{userId}/registration/{courseParticipantId}/cancel → teade \"Oled koolitusest loobunud\" ja nimekiri laaditakse uuesti. Tühi nimekiri: \"Sa pole veel ühelegi koolitusele registreerunud.\" + link \"Vaata koolituste kalendrit\" → /courses."]),
     certificates: viewNote("ParticipantCertificatesView.vue", "/participant-certificates", [
       "Pealkiri \"Tunnistused\" ja tekst \"Tunnistused tulevad varsti — siia ilmuvad sinu läbitud koolituste tunnistused.\" Päringut pole (tunnistused tehakse hiljem)."]),
     password: viewNote("ChangePasswordView.vue", "/change-password", [
-      "Pealkiri \"Parool\". Praegune parool*, Uus parool* (vähemalt 8 märki), Korda uut parooli* (type=password). Frontendi kontroll: uus ≥ 8 märki, kordus klapib, uus ≠ praegune. \"Muuda parool\" → PUT /api/user/{userId}/password; INCORRECT_PASSWORD → viga välja \"Praegune parool\" all; edu → teade \"Parool muudetud\" ja väljad tühjaks."])
+      "Pealkiri \"Parool\". Praegune parool*, Uus parool* (vähemalt 8 märki), Korda uut parooli* (type=password). Frontendi kontroll: uus ≥ 8 märki, kordus klapib, uus ≠ praegune. \"Muuda parool\" → PUT /api/user/{userId}/password; INCORRECT_PASSWORD → viga välja \"Praegune parool\" all; edu → teade \"Parool muudetud\" ja väljad tühjaks."], "Kasutaja (osaleja) ja admin")
   };
   var USER_NOT_FOUND = "HTTP: 404\nerrorCode: PRIMARY_KEY_NOT_FOUND\nmessage: \"Ei leidnud primary keyd 'userId' väärtusega: 123\"";
   var NOTES = [
@@ -568,17 +568,20 @@ td .linkish { font-size: .84rem; }
   var TAB_NAMES = { details: "Minu andmed", courses: "Minu koolitused", certificates: "Tunnistused", password: "Parool" };
   var TAB_PATHS = { details: "/participant-details", courses: "/participant-courses", certificates: "/participant-certificates", password: "/change-password" };
   var TAB_VIEWS = { details: "ParticipantDetailsView", courses: "ParticipantCoursesView", certificates: "ParticipantCertificatesView", password: "ChangePasswordView" };
+  // Osaleja vaated ainult osalejale; parooli vaade kõigile sisseloginutele (parool kuulub kontole, mitte osalejale)
+  function allowed(tab) { return ui.role === "user" || tab === "password"; }
+  function menuTabs() { return Object.keys(TAB_NAMES).filter(allowed); }
   function openTab(tab, title) {
     startStep(title);
     ui.tab = tab; ui.success = ""; ui.coursesMsg = ""; ui.pwMsg = ""; ui.edit = false; ui.form = null; ui.errors = {}; ui.pwErrors = {};
     ui.pw = { current: "", next: "", repeat: "" };
-    if (ui.role !== "public") {
+    if (ui.role !== "public" && allowed(tab)) {
       if (tab === "details") ui.me = apiGetParticipant();
       if (tab === "courses") ui.regs = apiGetRegs();
     }
     renderAll();
   }
-  function startAs(role, title) { var keep = ui ? ui.tab : null; ui = freshUi(role); openTab(keep || (TAB_NAMES[SHELL_Q.get("view")] ? SHELL_Q.get("view") : "details"), title); startAs.done = true; }
+  function startAs(role, title) { var keep = ui ? ui.tab : null; ui = freshUi(role); if (keep && !allowed(keep)) keep = "password"; openTab(keep || (TAB_NAMES[SHELL_Q.get("view")] ? SHELL_Q.get("view") : "details"), title); startAs.done = true; }
 
   function validateProfile(f) {
     var e = {};
@@ -651,7 +654,7 @@ td .linkish { font-size: .84rem; }
   function renderNav() {
     var right = ui.role === "public" ? '<span class="pillbtn">Logi sisse</span><span class="pillbtn">Loo konto</span>'
       : '<span class="who">' + ROLE_NAMES[ui.role] + '</span><span class="admin"><button type="button" id="b-pmenu" aria-expanded="false" aria-controls="p-menu" style="font-weight:700">Minu profiil ▾</button><span class="menu" id="p-menu" hidden>' +
-        Object.keys(TAB_NAMES).map(function (k) { return '<button type="button" data-pnav="' + k + '"' + (ui.tab === k ? ' class="cur"' : "") + '>' + TAB_NAMES[k] + '</button>'; }).join("") + '</span></span><span class="pillbtn">Logi välja</span>';
+        menuTabs().map(function (k) { return '<button type="button" data-pnav="' + k + '"' + (ui.tab === k ? ' class="cur"' : "") + '>' + TAB_NAMES[k] + '</button>'; }).join("") + '</span></span><span class="pillbtn">Logi välja</span>';
     document.getElementById("sitenav").innerHTML = '<span class="logo" aria-hidden="true"></span><span>Koolitused ▾</span><span>Meie koolitajad</span><span>Teenused</span><span>Ettevõttest</span><span>Kontakt</span>' +
       (ui.role === "admin" ? "<span>Admin ▾</span>" : "") + '<span class="right">' + right + '</span>';
   }
@@ -709,8 +712,15 @@ td .linkish { font-size: .84rem; }
         '<button type="button" class="sbtn" data-route="/login?redirect=' + encodeURIComponent(TAB_PATHS[ui.tab]) + '">Ava /login?redirect=' + TAB_PATHS[ui.tab] + '</button></div>';
       return;
     }
+    if (!allowed(ui.tab)) {
+      document.getElementById("view").innerHTML = '<div class="ph"><h2 class="denied">Puudub õigus</h2><p class="hint"><code>' + TAB_VIEWS[ui.tab] + '.vue</code> on ainult osalejale — admin suunatakse <code>/not-authorized</code>. Adminil on „Minu profiil ▾“ all ainult „Parool“.</p>' +
+        '<button type="button" class="sbtn" data-tab="password">Ava Parool</button></div>';
+      return;
+    }
+    var body0 = { details: renderDetails, courses: renderCourses, certificates: renderCertificates, password: renderPassword }[ui.tab]();
+    if (ui.role === "admin") { document.getElementById("view").innerHTML = '<section class="pcard" style="max-width:640px">' + body0 + '</section>'; return; }
     var menu = Object.keys(TAB_NAMES).map(function (k) { return '<button type="button" data-tab="' + k + '"' + (ui.tab === k ? ' aria-current="page"' : "") + '>' + TAB_NAMES[k] + '</button>'; }).join("");
-    var body = { details: renderDetails, courses: renderCourses, certificates: renderCertificates, password: renderPassword }[ui.tab]();
+    var body = body0;
     document.getElementById("view").innerHTML = '<div class="profile-layout"><nav class="pmenu" aria-label="Profiili menüü (ProfileMenu.vue)">' + menu + '</nav><section class="pcard">' + body + '</section></div>';
   }
   function renderKv() {

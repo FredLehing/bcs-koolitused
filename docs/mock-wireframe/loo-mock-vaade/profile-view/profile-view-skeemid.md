@@ -22,13 +22,14 @@ Mõisted: **konto** = `"user"` rida (sisselogimise e-post ja parool). **Profiil*
   | Parool | `ChangePasswordView.vue` | `/change-password` |
 
 - **Nimed on andmebaasi järgi:** andmed (nimi, telefon, koolitused, tunnistused) kuuluvad osalejale (`participant`), seega `Participant…View`. Parool kuulub kontole (`"user"`), seega `ChangePasswordView`. Hilisem admini vaade ühe osaleja kohta saab projekti tava järgi `Admin` eesliite (nt `AdminParticipantView`), nii et nimed ei kattu.
-- Vaated on **kõigile sisseloginud kasutajatele, ka adminile** (admin saab muuta oma andmeid ja parooli). Sisselogimata kasutaja → `/login?redirect={vaate rada}` (nt `/login?redirect=/participant-courses`); pärast sisselogimist jõuab ta samasse vaatesse tagasi.
+- **Osaleja vaated** (`Participant…View`) on ainult osaleja rollile; admin → `/not-authorized` (nagu `/course-registration`). **`ChangePasswordView`** on kõigile sisseloginutele, ka adminile — parool kuulub kontole. Adminile piisab kontode haldusest (`../admin-users-view/admin-users-view-skeemid.md`). Sisselogimata kasutaja → `/login?redirect={vaate rada}` (nt `/login?redirect=/participant-courses`); pärast sisselogimist jõuab ta samasse vaatesse tagasi.
+- Konto on loomisel kohe aktiivne (`status = A`), osaleja saab kohe sisse logida ja registreeruda — admin kontosid ei kinnita. Kaitse robot-kontode vastu (captcha, e-posti kinnitamine) tuleb hiljem (jaotis 7).
 - `userId` tuleb `sessionStorage`-ist (`SessionStorageService.getUserId()`), nagu teistes kasutaja teenustes. Päris autentimist projektis pole, seega backend usaldab path'i `userId`-d (teadaolev piirang, sama mis `GET /api/user/{userId}/participant` puhul).
-- Paigutus mockupi järgi: vasakul profiilimenüü **`ProfileMenu.vue`** (uus ühine komponent, samad neli `RouterLink`-i, aktiivne esile tõstetud; Bootstrap `list-group` / `nav-pills flex-column`), paremal vaate kaart. Kitsal ekraanil on menüü kaardi kohal horisontaalselt. Iga vaade laeb oma andmed ise.
+- Paigutus mockupi järgi (osalejal; adminil on parooli vaates ainult kaart, profiilimenüüd pole): vasakul profiilimenüü **`ProfileMenu.vue`** (uus ühine komponent, samad neli `RouterLink`-i, aktiivne esile tõstetud; Bootstrap `list-group` / `nav-pills flex-column`), paremal vaate kaart. Kitsal ekraanil on menüü kaardi kohal horisontaalselt. Iga vaade laeb oma andmed ise.
 
 ### Navbar (`App.vue`)
 
-- Sisseloginud kasutajale (ka adminile) "Logi välja" kõrvale **rippmenüü "Minu profiil ▾"** (ikoon `PhUserCircle`, i18n `navbar.profile`, en "My profile"; Bootstrap `dropdown`, menüü avaneb paremale joondatult `dropdown-menu-end`):
+- Sisseloginud kasutajale "Logi välja" kõrvale **rippmenüü "Minu profiil ▾"** (ikoon `PhUserCircle`, i18n `navbar.profile`, en "My profile"; Bootstrap `dropdown`, menüü avaneb paremale joondatult `dropdown-menu-end`). **Osalejal** neli punkti, **adminil ainult "Parool"**:
   - Minu andmed → `/participant-details` (`navbar.participantDetails`, en "My details");
   - Minu koolitused → `/participant-courses` (`navbar.participantCourses`, en "My courses");
   - Tunnistused → `/participant-certificates` (`navbar.participantCertificates`, en "Certificates");
@@ -42,7 +43,7 @@ Mõisted: **konto** = `"user"` rida (sisselogimise e-post ja parool). **Profiil*
 - Valideerimine nagu konto loomisel (`SignupView`): kõik väljad kohustuslikud, e-post korrektne, telefon kuni 20 märki.
 - **E-post on kasutaja jaoks üks:** salvestamisel muutub nii `profile.email` kui ka konto `user.email`. Seega logitakse järgmine kord sisse **uue** e-postiga. Vormis on selle kohta vihje: "Selle e-postiga logid ka sisse".
 - Kui e-post on teisel kontol juba kasutusel → `EMAIL_TAKEN` (sama kontroll nagu konto loomisel, enda kontot välja arvates, tõstutundetult).
-- **Kui kasutajal osalejat/profiili pole** (nt admin, vt `3_import.sql` kasutajad 1 ja 3): väljad on tühjad ja e-post = konto e-post. Salvestamisel luuakse `profile` + `participant` (sama loogika mis registreerumisel, `ParticipantService.addParticipant`).
+- **Kui kasutajal osalejat/profiili pole** (erandjuht — konto loomine loob osaleja kohe): väljad on tühjad ja e-post = konto e-post. Salvestamisel luuakse `profile` + `participant` (sama loogika mis registreerumisel, `ParticipantService.addParticipant`).
 - Salvestamisel uuendatakse ka `participant.name` (= eesnimi + perekonnanimi), nagu registreerumisel.
 - Edu korral teade "Andmed salvestatud" ja tagasi lugemisrežiimi.
 
@@ -185,6 +186,7 @@ flowchart TD
 ## 7. Hiljem
 
 - **Tunnistused:** `participant_certificate` saab seose registreerumisega (`course_participant_id`, unikaalne), faili nime ja tüübi. Admin laeb PDF-i üles registreerumise vaates (`/admin-registration`), kasutaja näeb "Tunnistused" all nimekirja (koolitus, kuupäev) ja laeb faili alla (`GET /api/user/{userId}/certificate/{id}`).
+- Kaitse robot-kontode vastu konto loomisel: captcha ja e-posti kinnitamine (konto aktiveerub pärast e-posti lingi avamist).
 - Parooli räsimine (BCrypt) kogu projektis.
 - "Unustasid parooli?" (LoginView link on praegu `#`).
 

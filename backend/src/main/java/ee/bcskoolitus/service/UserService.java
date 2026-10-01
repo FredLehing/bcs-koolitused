@@ -4,6 +4,8 @@ import ee.bcskoolitus.ApiRole;
 import ee.bcskoolitus.ApiStatus;
 import ee.bcskoolitus.controller.login.dto.LoginResponse;
 import ee.bcskoolitus.controller.user.dto.MyParticipantDto;
+import ee.bcskoolitus.controller.user.dto.PasswordChangeRequestDto;
+import ee.bcskoolitus.controller.user.dto.ProfileUpdateRequestDto;
 import ee.bcskoolitus.controller.user.dto.SignupRequestDto;
 import ee.bcskoolitus.infrastructure.exception.ForbiddenException;
 import ee.bcskoolitus.infrastructure.exception.PrimaryKeyNotFoundException;
@@ -23,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 
 import static ee.bcskoolitus.Error.EMAIL_TAKEN;
+import static ee.bcskoolitus.Error.INCORRECT_PASSWORD;
 
 @Service
 @RequiredArgsConstructor
@@ -68,6 +71,44 @@ public class UserService {
         MyParticipantDto myParticipantDto = profileMapper.toMyParticipantDto(participant.get().getProfile());
         myParticipantDto.setParticipantId(participant.get().getId());
         return myParticipantDto;
+    }
+
+    // "Minu andmed": e-post muutub nii kontol (sisselogimine) kui ka profiilis; osalejata kasutajale luuakse profiil + osaleja
+    @Transactional
+    public void updateProfile(Integer userId, ProfileUpdateRequestDto profileUpdateRequestDto) {
+        User user = getValidUserBy(userId);
+        String email = profileUpdateRequestDto.getEmail().trim();
+        validateEmailNotTakenByOtherUser(email, userId);
+        user.setEmail(email);
+        userRepository.save(user);
+        Optional<Participant> participant = participantRepository.findByUserId(userId);
+        if (participant.isEmpty()) {
+            Profile profile = profileMapper.toProfile(profileUpdateRequestDto);
+            profile.setEmail(email);
+            participantService.addParticipant(user, profile);
+            return;
+        }
+        Profile profile = participant.get().getProfile();
+        profileMapper.updateProfile(profileUpdateRequestDto, profile);
+        profile.setEmail(email);
+        participantService.updateParticipantName(participant.get());
+    }
+
+    // Parool on kontol; praegune parool peab klappima (paroolid on praegu lihttekstina)
+    @Transactional
+    public void updatePassword(Integer userId, PasswordChangeRequestDto passwordChangeRequestDto) {
+        User user = getValidUserBy(userId);
+        if (!user.getPassword().equals(passwordChangeRequestDto.getCurrentPassword())) {
+            throw new ForbiddenException(INCORRECT_PASSWORD.getMessage(), INCORRECT_PASSWORD.name());
+        }
+        user.setPassword(passwordChangeRequestDto.getNewPassword());
+        userRepository.save(user);
+    }
+
+    private void validateEmailNotTakenByOtherUser(String email, Integer userId) {
+        if (userRepository.existsByEmailIgnoreCaseAndIdNot(email, userId)) {
+            throw new ForbiddenException(EMAIL_TAKEN.getMessage(), EMAIL_TAKEN.name());
+        }
     }
 
     private void validateEmailNotTaken(String email) {

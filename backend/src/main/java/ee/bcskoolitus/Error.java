@@ -18,7 +18,12 @@ public enum Error {
     EMAIL_TAKEN("Selle e-posti aadressiga konto on juba olemas"),
     COURSE_FULL("Toimumiskord on täis"),
     ALREADY_REGISTERED("Oled sellele toimumiskorrale juba registreerunud"),
-    REGISTRATION_CLOSED("Registreerumine on lõppenud");
+    REGISTRATION_CLOSED("Registreerumine on lõppenud"),
+
+    INCORRECT_PASSWORD("Praegune parool on vale"),
+    CANCEL_NOT_ALLOWED("Sellest registreerumisest ei saa enam loobuda"),
+    REGISTRATION_NOT_FOUND("Registreerumist ei leitud"),
+    CANNOT_DEACTIVATE_SELF("Enda kontot ei saa deaktiveerida");
 
     private final String message;
 

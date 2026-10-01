@@ -15,6 +15,15 @@ public class TrainingTranslationService {
 
     private final TrainingTranslationRepository trainingTranslationRepository;
     private final TrainingTranslationMapper trainingTranslationMapper;
+    private final LanguageService languageService;
+
+    // Koolituse nimi contentLang keeles, puudumisel põhikeeles; tõlke puudumisel "" (põhikeele tõlge on koolitusel alati olemas)
+    public String getTrainingTitle(Integer trainingId, String contentLang) {
+        return trainingTranslationRepository.findByTraining_IdAndLanguage_Code(trainingId, contentLang)
+                .or(() -> trainingTranslationRepository.findByTraining_IdAndLanguage_Code(trainingId, languageService.getMainLanguage().getCode()))
+                .map(TrainingTranslation::getTitle)
+                .orElse("");
+    }
 
     // Kustutatud koolituse (status D) tõlge on nagu olematu → 404
     public TrainingTranslationDto getTrainingTranslation(Integer trainingTranslationId) {

@@ -167,9 +167,9 @@ code { font-family: var(--font-mono); font-size: .88em; }
     { key: "lecturer", path: "/lecturer", name: "Koolitaja", view: "LecturerView.vue", group: "public", sample: "/lecturer?lecturerId=1", file: "lecturers-view/lecturers-view-labimang.html", params: ["lecturerId", "returnTo"] },
     { key: "login", path: "/login", name: "Logi sisse", view: "LoginView.vue", group: "public", login: true },
     { key: "signup", path: "/signup", name: "Loo konto", view: "SignupView.vue", group: "public", file: "courses-view/course-registration-view-labimang.html", params: ["redirect"], extra: "view=signup" },
-    { key: "participant-details", path: "/participant-details", name: "Minu andmed", view: "ParticipantDetailsView.vue", group: "user", file: "profile-view/profile-view-labimang.html", roleParam: true, auth: true, extra: "view=details" },
-    { key: "participant-courses", path: "/participant-courses", name: "Minu koolitused", view: "ParticipantCoursesView.vue", group: "user", file: "profile-view/profile-view-labimang.html", roleParam: true, auth: true, extra: "view=courses" },
-    { key: "participant-certificates", path: "/participant-certificates", name: "Tunnistused", view: "ParticipantCertificatesView.vue", group: "user", file: "profile-view/profile-view-labimang.html", roleParam: true, auth: true, extra: "view=certificates" },
+    { key: "participant-details", participantOnly: true, path: "/participant-details", name: "Minu andmed", view: "ParticipantDetailsView.vue", group: "user", file: "profile-view/profile-view-labimang.html", roleParam: true, auth: true, extra: "view=details" },
+    { key: "participant-courses", participantOnly: true, path: "/participant-courses", name: "Minu koolitused", view: "ParticipantCoursesView.vue", group: "user", file: "profile-view/profile-view-labimang.html", roleParam: true, auth: true, extra: "view=courses" },
+    { key: "participant-certificates", participantOnly: true, path: "/participant-certificates", name: "Tunnistused", view: "ParticipantCertificatesView.vue", group: "user", file: "profile-view/profile-view-labimang.html", roleParam: true, auth: true, extra: "view=certificates" },
     { key: "change-password", path: "/change-password", name: "Parool", view: "ChangePasswordView.vue", group: "user", file: "profile-view/profile-view-labimang.html", roleParam: true, auth: true, extra: "view=password" },
     { key: "admin-enquiries", path: "/admin-enquiries", name: "Koolituste päringud", view: "AdminEnquiriesView.vue", group: "admin", file: "admin-enquiries-view/admin-enquiries-view-labimang.html" },
     { key: "admin-enquiry", path: "/admin-enquiry", name: "Koolituse päring", view: "AdminEnquiryView.vue", group: "admin", sample: "/admin-enquiry?enquiryId=4", file: "admin-enquiries-view/admin-enquiries-view-labimang.html", params: ["enquiryId"], extra: "view=admin-enquiry" },
@@ -224,7 +224,8 @@ code { font-family: var(--font-mono); font-size: .88em; }
       VIEWS.filter(function (v) { return v.group === g[0]; }).forEach(function (v) {
         var locked = v.group === "admin" && state.role !== "admin";
         var needsLogin = v.auth && state.role === "public";
-        var tag = locked ? '<span class="tag lock" title="Ainult adminile">🔒 admin</span>' : needsLogin ? '<span class="tag lock" title="Ainult sisseloginud kasutajale">🔒 sisselogimine</span>' : v.file ? '<span class="tag mock">läbimäng</span>' : '<span class="tag ph">kohatäide</span>';
+        var participantOnly = v.participantOnly && state.role === "admin";
+        var tag = locked ? '<span class="tag lock" title="Ainult adminile">🔒 admin</span>' : needsLogin ? '<span class="tag lock" title="Ainult sisseloginud kasutajale">🔒 sisselogimine</span>' : participantOnly ? '<span class="tag lock" title="Ainult osalejale">🔒 osaleja</span>' : v.file ? '<span class="tag mock">läbimäng</span>' : '<span class="tag ph">kohatäide</span>';
         html += '<button type="button" data-go="' + esc(v.sample || v.path) + '"' + (cur === v ? ' aria-current="page"' : "") + '><span class="nm">' + esc(v.name) + '</span>' + tag + '<span class="path">' + esc(v.view) + " · " + esc(v.sample || v.path) + '</span></button>';
       });
     });
@@ -246,7 +247,7 @@ code { font-family: var(--font-mono); font-size: .88em; }
       '<button type="button" data-go="/admin-users">Kontod</button></span></span>' : "";
     var right = state.role === "public" ? '<button type="button" class="pill" data-go="/login">Logi sisse</button><button type="button" class="pill" data-go="/signup">Loo konto</button>'
       : '<span class="who">' + ROLE_NAMES[state.role] + '</span><span class="admin"><button type="button" id="b-pmenu" aria-expanded="false" aria-controls="p-menu"' + (cur && cur.group === "user" ? ' style="text-decoration:underline;text-underline-offset:3px;font-weight:700"' : "") + '>Minu profiil ▾</button><span class="menu" id="p-menu" hidden>' +
-        VIEWS.filter(function (v) { return v.group === "user"; }).map(function (v) { return '<button type="button" data-go="' + v.path + '">' + esc(v.name) + '</button>'; }).join("") + '</span></span><button type="button" class="pill" id="b-logout">Logi välja</button>';
+        VIEWS.filter(function (v) { return v.group === "user" && !(v.participantOnly && state.role === "admin"); }).map(function (v) { return '<button type="button" data-go="' + v.path + '">' + esc(v.name) + '</button>'; }).join("") + '</span></span><button type="button" class="pill" id="b-logout">Logi välja</button>';
     document.getElementById("sitenav").innerHTML = '<button type="button" class="logo" data-go="/" aria-label="Avaleht"></button>' +
       kmenu + lnk("/lecturers", "Meie koolitajad") + dead("Teenused") + dead("Ettevõttest") + dead("Blogi") + dead("Kontakt") + dead("Tagasiside") +
       admin + '<span class="right">' + right + '</span>';
@@ -265,6 +266,11 @@ code { font-family: var(--font-mono); font-size: .88em; }
       return;
     }
     // Sisselogimist nõudev vaade (nt /profile): sisselogimata kasutaja suunatakse /login?redirect=...
+    // Osaleja vaated (Minu andmed, koolitused, tunnistused): admin → NotAuthorizedView; adminil on "Minu profiil ▾" all ainult "Parool"
+    if (v.participantOnly && state.role === "admin") {
+      stage.innerHTML = '<div class="ph-page"><h2 class="denied">Puudub õigus</h2><p>Vaade <strong>' + esc(v.name) + '</strong> (<code>' + esc(v.view) + '</code>) on ainult osalejale — päris rakenduses suunatakse admin <code>NotAuthorizedView</code>-le. Adminil on „Minu profiil ▾“ all ainult „Parool“.</p><div class="row"><button type="button" class="sbtn primary" data-go="/change-password">Parool</button><button type="button" class="sbtn" data-role-go="user">Vaheta roll: Kasutaja</button></div></div>';
+      return;
+    }
     if (v.auth && state.role === "public") { go("/login?redirect=" + encodeURIComponent(state.path), { replace: true }); return; }
     if (v.login) {
       // ?redirect= (nt registreerumisest): pärast sisselogimist minnakse sinna tagasi; link "Loo konto" annab redirecti edasi
