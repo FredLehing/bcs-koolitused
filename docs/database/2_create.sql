@@ -323,6 +323,20 @@ CREATE TABLE training_translation
     CONSTRAINT training_translation_uq UNIQUE (training_id, language_id)
 );
 
+-- Table: training_translation_curriculum (1:1 training_translation'iga; rida puudub = õppekava pole)
+CREATE TABLE training_translation_curriculum
+(
+    id                      serial       NOT NULL,
+    training_translation_id int          NOT NULL,
+    file                    bytea        NOT NULL,
+    file_name               varchar(255) NOT NULL,
+    file_size               int          NOT NULL,
+    created_at              timestamp    NOT NULL,
+    updated_at              timestamp    NOT NULL,
+    CONSTRAINT training_translation_curriculum_pk PRIMARY KEY (id),
+    CONSTRAINT training_translation_curriculum_uq UNIQUE (training_translation_id)
+);
+
 -- Table: user
 CREATE TABLE "user"
 (
@@ -650,6 +664,15 @@ ALTER TABLE training_lecturer
     ADD CONSTRAINT training_lecturer_training
         FOREIGN KEY (training_id)
             REFERENCES training (id)
+            NOT DEFERRABLE
+                INITIALLY IMMEDIATE
+;
+
+-- Reference: training_translation_curriculum_training_translation (table: training_translation_curriculum)
+ALTER TABLE training_translation_curriculum
+    ADD CONSTRAINT training_translation_curriculum_training_translation
+        FOREIGN KEY (training_translation_id)
+            REFERENCES training_translation (id)
             NOT DEFERRABLE
                 INITIALLY IMMEDIATE
 ;

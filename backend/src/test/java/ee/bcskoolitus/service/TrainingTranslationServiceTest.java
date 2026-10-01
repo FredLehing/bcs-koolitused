@@ -8,12 +8,14 @@ import ee.bcskoolitus.persistance.training.Training;
 import ee.bcskoolitus.persistance.training.translation.TrainingTranslation;
 import ee.bcskoolitus.persistance.training.translation.TrainingTranslationMapperImpl;
 import ee.bcskoolitus.persistance.training.translation.TrainingTranslationRepository;
+import ee.bcskoolitus.persistance.training.translation.curriculum.TrainingTranslationCurriculumInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -24,13 +26,33 @@ class TrainingTranslationServiceTest {
             "<p>Kursusel õpitakse <strong>Java süntaksit</strong>.</p><ul><li><p>Klassid</p></li></ul>";
 
     private TrainingTranslationRepository trainingTranslationRepository;
+    private LanguageService languageService;
+    private TrainingTranslationCurriculumService trainingTranslationCurriculumService;
     private TrainingTranslationService trainingTranslationService;
 
     @BeforeEach
     void setUp() {
         trainingTranslationRepository = mock(TrainingTranslationRepository.class);
+        languageService = mock(LanguageService.class);
+        trainingTranslationCurriculumService = mock(TrainingTranslationCurriculumService.class);
+        when(trainingTranslationCurriculumService.findCurriculumInfo(1)).thenReturn(Optional.empty());
         trainingTranslationService = new TrainingTranslationService(
-                trainingTranslationRepository, new TrainingTranslationMapperImpl());
+                trainingTranslationRepository, new TrainingTranslationMapperImpl(),
+                trainingTranslationCurriculumService, languageService);
+    }
+
+
+    @Test
+    void getTrainingTitle_fallsBackToMainLanguageWhenContentLanguageIsMissing() {
+        Language mainLanguage = new Language();
+        mainLanguage.setCode("et");
+        when(trainingTranslationRepository.findByTraining_IdAndLanguage_Code(3, "en"))
+                .thenReturn(Optional.empty());
+        when(languageService.getMainLanguage()).thenReturn(mainLanguage);
+        when(trainingTranslationRepository.findByTraining_IdAndLanguage_Code(3, "et"))
+                .thenReturn(Optional.of(createTrainingTranslation()));
+
+        assertEquals("Java Basics", trainingTranslationService.getTrainingTitle(3, "en"));
     }
 
     @Test
@@ -46,6 +68,29 @@ class TrainingTranslationServiceTest {
         assertEquals("Java Basics", trainingTranslationDto.getTitle());
         assertEquals("Fundamentals of Java.", trainingTranslationDto.getShortDescription());
         assertEquals(DESCRIPTION_HTML, trainingTranslationDto.getDescription());
+        assertNull(trainingTranslationDto.getCurriculumFileName());
+        assertNull(trainingTranslationDto.getCurriculumFileSize());
+    }
+
+    @Test
+    void getTrainingTranslation_returnsCurriculumFileNameAndSize() {
+        when(trainingTranslationRepository.findById(1)).thenReturn(Optional.of(createTrainingTranslation()));
+        when(trainingTranslationCurriculumService.findCurriculumInfo(1)).thenReturn(Optional.of(new TrainingTranslationCurriculumInfo() {
+            @Override
+            public String getFileName() {
+                return "java-basics-curriculum.pdf";
+            }
+
+            @Override
+            public Integer getFileSize() {
+                return 846213;
+            }
+        }));
+
+        TrainingTranslationDto trainingTranslationDto = trainingTranslationService.getTrainingTranslation(1);
+
+        assertEquals("java-basics-curriculum.pdf", trainingTranslationDto.getCurriculumFileName());
+        assertEquals(846213, trainingTranslationDto.getCurriculumFileSize());
     }
 
     @Test

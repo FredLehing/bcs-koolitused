@@ -292,6 +292,12 @@ textarea { min-height: 88px; resize: vertical; }
 }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 .quick { display: flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }
+/* Õppekava (PDF) */
+.cur-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; border: 1.5px dashed var(--line); border-radius: 5px; padding: 4px 8px; font-size: .9rem; }
+.cur-file { overflow-wrap: anywhere; }
+.cur-file.removed { text-decoration: line-through; color: var(--ink-soft); }
+.cur-row .linkish { font-size: .9rem; overflow-wrap: anywhere; text-align: left; }
+.cur-name code { font-size: .78rem; overflow-wrap: anywhere; }
 .embed .sitenav { display: none; }
 /* hidden-atribuut peab peitma ka elemendid, millel on oma display (nt .menu { display: grid }) */
 [hidden] { display: none !important; }
@@ -302,6 +308,7 @@ textarea { min-height: 88px; resize: vertical; }
     <h1>TrainingFormView.vue — läbimäng</h1>
     <p>Vajuta vormi nuppe ja lipukesi nagu päris vaates. URL, backendi päringud ja olek muutuvad kaasa. Kollased kastid on mockupi märkmed samas vormingus nagu <code>skill-uus-mockup-markmed</code> — neid saab otse Balsamiqi kopeerida.</p>
     <p>Keeled tulevad päringust <code>GET /api/languages</code> (<code>language</code> tabel): <code>et</code> (põhikeel), <code>en</code> ja <code>ru</code>. Tõlkelipud on ainult keeltel, mille <code>requiresTranslation = true</code> (<code>et</code>, <code>en</code>). <code>ru</code> on ainult õppekeel („Koolituse keel“ rippmenüüs), sellesse koolituse sisu ei tõlgita. Näidisandmed: koolitus 1 „Java algkursus“ on andmebaasist (<code>3_import.sql</code>), sellel on et ja en tõlge. Koolitus 9 „Exceli algkursus“ (õppekeel ru, ainult et tõlge, mustand) on samuti andmebaasist ja sobib olekule C. „Power BI edasijõudnutele“ on mockupi lk 7 põhjal uus koolitus, mis saab ID <code>15</code>. DTO-de väljad on <strong>ettepanek</strong> — need kinnitatakse plaanifailis.</p>
+    <p><strong>Õppekava (PDF, 2026-10-01):</strong> igal tõlkel võib olla üks PDF-fail (kuni 10 MB). Fail salvestub koos tõlkega, failinime teeb backend pealkirjast ja sõnast „Õppekava“ tõlke keeles (<code>curriculumLabel</code>). Java algkursuse <code>et</code> tõlkel on õppekava olemas, <code>en</code> tõlkel mitte. Proovi: vali fail (või „näidisfail“), muuda pealkirja ja vaata, kuidas failinimi kaasa muutub. Plaan: <code>training-curriculum-plaan.md</code>.</p>
     <div class="toolbar">
       <button class="tbtn" id="btn-a" type="button" data-mode="A"><span>A. Alusta uue koolitusega</span><span class="tstate">state: "new-training"</span></button>
       <button class="tbtn" id="btn-b" type="button" data-mode="B"><span>B. Muuda koolitust (Java algkursus)</span><span class="tstate">state: "update"</span></button>
@@ -399,6 +406,24 @@ textarea { min-height: 88px; resize: vertical; }
       en: { title: "Power BI for Advanced Users", shortDescription: "Data models, DAX and interactive reports.", description: "The course builds a data model in Power BI, writes DAX formulas and creates interactive reports." }
     }
   };
+  // Õppekava: sõna "Õppekava" tõlke keeles (päris vaates i18n: $t('trainingForm.curriculum', {}, { locale: tõlke keel }))
+  var CURRICULUM_LABEL = { et: "Õppekava", en: "Curriculum" };
+  var CURRICULUM_MAX_BYTES = 10 * 1024 * 1024;
+  var SAMPLE_CURRICULUM = { name: "Õppekava_v3 LÕPLIK (1).pdf", size: 1258291 };
+  // Failinime reegel (backendi FileNameSanitizer): diakriitikud ära, väiketähed, muu → "-"
+  function slug(text) {
+    return String(text).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  }
+  function curriculumFileName(title, label, trainingId) {
+    var t = slug(title);
+    if (t.length > 100) { t = t.slice(0, 100); var cut = t.lastIndexOf("-"); if (cut > 0) t = t.slice(0, cut); }
+    if (!t) t = "koolitus-" + (trainingId || "{id}");
+    var l = slug(label);
+    return t + (l ? "-" + l : "") + ".pdf";
+  }
+  function fmtSize(bytes) {
+    return bytes < 102400 ? Math.max(1, Math.round(bytes / 1024)) + " KB" : (bytes / 1048576).toFixed(1).replace(".", ",") + " MB";
+  }
   var NEW_ET = { title: "Power BI edasijõudnutele", shortDescription: "Andmemudelid, DAX ja interaktiivsed aruanded.", description: "Kursusel ehitatakse Power BI-s andmemudel, kirjutatakse DAX-valemeid ja luuakse interaktiivseid aruandeid." };
 
   function freshDb() {
@@ -409,7 +434,7 @@ textarea { min-height: 88px; resize: vertical; }
         9: { trainingId: 9, categoryId: 1, trainingLanguageId: 3, locationId: 2, lecturerIds: [6, 2], isOrderable: true, isPromoted: false, status: "U", fundingTypeIds: [] }
       },
       translations: {
-        1: { trainingTranslationId: 1, trainingId: 1, languageId: 1, title: "Java algkursus", shortDescription: "Java programmeerimise alused algajatele.", description: "Kursusel õpitakse Java süntaksit, objektorienteeritud programmeerimist ja põhilisi andmestruktuure." },
+        1: { trainingTranslationId: 1, trainingId: 1, languageId: 1, title: "Java algkursus", shortDescription: "Java programmeerimise alused algajatele.", description: "Kursusel õpitakse Java süntaksit, objektorienteeritud programmeerimist ja põhilisi andmestruktuure.", curriculum: { fileName: "java-algkursus-oppekava.pdf", fileSize: 846213 } },
         2: { trainingTranslationId: 2, trainingId: 1, languageId: 2, title: "Java Basics", shortDescription: "Fundamentals of Java programming for beginners.", description: "The course covers Java syntax, object-oriented programming, and basic data structures." },
         17: { trainingTranslationId: 17, trainingId: 9, languageId: 1, title: "Exceli algkursus", shortDescription: "Tabelid, valemid ja diagrammid algajatele.", description: "Kursusel õpitakse töötama tabelitega, kasutama põhilisi valemeid ja looma diagramme." }
       },
@@ -447,6 +472,26 @@ textarea { min-height: 88px; resize: vertical; }
     call("GET", "/api/categories?contentLang=" + UI_LANG, null, Object.keys(CATEGORIES).map(function (k) { return { categoryId: +k, categoryName: CATEGORIES[k][UI_LANG] }; }));
     call("GET", "/api/funding-types?contentLang=" + UI_LANG, null, Object.keys(FUNDING).map(function (k) { return { fundingTypeId: +k, fundingTypeName: FUNDING[k][UI_LANG] }; }));
   }
+  function translationDto(tr) {
+    var c = tr.curriculum || null;
+    return { trainingTranslationId: tr.trainingTranslationId, trainingId: tr.trainingId, languageId: tr.languageId, languageCode: lang(tr.languageId).languageCode, title: tr.title, shortDescription: tr.shortDescription, description: tr.description, curriculumFileName: c ? c.fileName : null, curriculumFileSize: c ? c.fileSize : null };
+  }
+  function freshCurriculum(saved) { return { saved: saved ? { fileName: saved.fileName, fileSize: saved.fileSize } : null, pending: null, removed: false, error: null }; }
+  // Request DTO õppekava väljad; withRemoved = ainult PUT
+  function curriculumReq(withRemoved) {
+    var o = { curriculum: st.cur.pending ? "JVBERi0xLjcKJeLjz9MK… (Base64, " + fmtSize(st.cur.pending.size) + ")" : null };
+    if (withRemoved) o.isCurriculumRemoved = st.cur.removed;
+    o.curriculumLabel = CURRICULUM_LABEL[st.langCode];
+    return o;
+  }
+  // Backend: uus fail → lisatakse/asendatakse; eemaldus → rida kustutatakse; muidu failinimi arvutatakse uuesti
+  function applyCurriculum(tr) {
+    var label = CURRICULUM_LABEL[lang(tr.languageId).languageCode];
+    if (st.cur.pending) tr.curriculum = { fileName: curriculumFileName(tr.title, label, tr.trainingId), fileSize: st.cur.pending.size };
+    else if (st.cur.removed) tr.curriculum = null;
+    else if (tr.curriculum) tr.curriculum = { fileName: curriculumFileName(tr.title, label, tr.trainingId), fileSize: tr.curriculum.fileSize };
+  }
+  function assign(target, extra) { Object.keys(extra).forEach(function (k) { target[k] = extra[k]; }); return target; }
   function trainingDto(t) {
     return { trainingId: t.trainingId, categoryId: t.categoryId, trainingLanguageId: t.trainingLanguageId, locationId: t.locationId, lecturers: t.lecturerIds.map(function (id) { return { lecturerId: id, lecturerName: lecturerName(id) }; }), isOrderable: t.isOrderable, isPromoted: t.isPromoted, status: t.status, fundingTypeIds: t.fundingTypeIds.slice() };
   }
@@ -465,7 +510,8 @@ textarea { min-height: 88px; resize: vertical; }
     if (!q.trainingId) {
       loadDropdowns("et");
       st = { mode: "A", url: url, langCode: "et", status: null, trainingId: null, translations: [],
-        form: { categoryId: 1, trainingLanguageId: 1, locationId: 2, lecturerIds: [6], isOrderable: true, isPromoted: false, fundingTypeIds: [1, 2], title: NEW_ET.title, shortDescription: NEW_ET.shortDescription, description: NEW_ET.description } };
+        form: { categoryId: 1, trainingLanguageId: 1, locationId: 2, lecturerIds: [6], isOrderable: true, isPromoted: false, fundingTypeIds: [1, 2], title: NEW_ET.title, shortDescription: NEW_ET.shortDescription, description: NEW_ET.description },
+        cur: freshCurriculum(null) };
     } else {
       var t = db.trainings[q.trainingId];
       var tdto = trainingDto(t);
@@ -482,15 +528,17 @@ textarea { min-height: 88px; resize: vertical; }
       call("GET", "/api/languages", null, LANGUAGES);
       call("GET", "/api/locations", null, Object.keys(LOCATIONS).map(function (k) { return { locationId: +k, locationName: LOCATIONS[k] }; }));
       call("GET", "/api/training/" + t.trainingId, null, tdto);
-      if (tr) call("GET", "/api/training-translation/" + tr.trainingTranslationId, null, { trainingTranslationId: tr.trainingTranslationId, trainingId: tr.trainingId, languageId: tr.languageId, languageCode: code, title: tr.title, shortDescription: tr.shortDescription, description: tr.description });
+      if (tr) call("GET", "/api/training-translation/" + tr.trainingTranslationId, null, translationDto(tr));
       call("GET", "/api/training/" + t.trainingId + "/training-translations", null, list);
-      if (src) call("GET", "/api/training-translation/" + src.trainingTranslationId, null, { trainingTranslationId: src.trainingTranslationId, trainingId: src.trainingId, languageId: src.languageId, languageCode: lang(src.languageId).languageCode, title: src.title, shortDescription: src.shortDescription, description: src.description });
+      if (src) call("GET", "/api/training-translation/" + src.trainingTranslationId, null, translationDto(src));
       call("GET", "/api/categories?contentLang=" + UI_LANG, null, Object.keys(CATEGORIES).map(function (k) { return { categoryId: +k, categoryName: CATEGORIES[k][UI_LANG] }; }));
       call("GET", "/api/funding-types?contentLang=" + UI_LANG, null, Object.keys(FUNDING).map(function (k) { return { fundingTypeId: +k, fundingTypeName: FUNDING[k][UI_LANG] }; }));
       st = { mode: tr ? "B" : "C", url: url, langCode: code, status: t.status, trainingId: t.trainingId,
         trainingTranslationId: tr ? tr.trainingTranslationId : null, languageId: tr ? tr.languageId : q.languageId, translations: list,
         form: { categoryId: t.categoryId, trainingLanguageId: t.trainingLanguageId, locationId: t.locationId, lecturerIds: t.lecturerIds.slice(), isOrderable: t.isOrderable, isPromoted: t.isPromoted, fundingTypeIds: t.fundingTypeIds.slice(),
-          title: (tr || src || {}).title || "", shortDescription: (tr || src || {}).shortDescription || "", description: (tr || src || {}).description || "" } };
+          title: (tr || src || {}).title || "", shortDescription: (tr || src || {}).shortDescription || "", description: (tr || src || {}).description || "" },
+        // olekus C on õppekava tühi — põhikeele faili ei kopeerita
+        cur: freshCurriculum(tr ? tr.curriculum : null) };
     }
     st.loaded = textsOf(st.form);
     renderAll(true);
@@ -502,10 +550,11 @@ textarea { min-height: 88px; resize: vertical; }
     if (!f.title.trim()) { st.error = "Täida pealkiri"; renderForm(); return; }
     startStep("„Lisa“ → POST, siis router.replace");
     var userId = 1; // localStorage'ist
-    var req = { userId: userId, categoryId: f.categoryId, trainingLanguageId: f.trainingLanguageId, locationId: f.locationId, lecturerIds: f.lecturerIds.slice(), isOrderable: f.isOrderable, isPromoted: f.isPromoted, fundingTypeIds: f.fundingTypeIds.slice(), title: f.title, shortDescription: f.shortDescription, description: f.description };
+    var req = assign({ userId: userId, categoryId: f.categoryId, trainingLanguageId: f.trainingLanguageId, locationId: f.locationId, lecturerIds: f.lecturerIds.slice(), isOrderable: f.isOrderable, isPromoted: f.isPromoted, fundingTypeIds: f.fundingTypeIds.slice(), title: f.title, shortDescription: f.shortDescription, description: f.description }, curriculumReq(false));
     var tid = db.nextTrainingId++, trid = db.nextTranslationId++;
     db.trainings[tid] = { trainingId: tid, categoryId: f.categoryId, trainingLanguageId: f.trainingLanguageId, locationId: f.locationId, lecturerIds: f.lecturerIds.slice(), isOrderable: f.isOrderable, isPromoted: f.isPromoted, status: "U", fundingTypeIds: f.fundingTypeIds.slice() };
     db.translations[trid] = { trainingTranslationId: trid, trainingId: tid, languageId: 1, title: f.title, shortDescription: f.shortDescription, description: f.description };
+    applyCurriculum(db.translations[trid]);
     call("POST", "/api/training", req, { trainingId: tid, trainingTranslationId: trid });
     navigate({ trainingId: tid, trainingTranslationId: trid }, null, true);
     toast("Koolitus lisatud (mustand)");
@@ -516,7 +565,8 @@ textarea { min-height: 88px; resize: vertical; }
     startStep("„Lisa tõlge“ → POST, siis router.replace");
     var trid = db.nextTranslationId++;
     db.translations[trid] = { trainingTranslationId: trid, trainingId: st.trainingId, languageId: st.languageId, title: f.title, shortDescription: f.shortDescription, description: f.description };
-    call("POST", "/api/training/" + st.trainingId + "/training-translation", { languageId: st.languageId, title: f.title, shortDescription: f.shortDescription, description: f.description }, { trainingTranslationId: trid });
+    applyCurriculum(db.translations[trid]);
+    call("POST", "/api/training/" + st.trainingId + "/training-translation", assign({ languageId: st.languageId, title: f.title, shortDescription: f.shortDescription, description: f.description }, curriculumReq(false)), { trainingTranslationId: trid });
     navigate({ trainingId: st.trainingId, trainingTranslationId: trid }, null, true);
     toast("Tõlge lisatud");
   }
@@ -530,7 +580,12 @@ textarea { min-height: 88px; resize: vertical; }
     t.fundingTypeIds = f.fundingTypeIds.slice();
     var tr = db.translations[st.trainingTranslationId];
     tr.title = f.title; tr.shortDescription = f.shortDescription; tr.description = f.description;
-    call("PUT", "/api/training/" + st.trainingId, { categoryId: f.categoryId, trainingLanguageId: f.trainingLanguageId, locationId: f.locationId, lecturerIds: f.lecturerIds.slice(), isOrderable: f.isOrderable, isPromoted: f.isPromoted, fundingTypeIds: f.fundingTypeIds.slice(), trainingTranslationId: tr.trainingTranslationId, title: f.title, shortDescription: f.shortDescription, description: f.description }, null);
+    call("PUT", "/api/training/" + st.trainingId, assign({ categoryId: f.categoryId, trainingLanguageId: f.trainingLanguageId, locationId: f.locationId, lecturerIds: f.lecturerIds.slice(), isOrderable: f.isOrderable, isPromoted: f.isPromoted, fundingTypeIds: f.fundingTypeIds.slice(), trainingTranslationId: tr.trainingTranslationId, title: f.title, shortDescription: f.shortDescription, description: f.description }, curriculumReq(true)), null);
+    applyCurriculum(tr);
+    // õppekava failinimi võis muutuda (uus fail, eemaldus või uus pealkiri) → tõlge laaditakse uuesti
+    call("GET", "/api/training-translation/" + tr.trainingTranslationId, null, translationDto(tr));
+    logSteps[logSteps.length - 1].reload = true;
+    st.cur = freshCurriculum(tr.curriculum);
     st.error = null;
     st.loaded = textsOf(f);
     renderAll(false);
@@ -597,6 +652,41 @@ textarea { min-height: 88px; resize: vertical; }
         '<button type="button" class="ibtn-s" data-lremove="' + i + '" aria-label="Eemalda"' + dis + '>×</button></li>';
     }).join("");
     return '<ul class="lect-rows">' + (rows || '<li class="none">— koolitajaid pole —</li>') + '</ul><button type="button" class="sbtn" id="b-lect"' + dis + '>+ Lisa koolitaja</button>';
+  }
+
+  // Õppekava (PDF): failivalija / valitud fail / salvestatud fail (Vaheta, Eemalda) / eemaldatakse salvestamisel
+  function curriculumNamePreview() {
+    return curriculumFileName(st.form.title, CURRICULUM_LABEL[st.langCode], st.trainingId);
+  }
+  function curriculumField() {
+    var c = st.cur, row;
+    if (c.pending) {
+      row = '<span class="cur-file">' + esc(c.pending.name) + ' (' + fmtSize(c.pending.size) + ')</span><span class="hint">salvestatakse koos vormiga</span><button type="button" class="sbtn" id="b-cur-undo">Tühista</button>';
+    } else if (c.removed) {
+      row = '<span class="cur-file removed">' + esc(c.saved.fileName) + '</span><span class="hint">eemaldatakse salvestamisel</span><button type="button" class="sbtn" id="b-cur-undo">Tühista</button>';
+    } else if (c.saved) {
+      row = '<button type="button" class="linkish" id="b-cur-dl" title="Laadi alla">' + esc(c.saved.fileName) + '</button><span class="hint">(' + fmtSize(c.saved.fileSize) + ')</span>' + pin("n-get-curriculum", "GET …/curriculum") +
+        '<button type="button" class="sbtn" id="b-cur-pick">Vaheta</button><button type="button" class="sbtn" id="b-cur-remove">Eemalda</button>';
+    } else {
+      row = '<button type="button" class="sbtn" id="b-cur-pick">Vali fail…</button><span class="hint">PDF, kuni 10 MB</span><button type="button" class="linkish" id="b-cur-sample">või näidisfail</button>';
+    }
+    var preview = (c.pending || (c.saved && !c.removed)) ? '<span class="hint cur-name">Nimi pärast salvestamist: <code id="cur-preview">' + esc(curriculumNamePreview()) + '</code> (pealkiri + „' + esc(CURRICULUM_LABEL[st.langCode]) + '“ tõlke keeles)</span>' : "";
+    return '<div class="fld"><span class="lbl">Õppekava (PDF)</span><div class="cur-row">' + row + '</div><input type="file" id="f-cur" accept="application/pdf,.pdf" hidden>' +
+      (c.error ? '<span class="err">' + esc(c.error) + '</span>' : "") + preview + '</div>';
+  }
+  function pickCurriculum(file) {
+    var isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name);
+    if (!isPdf) st.cur.error = "Lubatud on ainult PDF-fail";
+    else if (file.size > CURRICULUM_MAX_BYTES) st.cur.error = "Fail on liiga suur, lubatud kuni 10 MB";
+    else { st.cur.error = null; st.cur.pending = { name: file.name, size: file.size }; st.cur.removed = false; }
+    renderForm();
+  }
+  function downloadCurriculum() {
+    startStep("Klikk õppekava failinimel → allalaadimine");
+    var tr = db.translations[st.trainingTranslationId];
+    call("GET", "/api/training-translation/" + tr.trainingTranslationId + "/curriculum", null, "PDF (" + fmtSize(tr.curriculum.fileSize) + ")\nContent-Type: application/pdf\nContent-Disposition: attachment; filename=\"" + tr.curriculum.fileName + "\"");
+    renderLog();
+    toast("Allalaadimine: " + tr.curriculum.fileName);
   }
 
   /* ---------- Modaalid ---------- */
@@ -719,6 +809,7 @@ textarea { min-height: 88px; resize: vertical; }
           '<div class="fld"><span class="lbl">Pealkiri' + (st.mode === "B" ? " " + pin("n-get-translation", "GET /api/training-translation/{id}") : "") + '</span><input type="text" id="f-title" value="' + esc(f.title) + '" placeholder="Pealkiri ' + code + ' keeles"></div>' +
           '<div class="fld"><span class="lbl">Lühikirjeldus</span><input type="text" id="f-short" value="' + esc(f.shortDescription) + '"></div>' +
           '<div class="fld"><span class="lbl">Kirjeldus (richtext)</span><div class="rt"><div class="rtbar" aria-hidden="true"><b>B</b><i>I</i><span>• loend</span><span>link</span></div><textarea id="f-desc">' + esc(f.description) + '</textarea></div></div>' +
+          curriculumField() +
           (st.error ? '<span class="err">' + esc(st.error) + '</span>' : "") + fill +
         '</fieldset>' +
       '</div>' +
@@ -735,7 +826,8 @@ textarea { min-height: 88px; resize: vertical; }
       ["languageId", st.mode === "C" ? st.languageId : "—"],
       ["contentLang", st.langCode],
       ["status", st.status ? st.status + (st.status === "U" ? " (mustand)" : " (publitseeritud)") : "— (määrab backend: U)"],
-      ["userId", "1 (localStorage)"]
+      ["userId", "1 (localStorage)"],
+      ["curriculumLabel", CURRICULUM_LABEL[st.langCode] + " ($t, locale " + st.langCode + ")"]
     ];
     document.getElementById("store").textContent = j(TRANSLATION_LANGUAGES);
     document.getElementById("statekv").innerHTML = rows.map(function (r) { return "<dt>" + r[0] + "</dt><dd>" + esc(r[1]) + "</dd>"; }).join("");
@@ -750,6 +842,7 @@ textarea { min-height: 88px; resize: vertical; }
     if (method === "GET" && p === "/api/lecturers") return "n-lecturers";
     if (method === "GET" && /\/ai-translation$/.test(p)) return "n-ai-translation";
     if (method === "GET" && /\/training-translations$/.test(p)) return "n-translations";
+    if (method === "GET" && /\/curriculum$/.test(p)) return "n-get-curriculum";
     if (method === "GET" && /^\/api\/training-translation\//.test(p)) return "n-get-translation";
     if (method === "GET" && /^\/api\/training\/\d+$/.test(p)) return "n-get-training";
     if (method === "POST" && p === "/api/training") return "n-post-training";
@@ -771,7 +864,7 @@ textarea { min-height: 88px; resize: vertical; }
       ],
       actions: [
         { m: "GET", p: "/api/lecturers?search={otsingusõna}", note: "n-lecturers", when: "\"Vali koolitaja\" modalis otsides" },
-        { m: "POST", p: "/api/training", note: "n-post-training", when: "\"Lisa\" → router.replace olekusse update" }
+        { m: "POST", p: "/api/training", note: "n-post-training", when: "\"Lisa\" (koos valitud õppekavaga) → router.replace olekusse update" }
       ]
     },
     B: {
@@ -786,7 +879,9 @@ textarea { min-height: 88px; resize: vertical; }
       ],
       actions: [
         { m: "GET", p: "/api/lecturers?search={otsingusõna}", note: "n-lecturers", when: "\"Vali koolitaja\" modalis otsides" },
-        { m: "PUT", p: "/api/training/{trainingId}", note: "n-put-training", when: "\"Salvesta\"" },
+        { m: "PUT", p: "/api/training/{trainingId}", note: "n-put-training", when: "\"Salvesta\" (sh õppekava)" },
+        { m: "GET", p: "/api/training-translation/{trainingTranslationId}", note: "n-get-translation", reload: true, when: "pärast \"Salvesta\" uuesti — õppekava failinimi" },
+        { m: "GET", p: "/api/training-translation/{trainingTranslationId}/curriculum", note: "n-get-curriculum", when: "klikk õppekava failinimel → allalaadimine" },
         { m: "GET", p: "/api/training/{trainingId}/ai-translation?languageId={id}", note: "n-ai-translation", when: "\"Tee AI tõlge\" (ainult mitte-põhikeele tõlkel)" },
         { m: "PUT", p: "/api/training/{trainingId}/publish", note: "n-put-publish", when: "\"Publitseeri\" (status U) → kinnitus" },
         { m: "PUT", p: "/api/training/{trainingId}/unpublish", note: "n-put-unpublish", when: "\"Liiguta mustandisse\" (status P) → kinnitus" }
@@ -804,7 +899,7 @@ textarea { min-height: 88px; resize: vertical; }
       ],
       actions: [
         { m: "GET", p: "/api/training/{trainingId}/ai-translation?languageId={id}", note: "n-ai-translation", when: "\"Tee AI tõlge\"" },
-        { m: "POST", p: "/api/training/{trainingId}/training-translation", note: "n-post-translation", when: "\"Lisa tõlge\" → router.replace olekusse update" },
+        { m: "POST", p: "/api/training/{trainingId}/training-translation", note: "n-post-translation", when: "\"Lisa tõlge\" (koos valitud õppekavaga) → router.replace olekusse update" },
         { m: "PUT", p: "/api/training/{trainingId}/publish", note: "n-put-publish", when: "\"Publitseeri\" (status U) → kinnitus" },
         { m: "PUT", p: "/api/training/{trainingId}/unpublish", note: "n-put-unpublish", when: "\"Liiguta mustandisse\" (status P) → kinnitus" }
       ]
@@ -818,7 +913,7 @@ textarea { min-height: 88px; resize: vertical; }
     var used = {};
     function row(d, key) {
       var idx = -1;
-      logSteps.forEach(function (r, i) { if (idx === -1 && !used[i] && noteFor(r.method, r.path) === d.note) idx = i; });
+      logSteps.forEach(function (r, i) { if (idx === -1 && !used[i] && noteFor(r.method, r.path) === d.note && !r.reload === !d.reload) idx = i; });
       if (idx !== -1) used[idx] = true;
       return item(d.m, d.p, d.when, d.note, idx);
     }
@@ -863,12 +958,16 @@ textarea { min-height: 88px; resize: vertical; }
   var formEl = document.getElementById("form");
   formEl.addEventListener("input", function (e) {
     var id = e.target.id, f = st.form;
-    if (id === "f-title") { f.title = e.target.value; st.error = null; }
+    if (id === "f-title") {
+      f.title = e.target.value; st.error = null;
+      var pv = document.getElementById("cur-preview"); if (pv) pv.textContent = curriculumNamePreview();
+    }
     else if (id === "f-short") f.shortDescription = e.target.value;
     else if (id === "f-desc") f.description = e.target.value;
   });
   formEl.addEventListener("change", function (e) {
     var t = e.target, f = st.form;
+    if (t.id === "f-cur") { if (t.files && t.files[0]) pickCurriculum(t.files[0]); return; }
     if (t.id === "f-cat") f.categoryId = +t.value;
     else if (t.id === "f-lang") f.trainingLanguageId = +t.value;
     else if (t.id === "f-loc") f.locationId = +t.value;
@@ -894,6 +993,11 @@ textarea { min-height: 88px; resize: vertical; }
     else if (b.dataset.lremove !== undefined) { st.form.lecturerIds.splice(+b.dataset.lremove, 1); renderForm(); }
     else if (b.dataset.lmove) { var mv = b.dataset.lmove.split(":"), i = +mv[0], k = i + +mv[1], ids = st.form.lecturerIds; var tmp = ids[i]; ids[i] = ids[k]; ids[k] = tmp; renderForm(); }
     else if (b.id === "b-ai") doAiTranslate();
+    else if (b.id === "b-cur-pick") document.getElementById("f-cur").click();
+    else if (b.id === "b-cur-sample") pickCurriculum({ name: SAMPLE_CURRICULUM.name, size: SAMPLE_CURRICULUM.size, type: "application/pdf" });
+    else if (b.id === "b-cur-remove") { st.cur.removed = true; st.cur.error = null; renderForm(); }
+    else if (b.id === "b-cur-undo") { st.cur.pending = null; st.cur.removed = false; st.cur.error = null; renderForm(); }
+    else if (b.id === "b-cur-dl") downloadCurriculum();
     else if (b.id === "b-q-admin") goRoute("/admin-trainings");
     else if (b.id === "b-q-cal") goRoute("/admin-training-courses?trainingId=" + st.trainingId);
   });
@@ -917,9 +1021,9 @@ textarea { min-height: 88px; resize: vertical; }
   /* ---------- Märkmete tekstid (struktuuridokumendi vorming) ---------- */
   // Vaate märkmed oleku kaupa (samad tekstid nagu markmed/training-form-view-state-*-markmed.md failides)
   var VIEW_NOTES = {
-      "A": "Roll: Admin\nFailinimi: TrainingFormView.vue\nFrontend rada: /training-form\n\nVaatega seotud lisainfo:\nstate: \"new-training\" — URL-is query parameetreid pole. Pealkiri \"Lisa uus koolitus\". Vorm on tühi; tõlke väljad (pealkiri, lühikirjeldus, kirjeldus) täidetakse põhikeeles (et); rippmenüüd (kategooriad, rahastustüübid) laaditakse kasutajaliidese keeles (store'i contentLang) ja laaditakse keele vahetamisel navbaris uuesti — vormi sisu jääb alles. Lipukesi ja staatuse nuppe pole.\nKoolitajad: valitud koolitajate nimekiri (× eemaldab, ↑ ↓ muudab järjekorda, esimene kuvatakse esimesena); \"+ Lisa koolitaja\" avab \"Vali koolitaja\" modali otsinguga (juba valitud koolitajaid ei pakuta). Võib jääda tühjaks. Rahastustüübid on checkboxid, \"Tellitav\" ja \"Esile tõstetud\" switchid.\nNupp \"Lisa\" → POST /api/training (userId localStorage'ist). Backend loob koolituse staatusega \"U\" koos põhikeele tõlkega. Vastuse trainingId ja trainingTranslationId järgi tehakse router.replace → state \"update\".",
-      "B": "Roll: Admin\nFailinimi: TrainingFormView.vue\nFrontend rada: /training-form?trainingId={id}&trainingTranslationId={id}\n\nVaatega seotud lisainfo:\nstate: \"update\" — URL-is trainingId ja trainingTranslationId. Pealkiri \"Muuda koolitust\" koos staatuse märgisega (Mustand / Publitseeritud). Vorm on eeltäidetud; rippmenüüd (kategooriad, rahastustüübid) laaditakse kasutajaliidese keeles (store'i contentLang) ja laaditakse keele vahetamisel navbaris uuesti — vormi sisu jääb alles. Iga router.replace järel laaditakse andmed uuesti.\nLipukesed: tõlge olemas → värviline lipp (klikk avab selle tõlke), tõlge puudub → hall lipp (klikk → state \"new-translation\").\n\"Salvesta\" → PUT /api/training/{trainingId} (koolituse väljad + avatud tõlge ühes transaktsioonis). \"Tee AI tõlge\" on ainult mitte-põhikeele tõlkel: täidab vaid vormi, ei salvesta.\nstatus \"U\" → nupp \"Publitseeri\", status \"P\" → nupp \"Liiguta mustandisse\"; mõlemal kinnituse modal (PUT /api/training/{trainingId}/publish või /unpublish).",
-      "C": "Roll: Admin\nFailinimi: TrainingFormView.vue\nFrontend rada: /training-form?trainingId={id}&languageId={id}\n\nVaatega seotud lisainfo:\nstate: \"new-translation\" — URL-is trainingId ja languageId (keel, mille tõlge puudub). Pealkiri \"Lisa koolituse tõlge\". Koolituse väljad on kirjutuskaitstud; rippmenüüd (kategooriad, rahastustüübid) laaditakse kasutajaliidese keeles (store'i contentLang) ja laaditakse keele vahetamisel navbaris uuesti — vormi sisu jääb alles.\nTõlke väljad eeltäidetakse salvestatud põhikeele (et) tõlkega, mida admin tõlgib. \"Tee AI tõlge\" tõlgib salvestatud põhikeele teksti ja täidab ainult vormi; salvestamata muudatuste korral küsitakse enne kinnitust.\n\"Lisa tõlge\" → POST /api/training/{trainingId}/training-translation. Vastuse trainingTranslationId järgi tehakse router.replace → state \"update\".\nStaatuse nupp (\"Publitseeri\" / \"Liiguta mustandisse\") nagu state \"update\" puhul."
+      "A": "Roll: Admin\nFailinimi: TrainingFormView.vue\nFrontend rada: /training-form\n\nVaatega seotud lisainfo:\nstate: \"new-training\" — URL-is query parameetreid pole. Pealkiri \"Lisa uus koolitus\". Vorm on tühi; tõlke väljad (pealkiri, lühikirjeldus, kirjeldus) täidetakse põhikeeles (et); rippmenüüd (kategooriad, rahastustüübid) laaditakse kasutajaliidese keeles (store'i contentLang) ja laaditakse keele vahetamisel navbaris uuesti — vormi sisu jääb alles. Lipukesi ja staatuse nuppe pole.\nKoolitajad: valitud koolitajate nimekiri (× eemaldab, ↑ ↓ muudab järjekorda, esimene kuvatakse esimesena); \"+ Lisa koolitaja\" avab \"Vali koolitaja\" modali otsinguga (juba valitud koolitajaid ei pakuta). Võib jääda tühjaks. Rahastustüübid on checkboxid, \"Tellitav\" ja \"Esile tõstetud\" switchid.\nNupp \"Lisa\" → POST /api/training (userId localStorage'ist). Backend loob koolituse staatusega \"U\" koos põhikeele tõlkega. Vastuse trainingId ja trainingTranslationId järgi tehakse router.replace → state \"update\".\nÕppekava (PDF): tõlke väljade all valikuline PDF-fail (kuni 10 MB) — \"Vali fail…\"; valitud fail salvestub koos \"Lisa\" nupuga (curriculum = Base64, curriculumLabel = sõna \"Õppekava\" tõlke keeles i18n-ist). Failinime teeb backend: puhastatud pealkiri + sõna, nt power-bi-edasijoudnutele-oppekava.pdf.",
+      "B": "Roll: Admin\nFailinimi: TrainingFormView.vue\nFrontend rada: /training-form?trainingId={id}&trainingTranslationId={id}\n\nVaatega seotud lisainfo:\nstate: \"update\" — URL-is trainingId ja trainingTranslationId. Pealkiri \"Muuda koolitust\" koos staatuse märgisega (Mustand / Publitseeritud). Vorm on eeltäidetud; rippmenüüd (kategooriad, rahastustüübid) laaditakse kasutajaliidese keeles (store'i contentLang) ja laaditakse keele vahetamisel navbaris uuesti — vormi sisu jääb alles. Iga router.replace järel laaditakse andmed uuesti.\nLipukesed: tõlge olemas → värviline lipp (klikk avab selle tõlke), tõlge puudub → hall lipp (klikk → state \"new-translation\").\n\"Salvesta\" → PUT /api/training/{trainingId} (koolituse väljad + avatud tõlge ühes transaktsioonis). \"Tee AI tõlge\" on ainult mitte-põhikeele tõlkel: täidab vaid vormi, ei salvesta.\nstatus \"U\" → nupp \"Publitseeri\", status \"P\" → nupp \"Liiguta mustandisse\"; mõlemal kinnituse modal (PUT /api/training/{trainingId}/publish või /unpublish).\nÕppekava (PDF): olemas → failinimi lingina (klikk = allalaadimine) + suurus, nupud \"Vaheta\" ja \"Eemalda\" (kinnitust ei küsi — jõustub salvestamisel, \"Tühista\" võtab tagasi); puudub → \"Vali fail…\" (PDF, kuni 10 MB). \"Salvesta\" saadab curriculum / isCurriculumRemoved / curriculumLabel (sõna \"Õppekava\" avatud tõlke keeles, mitte kasutajaliidese keeles); backend arvutab failinime uuesti ka siis, kui muutus ainult pealkiri. Pärast salvestamist laaditakse tõlge uuesti (curriculumFileName).",
+      "C": "Roll: Admin\nFailinimi: TrainingFormView.vue\nFrontend rada: /training-form?trainingId={id}&languageId={id}\n\nVaatega seotud lisainfo:\nstate: \"new-translation\" — URL-is trainingId ja languageId (keel, mille tõlge puudub). Pealkiri \"Lisa koolituse tõlge\". Koolituse väljad on kirjutuskaitstud; rippmenüüd (kategooriad, rahastustüübid) laaditakse kasutajaliidese keeles (store'i contentLang) ja laaditakse keele vahetamisel navbaris uuesti — vormi sisu jääb alles.\nTõlke väljad eeltäidetakse salvestatud põhikeele (et) tõlkega, mida admin tõlgib. \"Tee AI tõlge\" tõlgib salvestatud põhikeele teksti ja täidab ainult vormi; salvestamata muudatuste korral küsitakse enne kinnitust.\n\"Lisa tõlge\" → POST /api/training/{trainingId}/training-translation. Vastuse trainingTranslationId järgi tehakse router.replace → state \"update\".\nStaatuse nupp (\"Publitseeri\" / \"Liiguta mustandisse\") nagu state \"update\" puhul.\nÕppekava (PDF): väli on tühi — põhikeele faili ei kopeerita ja AI tõlge faili ei puuduta. Valitud fail salvestub koos \"Lisa tõlge\" nupuga (curriculumLabel tõlke keeles, nt \"Curriculum\")."
   };
   function viewNote() { return VIEW_NOTES[st.mode]; }
 
@@ -961,8 +1065,8 @@ textarea { min-height: 88px; resize: vertical; }
       "Veateated:", PK("trainingId")] },
     { id: "n-get-translation", title: "GET /api/training-translation/{id}", draft: true, text: [
       "API: GET /api/training-translation/{trainingTranslationId}", "",
-      "Response (200):", "TrainingTranslationDto.java", "{", "  \"trainingTranslationId\": 1,", "  \"trainingId\": 1,", "  \"languageId\": 1,", "  \"languageCode\": \"et\",", "  \"title\": \"Java algkursus\",", "  \"shortDescription\": \"Java programmeerimise alused algajatele.\",", "  \"description\": \"Kursusel õpitakse Java süntaksit, objektorienteeritud programmeerimist ja põhilisi andmestruktuure.\"", "}", "",
-      "API teenuse lisainfo:", "Ühe tõlke andmed. Olekus B laaditakse avatud tõlge. Olekus C laaditakse et tõlge, millega uue tõlke väljad eeltäidetakse. Kui tõlke koolitus on kustutatud (status \"D\"), on tõlge nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.", "",
+      "Response (200):", "TrainingTranslationDto.java", "{", "  \"trainingTranslationId\": 1,", "  \"trainingId\": 1,", "  \"languageId\": 1,", "  \"languageCode\": \"et\",", "  \"title\": \"Java algkursus\",", "  \"shortDescription\": \"Java programmeerimise alused algajatele.\",", "  \"description\": \"Kursusel õpitakse Java süntaksit, objektorienteeritud programmeerimist ja põhilisi andmestruktuure.\",", "  \"curriculumFileName\": \"java-algkursus-oppekava.pdf\",", "  \"curriculumFileSize\": 846213", "}", "",
+      "API teenuse lisainfo:", "Ühe tõlke andmed. Olekus B laaditakse avatud tõlge. Olekus C laaditakse et tõlge, millega uue tõlke väljad eeltäidetakse. Kui tõlke koolitus on kustutatud (status \"D\"), on tõlge nagu olematu: 404 PRIMARY_KEY_NOT_FOUND. curriculumFileName = õppekava failinimi (nt java-algkursus-oppekava.pdf), curriculumFileSize = suurus baitides; mõlemad null, kui õppekava pole. Faili ennast ei tagastata (GET /api/training-translation/{trainingTranslationId}/curriculum).", "",
       "Veateated:", PK("trainingTranslationId")] },
     { id: "n-translations", title: "GET /api/training/{id}/training-translations", draft: true, text: [
       "API: GET /api/training/{trainingId}/training-translations", "",
@@ -980,22 +1084,24 @@ textarea { min-height: 88px; resize: vertical; }
       "HTTP: 503\nerrorCode: AI_SERVICE_UNAVAILABLE\nmessage: \"AI tõlketeenus ei ole hetkel kättesaadav\""] },
     { id: "n-post-training", title: "POST /api/training", draft: true, text: [
       "API: POST /api/training", "",
-      "Request body:", "TrainingCreateRequestDto.java", "{", "  \"userId\": 1,", "  \"categoryId\": 1,", "  \"trainingLanguageId\": 1,", "  \"locationId\": 2,", "  \"lecturerIds\": [", "    1,", "    ...", "  ],", "  \"isOrderable\": true,", "  \"isPromoted\": false,", "  \"fundingTypeIds\": [", "    1,", "    ...", "  ],", "  \"title\": \"Power BI edasijõudnutele\",", "  \"shortDescription\": \"Andmemudelid, DAX ja interaktiivsed aruanded.\",", "  \"description\": \"Kursusel ehitatakse Power BI-s andmemudel, kirjutatakse DAX-valemeid ja luuakse interaktiivseid aruandeid.\"", "}", "",
+      "Request body:", "TrainingCreateRequestDto.java", "{", "  \"userId\": 1,", "  \"categoryId\": 1,", "  \"trainingLanguageId\": 1,", "  \"locationId\": 2,", "  \"lecturerIds\": [", "    1,", "    ...", "  ],", "  \"isOrderable\": true,", "  \"isPromoted\": false,", "  \"fundingTypeIds\": [", "    1,", "    ...", "  ],", "  \"title\": \"Power BI edasijõudnutele\",", "  \"shortDescription\": \"Andmemudelid, DAX ja interaktiivsed aruanded.\",", "  \"description\": \"Kursusel ehitatakse Power BI-s andmemudel, kirjutatakse DAX-valemeid ja luuakse interaktiivseid aruandeid.\",", "  \"curriculum\": \"JVBERi0xLjcKJeLjz9MK...\",", "  \"curriculumLabel\": \"Õppekava\"", "}", "",
       "Response (200):", "TrainingCreateResponseDto.java", "{", "  \"trainingId\": 3,", "  \"trainingTranslationId\": 5", "}", "",
-      "API teenuse lisainfo:", "Loob training rea (status = \"U\", määrab backend), training_funding_type read ja et tõlke (language_id = 1) ühes transaktsioonis. lecturerIds = koolitajate ID-d kuvamise järjekorras (sort_order = positsioon 1, 2, …), võib olla tühi list; backend kirjutab training_lecturer read üle. Uus ID peab olema aktiivne koolitaja; juba seotud kustutatud koolitaja võib jääda. Sama PRIMARY_KEY_NOT_FOUND muster kehtib ka trainingLanguageId, lecturerIds (sõnumis 'lecturerId') ja fundingTypeIds väljadele.", "",
-      "Veateated:", PK("categoryId"), "", PK("locationId")] },
+      "API teenuse lisainfo:", "Loob training rea (status = \"U\", määrab backend), training_funding_type read ja et tõlke (language_id = 1) ühes transaktsioonis. lecturerIds = koolitajate ID-d kuvamise järjekorras (sort_order = positsioon 1, 2, …), võib olla tühi list; backend kirjutab training_lecturer read üle. Uus ID peab olema aktiivne koolitaja; juba seotud kustutatud koolitaja võib jääda. Sama PRIMARY_KEY_NOT_FOUND muster kehtib ka trainingLanguageId, lecturerIds (sõnumis 'lecturerId') ja fundingTypeIds väljadele. Õppekava: curriculum = PDF Base64 (valikuline, null = õppekava pole), curriculumLabel = sõna \"Õppekava\" tõlke keeles (kohustuslik). Backend kontrollib faili (algus %PDF-, kuni 10 MB) ja lisab training_translation_curriculum rea; failinimi = puhastatud pealkiri + \"-\" + puhastatud curriculumLabel + \".pdf\" (nt power-bi-edasijoudnutele-oppekava.pdf). Vigane Base64 või puuduv curriculumLabel → 400 INCORRECT_INPUT.", "",
+      "Veateated:", PK("categoryId"), "", PK("locationId"), "", "HTTP: 403\nerrorCode: CURRICULUM_TYPE_NOT_ALLOWED\nmessage: \"Lubatud on ainult PDF-fail\"", "", "HTTP: 403\nerrorCode: CURRICULUM_TOO_LARGE\nmessage: \"Õppekava on liiga suur, lubatud kuni 10 MB\""] },
     { id: "n-post-translation", title: "POST /api/training/{id}/training-translation", draft: true, text: [
       "API: POST /api/training/{trainingId}/training-translation", "",
-      "Request body:", "TrainingTranslationCreateRequestDto.java", "{", "  \"languageId\": 2,", "  \"title\": \"Power BI for Advanced Users\",", "  \"shortDescription\": \"Data models, DAX and interactive reports.\",", "  \"description\": \"The course builds a data model in Power BI, writes DAX formulas and creates interactive reports.\"", "}", "",
+      "Request body:", "TrainingTranslationCreateRequestDto.java", "{", "  \"languageId\": 2,", "  \"title\": \"Power BI for Advanced Users\",", "  \"shortDescription\": \"Data models, DAX and interactive reports.\",", "  \"description\": \"The course builds a data model in Power BI, writes DAX formulas and creates interactive reports.\",", "  \"curriculum\": \"JVBERi0xLjcKJeLjz9MK...\",", "  \"curriculumLabel\": \"Curriculum\"", "}", "",
       "Response (200):", "TrainingTranslationCreateResponseDto.java", "{", "  \"trainingTranslationId\": 6", "}", "",
-      "API teenuse lisainfo:", "Lisab koolitusele uue keele tõlke. Ühes keeles saab koolitusel olla ainult üks tõlge (training_translation_uq). Kustutatud koolitus (status \"D\") on nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.", "",
-      "Veateated:", PK("trainingId"), "", PK("languageId"), "", "HTTP: 403\nerrorCode: TRANSLATION_EXISTS\nmessage: \"Selles keeles tõlge on juba olemas\""] },
+      "API teenuse lisainfo:", "Lisab koolitusele uue keele tõlke. Ühes keeles saab koolitusel olla ainult üks tõlge (training_translation_uq). Kustutatud koolitus (status \"D\") on nagu olematu: 404 PRIMARY_KEY_NOT_FOUND. Õppekava: curriculum = PDF Base64 (valikuline, null = õppekava pole), curriculumLabel = sõna \"Õppekava\" tõlke keeles (kohustuslik). Backend kontrollib faili (algus %PDF-, kuni 10 MB) ja lisab training_translation_curriculum rea; failinimi = puhastatud pealkiri + \"-\" + puhastatud curriculumLabel + \".pdf\" (nt power-bi-for-advanced-users-curriculum.pdf). Vigane Base64 või puuduv curriculumLabel → 400 INCORRECT_INPUT.", "",
+      "Veateated:", PK("trainingId"), "", PK("languageId"), "", "HTTP: 403\nerrorCode: TRANSLATION_EXISTS\nmessage: \"Selles keeles tõlge on juba olemas\"", "", "HTTP: 403\nerrorCode: CURRICULUM_TYPE_NOT_ALLOWED\nmessage: \"Lubatud on ainult PDF-fail\"", "", "HTTP: 403\nerrorCode: CURRICULUM_TOO_LARGE\nmessage: \"Õppekava on liiga suur, lubatud kuni 10 MB\""] },
     { id: "n-put-training", title: "PUT /api/training/{trainingId}", draft: true, text: [
       "API: PUT /api/training/{trainingId}", "",
-      "Request body:", "TrainingUpdateRequestDto.java", "{", "  \"categoryId\": 1,", "  \"trainingLanguageId\": 1,", "  \"locationId\": 1,", "  \"lecturerIds\": [", "    1,", "    ...", "  ],", "  \"isOrderable\": true,", "  \"isPromoted\": true,", "  \"fundingTypeIds\": [", "    1,", "    ...", "  ],", "  \"trainingTranslationId\": 1,", "  \"title\": \"Java algkursus\",", "  \"shortDescription\": \"Java programmeerimise alused algajatele.\",", "  \"description\": \"Kursusel õpitakse Java süntaksit, objektorienteeritud programmeerimist ja põhilisi andmestruktuure.\"", "}", "",
+      "Request body:", "TrainingUpdateRequestDto.java", "{", "  \"categoryId\": 1,", "  \"trainingLanguageId\": 1,", "  \"locationId\": 1,", "  \"lecturerIds\": [", "    1,", "    ...", "  ],", "  \"isOrderable\": true,", "  \"isPromoted\": true,", "  \"fundingTypeIds\": [", "    1,", "    ...", "  ],", "  \"trainingTranslationId\": 1,", "  \"title\": \"Java algkursus\",", "  \"shortDescription\": \"Java programmeerimise alused algajatele.\",", "  \"description\": \"Kursusel õpitakse Java süntaksit, objektorienteeritud programmeerimist ja põhilisi andmestruktuure.\",", "  \"curriculum\": null,", "  \"isCurriculumRemoved\": false,", "  \"curriculumLabel\": \"Õppekava\"", "}", "",
       "Response (200): NONE", "",
-      "API teenuse lisainfo:", "Salvestab koolituse väljad ja trainingTranslationId tõlke ühes transaktsioonis. training_funding_type read kirjutatakse fundingTypeIds järgi üle, training_lecturer read lecturerIds järgi (lecturerIds = koolitajate ID-d kuvamise järjekorras (sort_order = positsioon 1, 2, …), võib olla tühi list; backend kirjutab training_lecturer read üle. Uus ID peab olema aktiivne koolitaja; juba seotud kustutatud koolitaja võib jääda.) Kustutatud koolitus (status \"D\") on nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.", "",
-      "Veateated:", PK("trainingId"), "", PK("trainingTranslationId")] },
+      "API teenuse lisainfo:", "Salvestab koolituse väljad ja trainingTranslationId tõlke ühes transaktsioonis. training_funding_type read kirjutatakse fundingTypeIds järgi üle, training_lecturer read lecturerIds järgi (lecturerIds = koolitajate ID-d kuvamise järjekorras (sort_order = positsioon 1, 2, …), võib olla tühi list; backend kirjutab training_lecturer read üle. Uus ID peab olema aktiivne koolitaja; juba seotud kustutatud koolitaja võib jääda.) Kustutatud koolitus (status \"D\") on nagu olematu: 404 PRIMARY_KEY_NOT_FOUND. Õppekava: curriculum ≠ null → uus fail (kontroll nagu POST puhul), training_translation_curriculum rida lisatakse või asendatakse; isCurriculumRemoved = true → rida kustutatakse (curriculum peab siis olema null); muidu, kui õppekava on olemas, arvutatakse ainult failinimi uuesti (pealkiri võis muutuda). curriculumLabel = sõna \"Õppekava\" avatud tõlke keeles (kohustuslik). Vigane Base64, puuduv curriculumLabel või isCurriculumRemoved koos curriculum'iga → 400 INCORRECT_INPUT.", "",
+      "Veateated:", PK("trainingId"), "", PK("trainingTranslationId"), "", "HTTP: 403\nerrorCode: CURRICULUM_TYPE_NOT_ALLOWED\nmessage: \"Lubatud on ainult PDF-fail\"", "", "HTTP: 403\nerrorCode: CURRICULUM_TOO_LARGE\nmessage: \"Õppekava on liiga suur, lubatud kuni 10 MB\""] },
+    { id: "n-get-curriculum", title: "GET /api/training-translation/{id}/curriculum", draft: true, text: [
+      "API: GET /api/training-translation/{trainingTranslationId}/curriculum", "", "Response (200): PDF-fail", "Content-Type: application/pdf", "Content-Disposition: attachment; filename=\"java-algkursus-oppekava.pdf\"", "Cache-Control: no-cache", "", "API teenuse lisainfo:", "Tagastab tõlke õppekava faili (training_translation_curriculum.file), failinimi = file_name. Vormis klikk õppekava failinimel; hiljem ka avalikus vaates /training. Backendis autentimist pole, seega on fail kättesaadav nii mustandi kui publitseeritud koolitusel. Kui õppekava pole või tõlke koolitus on kustutatud (status \"D\") → 404 PRIMARY_KEY_NOT_FOUND. no-cache, sest fail võib sama URL-i all vahetuda.", "", "Veateated:", "HTTP: 404\nerrorCode: PRIMARY_KEY_NOT_FOUND\nmessage: \"Ei leidnud primary keyd 'trainingTranslationId' väärtusega: 123\""] },
     { id: "n-put-publish", title: "PUT /api/training/{id}/publish", text: [
       "API: PUT /api/training/{trainingId}/publish", "",
       "Response (200): NONE", "",
@@ -1011,8 +1117,8 @@ textarea { min-height: 88px; resize: vertical; }
 
   // Olekupõhine lisainfo (sama nagu markmed/training-form-view-state-*-markmed.md failides)
   var GET_TRANSLATION_INFO = {
-    B: "Laadib avatud tõlke (URL-i trainingTranslationId). languageCode näitab, mis keeles avatud tõlge on (tõlke vormi pealkiri, AI nupu nähtavus). Kui tõlke koolitus on kustutatud (status \"D\"), on tõlge nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.",
-    C: "Laadib koolituse salvestatud põhikeele tõlke (training-translations vastusest isMainLanguage = true), millega eeltäidetakse uue tõlke väljad. Vastuse languageCode on põhikeel (et). Kui tõlke koolitus on kustutatud (status \"D\"), on tõlge nagu olematu: 404 PRIMARY_KEY_NOT_FOUND."
+    B: "Laadib avatud tõlke (URL-i trainingTranslationId). languageCode näitab, mis keeles avatud tõlge on (tõlke vormi pealkiri, AI nupu nähtavus). Kui tõlke koolitus on kustutatud (status \"D\"), on tõlge nagu olematu: 404 PRIMARY_KEY_NOT_FOUND. curriculumFileName = õppekava failinimi (nt java-algkursus-oppekava.pdf), curriculumFileSize = suurus baitides; mõlemad null, kui õppekava pole. Faili ennast ei tagastata (GET /api/training-translation/{trainingTranslationId}/curriculum).",
+    C: "Laadib koolituse salvestatud põhikeele tõlke (training-translations vastusest isMainLanguage = true), millega eeltäidetakse uue tõlke väljad. Vastuse languageCode on põhikeel (et). Kui tõlke koolitus on kustutatud (status \"D\"), on tõlge nagu olematu: 404 PRIMARY_KEY_NOT_FOUND. curriculumFileName = õppekava failinimi (nt java-algkursus-oppekava.pdf), curriculumFileSize = suurus baitides; mõlemad null, kui õppekava pole. Faili ennast ei tagastata (GET /api/training-translation/{trainingTranslationId}/curriculum)."
   };
   var showAllNotes = false;
   function stateNoteIds() {

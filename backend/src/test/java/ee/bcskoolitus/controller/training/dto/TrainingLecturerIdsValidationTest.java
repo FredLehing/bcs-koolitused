@@ -55,7 +55,7 @@ class TrainingLecturerIdsValidationTest {
     @Test
     void updateRequest_duplicateLecturerIds_isInvalid() {
         TrainingUpdateRequestDto trainingUpdateRequestDto = new TrainingUpdateRequestDto(1, 1, 1, List.of(2, 2), true, false,
-                List.of(), 1, "Java algkursus", "Java alused.", "<p>Java alused.</p>");
+                List.of(), 1, "Java algkursus", "Java alused.", "<p>Java alused.</p>", null, false, "Õppekava");
 
         Set<ConstraintViolation<TrainingUpdateRequestDto>> violations = validator.validate(trainingUpdateRequestDto);
 
@@ -65,7 +65,7 @@ class TrainingLecturerIdsValidationTest {
 
     private static Set<ConstraintViolation<TrainingCreateRequestDto>> validateCreateRequestLecturerIds(List<Integer> lecturerIds) {
         TrainingCreateRequestDto trainingCreateRequestDto = new TrainingCreateRequestDto(1, 1, 1, 1, lecturerIds, true, false,
-                "Java algkursus", "Java alused.", "<p>Java alused.</p>", List.of());
+                "Java algkursus", "Java alused.", "<p>Java alused.</p>", List.of(), null, "Õppekava");
         return validator.validate(trainingCreateRequestDto);
     }
 }

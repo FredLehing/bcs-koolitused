@@ -37,6 +37,10 @@ export default {
   data() {
     return {
       state: STATE_NEW_TRAINING,
+      newCurriculum: null,
+      isCurriculumRemoved: false,
+      isCurriculumLoading: false,
+      isSaving: false,
       successMessage: '',
       errorMessage: '',
 
@@ -69,6 +73,8 @@ export default {
         title: '',
         shortDescription: '',
         description: '',
+        curriculumFileName: null,
+        curriculumFileSize: null,
       },
 
       // Viimati laaditud/salvestatud tõlketekstid — salvestamata muudatuste tuvastamiseks
@@ -159,6 +165,7 @@ export default {
   },
   methods: {
     loadView() {
+      this.resetCurriculum()
       this.trainingId = Number(this.$route.query.trainingId ?? 0)
       this.trainingTranslationId = Number(this.$route.query.trainingTranslationId ?? 0)
       this.targetLanguageId = Number(this.$route.query.languageId ?? 0)
@@ -206,6 +213,7 @@ export default {
 
     handleGetUpdateTranslationResponse(translation) {
       this.translation = translation
+      this.resetCurriculum()
       this.savedTranslationTexts = this.getTranslationTexts()
     },
 
@@ -284,14 +292,17 @@ export default {
     // ---------- "Lisa" (new-training) ----------
 
     addTraining() {
+      if (this.isSaving || this.isCurriculumLoading) return
       this.resetMessages()
       this.checkTrainingDataForErrors()
       this.checkTranslationForErrors()
 
       if (this.errorMessageIsEmpty()) {
+        this.isSaving = true
         TrainingService.sendPostTrainingRequest(this.createTrainingCreateRequest())
           .then((response) => this.handleAddTrainingResponse(response.data))
           .catch((error) => this.handleSaveTrainingError(error))
+          .finally(() => (this.isSaving = false))
       }
     },
 
@@ -308,6 +319,8 @@ export default {
         title: this.translation.title,
         shortDescription: this.translation.shortDescription,
         description: this.translation.description,
+        curriculum: this.newCurriculum?.curriculum ?? null,
+        curriculumLabel: this.getCurriculumLabel(),
       }
     },
 
@@ -324,14 +337,17 @@ export default {
     // ---------- "Salvesta" (update) ----------
 
     updateTraining() {
+      if (this.isSaving || this.isCurriculumLoading) return
       this.resetMessages()
       this.checkTrainingDataForErrors()
       this.checkTranslationForErrors()
 
       if (this.errorMessageIsEmpty()) {
+        this.isSaving = true
         TrainingService.sendPutTrainingRequest(this.trainingId, this.createTrainingUpdateRequest())
           .then(() => this.handleUpdateTrainingResponse())
           .catch((error) => this.handleSaveTrainingError(error))
+          .finally(() => (this.isSaving = false))
       }
     },
 
@@ -345,21 +361,62 @@ export default {
         isPromoted: this.training.isPromoted,
         fundingTypeIds: this.training.fundingTypeIds,
         trainingTranslationId: this.translation.trainingTranslationId,
+        isCurriculumRemoved: this.isCurriculumRemoved,
         title: this.translation.title,
         shortDescription: this.translation.shortDescription,
         description: this.translation.description,
+        curriculum: this.newCurriculum?.curriculum ?? null,
+        curriculumLabel: this.getCurriculumLabel(),
       }
     },
 
     handleUpdateTrainingResponse() {
-      this.successMessage = this.$t('trainingForm.messages.saved')
-      this.savedTranslationTexts = this.getTranslationTexts()
+      return TrainingTranslationService.sendGetTrainingTranslationRequest(
+        this.trainingTranslationId,
+      ).then((response) => {
+        this.handleGetUpdateTranslationResponse(response.data)
+        this.successMessage = this.$t('trainingForm.messages.saved')
+      })
+    },
+
+    getCurriculumLabel() {
+      return this.$t(
+        'trainingForm.translation.curriculum',
+        {},
+        { locale: this.translation.languageCode },
+      )
+    },
+
+    resetCurriculum() {
+      this.newCurriculum = null
+      this.isCurriculumRemoved = false
+      this.isCurriculumLoading = false
+    },
+
+    handleCurriculumSelected(curriculum) {
+      this.newCurriculum = curriculum
+      this.isCurriculumRemoved = false
+    },
+
+    handleCurriculumRemoved() {
+      this.newCurriculum = null
+      this.isCurriculumRemoved = true
     },
 
     // Vahepeal kustutatud koolitaja (404 'lecturerId') → backendi teade vormis, muu viga → veavaade
     handleSaveTrainingError(error) {
       this.errorResponse = error.response?.data ?? { message: '', errorCode: '' }
-      if (error.response?.status === 404 && this.errorResponse.message.includes("'lecturerId'")) {
+      if (
+        error.response?.status === 403 &&
+        ['CURRICULUM_TYPE_NOT_ALLOWED', 'CURRICULUM_TOO_LARGE'].includes(
+          this.errorResponse.errorCode,
+        )
+      ) {
+        this.errorMessage = this.errorResponse.message
+      } else if (
+        error.response?.status === 404 &&
+        this.errorResponse.message.includes("'lecturerId'")
+      ) {
         this.errorMessage = this.errorResponse.message
       } else {
         NavigationService.navigateToErrorView()
@@ -369,18 +426,23 @@ export default {
     // ---------- "Lisa tõlge" (new-translation) ----------
 
     addTrainingTranslation() {
+      if (this.isSaving || this.isCurriculumLoading) return
       this.resetMessages()
       this.checkTranslationForErrors()
 
       if (this.errorMessageIsEmpty()) {
+        this.isSaving = true
         TrainingService.sendPostTrainingTranslationRequest(this.trainingId, {
           languageId: this.targetLanguageId,
           title: this.translation.title,
           shortDescription: this.translation.shortDescription,
           description: this.translation.description,
+          curriculum: this.newCurriculum?.curriculum ?? null,
+          curriculumLabel: this.getCurriculumLabel(),
         })
           .then((response) => this.handleAddTrainingTranslationResponse(response.data))
-          .catch(() => NavigationService.navigateToErrorView())
+          .catch((error) => this.handleSaveTrainingError(error))
+          .finally(() => (this.isSaving = false))
       }
     },
 
@@ -399,6 +461,8 @@ export default {
     // translationLanguage on GET /api/languages vastuse element, seega languageId on alati olemas
     handleTranslationFlagClicked(translationLanguage) {
       if (
+        this.isSaving ||
+        this.isCurriculumLoading ||
         this.isNewTraining ||
         translationLanguage.languageCode === this.translation.languageCode
       ) {
@@ -565,6 +629,8 @@ export default {
         title: '',
         shortDescription: '',
         description: '',
+        curriculumFileName: null,
+        curriculumFileSize: null,
       }
     },
 
@@ -645,7 +711,14 @@ export default {
         />
 
         <TrainingTranslationForm
+          :key="$route.fullPath"
           :translation="translation"
+          :new-curriculum="newCurriculum"
+          :is-curriculum-removed="isCurriculumRemoved"
+          :is-saving="isSaving"
+          @event-curriculum-selected="handleCurriculumSelected"
+          @event-curriculum-removed="handleCurriculumRemoved"
+          @event-curriculum-loading="isCurriculumLoading = $event"
           :language-name="translationLanguageName"
           :show-ai-button="showAiButton"
           :is-ai-loading="isAiLoading"
@@ -657,14 +730,27 @@ export default {
         />
 
         <div class="d-flex flex-wrap align-items-center gap-3 mb-5">
-          <button v-if="isNewTraining" @click="addTraining" class="btn btn-success" type="button">
+          <button
+            v-if="isNewTraining"
+            :disabled="isSaving || isCurriculumLoading"
+            @click="addTraining"
+            class="btn btn-success"
+            type="button"
+          >
             {{ $t('trainingForm.buttons.add') }}
           </button>
-          <button v-if="isUpdate" @click="updateTraining" class="btn btn-success" type="button">
+          <button
+            v-if="isUpdate"
+            :disabled="isSaving || isCurriculumLoading"
+            @click="updateTraining"
+            class="btn btn-success"
+            type="button"
+          >
             {{ $t('trainingForm.buttons.save') }}
           </button>
           <button
             v-if="isNewTranslation"
+            :disabled="isSaving || isCurriculumLoading"
             @click="addTrainingTranslation"
             class="btn btn-success"
             type="button"

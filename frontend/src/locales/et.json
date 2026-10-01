@@ -160,7 +160,18 @@
       "description": "Kirjeldus",
       "aiButton": "Tee AI tõlge",
       "aiLoading": "Tõlgin…",
-      "aiTooltip": "Tõlge tehakse salvestatud põhikeele ({mainLanguage}) tekstist, mitte vormi sisust. Tulemus kuvatakse ainult vormis — see salvestub alles siis, kui vajutad „{saveButton}“."
+      "aiTooltip": "Tõlge tehakse salvestatud põhikeele ({mainLanguage}) tekstist, mitte vormi sisust. Tulemus kuvatakse ainult vormis — see salvestub alles siis, kui vajutad „{saveButton}“.",
+      "curriculum": "Õppekava",
+      "curriculumField": "Õppekava (PDF)",
+      "curriculumSelect": "Vali fail",
+      "curriculumChange": "Vaheta",
+      "curriculumRemove": "Eemalda",
+      "curriculumUndo": "Tühista",
+      "curriculumHint": "PDF, kuni 10 MB",
+      "curriculumPending": "salvestatakse koos vormiga",
+      "curriculumRemoving": "eemaldatakse salvestamisel",
+      "curriculumInvalid": "Lubatud on PDF-fail kuni 10 MB",
+      "curriculumReadError": "Faili lugemine ebaõnnestus. Vali fail uuesti."
     },
     "buttons": {
       "add": "Lisa",

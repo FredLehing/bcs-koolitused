@@ -160,7 +160,18 @@
       "description": "Description",
       "aiButton": "AI translate",
       "aiLoading": "Translating…",
-      "aiTooltip": "The translation is made from the saved main language ({mainLanguage}) text, not from the form. The result is only shown in the form — it is saved only when you press \"{saveButton}\"."
+      "aiTooltip": "The translation is made from the saved main language ({mainLanguage}) text, not from the form. The result is only shown in the form — it is saved only when you press \"{saveButton}\".",
+      "curriculum": "Curriculum",
+      "curriculumField": "Curriculum (PDF)",
+      "curriculumSelect": "Choose file",
+      "curriculumChange": "Replace",
+      "curriculumRemove": "Remove",
+      "curriculumUndo": "Undo",
+      "curriculumHint": "PDF, up to 10 MB",
+      "curriculumPending": "will be saved with the form",
+      "curriculumRemoving": "will be removed on save",
+      "curriculumInvalid": "Only a PDF file up to 10 MB is allowed",
+      "curriculumReadError": "Could not read the file. Please select it again."
     },
     "buttons": {
       "add": "Add",
