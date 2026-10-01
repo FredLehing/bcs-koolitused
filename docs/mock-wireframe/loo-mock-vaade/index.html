@@ -161,6 +161,7 @@ code { font-family: var(--font-mono); font-size: .88em; }
   </main>
 </div>
 
+<script src="return-navigation.js"></script>
 <script>
 (function () {
   "use strict";
@@ -293,13 +294,14 @@ code { font-family: var(--font-mono); font-size: .88em; }
     }
     if (!v.file) {
       var q = queryOf(state.path).toString();
-      stage.innerHTML = '<div class="ph-page"><h2>' + esc(v.name) + '</h2><div class="box"><strong>Kohatäide — läbimäng puudub</strong><p>' + esc(v.ph) + '</p><p>Vaade: <code>' + esc(v.view) + '</code>, rada <code>' + esc(v.path) + '</code>' + (q ? ', parameetrid <code>' + esc(q) + '</code>' : "") + '.</p></div>' +
+      var back = v.path === "/training" ? '<a class="sbtn" href="?path=' + encodeURIComponent(window.BcsReturnNavigation.returnTo(state.path) || "/trainings") + '" data-go="' + esc(window.BcsReturnNavigation.returnTo(state.path) || "/trainings") + '">← Tagasi</a>' : "";
+      stage.innerHTML = '<div class="ph-page">' + back + '<h2>' + esc(v.name) + '</h2><div class="box"><strong>Kohatäide — läbimäng puudub</strong><p>' + esc(v.ph) + '</p><p>Vaade: <code>' + esc(v.view) + '</code>, rada <code>' + esc(v.path) + '</code>' + (q ? ', parameetrid <code>' + esc(q) + '</code>' : "") + '.</p></div>' +
         '<div class="row"><button type="button" class="sbtn" data-go="/trainings">Koolitused</button><button type="button" class="sbtn" data-go="/lecturers">Meie koolitajad</button>' + (state.role === "admin" ? '<button type="button" class="sbtn" data-go="/admin-enquiries">Koolituste päringud</button>' : "") + '</div></div>';
       return;
     }
-    var src = v.file + "?embed=1" + (v.extra ? "&" + v.extra : "") + (v.roleParam ? "&role=" + state.role : "");
+    var src = v.file + "?embed=1&appPath=" + encodeURIComponent(state.path) + (queryOf(state.path).get("returnTo") ? "&returnTo=" + encodeURIComponent(queryOf(state.path).get("returnTo")) : "") + (v.extra ? "&" + v.extra : "") + (v.roleParam ? "&role=" + state.role : "");
     var q2 = queryOf(state.path);
-    (v.params || []).forEach(function (k) { if (q2.get(k)) src += "&" + k + "=" + encodeURIComponent(q2.get(k)); });
+    (v.params || []).forEach(function (k) { if (k !== "returnTo" && q2.get(k)) src += "&" + k + "=" + encodeURIComponent(q2.get(k)); });
     var frame = stage.querySelector("iframe");
     if (frame && frame.getAttribute("src") === src) return;
     stage.innerHTML = '<iframe title="' + esc(v.name) + ' läbimäng" src="' + esc(src) + '"></iframe>';
@@ -319,7 +321,11 @@ code { font-family: var(--font-mono); font-size: .88em; }
 
   /* ---------- Sündmused ---------- */
   document.addEventListener("click", function (e) {
-    var b = e.target.closest("button"); if (!b) return;
+    var b = e.target.closest("button, a[data-go]"); if (!b) return;
+    if (b.tagName === "A") {
+      if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+      e.preventDefault();
+    }
     if (b.dataset.role) { setRole(b.dataset.role); return; }
     if (b.dataset.roleGo) { setRole(b.dataset.roleGo); return; }
     if (b.dataset.login) { var rd = queryOf(state.path).get("redirect"); setRole(b.dataset.login); go(rd || (b.dataset.login === "admin" ? "/admin-enquiries" : "/")); return; }
@@ -345,7 +351,8 @@ code { font-family: var(--font-mono); font-size: .88em; }
 
   // Algus: #token (nt #admin-trainings) avab vastava vaate
   var start = VIEWS.filter(function (v) { return "#" + v.key === location.hash; })[0];
-  state.path = start ? (start.sample || start.path) : "/";
+  var requestedPath = new URLSearchParams(location.search).get("path");
+  state.path = requestedPath && viewFor(requestedPath) ? requestedPath : (start ? (start.sample || start.path) : "/");
   render();
 })();
 </script>

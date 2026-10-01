@@ -278,7 +278,10 @@ export default {
             <td>
               <div class="d-flex gap-1">
                 <RouterLink
-                  :to="{ name: 'adminUserRoute', query: { userId: user.userId } }"
+                  :to="{
+                    name: 'adminUserRoute',
+                    query: { returnTo: $route.fullPath, userId: user.userId },
+                  }"
                   :title="$t('adminUsers.view')"
                   :aria-label="$t('adminUsers.view')"
                   class="btn btn-sm btn-outline-secondary d-inline-flex"

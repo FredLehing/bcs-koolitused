@@ -217,7 +217,10 @@ export default {
             <td><EnquiryStatusBadge :status="enquiry.status" /></td>
             <td>
               <RouterLink
-                :to="{ name: 'adminEnquiryRoute', query: { enquiryId: enquiry.enquiryId } }"
+                :to="{
+                  name: 'adminEnquiryRoute',
+                  query: { returnTo: $route.fullPath, enquiryId: enquiry.enquiryId },
+                }"
                 :title="$t('adminEnquiries.view')"
                 :aria-label="$t('adminEnquiries.view')"
                 class="btn btn-sm btn-outline-secondary d-inline-flex"

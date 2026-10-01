@@ -64,7 +64,10 @@ export default {
             {{ $t('trainingCard.orderable') }}
           </span>
           <RouterLink
-            :to="{ name: 'trainingRoute', query: { trainingId: training.trainingId } }"
+            :to="{
+              name: 'trainingRoute',
+              query: { returnTo: $route.fullPath, trainingId: training.trainingId },
+            }"
             class="btn btn-primary"
           >
             {{ $t('trainingCard.viewDetails') }}

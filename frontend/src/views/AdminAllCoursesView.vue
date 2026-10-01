@@ -418,7 +418,7 @@ export default {
               <RouterLink
                 :to="{
                   name: 'adminTrainingCoursesRoute',
-                  query: { trainingId: adminCourseSummary.trainingId },
+                  query: { returnTo: $route.fullPath, trainingId: adminCourseSummary.trainingId },
                 }"
               >
                 {{ adminCourseSummary.trainingTitle }}
@@ -445,7 +445,7 @@ export default {
                 <RouterLink
                   :to="{
                     name: 'adminCourseRoute',
-                    query: { courseId: adminCourseSummary.courseId },
+                    query: { returnTo: $route.fullPath, courseId: adminCourseSummary.courseId },
                   }"
                   :title="$t('adminAllCourses.view')"
                   :aria-label="$t('adminAllCourses.view')"
@@ -456,7 +456,7 @@ export default {
                 <RouterLink
                   :to="{
                     name: 'courseFormRoute',
-                    query: { courseId: adminCourseSummary.courseId },
+                    query: { returnTo: $route.fullPath, courseId: adminCourseSummary.courseId },
                   }"
                   :title="$t('adminTrainingCourses.edit')"
                   :aria-label="$t('adminTrainingCourses.edit')"
@@ -467,7 +467,7 @@ export default {
                 <RouterLink
                   :to="{
                     name: 'adminTrainingCoursesRoute',
-                    query: { trainingId: adminCourseSummary.trainingId },
+                    query: { returnTo: $route.fullPath, trainingId: adminCourseSummary.trainingId },
                   }"
                   :title="$t('adminTrainings.calendar')"
                   :aria-label="$t('adminTrainings.calendar')"

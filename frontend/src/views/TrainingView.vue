@@ -1,4 +1,5 @@
 <script>
+import BackLink from '@/components/common/BackLink.vue'
 import { mapState } from 'pinia'
 import { useLanguageStore } from '@/stores/languageStore.js'
 import TrainingService from '@/api-services/TrainingService.js'
@@ -10,7 +11,7 @@ import LecturerCard from '@/components/common/LecturerCard.vue'
 
 export default {
   name: 'TrainingView',
-  components: { EditTrainingLink, LecturerCard, RichTextContent },
+  components: { BackLink, EditTrainingLink, LecturerCard, RichTextContent },
   data() {
     return {
       trainingId: 0,
@@ -126,6 +127,7 @@ export default {
 
 <template>
   <div class="container">
+    <BackLink :fallback="{ name: 'trainingsRoute' }" />
     <div class="row text-start">
       <!-- Vasak veerg: koolituse sisu -->
       <div class="col-lg-8">

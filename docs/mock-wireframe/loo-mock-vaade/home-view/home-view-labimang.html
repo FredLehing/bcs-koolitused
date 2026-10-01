@@ -383,6 +383,7 @@ button.lcard { width: 100%; text-align: left; background: none; font: inherit; c
     <h1>Avaleht — läbimäng</h1>
     <p>HomeView.vue (<code>/</code>), ülevalt alla: otsing, galerii (<code>HomeGallery.vue</code>, olemas), <strong>kaks suunavat kaarti</strong>, <strong>„Meie järgmised 5 koolitust“</strong> (<code>CourseCard.vue</code> nagu <code>/courses</code>), „Kliendid meist“ (<code>HomeTestimonials.vue</code>, olemas) ja <strong>lõpu turunduslause</strong>. Paksus kirjas osad on uued. Paremal all näed backendi päringut; kollased kastid on mockupi märkmed.</p>
     <p>Andmed on seed-andmed (täna = 01/10/2026): avatud tulevased toimumiskorrad, <strong>täis jäetakse välja</strong>, esile tõstetud eespool. Uue teenuse <code>GET /api/next-courses</code> DTO on <strong>ettepanek</strong>.</p>
+    <p>Detailide ja vormide avamisel säilib lähtevaate URL <code>returnTo</code> parameetris; „← Tagasi“ taastab lähtekoha. <a href="../return-to-navigation-skeemid.md">Tagasitee skeemid ja kaardistus</a>.</p>
     <div class="toolbar">
       <span class="lbl-soft">Kasutajaliidese keel (navbar):</span>
       <button class="tbtn" type="button" data-ui-lang="et">et</button>
@@ -434,6 +435,7 @@ button.lcard { width: 100%; text-align: left; background: none; font: inherit; c
   </section>
 </div>
 
+<script src="../return-navigation.js"></script>
 <script>
 (function () {
   "use strict";
@@ -441,7 +443,8 @@ button.lcard { width: 100%; text-align: left; background: none; font: inherit; c
   var SHELL_Q = new URLSearchParams(location.search);
   var EMBED = SHELL_Q.get("embed") === "1" && window.parent !== window;
   if (EMBED) document.documentElement.classList.add("embed");
-  function goRoute(path, standaloneMessage) {
+  function goRoute(path, standaloneMessage, isBack) {
+    if (!isBack) path = window.BcsReturnNavigation.forward(path);
     if (EMBED) { window.parent.postMessage({ type: "bcs-navigate", path: path }, "*"); return; }
     toast(standaloneMessage || "router.push → " + path);
   }
@@ -611,6 +614,7 @@ button.lcard { width: 100%; text-align: left; background: none; font: inherit; c
     renderView(); renderKv(); renderLog();
     document.getElementById("view-note-title").textContent = "Vaate märkmed — " + VIEW_NOTE.title;
     document.getElementById("view-note-text").textContent = VIEW_NOTE.text;
+    window.BcsReturnNavigation.render(goRoute);
   }
 
   /* ---------- Sündmused ---------- */

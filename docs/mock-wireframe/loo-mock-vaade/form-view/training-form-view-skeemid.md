@@ -456,3 +456,8 @@ Kõik kasutavad `AiTrainingContentDto` mudelit. Swaggeri pealkirjades on `TO BE 
 Olekus C (`new-translation`) on PDF-i väli alguses tühi. PDF + AI nupp ilmub alles faili valimisel ning saadab selle salvestamata faili sama `/api/ai-training/pdf` teenusega nagu olekus A. Salvestatud põhikeele PDF-i selle toimingu jaoks ei loeta. Vastus täidab uue tõlke tekstiväljad; andmed ja fail salvestatakse alles „Lisa tõlge“ nupuga.
 
 **Teostuse ühendus (RAIN-ai-training):** PDF + AI ja AI tõlke kutsed on eraldi `AiTrainingService.js` failis. Originaal-PDF saadetakse multipart-kujul; olemasolev Base64 väärtus jääb tavalise salvestamise jaoks. AI päringu ajal on tekstide muutmine ja salvestus keelatud. Vea korral säilivad tekstid ja PDF; pärast vaate vahetust ei rakendata eelmise päringu vastust.
+
+
+## Vaadetevaheline tagasitee
+
+Detailide ja vormide avamisel antakse kaasa lähtevaate täielik URL `returnTo` parameetrina. Ühine „← Tagasi“ link taastab selle URL-i; otselingi korral kasutatakse vaate varusihti. Peamenüü ja vahelehed tagasiteed ei loo. Oleku- ja tõlkevahetus säilitab senise tagasitee. Kõigi avamiskohtade, erandite ja varusihtide [ühine skeem](../return-to-navigation-skeemid.md).

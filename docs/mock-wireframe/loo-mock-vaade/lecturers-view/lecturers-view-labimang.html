@@ -265,6 +265,7 @@ td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
     <h1>Meie koolitajad — läbimäng</h1>
     <p>LecturersView.vue (avalik koolitajate nimekiri) ja LecturerView.vue (koolitaja detailvaade). Ava navbarist „Meie koolitajad“, klõpsa kaardil, liigu koolitusele või tagasi nimekirja. Paremal all näed backendi päringuid — sh pildipäringud <code>GET /api/lecturer/{id}/photo?v=…</code>, mida brauser teeb <code>&lt;img src&gt;</code> kaudu ja paneb vahemällu. Kollased kastid on mockupi märkmed samas vormingus nagu <code>lecturers-view-markmed.md</code> ja <code>lecturer-view-markmed.md</code>.</p>
     <p>Andmed on seed-andmete ettepanek: 8 aktiivset koolitajat (ametid ja spetsialiseerumised BCS Koolituse lektorite nimekirjast). Pilt on ainult Rain Tüüril (<code>rain-tuur.jpg</code>), teistel kohatäide. Kustutatud koolitaja (Virve Räni) nimekirjas ei ole. Uute teenuste DTO-d on <strong>ettepanek</strong>.</p>
+    <p>Detailide ja vormide avamisel säilib lähtevaate URL <code>returnTo</code> parameetris; „← Tagasi“ taastab lähtekoha. <a href="../return-to-navigation-skeemid.md">Tagasitee skeemid ja kaardistus</a>.</p>
     <div class="toolbar">
       <span class="lbl-soft">Kasutajaliidese keel (navbar):</span>
       <button class="tbtn" type="button" data-ui-lang="et">et</button>
@@ -318,6 +319,7 @@ td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
 
 <div id="modal-root"></div>
 
+<script src="../return-navigation.js"></script>
 <script>
 (function () {
   "use strict";
@@ -334,7 +336,8 @@ td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
     if (window.ResizeObserver) new ResizeObserver(sendHeight).observe(document.body);
     window.addEventListener("load", sendHeight);
   }
-  function goRoute(path, standaloneMessage) {
+  function goRoute(path, standaloneMessage, isBack) {
+    if (!isBack) path = window.BcsReturnNavigation.forward(path);
     if (EMBED) { window.parent.postMessage({ type: "bcs-navigate", path: path }, "*"); return; }
     toast(standaloneMessage || "router.push → " + path);
   }
@@ -504,6 +507,7 @@ td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
     var vn = VIEW_NOTES[ui.route];
     document.getElementById("view-note-title").textContent = "Vaate märkmed — " + vn.title;
     document.getElementById("view-note-text").textContent = vn.text;
+    window.BcsReturnNavigation.render(goRoute);
   }
 
   /* ---------- Sündmused ---------- */

@@ -540,7 +540,10 @@ export default {
                 <RouterLink
                   :to="{
                     name: 'adminTrainingCoursesRoute',
-                    query: { trainingId: adminTrainingSummary.trainingId },
+                    query: {
+                      returnTo: $route.fullPath,
+                      trainingId: adminTrainingSummary.trainingId,
+                    },
                   }"
                   :title="$t('adminTrainings.calendar')"
                   :aria-label="$t('adminTrainings.calendar')"

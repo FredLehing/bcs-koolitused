@@ -47,7 +47,10 @@ export default {
     <div class="flex-grow-1">
       <RouterLink
         v-if="isCoursePublic"
-        :to="{ name: 'courseRoute', query: { courseId: registration.courseId } }"
+        :to="{
+          name: 'courseRoute',
+          query: { returnTo: $route.fullPath, courseId: registration.courseId },
+        }"
         class="fw-semibold"
       >
         {{ registration.trainingTitle }}

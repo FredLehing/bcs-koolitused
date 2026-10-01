@@ -1,4 +1,5 @@
 <script>
+import BackLink from '@/components/common/BackLink.vue'
 import { mapState } from 'pinia'
 import { useLanguageStore } from '@/stores/languageStore.js'
 import TrainingService from '@/api-services/TrainingService.js'
@@ -37,7 +38,14 @@ function countWorkingDays(startDate, endDate) {
 
 export default {
   name: 'CourseFormView',
-  components: { AlertDanger, CourseDeleteButton, DateInput, LecturersPicker, RoomsDropdown },
+  components: {
+    BackLink,
+    AlertDanger,
+    CourseDeleteButton,
+    DateInput,
+    LecturersPicker,
+    RoomsDropdown,
+  },
   data() {
     return {
       state: STATE_NEW,
@@ -234,7 +242,10 @@ export default {
       const successMessage = this.isNew
         ? this.$t('courseForm.messages.added')
         : this.$t('courseForm.messages.saved')
-      NavigationService.navigateToAdminTrainingCoursesView(this.trainingId, successMessage)
+      NavigationService.navigateBack(
+        { name: 'adminTrainingCoursesRoute', query: { trainingId: this.trainingId } },
+        successMessage,
+      )
     },
 
     // 403 COURSE_END_BEFORE_START, 400 ja vahepeal kustutatud koolitaja või ruum (404 'lecturerId' /
@@ -287,10 +298,18 @@ export default {
     },
 
     handleCourseDeleted() {
-      NavigationService.navigateToAdminTrainingCoursesView(
-        this.trainingId,
+      NavigationService.navigateBack(
+        { name: 'adminTrainingCoursesRoute', query: { trainingId: this.trainingId } },
         this.$t('adminTrainingCourses.messages.deleted'),
+        ['adminCourseRoute', 'courseRoute', 'courseFormRoute'],
       )
+    },
+
+    navigateBack() {
+      NavigationService.navigateBack({
+        name: 'adminTrainingCoursesRoute',
+        query: { trainingId: this.trainingId },
+      })
     },
 
     navigateToAdminTrainingCoursesView() {
@@ -309,6 +328,7 @@ export default {
 
 <template>
   <div class="container">
+    <BackLink :fallback="{ name: 'adminTrainingCoursesRoute', query: { trainingId } }" />
     <div class="row justify-content-center">
       <div class="col-lg-10">
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-1">
@@ -444,11 +464,7 @@ export default {
           <button @click="saveCourse" :disabled="isSending" class="btn btn-success" type="button">
             {{ $t('trainingForm.buttons.save') }}
           </button>
-          <button
-            @click="navigateToAdminTrainingCoursesView"
-            class="btn btn-outline-secondary"
-            type="button"
-          >
+          <button @click="navigateBack" class="btn btn-outline-secondary" type="button">
             {{ $t('courseForm.back') }}
           </button>
           <CourseDeleteButton

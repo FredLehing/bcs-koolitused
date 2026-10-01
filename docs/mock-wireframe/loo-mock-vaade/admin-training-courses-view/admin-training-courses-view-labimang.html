@@ -299,6 +299,7 @@ textarea { min-height: 70px; resize: vertical; }
     <h1>Koolituse kalender — läbimäng</h1>
     <p>AdminTrainingCoursesView.vue (koolituse kalender) ja CourseFormView.vue (toimumiskorra vorm) koos. Ava kirjeldus, lülita möödunud toimumiskorrad sisse, sorteeri veerge (ainult frontendis), lisa uus toimumiskord, muuda või kustuta olemasolevat. Paremal all näed, milline backendi päring iga tegevuse peale tehti. Kollased kastid on mockupi märkmed samas vormingus nagu <code>admin-training-courses-view-markmed.md</code> ja <code>course-form-view-markmed.md</code>.</p>
     <p>Andmed on seed-andmete ettepanek (skeemide fail, jaotised 1–2), täna = <strong>30/09/2026</strong>. „Java algkursus“ näitab kõiki olukordi (avatud, täis, tühistatud, mustand, möödunud, kustutatud); „Docker ja konteinerid“ on mustand ilma toimumiskordadeta. „Java algkursus“, selle 1. toimumiskord ja „Git ja GitHub“ on kahe koolitajaga (koolitajad kuvatakse nimedena). Uute teenuste DTO-d on <strong>ettepanek</strong>.</p>
+    <p>Detailide ja vormide avamisel säilib lähtevaate URL <code>returnTo</code> parameetris; „← Tagasi“ taastab lähtekoha. <a href="../return-to-navigation-skeemid.md">Tagasitee skeemid ja kaardistus</a>.</p>
     <div class="toolbar">
       <span class="lbl-soft">Koolitus:</span>
       <button class="tbtn" type="button" data-training="1">Java algkursus (1)</button>
@@ -352,6 +353,7 @@ textarea { min-height: 70px; resize: vertical; }
 
 <div id="modal-root"></div>
 
+<script src="../return-navigation.js"></script>
 <script>
 (function () {
   "use strict";
@@ -366,7 +368,8 @@ textarea { min-height: 70px; resize: vertical; }
     if (window.ResizeObserver) new ResizeObserver(sendHeight).observe(document.body);
     window.addEventListener("load", sendHeight);
   }
-  function goRoute(path, standaloneMessage) {
+  function goRoute(path, standaloneMessage, isBack) {
+    if (!isBack) path = window.BcsReturnNavigation.forward(path);
     if (EMBED) { window.parent.postMessage({ type: "bcs-navigate", path: path }, "*"); return; }
     toast(standaloneMessage || "router.push → " + path);
   }
@@ -540,6 +543,12 @@ textarea { min-height: 70px; resize: vertical; }
       startStep("Prügikast → kinnitus → DELETE (CourseDeleteButton, soft delete) → event-course-deleted" + (fromForm ? " → kalendrisse" : " → tabel uuesti"));
       c.st = "D";
       call("DELETE", "/api/course/" + courseId, null, null);
+      if (fromForm && EMBED) {
+        var fallback = "/admin-training-courses?trainingId=" + c.t;
+        var destination = window.BcsReturnNavigation.getBack(fallback);
+        if (["/course", "/admin-course", "/course-form"].indexOf(new URL(destination, location.href).pathname) !== -1) destination = fallback;
+        goRoute(destination, "Toimumiskord kustutatud", true); return;
+      }
       if (fromForm) openCalendar(c.t); else loadCourses();
       renderAll();
       toast("Toimumiskord kustutatud");
@@ -577,11 +586,13 @@ textarea { min-height: 70px; resize: vertical; }
     }
     var pastNeeded = f.endDate < TODAY && !ui.includePast;
     if (pastNeeded) ui.includePast = true;
+    if (EMBED) { goRoute(window.BcsReturnNavigation.getBack("/admin-training-courses?trainingId=" + tId), msg, true); return; }
     openCalendar(tId);
     if (pastNeeded) logTitle += " (möödunud kuupäev → lüliti „Näita ka möödunud“ sisse)";
     renderAll(); toast(msg);
   }
   function back() {
+    if (EMBED) { goRoute(window.BcsReturnNavigation.getBack("/admin-training-courses?trainingId=" + form.trainingId), null, true); return; }
     var tId = form.trainingId;
     startStep("„Tagasi“ / „Kalender“ → /admin-training-courses?trainingId=" + tId + " (ilma salvestamata)");
     openCalendar(tId); renderAll();
@@ -829,6 +840,7 @@ textarea { min-height: 70px; resize: vertical; }
     var vn = VIEW_NOTES[ui.route === "calendar" ? 0 : 1];
     document.getElementById("view-note-title").textContent = "Vaate märkmed — " + vn.title;
     document.getElementById("view-note-text").textContent = vn.text;
+    window.BcsReturnNavigation.render(goRoute, ui.route === 'calendar' ? '/admin-trainings' : '/admin-training-courses?trainingId=' + form.trainingId);
   }
 
   /* ---------- Sündmused ---------- */
@@ -857,7 +869,11 @@ textarea { min-height: 70px; resize: vertical; }
       case "b-admin-trainings": goRoute("/admin-trainings"); break;
       case "b-view": goRoute("/training?trainingId=" + ui.training.trainingId + "&trainingTranslationId=" + ui.training.trainingTranslationId); break;
       case "b-edit-training": goRoute("/training-form?trainingId=" + ui.training.trainingId + "&trainingTranslationId=" + ui.training.trainingTranslationId); break;
-      case "b-calendar": case "b-back": back(); break;
+      case "b-calendar":
+        if (EMBED) goRoute("/admin-training-courses?trainingId=" + form.trainingId);
+        else { openCalendar(form.trainingId); renderAll(); }
+        break;
+      case "b-back": back(); break;
       case "b-save": save(); break;
       case "b-lect": lecturerModal(); break;
       default:
