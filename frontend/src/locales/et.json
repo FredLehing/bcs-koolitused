@@ -114,7 +114,17 @@
     "searchHelp": "Otsitakse sõnade esinemist koolituse pealkirjast ja lühikirjeldusest. Parima tulemuse saad, kui sisestad mõned sõnad. Sõnade käändeid ei arvestata.",
     "showAllLanguages": "Kuva kõik keeled",
     "showAllCategories": "Näita kõiki kategooriaid",
-    "showAllFundingTypes": "Näita kõiki rahastustüüpe"
+    "showAllFundingTypes": "Näita kõiki rahastustüüpe",
+    "filters": {
+      "title": "Filtrid",
+      "clear": "Tühjenda filtrid",
+      "trainingLanguage": "Koolituse keel",
+      "category": "Koolituse kategooria",
+      "fundingType": "Rahastus",
+      "allLanguages": "Kõik keeled",
+      "allCategories": "Kõik kategooriad",
+      "all": "Kõik"
+    }
   },
   "trainingCard": {
     "language": "Koolituse keel",

@@ -62,7 +62,7 @@ export default {
               v-if="course.isPromoted"
               :size="20"
               weight="fill"
-              class="text-warning"
+              class="text-warning flex-shrink-0"
               :aria-label="$t('courses.promoted')"
             />
             {{ course.title }}
@@ -71,7 +71,7 @@ export default {
               :to="{ name: 'courseFormRoute', query: { courseId: course.courseId } }"
               :title="$t('courses.editCourse')"
               :aria-label="$t('courses.editCourse')"
-              class="btn btn-sm btn-outline-secondary d-inline-flex ms-auto"
+              class="btn btn-sm btn-outline-secondary d-inline-flex flex-shrink-0"
             >
               <PhPencilSimple :size="18" />
             </RouterLink>

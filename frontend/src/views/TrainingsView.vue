@@ -31,7 +31,9 @@ export default {
     return {
       categoryId: 0,
       fundingTypeId: 0,
-      limit: 4,
+      limit: 5,
+      trainingsRequestId: 0,
+      isLoadingTrainings: true,
       page: 0,
       trainingLanguageId: 0,
       // searchText = väljale sisestatud tekst, appliedSearchText = tekst, millega päring tehti
@@ -39,48 +41,18 @@ export default {
       appliedSearchText: '',
       totalPages: 0,
       totalElements: 0,
-      trainings: [
-        {
-          trainingId: 0,
-          trainingLanguageCode: '',
-          trainingLanguageFlagIconCode: '',
-          title: '',
-          shortDescription: '',
-          categoryId: 0,
-          categoryName: '',
-          isOrderable: false,
-          isPromoted: false,
-          fundingTypes: [
-            {
-              fundingTypeId: 0,
-              fundingTypeName: '',
-            },
-          ],
-        },
-      ],
-      categories: [
-        {
-          categoryId: 0,
-          categoryName: '',
-        },
-      ],
-      languages: [
-        {
-          languageId: 0,
-          languageName: '',
-        },
-      ],
-      fundingTypes: [
-        {
-          fundingTypeId: 0,
-          fundingTypeName: '',
-        },
-      ],
+      trainings: [],
+      categories: [],
+      languages: [],
+      fundingTypes: [],
     }
   },
   computed: {
     // Kasutajaliidese keel (navbaris valitud) — sellega küsitakse koolituste tõlgitud väljad
     ...mapState(useLanguageStore, ['contentLang']),
+    hasActiveFilters() {
+      return this.trainingLanguageId !== 0 || this.categoryId !== 0 || this.fundingTypeId !== 0
+    },
   },
   watch: {
     // Keele vahetus navbaris → laadi koolitused uues keeles (filtrid ja lehekülg jäävad alles)
@@ -98,8 +70,18 @@ export default {
     },
   },
   methods: {
+    handleClearFiltersClick() {
+      if (!this.hasActiveFilters) return
+      this.trainingLanguageId = 0
+      this.categoryId = 0
+      this.fundingTypeId = 0
+      this.page = 0
+      this.getTrainings()
+    },
     getTrainings() {
-      TrainingService.sendGetTrainingsRequest(
+      const trainingsRequestId = ++this.trainingsRequestId
+      this.isLoadingTrainings = true
+      return TrainingService.sendGetTrainingsRequest(
         this.categoryId,
         this.fundingTypeId,
         this.limit,
@@ -108,11 +90,29 @@ export default {
         this.contentLang,
         this.appliedSearchText,
       )
-        .then((response) => this.handleGetTrainingsResponse(response))
-        .catch(() => NavigationService.navigateToErrorView())
-        .finally()
+        .then((response) => {
+          if (trainingsRequestId === this.trainingsRequestId) {
+            return this.handleGetTrainingsResponse(response)
+          }
+        })
+        .catch(() => {
+          if (trainingsRequestId === this.trainingsRequestId) {
+            NavigationService.navigateToErrorView()
+          }
+        })
+        .finally(() => {
+          if (trainingsRequestId === this.trainingsRequestId) {
+            this.isLoadingTrainings = false
+          }
+        })
     },
     handleGetTrainingsResponse(response) {
+      // Keele vahetusel võib tulemuste arv väheneda; jätka viimasel olemasoleval lehel.
+      const lastPage = Math.max(0, response.data.totalPages - 1)
+      if (this.page > lastPage) {
+        this.page = lastPage
+        return this.getTrainings()
+      }
       this.totalPages = response.data.totalPages
       this.totalElements = response.data.totalElements
       this.trainings = response.data.trainingSummaries
@@ -128,7 +128,7 @@ export default {
     },
     // Bootstrap tooltip loeb teksti ainult loomisel, keele vahetusel tuleb see uuendada
     updateSearchHelpTooltip() {
-      this.searchHelpTooltip.setContent({ '.tooltip-inner': this.$t('trainings.searchHelp') })
+      this.searchHelpTooltip?.setContent({ '.tooltip-inner': this.$t('trainings.searchHelp') })
     },
     handlePageChanged(newPage) {
       this.page = newPage
@@ -140,27 +140,40 @@ export default {
         .catch(() => NavigationService.navigateToErrorView())
     },
     getCategories() {
-      CategoryService.sendGetCategoriesRequest(this.contentLang)
-        .then((response) => (this.categories = response.data))
-        .catch(() => NavigationService.navigateToErrorView())
+      const contentLang = this.contentLang
+      return CategoryService.sendGetCategoriesRequest(contentLang)
+        .then((response) => {
+          if (contentLang === this.contentLang) this.categories = response.data
+        })
+        .catch(() => {
+          if (contentLang === this.contentLang) NavigationService.navigateToErrorView()
+        })
     },
     getFundingTypes() {
-      FundingTypeService.sendGetFundingTypesRequest(this.contentLang)
-        .then((response) => (this.fundingTypes = response.data))
-        .catch(() => NavigationService.navigateToErrorView())
+      const contentLang = this.contentLang
+      return FundingTypeService.sendGetFundingTypesRequest(contentLang)
+        .then((response) => {
+          if (contentLang === this.contentLang) this.fundingTypes = response.data
+        })
+        .catch(() => {
+          if (contentLang === this.contentLang) NavigationService.navigateToErrorView()
+        })
     },
     handleNewLanguageSelected(newLanguageId) {
+      if (this.trainingLanguageId === newLanguageId) return
       this.trainingLanguageId = newLanguageId
       this.page = 0
       this.getTrainings()
     },
     handleNewCategorySelected(newCategoryId) {
+      if (this.categoryId === newCategoryId) return
       this.categoryId = newCategoryId
       this.page = 0
       this.getTrainings()
     },
 
     handleNewFundingTypeSelected(newFundingTypeId) {
+      if (this.fundingTypeId === newFundingTypeId) return
       this.fundingTypeId = newFundingTypeId
       this.page = 0
       this.getTrainings()
@@ -179,6 +192,7 @@ export default {
     this.searchHelpTooltip = new Tooltip(this.$refs.searchHelp)
   },
   beforeUnmount() {
+    this.trainingsRequestId++
     this.searchHelpTooltip.dispose()
   },
 }
@@ -189,25 +203,52 @@ export default {
     <TrainingsTabs />
 
     <div class="row flex-grow-1">
-      <div class="col-md-4 col-lg-3 d-flex flex-column gap-4">
-        <LanguagesDropdown
-          :languages="languages"
-          :languageId="trainingLanguageId"
-          @event-new-language-selected="handleNewLanguageSelected"
-          :firstOptionLabel="$t('trainings.showAllLanguages')"
-        />
-        <CategoriesDropdown
-          :categories="categories"
-          :categoryId="categoryId"
-          @event-new-category-selected="handleNewCategorySelected"
-          :firstOptionLabel="$t('trainings.showAllCategories')"
-        />
-        <FundingTypesRadio
-          :fundingTypes="fundingTypes"
-          :fundingTypeId="fundingTypeId"
-          @event-new-fundingtype-selected="handleNewFundingTypeSelected"
-          :firstOptionLabel="$t('trainings.showAllFundingTypes')"
-        />
+      <div class="col-md-4 col-lg-3">
+        <aside class="d-flex flex-column gap-3 mb-4" :aria-label="$t('trainings.filters.title')">
+          <div>
+            <label class="form-label fw-semibold" for="training-filter-language">
+              {{ $t('trainings.filters.trainingLanguage') }}
+            </label>
+            <LanguagesDropdown
+              id="training-filter-language"
+              :languages="languages"
+              :language-id="trainingLanguageId"
+              @event-new-language-selected="handleNewLanguageSelected"
+              :first-option-label="$t('trainings.filters.allLanguages')"
+            />
+          </div>
+          <div>
+            <label class="form-label fw-semibold" for="training-filter-category">
+              {{ $t('trainings.filters.category') }}
+            </label>
+            <CategoriesDropdown
+              id="training-filter-category"
+              :categories="categories"
+              :category-id="categoryId"
+              @event-new-category-selected="handleNewCategorySelected"
+              :first-option-label="$t('trainings.filters.allCategories')"
+            />
+          </div>
+          <fieldset>
+            <legend class="form-label fw-semibold fs-6">
+              {{ $t('trainings.filters.fundingType') }}
+            </legend>
+            <FundingTypesRadio
+              :funding-types="fundingTypes"
+              :funding-type-id="fundingTypeId"
+              @event-new-fundingtype-selected="handleNewFundingTypeSelected"
+              :first-option-label="$t('trainings.filters.all')"
+            />
+          </fieldset>
+          <button
+            v-if="hasActiveFilters"
+            @click="handleClearFiltersClick"
+            class="btn btn-link p-0 align-self-start"
+            type="button"
+          >
+            {{ $t('trainings.filters.clear') }}
+          </button>
+        </aside>
       </div>
       <div class="col-md-8 col-lg-9 d-flex flex-column">
         <div class="d-flex align-items-center gap-2 mb-3">
@@ -218,6 +259,7 @@ export default {
               type="text"
               class="form-control"
               :placeholder="$t('trainings.searchPlaceholder')"
+              :aria-label="$t('trainings.searchPlaceholder')"
               @keyup.enter="handleSearchClick"
               @keyup.esc="handleClearSearch"
             />
@@ -262,7 +304,7 @@ export default {
           :training="training"
         />
         <div
-          v-if="trainings.length === 0"
+          v-if="!isLoadingTrainings && trainings.length === 0"
           class="text-center text-secondary border rounded py-4 px-3 mb-3"
         >
           <template v-if="appliedSearchText">
