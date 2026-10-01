@@ -32,15 +32,17 @@ Eemaldatakse: "Lisa uus koolitus" (`/training-form`) ja "Lisa uus koolitaja" (`/
 - **"Koolitused", mitte "Meie koolitused"** — avalikus menüüs "Koolitused ▾" on juba "Meie koolitused" (`/trainings`); admini nimekirjal on oma nimi.
 - **Päringud esimesena** — päring ootab admini vastust (staatus "Uus"), registreerumine toimib ilma adminita.
 - **Vaate pealkiri ühtib menüüga:** `/admin-trainings` pealkiri on "Koolitused" (`adminTrainings.title`). Sama võtit `navbar.manageTrainings` kasutavad kiirnupud `TrainingFormView` ja `AdminTrainingCoursesView` vaates — need muutuvad automaatselt.
-- **Prototüübi kest:** admini vaikimisi vaade pärast sisselogimist on `/admin-enquiries` (menüü esimene punkt); külgriba admini vaated on menüü järjekorras.
+- **Sisselogimine adminina** (`LoginView.vue`): ilma `redirect` parameetrita → `/admin-enquiries` (menüü esimene punkt, `NavigationService.navigateToAdminEnquiriesView`); `redirect` olemasolul (nt registreerumise link) minnakse sinna nagu varem. Teised rollid → `redirect` või avaleht.
+- **Prototüübi kest:** sama suunamine; külgriba admini vaated on menüü järjekorras.
 
 ## Komponendid ja failistruktuur
 
-- `App.vue`, `locales/et.json`, `locales/en.json` (muudetakse)
+- `App.vue`, `views/LoginView.vue`, `locales/et.json`, `locales/en.json` (muudetakse)
 
 ## Vastuvõtu kriteeriumid
 
 - [x] Menüü "Admin" järjekord ja eraldajad nagu tabelis
 - [x] "Lisa uus koolitus" ja "Lisa uus koolitaja" menüüs puuduvad, nimekirja nupud töötavad
+- [x] Admin satub pärast sisselogimist (ilma `redirect`ita) `/admin-enquiries` vaatesse
 - [x] `/admin-trainings` pealkiri ja kiirnupud "Koolitused" / "Trainings"
 - [x] Läbimängude navbarid, prototüübi kest, skeemid ja märkmed vastavad uuele menüüle

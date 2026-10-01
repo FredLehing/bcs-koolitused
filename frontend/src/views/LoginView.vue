@@ -1,6 +1,7 @@
 <script>
 import LoginService from '@/api-services/LoginService.js'
 import NavigationService from '@/services/NavigationService.js'
+import SessionStorageService from '@/services/SessionStorageService.js'
 
 export default {
   name: 'LoginView',
@@ -12,7 +13,7 @@ export default {
     }
   },
   computed: {
-    // Rada, kuhu pärast sisselogimist minnakse (nt registreerumine); '' = avaleht
+    // Rada, kuhu pärast sisselogimist minnakse (nt registreerumine); '' = avaleht või admini vaade
     redirect() {
       return this.$route.query.redirect ?? ''
     },
@@ -32,7 +33,12 @@ export default {
     handleLoginResponse(loginResponse) {
       sessionStorage.setItem('userId', loginResponse.userId)
       sessionStorage.setItem('roleName', loginResponse.roleName)
-      NavigationService.navigateToRedirectOrHomeView(this.redirect)
+      // Admin ilma redirectita → admin-menüü esimene vaade (koolituste päringud)
+      if (SessionStorageService.userIsAdmin() && !NavigationService.isInternalPath(this.redirect)) {
+        NavigationService.navigateToAdminEnquiriesView()
+      } else {
+        NavigationService.navigateToRedirectOrHomeView(this.redirect)
+      }
     },
 
     handleLoginError(loginError) {
@@ -50,7 +56,7 @@ export default {
   <div class="container flex-grow-1 d-flex flex-column justify-content-center">
     <div class="row align-items-center">
       <div class="col-6">
-        <img class="img-fluid" src="@/assets/programming.gif" alt="koodimine">
+        <img class="img-fluid" src="@/assets/programming.gif" alt="koodimine" />
       </div>
       <div class="col-6 text-center">
         <div v-if="redirect" class="alert alert-info w-75 mx-auto">
