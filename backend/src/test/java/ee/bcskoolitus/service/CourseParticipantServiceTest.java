@@ -2,6 +2,7 @@ package ee.bcskoolitus.service;
 
 import ee.bcskoolitus.controller.courseparticipant.dto.AdminRegistrationDto;
 import ee.bcskoolitus.controller.courseparticipant.dto.AdminRegistrationSummaryDto;
+import ee.bcskoolitus.controller.courseparticipant.dto.AdminRegistrationUpdateRequestDto;
 import ee.bcskoolitus.controller.courseparticipant.dto.CourseParticipantDto;
 import ee.bcskoolitus.controller.courseparticipant.dto.CourseParticipantStatusDto;
 import ee.bcskoolitus.controller.courseparticipant.dto.CourseRegistrationRequestDto;
@@ -312,6 +313,45 @@ class CourseParticipantServiceTest {
         when(adminRegistrationSummaryRepository.findByCourseParticipantIdAndContentLanguageCode(1, "xx")).thenReturn(Optional.empty());
 
         assertThrows(PrimaryKeyNotFoundException.class, () -> courseParticipantService.getAdminRegistration(1, "xx"));
+    }
+
+    @Test
+    void updateAdminRegistration_changesOnlyRegistrationFields() {
+        CourseParticipant courseParticipant = createCourseParticipant();
+        Participant participant = courseParticipant.getParticipant();
+        when(courseParticipantRepository.findById(5)).thenReturn(Optional.of(courseParticipant));
+
+        courseParticipantService.updateAdminRegistration(5, new AdminRegistrationUpdateRequestDto("R", true, false, "  Taastas registreerumise  "));
+
+        CourseParticipant savedCourseParticipant = captureSavedCourseParticipant();
+        assertSame(courseParticipant, savedCourseParticipant);
+        assertEquals("R", savedCourseParticipant.getStatus());
+        assertEquals(true, savedCourseParticipant.getHasPaid());
+        assertEquals(false, savedCourseParticipant.getRequiresLaptop());
+        assertEquals("Taastas registreerumise", savedCourseParticipant.getAdminNotes());
+        assertEquals("Loobus haiguse tõttu.", savedCourseParticipant.getNotes());
+        assertSame(participant, savedCourseParticipant.getParticipant());
+        assertEquals("mari.lepp@example.com", savedCourseParticipant.getParticipant().getProfile().getEmail());
+    }
+
+    @Test
+    void updateAdminRegistration_blankAdminNotesBecomesNull() {
+        CourseParticipant courseParticipant = createCourseParticipant();
+        courseParticipant.setAdminNotes("Teatas telefoni teel 25.09.");
+        when(courseParticipantRepository.findById(5)).thenReturn(Optional.of(courseParticipant));
+
+        courseParticipantService.updateAdminRegistration(5, new AdminRegistrationUpdateRequestDto("C", false, true, "   "));
+
+        assertNull(captureSavedCourseParticipant().getAdminNotes());
+    }
+
+    @Test
+    void updateAdminRegistration_unknownCourseParticipantThrows() {
+        when(courseParticipantRepository.findById(123)).thenReturn(Optional.empty());
+
+        assertThrows(PrimaryKeyNotFoundException.class,
+                () -> courseParticipantService.updateAdminRegistration(123, new AdminRegistrationUpdateRequestDto("R", false, false, null)));
+        verify(courseParticipantRepository, never()).save(any());
     }
 
     private CourseParticipant captureSavedCourseParticipant() {

@@ -5,6 +5,7 @@ import ee.bcskoolitus.CourseStatus;
 import ee.bcskoolitus.TrainingStatus;
 import ee.bcskoolitus.controller.courseparticipant.dto.AdminRegistrationDto;
 import ee.bcskoolitus.controller.courseparticipant.dto.AdminRegistrationSummaryDto;
+import ee.bcskoolitus.controller.courseparticipant.dto.AdminRegistrationUpdateRequestDto;
 import ee.bcskoolitus.controller.courseparticipant.dto.CourseParticipantDto;
 import ee.bcskoolitus.controller.courseparticipant.dto.CourseParticipantStatusDto;
 import ee.bcskoolitus.controller.courseparticipant.dto.CourseRegistrationRequestDto;
@@ -80,6 +81,16 @@ public class CourseParticipantService {
         return adminRegistrationSummaryMapper.toAdminRegistrationDto(adminRegistrationSummary);
     }
 
+    // Admin muudab ainult registreerumise enda välju (osaleja lisainfo ja profiil jäävad); kustutamist pole — loobumine on status C.
+    // Taastamine (C → R) on lubatud ka täis toimumiskorrale, sest mahutavust veel ei modelleerita
+    @Transactional
+    public void updateAdminRegistration(Integer courseParticipantId, AdminRegistrationUpdateRequestDto adminRegistrationUpdateRequestDto) {
+        CourseParticipant courseParticipant = getValidCourseParticipantBy(courseParticipantId);
+        courseParticipantMapper.updateCourseParticipant(adminRegistrationUpdateRequestDto, courseParticipant);
+        courseParticipant.setAdminNotes(trimToNull(adminRegistrationUpdateRequestDto.getAdminNotes()));
+        courseParticipantRepository.save(courseParticipant);
+    }
+
     // Kasutaja registreerumise olek: R / C; null = pole registreerunud (ka siis, kui kasutajal osalejat pole)
     @Transactional(readOnly = true)
     public CourseParticipantStatusDto getCourseParticipantStatus(Integer courseId, Integer userId) {
@@ -108,6 +119,13 @@ public class CourseParticipantService {
         courseParticipant.setRequiresLaptop(Boolean.TRUE.equals(courseRegistrationRequestDto.getRequiresLaptop()));
         courseParticipant.setNotes(courseRegistrationRequestDto.getNotes() == null ? "" : courseRegistrationRequestDto.getNotes());
         courseParticipantRepository.save(courseParticipant);
+    }
+
+    private static String trimToNull(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        return value.strip();
     }
 
     private Optional<CourseParticipant> findUserCourseParticipant(Integer courseId, Integer userId) {
