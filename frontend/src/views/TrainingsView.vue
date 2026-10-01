@@ -7,10 +7,25 @@ import TrainingCard from '@/components/TrainingCard.vue'
 import PaginationNav from '@/components/common/PaginationNav.vue'
 import { PhQuestion, PhX } from '@phosphor-icons/vue'
 import { Tooltip } from 'bootstrap'
+import LanguageService from '@/api-services/LanguageService.js'
+import CategoryService from '@/api-services/CategoryService.js'
+import FundingTypeService from '@/api-services/FundingTypeService.js'
+import LanguagesDropdown from '@/components/forms/LanguagesDropdown.vue'
+import CategoriesDropdown from '@/components/forms/CategoriesDropdown.vue'
+import FundingTypesRadio from '@/components/forms/FundingTypesRadio.vue'
 import TrainingsTabs from '@/components/common/TrainingsTabs.vue'
 
 export default {
   name: 'TrainingsView',
+  components: {
+    FundingTypesRadio,
+    TrainingCard,
+    PaginationNav,
+    PhQuestion,
+    PhX,
+    LanguagesDropdown,
+    CategoriesDropdown,
+  },
   components: { TrainingsTabs, TrainingCard, PaginationNav, PhQuestion, PhX },
   data() {
     return {
@@ -43,6 +58,24 @@ export default {
           ],
         },
       ],
+      categories: [
+        {
+          categoryId: 0,
+          categoryName: '',
+        },
+      ],
+      languages: [
+        {
+          languageId: 0,
+          languageName: '',
+        },
+      ],
+      fundingTypes: [
+        {
+          fundingTypeId: 0,
+          fundingTypeName: '',
+        },
+      ],
     }
   },
   computed: {
@@ -54,6 +87,8 @@ export default {
     contentLang() {
       this.getTrainings()
       this.$nextTick(() => this.updateSearchHelpTooltip())
+      this.getCategories()
+      this.getFundingTypes()
     },
     // Väli tühjendati (käsitsi, × nupu või Esc-iga) → näita kohe kõiki koolitusi
     searchText(newSearchText) {
@@ -99,12 +134,46 @@ export default {
       this.page = newPage
       this.getTrainings()
     },
+    getLanguages() {
+      LanguageService.sendGetLanguagesRequest()
+        .then((response) => (this.languages = response.data))
+        .catch(() => NavigationService.navigateToErrorView())
+    },
+    getCategories() {
+      CategoryService.sendGetCategoriesRequest(this.contentLang)
+        .then((response) => (this.categories = response.data))
+        .catch(() => NavigationService.navigateToErrorView())
+    },
+    getFundingTypes() {
+      FundingTypeService.sendGetFundingTypesRequest(this.contentLang)
+        .then((response) => (this.fundingTypes = response.data))
+        .catch(() => NavigationService.navigateToErrorView())
+    },
+    handleNewLanguageSelected(newLanguageId) {
+      this.trainingLanguageId = newLanguageId
+      this.page = 0
+      this.getTrainings()
+    },
+    handleNewCategorySelected(newCategoryId) {
+      this.categoryId = newCategoryId
+      this.page = 0
+      this.getTrainings()
+    },
+
+    handleNewFundingTypeSelected(newFundingTypeId) {
+      this.fundingTypeId = newFundingTypeId
+      this.page = 0
+      this.getTrainings()
+    },
   },
   beforeMount() {
     const appliedSearchText = this.$route.query.searchText ?? ''
     this.appliedSearchText = appliedSearchText
     this.searchText = appliedSearchText
     this.getTrainings()
+    this.getLanguages()
+    this.getCategories()
+    this.getFundingTypes()
   },
   mounted() {
     this.searchHelpTooltip = new Tooltip(this.$refs.searchHelp)
@@ -120,7 +189,26 @@ export default {
     <TrainingsTabs />
 
     <div class="row flex-grow-1">
-      <div class="col-2">Siin on filtrid</div>
+      <div class="col-2 d-flex flex-column gap-3">
+        <LanguagesDropdown
+          :languages="languages"
+          :languageId="trainingLanguageId"
+          @event-new-language-selected="handleNewLanguageSelected"
+          :firstOptionLabel="$t('trainings.showAllLanguages')"
+        />
+        <CategoriesDropdown
+          :categories="categories"
+          :categoryId="categoryId"
+          @event-new-category-selected="handleNewCategorySelected"
+          :firstOptionLabel="$t('trainings.showAllCategories')"
+        />
+        <FundingTypesRadio
+          :fundingTypes="fundingTypes"
+          :fundingTypeId="fundingTypeId"
+          @event-new-fundingtype-selected="handleNewFundingTypeSelected"
+          :firstOptionLabel="$t('trainings.showAllFundingTypes')"
+        />
+      </div>
       <div class="col-10 d-flex flex-column">
         <div class="d-flex align-items-center gap-2 mb-3">
           <div class="input-group">

@@ -105,7 +105,10 @@
     "noSearchResultsHint": "Try fewer or different words. Word forms are not adjusted, so use the beginning of a word (e.g. “program” instead of “programming”).",
     "showAllTrainings": "Show all trainings",
     "noResults": "No trainings match the selected filters.",
-    "searchHelp": "Searches for the entered words in the training title and short description. For best results, enter a few words. Word forms are not adjusted."
+    "searchHelp": "Searches for the entered words in the training title and short description. For best results, enter a few words. Word forms are not adjusted.",
+    "showAllLanguages": "Show all languages",
+    "showAllCategories": "Show all categories",
+    "showAllFundingTypes": "Show all fundingtypes"
   },
   "trainingCard": {
     "language": "Training language",
