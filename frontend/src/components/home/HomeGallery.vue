@@ -1,4 +1,6 @@
 <script>
+import { Carousel } from 'bootstrap'
+
 // Galerii pildid loetakse automaatselt kaustast src/assets/images/gallery/ (failinime järjekorras).
 // Uue pildi lisamiseks pane fail sinna kausta — koodi muuta pole vaja.
 const galleryImageModules = import.meta.glob('@/assets/images/gallery/*.{jpg,jpeg,png,webp,svg}', {
@@ -11,6 +13,9 @@ const GALLERY_IMAGES = Object.keys(galleryImageModules)
 
 // Kuni päris pilte pole, kuvatakse nii mitu kohatäitjat
 const PLACEHOLDER_SLIDE_COUNT = 4
+
+// Mitme millisekundi tagant karussell järgmise pildi peale liigub
+const AUTOPLAY_INTERVAL_MS = 8000
 
 export default {
   name: 'HomeGallery',
@@ -25,13 +30,29 @@ export default {
       return this.images.length > 0 ? this.images.length : PLACEHOLDER_SLIDE_COUNT
     },
   },
+  mounted() {
+    // Käivitame automaatse kerimise ise: data-bs-ride="carousel" loetakse ainult lehe esmalaadimisel,
+    // aga SPA-s võib komponent tekkida hiljem (nt router-lingiga avalehele tulles)
+    this.carousel = Carousel.getOrCreateInstance(this.$refs.carouselElement, {
+      interval: AUTOPLAY_INTERVAL_MS,
+      ride: 'carousel',
+    })
+  },
+  beforeUnmount() {
+    // Peatame taimeri ja eemaldame Bootstrapi kuularid, kui avalehelt lahkutakse
+    this.carousel.dispose()
+  },
 }
 </script>
 
 <template>
-  <!-- Bootstrapi karussell: nooled ja indikaatorid töötavad data-bs-* atribuutidega, automaatset kerimist pole -->
+  <!-- Bootstrapi karussell: nooled ja indikaatorid töötavad data-bs-* atribuutidega, automaatne kerimine käivitatakse mounted()-is -->
   <section class="py-4">
-    <div id="homeGallery" class="carousel slide rounded overflow-hidden shadow-sm">
+    <div
+      id="homeGallery"
+      ref="carouselElement"
+      class="carousel slide rounded overflow-hidden shadow-sm"
+    >
       <div class="carousel-indicators">
         <button
           v-for="slideIndex in slideCount"

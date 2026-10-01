@@ -85,7 +85,7 @@ code { font-family: var(--font-mono); font-size: .88em; }
 .sitenav .right { margin-left: auto; display: flex; gap: 10px; align-items: center; }
 .sitenav .pill { border: 1.5px solid var(--accent); border-radius: 10px; padding: 0 8px; font-size: .8rem; background: var(--field); color: var(--accent); cursor: pointer; font-family: var(--font-sketch); }
 .sitenav span.pill { border-color: var(--line); color: var(--ink-soft); }
-.sitenav button.pill:hover { background: var(--accent-soft); }
+.sitenav button.pill:hover, .sitenav button.pill.cur { background: var(--accent-soft); }
 .sitenav .who { font-size: .78rem; color: var(--ink-soft); }
 .admin { position: relative; }
 .admin > button { background: none; border: 1.5px solid transparent; border-radius: 6px; color: var(--accent); padding: 0 6px; cursor: pointer; font-family: var(--font-sketch); }
@@ -94,6 +94,8 @@ code { font-family: var(--font-mono); font-size: .88em; }
 .menu button { background: none; border: 0; text-align: left; color: var(--accent); padding: 4px 8px; border-radius: 4px; cursor: pointer; white-space: nowrap; font-family: var(--font-sketch); }
 .menu button:hover { background: var(--accent-soft); }
 .menu hr { border: 0; border-top: 1.5px dashed var(--line); margin: 3px 4px; }
+/* "Minu profiil" rippmenüü on navbari paremas servas — avaneb vasakule, et ei läheks ekraanist välja */
+#p-menu { left: auto; right: 0; }
 
 .stage { background: var(--board); }
 /* iframe on nähtava akna kõrgune ja kerib ise — nii ilmuvad läbimängu modalid ja teated (position: fixed) alati nähtavasse kohta */
@@ -165,6 +167,10 @@ code { font-family: var(--font-mono); font-size: .88em; }
     { key: "lecturer", path: "/lecturer", name: "Koolitaja", view: "LecturerView.vue", group: "public", sample: "/lecturer?lecturerId=1", file: "lecturers-view/lecturers-view-labimang.html", params: ["lecturerId", "returnTo"] },
     { key: "login", path: "/login", name: "Logi sisse", view: "LoginView.vue", group: "public", login: true },
     { key: "signup", path: "/signup", name: "Loo konto", view: "SignupView.vue", group: "public", file: "courses-view/course-registration-view-labimang.html", params: ["redirect"], extra: "view=signup" },
+    { key: "my-details", path: "/my-details", name: "Minu andmed", view: "MyDetailsView.vue", group: "user", file: "profile-view/profile-view-labimang.html", roleParam: true, auth: true, extra: "view=details" },
+    { key: "my-courses", path: "/my-courses", name: "Minu koolitused", view: "MyCoursesView.vue", group: "user", file: "profile-view/profile-view-labimang.html", roleParam: true, auth: true, extra: "view=courses" },
+    { key: "my-certificates", path: "/my-certificates", name: "Tunnistused", view: "MyCertificatesView.vue", group: "user", file: "profile-view/profile-view-labimang.html", roleParam: true, auth: true, extra: "view=certificates" },
+    { key: "change-password", path: "/change-password", name: "Parool", view: "ChangePasswordView.vue", group: "user", file: "profile-view/profile-view-labimang.html", roleParam: true, auth: true, extra: "view=password" },
     { key: "admin-enquiries", path: "/admin-enquiries", name: "Koolituste päringud", view: "AdminEnquiriesView.vue", group: "admin", file: "admin-enquiries-view/admin-enquiries-view-labimang.html" },
     { key: "admin-enquiry", path: "/admin-enquiry", name: "Koolituse päring", view: "AdminEnquiryView.vue", group: "admin", sample: "/admin-enquiry?enquiryId=4", file: "admin-enquiries-view/admin-enquiries-view-labimang.html", params: ["enquiryId"], extra: "view=admin-enquiry" },
     { key: "admin-registrations", path: "/admin-registrations", name: "Registreerumised", view: "AdminRegistrationsView.vue", group: "admin", file: "admin-registrations-view/admin-registrations-view-labimang.html" },
@@ -211,11 +217,12 @@ code { font-family: var(--font-mono); font-size: .88em; }
   function renderSide() {
     var cur = viewFor(state.path);
     var html = "";
-    [["public", "Avalikud vaated"], ["admin", "Admin"]].forEach(function (g) {
+    [["public", "Avalikud vaated"], ["user", "Sisseloginud kasutaja"], ["admin", "Admin"]].forEach(function (g) {
       html += "<h2>" + g[1] + "</h2>";
       VIEWS.filter(function (v) { return v.group === g[0]; }).forEach(function (v) {
         var locked = v.group === "admin" && state.role !== "admin";
-        var tag = locked ? '<span class="tag lock" title="Ainult adminile">🔒 admin</span>' : v.file ? '<span class="tag mock">läbimäng</span>' : '<span class="tag ph">kohatäide</span>';
+        var needsLogin = v.auth && state.role === "public";
+        var tag = locked ? '<span class="tag lock" title="Ainult adminile">🔒 admin</span>' : needsLogin ? '<span class="tag lock" title="Ainult sisseloginud kasutajale">🔒 sisselogimine</span>' : v.file ? '<span class="tag mock">läbimäng</span>' : '<span class="tag ph">kohatäide</span>';
         html += '<button type="button" data-go="' + esc(v.sample || v.path) + '"' + (cur === v ? ' aria-current="page"' : "") + '><span class="nm">' + esc(v.name) + '</span>' + tag + '<span class="path">' + esc(v.view) + " · " + esc(v.sample || v.path) + '</span></button>';
       });
     });
@@ -235,7 +242,8 @@ code { font-family: var(--font-mono); font-size: .88em; }
       '<button type="button" data-go="/admin-trainings">Koolitused</button><button type="button" data-go="/admin-all-courses">Koolituste kalender</button><hr>' +
       '<button type="button" data-go="/admin-lecturers">Koolitajad</button><button type="button" data-go="/admin-rooms">Koolitusruumid</button></span></span>' : "";
     var right = state.role === "public" ? '<button type="button" class="pill" data-go="/login">Logi sisse</button><button type="button" class="pill" data-go="/signup">Loo konto</button>'
-      : '<span class="who">' + ROLE_NAMES[state.role] + '</span><button type="button" class="pill" id="b-logout">Logi välja</button>';
+      : '<span class="who">' + ROLE_NAMES[state.role] + '</span><span class="admin"><button type="button" id="b-pmenu" aria-expanded="false" aria-controls="p-menu"' + (cur && cur.group === "user" ? ' style="text-decoration:underline;text-underline-offset:3px;font-weight:700"' : "") + '>Minu profiil ▾</button><span class="menu" id="p-menu" hidden>' +
+        VIEWS.filter(function (v) { return v.group === "user"; }).map(function (v) { return '<button type="button" data-go="' + v.path + '">' + esc(v.name) + '</button>'; }).join("") + '</span></span><button type="button" class="pill" id="b-logout">Logi välja</button>';
     document.getElementById("sitenav").innerHTML = '<button type="button" class="logo" data-go="/" aria-label="Avaleht"></button>' +
       kmenu + lnk("/lecturers", "Meie koolitajad") + dead("Teenused") + dead("Ettevõttest") + dead("Blogi") + dead("Kontakt") + dead("Tagasiside") +
       admin + '<span class="right">' + right + '</span>';
@@ -253,6 +261,8 @@ code { font-family: var(--font-mono); font-size: .88em; }
       stage.innerHTML = '<div class="ph-page"><h2 class="denied">Puudub õigus</h2><p>Vaade <strong>' + esc(v.name) + '</strong> (<code>' + esc(v.view) + '</code>) on ainult adminile — päris rakenduses suunatakse <code>NotAuthorizedView</code>-le.</p><div class="row"><button type="button" class="sbtn primary" data-role-go="admin">Vaheta roll: Admin</button><button type="button" class="sbtn" data-go="/">Avalehele</button></div></div>';
       return;
     }
+    // Sisselogimist nõudev vaade (nt /profile): sisselogimata kasutaja suunatakse /login?redirect=...
+    if (v.auth && state.role === "public") { go("/login?redirect=" + encodeURIComponent(state.path), { replace: true }); return; }
     if (v.login) {
       // ?redirect= (nt registreerumisest): pärast sisselogimist minnakse sinna tagasi; link "Loo konto" annab redirecti edasi
       var redirect = queryOf(state.path).get("redirect") || "";
@@ -295,6 +305,7 @@ code { font-family: var(--font-mono); font-size: .88em; }
     if (b.dataset.login) { var rd = queryOf(state.path).get("redirect"); setRole(b.dataset.login); go(rd || (b.dataset.login === "admin" ? "/admin-enquiries" : "/")); return; }
     if (b.id === "b-logout") { setRole("public"); go("/"); return; }
     if (b.id === "b-kmenu") { var km = document.getElementById("k-menu"); km.hidden = !km.hidden; b.setAttribute("aria-expanded", String(!km.hidden)); return; }
+    if (b.id === "b-pmenu") { var pm = document.getElementById("p-menu"); pm.hidden = !pm.hidden; b.setAttribute("aria-expanded", String(!pm.hidden)); return; }
     if (b.id === "b-admin") { var m = document.getElementById("admin-menu"); m.hidden = !m.hidden; b.setAttribute("aria-expanded", String(!m.hidden)); return; }
     if (b.id === "b-back" && state.history.length) { state.future.push(state.path); go(state.history.pop(), { replace: true }); return; }
     if (b.id === "b-fwd" && state.future.length) { state.history.push(state.path); go(state.future.pop(), { replace: true }); return; }
@@ -302,7 +313,7 @@ code { font-family: var(--font-mono); font-size: .88em; }
   });
   document.addEventListener("click", function (e) {
     var owner = e.target.closest(".admin");
-    ["admin-menu", "k-menu"].forEach(function (id) { var m = document.getElementById(id); if (m && (!owner || !owner.contains(m))) m.hidden = true; });
+    ["admin-menu", "k-menu", "p-menu"].forEach(function (id) { var m = document.getElementById(id); if (m && (!owner || !owner.contains(m))) m.hidden = true; });
   });
   // Läbimängudest tulevad teated: navigeerimine (kõrguse teadet ei kasutata — iframe kerib ise)
   window.addEventListener("message", function (e) {
