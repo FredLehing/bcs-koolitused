@@ -4,6 +4,7 @@
 
 ## Vaate märkmed
 
+AI tegevused on selles etapis ühendatud päris POST-teenustega AiTrainingController klassis; vastus on placeholder-objekt. AI päringu ajal on tekstide muutmine, faili vahetamine ja salvestamine keelatud; vea korral säilivad tekstid ja fail. Vaate vahetamisel vana AI tulemust ei rakendata.
 ```text
 Roll: Admin
 Failinimi: TrainingFormView.vue
@@ -13,7 +14,7 @@ Vaatega seotud lisainfo:
 state: "new-training" — URL-is query parameetreid pole. Pealkiri "Lisa uus koolitus". Vorm on tühi; tõlke väljad (pealkiri, lühikirjeldus, kirjeldus) täidetakse põhikeeles (et); rippmenüüd (kategooriad, rahastustüübid) laaditakse kasutajaliidese keeles (store'i contentLang) ja laaditakse keele vahetamisel navbaris uuesti — vormi sisu jääb alles. Lipukesi ja staatuse nuppe pole.
 Koolitajad: valitud koolitajate nimekiri (× eemaldab, ↑ ↓ muudab järjekorda, esimene kuvatakse esimesena); "+ Lisa koolitaja" avab "Vali koolitaja" modali otsinguga (juba valitud koolitajaid ei pakuta). Võib jääda tühjaks. Rahastustüübid on checkboxid, "Tellitav" ja "Esile tõstetud" switchid.
 Nupp "Lisa" → POST /api/training (userId localStorage'ist). Backend loob koolituse staatusega "U" koos põhikeele tõlkega. Vastuse trainingId ja trainingTranslationId järgi tehakse router.replace → state "update".
-Õppekava (PDF): tõlke väljade all valikuline PDF-fail (kuni 10 MB) — "Vali fail…"; valitud fail salvestub koos "Lisa" nupuga (curriculum = Base64, curriculumLabel = sõna "Õppekava" tõlke keeles i18n-ist). Failinime teeb backend: puhastatud pealkiri + sõna, nt power-bi-edasijoudnutele-oppekava.pdf.
+Õppekava (PDF): tõlke väljade all valikuline PDF-fail (kuni 10 MB) — "Vali fail…"; valitud fail salvestub koos "Lisa" nupuga (curriculum = Base64, curriculumLabel = sõna "Õppekava" tõlke keeles i18n-ist). Failinime teeb backend: puhastatud pealkiri + sõna, nt power-bi-edasijoudnutele-oppekava.pdf. Kui PDF on valitud, nupp "Täida vorm PDF + AI abiga" saadab salvestamata faili backendile → Gemini AI; vastus täidab pealkirja, lühikirjelduse ja kirjelduse. DB-sse midagi ei salvestata enne "Lisa" vajutamist. Salvestamata tekstide korral küsitakse ülekirjutamiseks kinnitust. Tooltip selgitab voogu.
 ```
 
 ## API märkmed — GET /api/languages
@@ -189,4 +190,28 @@ message: "Lubatud on ainult PDF-fail"
 HTTP: 403
 errorCode: CURRICULUM_TOO_LARGE
 message: "Õppekava on liiga suur, lubatud kuni 10 MB"
+```
+
+
+## API märkmed — POST /api/ai-training/pdf (TO BE IMPLEMENTED)
+
+```text
+API: POST /api/ai-training/pdf
+
+Request: multipart/form-data
+curriculum: kohustuslik PDF-fail (kuni 10 MB)
+
+Response (200):
+AiTrainingContentDto.java
+{
+  "title": "PDF-ist genereeritud pealkiri (TO BE IMPLEMENTED)",
+  "shortDescription": "PDF-ist genereeritud lühikirjeldus (TO BE IMPLEMENTED)",
+  "description": "PDF-ist genereeritud kirjeldus (TO BE IMPLEMENTED)"
+}
+
+API teenuse lisainfo:
+TO BE IMPLEMENTED: controller tagastab praegu fikseeritud placeholder-väärtused; DB-d ei loeta ja Geminit ei kutsuta.
+Valitud salvestamata PDF saadetakse backendile, kus tulevikus töödeldakse see Gemini AI-ga. Vastus täidab vormi, kuid DB-sse midagi ei salvestata; admin kontrollib tulemust ja vajutab ise "Lisa". Praegu tagastab controller placeholder-väärtused. Sama vastuse DTO on mõeldud ka AI tõlkele.
+
+Veateated: —
 ```

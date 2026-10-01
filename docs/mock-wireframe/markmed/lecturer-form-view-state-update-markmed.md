@@ -174,7 +174,7 @@ LecturerAiTranslationDto.java
 }
 
 API teenuse lisainfo:
-Tõlgib alati andmebaasi salvestatud põhikeele tõlke (kõik kolm välja) AI abil sihtkeelde — vormi sisu ei kasutata. Andmebaasi midagi ei salvestata; tulemus täidab ainult vormi. description HTML-märgendid säilitatakse. Vastusel päis Cache-Control: no-store. Sama loogika nagu GET /api/training/{trainingId}/ai-translation; frontend võib alustada mock-vastusega. Kustutatud koolitaja (status "D") on nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.
+Tõlgib alati andmebaasi salvestatud põhikeele tõlke (kõik kolm välja) AI abil sihtkeelde — vormi sisu ei kasutata. Andmebaasi midagi ei salvestata; tulemus täidab ainult vormi. description HTML-märgendid säilitatakse. Vastusel päis Cache-Control: no-store. Sama loogika nagu POST /api/ai-training/translation/{trainingId}; frontend võib alustada mock-vastusega. Kustutatud koolitaja (status "D") on nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.
 
 Veateated:
 HTTP: 404

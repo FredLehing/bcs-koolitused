@@ -171,7 +171,12 @@
       "curriculumPending": "salvestatakse koos vormiga",
       "curriculumRemoving": "eemaldatakse salvestamisel",
       "curriculumInvalid": "Lubatud on PDF-fail kuni 10 MB",
-      "curriculumReadError": "Faili lugemine ebaõnnestus. Vali fail uuesti."
+      "curriculumReadError": "Faili lugemine ebaõnnestus. Vali fail uuesti.",
+      "aiPdfButton": "Täida vorm PDF + AI abiga",
+      "aiPdfLoading": "PDF-i analüüsin…",
+      "aiPdfTooltipNewTraining": "Valitud salvestamata PDF saadetakse backendile ja sealt Gemini AI-le. Vastus täidab vormi väljad; midagi ei salvestata enne „Lisa“ vajutamist.",
+      "aiPdfTooltipNewTranslation": "Valitud salvestamata PDF saadetakse backendile ja sealt Gemini AI-le. Vastus täidab uue tõlke tekstiväljad; midagi ei salvestata enne „Lisa tõlge“ vajutamist.",
+      "aiPdfTooltipUpdate": "Uus vormis valitud PDF saadetakse backendile; selle puudumisel loetakse salvestatud õppekava andmebaasist. Gemini AI vastus täidab vormi väljad; midagi ei salvestata enne „Salvesta“ vajutamist."
     },
     "buttons": {
       "add": "Lisa",
@@ -205,7 +210,13 @@
       "translationAdded": "Tõlge ({language}) on lisatud",
       "published": "Koolitus on publitseeritud",
       "unpublished": "Koolitus on liigutatud mustandisse",
-      "aiDone": "AI tõlge on vormis — kontrolli teksti ja salvesta"
+      "aiDone": "AI tõlge on vormis — kontrolli teksti ja salvesta",
+      "aiPdfDone": "PDF + AI tulemus on vormis — kontrolli teksti ja salvesta",
+      "aiFailed": "AI päring ebaõnnestus. Proovi uuesti."
+    },
+    "aiPdfModal": {
+      "title": "Asenda vorm PDF-i põhjal loodud tekstiga?",
+      "message": "Vormis on salvestamata muudatusi. PDF + AI tulemus kirjutab pealkirja, lühikirjelduse ja kirjelduse üle."
     }
   },
   "richTextEditor": {

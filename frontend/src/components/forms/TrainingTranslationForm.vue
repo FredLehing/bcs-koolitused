@@ -20,6 +20,10 @@ export default {
       default: false,
     },
     aiTooltip: String,
+    isDisabled: Boolean,
+    showAiPdfButton: Boolean,
+    isAiPdfLoading: Boolean,
+    aiPdfTooltip: String,
   },
   emits: [
     'event-curriculum-selected',
@@ -30,12 +34,13 @@ export default {
     'event-new-short-description-input',
     'event-new-description-input',
     'event-ai-translation-clicked',
+    'event-ai-pdf-clicked',
   ],
 }
 </script>
 
 <template>
-  <fieldset class="border rounded bg-body p-3 mb-4">
+  <fieldset class="border rounded bg-body p-3 mb-4" :disabled="isDisabled">
     <legend class="float-none w-auto px-2 fs-5">
       {{ $t('trainingForm.translation.legend', { language: languageName }) }}
     </legend>
@@ -43,7 +48,7 @@ export default {
       <div v-if="showAiButton" class="mb-3">
         <button
           @click="$emit('event-ai-translation-clicked')"
-          :disabled="isAiLoading"
+          :disabled="isDisabled"
           :title="aiTooltip"
           class="btn btn-outline-primary btn-sm"
           type="button"
@@ -86,6 +91,7 @@ export default {
         }}</label>
         <RichTextEditor
           :html="translation.description"
+          :is-disabled="isDisabled"
           @event-new-html-input="$emit('event-new-description-input', $event)"
           label-id="descriptionLabel"
         />
@@ -97,7 +103,11 @@ export default {
         :curriculum-file-size="translation.curriculumFileSize"
         :new-curriculum="newCurriculum"
         :is-curriculum-removed="isCurriculumRemoved"
-        :is-disabled="isSaving"
+        :is-disabled="isSaving || isDisabled"
+        :show-ai-pdf-button="showAiPdfButton"
+        :is-ai-pdf-loading="isAiPdfLoading"
+        :ai-pdf-tooltip="aiPdfTooltip"
+        @event-ai-pdf-clicked="$emit('event-ai-pdf-clicked')"
         @event-curriculum-selected="$emit('event-curriculum-selected', $event)"
         @event-curriculum-removed="$emit('event-curriculum-removed')"
         @event-curriculum-error="$emit('event-curriculum-error', $event)"

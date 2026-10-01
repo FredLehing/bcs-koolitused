@@ -3,7 +3,7 @@
 // töötab muutmata ka siis, kui mock asendatakse päris API kutsega.
 //
 // Kasutamine api-services failides:
-//   // return axios.get(`/api/training/${trainingId}/ai-translation`, { params: { languageId: languageId } })
+//   // return axios.post(`/api/ai-training/translation/${trainingId}`, null, { params: { languageId: languageId } })
 //   return mockResponse(MockDatabase.getAiTranslation(trainingId, languageId))
 //
 // Kui backendi teenus valmib: võta päris kutse kommentaarist välja ja kustuta mockResponse rida.

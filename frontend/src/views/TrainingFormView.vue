@@ -2,6 +2,7 @@
 import { mapState } from 'pinia'
 import { useLanguageStore } from '@/stores/languageStore.js'
 import TrainingService from '@/api-services/TrainingService.js'
+import AiTrainingService from '@/api-services/AiTrainingService.js'
 import TrainingTranslationService from '@/api-services/TrainingTranslationService.js'
 import LanguageService from '@/api-services/LanguageService.js'
 import CategoryService from '@/api-services/CategoryService.js'
@@ -87,6 +88,9 @@ export default {
 
       isAiConfirmModalOpen: false,
       isAiLoading: false,
+      isAiPdfConfirmModalOpen: false,
+      isAiPdfLoading: false,
+      aiRequestId: 0,
     }
   },
   computed: {
@@ -141,6 +145,30 @@ export default {
       )
     },
 
+    isAiBusy() {
+      return this.isAiLoading || this.isAiPdfLoading
+    },
+
+    isAiActionDisabled() {
+      return this.isAiBusy || this.isSaving || this.isCurriculumLoading
+    },
+
+    showAiPdfButton() {
+      return (
+        !this.isCurriculumRemoved &&
+        (!!this.newCurriculum?.file || (this.isUpdate && !!this.translation.curriculumFileName))
+      )
+    },
+
+    aiPdfTooltip() {
+      const tooltipKey = this.isNewTraining
+        ? 'aiPdfTooltipNewTraining'
+        : this.isNewTranslation
+          ? 'aiPdfTooltipNewTranslation'
+          : 'aiPdfTooltipUpdate'
+      return this.$t(`trainingForm.translation.${tooltipKey}`)
+    },
+
     aiTooltip() {
       const saveButton = this.isNewTranslation
         ? this.$t('trainingForm.buttons.addTranslation')
@@ -165,6 +193,12 @@ export default {
   },
   methods: {
     loadView() {
+      // Vana vaate AI vastus ei tohi täita äsja avatud vormi.
+      this.aiRequestId++
+      this.isAiLoading = false
+      this.isAiPdfLoading = false
+      this.isAiConfirmModalOpen = false
+      this.isAiPdfConfirmModalOpen = false
       this.resetCurriculum()
       this.trainingId = Number(this.$route.query.trainingId ?? 0)
       this.trainingTranslationId = Number(this.$route.query.trainingTranslationId ?? 0)
@@ -292,7 +326,7 @@ export default {
     // ---------- "Lisa" (new-training) ----------
 
     addTraining() {
-      if (this.isSaving || this.isCurriculumLoading) return
+      if (this.isAiActionDisabled) return
       this.resetMessages()
       this.checkTrainingDataForErrors()
       this.checkTranslationForErrors()
@@ -337,7 +371,7 @@ export default {
     // ---------- "Salvesta" (update) ----------
 
     updateTraining() {
-      if (this.isSaving || this.isCurriculumLoading) return
+      if (this.isAiActionDisabled) return
       this.resetMessages()
       this.checkTrainingDataForErrors()
       this.checkTranslationForErrors()
@@ -426,7 +460,7 @@ export default {
     // ---------- "Lisa tõlge" (new-translation) ----------
 
     addTrainingTranslation() {
-      if (this.isSaving || this.isCurriculumLoading) return
+      if (this.isAiActionDisabled) return
       this.resetMessages()
       this.checkTranslationForErrors()
 
@@ -461,8 +495,7 @@ export default {
     // translationLanguage on GET /api/languages vastuse element, seega languageId on alati olemas
     handleTranslationFlagClicked(translationLanguage) {
       if (
-        this.isSaving ||
-        this.isCurriculumLoading ||
+        this.isAiActionDisabled ||
         this.isNewTraining ||
         translationLanguage.languageCode === this.translation.languageCode
       ) {
@@ -506,9 +539,10 @@ export default {
       this.getTraining()
     },
 
-    // ---------- AI tõlge ----------
+    // ---------- AI tõlge ja PDF-ist vormi täitmine ----------
 
     handleAiTranslationClicked() {
+      if (this.isAiActionDisabled || !this.showAiButton) return
       if (this.translationHasUnsavedChanges()) {
         this.isAiConfirmModalOpen = true
       } else {
@@ -518,36 +552,78 @@ export default {
 
     getAiTranslation() {
       this.isAiConfirmModalOpen = false
+      if (this.isAiActionDisabled || !this.showAiButton) return
       this.resetMessages()
       this.isAiLoading = true
-      TrainingService.sendGetAiTranslationRequest(this.trainingId, this.translation.languageId)
-        .then((response) => this.handleGetAiTranslationResponse(response.data))
-        .catch((error) => this.handleGetAiTranslationError(error))
-        .finally(() => (this.isAiLoading = false))
+      const aiRequestId = ++this.aiRequestId
+      return this.handleAiTrainingRequest(
+        AiTrainingService.sendPostTranslationRequest(this.trainingId, this.translation.languageId),
+        aiRequestId,
+        'aiDone',
+      )
     },
 
-    // AI tulemus kuvatakse ainult vormis — andmebaasi läheb see "Lisa tõlge" / "Salvesta" nupuga
-    handleGetAiTranslationResponse(aiTranslation) {
-      this.translation.title = aiTranslation.title
-      this.translation.shortDescription = aiTranslation.shortDescription
-      this.translation.description = aiTranslation.description
-      this.successMessage = this.$t('trainingForm.messages.aiDone')
-    },
-
-    // AI teenuse teadaolevad vead kuvatakse vormis — admini sisestatud tekst jääb alles
-    handleGetAiTranslationError(error) {
-      const statusCode = error.response?.status
-      this.errorResponse = error.response?.data ?? { message: '', errorCode: '' }
-
-      if (
-        (statusCode === 503 && this.errorResponse.errorCode === 'AI_SERVICE_UNAVAILABLE') ||
-        (statusCode === 403 && this.errorResponse.errorCode === 'MAIN_LANGUAGE_NOT_TRANSLATABLE') ||
-        (statusCode === 404 && this.errorResponse.errorCode === 'MAIN_TRANSLATION_NOT_FOUND')
-      ) {
-        this.errorMessage = this.errorResponse.message
+    handleAiPdfClicked() {
+      if (this.isAiActionDisabled || !this.showAiPdfButton) return
+      if (this.translationHasUnsavedChanges()) {
+        this.isAiPdfConfirmModalOpen = true
       } else {
-        NavigationService.navigateToErrorView()
+        this.fillTrainingContentFromPdf()
       }
+    },
+
+    fillTrainingContentFromPdf() {
+      this.isAiPdfConfirmModalOpen = false
+      if (this.isAiActionDisabled || !this.showAiPdfButton) return
+      this.resetMessages()
+      this.isAiPdfLoading = true
+      const aiRequestId = ++this.aiRequestId
+      const curriculumFile = this.newCurriculum?.file
+      const aiTrainingRequest = this.isUpdate
+        ? AiTrainingService.sendPostTranslationPdfRequest(
+            this.trainingTranslationId,
+            curriculumFile,
+          )
+        : AiTrainingService.sendPostPdfRequest(curriculumFile)
+      return this.handleAiTrainingRequest(aiTrainingRequest, aiRequestId, 'aiPdfDone')
+    },
+
+    handleAiTrainingRequest(aiTrainingRequest, aiRequestId, messageKey) {
+      return aiTrainingRequest
+        .then((response) => {
+          if (aiRequestId === this.aiRequestId) {
+            this.handleAiTrainingContentResponse(response.data, messageKey)
+          }
+        })
+        .catch((error) => {
+          if (aiRequestId === this.aiRequestId) this.handleAiTrainingError(error)
+        })
+        .finally(() => {
+          if (aiRequestId === this.aiRequestId) {
+            this.isAiLoading = false
+            this.isAiPdfLoading = false
+          }
+        })
+    },
+
+    // AI tulemus kuvatakse ainult vormis; salvestamata muutuste võrdlusalus jääb alles.
+    handleAiTrainingContentResponse(aiTrainingContent, messageKey) {
+      const textFields = ['title', 'shortDescription', 'description']
+      if (!textFields.every((field) => typeof aiTrainingContent?.[field] === 'string')) {
+        throw new Error('AI vastuses puuduvad koolituse tekstiväljad')
+      }
+      this.translation.title = aiTrainingContent.title
+      this.translation.shortDescription = aiTrainingContent.shortDescription
+      this.translation.description = aiTrainingContent.description
+      this.successMessage = this.$t(`trainingForm.messages.${messageKey}`)
+    },
+
+    handleAiTrainingError(error) {
+      this.errorResponse = error.response?.data ?? { message: '', errorCode: '' }
+      this.errorMessage =
+        this.errorResponse.message ||
+        this.errorResponse.detail ||
+        this.$t('trainingForm.messages.aiFailed')
     },
 
     translationHasUnsavedChanges() {
@@ -653,6 +729,9 @@ export default {
       this.errorMessage = ''
     },
   },
+  beforeUnmount() {
+    this.aiRequestId++
+  },
   beforeMount() {
     if (SessionStorageService.userIsAdmin()) {
       this.loadView()
@@ -716,6 +795,11 @@ export default {
           :new-curriculum="newCurriculum"
           :is-curriculum-removed="isCurriculumRemoved"
           :is-saving="isSaving"
+          :is-disabled="isAiActionDisabled"
+          :show-ai-pdf-button="showAiPdfButton"
+          :is-ai-pdf-loading="isAiPdfLoading"
+          :ai-pdf-tooltip="aiPdfTooltip"
+          @event-ai-pdf-clicked="handleAiPdfClicked"
           @event-curriculum-selected="handleCurriculumSelected"
           @event-curriculum-removed="handleCurriculumRemoved"
           @event-curriculum-loading="isCurriculumLoading = $event"
@@ -732,7 +816,7 @@ export default {
         <div class="d-flex flex-wrap align-items-center gap-3 mb-5">
           <button
             v-if="isNewTraining"
-            :disabled="isSaving || isCurriculumLoading"
+            :disabled="isAiActionDisabled"
             @click="addTraining"
             class="btn btn-success"
             type="button"
@@ -741,7 +825,7 @@ export default {
           </button>
           <button
             v-if="isUpdate"
-            :disabled="isSaving || isCurriculumLoading"
+            :disabled="isAiActionDisabled"
             @click="updateTraining"
             class="btn btn-success"
             type="button"
@@ -750,7 +834,7 @@ export default {
           </button>
           <button
             v-if="isNewTranslation"
-            :disabled="isSaving || isCurriculumLoading"
+            :disabled="isAiActionDisabled"
             @click="addTrainingTranslation"
             class="btn btn-success"
             type="button"
@@ -797,6 +881,14 @@ export default {
       </div>
     </div>
 
+    <ConfirmModal
+      :is-open="isAiPdfConfirmModalOpen"
+      :title="$t('trainingForm.aiPdfModal.title')"
+      :message="$t('trainingForm.aiPdfModal.message')"
+      :confirm-label="$t('trainingForm.aiModal.confirm')"
+      @event-confirmed="fillTrainingContentFromPdf"
+      @event-modal-closed="isAiPdfConfirmModalOpen = false"
+    />
     <ConfirmModal
       :is-open="isAiConfirmModalOpen"
       :title="$t('trainingForm.aiModal.title')"

@@ -46,7 +46,7 @@ Eeskuju: `TrainingsView.vue` (`docs/tasks/frontend/trainings-view.md`) — sama 
   - Kustutatud koolitus kaob vaikimisi vaatest (filter "Aktiivsed"). Kui kustutamise järel jääb leht tühjaks, liigutakse eelmisele lehele.
   - Tulevikus võiks backend keelduda (`403`) koolituse kustutamisest, millel on tulevasi toimumiskordi (`course`). **Praegu seda kontrolli ei tehta.**
 - **Kustutatud koolitus on teistele teenustele nagu olematu** → `404 PRIMARY_KEY_NOT_FOUND` (sama message nagu olematu ID korral). Muudatus olemasolevatele teenustele:
-  - `GET /api/training/{trainingId}`, `GET /api/training/{trainingId}/training-translations`, `GET /api/training-translation/{trainingTranslationId}` (tõlke koolitus kustutatud), `PUT /api/training/{trainingId}`, `POST /api/training/{trainingId}/training-translation`, `GET /api/training/{trainingId}/ai-translation`.
+  - `GET /api/training/{trainingId}`, `GET /api/training/{trainingId}/training-translations`, `GET /api/training-translation/{trainingTranslationId}` (tõlke koolitus kustutatud), `PUT /api/training/{trainingId}`, `POST /api/training/{trainingId}/training-translation`, `POST /api/ai-training/translation/{trainingId}`.
   - Nii annavad `/training` ja `/training-form` kustutatud koolituse korral 404 ja frontend suunab üldisele veavaatele (nagu olematu ID korral).
   - Erandid, mis leiavad ka kustutatud koolituse: `publish` / `unpublish` (→ `403 TRAINING_DELETED`), `restore` (taastab) ja `DELETE` (kustutatud koolituse korral midagi ei muutu).
   - Backendis: `TrainingService`-isse lisaks olemasolevale `getValidTrainingBy` meetod, mis leiab ainult aktiivse koolituse (`status <> 'D'`), ja seda kasutavad ülal loetletud teenused.

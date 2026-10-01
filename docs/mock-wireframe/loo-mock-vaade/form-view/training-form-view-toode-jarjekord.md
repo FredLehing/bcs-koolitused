@@ -64,7 +64,7 @@ Järjekord tuleb sõltuvustest: kõigepealt lugemine (vaade avaneb olekus `updat
 | 3.5 | `PUT /api/training/{trainingId}/publish` | `PUT-api-training-trainingId-publish.md` | update, new-translation | lihtne | tegevusteenus, body puudub |
 | 3.6 | `PUT /api/training/{trainingId}/unpublish` | `PUT-api-training-trainingId-unpublish.md` | update, new-translation | lihtne | sama mis 3.5, teine staatus — sobib teha koos |
 | 3.7 | `POST /api/training/{trainingId}/training-translation` | `POST-api-training-trainingId-training-translation.md` | new-translation | keskmine | → pärast seda töötab olek `new-translation` (v.a AI) |
-| 3.8 | `GET /api/training/{trainingId}/ai-translation?languageId=` | `GET-api-training-trainingId-ai-translation.md` | update, new-translation | keerukas | väline AI teenus, uued veakoodid (403/404/503), 503 käsitlus `RestExceptionHandler`-isse; `Cache-Control: no-store` |
+| 3.8 | `POST /api/ai-training/translation/{trainingId}?languageId=` | `POST-api-ai-training-translation-trainingId.md` | update, new-translation | keerukas | väline AI teenus, uued veakoodid (403/404/503), 503 käsitlus `RestExceptionHandler`-isse; `Cache-Control: no-store` |
 
 **Etapi tulemus:** kõik kolm olekut töötavad päris backendiga.
 
@@ -74,3 +74,17 @@ Järjekord tuleb sõltuvustest: kõigepealt lugemine (vaade avaneb olekus `updat
 
 - Taskide loomise skillid (`skill-loo-backend-task`, `skill-loo-frontend-task`) eeldavad mockupi PDF-i lehekülge. TrainingFormView lehed tulevad Balsamiqi hiljem — kuni selleni saab taskid koostada märkmete failide põhjal.
 - "Ettepanek" märgisega DTO-d ja veakoodid (vt märkmed) tuleb enne vastava taski loomist kinnitada.
+
+
+## PDF + AI placeholder-etapp (2026-10-01)
+
+Üks ühine haru: `RAIN-ai-training`, lähteharu `master`. Harusse koondatakse eelnev mock-vaate ja controlleri placeholder töö ning käesoleva etapi taskid, märkmed ja frontendi ühendus.
+
+| Järjekord | Task | Seis |
+|---|---|---|
+| 1 | `POST-api-ai-training-pdf.md` | Task koostatud; controlleri placeholder ja HTTP-leping kontrollitud |
+| 2 | `POST-api-ai-training-pdf-trainingTranslationId.md` | Task koostatud; valikuline asendusfail ja failita päring kontrollitud |
+| 3 | `POST-api-ai-training-translation-trainingId.md` | Placeholder-etapp tehtud; tegelik Gemini tõlge jääb WIP |
+| 4 | `training-form-view.md`, jaotis „PDF + AI ja ühise AI-controlleri ühendamine“ | Kolm olekut, nupud, modalid ja päris POST-kutsed rakendatud |
+
+Kõigi kolme oleku vaate/API märkmed ja läbimäng kasutavad ühiseid `/api/ai-training` radu. Kontrollid: backendi testid, muudetud frontendifailide ESLint, Vite build ajutises Linuxi koopias ning faili/oleku/vea voo kontroll. Gemini päringut ja DB lugemist AI-controllerisse selles etapis ei lisatud.

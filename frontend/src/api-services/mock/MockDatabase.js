@@ -242,7 +242,7 @@ export default {
     return { trainingTranslationId: trainingTranslationId }
   },
 
-  // GET /api/training/{trainingId}/ai-translation?languageId= → AiTranslationDto
+  // POST /api/ai-training/translation/{trainingId}?languageId= → AiTrainingContentDto
   // Päris teenus tõlgib AI abil; mock lisab põhikeele pealkirjale ja lühikirjeldusele keele eesliite.
   // description tagastatakse muutmata — HTML-i ette lisatud tekst jääks väljapoole <p>-d.
   getAiTranslation(trainingId, languageId) {

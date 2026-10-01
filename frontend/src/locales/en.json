@@ -171,7 +171,12 @@
       "curriculumPending": "will be saved with the form",
       "curriculumRemoving": "will be removed on save",
       "curriculumInvalid": "Only a PDF file up to 10 MB is allowed",
-      "curriculumReadError": "Could not read the file. Please select it again."
+      "curriculumReadError": "Could not read the file. Please select it again.",
+      "aiPdfButton": "Fill form with PDF + AI",
+      "aiPdfLoading": "Analysing PDF…",
+      "aiPdfTooltipNewTraining": "The selected unsaved PDF is sent to the backend and then to Gemini AI. The response fills the form fields; nothing is saved until you click “Add”.",
+      "aiPdfTooltipNewTranslation": "The selected unsaved PDF is sent to the backend and then to Gemini AI. The response fills the new translation fields; nothing is saved until you click “Add translation”.",
+      "aiPdfTooltipUpdate": "The newly selected PDF is sent to the backend; otherwise the saved curriculum is read from the database. The Gemini AI response fills the form fields; nothing is saved until you click “Save”."
     },
     "buttons": {
       "add": "Add",
@@ -205,7 +210,13 @@
       "translationAdded": "Translation ({language}) has been added",
       "published": "The training has been published",
       "unpublished": "The training has been moved to draft",
-      "aiDone": "The AI translation is in the form — check the text and save"
+      "aiDone": "The AI translation is in the form — check the text and save",
+      "aiPdfDone": "The PDF + AI result is in the form — review the text and save",
+      "aiFailed": "The AI request failed. Please try again."
+    },
+    "aiPdfModal": {
+      "title": "Replace the form text with content generated from the PDF?",
+      "message": "The form has unsaved changes. The PDF + AI result will overwrite the title, short description and description."
     }
   },
   "richTextEditor": {
