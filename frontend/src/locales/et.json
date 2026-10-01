@@ -59,7 +59,10 @@
     "noSearchResultsHint": "Proovi vähem või teisi sõnu. Sõnade käändeid ei arvestata, seega kasuta sõna algust (nt „kursus“, mitte „kursusele“).",
     "showAllTrainings": "Näita kõiki koolitusi",
     "noResults": "Valitud filtritele vastavaid koolitusi ei leitud.",
-    "searchHelp": "Otsitakse sõnade esinemist koolituse pealkirjast ja lühikirjeldusest. Parima tulemuse saad, kui sisestad mõned sõnad. Sõnade käändeid ei arvestata."
+    "searchHelp": "Otsitakse sõnade esinemist koolituse pealkirjast ja lühikirjeldusest. Parima tulemuse saad, kui sisestad mõned sõnad. Sõnade käändeid ei arvestata.",
+    "showAllLanguages": "Kuva kõik keeled",
+    "showAllCategories": "Näita kõiki kategooriaid",
+    "showAllFundingTypes": "Näita kõiki rahastustüüpe"
   },
   "trainingCard": {
     "language": "Koolituse keel",

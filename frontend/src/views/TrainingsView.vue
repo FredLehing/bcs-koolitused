@@ -11,10 +11,20 @@ import LanguageService from '@/api-services/LanguageService.js'
 import CategoryService from '@/api-services/CategoryService.js'
 import FundingTypeService from '@/api-services/FundingTypeService.js'
 import LanguagesDropdown from '@/components/forms/LanguagesDropdown.vue'
+import CategoriesDropdown from '@/components/forms/CategoriesDropdown.vue'
+import FundingTypesRadio from '@/components/forms/FundingTypesRadio.vue'
 
 export default {
   name: 'TrainingsView',
-  components: { TrainingCard, PaginationNav, PhQuestion, PhX, LanguagesDropdown },
+  components: {
+    FundingTypesRadio,
+    TrainingCard,
+    PaginationNav,
+    PhQuestion,
+    PhX,
+    LanguagesDropdown,
+    CategoriesDropdown,
+  },
   data() {
     return {
       categoryId: 0,
@@ -137,6 +147,22 @@ export default {
         .then((response) => (this.fundingTypes = response.data))
         .catch(() => NavigationService.navigateToErrorView())
     },
+    handleNewLanguageSelected(newLanguageId) {
+      this.trainingLanguageId = newLanguageId
+      this.page = 0
+      this.getTrainings()
+    },
+    handleNewCategorySelected(newCategoryId) {
+      this.categoryId = newCategoryId
+      this.page = 0
+      this.getTrainings()
+    },
+
+    handleNewFundingTypeSelected(newFundingTypeId) {
+      this.fundingTypeId = newFundingTypeId
+      this.page = 0
+      this.getTrainings()
+    },
   },
   beforeMount() {
     const appliedSearchText = this.$route.query.searchText ?? ''
@@ -159,7 +185,26 @@ export default {
 <template>
   <div class="container d-flex flex-grow-1 flex-column">
     <div class="row flex-grow-1">
-      <div class="col-2"><LanguagesDropdown :languages="languages" :languageId="trainingLanguageId" /></div>
+      <div class="col-2 d-flex flex-column gap-3">
+        <LanguagesDropdown
+          :languages="languages"
+          :languageId="trainingLanguageId"
+          @event-new-language-selected="handleNewLanguageSelected"
+          :firstOptionLabel="$t('trainings.showAllLanguages')"
+        />
+        <CategoriesDropdown
+          :categories="categories"
+          :categoryId="categoryId"
+          @event-new-category-selected="handleNewCategorySelected"
+          :firstOptionLabel="$t('trainings.showAllCategories')"
+        />
+        <FundingTypesRadio
+          :fundingTypes="fundingTypes"
+          :fundingTypeId="fundingTypeId"
+          @event-new-fundingtype-selected="handleNewFundingTypeSelected"
+          :firstOptionLabel="$t('trainings.showAllFundingTypes')"
+        />
+      </div>
       <div class="col-10 d-flex flex-column">
         <div class="d-flex align-items-center gap-2 mb-3">
           <div class="input-group">
