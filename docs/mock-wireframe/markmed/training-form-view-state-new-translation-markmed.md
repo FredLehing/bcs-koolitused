@@ -14,6 +14,7 @@ state: "new-translation" — URL-is trainingId ja languageId (keel, mille tõlge
 Tõlke väljad eeltäidetakse salvestatud põhikeele (et) tõlkega, mida admin tõlgib. "Tee AI tõlge" tõlgib salvestatud põhikeele teksti ja täidab ainult vormi; salvestamata muudatuste korral küsitakse enne kinnitust.
 "Lisa tõlge" → POST /api/training/{trainingId}/training-translation. Vastuse trainingTranslationId järgi tehakse router.replace → state "update".
 Staatuse nupp ("Publitseeri" / "Liiguta mustandisse") nagu state "update" puhul.
+Õppekava (PDF): väli on tühi — põhikeele faili ei kopeerita ja AI tõlge faili ei puuduta. Valitud fail salvestub koos "Lisa tõlge" nupuga (curriculumLabel tõlke keeles, nt "Curriculum").
 ```
 
 ## API märkmed — GET /api/languages
@@ -139,11 +140,13 @@ TrainingTranslationDto.java
   "languageCode": "et",
   "title": "Java algkursus",
   "shortDescription": "Java programmeerimise alused algajatele.",
-  "description": "Kursusel õpitakse Java süntaksit, objektorienteeritud programmeerimist ja põhilisi andmestruktuure."
+  "description": "Kursusel õpitakse Java süntaksit, objektorienteeritud programmeerimist ja põhilisi andmestruktuure.",
+  "curriculumFileName": "java-algkursus-oppekava.pdf",
+  "curriculumFileSize": 846213
 }
 
 API teenuse lisainfo:
-Laadib koolituse salvestatud põhikeele tõlke (training-translations vastusest isMainLanguage = true), millega eeltäidetakse uue tõlke väljad. Vastuse languageCode on põhikeel (et). Kui tõlke koolitus on kustutatud (status "D"), on tõlge nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.
+Laadib koolituse salvestatud põhikeele tõlke (training-translations vastusest isMainLanguage = true), millega eeltäidetakse uue tõlke väljad. Vastuse languageCode on põhikeel (et). Kui tõlke koolitus on kustutatud (status "D"), on tõlge nagu olematu: 404 PRIMARY_KEY_NOT_FOUND. curriculumFileName = õppekava failinimi (nt java-algkursus-oppekava.pdf), curriculumFileSize = suurus baitides; mõlemad null, kui õppekava pole. Faili ennast ei tagastata (GET /api/training-translation/{trainingTranslationId}/curriculum).
 
 Veateated:
 HTTP: 404
@@ -251,7 +254,9 @@ TrainingTranslationCreateRequestDto.java
   "languageId": 2,
   "title": "Power BI for Advanced Users",
   "shortDescription": "Data models, DAX and interactive reports.",
-  "description": "The course builds a data model in Power BI, writes DAX formulas and creates interactive reports."
+  "description": "The course builds a data model in Power BI, writes DAX formulas and creates interactive reports.",
+  "curriculum": "JVBERi0xLjcKJeLjz9MK...",
+  "curriculumLabel": "Curriculum"
 }
 
 Response (200):
@@ -261,7 +266,7 @@ TrainingTranslationCreateResponseDto.java
 }
 
 API teenuse lisainfo:
-Lisab koolitusele uue keele tõlke. Ühes keeles saab koolitusel olla ainult üks tõlge (training_translation_uq). Kustutatud koolitus (status "D") on nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.
+Lisab koolitusele uue keele tõlke. Ühes keeles saab koolitusel olla ainult üks tõlge (training_translation_uq). Kustutatud koolitus (status "D") on nagu olematu: 404 PRIMARY_KEY_NOT_FOUND. Õppekava: curriculum = PDF Base64 (valikuline, null = õppekava pole), curriculumLabel = sõna "Õppekava" tõlke keeles (kohustuslik). Backend kontrollib faili (algus %PDF-, kuni 10 MB) ja lisab training_translation_curriculum rea; failinimi = puhastatud pealkiri + "-" + puhastatud curriculumLabel + ".pdf" (nt power-bi-for-advanced-users-curriculum.pdf). Vigane Base64 või puuduv curriculumLabel → 400 INCORRECT_INPUT.
 
 Veateated:
 HTTP: 404
@@ -275,6 +280,14 @@ message: "Ei leidnud primary keyd 'languageId' väärtusega: 123"
 HTTP: 403
 errorCode: TRANSLATION_EXISTS
 message: "Selles keeles tõlge on juba olemas"
+
+HTTP: 403
+errorCode: CURRICULUM_TYPE_NOT_ALLOWED
+message: "Lubatud on ainult PDF-fail"
+
+HTTP: 403
+errorCode: CURRICULUM_TOO_LARGE
+message: "Õppekava on liiga suur, lubatud kuni 10 MB"
 ```
 
 ## API märkmed — PUT /api/training/{trainingId}/publish

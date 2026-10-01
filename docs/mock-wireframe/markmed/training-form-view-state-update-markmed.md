@@ -14,6 +14,7 @@ state: "update" — URL-is trainingId ja trainingTranslationId. Pealkiri "Muuda 
 Lipukesed: tõlge olemas → värviline lipp (klikk avab selle tõlke), tõlge puudub → hall lipp (klikk → state "new-translation").
 "Salvesta" → PUT /api/training/{trainingId} (koolituse väljad + avatud tõlge ühes transaktsioonis). "Tee AI tõlge" on ainult mitte-põhikeele tõlkel: täidab vaid vormi, ei salvesta.
 status "U" → nupp "Publitseeri", status "P" → nupp "Liiguta mustandisse"; mõlemal kinnituse modal (PUT /api/training/{trainingId}/publish või /unpublish).
+Õppekava (PDF): olemas → failinimi lingina (klikk = allalaadimine) + suurus, nupud "Vaheta" ja "Eemalda" (kinnitust ei küsi — jõustub salvestamisel, "Tühista" võtab tagasi); puudub → "Vali fail…" (PDF, kuni 10 MB). "Salvesta" saadab curriculum / isCurriculumRemoved / curriculumLabel (sõna "Õppekava" avatud tõlke keeles, mitte kasutajaliidese keeles); backend arvutab failinime uuesti ka siis, kui muutus ainult pealkiri. Pärast salvestamist laaditakse tõlge uuesti (curriculumFileName).
 ```
 
 ## API märkmed — GET /api/languages
@@ -113,11 +114,13 @@ TrainingTranslationDto.java
   "languageCode": "et",
   "title": "Java algkursus",
   "shortDescription": "Java programmeerimise alused algajatele.",
-  "description": "Kursusel õpitakse Java süntaksit, objektorienteeritud programmeerimist ja põhilisi andmestruktuure."
+  "description": "Kursusel õpitakse Java süntaksit, objektorienteeritud programmeerimist ja põhilisi andmestruktuure.",
+  "curriculumFileName": "java-algkursus-oppekava.pdf",
+  "curriculumFileSize": 846213
 }
 
 API teenuse lisainfo:
-Laadib avatud tõlke (URL-i trainingTranslationId). languageCode näitab, mis keeles avatud tõlge on (tõlke vormi pealkiri, AI nupu nähtavus). Kui tõlke koolitus on kustutatud (status "D"), on tõlge nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.
+Laadib avatud tõlke (URL-i trainingTranslationId). languageCode näitab, mis keeles avatud tõlge on (tõlke vormi pealkiri, AI nupu nähtavus). Kui tõlke koolitus on kustutatud (status "D"), on tõlge nagu olematu: 404 PRIMARY_KEY_NOT_FOUND. curriculumFileName = õppekava failinimi (nt java-algkursus-oppekava.pdf), curriculumFileSize = suurus baitides; mõlemad null, kui õppekava pole. Faili ennast ei tagastata (GET /api/training-translation/{trainingTranslationId}/curriculum).
 
 Veateated:
 HTTP: 404
@@ -247,19 +250,49 @@ TrainingUpdateRequestDto.java
   "trainingTranslationId": 1,
   "title": "Java algkursus",
   "shortDescription": "Java programmeerimise alused algajatele.",
-  "description": "Kursusel õpitakse Java süntaksit, objektorienteeritud programmeerimist ja põhilisi andmestruktuure."
+  "description": "Kursusel õpitakse Java süntaksit, objektorienteeritud programmeerimist ja põhilisi andmestruktuure.",
+  "curriculum": null,
+  "isCurriculumRemoved": false,
+  "curriculumLabel": "Õppekava"
 }
 
 Response (200): NONE
 
 API teenuse lisainfo:
-Salvestab koolituse väljad ja trainingTranslationId tõlke ühes transaktsioonis. training_funding_type read kirjutatakse fundingTypeIds järgi üle, training_lecturer read lecturerIds järgi (lecturerIds = koolitajate ID-d kuvamise järjekorras (sort_order = positsioon 1, 2, …), võib olla tühi list; backend kirjutab training_lecturer read üle. Uus ID peab olema aktiivne koolitaja; juba seotud kustutatud koolitaja võib jääda.) Kustutatud koolitus (status "D") on nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.
+Salvestab koolituse väljad ja trainingTranslationId tõlke ühes transaktsioonis. training_funding_type read kirjutatakse fundingTypeIds järgi üle, training_lecturer read lecturerIds järgi (lecturerIds = koolitajate ID-d kuvamise järjekorras (sort_order = positsioon 1, 2, …), võib olla tühi list; backend kirjutab training_lecturer read üle. Uus ID peab olema aktiivne koolitaja; juba seotud kustutatud koolitaja võib jääda.) Kustutatud koolitus (status "D") on nagu olematu: 404 PRIMARY_KEY_NOT_FOUND. Õppekava: curriculum ≠ null → uus fail (kontroll nagu POST puhul), training_translation_curriculum rida lisatakse või asendatakse; isCurriculumRemoved = true → rida kustutatakse (curriculum peab siis olema null); muidu, kui õppekava on olemas, arvutatakse ainult failinimi uuesti (pealkiri võis muutuda). curriculumLabel = sõna "Õppekava" avatud tõlke keeles (kohustuslik). Vigane Base64, puuduv curriculumLabel või isCurriculumRemoved koos curriculum'iga → 400 INCORRECT_INPUT.
 
 Veateated:
 HTTP: 404
 errorCode: PRIMARY_KEY_NOT_FOUND
 message: "Ei leidnud primary keyd 'trainingId' väärtusega: 123"
 
+HTTP: 404
+errorCode: PRIMARY_KEY_NOT_FOUND
+message: "Ei leidnud primary keyd 'trainingTranslationId' väärtusega: 123"
+
+HTTP: 403
+errorCode: CURRICULUM_TYPE_NOT_ALLOWED
+message: "Lubatud on ainult PDF-fail"
+
+HTTP: 403
+errorCode: CURRICULUM_TOO_LARGE
+message: "Õppekava on liiga suur, lubatud kuni 10 MB"
+```
+
+## API märkmed — GET /api/training-translation/{trainingTranslationId}/curriculum
+
+```text
+API: GET /api/training-translation/{trainingTranslationId}/curriculum
+
+Response (200): PDF-fail
+Content-Type: application/pdf
+Content-Disposition: attachment; filename="java-algkursus-oppekava.pdf"
+Cache-Control: no-cache
+
+API teenuse lisainfo:
+Tagastab tõlke õppekava faili (training_translation_curriculum.file), failinimi = file_name. Vormis klikk õppekava failinimel; hiljem ka avalikus vaates /training. Backendis autentimist pole, seega on fail kättesaadav nii mustandi kui publitseeritud koolitusel. Kui õppekava pole või tõlke koolitus on kustutatud (status "D") → 404 PRIMARY_KEY_NOT_FOUND. no-cache, sest fail võib sama URL-i all vahetuda.
+
+Veateated:
 HTTP: 404
 errorCode: PRIMARY_KEY_NOT_FOUND
 message: "Ei leidnud primary keyd 'trainingTranslationId' väärtusega: 123"

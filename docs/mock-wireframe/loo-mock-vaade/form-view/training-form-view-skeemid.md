@@ -19,6 +19,7 @@ Selles failis on `TrainingFormView.vue` olekud ja andmevood skeemidena (Mermaid)
 - **Uuendus (2026-09-30): koolitusel võib olla mitu koolitajat** (tabel `training_lecturer`, veerg `sort_order`; `training.default_lecturer_id` eemaldatakse). Vormis on väli "Koolitajad": valitud koolitajate nimekiri (× eemaldab, ↑ ↓ muudab järjekorda), "+ Lisa koolitaja" avab "Vali koolitaja" modali (juba valitud koolitajaid ei pakuta). `TrainingDto.lecturers: [{ lecturerId, lecturerName }]`, request DTO-des `lecturerIds: [..]` (järjekord = `sort_order`). Vt `docs/mock-wireframe/loo-mock-vaade/admin-lecturers-view/admin-lecturers-view-skeemid.md`, "Mitu koolitajat".
 - Põhikeel on määratud andmebaasis (`language.is_main_language`, praegu `et`) ja frontendi store'is (`supportedLanguages[].isMainLanguage`). Uus koolitus luuakse põhikeele tõlkega ja uue tõlke vorm eeltäidetakse põhikeele tekstiga.
 - "Tee AI tõlge" nupp on olekus C ja olekus B, kui avatud tõlge pole põhikeeles. Nupp kutsub `GET /api/training/{trainingId}/ai-translation?languageId={id}`, mis tõlgib alati **salvestatud põhikeele tõlke** (mitte vormi sisu) ja tagastab `AiTranslationDto` (`title`, `shortDescription`, `description`). Tulemus kuvatakse ainult vormis — andmebaasi läheb see alles "Lisa tõlge" / "Salvesta" nupuga. Kui vormis on salvestamata muudatusi, küsitakse enne üle kirjutamist kinnitust. Nupu tooltip selgitab seda kasutajale.
+- **Uuendus (2026-10-01): õppekava (PDF) tõlke juures.** Igal tõlkel võib olla üks PDF-fail "Õppekava" (tabel `training_translation_curriculum`, 1:1 `training_translation`-iga). Fail saadetakse Base64-na samas päringus mis tõlge (`curriculum`, `isCurriculumRemoved`, `curriculumLabel`); failinime teeb backend: `<pealkiri>-<curriculumLabel>.pdf` puhastatuna (nt `tehisaru-toovahendid-arendajale-oppekava.pdf`). `curriculumLabel` = i18n sõna "Õppekava" **tõlke keeles** (mitte kasutajaliidese keeles); see saadetakse igal salvestamisel, et failinimi järgiks pealkirja. "Eemalda" kinnitust ei küsi (jõustub salvestamisel, "Tühista" võtab tagasi). Olekus C on väli tühi — põhikeele faili ei kopeerita, AI tõlge faili ei puuduta. Allalaadimine: `GET /api/training-translation/{trainingTranslationId}/curriculum`. Üksikasjad: `training-curriculum-plaan.md`, skeem 10.
 - Olemasolevad tõlked kuvatakse lipukestena: frontendi store'i `supportedLanguages` (`et`, `en`, `ru`) võrreldakse `GET /api/training/{trainingId}/training-translations` vastusega — tõlge olemas → värviline lipp, puudub → hall lipp.
 
 ---
@@ -100,7 +101,7 @@ Iga oleku kõik võimalikud päringud. **Laadimine** käivitub vaate avamisel ja
 | Laadimine | `GET /api/categories?contentLang={UI keel}` | kategooriad kasutajaliidese keeles (ka keele vahetusel) |
 | Laadimine | `GET /api/funding-types?contentLang={UI keel}` | rahastustüübid kasutajaliidese keeles (ka keele vahetusel) |
 | Tegevus | `GET /api/lecturers?search={otsingusõna}` | "Vali koolitaja" modalis otsides |
-| Tegevus | `POST /api/training` | "Lisa" → `router.replace` olekusse `update` |
+| Tegevus | `POST /api/training` | "Lisa" (koos valitud õppekavaga) → `router.replace` olekusse `update` |
 
 ### `state: "update"` (B. Muutmine)
 
@@ -114,7 +115,8 @@ Iga oleku kõik võimalikud päringud. **Laadimine** käivitub vaate avamisel ja
 | Laadimine | `GET /api/categories?contentLang={UI keel}` | kategooriad kasutajaliidese keeles (ka keele vahetusel) |
 | Laadimine | `GET /api/funding-types?contentLang={UI keel}` | rahastustüübid kasutajaliidese keeles (ka keele vahetusel) |
 | Tegevus | `GET /api/lecturers?search={otsingusõna}` | "Vali koolitaja" modalis otsides |
-| Tegevus | `PUT /api/training/{trainingId}` | "Salvesta" |
+| Tegevus | `PUT /api/training/{trainingId}` | "Salvesta" (sh õppekava: uus fail / eemaldus / failinime uuendus) |
+| Tegevus | `GET /api/training-translation/{trainingTranslationId}/curriculum` | klikk õppekava failinimel → allalaadimine |
 | Tegevus | `GET /api/training/{trainingId}/ai-translation?languageId={id}` | "Tee AI tõlge" (ainult mitte-põhikeele tõlkel) |
 | Tegevus | `PUT /api/training/{trainingId}/publish` | "Publitseeri" (status `U`) → kinnitus |
 | Tegevus | `PUT /api/training/{trainingId}/unpublish` | "Liiguta mustandisse" (status `P`) → kinnitus |
@@ -133,7 +135,7 @@ Lipule klikkimine päringut ei tee — see teeb `router.replace`-i ja käivitab 
 | Laadimine | `GET /api/categories?contentLang={UI keel}` | kategooriad kasutajaliidese keeles (ka keele vahetusel) |
 | Laadimine | `GET /api/funding-types?contentLang={UI keel}` | rahastustüübid kasutajaliidese keeles (ka keele vahetusel) |
 | Tegevus | `GET /api/training/{trainingId}/ai-translation?languageId={id}` | "Tee AI tõlge" |
-| Tegevus | `POST /api/training/{trainingId}/training-translation` | "Lisa tõlge" → `router.replace` olekusse `update` |
+| Tegevus | `POST /api/training/{trainingId}/training-translation` | "Lisa tõlge" (koos valitud õppekavaga) → `router.replace` olekusse `update` |
 | Tegevus | `PUT /api/training/{trainingId}/publish` | "Publitseeri" (status `U`) → kinnitus |
 | Tegevus | `PUT /api/training/{trainingId}/unpublish` | "Liiguta mustandisse" (status `P`) → kinnitus |
 
@@ -281,6 +283,9 @@ sequenceDiagram
 | `PUT /api/training/{trainingId}` | "Salvesta" (olek B) | täpsustamisel | NONE |
 | `PUT /api/training/{trainingId}/publish` | "Publitseeri" | — | NONE |
 | `PUT /api/training/{trainingId}/unpublish` | "Liiguta mustandisse" | — | NONE |
+| `GET /api/training-translation/{trainingTranslationId}/curriculum` | õppekava allalaadimine (olek B; hiljem `/training`) | — | PDF (`Content-Disposition: attachment`) |
+
+Õppekava väljad: request DTO-des `curriculum` (Base64), `isCurriculumRemoved` (ainult PUT), `curriculumLabel`; `TrainingTranslationDto`-s `curriculumFileName`, `curriculumFileSize`.
 
 DTO-de väljad täpsustatakse plaanifailis.
 
@@ -299,6 +304,7 @@ erDiagram
     lecturer ||--o{ training_lecturer : ""
     language ||--o{ training : "training_language_id"
     language ||--o{ training_translation : "language_id"
+    training_translation ||--o| training_translation_curriculum : "õppekava (PDF)"
 
     training {
         int id PK
@@ -324,4 +330,68 @@ erDiagram
         varchar short_description
         text description
     }
+    training_translation_curriculum {
+        int id PK
+        int training_translation_id "UNIQUE"
+        bytea file
+        varchar file_name "nt tehisaru-toovahendid-arendajale-oppekava.pdf"
+        int file_size "baitides"
+    }
 ```
+
+---
+
+## 10. Õppekava (PDF) — valimine, salvestamine, allalaadimine
+
+Õppekava on avatud tõlke väli; see salvestub koos tõlkega ("Lisa", "Lisa tõlge", "Salvesta"). Vt `training-curriculum-plaan.md`.
+
+```mermaid
+stateDiagram-v2
+    [*] --> Puudub: curriculumFileName = null
+    [*] --> Olemas: curriculumFileName ≠ null
+
+    Puudub --> Valitud: vali PDF (≤ 10 MB)
+    Olemas --> Valitud: "Vaheta" → vali PDF
+    Olemas --> Eemaldatakse: "Eemalda" (kinnitust ei küsi)
+    Valitud --> Puudub: "Tühista" (faili polnud)
+    Valitud --> Olemas: "Tühista" (fail oli)
+    Eemaldatakse --> Olemas: "Tühista"
+
+    Valitud --> Olemas: salvestamine<br/>curriculum = Base64
+    Eemaldatakse --> Puudub: salvestamine<br/>isCurriculumRemoved = true
+
+    state "Puudub (failivalija)" as Puudub
+    state "Olemas (failinimi + Vaheta / Eemalda)" as Olemas
+    state "Valitud, salvestamata" as Valitud
+    state "Eemaldatakse salvestamisel" as Eemaldatakse
+```
+
+```mermaid
+sequenceDiagram
+    actor Admin
+    participant FE as TrainingFormView.vue
+    participant BE as Backend
+    participant DB as Andmebaas
+
+    Admin->>FE: valib faili Tehisaru töövahendid arendajale.pdf
+    FE->>FE: kontroll: PDF, ≤ 10 MB → FileReader → Base64
+    FE-->>Admin: "Tehisaru töövahendid arendajale.pdf (1,2 MB) — salvestatakse koos vormiga"
+
+    Admin->>FE: "Salvesta"
+    FE->>FE: curriculumLabel = $t('trainingForm.curriculum', {}, { locale: tõlke keel }) → "Õppekava"
+    FE->>BE: PUT /api/training/3<br/>{ …, trainingTranslationId: 4, title, …,<br/>curriculum: "JVBERi0x…", isCurriculumRemoved: false, curriculumLabel: "Õppekava" }
+    Note over BE,DB: üks transaktsioon
+    BE->>BE: kontroll: %PDF-, ≤ 10 MB<br/>failinimi = slug(title) + "-" + slug(curriculumLabel) + ".pdf"
+    BE->>DB: UPDATE training, training_translation …
+    BE->>DB: INSERT / UPDATE training_translation_curriculum<br/>(file, file_name, file_size)
+    BE-->>FE: 200 (NONE)
+    FE->>BE: GET /api/training-translation/4
+    BE-->>FE: { …, curriculumFileName: "tehisaru-toovahendid-arendajale-oppekava.pdf", curriculumFileSize: 1258291 }
+    FE-->>Admin: failinimi lingina + "Vaheta" / "Eemalda"
+
+    Admin->>FE: klikib failinimel
+    FE->>BE: GET /api/training-translation/4/curriculum
+    BE-->>FE: application/pdf, Content-Disposition: attachment;<br/>filename="tehisaru-toovahendid-arendajale-oppekava.pdf"
+```
+
+Kui pealkiri muutub ja faili ei vahetata, arvutab backend salvestamisel `file_name` uuesti (`curriculumLabel` tuleb igal salvestamisel kaasa).

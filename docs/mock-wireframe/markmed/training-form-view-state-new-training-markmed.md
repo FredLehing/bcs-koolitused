@@ -13,6 +13,7 @@ Vaatega seotud lisainfo:
 state: "new-training" — URL-is query parameetreid pole. Pealkiri "Lisa uus koolitus". Vorm on tühi; tõlke väljad (pealkiri, lühikirjeldus, kirjeldus) täidetakse põhikeeles (et); rippmenüüd (kategooriad, rahastustüübid) laaditakse kasutajaliidese keeles (store'i contentLang) ja laaditakse keele vahetamisel navbaris uuesti — vormi sisu jääb alles. Lipukesi ja staatuse nuppe pole.
 Koolitajad: valitud koolitajate nimekiri (× eemaldab, ↑ ↓ muudab järjekorda, esimene kuvatakse esimesena); "+ Lisa koolitaja" avab "Vali koolitaja" modali otsinguga (juba valitud koolitajaid ei pakuta). Võib jääda tühjaks. Rahastustüübid on checkboxid, "Tellitav" ja "Esile tõstetud" switchid.
 Nupp "Lisa" → POST /api/training (userId localStorage'ist). Backend loob koolituse staatusega "U" koos põhikeele tõlkega. Vastuse trainingId ja trainingTranslationId järgi tehakse router.replace → state "update".
+Õppekava (PDF): tõlke väljade all valikuline PDF-fail (kuni 10 MB) — "Vali fail…"; valitud fail salvestub koos "Lisa" nupuga (curriculum = Base64, curriculumLabel = sõna "Õppekava" tõlke keeles i18n-ist). Failinime teeb backend: puhastatud pealkiri + sõna, nt power-bi-edasijoudnutele-oppekava.pdf.
 ```
 
 ## API märkmed — GET /api/languages
@@ -157,7 +158,9 @@ TrainingCreateRequestDto.java
   ],
   "title": "Power BI edasijõudnutele",
   "shortDescription": "Andmemudelid, DAX ja interaktiivsed aruanded.",
-  "description": "Kursusel ehitatakse Power BI-s andmemudel, kirjutatakse DAX-valemeid ja luuakse interaktiivseid aruandeid."
+  "description": "Kursusel ehitatakse Power BI-s andmemudel, kirjutatakse DAX-valemeid ja luuakse interaktiivseid aruandeid.",
+  "curriculum": "JVBERi0xLjcKJeLjz9MK...",
+  "curriculumLabel": "Õppekava"
 }
 
 Response (200):
@@ -168,7 +171,7 @@ TrainingCreateResponseDto.java
 }
 
 API teenuse lisainfo:
-Loob training rea (status = "U", määrab backend), training_funding_type read ja et tõlke (language_id = 1) ühes transaktsioonis. lecturerIds = koolitajate ID-d kuvamise järjekorras (sort_order = positsioon 1, 2, …), võib olla tühi list; backend kirjutab training_lecturer read üle. Uus ID peab olema aktiivne koolitaja; juba seotud kustutatud koolitaja võib jääda. Sama PRIMARY_KEY_NOT_FOUND muster kehtib ka trainingLanguageId, lecturerIds (sõnumis 'lecturerId') ja fundingTypeIds väljadele.
+Loob training rea (status = "U", määrab backend), training_funding_type read ja et tõlke (language_id = 1) ühes transaktsioonis. lecturerIds = koolitajate ID-d kuvamise järjekorras (sort_order = positsioon 1, 2, …), võib olla tühi list; backend kirjutab training_lecturer read üle. Uus ID peab olema aktiivne koolitaja; juba seotud kustutatud koolitaja võib jääda. Sama PRIMARY_KEY_NOT_FOUND muster kehtib ka trainingLanguageId, lecturerIds (sõnumis 'lecturerId') ja fundingTypeIds väljadele. Õppekava: curriculum = PDF Base64 (valikuline, null = õppekava pole), curriculumLabel = sõna "Õppekava" tõlke keeles (kohustuslik). Backend kontrollib faili (algus %PDF-, kuni 10 MB) ja lisab training_translation_curriculum rea; failinimi = puhastatud pealkiri + "-" + puhastatud curriculumLabel + ".pdf" (nt power-bi-edasijoudnutele-oppekava.pdf). Vigane Base64 või puuduv curriculumLabel → 400 INCORRECT_INPUT.
 
 Veateated:
 HTTP: 404
@@ -178,4 +181,12 @@ message: "Ei leidnud primary keyd 'categoryId' väärtusega: 123"
 HTTP: 404
 errorCode: PRIMARY_KEY_NOT_FOUND
 message: "Ei leidnud primary keyd 'locationId' väärtusega: 123"
+
+HTTP: 403
+errorCode: CURRICULUM_TYPE_NOT_ALLOWED
+message: "Lubatud on ainult PDF-fail"
+
+HTTP: 403
+errorCode: CURRICULUM_TOO_LARGE
+message: "Õppekava on liiga suur, lubatud kuni 10 MB"
 ```
