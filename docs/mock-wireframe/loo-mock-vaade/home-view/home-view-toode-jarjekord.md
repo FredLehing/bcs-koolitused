@@ -12,3 +12,7 @@ Allikad: skeemid `home-view-skeemid.md`, märkmed `docs/mock-wireframe/markmed/h
 ## Hiljem
 
 - Mockupi pilt (Balsamiq käsk skeemide failis, jaotis 4).
+
+## Seis (2026-10-01)
+
+**Tehtud** (katusharus `feature/RAIN-home-view`, iga task oma harust `--no-ff`): 1.1, 2.1. Backendi testid läbivad (232), frontendi lint ja build läbivad. Andmebaasi muudatusi pole. Brauseris kontrollib kasutaja; seejärel katusharu `--no-ff` master'isse.
