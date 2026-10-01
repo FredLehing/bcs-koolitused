@@ -46,7 +46,8 @@
     },
     "nextCoursesTitle": "Our next 5 courses",
     "marketingText": "Find the training that suits you — new courses are added all the time.",
-    "allCoursesLink": "View all upcoming courses →"
+    "allCoursesLink": "View all upcoming courses →",
+    "eyebrow": "IT · design · management"
   },
   "navbar": {
     "trainings": "Trainings",
@@ -81,7 +82,8 @@
     "participantCertificates": "Certificates",
     "changePassword": "Password",
     "manageUsers": "Accounts",
-    "manageFeedbacks": "Feedback"
+    "manageFeedbacks": "Feedback",
+    "menu": "Menu"
   },
   "error": {
     "message": "Something went wrong, please try again later!",
@@ -786,6 +788,7 @@
     "promoted": "Highlighted",
     "editCourse": "Edit course",
     "filters": {
+      "title": "Filters",
       "startDateFrom": "From",
       "startDateTo": "Until",
       "attendance": "Attendance",

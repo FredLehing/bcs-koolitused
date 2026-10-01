@@ -1,6 +1,6 @@
 <script>
 import { mapState } from 'pinia'
-import { PhBooks, PhCalendarDots, PhX } from '@phosphor-icons/vue'
+import { PhArrowRight, PhBooks, PhCalendarDots, PhMagnifyingGlass, PhX } from '@phosphor-icons/vue'
 import { useLanguageStore } from '@/stores/languageStore.js'
 import CourseService from '@/api-services/CourseService.js'
 import NavigationService from '@/services/NavigationService.js'
@@ -13,7 +13,16 @@ const NEXT_COURSES_LIMIT = 5
 
 export default {
   name: 'HomeView',
-  components: { PhBooks, PhCalendarDots, PhX, CourseCard, HomeGallery, HomeTestimonials },
+  components: {
+    PhArrowRight,
+    PhBooks,
+    PhCalendarDots,
+    PhMagnifyingGlass,
+    PhX,
+    CourseCard,
+    HomeGallery,
+    HomeTestimonials,
+  },
 
   data() {
     return {
@@ -23,6 +32,13 @@ export default {
   },
   computed: {
     ...mapState(useLanguageStore, ['contentLang']),
+
+    navCards() {
+      return [
+        { key: 'trainingsCard', routeName: 'trainingsRoute', icon: 'PhBooks' },
+        { key: 'coursesCard', routeName: 'coursesRoute', icon: 'PhCalendarDots' },
+      ]
+    },
   },
   watch: {
     // Keele vahetus navbaris → toimumiskorrad uues keeles
@@ -58,110 +74,121 @@ export default {
 </script>
 
 <template>
-  <div class="container">
-    <section class="py-5 text-center">
-      <h1 class="display-5 fw-bold">{{ $t('homeView.title') }}</h1>
-      <p class="lead fw-normal text-body">{{ $t('homeView.subtitle') }}</p>
-      <div class="col-lg-8 mx-auto">
-        <div class="d-flex align-items-center gap-2 mb-3">
-          <div class="input-group input-group-lg">
-            <input
-              ref="searchInput"
-              v-model="searchText"
-              type="text"
-              class="form-control"
-              :placeholder="$t('trainings.searchPlaceholder')"
-              @keyup.enter="handleSearchClick"
-              @keyup.esc="handleClearSearch"
-            />
-            <button
-              v-if="searchText"
-              type="button"
-              class="btn btn-outline-secondary"
-              :title="$t('trainings.clearSearch')"
-              :aria-label="$t('trainings.clearSearch')"
-              @click="handleClearSearch"
+  <div>
+    <!-- Lehe päis: pealkiri, otsing ja logo triibud -->
+    <section class="overflow-hidden border-b border-brand-100 bg-brand-50">
+      <div
+        class="mx-auto flex w-full max-w-6xl items-center gap-12 px-4 py-14 sm:px-6 sm:py-20 lg:py-24"
+      >
+        <div class="flex flex-1 flex-col gap-5">
+          <span class="font-display text-xs font-bold tracking-[0.12em] text-brand-600 uppercase">
+            {{ $t('homeView.eyebrow') }}
+          </span>
+          <h1
+            class="text-4xl leading-[1.08] font-extrabold tracking-tight sm:text-5xl lg:text-[56px]"
+          >
+            {{ $t('homeView.title') }}
+          </h1>
+          <p class="max-w-xl text-lg text-muted sm:text-xl">{{ $t('homeView.subtitle') }}</p>
+          <form
+            class="mt-2 flex max-w-xl flex-col gap-2 sm:flex-row"
+            @submit.prevent="handleSearchClick"
+          >
+            <div
+              class="flex min-h-14 flex-1 items-center gap-2 rounded-xl border border-brand-200 bg-white px-4 shadow-sm focus-within:border-brand-600 focus-within:ring-3 focus-within:ring-brand-600/15"
             >
-              <PhX :size="16" />
-            </button>
-            <button type="button" class="btn btn-primary" @click="handleSearchClick">
+              <PhMagnifyingGlass :size="20" class="shrink-0 text-muted" />
+              <input
+                ref="searchInput"
+                v-model="searchText"
+                type="text"
+                class="min-w-0 flex-1 bg-transparent text-lg outline-none"
+                :placeholder="$t('trainings.searchPlaceholder')"
+                :aria-label="$t('trainings.searchPlaceholder')"
+                @keyup.esc="handleClearSearch"
+              />
+              <button
+                v-if="searchText"
+                type="button"
+                class="btn btn-link btn-sm text-muted"
+                :title="$t('trainings.clearSearch')"
+                :aria-label="$t('trainings.clearSearch')"
+                @click="handleClearSearch"
+              >
+                <PhX :size="18" />
+              </button>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg min-h-14">
               {{ $t('trainings.search') }}
             </button>
-          </div>
+          </form>
+        </div>
+        <!-- Logo triibud kujunduselemendina (ainult laial ekraanil) -->
+        <div class="hidden w-80 shrink-0 flex-col gap-5 lg:flex xl:w-96" aria-hidden="true">
+          <div class="h-11 w-[92%] rounded-r-full bg-brand-600"></div>
+          <div class="ml-[26%] h-11 w-[74%] rounded-full bg-brand-300"></div>
+          <div class="h-11 w-full rounded-r-full bg-brand-600"></div>
+          <div class="ml-[12%] h-11 w-[58%] rounded-full bg-brand-200"></div>
         </div>
       </div>
     </section>
 
-    <HomeGallery />
+    <div class="mx-auto flex w-full max-w-6xl flex-col gap-14 px-4 py-12 sm:px-6 sm:py-16">
+      <HomeGallery />
 
-    <!-- Suured sektsioonid on eraldatud joonega (border-top), otsing ja galerii on koos lehe päis -->
-
-    <!-- Suunavad kaardid: kogu kaart on link -->
-    <section class="border-top pt-5 mb-5">
-      <div class="row g-4">
-        <div class="col-md-6">
-          <RouterLink
-            :to="{ name: 'trainingsRoute' }"
-            class="card h-100 nav-card text-decoration-none"
+      <!-- Suunavad kaardid: kogu kaart on link -->
+      <section class="grid gap-5 md:grid-cols-2">
+        <RouterLink
+          v-for="navCard in navCards"
+          :key="navCard.routeName"
+          :to="{ name: navCard.routeName }"
+          class="group flex flex-col gap-3 rounded-2xl border border-line bg-white p-6 text-ink transition hover:border-brand-300 hover:text-ink hover:shadow-xl hover:shadow-brand-600/10 sm:p-8"
+        >
+          <span
+            class="flex size-13 items-center justify-center rounded-xl bg-brand-100 text-brand-600"
           >
-            <div class="card-body p-4 text-start">
-              <PhBooks :size="48" class="text-primary mb-3" />
-              <h2 class="h4 card-title text-body">{{ $t('homeView.trainingsCard.title') }}</h2>
-              <p class="card-text text-secondary">{{ $t('homeView.trainingsCard.text') }}</p>
-              <span class="link-primary fw-semibold">{{ $t('homeView.trainingsCard.link') }}</span>
-            </div>
+            <component :is="navCard.icon" :size="28" />
+          </span>
+          <h2 class="text-2xl font-bold">{{ $t(`homeView.${navCard.key}.title`) }}</h2>
+          <p class="text-muted">{{ $t(`homeView.${navCard.key}.text`) }}</p>
+          <span
+            class="mt-1 inline-flex items-center gap-1.5 font-semibold text-brand-600 group-hover:gap-2.5 transition-all"
+          >
+            {{ $t(`homeView.${navCard.key}.link`).replace('→', '').trim() }}
+            <PhArrowRight :size="18" weight="bold" />
+          </span>
+        </RouterLink>
+      </section>
+
+      <section v-if="nextCourses.length > 0">
+        <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
+          <h2 class="text-2xl font-extrabold sm:text-3xl">{{ $t('homeView.nextCoursesTitle') }}</h2>
+          <RouterLink :to="{ name: 'coursesRoute' }" class="font-semibold">
+            {{ $t('navbar.coursesCalendar') }} →
           </RouterLink>
         </div>
-        <div class="col-md-6">
-          <RouterLink
-            :to="{ name: 'coursesRoute' }"
-            class="card h-100 nav-card text-decoration-none"
-          >
-            <div class="card-body p-4 text-start">
-              <PhCalendarDots :size="48" class="text-primary mb-3" />
-              <h2 class="h4 card-title text-body">{{ $t('homeView.coursesCard.title') }}</h2>
-              <p class="card-text text-secondary">{{ $t('homeView.coursesCard.text') }}</p>
-              <span class="link-primary fw-semibold">{{ $t('homeView.coursesCard.link') }}</span>
-            </div>
-          </RouterLink>
+        <div class="flex flex-col gap-4">
+          <CourseCard
+            v-for="nextCourse in nextCourses"
+            :key="nextCourse.courseId"
+            :course="nextCourse"
+          />
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section v-if="nextCourses.length > 0" class="border-top pt-5 mb-5 text-start">
-      <h2 class="h3 mb-3">{{ $t('homeView.nextCoursesTitle') }}</h2>
-      <CourseCard
-        v-for="nextCourse in nextCourses"
-        :key="nextCourse.courseId"
-        :course="nextCourse"
-      />
-    </section>
-
-    <div class="border-top">
       <HomeTestimonials />
-    </div>
 
-    <!-- Lõpu üleskutse pärast tagasisidet -->
-    <section class="text-center border-top pt-5 mb-5">
-      <p class="fs-5 mb-3">{{ $t('homeView.marketingText') }}</p>
-      <RouterLink :to="{ name: 'coursesRoute' }" class="btn btn-primary btn-lg">
-        {{ $t('homeView.allCoursesLink') }}
-      </RouterLink>
-    </section>
+      <!-- Lõpu üleskutse pärast tagasisidet -->
+      <section
+        class="flex flex-col items-start gap-6 rounded-3xl bg-navy p-8 text-white sm:p-12 md:flex-row md:items-center md:justify-between"
+      >
+        <p class="max-w-xl font-display text-2xl leading-snug font-bold sm:text-3xl">
+          {{ $t('homeView.marketingText') }}
+        </p>
+        <RouterLink :to="{ name: 'coursesRoute' }" class="btn btn-white btn-lg">
+          {{ $t('homeView.allCoursesLink') }}
+        </RouterLink>
+      </section>
+    </div>
   </div>
 </template>
-
-<style scoped>
-/* Suunav kaart: hover'il vari ja esiletõstetud ääris, et oleks näha, et see on link */
-.nav-card {
-  transition:
-    box-shadow 0.15s ease-in-out,
-    border-color 0.15s ease-in-out;
-}
-
-.nav-card:hover,
-.nav-card:focus-visible {
-  border-color: var(--bs-primary);
-  box-shadow: var(--bs-box-shadow);
-}
-</style>

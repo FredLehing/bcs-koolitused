@@ -25,8 +25,8 @@ export default {
 </script>
 
 <template>
-  <span class="d-inline-flex flex-wrap gap-1">
+  <span class="inline-flex flex-wrap gap-1">
     <span class="badge" :class="statusBadgeClass">{{ $t(`courseStatus.${status}`) }}</span>
-    <span v-if="isPast" class="badge text-bg-light border">{{ $t('courseStatus.past') }}</span>
+    <span v-if="isPast" class="badge text-bg-light">{{ $t('courseStatus.past') }}</span>
   </span>
 </template>

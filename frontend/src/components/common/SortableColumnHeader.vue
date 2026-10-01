@@ -28,10 +28,11 @@ export default {
 </script>
 
 <template>
-  <th :aria-sort="ariaSort" class="text-nowrap">
+  <th :aria-sort="ariaSort">
     <button
       @click="$emit('event-sort-clicked', sortKey)"
-      class="btn btn-link p-0 fw-semibold text-body text-decoration-none d-inline-flex align-items-center gap-1"
+      class="inline-flex cursor-pointer items-center gap-1 font-bold tracking-wide uppercase hover:text-brand-700"
+      :class="isActive ? 'text-brand-700' : 'text-muted'"
       type="button"
     >
       {{ label }}

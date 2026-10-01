@@ -18,7 +18,9 @@ npm run format     # Prettieri formaatimine src/ kaustas
 
 See on Vue 3 + Vite frontend (Vali-IT grupiprojekt).
 
-**Stack:** Vue 3 (Composition API), Vue Router 5, Pinia, Bootstrap 5, Axios, Phosphor Icons
+**Stack:** Vue 3 (Composition API), Vue Router 5, Pinia, Tailwind CSS 4, Axios, Phosphor Icons
+
+**Kujundus (haru `alternative-frontend-design`):** Bootstrap on asendatud Tailwindiga. Värvid, põhiklassid ja mustrid on kirjas `docs/structure/frontend-tailwind-stiilijuhend.md` — loe see enne vaate kujundamist. Prototüübis on uues stiilis ainult osa vaateid (vt sama faili jaotist „Prototüübi seis“).
 
 **Sisenemispunkt:** `index.html` laeb Vue rakenduse (`src/main.js` → `src/App.vue`).
 
@@ -30,7 +32,7 @@ See on Vue 3 + Vite frontend (Vali-IT grupiprojekt).
 
 - `languageStore.js` — `contentLang` (kasutajaliidese keel ja ühtlasi API parameeter `contentLang`; muuda ainult `setContentLang()` kaudu, mis hoiab store'i, vue-i18n ja localStorage'i sünkis) ja `uiLanguages` (navbari keelevalik, pärineb `i18n.js` konstandist `UI_LANGUAGES`).
 
-**Keeled:** kasutajaliidese keeled (`UI_LANGUAGES`) on frontendis kõvasti kirjas, sest iga keele jaoks peab olemas olema tõlkefail `src/locales/<keelekood>.json`. Andmebaasi keeled — tõlkekeeled (`requiresTranslation`), põhikeel (`isMainLanguage`) ja lipud (`flagIconCode`) — tulevad backendist (`GET /api/languages`) ja vaade laadib need ise; store'i neid ei dubleerita. Lipu kuvamiseks kasuta alati komponenti `components/common/FlagIcon.vue` (prop `flagIconCode`, raamiga; suurus klassiga, nt `class="fs-3"`).
+**Keeled:** kasutajaliidese keeled (`UI_LANGUAGES`) on frontendis kõvasti kirjas, sest iga keele jaoks peab olemas olema tõlkefail `src/locales/<keelekood>.json`. Andmebaasi keeled — tõlkekeeled (`requiresTranslation`), põhikeel (`isMainLanguage`) ja lipud (`flagIconCode`) — tulevad backendist (`GET /api/languages`) ja vaade laadib need ise; store'i neid ei dubleerita. Lipu kuvamiseks kasuta alati komponenti `components/common/FlagIcon.vue` (prop `flagIconCode`, raamiga; suurus teksti suuruse klassiga, nt `class="text-2xl"`).
 
 **Marsruutimine:** Marsruudid on defineeritud `src/router/index.js`-is.
 

@@ -18,7 +18,7 @@ export default {
       query: { lecturerId: lecturerSummary.lecturerId, returnTo: $route.fullPath },
     }"
     :aria-label="$t('lecturerCard.viewProfile', { name: lecturerSummary.fullName })"
-    class="d-flex gap-3 align-items-start rounded p-2 text-decoration-none text-body lecturer-card-link"
+    class="-mx-2 flex items-start gap-3 rounded-xl p-2 text-ink transition-colors hover:bg-brand-50 hover:text-ink"
   >
     <LecturerAvatar
       :lecturer-id="lecturerSummary.lecturerId"
@@ -26,22 +26,10 @@ export default {
       :alt="lecturerSummary.fullName"
       :size="56"
     />
-    <div>
-      <div class="fw-bold">{{ lecturerSummary.fullName }}</div>
-      <div class="small text-secondary mb-1">{{ lecturerSummary.title }}</div>
-      <div class="small">{{ lecturerSummary.shortDescription }}</div>
+    <div class="min-w-0">
+      <div class="font-semibold text-navy">{{ lecturerSummary.fullName }}</div>
+      <div class="mb-1 text-sm text-muted">{{ lecturerSummary.title }}</div>
+      <div class="line-clamp-3 text-sm">{{ lecturerSummary.shortDescription }}</div>
     </div>
   </RouterLink>
 </template>
-
-<style scoped>
-/* Kogu kaart on link koolitaja detailvaatesse */
-.lecturer-card-link {
-  transition: box-shadow 0.15s ease;
-}
-
-.lecturer-card-link:hover,
-.lecturer-card-link:focus-visible {
-  box-shadow: var(--bs-box-shadow);
-}
-</style>

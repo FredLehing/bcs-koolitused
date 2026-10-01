@@ -1,7 +1,6 @@
 <script>
 import { mapState } from 'pinia'
-import { Tooltip } from 'bootstrap'
-import { PhQuestion, PhX } from '@phosphor-icons/vue'
+import { PhFunnel, PhMagnifyingGlass, PhX } from '@phosphor-icons/vue'
 import { useLanguageStore } from '@/stores/languageStore.js'
 import CourseService from '@/api-services/CourseService.js'
 import CategoryService from '@/api-services/CategoryService.js'
@@ -11,7 +10,7 @@ import NavigationService from '@/services/NavigationService.js'
 import PaginationNav from '@/components/common/PaginationNav.vue'
 import CourseCard from '@/components/course/CourseCard.vue'
 import CourseFilters from '@/components/forms/CourseFilters.vue'
-import TrainingsTabs from '@/components/common/TrainingsTabs.vue'
+import HelpTip from '@/components/common/HelpTip.vue'
 
 const LIMIT = 5
 
@@ -31,7 +30,15 @@ function createDefaultFilters() {
 // Avalik koolituste kalender: /courses
 export default {
   name: 'CoursesView',
-  components: { TrainingsTabs, PhQuestion, PhX, PaginationNav, CourseCard, CourseFilters },
+  components: {
+    HelpTip,
+    PhFunnel,
+    PhMagnifyingGlass,
+    PhX,
+    PaginationNav,
+    CourseCard,
+    CourseFilters,
+  },
   data() {
     return {
       filters: createDefaultFilters(),
@@ -45,16 +52,22 @@ export default {
       categories: [],
       languages: [],
       fundingTypes: [],
+      // Kitsal ekraanil on filtrid peidetud paneelis
+      isFilterPanelOpen: false,
     }
   },
   computed: {
     ...mapState(useLanguageStore, ['contentLang']),
 
     hasActiveFilters() {
+      return this.activeFilterCount > 0
+    },
+
+    activeFilterCount() {
       const defaultFilters = createDefaultFilters()
-      return Object.keys(defaultFilters).some(
+      return Object.keys(defaultFilters).filter(
         (filterName) => this.filters[filterName] !== defaultFilters[filterName],
-      )
+      ).length
     },
   },
   watch: {
@@ -63,7 +76,6 @@ export default {
       this.getCategories()
       this.getFundingTypes()
       this.getCourses()
-      this.$nextTick(() => this.updateSearchHelpTooltip())
     },
 
     // Väli tühjendati (käsitsi, × nupu või Esc-iga) → näita kohe kõiki toimumiskordi
@@ -153,11 +165,6 @@ export default {
       this.page = newPage
       this.getCourses()
     },
-
-    // Bootstrap tooltip loeb teksti ainult loomisel, keele vahetusel tuleb see uuendada
-    updateSearchHelpTooltip() {
-      this.searchHelpTooltip.setContent({ '.tooltip-inner': this.$t('trainings.searchHelp') })
-    },
   },
   beforeMount() {
     this.getLanguages()
@@ -165,77 +172,84 @@ export default {
     this.getFundingTypes()
     this.getCourses()
   },
-  mounted() {
-    this.searchHelpTooltip = new Tooltip(this.$refs.searchHelp)
-  },
-  beforeUnmount() {
-    this.searchHelpTooltip.dispose()
-  },
 }
 </script>
 
 <template>
-  <div class="container d-flex flex-grow-1 flex-column">
-    <TrainingsTabs />
+  <div class="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 py-8 sm:px-6 sm:py-10">
+    <h1 class="mb-6 text-3xl font-extrabold tracking-tight sm:text-4xl">
+      {{ $t('courses.title') }}
+    </h1>
 
-    <h1 class="h3 mb-3">{{ $t('courses.title') }}</h1>
-    <div class="row flex-grow-1">
-      <div class="col-md-4 col-lg-3">
-        <CourseFilters
-          :filters="filters"
-          :categories="categories"
-          :languages="languages"
-          :funding-types="fundingTypes"
-          :has-active-filters="hasActiveFilters"
-          @event-filter-changed="handleFilterChanged"
-          @event-clear-clicked="handleClearFiltersClick"
-        />
-      </div>
-      <div class="col-md-8 col-lg-9 d-flex flex-column">
-        <div class="d-flex align-items-center gap-2 mb-3">
-          <div class="input-group">
+    <div class="flex flex-1 flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
+      <!-- Filtrid: kitsal ekraanil nupp + avatav paneel, laial ekraanil külgriba -->
+      <aside class="lg:sticky lg:top-24 lg:w-72 lg:shrink-0">
+        <button
+          @click="isFilterPanelOpen = !isFilterPanelOpen"
+          :aria-expanded="isFilterPanelOpen"
+          aria-controls="course-filter-panel"
+          class="btn btn-outline-secondary w-full lg:hidden"
+          type="button"
+        >
+          <PhFunnel :size="18" />
+          {{ $t('courses.filters.title') }}
+          <span v-if="activeFilterCount > 0" class="badge text-bg-primary">
+            {{ activeFilterCount }}
+          </span>
+        </button>
+        <div
+          id="course-filter-panel"
+          :class="isFilterPanelOpen ? 'block' : 'hidden'"
+          class="mt-3 rounded-2xl border border-line bg-white p-5 lg:mt-0 lg:block"
+        >
+          <CourseFilters
+            :filters="filters"
+            :categories="categories"
+            :languages="languages"
+            :funding-types="fundingTypes"
+            :has-active-filters="hasActiveFilters"
+            @event-filter-changed="handleFilterChanged"
+            @event-clear-clicked="handleClearFiltersClick"
+          />
+        </div>
+      </aside>
+
+      <div class="flex min-w-0 flex-1 flex-col gap-4">
+        <form class="flex items-center gap-2" @submit.prevent="handleSearchClick">
+          <div
+            class="flex min-h-12 flex-1 items-center gap-2 rounded-xl border border-brand-200 bg-white px-3 focus-within:border-brand-600 focus-within:ring-3 focus-within:ring-brand-600/15"
+          >
+            <PhMagnifyingGlass :size="20" class="shrink-0 text-muted" />
             <input
               ref="searchInput"
               v-model="searchText"
               type="text"
-              class="form-control"
+              class="min-w-0 flex-1 bg-transparent outline-none"
               :placeholder="$t('courses.searchPlaceholder')"
               :aria-label="$t('courses.searchPlaceholder')"
-              @keyup.enter="handleSearchClick"
               @keyup.esc="handleClearSearch"
             />
             <button
               v-if="searchText"
               type="button"
-              class="btn btn-outline-secondary"
+              class="btn btn-link btn-sm text-muted"
               :title="$t('trainings.clearSearch')"
               :aria-label="$t('trainings.clearSearch')"
               @click="handleClearSearch"
             >
               <PhX :size="16" />
             </button>
-            <button type="button" class="btn btn-primary" @click="handleSearchClick">
-              {{ $t('trainings.search') }}
-            </button>
           </div>
-          <span
-            ref="searchHelp"
-            class="text-secondary"
-            role="img"
-            tabindex="0"
-            data-bs-toggle="tooltip"
-            data-bs-placement="left"
-            :data-bs-title="$t('trainings.searchHelp')"
-            :aria-label="$t('trainings.searchHelp')"
-          >
-            <PhQuestion :size="22" />
-          </span>
-        </div>
-        <p v-if="appliedSearchText" class="text-secondary mb-3">
+          <button type="submit" class="btn btn-primary min-h-12">
+            {{ $t('trainings.search') }}
+          </button>
+          <HelpTip :text="$t('trainings.searchHelp')" />
+        </form>
+        <p v-if="appliedSearchText" class="text-muted">
           {{ $t('trainings.searchResults', { query: appliedSearchText }) }}
-          <strong>{{ $t('courses.resultCount', totalElements) }}</strong>
+          <strong class="text-ink">{{ $t('courses.resultCount', totalElements) }}</strong>
           ·
-          <button type="button" class="btn btn-link p-0 align-baseline" @click="handleClearSearch">
+          <button type="button" class="btn btn-link" @click="handleClearSearch">
             {{ $t('trainings.cancelSearch') }}
           </button>
         </p>
@@ -247,24 +261,24 @@ export default {
         />
         <div
           v-if="courseSummaries.length === 0"
-          class="text-center text-secondary border rounded py-4 px-3 mb-3"
+          class="rounded-2xl border border-dashed border-brand-200 bg-white px-4 py-10 text-center text-muted"
         >
           <template v-if="appliedSearchText">
-            <p class="fw-semibold mb-1">
+            <p class="mb-1 font-semibold text-ink">
               {{ $t('courses.noSearchResults', { query: appliedSearchText }) }}
             </p>
-            <p class="mb-3">{{ $t('trainings.noSearchResultsHint') }}</p>
+            <p class="mb-4">{{ $t('trainings.noSearchResultsHint') }}</p>
             <button type="button" class="btn btn-outline-primary" @click="handleClearSearch">
               {{ $t('courses.showAllCourses') }}
             </button>
           </template>
-          <p v-else class="mb-0">{{ $t('courses.noResults') }}</p>
+          <p v-else>{{ $t('courses.noResults') }}</p>
         </div>
         <PaginationNav
           :page="page"
           :total-pages="totalPages"
           @event-page-changed="handlePageChanged"
-          class="mb-3 mt-auto"
+          class="mt-auto pt-4"
         />
       </div>
     </div>

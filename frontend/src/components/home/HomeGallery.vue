@@ -1,5 +1,5 @@
 <script>
-import { Carousel } from 'bootstrap'
+import { PhCaretLeft, PhCaretRight } from '@phosphor-icons/vue'
 
 // Galerii pildid loetakse automaatselt kaustast src/assets/images/gallery/ (failinime järjekorras).
 // Uue pildi lisamiseks pane fail sinna kausta — koodi muuta pole vaja.
@@ -19,10 +19,13 @@ const AUTOPLAY_INTERVAL_MS = 8000
 
 export default {
   name: 'HomeGallery',
+  components: { PhCaretLeft, PhCaretRight },
 
   data() {
     return {
       images: GALLERY_IMAGES,
+      activeIndex: 0,
+      autoplayTimerId: null,
     }
   },
   computed: {
@@ -30,128 +33,91 @@ export default {
       return this.images.length > 0 ? this.images.length : PLACEHOLDER_SLIDE_COUNT
     },
   },
+  methods: {
+    showSlide(slideIndex) {
+      this.activeIndex = (slideIndex + this.slideCount) % this.slideCount
+      this.restartAutoplay()
+    },
+
+    restartAutoplay() {
+      clearInterval(this.autoplayTimerId)
+      this.autoplayTimerId = setInterval(
+        () => (this.activeIndex = (this.activeIndex + 1) % this.slideCount),
+        AUTOPLAY_INTERVAL_MS,
+      )
+    },
+  },
   mounted() {
-    // Käivitame automaatse kerimise ise: data-bs-ride="carousel" loetakse ainult lehe esmalaadimisel,
-    // aga SPA-s võib komponent tekkida hiljem (nt router-lingiga avalehele tulles)
-    this.carousel = Carousel.getOrCreateInstance(this.$refs.carouselElement, {
-      interval: AUTOPLAY_INTERVAL_MS,
-      ride: 'carousel',
-    })
+    this.restartAutoplay()
   },
   beforeUnmount() {
-    // Peatame taimeri ja eemaldame Bootstrapi kuularid, kui avalehelt lahkutakse
-    this.carousel.dispose()
+    clearInterval(this.autoplayTimerId)
   },
 }
 </script>
 
 <template>
-  <!-- Bootstrapi karussell: nooled ja indikaatorid töötavad data-bs-* atribuutidega, automaatne kerimine käivitatakse mounted()-is -->
-  <section class="py-4">
+  <section
+    class="relative overflow-hidden rounded-2xl bg-brand-100 shadow-sm"
+    aria-roledescription="carousel"
+  >
     <div
-      id="homeGallery"
-      ref="carouselElement"
-      class="carousel slide rounded overflow-hidden shadow-sm"
+      class="flex transition-transform duration-500 ease-out"
+      :style="{ transform: `translateX(-${activeIndex * 100}%)` }"
     >
-      <div class="carousel-indicators">
-        <button
+      <template v-if="images.length > 0">
+        <img
+          v-for="(image, imageIndex) in images"
+          :key="image"
+          :src="image"
+          :aria-hidden="imageIndex !== activeIndex"
+          class="h-56 w-full shrink-0 object-cover sm:h-96"
+          alt=""
+        />
+      </template>
+      <template v-else>
+        <div
           v-for="slideIndex in slideCount"
           :key="slideIndex"
-          type="button"
-          data-bs-target="#homeGallery"
-          :data-bs-slide-to="slideIndex - 1"
-          :class="{ active: slideIndex === 1 }"
-          :aria-current="slideIndex === 1 ? 'true' : undefined"
-          :aria-label="$t('homeView.gallery.slide', { number: slideIndex })"
-        ></button>
-      </div>
+          class="flex h-56 w-full shrink-0 items-center justify-center text-xl text-brand-700 sm:h-96"
+        >
+          {{ $t('homeView.gallery.placeholder', { number: slideIndex }) }}
+        </div>
+      </template>
+    </div>
 
-      <div class="carousel-inner">
-        <template v-if="images.length > 0">
-          <div
-            v-for="(image, imageIndex) in images"
-            :key="image"
-            class="carousel-item"
-            :class="{ active: imageIndex === 0 }"
-          >
-            <img :src="image" class="d-block w-100 gallery-image" alt="" />
-          </div>
-        </template>
-        <template v-else>
-          <div
-            v-for="slideIndex in slideCount"
-            :key="slideIndex"
-            class="carousel-item"
-            :class="{ active: slideIndex === 1 }"
-          >
-            <div
-              class="gallery-image gallery-placeholder d-flex align-items-center justify-content-center"
-            >
-              <span class="fs-4 text-body-secondary">
-                {{ $t('homeView.gallery.placeholder', { number: slideIndex }) }}
-              </span>
-            </div>
-          </div>
-        </template>
-      </div>
+    <button
+      @click="showSlide(activeIndex - 1)"
+      :aria-label="$t('homeView.gallery.previous')"
+      class="absolute top-1/2 left-3 flex size-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-navy/55 text-white hover:bg-navy/75"
+      type="button"
+    >
+      <PhCaretLeft :size="22" weight="bold" />
+    </button>
+    <button
+      @click="showSlide(activeIndex + 1)"
+      :aria-label="$t('homeView.gallery.next')"
+      class="absolute top-1/2 right-3 flex size-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-navy/55 text-white hover:bg-navy/75"
+      type="button"
+    >
+      <PhCaretRight :size="22" weight="bold" />
+    </button>
 
+    <div class="absolute inset-x-0 bottom-3 flex justify-center gap-1">
       <button
-        class="carousel-control-prev"
+        v-for="slideIndex in slideCount"
+        :key="slideIndex"
+        @click="showSlide(slideIndex - 1)"
+        :aria-current="slideIndex - 1 === activeIndex ? 'true' : undefined"
+        :aria-label="$t('homeView.gallery.slide', { number: slideIndex })"
+        class="flex size-6 cursor-pointer items-center justify-center"
         type="button"
-        data-bs-target="#homeGallery"
-        data-bs-slide="prev"
       >
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">{{ $t('homeView.gallery.previous') }}</span>
-      </button>
-      <button
-        class="carousel-control-next"
-        type="button"
-        data-bs-target="#homeGallery"
-        data-bs-slide="next"
-      >
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">{{ $t('homeView.gallery.next') }}</span>
+        <span
+          :class="slideIndex - 1 === activeIndex ? 'w-6 bg-white' : 'w-2 bg-white/60'"
+          class="h-2 rounded-full shadow transition-all"
+        ></span>
       </button>
     </div>
   </section>
 </template>
-
-<style scoped>
-.gallery-image {
-  height: 400px;
-  object-fit: cover;
-}
-
-.gallery-placeholder {
-  background: linear-gradient(135deg, var(--bs-secondary-bg), var(--bs-tertiary-bg));
-}
-
-/* Valged nooled ja täpid tumeda tausta/äärisega, et need paistaksid nii heledal kui tumedal pildil */
-.carousel-control-prev-icon,
-.carousel-control-next-icon {
-  width: 3rem;
-  height: 3rem;
-  background-color: rgba(0, 0, 0, 0.45);
-  background-size: 50%;
-  border-radius: 50%;
-}
-
-/* Bootstrapi vaikimisi on noole ala 15% laiune ja nool selle keskel — lükkame nooled äärde */
-.carousel-control-prev,
-.carousel-control-next {
-  width: auto;
-  padding: 0 0.75rem;
-}
-
-.carousel-indicators [data-bs-target] {
-  /* drop-shadow, mitte box-shadow: täpi nupul on läbipaistev ääris, box-shadow joonistaks selle ümber kasti */
-  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.6));
-}
-
-@media (max-width: 576px) {
-  .gallery-image {
-    height: 220px;
-  }
-}
-</style>

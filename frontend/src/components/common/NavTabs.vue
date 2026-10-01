@@ -18,36 +18,23 @@ export default {
 </script>
 
 <template>
-  <ul ref="tabList" class="nav nav-tabs nav-tabs-scroll mb-3">
-    <li v-for="tab in tabs" :key="tab.routeName" class="nav-item">
+  <ul
+    ref="tabList"
+    class="mb-6 flex gap-6 overflow-x-auto border-b border-line [scrollbar-width:thin]"
+  >
+    <li v-for="tab in tabs" :key="tab.routeName" class="shrink-0">
       <RouterLink
         :to="{ name: tab.routeName }"
-        :class="{ active: $route.name === tab.routeName }"
+        :class="
+          $route.name === tab.routeName
+            ? 'active border-brand-600 text-brand-600'
+            : 'border-transparent text-muted hover:text-ink'
+        "
         :aria-current="$route.name === tab.routeName ? 'page' : undefined"
-        class="nav-link"
+        class="-mb-px block border-b-[3px] px-0.5 pt-2 pb-3 font-semibold whitespace-nowrap"
       >
         {{ tab.label }}
       </RouterLink>
     </li>
   </ul>
 </template>
-
-<style scoped>
-/* Kõik vahelehed ühel real; kui ekraanile ei mahu, keritakse rida külgsuunas (ei murra kahele reale) */
-.nav-tabs-scroll {
-  position: relative;
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scrollbar-width: thin;
-  /* Kerimine lõikaks aktiivse vahelehe alla ulatuva serva ära — alumine joon on seepärast vari,
-     mille aktiivne vaheleht oma taustaga katab */
-  border-bottom: 0;
-  box-shadow: inset 0 calc(-1 * var(--bs-nav-tabs-border-width)) 0 var(--bs-nav-tabs-border-color);
-}
-
-.nav-tabs-scroll .nav-link {
-  margin-bottom: 0;
-  white-space: nowrap;
-}
-</style>

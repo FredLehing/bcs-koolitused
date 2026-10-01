@@ -1,6 +1,13 @@
 <script>
 import { mapState } from 'pinia'
-import { PhCalendarBlank, PhEye, PhPencilSimple, PhStar } from '@phosphor-icons/vue'
+import {
+  PhCalendarBlank,
+  PhEye,
+  PhFunnel,
+  PhMagnifyingGlass,
+  PhPencilSimple,
+  PhStar,
+} from '@phosphor-icons/vue'
 import { useLanguageStore } from '@/stores/languageStore.js'
 import CourseService from '@/api-services/CourseService.js'
 import TrainingService from '@/api-services/TrainingService.js'
@@ -39,6 +46,8 @@ export default {
     AdminTabs,
     PhCalendarBlank,
     PhEye,
+    PhFunnel,
+    PhMagnifyingGlass,
     PhPencilSimple,
     PhStar,
     CheckMark,
@@ -266,24 +275,55 @@ export default {
 </script>
 
 <template>
-  <div class="container">
+  <div class="mx-auto w-full max-w-7xl px-6 py-8">
     <AdminTabs />
 
-    <h1 class="h3 mb-3">{{ $t('adminAllCourses.title') }}</h1>
+    <div class="mb-6 flex items-end justify-between gap-4">
+      <h1 class="text-3xl font-extrabold tracking-tight">{{ $t('adminAllCourses.title') }}</h1>
+      <span class="text-muted">{{ $t('adminAllCourses.totalCount', totalElements) }}</span>
+    </div>
 
-    <div class="input-group mb-2">
-      <input
-        v-model="searchText"
-        @keyup.enter="handleSearchClick"
-        :placeholder="$t('adminAllCourses.searchPlaceholder')"
-        :aria-label="$t('adminAllCourses.searchPlaceholder')"
-        list="admin-course-training-titles"
-        autocomplete="off"
-        class="form-control"
-        type="text"
-      />
-      <button @click="handleSearchClick" class="btn btn-primary" type="button">
-        {{ $t('adminAllCourses.search') }}
+    <div class="mb-4 flex items-center gap-2">
+      <form class="flex flex-1 gap-2" @submit.prevent="handleSearchClick">
+        <div
+          class="flex min-h-11 flex-1 items-center gap-2 rounded-lg border border-brand-200 bg-white px-3 focus-within:border-brand-600 focus-within:ring-3 focus-within:ring-brand-600/15"
+        >
+          <PhMagnifyingGlass :size="18" class="shrink-0 text-muted" />
+          <input
+            v-model="searchText"
+            :placeholder="$t('adminAllCourses.searchPlaceholder')"
+            :aria-label="$t('adminAllCourses.searchPlaceholder')"
+            list="admin-course-training-titles"
+            autocomplete="off"
+            class="min-w-0 flex-1 bg-transparent outline-none"
+            type="text"
+          />
+        </div>
+        <button class="btn btn-primary" type="submit">
+          {{ $t('adminAllCourses.search') }}
+        </button>
+      </form>
+      <button
+        @click="isFilterCardOpen = !isFilterCardOpen"
+        :aria-expanded="isFilterCardOpen"
+        aria-controls="admin-course-filters"
+        :class="{ 'border-brand-600 bg-brand-50': isFilterCardOpen }"
+        class="btn btn-outline-secondary"
+        type="button"
+      >
+        <PhFunnel :size="18" />
+        {{ $t('adminAllCourses.filters.title') }}
+        <span v-if="activeFilterCount > 0" class="badge text-bg-primary">
+          {{ activeFilterCount }}
+        </span>
+      </button>
+      <button
+        v-if="activeFilterCount > 0"
+        @click="handleClearFiltersClick"
+        class="btn btn-link btn-sm"
+        type="button"
+      >
+        {{ $t('adminAllCourses.filters.clear') }}
       </button>
     </div>
     <datalist id="admin-course-training-titles">
@@ -293,28 +333,6 @@ export default {
         :value="trainingTitle.title"
       ></option>
     </datalist>
-
-    <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
-      <button
-        @click="isFilterCardOpen = !isFilterCardOpen"
-        :aria-expanded="isFilterCardOpen"
-        aria-controls="admin-course-filters"
-        class="btn btn-link p-0"
-        type="button"
-      >
-        {{
-          isFilterCardOpen ? $t('adminAllCourses.filters.hide') : $t('adminAllCourses.filters.show')
-        }}
-      </button>
-      <template v-if="activeFilterCount > 0">
-        <span class="badge text-bg-primary">
-          {{ $t('adminAllCourses.filters.activeCount', activeFilterCount) }}
-        </span>
-        <button @click="handleClearFiltersClick" class="btn btn-link btn-sm p-0" type="button">
-          {{ $t('adminAllCourses.filters.clear') }}
-        </button>
-      </template>
-    </div>
 
     <AdminCourseFilters
       v-if="isFilterCardOpen"
@@ -326,191 +344,195 @@ export default {
       @event-clear-clicked="handleClearFiltersClick"
     />
 
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
-      <div class="form-check form-switch mb-0">
-        <input
-          v-model="includePast"
-          id="includePast"
-          class="form-check-input"
-          type="checkbox"
-          role="switch"
+    <div class="overflow-hidden rounded-2xl border border-line bg-white">
+      <div class="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
+        <div class="form-check form-switch">
+          <input
+            v-model="includePast"
+            id="includePast"
+            class="form-check-input"
+            type="checkbox"
+            role="switch"
+          />
+          <label class="form-check-label" for="includePast">
+            {{ $t('adminTrainingCourses.includePast') }}
+          </label>
+        </div>
+        <InlineAlerts
+          :success-message="successMessage"
+          :error-message="errorMessage"
+          @event-success-message-closed="successMessage = ''"
+          @event-error-message-closed="errorMessage = ''"
         />
-        <label class="form-check-label" for="includePast">
-          {{ $t('adminTrainingCourses.includePast') }}
-        </label>
       </div>
-      <InlineAlerts
-        :success-message="successMessage"
-        :error-message="errorMessage"
-        @event-success-message-closed="successMessage = ''"
-        @event-error-message-closed="errorMessage = ''"
-      />
-    </div>
 
-    <div class="table-responsive">
-      <table class="table table-hover align-middle">
-        <thead>
-          <tr>
-            <SortableColumnHeader
-              :label="sortableColumns.startDate"
-              sort-key="startDate"
-              :sort-by="sortBy"
-              :sort-direction="sortDirection"
-              @event-sort-clicked="handleSortClick"
-            />
-            <th>{{ $t('adminAllCourses.columns.numberOfDays') }}</th>
-            <SortableColumnHeader
-              :label="sortableColumns.trainingTitle"
-              sort-key="trainingTitle"
-              :sort-by="sortBy"
-              :sort-direction="sortDirection"
-              @event-sort-clicked="handleSortClick"
-            />
-            <SortableColumnHeader
-              :label="sortableColumns.price"
-              sort-key="price"
-              :sort-by="sortBy"
-              :sort-direction="sortDirection"
-              @event-sort-clicked="handleSortClick"
-            />
-            <SortableColumnHeader
-              :label="sortableColumns.status"
-              sort-key="status"
-              :sort-by="sortBy"
-              :sort-direction="sortDirection"
-              @event-sort-clicked="handleSortClick"
-            />
-            <SortableColumnHeader
-              :label="sortableColumns.participantCount"
-              sort-key="participantCount"
-              :sort-by="sortBy"
-              :sort-direction="sortDirection"
-              @event-sort-clicked="handleSortClick"
-            />
-            <th>{{ $t('adminAllCourses.columns.paid') }}</th>
-            <th>{{ $t('adminAllCourses.columns.meetingLink') }}</th>
-            <SortableColumnHeader
-              :label="sortableColumns.enquiryCount"
-              sort-key="enquiryCount"
-              :sort-by="sortBy"
-              :sort-direction="sortDirection"
-              @event-sort-clicked="handleSortClick"
-            />
-            <th>{{ $t('adminAllCourses.columns.actions') }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="adminCourseSummary in adminCourseSummaries"
-            :key="adminCourseSummary.courseId"
-            :class="{ 'past-row': adminCourseSummary.isPast }"
-          >
-            <td class="text-nowrap">{{ formatLocalDate(adminCourseSummary.startDate) }}</td>
-            <td>{{ adminCourseSummary.numberOfDays }}</td>
-            <td>
-              <PhStar
-                v-if="adminCourseSummary.isPromoted"
-                :size="16"
-                class="text-warning me-1"
-                :title="$t('adminAllCourses.promoted')"
-                :aria-label="$t('adminAllCourses.promoted')"
+      <div class="overflow-x-auto">
+        <table class="table table-hover">
+          <thead class="bg-surface">
+            <tr>
+              <SortableColumnHeader
+                :label="sortableColumns.startDate"
+                sort-key="startDate"
+                :sort-by="sortBy"
+                :sort-direction="sortDirection"
+                @event-sort-clicked="handleSortClick"
               />
-              <RouterLink
-                :to="{
-                  name: 'adminTrainingCoursesRoute',
-                  query: { returnTo: $route.fullPath, trainingId: adminCourseSummary.trainingId },
-                }"
-              >
-                {{ adminCourseSummary.trainingTitle }}
-              </RouterLink>
-            </td>
-            <td class="text-nowrap">{{ formatPrice(adminCourseSummary.price) }}</td>
-            <td>
-              <CourseStatusBadge
-                :status="adminCourseSummary.status"
-                :is-past="adminCourseSummary.isPast"
+              <th>{{ $t('adminAllCourses.columns.numberOfDays') }}</th>
+              <SortableColumnHeader
+                :label="sortableColumns.trainingTitle"
+                sort-key="trainingTitle"
+                :sort-by="sortBy"
+                :sort-direction="sortDirection"
+                @event-sort-clicked="handleSortClick"
               />
-            </td>
-            <td>{{ adminCourseSummary.participantCount }}</td>
-            <td
-              class="text-nowrap"
-              :class="{ 'text-success fw-bold': isAllPaid(adminCourseSummary) }"
+              <SortableColumnHeader
+                :label="sortableColumns.price"
+                sort-key="price"
+                :sort-by="sortBy"
+                :sort-direction="sortDirection"
+                @event-sort-clicked="handleSortClick"
+              />
+              <SortableColumnHeader
+                :label="sortableColumns.status"
+                sort-key="status"
+                :sort-by="sortBy"
+                :sort-direction="sortDirection"
+                @event-sort-clicked="handleSortClick"
+              />
+              <SortableColumnHeader
+                :label="sortableColumns.participantCount"
+                sort-key="participantCount"
+                :sort-by="sortBy"
+                :sort-direction="sortDirection"
+                @event-sort-clicked="handleSortClick"
+              />
+              <th>{{ $t('adminAllCourses.columns.paid') }}</th>
+              <th>{{ $t('adminAllCourses.columns.meetingLink') }}</th>
+              <SortableColumnHeader
+                :label="sortableColumns.enquiryCount"
+                sort-key="enquiryCount"
+                :sort-by="sortBy"
+                :sort-direction="sortDirection"
+                @event-sort-clicked="handleSortClick"
+              />
+              <th class="text-right">{{ $t('adminAllCourses.columns.actions') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="adminCourseSummary in adminCourseSummaries"
+              :key="adminCourseSummary.courseId"
+              :class="{ 'text-muted': adminCourseSummary.isPast }"
             >
-              {{ paidText(adminCourseSummary) }}
-            </td>
-            <td><CheckMark :value="adminCourseSummary.hasMeetingLink" /></td>
-            <td>{{ adminCourseSummary.enquiryCount }}</td>
-            <td>
-              <div class="d-flex gap-1">
-                <RouterLink
-                  :to="{
-                    name: 'adminCourseRoute',
-                    query: { returnTo: $route.fullPath, courseId: adminCourseSummary.courseId },
-                  }"
-                  :title="$t('adminAllCourses.view')"
-                  :aria-label="$t('adminAllCourses.view')"
-                  class="btn btn-sm btn-outline-secondary d-inline-flex"
-                >
-                  <PhEye :size="20" />
-                </RouterLink>
-                <RouterLink
-                  :to="{
-                    name: 'courseFormRoute',
-                    query: { returnTo: $route.fullPath, courseId: adminCourseSummary.courseId },
-                  }"
-                  :title="$t('adminTrainingCourses.edit')"
-                  :aria-label="$t('adminTrainingCourses.edit')"
-                  class="btn btn-sm btn-outline-secondary d-inline-flex"
-                >
-                  <PhPencilSimple :size="20" />
-                </RouterLink>
-                <RouterLink
-                  :to="{
-                    name: 'adminTrainingCoursesRoute',
-                    query: { returnTo: $route.fullPath, trainingId: adminCourseSummary.trainingId },
-                  }"
-                  :title="$t('adminTrainings.calendar')"
-                  :aria-label="$t('adminTrainings.calendar')"
-                  class="btn btn-sm btn-outline-secondary d-inline-flex"
-                >
-                  <PhCalendarBlank :size="20" />
-                </RouterLink>
-                <CourseDeleteButton
-                  :course-id="adminCourseSummary.courseId"
-                  :start-date="adminCourseSummary.startDate"
-                  :end-date="adminCourseSummary.endDate"
-                  :participant-count="adminCourseSummary.participantCount"
-                  @event-course-deleted="handleCourseDeleted"
+              <td class="font-semibold whitespace-nowrap tabular-nums">
+                {{ formatLocalDate(adminCourseSummary.startDate) }}
+              </td>
+              <td class="tabular-nums">{{ adminCourseSummary.numberOfDays }}</td>
+              <td>
+                <span class="inline-flex items-center gap-1.5">
+                  <PhStar
+                    v-if="adminCourseSummary.isPromoted"
+                    :size="16"
+                    weight="fill"
+                    class="shrink-0 text-brand-600"
+                    :title="$t('adminAllCourses.promoted')"
+                    :aria-label="$t('adminAllCourses.promoted')"
+                  />
+                  <RouterLink
+                    :to="{
+                      name: 'adminTrainingCoursesRoute',
+                      query: {
+                        returnTo: $route.fullPath,
+                        trainingId: adminCourseSummary.trainingId,
+                      },
+                    }"
+                    class="font-semibold"
+                  >
+                    {{ adminCourseSummary.trainingTitle }}
+                  </RouterLink>
+                </span>
+              </td>
+              <td class="whitespace-nowrap tabular-nums">
+                {{ formatPrice(adminCourseSummary.price) }} €
+              </td>
+              <td>
+                <CourseStatusBadge
+                  :status="adminCourseSummary.status"
+                  :is-past="adminCourseSummary.isPast"
                 />
-              </div>
-            </td>
-          </tr>
-          <tr v-if="adminCourseSummaries.length === 0">
-            <td colspan="10" class="text-center text-secondary py-4">
-              {{ $t('adminAllCourses.noResults') }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+              </td>
+              <td class="tabular-nums">{{ adminCourseSummary.participantCount }}</td>
+              <td
+                class="whitespace-nowrap tabular-nums"
+                :class="{ 'font-bold text-emerald-700': isAllPaid(adminCourseSummary) }"
+              >
+                {{ paidText(adminCourseSummary) }}
+              </td>
+              <td><CheckMark :value="adminCourseSummary.hasMeetingLink" /></td>
+              <td class="tabular-nums">{{ adminCourseSummary.enquiryCount }}</td>
+              <td>
+                <div class="flex justify-end gap-1">
+                  <RouterLink
+                    :to="{
+                      name: 'adminCourseRoute',
+                      query: { returnTo: $route.fullPath, courseId: adminCourseSummary.courseId },
+                    }"
+                    :title="$t('adminAllCourses.view')"
+                    :aria-label="$t('adminAllCourses.view')"
+                    class="btn btn-outline-secondary btn-sm btn-icon"
+                  >
+                    <PhEye :size="18" />
+                  </RouterLink>
+                  <RouterLink
+                    :to="{
+                      name: 'courseFormRoute',
+                      query: { returnTo: $route.fullPath, courseId: adminCourseSummary.courseId },
+                    }"
+                    :title="$t('adminTrainingCourses.edit')"
+                    :aria-label="$t('adminTrainingCourses.edit')"
+                    class="btn btn-outline-secondary btn-sm btn-icon"
+                  >
+                    <PhPencilSimple :size="18" />
+                  </RouterLink>
+                  <RouterLink
+                    :to="{
+                      name: 'adminTrainingCoursesRoute',
+                      query: {
+                        returnTo: $route.fullPath,
+                        trainingId: adminCourseSummary.trainingId,
+                      },
+                    }"
+                    :title="$t('adminTrainings.calendar')"
+                    :aria-label="$t('adminTrainings.calendar')"
+                    class="btn btn-outline-secondary btn-sm btn-icon"
+                  >
+                    <PhCalendarBlank :size="18" />
+                  </RouterLink>
+                  <CourseDeleteButton
+                    :course-id="adminCourseSummary.courseId"
+                    :start-date="adminCourseSummary.startDate"
+                    :end-date="adminCourseSummary.endDate"
+                    :participant-count="adminCourseSummary.participantCount"
+                    @event-course-deleted="handleCourseDeleted"
+                  />
+                </div>
+              </td>
+            </tr>
+            <tr v-if="adminCourseSummaries.length === 0">
+              <td colspan="10" class="py-10 text-center text-muted">
+                {{ $t('adminAllCourses.noResults') }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
-      <span class="text-secondary">
-        {{ $t('adminAllCourses.totalCount', totalElements) }}
-      </span>
-      <PaginationNav
-        :page="page"
-        :total-pages="totalPages"
-        @event-page-changed="handlePageChanged"
-      />
-      <span></span>
-    </div>
+    <PaginationNav
+      :page="page"
+      :total-pages="totalPages"
+      @event-page-changed="handlePageChanged"
+      class="mt-6"
+    />
   </div>
 </template>
-
-<style scoped>
-/* Toimunud toimumiskord: tuhmim rida */
-.past-row td {
-  color: var(--bs-secondary-color);
-}
-</style>

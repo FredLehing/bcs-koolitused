@@ -140,11 +140,11 @@ export default {
   <BaseModal :is-open="isOpen" @event-modal-closed="close">
     <template #title>
       {{ $t('enquiryModal.title') }}
-      <div class="fs-6 fw-normal text-secondary">{{ contextText }}</div>
+      <div class="mt-0.5 font-sans text-sm font-normal text-muted">{{ contextText }}</div>
     </template>
     <template #body>
-      <div class="row g-2 text-start">
-        <div class="col-sm-6">
+      <div class="grid gap-3 sm:grid-cols-2">
+        <div>
           <label class="form-label" for="enquiry-first-name">
             {{ $t('enquiryModal.firstName') }} *
           </label>
@@ -157,7 +157,7 @@ export default {
             autocomplete="given-name"
           />
         </div>
-        <div class="col-sm-6">
+        <div>
           <label class="form-label" for="enquiry-last-name">
             {{ $t('enquiryModal.lastName') }} *
           </label>
@@ -170,7 +170,7 @@ export default {
             autocomplete="family-name"
           />
         </div>
-        <div class="col-sm-6">
+        <div>
           <label class="form-label" for="enquiry-email">{{ $t('enquiryModal.email') }} *</label>
           <input
             v-model="enquiry.email"
@@ -181,7 +181,7 @@ export default {
             autocomplete="email"
           />
         </div>
-        <div class="col-sm-6">
+        <div>
           <label class="form-label" for="enquiry-phone">{{ $t('enquiryModal.phone') }} *</label>
           <input
             v-model="enquiry.phone"
@@ -192,7 +192,7 @@ export default {
             autocomplete="tel"
           />
         </div>
-        <div class="col-12">
+        <div class="sm:col-span-2">
           <label class="form-label" for="enquiry-company">{{ $t('enquiryModal.company') }}</label>
           <input
             v-model="enquiry.companyName"
@@ -203,7 +203,7 @@ export default {
             autocomplete="organization"
           />
         </div>
-        <div class="col-12">
+        <div class="sm:col-span-2">
           <label class="form-label" for="enquiry-message">{{ $t('enquiryModal.message') }} *</label>
           <textarea
             v-model="enquiry.message"
@@ -212,12 +212,12 @@ export default {
             rows="4"
             :maxlength="messageMaxLength"
           ></textarea>
-          <div class="form-text text-end">
+          <div class="form-text text-right">
             {{ enquiry.message.length }} / {{ messageMaxLength }}
           </div>
         </div>
       </div>
-      <p class="small text-secondary mt-2 mb-2">{{ $t('enquiryModal.privacy') }}</p>
+      <p class="mt-3 mb-3 text-sm text-muted">{{ $t('enquiryModal.privacy') }}</p>
       <AlertDanger :error-message="errorMessage" />
     </template>
     <template #buttons>

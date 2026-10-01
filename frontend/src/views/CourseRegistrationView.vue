@@ -187,53 +187,61 @@ export default {
 </script>
 
 <template>
-  <div class="container">
+  <div class="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 sm:py-10">
     <BackLink :fallback="{ name: 'courseRoute', query: { courseId } }" />
-    <h1 class="h3 mb-3">{{ $t('courseRegistration.title') }}</h1>
+    <h1 class="mb-6 text-3xl font-extrabold tracking-tight sm:text-4xl">
+      {{ $t('courseRegistration.title') }}
+    </h1>
 
-    <div v-if="coursePage" class="row text-start">
-      <div class="col-lg-5">
-        <fieldset class="border rounded bg-body p-3 mb-4">
-          <legend class="float-none w-auto px-2 fs-5">{{ $t('courseView.course') }}</legend>
-          <dl class="mb-3">
-            <dt>{{ $t('adminCourse.fields.training') }}</dt>
-            <dd>{{ coursePage.title }}</dd>
-            <dt>{{ $t('adminCourse.fields.dates') }}</dt>
-            <dd>{{ formatDateRange(coursePage.startDate, coursePage.endDate) }}</dd>
-            <dt>{{ $t('courseRegistration.duration') }}</dt>
-            <dd>
-              {{
-                $t('courses.duration', {
-                  days: coursePage.numberOfDays,
-                  hours: coursePage.numberOfAcademicHours,
-                })
-              }}
-            </dd>
-            <dt>{{ $t('adminTrainingCourses.columns.price') }}</dt>
-            <dd>{{ formatPrice(coursePage.price) }}</dd>
-            <dt>{{ $t('courses.filters.attendance') }}</dt>
-            <dd>{{ attendanceText }}</dd>
-            <dt>{{ $t('adminTrainingCourses.columns.lecturers') }}</dt>
-            <dd>{{ lecturerNames || '—' }}</dd>
-          </dl>
-          <RouterLink :to="backDestination">
-            {{ $t('courseRegistration.backToCourse') }}
-          </RouterLink>
-        </fieldset>
-      </div>
+    <div v-if="coursePage" class="flex flex-col gap-6 lg:flex-row lg:items-start">
+      <!-- Toimumiskorra kokkuvõte: kitsal ekraanil vormi kohal -->
+      <aside
+        class="rounded-2xl border border-brand-200 bg-brand-50 p-5 sm:p-6 lg:sticky lg:top-24 lg:w-80 lg:shrink-0"
+      >
+        <h2 class="text-lg leading-snug font-bold">{{ coursePage.title }}</h2>
+        <dl class="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 text-[15px]">
+          <dt class="text-muted">{{ $t('adminCourse.fields.dates') }}</dt>
+          <dd class="font-semibold">
+            {{ formatDateRange(coursePage.startDate, coursePage.endDate) }}
+          </dd>
+          <dt class="text-muted">{{ $t('courseRegistration.duration') }}</dt>
+          <dd class="font-semibold">
+            {{
+              $t('courses.duration', {
+                days: coursePage.numberOfDays,
+                hours: coursePage.numberOfAcademicHours,
+              })
+            }}
+          </dd>
+          <dt class="text-muted">{{ $t('courses.filters.attendance') }}</dt>
+          <dd class="font-semibold">{{ attendanceText }}</dd>
+          <dt class="text-muted">{{ $t('adminTrainingCourses.columns.lecturers') }}</dt>
+          <dd class="font-semibold">{{ lecturerNames || '—' }}</dd>
+          <dt class="text-muted">{{ $t('adminTrainingCourses.columns.price') }}</dt>
+          <dd class="font-display text-xl font-extrabold text-navy">
+            {{ formatPrice(coursePage.price) }} €
+          </dd>
+        </dl>
+        <RouterLink :to="backDestination" class="mt-4 inline-block text-[15px] font-semibold">
+          {{ $t('courseRegistration.backToCourse') }}
+        </RouterLink>
+      </aside>
 
-      <div class="col-lg-7">
+      <div class="min-w-0 flex-1">
         <AlertSuccess
           v-if="isRegistered"
           :success-message="$t('courseRegistration.alreadyRegistered')"
         />
         <AlertDanger v-else-if="isFull" :error-message="$t('courseRegistration.full')" />
-        <fieldset v-else class="border rounded bg-body p-3 mb-4">
-          <legend class="float-none w-auto px-2 fs-5">
-            {{ $t('courseRegistration.participantData') }}
-          </legend>
-          <div class="row g-3">
-            <div class="col-sm-6">
+        <form
+          v-else
+          class="rounded-2xl border border-line bg-white p-5 sm:p-8"
+          @submit.prevent="registerCourseParticipant"
+        >
+          <h2 class="mb-1 text-xl font-bold">{{ $t('courseRegistration.participantData') }}</h2>
+          <p class="mb-5 text-sm text-muted">{{ $t('courseRegistration.profileHint') }}</p>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div>
               <label class="form-label" for="registration-first-name">
                 {{ $t('enquiryModal.firstName') }} *
               </label>
@@ -243,9 +251,10 @@ export default {
                 class="form-control"
                 type="text"
                 maxlength="255"
+                autocomplete="given-name"
               />
             </div>
-            <div class="col-sm-6">
+            <div>
               <label class="form-label" for="registration-last-name">
                 {{ $t('enquiryModal.lastName') }} *
               </label>
@@ -255,9 +264,10 @@ export default {
                 class="form-control"
                 type="text"
                 maxlength="255"
+                autocomplete="family-name"
               />
             </div>
-            <div class="col-sm-6">
+            <div>
               <label class="form-label" for="registration-email">
                 {{ $t('enquiryModal.email') }} *
               </label>
@@ -267,9 +277,10 @@ export default {
                 class="form-control"
                 type="email"
                 maxlength="255"
+                autocomplete="email"
               />
             </div>
-            <div class="col-sm-6">
+            <div>
               <label class="form-label" for="registration-phone">
                 {{ $t('enquiryModal.phone') }} *
               </label>
@@ -279,23 +290,21 @@ export default {
                 class="form-control"
                 type="tel"
                 maxlength="20"
+                autocomplete="tel"
               />
             </div>
-            <div class="col-12 form-text mt-1">{{ $t('courseRegistration.profileHint') }}</div>
-            <div class="col-12">
-              <div class="form-check">
-                <input
-                  v-model="registration.requiresLaptop"
-                  id="registration-requires-laptop"
-                  class="form-check-input"
-                  type="checkbox"
-                />
-                <label class="form-check-label" for="registration-requires-laptop">
-                  {{ $t('courseRegistration.requiresLaptop') }}
-                </label>
-              </div>
+            <div class="form-check sm:col-span-2">
+              <input
+                v-model="registration.requiresLaptop"
+                id="registration-requires-laptop"
+                class="form-check-input"
+                type="checkbox"
+              />
+              <label class="form-check-label" for="registration-requires-laptop">
+                {{ $t('courseRegistration.requiresLaptop') }}
+              </label>
             </div>
-            <div class="col-12">
+            <div class="sm:col-span-2">
               <label class="form-label" for="registration-notes">
                 {{ $t('courseRegistration.notes') }}
               </label>
@@ -308,22 +317,17 @@ export default {
             </div>
           </div>
 
-          <AlertDanger :error-message="errorMessage" class="mt-3" />
+          <AlertDanger :error-message="errorMessage" class="mt-5" />
 
-          <div class="d-flex flex-wrap gap-2 mt-3">
-            <button
-              @click="registerCourseParticipant"
-              :disabled="isSending"
-              class="btn btn-success"
-              type="button"
-            >
-              {{ $t('courseView.register') }}
-            </button>
+          <div class="mt-6 flex flex-col-reverse gap-2 sm:flex-row">
             <button @click="navigateToCourseView" class="btn btn-outline-secondary" type="button">
               {{ $t('courseRegistration.cancel') }}
             </button>
+            <button :disabled="isSending" class="btn btn-primary btn-lg sm:ml-auto" type="submit">
+              {{ $t('courseView.register') }}
+            </button>
           </div>
-        </fieldset>
+        </form>
       </div>
     </div>
   </div>

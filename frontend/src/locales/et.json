@@ -46,7 +46,8 @@
     },
     "nextCoursesTitle": "Meie järgmised 5 koolitust",
     "marketingText": "Leia endale sobiv koolitus — uusi toimumiskordi lisandub pidevalt.",
-    "allCoursesLink": "Vaata kõiki toimuvaid koolitusi →"
+    "allCoursesLink": "Vaata kõiki toimuvaid koolitusi →",
+    "eyebrow": "IT · disain · juhtimine"
   },
   "navbar": {
     "trainings": "Koolitused",
@@ -81,7 +82,8 @@
     "participantCertificates": "Tunnistused",
     "changePassword": "Parool",
     "manageUsers": "Kontod",
-    "manageFeedbacks": "Tagasisided"
+    "manageFeedbacks": "Tagasisided",
+    "menu": "Menüü"
   },
   "error": {
     "message": "Midagi läks valesti, proovi hiljem uuesti!",
@@ -786,6 +788,7 @@
     "promoted": "Esile tõstetud",
     "editCourse": "Muuda toimumiskorda",
     "filters": {
+      "title": "Filtrid",
       "startDateFrom": "Alates",
       "startDateTo": "Kuni",
       "attendance": "Toimumisviis",

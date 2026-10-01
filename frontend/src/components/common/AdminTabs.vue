@@ -1,21 +1,16 @@
 <script>
 import NavTabs from '@/components/common/NavTabs.vue'
 
-// Admini nimekirjavaadete vahelehed (samad lingid ja järjekord mis navbari menüüs "Admin")
+// Admini nimekirjavaadete vahelehed (samad lingid ja järjekord mis navbari menüüs "Admin").
+// Prototüüp (haru alternative-frontend-design): ainult uues stiilis vaated.
 export default {
   name: 'AdminTabs',
   components: { NavTabs },
   computed: {
     tabs() {
       return [
-        { routeName: 'adminEnquiriesRoute', label: this.$t('navbar.manageEnquiries') },
-        { routeName: 'adminRegistrationsRoute', label: this.$t('navbar.manageRegistrations') },
         { routeName: 'adminFeedbacksRoute', label: this.$t('navbar.manageFeedbacks') },
-        { routeName: 'adminTrainingsRoute', label: this.$t('navbar.manageTrainings') },
         { routeName: 'adminAllCoursesRoute', label: this.$t('navbar.manageCourses') },
-        { routeName: 'adminLecturersRoute', label: this.$t('navbar.manageLecturers') },
-        { routeName: 'adminRoomsRoute', label: this.$t('navbar.manageRooms') },
-        { routeName: 'adminUsersRoute', label: this.$t('navbar.manageUsers') },
       ]
     },
   },

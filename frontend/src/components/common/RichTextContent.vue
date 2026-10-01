@@ -24,22 +24,47 @@ export default {
 </template>
 
 <style scoped>
-/* v-html sisu ei saa scoped stiile — seega :deep() */
+/* v-html sisu ei saa scoped stiile — seega :deep(). Tailwindi baasstiil eemaldab vahed ja loendimärgid,
+   kirjelduse tekst vajab need tagasi. */
+.rich-text-content {
+  line-height: 1.65;
+}
 
-/* TipTap paneb iga loendi elemendi sisse <p> — Bootstrapi margin teeks loendisse suured vahed */
+.rich-text-content :deep(p),
+.rich-text-content :deep(ul),
+.rich-text-content :deep(ol) {
+  margin-bottom: 0.875rem;
+}
+
+.rich-text-content :deep(ul) {
+  list-style: disc;
+  padding-left: 1.4rem;
+}
+
+.rich-text-content :deep(ol) {
+  list-style: decimal;
+  padding-left: 1.4rem;
+}
+
+/* TipTap paneb iga loendi elemendi sisse <p> */
 .rich-text-content :deep(li > p) {
   margin-bottom: 0;
+}
+
+.rich-text-content :deep(a) {
+  text-decoration: underline;
 }
 
 /* Kirjelduse alapealkirjad, mitte lehe pealkirjad (samad suurused mis editoris) */
 .rich-text-content :deep(h3) {
   font-size: 1.25rem;
-  margin-top: 0.75rem;
+  font-weight: 700;
+  margin: 1.25rem 0 0.5rem;
 }
 
 .rich-text-content :deep(h4) {
   font-size: 1rem;
-  font-weight: bold;
-  margin-top: 0.75rem;
+  font-weight: 700;
+  margin: 1rem 0 0.375rem;
 }
 </style>
