@@ -175,7 +175,11 @@ export default {
         </RouterLink>
       </fieldset>
 
-      <CourseParticipantsTable :course-participants="courseParticipants" class="mb-4" />
+      <CourseParticipantsTable
+        :course-id="courseId"
+        :course-participants="courseParticipants"
+        class="mb-4"
+      />
 
       <CourseEnquiriesTable :course-enquiries="courseEnquiries" class="mb-5" />
     </template>

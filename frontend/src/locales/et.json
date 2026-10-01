@@ -21,6 +21,7 @@
     "manageLecturers": "Koolitajad",
     "manageRooms": "Koolitusruumid",
     "manageEnquiries": "Koolituste päringud",
+    "manageRegistrations": "Registreerumised",
     "login": "Logi sisse",
     "logout": "Logi välja",
     "logoutModal": {
@@ -605,9 +606,11 @@
         "hasPaid": "Tasunud",
         "requiresLaptop": "Vajab sülearvutit",
         "status": "Staatus",
-        "notes": "Märkmed"
+        "notes": "Märkmed",
+        "actions": "Tegevused"
       },
-      "includeCancelled": "Näita ka loobunud"
+      "includeCancelled": "Näita ka loobunud",
+      "view": "Vaata registreerumist"
     },
     "enquiries": {
       "title": "Huvilised",
@@ -620,6 +623,59 @@
         "company": "Ettevõte",
         "status": "Staatus"
       }
+    }
+  },
+  "adminRegistrations": {
+    "title": "Registreerumised",
+    "searchPlaceholder": "Otsi osaleja nime, e-posti või koolituse järgi…",
+    "showCancelled": "Näita ka loobunud",
+    "showPast": "Näita ka toimunud",
+    "noResults": "Registreerumisi ei leitud",
+    "totalCount": "Kokku {n} registreerumist | Kokku {n} registreerumine | Kokku {n} registreerumist",
+    "view": "Vaata",
+    "columns": {
+      "registeredAt": "Registreerus",
+      "participantName": "Osaleja",
+      "email": "E-post",
+      "trainingTitle": "Koolitus",
+      "courseDates": "Toimumisaeg",
+      "hasPaid": "Tasunud",
+      "requiresLaptop": "Vajab sülearvutit",
+      "status": "Staatus",
+      "actions": "Tegevused"
+    }
+  },
+  "adminRegistration": {
+    "title": "Registreerumine",
+    "back": "Tagasi",
+    "backToRegistrations": "Kõik registreerumised",
+    "participantLegend": "Osaleja",
+    "participantName": "Nimi",
+    "email": "E-post",
+    "phone": "Telefon",
+    "accountEmail": "Konto e-post",
+    "courseLegend": "Toimumiskord",
+    "training": "Koolitus",
+    "courseDates": "Toimumisaeg",
+    "courseStatus": "Staatus",
+    "openCourse": "Ava toimumiskord",
+    "registrationLegend": "Registreerumine",
+    "status": "Staatus",
+    "hasPaid": "Tasunud",
+    "requiresLaptop": "Vajab sülearvutit",
+    "notes": "Osaleja lisainfo",
+    "adminNotes": "Admini märkmed",
+    "registeredAt": "Registreerus",
+    "updatedAt": "Viimati muudetud",
+    "save": "Salvesta",
+    "cancel": "Tühista",
+    "confirmTitle": "Staatuse muutmine",
+    "confirm": "Kinnita",
+    "confirmCancel": "Märgi osaleja loobunuks?",
+    "confirmRestore": "Taasta registreerumine?",
+    "messages": {
+      "saved": "Registreerumine salvestatud",
+      "saveFailed": "Salvestamine ebaõnnestus"
     }
   },
   "courses": {

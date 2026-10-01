@@ -68,6 +68,9 @@
                 <RouterLink class="nav-link" :to="{ name: 'adminEnquiriesRoute' }">
                   {{ $t('navbar.manageEnquiries') }}
                 </RouterLink>
+                <RouterLink class="nav-link" :to="{ name: 'adminRegistrationsRoute' }">
+                  {{ $t('navbar.manageRegistrations') }}
+                </RouterLink>
               </div>
             </div>
           </div>
