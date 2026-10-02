@@ -269,7 +269,9 @@ INSERT INTO course (id, training_id, room_id, number_of_days, number_of_academic
     (14, 8, 3, 3, 24, 320.0000, 'O', '2026-09-21', '2026-09-23', 'Septembrikuine SQL-koolitus tagasiside näideteks.', NULL, false, '2026-08-21 10:00:00', '2026-08-21 10:00:00', 1),
     (15, 3, NULL, 3, 24, 480.0000, 'O', '2026-09-28', '2026-09-30', 'Toimunud koolitus, millele pole veel tagasisidet antud.', 'https://meet.vali-it.ee/spring-sept', false, '2026-08-24 10:00:00', '2026-08-24 10:00:00', 1),
     -- Vali-IT 10.08.–25.09.2026: 7 nädalat, 35 õppepäeva, 280 akadeemilist tundi.
-    (16, 15, 1, 35, 280, 0.0, 'O', '2026-08-10', '2026-09-25', 'Fiktiivne lõppenud Vali-IT rühm tagasiside UI testimiseks.', NULL, false, '2026-07-20 10:00:00', '2026-07-20 10:00:00', 1);
+    (16, 15, 1, 35, 280, 0.0, 'O', '2026-08-10', '2026-09-25', 'Fiktiivne lõppenud Vali-IT rühm tagasiside UI testimiseks.', NULL, false, '2026-07-20 10:00:00', '2026-07-20 10:00:00', 1),
+    -- Järgmine Vali-IT rühm 02.11.–18.12.2026 (avalikus toimumiskordade nimekirjas nähtav).
+    (17, 15, 1, 35, 280, 0.0, 'O', '2026-11-02', '2026-12-18', NULL, NULL, false, '2026-09-28 10:00:00', '2026-09-28 10:00:00', 1);
 
 -- Table: course_lecturer (toimumiskorra koolitajad; sort_order = kuvamise järjekord)
 INSERT INTO course_lecturer (id, course_id, lecturer_id, sort_order) VALUES
@@ -289,7 +291,9 @@ INSERT INTO course_lecturer (id, course_id, lecturer_id, sort_order) VALUES
     (14, 15, 1, 1),
     -- Sama toimumiskorra koolitajad.
     (15, 16, 1, 1),
-    (16, 16, 8, 2);
+    (16, 16, 8, 2),
+    (17, 17, 1, 1),
+    (18, 17, 8, 2);
 
 -- Table: course_participant (status: R = registreerunud, C = loobunud)
 INSERT INTO course_participant (id, course_id, participant_id, notes, admin_notes, has_paid, requires_laptop, status, created_at, updated_at) VALUES
