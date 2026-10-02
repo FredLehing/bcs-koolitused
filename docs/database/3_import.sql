@@ -271,7 +271,7 @@ INSERT INTO course (id, training_id, room_id, number_of_days, number_of_academic
     -- Vali-IT 10.08.–25.09.2026: 7 nädalat, 35 õppepäeva, 280 akadeemilist tundi.
     (16, 15, 1, 35, 280, 0.0, 'O', '2026-08-10', '2026-09-25', 'Fiktiivne lõppenud Vali-IT rühm tagasiside UI testimiseks.', NULL, false, '2026-07-20 10:00:00', '2026-07-20 10:00:00', 1),
     -- Järgmine Vali-IT rühm 02.11.–18.12.2026 (avalikus toimumiskordade nimekirjas nähtav).
-    (17, 15, 1, 35, 280, 0.0, 'O', '2026-11-02', '2026-12-18', NULL, NULL, false, '2026-09-28 10:00:00', '2026-09-28 10:00:00', 1);
+    (17, 15, 1, 35, 280, 2500.0000, 'O', '2026-11-02', '2026-12-18', NULL, NULL, false, '2026-09-28 10:00:00', '2026-09-28 10:00:00', 1);
 
 -- Table: course_lecturer (toimumiskorra koolitajad; sort_order = kuvamise järjekord)
 INSERT INTO course_lecturer (id, course_id, lecturer_id, sort_order) VALUES
