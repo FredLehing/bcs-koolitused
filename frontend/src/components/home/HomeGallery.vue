@@ -2,7 +2,8 @@
 import { PhCaretLeft, PhCaretRight } from '@phosphor-icons/vue'
 
 // Galerii pildid loetakse automaatselt kaustast src/assets/images/gallery/ (failinime järjekorras).
-// Uue pildi lisamiseks pane fail sinna kausta — koodi muuta pole vaja.
+// Uue pildi lisamiseks pane fail sinna kausta — koodi muuta pole vaja. Järjekorra määrab
+// failinime numbriline eesliide (01_, 02_, ...). SVG-d (logod) kuvatakse tervikuna, mitte lõigatult.
 const galleryImageModules = import.meta.glob('@/assets/images/gallery/*.{jpg,jpeg,png,webp,svg}', {
   eager: true,
   import: 'default',
@@ -34,6 +35,10 @@ export default {
     },
   },
   methods: {
+    getImageFitClass(image) {
+      return image.endsWith('.svg') ? 'object-contain p-8 sm:p-16' : 'object-cover'
+    },
+
     showSlide(slideIndex) {
       this.activeIndex = (slideIndex + this.slideCount) % this.slideCount
       this.restartAutoplay()
@@ -71,7 +76,8 @@ export default {
           :key="image"
           :src="image"
           :aria-hidden="imageIndex !== activeIndex"
-          class="h-56 w-full shrink-0 object-cover sm:h-96"
+          :class="getImageFitClass(image)"
+          class="aspect-video w-full shrink-0"
           alt=""
         />
       </template>
@@ -79,7 +85,7 @@ export default {
         <div
           v-for="slideIndex in slideCount"
           :key="slideIndex"
-          class="flex h-56 w-full shrink-0 items-center justify-center text-xl text-brand-700 sm:h-96"
+          class="flex aspect-video w-full shrink-0 items-center justify-center text-xl text-brand-700"
         >
           {{ $t('homeView.gallery.placeholder', { number: slideIndex }) }}
         </div>
