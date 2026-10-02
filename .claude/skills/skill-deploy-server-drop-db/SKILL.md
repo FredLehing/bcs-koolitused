@@ -33,7 +33,7 @@ Frontendi build scratchpadi koopias (juur-`CLAUDE.md`). Kui midagi ebaõnnestub,
 ## Samm 2 — Kopeeri kood serverisse
 
 ```bash
-rsync -az --exclude node_modules --exclude .git --exclude .env \
+rsync -az --delete --exclude node_modules --exclude .git --exclude .env \
   --exclude backend/build --exclude backend/.gradle \
   --exclude frontend/dist --exclude .idea --exclude .claude \
   ./ root@91.98.82.87:bcs-koolitused/

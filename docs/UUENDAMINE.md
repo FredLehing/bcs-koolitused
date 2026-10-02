@@ -34,13 +34,13 @@ ssh root@91.98.82.87 'cd bcs-koolitused && docker compose exec -T db pg_dump -U 
 ### 2. Kopeeri kood serverisse
 
 ```bash
-rsync -az --exclude node_modules --exclude .git --exclude .env \
+rsync -az --delete --exclude node_modules --exclude .git --exclude .env \
   --exclude backend/build --exclude backend/.gradle \
   --exclude frontend/dist --exclude .idea --exclude .claude \
   ./ root@91.98.82.87:bcs-koolitused/
 ```
 
-`--exclude .env` on kohustuslik — serveril on oma `.env` päris saladustega.
+`--exclude .env` on kohustuslik — serveril on oma `.env` päris saladustega. `--delete` eemaldab serverist failid, mis lokaalselt kustutati (nt galerii pildid); `--exclude`-itud teid (`.env`, `node_modules` jm) see ei puuduta.
 
 ### 3. Ehita ja käivita serveris uuesti
 

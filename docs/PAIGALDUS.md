@@ -71,7 +71,7 @@ ufw allow 22/tcp && ufw allow 80/tcp && ufw allow 443/tcp && ufw --force enable
 Lokaalsest repo kaustast (WSL):
 
 ```bash
-rsync -az --exclude node_modules --exclude .git --exclude .env \
+rsync -az --delete --exclude node_modules --exclude .git --exclude .env \
   --exclude backend/build --exclude backend/.gradle \
   --exclude frontend/dist --exclude .idea --exclude .claude \
   ./ root@91.98.82.87:bcs-koolitused/
