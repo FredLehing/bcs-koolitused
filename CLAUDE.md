@@ -12,6 +12,7 @@ See on Vali-IT pangaäpi monorepo: Spring Boot backend + Vue 3 frontend.
 backend/    Spring Boot 4.x / Java 21 REST API — vt backend/CLAUDE.md
 frontend/   Vue 3 + Vite SPA — vt frontend/CLAUDE.md
 docs/       Dokumentatsioon ja andmebaasiskriptid
+deploy/     Serveripaigalduse abifailid (Postgresi init-skript)
 ```
 
 **Backend ja frontend on eraldi arendatavad ja käivitatavad rakendused** — igaühel on oma CLAUDE.md alamkaustas koos täpsete ehitus-/käivitus-/testikäskudega, arhitektuuri ja koodikonventsioonidega. Enne kummaski kaustas töötamist loe vastav CLAUDE.md.
@@ -61,6 +62,10 @@ Kui ülesanne on suur ja jaguneb sõltumatuteks osadeks (nt mitu eraldi backend 
    - **Opus** — keerukas loogika (transaktsioonid, mitu tabelit, veakäsitlus, välised teenused, arhitektuur).
 
 Käivita agendid alles pärast kasutaja kinnitust. Paralleelsed agendid ei tohi muuta samu faile. Enne kasutajale raporteerimist vaata agentide tulemus üle (kompileerimine, testid) ja anna kasutajale lühike kokkuvõte.
+
+## Serveripaigaldus (Docker)
+
+Rakendus on paigaldatud serverisse https://91-98-82-87.sslip.io (`root@91.98.82.87`, kaust `/root/bcs-koolitused`) juurkausta `docker-compose.yml` abil (Postgres + backend + Caddy). Juhendid: `docs/PAIGALDUS.md` (esmane paigaldus, saladused, DB ligipääs) ja `docs/UUENDAMINE.md` (uue versiooni viimine). Uuendamiseks kasuta `skill-deploy-server`; kui `docs/database` skriptid muutusid ja serveri andmebaas tuleb lähtestada, `skill-deploy-server-drop-db`. Andmebaasi skriptid laetakse serveris `deploy/db-init/00_init.sh` kaudu (migratsioone pole).
 
 ## docs/ kausta struktuur
 

@@ -1,0 +1,46 @@
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: vali_it
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "127.0.0.1:${DB_PORT:-5433}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # Tühja volume'i esmakäivitusel laetakse docs/database skriptid (vt deploy/db-init/00_init.sh)
+      - ./deploy/db-init:/docker-entrypoint-initdb.d:ro
+      - ./docs/database:/database:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d vali_it"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db/vali_it?currentSchema=bcs_koolitused
+      SPRING_DATASOURCE_DRIVERCLASSNAME: org.postgresql.Driver
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build: ./frontend
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS}
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+    volumes:
+      - caddy_data:/data
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
+  caddy_data:
