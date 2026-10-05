@@ -19,4 +19,8 @@ public class TrainingTranslationDto implements Serializable {
     private String shortDescription;
     // Richtext (HTML) — salvestamisel HtmlSanitizer-iga puhastatud, tagastatakse muutmata
     private String description;
+    // Õppekava (training_translation_curriculum); null = õppekava pole
+    private String curriculumFileName;
+    // Baitides
+    private Integer curriculumFileSize;
 }

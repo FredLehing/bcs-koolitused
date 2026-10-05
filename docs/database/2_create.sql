@@ -89,6 +89,22 @@ CREATE TABLE course_participant
     CONSTRAINT course_participant_uq UNIQUE (course_id, participant_id)
 );
 
+-- Table: course_participant_feedback (vastus: ühe kriteeriumi hinne ja kommentaar)
+CREATE TABLE course_participant_feedback
+(
+    id                   serial       NOT NULL,
+    feedback_id          int          NOT NULL,
+    feedback_criteria_id int          NOT NULL,
+    score                int          NOT NULL,
+    feedback_text        text         NULL,
+    created_at           timestamp    NOT NULL,
+    updated_at           timestamp    NOT NULL,
+    CONSTRAINT course_participant_feedback_pk PRIMARY KEY (id),
+    -- tagasisides üks vastus kriteeriumi kohta
+    CONSTRAINT course_participant_feedback_uq UNIQUE (feedback_id, feedback_criteria_id),
+    CONSTRAINT course_participant_feedback_score_ck CHECK (score BETWEEN 1 AND 10)
+);
+
 -- Table: enquiry
 CREATE TABLE enquiry
 (
@@ -104,10 +120,44 @@ CREATE TABLE enquiry
     CONSTRAINT applicant_pk PRIMARY KEY (id)
 );
 
--- Table: feedback
+-- Table: feedback (ühe registreerumise tagasiside päis)
 CREATE TABLE feedback
 (
-    id serial NOT NULL
+    id                    serial     NOT NULL,
+    course_participant_id int        NOT NULL,
+    -- N = uus, U = osaleja muutis pärast admini ülevaatust, H = admin on üle vaadanud
+    status                varchar(1) NOT NULL,
+    created_at            timestamp  NOT NULL,
+    updated_at            timestamp  NOT NULL,
+    CONSTRAINT feedback_pk PRIMARY KEY (id),
+    -- registreerumisel üks tagasiside
+    CONSTRAINT feedback_uq UNIQUE (course_participant_id)
+);
+
+-- Table: feedback_criteria (tagasiside kriteerium; tekst tõlgetes)
+CREATE TABLE feedback_criteria
+(
+    id         serial     NOT NULL,
+    sequence   int        NOT NULL,
+    -- A = aktiivne, D = kustutatud (soft delete)
+    status     varchar(1) NOT NULL,
+    created_at timestamp  NOT NULL,
+    updated_at timestamp  NOT NULL,
+    CONSTRAINT feedback_criteria_pk PRIMARY KEY (id)
+);
+
+-- Table: feedback_criteria_translation
+CREATE TABLE feedback_criteria_translation
+(
+    id                   serial       NOT NULL,
+    feedback_criteria_id int          NOT NULL,
+    language_id          int          NOT NULL,
+    title                varchar(50)  NOT NULL,
+    description          varchar(255) NOT NULL,
+    created_at           timestamp    NOT NULL,
+    updated_at           timestamp    NOT NULL,
+    CONSTRAINT feedback_criteria_translation_pk PRIMARY KEY (id),
+    CONSTRAINT feedback_criteria_translation_uq UNIQUE (feedback_criteria_id, language_id)
 );
 
 -- Table: funding_type
@@ -323,6 +373,20 @@ CREATE TABLE training_translation
     CONSTRAINT training_translation_uq UNIQUE (training_id, language_id)
 );
 
+-- Table: training_translation_curriculum (1:1 training_translation'iga; rida puudub = õppekava pole)
+CREATE TABLE training_translation_curriculum
+(
+    id                      serial       NOT NULL,
+    training_translation_id int          NOT NULL,
+    file                    bytea        NOT NULL,
+    file_name               varchar(255) NOT NULL,
+    file_size               int          NOT NULL,
+    created_at              timestamp    NOT NULL,
+    updated_at              timestamp    NOT NULL,
+    CONSTRAINT training_translation_curriculum_pk PRIMARY KEY (id),
+    CONSTRAINT training_translation_curriculum_uq UNIQUE (training_translation_id)
+);
+
 -- Table: user
 CREATE TABLE "user"
 (
@@ -465,6 +529,24 @@ ALTER TABLE course_participant
                 INITIALLY IMMEDIATE
 ;
 
+-- Reference: course_participant_feedback_feedback (table: course_participant_feedback)
+ALTER TABLE course_participant_feedback
+    ADD CONSTRAINT course_participant_feedback_feedback
+        FOREIGN KEY (feedback_id)
+            REFERENCES feedback (id)
+            NOT DEFERRABLE
+                INITIALLY IMMEDIATE
+;
+
+-- Reference: course_participant_feedback_feedback_criteria (table: course_participant_feedback)
+ALTER TABLE course_participant_feedback
+    ADD CONSTRAINT course_participant_feedback_feedback_criteria
+        FOREIGN KEY (feedback_criteria_id)
+            REFERENCES feedback_criteria (id)
+            NOT DEFERRABLE
+                INITIALLY IMMEDIATE
+;
+
 -- Reference: course_participant_participant (table: course_participant)
 ALTER TABLE course_participant
     ADD CONSTRAINT course_participant_participant
@@ -506,6 +588,33 @@ ALTER TABLE enquiry
     ADD CONSTRAINT enquiry_profile
         FOREIGN KEY (profile_id)
             REFERENCES profile (id)
+            NOT DEFERRABLE
+                INITIALLY IMMEDIATE
+;
+
+-- Reference: feedback_course_participant (table: feedback)
+ALTER TABLE feedback
+    ADD CONSTRAINT feedback_course_participant
+        FOREIGN KEY (course_participant_id)
+            REFERENCES course_participant (id)
+            NOT DEFERRABLE
+                INITIALLY IMMEDIATE
+;
+
+-- Reference: feedback_criteria_translation_feedback_criteria (table: feedback_criteria_translation)
+ALTER TABLE feedback_criteria_translation
+    ADD CONSTRAINT feedback_criteria_translation_feedback_criteria
+        FOREIGN KEY (feedback_criteria_id)
+            REFERENCES feedback_criteria (id)
+            NOT DEFERRABLE
+                INITIALLY IMMEDIATE
+;
+
+-- Reference: feedback_criteria_translation_language (table: feedback_criteria_translation)
+ALTER TABLE feedback_criteria_translation
+    ADD CONSTRAINT feedback_criteria_translation_language
+        FOREIGN KEY (language_id)
+            REFERENCES language (id)
             NOT DEFERRABLE
                 INITIALLY IMMEDIATE
 ;
@@ -650,6 +759,15 @@ ALTER TABLE training_lecturer
     ADD CONSTRAINT training_lecturer_training
         FOREIGN KEY (training_id)
             REFERENCES training (id)
+            NOT DEFERRABLE
+                INITIALLY IMMEDIATE
+;
+
+-- Reference: training_translation_curriculum_training_translation (table: training_translation_curriculum)
+ALTER TABLE training_translation_curriculum
+    ADD CONSTRAINT training_translation_curriculum_training_translation
+        FOREIGN KEY (training_translation_id)
+            REFERENCES training_translation (id)
             NOT DEFERRABLE
                 INITIALLY IMMEDIATE
 ;
@@ -958,5 +1076,14 @@ FROM course c
 WHERE t.status = 'P'
   AND c.status IN ('O', 'F')
   AND c.start_date >= current_date;
+
+-- Olemasoleva andmebaasi kommentaariveeru laiendamine.
+-- Käivita eraldi, kui andmebaas loodi vana varchar(255) skeemiga.
+-- Uuel andmebaasil on sama muudatus juba 2_create.sql failis.
+BEGIN;
+ALTER TABLE bcs_koolitused.course_participant_feedback
+    ALTER COLUMN feedback_text TYPE text;
+COMMIT;
+
 
 -- End of file.

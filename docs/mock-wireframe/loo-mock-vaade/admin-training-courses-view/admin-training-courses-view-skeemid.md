@@ -12,7 +12,7 @@ Eeskuju: `docs/mock-wireframe/loo-mock-vaade/admin-trainings-view/` (skeemid, l�
 - Avaneb AdminTrainingsView rea uuest ikoonist "Kalender" ja TrainingFormView kiirnupust "Kalender".
 - Ülal koolituse andmed (suures pildis nagu `/training`): pealkiri, staatus, kategooria, õppekeel (lipp), toimumiskoht, koolitajad, rahastus, sätted. Koolitajad (`training_lecturer`, `sort_order` järjekorras) kuvatakse **ainult nimedena** komadega (koolitaja kaart `LecturerCard.vue` on avalikul koolituse lehel, mitte admini kalendris). Korduvad osad tehakse komponentideks, mida saab kasutada ka `/training` vaates.
   - Andmed kuvatakse kasutajaliidese keeles (store'i `contentLang`); puuduva tõlke korral põhikeeles (sama reegel nagu AdminTrainingsView-s). Keele vahetusel laaditakse koolituse andmed uuesti.
-  - Koolituse kaardil on lingid "Vaata" (`/training?...`) ja "Muuda" (`/training-form?...`) ning kiirnupp "Koolituste haldus" (`/admin-trainings`).
+  - Koolituse kaardil on lingid "Vaata" (`/training?...`) ja "Muuda" (`/training-form?...`) ning kiirnupp "Koolitused" (`/admin-trainings`).
 - Kaart "Kirjeldus" (pikk `description`, `RichTextContent`) on **vaikimisi peidus**, avatakse lingiga "▾ Näita kirjeldust" / "▴ Peida kirjeldus" (sama muster nagu AdminTrainingsView filtrikaart).
 - Kalendritabel: üks rida iga toimumiskorra (`course`) kohta. Veerud: Algus | Lõpp (`30/09/2026`) | Päevi | Akad. tunde | Hind (€) | Koolitajad | Ruum | Staatus | Osalejaid | Märkmed | Veebilink | Tegevused.
   - `notes` sisu ei kuvata — ainult `hasNotes` (✓/✗). Samamoodi `hasMeetingLink` (✓/✗).
@@ -48,7 +48,7 @@ Eeskuju: `docs/mock-wireframe/loo-mock-vaade/admin-trainings-view/` (skeemid, l�
 - **Miks:** JPA laeb `bytea` välja entity'ga alati kaasa (laisk laadimine vajaks bytecode enhancement'it). Eraldi tabeliga ei loeta pilte näiteks "Vali koolitaja" otsingus ega teistes koolitajate päringutes. Kaob ka `NOT NULL` + `''::bytea` kohatäide.
 - `content_type` salvestatakse koos pildiga (normaliseeritud pildil `image/jpeg`); pilditeenus saadab selle `Content-Type` päisena.
 - `GET /api/lecturers` → `LecturerDto` ilma `lecturerPhoto`-ta (`{ lecturerId, lecturerName }`). Muutub olemasolev kood: `Lecturer` entity (`photo` väli kaob), `LecturerMapper` (`bytesToBase64` liigub pildi mapperisse), `LecturerDto`, `MockDatabase.js`.
-- Kalender ja toimumiskorra vorm pilte ei kuva (koolitajad on nimedena). Pilti kuvab avalikul koolituse lehel koolitaja kaart (`LecturerCard.vue`, teenus `GET /api/lecturer-summary/{lecturerId}` — vt `docs/mock-wireframe/loo-mock-vaade/admin-lecturers-view/admin-lecturers-view-skeemid.md`). `GET /api/admin-training/{trainingId}` pilti **ei** tagasta.
+- Kalender ja toimumiskorra vorm pilte ei kuva (koolitajad on nimedena). Pilti kuvab avalikul koolituse lehel koolitaja kaart (`LecturerCard.vue`, andmed `GET /api/training-summary/{trainingId}` vastusest, foto eraldi pilditeenusest — vt `docs/mock-wireframe/loo-mock-vaade/admin-lecturers-view/admin-lecturers-view-skeemid.md`). `GET /api/admin-training/{trainingId}` pilti **ei** tagasta.
 - **Uuendus (avalik koolitajate leht):** pilt tuleb pilditeenusest `GET /api/lecturer/{lecturerId}/photo?v={photoVersion}` ja DTO-d tagastavad Base64 asemel `photoVersion`; üleslaadimisel pilt normaliseeritakse (400×400 JPEG). Vt `docs/mock-wireframe/loo-mock-vaade/lecturers-view/lecturers-view-skeemid.md`, "Pildid".
 
 ### Staatused (`course.status`, ingliskeelsed ühetähelised koodid)
@@ -115,7 +115,7 @@ ALTER TABLE lecturer_photo
 
 Seed: koolitajad (9) ja pildid on `admin-lecturers-view-skeemid.md` jaotises 1 ning taskis `docs/tasks/backend/lecturer-db-changes.md` — Rain Tüüril (1) on näidispilt, teistel pilti pole.
 
-Backend: uus entity `persistance/lecturer/photo/LecturerPhoto` (`@ManyToOne` / `@OneToOne` väli `lecturer`) ja `LecturerPhotoRepository.findByLecturerId(Integer)` → `Optional`. Pildi loeb ainult `GET /api/lecturer-summary/{lecturerId}` (ja koolitaja vormi `GET /api/lecturer/{lecturerId}`).
+Backend: uus entity `persistance/lecturer/photo/LecturerPhoto` (`@ManyToOne` / `@OneToOne` väli `lecturer`) ja `LecturerPhotoRepository.findByLecturerId(Integer)` → `Optional`. Pildi baite loeb olemasolev `GET /api/lecturer/{lecturerId}/photo` teenus; koondvastused sisaldavad ainult photoVersion metainfot.
 
 ---
 
@@ -301,7 +301,7 @@ Vormis (muutmise olek) on sama komponent; `event-course-deleted` järel suunatak
 | kalender | Laadimine | `GET /api/admin-training/{trainingId}?contentLang={UI keel}` | koolituse kaart ja kirjeldus (ka keele vahetusel) |
 | kalender | Laadimine | `GET /api/training/{trainingId}/courses?includePast=false` | tabel (lüliti muutmisel uuesti) |
 | kalender | Tegevus | `DELETE /api/course/{courseId}` | `CourseDeleteButton` → kinnitus → tabel uuesti |
-| kalender | Navigeerimine | — | "+ Lisa toimuv koolitus" → `/course-form?trainingId={id}`; pliiats → `/course-form?courseId={id}`; "Vaata" / "Muuda" koolitust; "Koolituste haldus" |
+| kalender | Navigeerimine | — | "+ Lisa toimuv koolitus" → `/course-form?trainingId={id}`; pliiats → `/course-form?courseId={id}`; "Vaata" / "Muuda" koolitust; "Koolitused" |
 | vorm | Laadimine | `GET /api/course/{courseId}` | ainult muutmise olekus; annab `trainingId` |
 | vorm | Laadimine | `GET /api/admin-training/{trainingId}?contentLang={UI keel}` | koolituse nimi ja koolitajad (uue toimumiskorra eeltäitmine) |
 | vorm | Laadimine | `GET /api/rooms` | ruumi rippmenüü |
@@ -351,8 +351,8 @@ Vormis (muutmise olek) on sama komponent; `event-course-deleted` järel suunatak
 
 ```text
 Create a desktop wireframe of an admin page "Koolituse kalender" in a web app.
-Top: site navigation bar with logo and links (Koolitused, Teenused, Ettevõttest, Kontakt), a dropdown "Admin ▾" and "Logi välja" on the right.
-Header row: page title "Koolituse kalender" on the left, a secondary button "Koolituste haldus" and a primary button "+ Lisa toimuv koolitus" on the right.
+Top: site navigation bar with logo and links (Koolitused, Teenused, Ettevõttest, Kontakt), a dropdown "Admin ▾", a user icon dropdown "👤 ▾" (Minu profiil) and "Logi välja" on the right.
+Header row: page title "Koolituse kalender" on the left, a secondary button "Koolitused" and a primary button "+ Lisa toimuv koolitus" on the right.
 Below: a card with the training title "Java algkursus", a green badge "Publitseeritud" and small links "Vaata" and "Muuda". Inside the card a two-column list of label/value pairs: "Kategooria: Programmeerimine", "Õppekeel: Estonian flag", "Toimumiskoht: BCS Koolitus", "Koolitajad: Rain Tüür, Meelis Teern", "Rahastus: Töötukassa", "Sätted: • Tellitav • Esile tõstetud".
 Below the card: a small text link with a down arrow "▾ Näita kirjeldust" (the description card is collapsed).
 Below: a toggle switch "Näita ka möödunud" (off).
@@ -367,7 +367,7 @@ Below the table: text "Kokku 4 toimumiskorda".
 
 ```text
 Create a desktop wireframe of an admin form page "Uus toimumiskord" in a web app.
-Top: site navigation bar with logo and links (Koolitused, Teenused, Ettevõttest, Kontakt), a dropdown "Admin ▾" and "Logi välja" on the right.
+Top: site navigation bar with logo and links (Koolitused, Teenused, Ettevõttest, Kontakt), a dropdown "Admin ▾", a user icon dropdown "👤 ▾" (Minu profiil) and "Logi välja" on the right.
 Header row: page title "Uus toimumiskord" with a subtitle "Java algkursus" below it, and a secondary button "Kalender" on the right.
 Main area: a card titled "Toimumiskorra andmed" with a form in a two-column grid:
 "Algus *" date input, "Lõpp *" date input,
@@ -379,3 +379,8 @@ Main area: a card titled "Toimumiskorra andmed" with a form in a two-column grid
 Bottom of the card: primary button "Salvesta" and secondary button "Tagasi".
 In the edit version of the page the title is "Toimumiskorra muutmine" and a trash icon button is next to "Salvesta".
 ```
+
+
+## Vaadetevaheline tagasitee
+
+Detailide ja vormide avamisel antakse kaasa lähtevaate täielik URL `returnTo` parameetrina. Ühine „← Tagasi“ link taastab selle URL-i; otselingi korral kasutatakse vaate varusihti. Peamenüü ja vahelehed tagasiteed ei loo. Oleku- ja tõlkevahetus säilitab senise tagasitee. Kõigi avamiskohtade, erandite ja varusihtide [ühine skeem](../return-to-navigation-skeemid.md).

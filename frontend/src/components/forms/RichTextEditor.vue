@@ -28,6 +28,7 @@ export default {
   props: {
     html: String,
     labelId: String,
+    isDisabled: Boolean,
   },
   emits: ['event-new-html-input'],
   data() {
@@ -72,6 +73,9 @@ export default {
     },
   },
   watch: {
+    isDisabled(isDisabled) {
+      this.editor?.setEditable(!isDisabled)
+    },
     // Väline sisu muutus (laadimine, oleku vahetus, AI tõlge) — oma emititud väärtust tagasi ei laeta
     html(newHtml) {
       if (newHtml === this.lastEmittedHtml) {
@@ -125,6 +129,7 @@ export default {
   },
   mounted() {
     this.editor = new Editor({
+      editable: !this.isDisabled,
       extensions: [
         StarterKit.configure({
           heading: { levels: [3, 4] },
@@ -171,6 +176,7 @@ export default {
         :title="$t('richTextEditor.' + button.name)"
         class="btn btn-sm"
         type="button"
+        :disabled="isDisabled"
       >
         <component :is="button.icon" v-if="button.icon" :size="16" weight="bold" />
         <span v-else class="fw-bold">{{ button.text }}</span>
@@ -181,6 +187,7 @@ export default {
         :title="$t(editor.isActive('link') ? 'richTextEditor.unlink' : 'richTextEditor.link')"
         class="btn btn-sm"
         type="button"
+        :disabled="isDisabled"
       >
         <PhLinkBreak v-if="editor.isActive('link')" :size="16" weight="bold" />
         <PhLink v-else :size="16" weight="bold" />

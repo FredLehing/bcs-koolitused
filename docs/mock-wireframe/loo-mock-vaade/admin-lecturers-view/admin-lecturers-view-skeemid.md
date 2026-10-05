@@ -9,12 +9,12 @@ Eeskuju:
 
 ## Otsused
 
+- **Vahelehed** (2026-10-01): admini nimekirjavaadete ülaosas vahelehed kõigi admin-menüü linkidega (`AdminTabs.vue` / `NavTabs.vue`), selle vaate vaheleht aktiivne — vt `docs/tasks/frontend/view-tabs.md`.
+
 ### Üldine
 
 - **Termin kasutajaliideses on "koolitaja"** (inglise keeles "Trainer") — kõikjal, ka olemasolevates tekstides: "Vali lektor" → "Vali koolitaja", "Vaikimisi lektor" → "Vaikimisi koolitaja", "— lektor puudub —" → "— koolitaja puudub —", navbari "Lektorid" → "Koolitajad"; en: "Lecturer(s)" → "Trainer(s)". Muutuvad `et.json` / `en.json` võtmed `navbar.lecturers`, `trainingForm.*` ja `trainingForm.lecturerModal.*` (võtmete nimed jäävad). Koodis ja andmebaasis jääb `lecturer`.
-- **Navbar → menüü "Admin"** (nähtav ainult adminile, `App.vue`): olemasolevate linkide järele eraldaja ja kaks uut linki:
-  - "Lisa uus koolitaja" → `/lecturer-form` (i18n `navbar.addLecturer`);
-  - "Koolitajad" → `/admin-lecturers` (i18n `navbar.manageLecturers`).
+- **Navbar → menüü "Admin"** (nähtav ainult adminile, `App.vue`): link "Koolitajad" → `/admin-lecturers` (i18n `navbar.manageLecturers`). Uus koolitaja lisatakse nimekirja nupust "+ Lisa uus koolitaja" (menüüs algselt olnud link "Lisa uus koolitaja" eemaldati). (Admin-menüü uuendatud 2026-10-01: vt `docs/tasks/frontend/admin-menu.md`.)
 - **Staatus** (`lecturer.status`, `varchar(1)`): `A` = aktiivne (`LecturerStatus.ACTIVE`), `D` = kustutatud (`LecturerStatus.DELETED`, soft delete). Mustandi/publitseerimise olekut koolitajal pole.
 
 ### Mitu koolitajat — `training_lecturer` ja `course_lecturer`
@@ -44,11 +44,11 @@ Eeskuju:
 ### Koolitaja kaart — `LecturerCard.vue`
 
 - Kuvab: pilt (`LecturerAvatar`, pilt pilditeenusest `GET /api/lecturer/{lecturerId}/photo?v={photoVersion}` (vt `lecturers-view-skeemid.md`, "Pildid")), nimi, ametinimetus (`title`), lühikirjeldus (`shortDescription`) — kasutajaliidese keeles (store'i `contentLang`), puuduva tõlke korral põhikeeles.
-- Komponent laeb andmed ise: prop `lecturerId`, päring `GET /api/lecturer-summary/{lecturerId}?contentLang=` (ka `lecturerId` või keele muutumisel). `lecturerId = null` → kaarti ei kuvata.
-- Kustutatud või olematu koolitaja → 404 → kaarti ei kuvata (üldisele veavaatele ei suunata).
+- Komponent saab kohustusliku `lecturerSummary` prop-i `/course` või `/training` koondvastusest; JSON-päringuid ega oma laadimisolekut pole. Keelevahetusel laadib andmed uuesti vanemvaade.
+- Kustutatud koolitajad jäetakse backendis koondvastusest välja; tühi lecturers massiiv peidab jaotise.
 - Kasutab:
-  - `TrainingView.vue` (`/training`) — parema veeru olemasolev kohatäide "Koolitaja" (`trainingView.sidebar.lecturer`): koolituse koolitajad (iga koolitaja jaoks oma kaart);
-- Seepärast ei tagasta `GET /api/admin-training/{trainingId}` enam `defaultLecturerPhoto` / `defaultLecturerPhotoContentType` — pilt tuleb ainult `lecturer-summary` teenusest (admin-training-courses-view skeemid ja märkmed on uuendatud).
+  - `TrainingView.vue` (`/training`) — parema veeru "Koolitajad" (`trainingView.sidebar.lecturers`): koolituse aktiivsed koolitajad (iga koolitaja jaoks oma kaart);
+- Seepärast ei tagasta `GET /api/admin-training/{trainingId}` enam `defaultLecturerPhoto` / `defaultLecturerPhotoContentType` — kaardiandmed tulevad avaliku vaate koondteenusest, foto olemasolevast pilditeenusest (admin-training-courses-view skeemid ja märkmed on uuendatud).
 
 ### Koolitajate nimekiri — `AdminLecturersView.vue`
 
@@ -331,7 +331,7 @@ Ametid ja spetsialiseerumised on BCS Koolituse lektorite nimekirjast; `descripti
 
 ```mermaid
 stateDiagram-v2
-    [*] --> A_Uus: /lecturer-form<br/>(navbar "Lisa uus koolitaja",<br/>AdminLecturersView "+ Lisa uus koolitaja")
+    [*] --> A_Uus: /lecturer-form<br/>(AdminLecturersView "+ Lisa uus koolitaja")
     [*] --> B_Muutmine: ?lecturerId&lecturerTranslationId<br/>(AdminLecturersView "Muuda")
 
     A_Uus --> B_Muutmine: "Lisa"<br/>POST /api/lecturer<br/>router.replace
@@ -383,7 +383,7 @@ sequenceDiagram
     participant BE as Backend
     participant DB as Andmebaas
 
-    Admin->>FE: navbar "Admin" → "Lisa uus koolitaja"
+    Admin->>FE: AdminLecturersView "+ Lisa uus koolitaja"
     FE->>BE: GET /api/languages
     FE-->>Admin: tühi vorm (tõlge et)
 
@@ -502,7 +502,7 @@ sequenceDiagram
 | vorm B | Tegevus | `PUT /api/lecturer/{lecturerId}` | "Salvesta" |
 | vorm C | Tegevus | `POST /api/lecturer/{lecturerId}/lecturer-translation` | "Lisa tõlge" → olek B |
 | vorm B (mitte-põhikeel), C | Tegevus | `GET /api/lecturer/{lecturerId}/ai-translation?languageId={id}` | "Tee AI tõlge" |
-| `LecturerCard` (TrainingView) | Laadimine | `GET /api/lecturer-summary/{lecturerId}?contentLang={UI keel}` | koolitaja kaart |
+| CourseView / TrainingView | Laadimine | `GET /api/course-summary/{courseId}` / `GET /api/training-summary/{trainingId}` koos contentLang-ga | kõik kaardiandmed koondvastuses, foto eraldi |
 
 Lipule klikkimine päringut ei tee — see teeb `router.replace`-i ja käivitab laadimise uuesti.
 
@@ -514,10 +514,10 @@ Lipule klikkimine päringut ei tee — see teeb `router.replace`-i ja käivitab 
 |---|---|---|
 | `views/AdminLecturersView.vue` | uus | nimekiri; hoiab `lecturers`, `searchText`, `includeDeleted`; `computed: filteredLecturers` |
 | `views/LecturerFormView.vue` | uus | vorm, olekud `new-lecturer` / `update` / `new-translation` |
-| `App.vue` (navbar) | muudetakse | menüüsse "Admin" eraldaja + "Lisa uus koolitaja", "Koolitajad" |
+| `App.vue` (navbar) | muudetakse | menüüsse "Admin" link "Koolitajad" |
 | `router/index.js` | muudetakse | `/admin-lecturers` (`adminLecturersRoute`), `/lecturer-form` (`lecturerFormRoute`) |
 | `NavigationService.js` | muudetakse | `navigateToAdminLecturersView()`, `navigateToLecturerFormView(query)` |
-| `components/common/LecturerCard.vue` | uus, jagatud | prop `lecturerId`; laeb `GET /api/lecturer-summary/{id}` ise; pilt, nimi, ametinimetus, lühikirjeldus; 404 → ei kuvata. Kasutab TrainingView (admini kalender näitab ainult nimesid) |
+| `components/common/LecturerCard.vue` | uus, jagatud | prop `lecturerSummary`; ainult kuvamine: pilt, nimi, ametinimetus, lühikirjeldus. Kasutavad TrainingView ja CourseView; kustutatud koolitajaid filtreerib backend (admini kalender näitab ainult nimesid) |
 | `components/common/LecturerAvatar.vue` | uus (admin-training-courses-view mockist) | pilt või kohatäide (`PhUserCircle`); prop `size` |
 | `components/common/LecturerDeleteButton.vue` | uus | propsid `lecturerId`, `fullName`, `upcomingCourseCount`; `disabled` + tooltip, kui > 0; `ConfirmModal` + `DELETE`; emits `event-lecturer-deleted`, `event-delete-error` |
 | `components/common/LecturerRestoreButton.vue` | uus | "Taasta" + `ConfirmModal` + `PUT .../restore`; emit `event-lecturer-restored` (või üks ühine `LecturerStatusButton`, arendaja otsustada) |
@@ -542,7 +542,8 @@ Lipule klikkimine päringut ei tee — see teeb `router.replace`-i ja käivitab 
 
 ```text
 Create a desktop wireframe of an admin page "Koolitajad" in a web app.
-Top: site navigation bar with logo and links (Koolitused, Teenused, Ettevõttest, Kontakt), an open dropdown "Admin ▾" with items "Lisa uus koolitus", "Koolituste haldus", a divider, "Lisa uus koolitaja" and "Koolitajad" (highlighted), and "Logi välja" on the right.
+Top: site navigation bar with logo and links (Koolitused, Teenused, Ettevõttest, Kontakt), an open dropdown "Admin ▾" with items "Koolituste päringud", "Registreerumised", a divider, "Koolitused", "Koolituste kalender", a divider, "Koolitajad" (highlighted), "Koolitusruumid", a divider and "Kontod",, a user icon dropdown "👤 ▾" (Minu profiil) and "Logi välja" on the right.
+Below the navigation bar: a tab bar "Koolituste päringud | Registreerumised | Koolitused | Koolituste kalender | Koolitajad | Koolitusruumid | Kontod" with "Koolitajad" as the active tab.
 Header row: page title "Koolitajad" on the left and a primary button "+ Lisa uus koolitaja" on the right.
 Below the header: a search text input "Otsi nime järgi…" and a toggle switch "Näita kustutatud" (on).
 Main area: a data table with columns "Nimi", "Ametinimetus", "Tõlked", "Koolitusi", "Tulevasi toimumiskordi", "Uuendatud", "Tegevused". No photos.
@@ -558,7 +559,7 @@ Below the table: text "Kokku 9 koolitajat".
 
 ```text
 Create a desktop wireframe of an admin form page "Muuda koolitajat" in a web app.
-Top: site navigation bar with logo and links, a dropdown "Admin ▾" and "Logi välja" on the right.
+Top: site navigation bar with logo and links, a dropdown "Admin ▾", a user icon dropdown "👤 ▾" (Minu profiil) and "Logi välja" on the right.
 Header row: page title "Muuda koolitajat" with subtitle "Rain Tüür" on the left and a secondary button "Koolitajad" on the right.
 Below the header: a row of small language flag buttons "et" (colored, selected) and "en" (colored).
 First card titled "Koolitaja andmed": a text input "Täisnimi *" with value "Rain Tüür"; a field "Pilt" with a round photo preview (80 px), a button "Vali pilt", a button "Eemalda" and a small hint "PNG, JPEG või WebP, kuni 2 MB".
@@ -576,3 +577,8 @@ In the "new lecturer" version the title is "Lisa uus koolitaja", there are no fl
 ```text
 Create a small wireframe card titled "Koolitaja" for a right sidebar: a round photo (56 px) on the left; on the right the name "Rain Tüür" in bold, below it a smaller grey line "Lektor/konsultant", and below that one sentence "Tarkvaraarendus, Java, HTML, CSS, JavaScript, SQL, Git, Spring Boot, REST API, PostgreSQL, JPA (Hibernate), MapStruct, JUnit, Swagger, Gradle, Confluence, Jira. Vali Tarkvaraarendus! programm.".
 ```
+
+
+## Vaadetevaheline tagasitee
+
+Detailide ja vormide avamisel antakse kaasa lähtevaate täielik URL `returnTo` parameetrina. Ühine „← Tagasi“ link taastab selle URL-i; otselingi korral kasutatakse vaate varusihti. Peamenüü ja vahelehed tagasiteed ei loo. Oleku- ja tõlkevahetus säilitab senise tagasitee. Kõigi avamiskohtade, erandite ja varusihtide [ühine skeem](../return-to-navigation-skeemid.md).

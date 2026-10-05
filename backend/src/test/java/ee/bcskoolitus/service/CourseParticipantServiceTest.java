@@ -6,6 +6,7 @@ import ee.bcskoolitus.controller.courseparticipant.dto.AdminRegistrationUpdateRe
 import ee.bcskoolitus.controller.courseparticipant.dto.CourseParticipantDto;
 import ee.bcskoolitus.controller.courseparticipant.dto.CourseParticipantStatusDto;
 import ee.bcskoolitus.controller.courseparticipant.dto.CourseRegistrationRequestDto;
+import ee.bcskoolitus.controller.courseparticipant.dto.MyRegistrationDto;
 import ee.bcskoolitus.infrastructure.exception.ForbiddenException;
 import ee.bcskoolitus.infrastructure.exception.PrimaryKeyNotFoundException;
 import ee.bcskoolitus.persistance.course.Course;
@@ -13,11 +14,13 @@ import ee.bcskoolitus.persistance.course.participant.CourseParticipant;
 import ee.bcskoolitus.persistance.course.participant.CourseParticipantMapper;
 import ee.bcskoolitus.persistance.course.participant.CourseParticipantMapperImpl;
 import ee.bcskoolitus.persistance.course.participant.CourseParticipantRepository;
+import ee.bcskoolitus.persistance.feedback.FeedbackRepository;
 import ee.bcskoolitus.persistance.participant.Participant;
 import ee.bcskoolitus.persistance.participant.ParticipantRepository;
 import ee.bcskoolitus.persistance.profile.Profile;
 import ee.bcskoolitus.persistance.profile.ProfileMapper;
 import ee.bcskoolitus.persistance.profile.ProfileMapperImpl;
+import ee.bcskoolitus.persistance.training.Training;
 import ee.bcskoolitus.persistance.user.User;
 import ee.bcskoolitus.persistance.view.adminregistrationsummary.AdminRegistrationSummary;
 import ee.bcskoolitus.persistance.view.adminregistrationsummary.AdminRegistrationSummaryMapper;
@@ -70,6 +73,10 @@ class CourseParticipantServiceTest {
     private AdminRegistrationSummaryRepository adminRegistrationSummaryRepository;
     @Spy
     private AdminRegistrationSummaryMapper adminRegistrationSummaryMapper = new AdminRegistrationSummaryMapperImpl();
+    @Mock
+    private TrainingTranslationService trainingTranslationService;
+    @Mock
+    private FeedbackRepository feedbackRepository;
 
     @InjectMocks
     private CourseParticipantService courseParticipantService;
@@ -106,6 +113,27 @@ class CourseParticipantServiceTest {
 
         assertThrows(PrimaryKeyNotFoundException.class, () -> courseParticipantService.findCourseParticipants(123));
         verify(courseParticipantRepository, never()).findAllByCourseIdOrderByCreatedAtAsc(any());
+    }
+
+    // ---------- "Minu koolitused": tagasiside väljad ----------
+
+    @Test
+    void findMyRegistrations_setsFeedbackFlags() {
+        when(participantRepository.findByUserId(2)).thenReturn(Optional.of(createParticipant()));
+        CourseParticipant past = createMyCourseParticipant(2, "R", LocalDate.now().minusDays(20), "O");
+        CourseParticipant pastWithFeedback = createMyCourseParticipant(10, "R", LocalDate.now().minusDays(100), "O");
+        CourseParticipant lastDay = createMyCourseParticipant(11, "R", LocalDate.now(), "O");
+        CourseParticipant upcoming = createMyCourseParticipant(1, "R", LocalDate.now().plusDays(8), "O");
+        CourseParticipant cancelled = createMyCourseParticipant(5, "C", LocalDate.now().minusDays(20), "O");
+        CourseParticipant cancelledCourse = createMyCourseParticipant(6, "R", LocalDate.now().minusDays(20), "X");
+        when(courseParticipantRepository.findParticipantCourseParticipantsBy(1, "D"))
+                .thenReturn(List.of(past, pastWithFeedback, lastDay, upcoming, cancelled, cancelledCourse));
+        when(feedbackRepository.findFeedbackCourseParticipantIdsBy(List.of(2, 10, 11, 1, 5, 6))).thenReturn(List.of(10));
+
+        List<MyRegistrationDto> myRegistrationDtos = courseParticipantService.findMyRegistrations(2, "et");
+
+        assertEquals(List.of(true, true, true, false, false, false), myRegistrationDtos.stream().map(MyRegistrationDto::getCanGiveFeedback).toList());
+        assertEquals(List.of(false, true, false, false, false, false), myRegistrationDtos.stream().map(MyRegistrationDto::getHasFeedback).toList());
     }
 
     // ---------- registreerumise olek ----------
@@ -403,6 +431,23 @@ class CourseParticipantServiceTest {
     }
 
     // 3_import.sql osaleja 1 (kasutaja 2)
+    private static CourseParticipant createMyCourseParticipant(Integer courseParticipantId, String status, LocalDate endDate, String courseStatus) {
+        Training training = new Training();
+        training.setId(1);
+        Course course = new Course();
+        course.setId(courseParticipantId);
+        course.setTraining(training);
+        course.setStartDate(endDate.minusDays(4));
+        course.setEndDate(endDate);
+        course.setStatus(courseStatus);
+        CourseParticipant courseParticipant = new CourseParticipant();
+        courseParticipant.setId(courseParticipantId);
+        courseParticipant.setCourse(course);
+        courseParticipant.setStatus(status);
+        courseParticipant.setHasPaid(true);
+        return courseParticipant;
+    }
+
     private static Participant createParticipant() {
         Profile profile = new Profile();
         profile.setFirstName("Anna");

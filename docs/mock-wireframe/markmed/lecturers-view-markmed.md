@@ -43,7 +43,7 @@ LecturerSummaryDto.java
 ]
 
 API teenuse lisainfo:
-Ainult aktiivsed koolitajad (lecturer.status = "A"), sorteeritud fullName järgi. title ja shortDescription contentLang keeles, puudumisel põhikeeles. Sama DTO nagu GET /api/lecturer-summary/{lecturerId} (LecturerCard). Pilti ei tagastata — photoVersion = lecturer_photo.updated_at epoch-sekundites või null, kui pilti pole; frontend koostab pildi URL-i /api/lecturer/{lecturerId}/photo?v={photoVersion}. description (pikk kirjeldus) ei kuulu vastusesse. Tühi list, kui koolitajaid pole.
+Ainult aktiivsed koolitajad (lecturer.status = "A"), sorteeritud fullName järgi. title ja shortDescription contentLang keeles, puudumisel põhikeeles. Sama DTO nagu GET /api/lecturer-summary/{lecturerId}; sama DTO on ka course-summary ja training-summary vastuste lecturers massiivis. Pilti ei tagastata — photoVersion = lecturer_photo.updated_at epoch-sekundites või null, kui pilti pole; frontend koostab pildi URL-i /api/lecturer/{lecturerId}/photo?v={photoVersion}. description (pikk kirjeldus) ei kuulu vastusesse. Tühi list, kui koolitajaid pole.
 
 Veateated: —
 ```

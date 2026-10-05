@@ -1,8 +1,10 @@
 import axios from 'axios'
-import { mockResponse } from '@/api-services/mock/mockResponse.js'
-import MockDatabase from '@/api-services/mock/MockDatabase.js'
 
 export default {
+  getCurriculumUrl(trainingTranslationId) {
+    return `/api/training-translation/${trainingTranslationId}/curriculum`
+  },
+
   sendGetTrainingsRequest(
     categoryId,
     fundingTypeId,
@@ -30,6 +32,13 @@ export default {
   // GET /api/training-translation/{id} kutsetega — "Lisa" järel laaditakse uus koolitus nende kaudu.
   sendPostTrainingRequest(trainingCreateRequest) {
     return axios.post('/api/training', trainingCreateRequest)
+  },
+
+  // Backend task: docs/tasks/backend/GET-api-training-summary-trainingId.md
+  sendGetTrainingSummaryRequest(trainingId, contentLang, trainingTranslationId) {
+    return axios.get(`/api/training-summary/${trainingId}`, {
+      params: { contentLang, trainingTranslationId },
+    })
   },
 
   // Backend task: docs/tasks/backend/GET-api-training-trainingId.md (3. etapp)
@@ -101,16 +110,5 @@ export default {
       `/api/training/${trainingId}/training-translation`,
       trainingTranslationCreateRequest,
     )
-  },
-
-  // Backend task: docs/tasks/backend/GET-api-training-trainingId-ai-translation.md (3. etapp)
-  sendGetAiTranslationRequest(trainingId, languageId) {
-    // MOCK — vaheta päris kutse vastu, kui teenus on valmis:
-    // return axios.get(`/api/training/${trainingId}/ai-translation`, {
-    //   params: {
-    //     languageId: languageId,
-    //   },
-    // })
-    return mockResponse(MockDatabase.getAiTranslation(trainingId, languageId), 1200)
   },
 }

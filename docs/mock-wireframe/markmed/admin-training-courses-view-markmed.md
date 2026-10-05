@@ -12,7 +12,7 @@ Frontend rada: /admin-training-courses?trainingId={id}
 Vaatega seotud lisainfo:
 Avaneb AdminTrainingsView rea ikoonist "Kalender" ja TrainingFormView kiirnupust "Kalender". Ülal koolituse kaart (TrainingSummaryCard.vue): nimi, staatus, kategooria, õppekeele lipp, toimumiskoht, koolitajad (nimed komadega), rahastus, sätted ning lingid "Vaata" ja "Muuda"; andmed kasutajaliidese keeles (puuduva tõlke korral põhikeeles), keele vahetusel laaditakse uuesti. Kirjelduse kaart on vaikimisi peidus ("▾ Näita kirjeldust" / "▴ Peida kirjeldus").
 Tabelis on toimumiskorrad: tulevased eespool (lähim üleval), lüliti "Näita ka möödunud" lisab möödunud (hiliseim üleval) tuhmimalt ja märgisega "Toimunud" — see tuleneb kuupäevast, mitte staatusest. Kustutatud toimumiskordi ei kuvata. Märkmete ja veebilingi sisu ei näidata, ainult ✓/✗. Kuupäevad kujul 30/09/2026, koolitajad komadega (puuduvad koolitajad / ruum "—"). Leheküljestust pole, all "Kokku N toimumiskorda". Veerud Algus, Hind, Staatus ja Osalejaid on sorteeritavad ainult frontendis (API kutset ei tehta): 1. klõps kasvav, 2. kahanev, 3. tagasi vaikimisi järjestusse; staatus järjekorras Mustand → Avatud → Täis → Tühistatud.
-Nupp "+ Lisa toimuv koolitus" → /course-form?trainingId={id}; pliiats → /course-form?courseId={id}; prügikast (CourseDeleteButton.vue) küsib kinnitust, teeb DELETE ise ja vaade laadib tabeli uuesti (osalejate korral hoiatab ja soovitab tühistamist). Kiirnupp "Koolituste haldus" → /admin-trainings. Kustutatud või olematu koolitus → üldine veavaade.
+Nupp "+ Lisa toimuv koolitus" → /course-form?trainingId={id}; pliiats → /course-form?courseId={id}; prügikast (CourseDeleteButton.vue) küsib kinnitust, teeb DELETE ise ja vaade laadib tabeli uuesti (osalejate korral hoiatab ja soovitab tühistamist). Kiirnupp "Koolitused" → /admin-trainings. Kustutatud või olematu koolitus → üldine veavaade.
 ```
 
 ## API märkmed — GET /api/admin-training/{trainingId}
@@ -115,3 +115,8 @@ HTTP: 404
 errorCode: PRIMARY_KEY_NOT_FOUND
 message: "Ei leidnud primary keyd 'courseId' väärtusega: 123"
 ```
+
+
+## Tagasitee — täiendatud navigatsioon
+
+Vaade võtab vastu valikulise `returnTo` query parameetri ja kuvab lingi „← Tagasi“ (`BackLink.vue`). Avamislingid annavad kaasa lähtevaate täieliku URL-i. Tagasilingi puuduv, väline, tundmatu või iseendale osutav siht asendatakse vaate varusihtkohaga. Oleku- ja tõlkevahetus ei kaota tagasiteed. Eraldi nimega nimekirja-/kalendrinupud säilitavad oma sihtkoha. Täpne [kaardistus ja varusihtkohad](../../tasks/frontend/return-to-navigation.md) ning [skeemid](../loo-mock-vaade/return-to-navigation-skeemid.md).

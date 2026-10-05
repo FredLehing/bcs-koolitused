@@ -1,66 +1,18 @@
 <script>
-import { mapState } from 'pinia'
-import { useLanguageStore } from '@/stores/languageStore.js'
-import LecturerService from '@/api-services/LecturerService.js'
 import LecturerAvatar from '@/components/common/LecturerAvatar.vue'
 
-// Koolitaja kaart (pilt, nimi, ametinimetus, lühikirjeldus); kogu kaart on link /lecturer vaatesse
-// (returnTo = praegune rada, et sealt saaks tagasi tulla). Laeb andmed ise lecturerId järgi ja
-// uuesti keele või lecturerId muutumisel. Kaart on lisainfo: vea korral (nt 404 kustutatud
-// koolitaja) seda ei kuvata ega suunata veavaatele — vaade saab teada sündmusega
-// event-lecturer-not-found.
+// Kuvab koondpäringuga saadud kaardi andmed. JSON-päringuid komponent ei tee.
 export default {
   name: 'LecturerCard',
   components: { LecturerAvatar },
   props: {
-    lecturerId: {
-      type: Number,
-      default: null,
-    },
-  },
-  emits: ['event-lecturer-not-found'],
-  data() {
-    return {
-      lecturerSummary: null,
-    }
-  },
-  computed: {
-    ...mapState(useLanguageStore, ['contentLang']),
-  },
-  watch: {
-    lecturerId() {
-      this.getLecturerSummary()
-    },
-
-    contentLang() {
-      this.getLecturerSummary()
-    },
-  },
-  methods: {
-    getLecturerSummary() {
-      if (this.lecturerId === null) {
-        this.lecturerSummary = null
-        return
-      }
-      LecturerService.sendGetLecturerSummaryRequest(this.lecturerId, this.contentLang)
-        .then((response) => (this.lecturerSummary = response.data))
-        .catch(() => this.handleGetLecturerSummaryError())
-    },
-
-    handleGetLecturerSummaryError() {
-      this.lecturerSummary = null
-      this.$emit('event-lecturer-not-found', this.lecturerId)
-    },
-  },
-  beforeMount() {
-    this.getLecturerSummary()
+    lecturerSummary: { type: Object, required: true },
   },
 }
 </script>
 
 <template>
   <RouterLink
-    v-if="lecturerSummary"
     :to="{
       name: 'lecturerRoute',
       query: { lecturerId: lecturerSummary.lecturerId, returnTo: $route.fullPath },

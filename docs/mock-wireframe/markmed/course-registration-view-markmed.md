@@ -47,7 +47,7 @@ CoursePageDto.java
   "status": "O",
   "isOnSite": true,
   "isOnline": false,
-  "lecturers": [ { "lecturerId": 1, "lecturerName": "Rain Tüür" } ],
+  "lecturers": [ { "lecturerId": 1, "fullName": "Rain Tüür", "title": "Lektor/konsultant", "shortDescription": "Java koolitaja.", "photoVersion": 1784106000 } ],
   "upcomingCourses": [
     { "courseId": 1, "startDate": "2026-10-05", "endDate": "2026-10-09", "status": "O", "isOnSite": true, "isOnline": false },
     { "courseId": 5, "startDate": "2026-11-16", "endDate": "2026-11-20", "status": "F", "isOnSite": false, "isOnline": true }
@@ -152,3 +152,8 @@ HTTP: 404
 errorCode: PRIMARY_KEY_NOT_FOUND
 message: "Ei leidnud primary keyd 'userId' väärtusega: 123"
 ```
+
+
+## Tagasitee — täiendatud navigatsioon
+
+Vaade võtab vastu valikulise `returnTo` query parameetri ja kuvab lingi „← Tagasi“ (`BackLink.vue`). Avamislingid annavad kaasa lähtevaate täieliku URL-i. Tagasilingi puuduv, väline, tundmatu või iseendale osutav siht asendatakse vaate varusihtkohaga. Oleku- ja tõlkevahetus ei kaota tagasiteed. Eraldi nimega nimekirja-/kalendrinupud säilitavad oma sihtkoha. Täpne [kaardistus ja varusihtkohad](../../tasks/frontend/return-to-navigation.md) ning [skeemid](../loo-mock-vaade/return-to-navigation-skeemid.md).

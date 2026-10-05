@@ -15,6 +15,7 @@ import RoomFormView from '@/views/RoomFormView.vue'
 import AdminEnquiriesView from '@/views/AdminEnquiriesView.vue'
 import AdminEnquiryView from '@/views/AdminEnquiryView.vue'
 import AdminRegistrationsView from '@/views/AdminRegistrationsView.vue'
+import AdminFeedbacksView from '@/views/AdminFeedbacksView.vue'
 import AdminRegistrationView from '@/views/AdminRegistrationView.vue'
 import AdminTrainingCoursesView from '@/views/AdminTrainingCoursesView.vue'
 import CourseFormView from '@/views/CourseFormView.vue'
@@ -26,9 +27,25 @@ import CoursesView from '@/views/CoursesView.vue'
 import CourseView from '@/views/CourseView.vue'
 import CourseRegistrationView from '@/views/CourseRegistrationView.vue'
 import SignupView from '@/views/SignupView.vue'
+import ParticipantDetailsView from '@/views/ParticipantDetailsView.vue'
+import ParticipantCoursesView from '@/views/ParticipantCoursesView.vue'
+import ParticipantCertificatesView from '@/views/ParticipantCertificatesView.vue'
+import ParticipantFeedbackFormView from '@/views/ParticipantFeedbackFormView.vue'
+import ChangePasswordView from '@/views/ChangePasswordView.vue'
+import AdminUsersView from '@/views/AdminUsersView.vue'
+import AdminUserView from '@/views/AdminUserView.vue'
 import SessionStorageService from '@/services/SessionStorageService.js'
 
-// Registreerumine: sisse logimata → login (pärast tagasi siia), admin ei registreeru
+// Parool: kõik sisseloginud (ka admin); sisse logimata → login (pärast tagasi siia)
+function checkLoggedInUser(to) {
+  if (!SessionStorageService.userIsLoggedIn()) {
+    return { name: 'loginRoute', query: { redirect: to.fullPath } }
+  }
+  return true
+}
+
+// Registreerumine ja osaleja profiilivaated: sisse logimata → login (pärast tagasi siia),
+// admin ei registreeru ega oma osaleja andmeid
 function checkParticipantUser(to) {
   if (!SessionStorageService.userIsLoggedIn()) {
     return { name: 'loginRoute', query: { redirect: to.fullPath } }
@@ -84,6 +101,36 @@ const router = createRouter({
       component: SignupView,
     },
     {
+      path: '/participant-details',
+      name: 'participantDetailsRoute',
+      component: ParticipantDetailsView,
+      beforeEnter: checkParticipantUser,
+    },
+    {
+      path: '/participant-courses',
+      name: 'participantCoursesRoute',
+      component: ParticipantCoursesView,
+      beforeEnter: checkParticipantUser,
+    },
+    {
+      path: '/participant-feedback-form',
+      name: 'participantFeedbackFormRoute',
+      component: ParticipantFeedbackFormView,
+      beforeEnter: checkParticipantUser,
+    },
+    {
+      path: '/participant-certificates',
+      name: 'participantCertificatesRoute',
+      component: ParticipantCertificatesView,
+      beforeEnter: checkParticipantUser,
+    },
+    {
+      path: '/change-password',
+      name: 'changePasswordRoute',
+      component: ChangePasswordView,
+      beforeEnter: checkLoggedInUser,
+    },
+    {
       path: '/training',
       name: 'trainingRoute',
       component: TrainingView,
@@ -134,6 +181,11 @@ const router = createRouter({
       component: AdminRegistrationsView,
     },
     {
+      path: '/admin-feedbacks',
+      name: 'adminFeedbacksRoute',
+      component: AdminFeedbacksView,
+    },
+    {
       path: '/admin-registration',
       name: 'adminRegistrationRoute',
       component: AdminRegistrationView,
@@ -157,6 +209,16 @@ const router = createRouter({
       path: '/admin-course',
       name: 'adminCourseRoute',
       component: AdminCourseView,
+    },
+    {
+      path: '/admin-users',
+      name: 'adminUsersRoute',
+      component: AdminUsersView,
+    },
+    {
+      path: '/admin-user',
+      name: 'adminUserRoute',
+      component: AdminUserView,
     },
     {
       path: '/lecturers',

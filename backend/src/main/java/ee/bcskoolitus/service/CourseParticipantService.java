@@ -9,12 +9,15 @@ import ee.bcskoolitus.controller.courseparticipant.dto.AdminRegistrationUpdateRe
 import ee.bcskoolitus.controller.courseparticipant.dto.CourseParticipantDto;
 import ee.bcskoolitus.controller.courseparticipant.dto.CourseParticipantStatusDto;
 import ee.bcskoolitus.controller.courseparticipant.dto.CourseRegistrationRequestDto;
+import ee.bcskoolitus.controller.courseparticipant.dto.MyRegistrationDto;
+import ee.bcskoolitus.infrastructure.exception.DataNotFoundException;
 import ee.bcskoolitus.infrastructure.exception.ForbiddenException;
 import ee.bcskoolitus.infrastructure.exception.PrimaryKeyNotFoundException;
 import ee.bcskoolitus.persistance.course.Course;
 import ee.bcskoolitus.persistance.course.participant.CourseParticipant;
 import ee.bcskoolitus.persistance.course.participant.CourseParticipantMapper;
 import ee.bcskoolitus.persistance.course.participant.CourseParticipantRepository;
+import ee.bcskoolitus.persistance.feedback.FeedbackRepository;
 import ee.bcskoolitus.persistance.participant.Participant;
 import ee.bcskoolitus.persistance.participant.ParticipantRepository;
 import ee.bcskoolitus.persistance.profile.ProfileMapper;
@@ -29,10 +32,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static ee.bcskoolitus.Error.ALREADY_REGISTERED;
+import static ee.bcskoolitus.Error.CANCEL_NOT_ALLOWED;
 import static ee.bcskoolitus.Error.COURSE_FULL;
 import static ee.bcskoolitus.Error.REGISTRATION_CLOSED;
+import static ee.bcskoolitus.Error.REGISTRATION_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -47,6 +53,8 @@ public class CourseParticipantService {
     private final ParticipantService participantService;
     private final AdminRegistrationSummaryRepository adminRegistrationSummaryRepository;
     private final AdminRegistrationSummaryMapper adminRegistrationSummaryMapper;
+    private final TrainingTranslationService trainingTranslationService;
+    private final FeedbackRepository feedbackRepository;
 
     public CourseParticipant getValidCourseParticipantBy(Integer courseParticipantId) {
         return courseParticipantRepository.findById(courseParticipantId)
@@ -119,6 +127,73 @@ public class CourseParticipantService {
         courseParticipant.setRequiresLaptop(Boolean.TRUE.equals(courseRegistrationRequestDto.getRequiresLaptop()));
         courseParticipant.setNotes(courseRegistrationRequestDto.getNotes() == null ? "" : courseRegistrationRequestDto.getNotes());
         courseParticipantRepository.save(courseParticipant);
+    }
+
+    // "Minu koolitused": kasutaja osaleja registreerumised alguse järgi (ka loobunud ja toimunud); osalejata kasutajal tühi list
+    @Transactional(readOnly = true)
+    public List<MyRegistrationDto> findMyRegistrations(Integer userId, String contentLang) {
+        userService.getValidUserBy(userId);
+        Optional<Participant> participant = participantRepository.findByUserId(userId);
+        if (participant.isEmpty()) {
+            return List.of();
+        }
+        List<CourseParticipant> courseParticipants = courseParticipantRepository.findParticipantCourseParticipantsBy(
+                participant.get().getId(), CourseStatus.DELETED.getCode());
+        Set<Integer> feedbackCourseParticipantIds = findFeedbackCourseParticipantIds(courseParticipants);
+        return courseParticipants.stream()
+                .map(courseParticipant -> createMyRegistrationDto(courseParticipant, contentLang, feedbackCourseParticipantIds))
+                .toList();
+    }
+
+    // Kasutaja loobub ise: ainult oma registreerumisest, mis on R ja mille toimumiskord pole alanud ega tühistatud
+    @Transactional
+    public void cancelMyRegistration(Integer userId, Integer courseParticipantId) {
+        userService.getValidUserBy(userId);
+        CourseParticipant courseParticipant = getValidCourseParticipantBy(courseParticipantId);
+        if (!courseParticipant.getParticipant().getUser().getId().equals(userId)) {
+            throw new DataNotFoundException(REGISTRATION_NOT_FOUND.getMessage(), REGISTRATION_NOT_FOUND.name());
+        }
+        if (!isCancelAllowed(courseParticipant)) {
+            throw new ForbiddenException(CANCEL_NOT_ALLOWED.getMessage(), CANCEL_NOT_ALLOWED.name());
+        }
+        courseParticipant.setStatus(CourseParticipantStatus.CANCELLED.getCode());
+        courseParticipantRepository.save(courseParticipant);
+    }
+
+    // Tagasiside: registreerunud (R), toimumiskord on lõppenud või lõpeb täna, pole tühistatud ega kustutatud; tasumine ei loe
+    public static boolean isFeedbackAllowed(CourseParticipant courseParticipant) {
+        Course course = courseParticipant.getCourse();
+        return CourseParticipantStatus.REGISTERED.getCode().equals(courseParticipant.getStatus())
+                && !course.getEndDate().isAfter(LocalDate.now())
+                && !CourseStatus.CANCELLED.getCode().equals(course.getStatus())
+                && !CourseStatus.DELETED.getCode().equals(course.getStatus());
+    }
+
+    private Set<Integer> findFeedbackCourseParticipantIds(List<CourseParticipant> courseParticipants) {
+        if (courseParticipants.isEmpty()) {
+            return Set.of();
+        }
+        List<Integer> courseParticipantIds = courseParticipants.stream().map(CourseParticipant::getId).toList();
+        return Set.copyOf(feedbackRepository.findFeedbackCourseParticipantIdsBy(courseParticipantIds));
+    }
+
+    private MyRegistrationDto createMyRegistrationDto(CourseParticipant courseParticipant, String contentLang,
+                                                      Set<Integer> feedbackCourseParticipantIds) {
+        MyRegistrationDto myRegistrationDto = courseParticipantMapper.toMyRegistrationDto(courseParticipant);
+        myRegistrationDto.setTrainingTitle(
+                trainingTranslationService.getTrainingTitle(courseParticipant.getCourse().getTraining().getId(), contentLang));
+        myRegistrationDto.setCanCancel(isCancelAllowed(courseParticipant));
+        myRegistrationDto.setCanGiveFeedback(isFeedbackAllowed(courseParticipant));
+        myRegistrationDto.setHasFeedback(feedbackCourseParticipantIds.contains(courseParticipant.getId()));
+        return myRegistrationDto;
+    }
+
+    private static boolean isCancelAllowed(CourseParticipant courseParticipant) {
+        Course course = courseParticipant.getCourse();
+        return CourseParticipantStatus.REGISTERED.getCode().equals(courseParticipant.getStatus())
+                && course.getStartDate().isAfter(LocalDate.now())
+                && !CourseStatus.CANCELLED.getCode().equals(course.getStatus())
+                && !CourseStatus.DELETED.getCode().equals(course.getStatus());
     }
 
     private static String trimToNull(String value) {

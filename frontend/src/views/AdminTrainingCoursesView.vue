@@ -1,4 +1,5 @@
 <script>
+import BackLink from '@/components/common/BackLink.vue'
 import { mapState } from 'pinia'
 import { PhPencilSimple, PhPlus } from '@phosphor-icons/vue'
 import { useLanguageStore } from '@/stores/languageStore.js'
@@ -30,6 +31,7 @@ const SORT_VALUES = {
 export default {
   name: 'AdminTrainingCoursesView',
   components: {
+    BackLink,
     PhPencilSimple,
     PhPlus,
     InlineAlerts,
@@ -171,6 +173,7 @@ export default {
 
 <template>
   <div class="container">
+    <BackLink :fallback="{ name: 'adminTrainingsRoute' }" />
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
       <h1 class="h3 mb-0">{{ $t('adminTrainingCourses.title') }}</h1>
       <div class="d-flex flex-wrap gap-2">
@@ -199,6 +202,7 @@ export default {
             :to="{
               name: 'trainingRoute',
               query: {
+                returnTo: $route.fullPath,
                 trainingId: training.trainingId,
                 trainingTranslationId: training.trainingTranslationId,
               },
@@ -211,6 +215,7 @@ export default {
             :to="{
               name: 'trainingFormRoute',
               query: {
+                returnTo: $route.fullPath,
                 trainingId: training.trainingId,
                 trainingTranslationId: training.trainingTranslationId,
               },
@@ -316,7 +321,10 @@ export default {
             <td>
               <div class="d-flex gap-1">
                 <RouterLink
-                  :to="{ name: 'courseFormRoute', query: { courseId: course.courseId } }"
+                  :to="{
+                    name: 'courseFormRoute',
+                    query: { returnTo: $route.fullPath, courseId: course.courseId },
+                  }"
                   :title="$t('adminTrainingCourses.edit')"
                   :aria-label="$t('adminTrainingCourses.edit')"
                   class="btn btn-sm btn-outline-secondary d-inline-flex"

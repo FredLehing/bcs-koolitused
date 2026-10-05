@@ -43,7 +43,7 @@ Päris süsteemides hoitakse pilte objektisalvestuses (S3 jms) ja jagatakse CDN-
 
 | Teenus | Enne | Nüüd |
 |---|---|---|
-| `GET /api/lecturer-summary/{lecturerId}` (`LecturerCard`) | `photo` (Base64), `photoContentType` | `photoVersion` |
+| `GET /api/lecturer-summary/{lecturerId}` (üksikkirje teenus) | `photo` (Base64), `photoContentType` | `photoVersion` |
 | `GET /api/lecturer/{lecturerId}` (vorm) | `photo` (Base64), `photoContentType` | `photoVersion` |
 | `POST /api/lecturer` | salvestab pildi nagu on | pilt **normaliseeritakse** (400×400 JPEG) |
 | `PUT /api/lecturer/{lecturerId}` | pilt saadetakse alati praegusel kujul, `null` = eemalda | `photo` = **uus** pilt (Base64) või `null` = pilti ei muudeta; eraldi `isPhotoRemoved: true` = eemalda. Nii ei kodeerita sama pilti igal salvestamisel uuesti (kvaliteet ei lange) |
@@ -181,3 +181,8 @@ Below: a small text link "← Kõik koolitajad".
 Two columns: on the left a large square photo with rounded corners (240 px); on the right the name "Rain Tüür" as the page title, a grey line "Lektor/konsultant", a larger lead paragraph "Tarkvaraarendus, Java, HTML, CSS, JavaScript, SQL, Git, Spring Boot…", and below it several paragraphs of formatted text with a bullet list.
 Below the text: a section titled "Koolitused" with four links: "Git ja GitHub", "Java algkursus", "SQL ja andmebaasid", "Spring Boot veebiarendus".
 ```
+
+
+## Vaadetevaheline tagasitee
+
+Detailide ja vormide avamisel antakse kaasa lähtevaate täielik URL `returnTo` parameetrina. Ühine „← Tagasi“ link taastab selle URL-i; otselingi korral kasutatakse vaate varusihti. Peamenüü ja vahelehed tagasiteed ei loo. Oleku- ja tõlkevahetus säilitab senise tagasitee. Kõigi avamiskohtade, erandite ja varusihtide [ühine skeem](../return-to-navigation-skeemid.md).

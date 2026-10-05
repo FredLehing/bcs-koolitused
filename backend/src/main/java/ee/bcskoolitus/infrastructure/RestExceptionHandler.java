@@ -2,6 +2,8 @@ package ee.bcskoolitus.infrastructure;
 
 import ee.bcskoolitus.infrastructure.error.ApiError;
 import ee.bcskoolitus.infrastructure.exception.ChatbotException;
+import ee.bcskoolitus.infrastructure.exception.ConflictException;
+import ee.bcskoolitus.infrastructure.exception.IncorrectInputException;
 import ee.bcskoolitus.infrastructure.exception.DataNotFoundException;
 import ee.bcskoolitus.infrastructure.exception.ForbiddenException;
 import ee.bcskoolitus.infrastructure.exception.PrimaryKeyNotFoundException;
@@ -25,6 +27,23 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         apiError.setErrorCode(exception.getErrorCode());
         return new ResponseEntity<>(apiError, exception.getHttpStatus());
     }
+
+    @ExceptionHandler
+    public ResponseEntity<ApiError> handleConflictException(ConflictException exception) {
+        ApiError apiError = new ApiError();
+        apiError.setMessage(exception.getMessage());
+        apiError.setErrorCode(exception.getErrorCode());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(apiError);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ApiError> handleIncorrectInputException(IncorrectInputException exception) {
+        ApiError apiError = new ApiError();
+        apiError.setMessage(exception.getMessage());
+        apiError.setErrorCode("INCORRECT_INPUT");
+        return ResponseEntity.badRequest().body(apiError);
+    }
+
 
     @ExceptionHandler
     public ResponseEntity<ApiError> handleForbiddenException(ForbiddenException exception) {

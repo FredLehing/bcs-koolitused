@@ -125,3 +125,8 @@ Päise "Logi sisse" nupp, mis viib `/login` rajale, kuulub päise/navigatsiooni 
 - [ ] Uuel "Logi sisse" vajutusel eelmine veateade kaob.
 - [ ] Ootamatu vea (nt backend maas) korral kuvatakse kasutajale arusaadav veateade ja rakendus ei jookse kokku.
 - [ ] Kood järgib Options API struktuuri (`name`, `components`, `data`, `methods`) ja API päringu `.then()/.catch()/.finally()` mustrit.
+
+## Täiendus 2026-10-01 — Enter-klahv
+
+- E-posti ja parooli väljal käivitab **Enter** sama sisselogimise mis nupp "Logi sisse" (`@keyup.enter="login"`), nagu konto loomise vaates (`SignupView`). Kontrollid ja veateated on samad.
+- [x] Enter e-posti või parooli väljal logib sisse

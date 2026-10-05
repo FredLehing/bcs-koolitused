@@ -1,4 +1,5 @@
 <script>
+import BackLink from '@/components/common/BackLink.vue'
 import { mapState } from 'pinia'
 import { PhCheckCircle, PhPencilSimple } from '@phosphor-icons/vue'
 import { useLanguageStore } from '@/stores/languageStore.js'
@@ -16,6 +17,7 @@ import EnquiryModal from '@/components/modals/EnquiryModal.vue'
 export default {
   name: 'CourseView',
   components: {
+    BackLink,
     PhCheckCircle,
     PhPencilSimple,
     AlertSuccess,
@@ -32,8 +34,6 @@ export default {
       participantStatus: null,
       successMessage: '',
       isEnquiryModalOpen: false,
-      // Kustutatud / olematud koolitajad (kaart andis 404) — kui kõik on peidus, peidetakse ka jaotis
-      notFoundLecturerIds: [],
     }
   },
   computed: {
@@ -59,9 +59,7 @@ export default {
     },
 
     hasVisibleLecturers() {
-      return this.coursePage.lecturers.some(
-        (lecturer) => !this.notFoundLecturerIds.includes(lecturer.lecturerId),
-      )
+      return this.coursePage.lecturers.length > 0
     },
 
     fundingTypeNames() {
@@ -84,7 +82,6 @@ export default {
     loadView() {
       this.courseId = Number(this.$route.query.courseId ?? 0)
       this.successMessage = window.history.state?.successMessage ?? ''
-      this.notFoundLecturerIds = []
       this.participantStatus = null
       if (this.courseId === 0) {
         NavigationService.navigateToErrorView()
@@ -117,17 +114,17 @@ export default {
       if (SessionStorageService.userIsLoggedIn()) {
         NavigationService.navigateToCourseRegistrationView(this.courseId)
       } else {
-        NavigationService.navigateToLoginView(`/course-registration?courseId=${this.courseId}`)
+        const registrationLocation = this.$router.resolve({
+          name: 'courseRegistrationRoute',
+          query: NavigationService.withReturnTo({ courseId: this.courseId }),
+        })
+        NavigationService.navigateToLoginView(registrationLocation.fullPath)
       }
     },
 
     handleEnquirySent() {
       this.isEnquiryModalOpen = false
       this.successMessage = this.$t('courseView.messages.enquirySent')
-    },
-
-    handleLecturerNotFound(lecturerId) {
-      this.notFoundLecturerIds.push(lecturerId)
     },
 
     formatDateRange(startDate, endDate) {
@@ -157,10 +154,11 @@ export default {
 
 <template>
   <div class="container">
+    <BackLink :fallback="{ name: 'coursesRoute' }" />
     <AlertSuccess :success-message="successMessage" />
 
     <div v-if="coursePage" class="row text-start">
-      <!-- Vasak veerg: koolituse sisu ja sama koolituse toimumiskorrad -->
+      <!-- Vasak veerg: koolituse sisu -->
       <div class="col-lg-8">
         <fieldset class="border rounded bg-body p-3 mb-4">
           <legend class="float-none w-auto px-2 fs-5">{{ $t('trainingView.legend') }}</legend>
@@ -173,7 +171,10 @@ export default {
             <div class="fs-4 fw-semibold">{{ coursePage.title }}</div>
             <RouterLink
               v-if="userIsAdmin"
-              :to="{ name: 'courseFormRoute', query: { courseId: coursePage.courseId } }"
+              :to="{
+                name: 'courseFormRoute',
+                query: { returnTo: $route.fullPath, courseId: coursePage.courseId },
+              }"
               :title="$t('courses.editCourse')"
               :aria-label="$t('courses.editCourse')"
               class="btn btn-sm btn-outline-secondary d-inline-flex"
@@ -193,6 +194,7 @@ export default {
             :to="{
               name: 'trainingRoute',
               query: {
+                returnTo: $route.fullPath,
                 trainingId: coursePage.trainingId,
                 trainingTranslationId: coursePage.trainingTranslationId,
               },
@@ -201,7 +203,10 @@ export default {
             {{ $t('courseView.allTrainingCourses') }}
           </RouterLink>
         </fieldset>
+      </div>
 
+      <!-- Parem veerg: toimumiskorrad, andmed, tegevused, koolitajad -->
+      <div class="col-lg-4">
         <fieldset v-if="hasOtherCourses" class="border rounded bg-body p-3 mb-4">
           <legend class="float-none w-auto px-2 fs-5">{{ $t('courseView.courses') }}</legend>
           <ul class="list-unstyled mb-0">
@@ -216,7 +221,11 @@ export default {
               </strong>
               <RouterLink
                 v-else
-                :to="{ name: 'courseRoute', query: { courseId: upcomingCourse.courseId } }"
+                :to="{
+                  name: 'courseRoute',
+                  query: { courseId: upcomingCourse.courseId },
+                }"
+                replace
               >
                 {{ formatDateRange(upcomingCourse.startDate, upcomingCourse.endDate) }} ·
                 {{ attendanceText(upcomingCourse) }}
@@ -227,10 +236,7 @@ export default {
             </li>
           </ul>
         </fieldset>
-      </div>
 
-      <!-- Parem veerg: toimumiskorra andmed, tegevused, koolitajad -->
-      <div class="col-lg-4">
         <fieldset class="border rounded bg-body p-3 mb-4">
           <legend class="float-none w-auto px-2 fs-5">{{ $t('courseView.course') }}</legend>
           <dl class="mb-3">
@@ -290,9 +296,8 @@ export default {
           <LecturerCard
             v-for="lecturer in coursePage.lecturers"
             :key="lecturer.lecturerId"
-            :lecturer-id="lecturer.lecturerId"
+            :lecturer-summary="lecturer"
             class="lecturer-card"
-            @event-lecturer-not-found="handleLecturerNotFound"
           />
         </fieldset>
       </div>

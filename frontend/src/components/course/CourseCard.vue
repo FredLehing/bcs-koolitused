@@ -62,16 +62,19 @@ export default {
               v-if="course.isPromoted"
               :size="20"
               weight="fill"
-              class="text-warning"
+              class="text-warning flex-shrink-0"
               :aria-label="$t('courses.promoted')"
             />
             {{ course.title }}
             <RouterLink
               v-if="userIsAdmin"
-              :to="{ name: 'courseFormRoute', query: { courseId: course.courseId } }"
+              :to="{
+                name: 'courseFormRoute',
+                query: { returnTo: $route.fullPath, courseId: course.courseId },
+              }"
               :title="$t('courses.editCourse')"
               :aria-label="$t('courses.editCourse')"
-              class="btn btn-sm btn-outline-secondary d-inline-flex ms-auto"
+              class="btn btn-sm btn-outline-secondary d-inline-flex flex-shrink-0"
             >
               <PhPencilSimple :size="18" />
             </RouterLink>
@@ -112,7 +115,10 @@ export default {
             {{ $t('courseStatus.F') }}
           </span>
           <RouterLink
-            :to="{ name: 'courseRoute', query: { courseId: course.courseId } }"
+            :to="{
+              name: 'courseRoute',
+              query: { returnTo: $route.fullPath, courseId: course.courseId },
+            }"
             class="btn btn-primary"
           >
             {{ $t('trainingCard.viewDetails') }}

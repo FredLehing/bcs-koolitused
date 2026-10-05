@@ -11,6 +11,7 @@ import NavigationService from '@/services/NavigationService.js'
 import PaginationNav from '@/components/common/PaginationNav.vue'
 import CourseCard from '@/components/course/CourseCard.vue'
 import CourseFilters from '@/components/forms/CourseFilters.vue'
+import TrainingsTabs from '@/components/common/TrainingsTabs.vue'
 
 const LIMIT = 5
 
@@ -30,7 +31,7 @@ function createDefaultFilters() {
 // Avalik koolituste kalender: /courses
 export default {
   name: 'CoursesView',
-  components: { PhQuestion, PhX, PaginationNav, CourseCard, CourseFilters },
+  components: { TrainingsTabs, PhQuestion, PhX, PaginationNav, CourseCard, CourseFilters },
   data() {
     return {
       filters: createDefaultFilters(),
@@ -175,6 +176,8 @@ export default {
 
 <template>
   <div class="container d-flex flex-grow-1 flex-column">
+    <TrainingsTabs />
+
     <h1 class="h3 mb-3">{{ $t('courses.title') }}</h1>
     <div class="row flex-grow-1">
       <div class="col-md-4 col-lg-3">

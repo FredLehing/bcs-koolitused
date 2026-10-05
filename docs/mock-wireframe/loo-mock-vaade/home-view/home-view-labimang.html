@@ -1,0 +1,686 @@
+<meta charset="utf-8">
+<title>Avalehe läbimäng</title>
+<meta name="description" content="HomeView.vue (avaleht: otsing, galerii, kaks suunavat kaarti, järgmised 5 toimumiskorda CourseCard.vue kaartidena, Kliendid meist ja turunduslause) — interaktiivne wireframe koos backendi päringu ja mockupi märkmetega.">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Sama visuaalne keel nagu trainings-view-labimang.html: täppidega tahvel, Balsamiqi-stiilis wireframe, kollased märkmed */
+:root {
+  --board: #e9ecef;
+  --board-dots: #d3d8de;
+  --panel: #ffffff;
+  --ink: #23272e;
+  --ink-soft: #5b6470;
+  --line: #b9c0c9;
+  --sketch: #3b4048;
+  --field: #ffffff;
+  --field-off: #eef0f3;
+  --accent: #2f6fde;
+  --accent-soft: #dce7fb;
+  --note: #f2c94c;
+  --note-edge: #d9ad2b;
+  --note-ink: #2e2505;
+  --get: #1f7a5c;
+  --post: #2f6fde;
+  --put: #a56200;
+  --del: #b83a3a;
+  --ok: #1f7a5c;
+  --bad: #c0392b;
+  --shadow: 0 1px 2px rgba(20, 30, 45, .08), 0 4px 14px rgba(20, 30, 45, .06);
+  --font-ui: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-sketch: "Balsamiq Sans", "Comic Sans MS", "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --board: #15181d; --board-dots: #242931; --panel: #1d2127; --ink: #e6e9ee; --ink-soft: #9aa4b2;
+    --line: #3a414b; --sketch: #c9ced6; --field: #252a31; --field-off: #1a1e23; --accent: #7aa5f5; --accent-soft: #22324f;
+    --get: #5cc59e; --post: #7aa5f5; --put: #e0a24a; --del: #ef7d7d; --ok: #5cc59e; --bad: #ef7d7d;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --board: #15181d; --board-dots: #242931; --panel: #1d2127; --ink: #e6e9ee; --ink-soft: #9aa4b2;
+  --line: #3a414b; --sketch: #c9ced6; --field: #252a31; --field-off: #1a1e23; --accent: #7aa5f5; --accent-soft: #22324f;
+  --get: #5cc59e; --post: #7aa5f5; --put: #e0a24a; --del: #ef7d7d; --ok: #5cc59e; --bad: #ef7d7d;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.3);
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background-color: var(--board);
+  background-image: radial-gradient(var(--board-dots) 1px, transparent 1px);
+  background-size: 18px 18px;
+  color: var(--ink);
+  font: 15px/1.5 var(--font-ui);
+}
+.page { max-width: 1320px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 64px; display: grid; gap: 28px; }
+h1, h2, h3 { text-wrap: balance; margin: 0; line-height: 1.2; }
+h1 { font-size: 1.7rem; font-weight: 600; }
+h2 { font-size: 1.15rem; font-weight: 600; }
+h3 { font-size: .8rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft); }
+code, .mono { font-family: var(--font-mono); font-size: .88em; }
+button { font: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Päis */
+.intro { display: grid; gap: 10px; }
+.intro p { margin: 0; max-width: 78ch; color: var(--ink-soft); }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.toolbar .sep { width: 1px; align-self: stretch; background: var(--line); margin-inline: 4px; }
+.toolbar .lbl-soft { font-size: .82rem; color: var(--ink-soft); }
+.tbtn { border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+.tbtn:hover { border-color: var(--accent); }
+.tbtn[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 1px var(--accent); }
+
+/* Brauseri wireframe */
+.browser { background: var(--panel); border: 2px solid var(--sketch); border-radius: 10px; font-family: var(--font-sketch); box-shadow: var(--shadow); overflow: hidden; min-width: 0; }
+.chrome { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-bottom: 2px solid var(--sketch); background: var(--field-off); }
+.chrome .dots { display: flex; gap: 5px; }
+.chrome .dots span { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--sketch); }
+.urlbar { flex: 1; min-width: 0; border: 1.5px solid var(--sketch); border-radius: 14px; padding: 3px 12px; font-family: var(--font-mono); font-size: .8rem; background: var(--field); white-space: nowrap; overflow-x: auto; }
+.sitenav { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; padding: 8px 14px; border-bottom: 1.5px dashed var(--line); font-size: .85rem; }
+.sitenav .logo { width: 44px; height: 24px; border: 1.5px solid var(--sketch); position: relative; }
+.sitenav .logo::before, .sitenav .logo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top right, transparent calc(50% - .75px), var(--sketch) 50%, transparent calc(50% + .75px)); }
+.sitenav .logo::after { transform: scaleX(-1); }
+.sitenav .cur { text-decoration: underline; text-underline-offset: 3px; }
+.sitenav .admin { position: relative; }
+.sitenav .admin > button { background: none; border: 1.5px solid transparent; border-radius: 6px; font: inherit; color: var(--ink); padding: 0 6px; cursor: pointer; }
+.sitenav .admin > button:hover, .sitenav .admin > button[aria-expanded="true"] { border-color: var(--sketch); }
+.sitenav .menu { position: absolute; top: calc(100% + 4px); left: 0; z-index: 6; background: var(--panel); border: 1.5px solid var(--sketch); border-radius: 6px; box-shadow: 3px 3px 0 var(--sketch); display: grid; min-width: 180px; padding: 4px; }
+.sitenav .menu button { background: none; border: 0; text-align: left; font: inherit; color: var(--ink); padding: 4px 8px; border-radius: 4px; cursor: pointer; white-space: nowrap; }
+.sitenav .menu button:hover { background: var(--accent-soft); }
+.sitenav .menu .cur { background: var(--accent-soft); font-weight: 700; }
+.viewhead { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; justify-content: space-between; }
+.sitenav .out { margin-left: auto; border: 1.5px solid var(--sketch); border-radius: 10px; padding: 0 8px; font-size: .78rem; }
+
+.view { padding: 16px 18px 20px; display: grid; gap: 14px; min-width: 0; }
+.view h2 { font-family: var(--font-sketch); font-size: 1.35rem; font-weight: 700; }
+.searchrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.searchrow input { flex: 1 1 260px; min-width: 0; }
+input[type="text"], select { font-family: var(--font-sketch); font-size: .9rem; color: var(--ink); background: var(--field); border: 1.5px solid var(--sketch); border-radius: 5px; padding: 4px 8px; }
+select { width: 100%; }
+.sbtn { font-family: var(--font-sketch); font-size: .9rem; border: 1.5px solid var(--sketch); border-radius: 12px; background: var(--field); color: var(--ink); padding: 3px 14px; cursor: pointer; box-shadow: 1.5px 1.5px 0 var(--sketch); white-space: nowrap; }
+.sbtn:hover:not(:disabled) { background: var(--accent-soft); }
+.sbtn:active:not(:disabled) { transform: translate(1px, 1px); box-shadow: .5px .5px 0 var(--sketch); }
+.sbtn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.sbtn.danger { background: var(--del); border-color: var(--del); color: #fff; }
+.sbtn.small { font-size: .78rem; padding: 1px 10px; }
+.sbtn:disabled { opacity: .45; cursor: not-allowed; }
+.api-pin { font-family: var(--font-mono); font-size: .66rem; background: var(--note); color: var(--note-ink); border: 0; border-radius: 3px; padding: 0 5px; cursor: pointer; line-height: 1.6; white-space: nowrap; }
+.api-pin:hover { outline: 1.5px solid var(--note-edge); }
+.pins { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+
+.tip { position: relative; display: inline-flex; }
+.tip .qmark { width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--sketch); background: var(--field); color: var(--ink); font: 700 .8rem var(--font-sketch); cursor: help; padding: 0; }
+.tip [role="tooltip"] { position: absolute; right: 0; top: calc(100% + 8px); z-index: 5; width: min(300px, 80vw); background: var(--ink); color: var(--panel); font: .78rem/1.4 var(--font-ui); padding: 8px 10px; border-radius: 6px; opacity: 0; visibility: hidden; transition: opacity .12s; pointer-events: none; }
+.tip:hover [role="tooltip"], .tip:focus-within [role="tooltip"] { opacity: 1; visibility: visible; }
+.togglerow { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+.linkish { background: none; border: 0; color: var(--accent); text-decoration: underline; cursor: pointer; padding: 0; font-family: var(--font-sketch); font-size: .9rem; }
+.linkish.small { font-size: .8rem; }
+.badge { border: 1.5px solid var(--sketch); border-radius: 10px; padding: 0 8px; font-size: .75rem; white-space: nowrap; }
+.badge.draft { background: var(--field-off); }
+.badge.pub { background: var(--ok); color: #fff; border-color: var(--ok); }
+.badge.active { background: var(--accent-soft); border-color: var(--accent); }
+.badge.deleted { background: var(--del); color: #fff; border-color: var(--del); }
+tr.is-deleted td { color: var(--ink-soft); }
+tr.is-deleted td .flag, tr.is-deleted td .settings { opacity: .55; }
+
+fieldset { border: 1.5px solid var(--sketch); border-radius: 8px; margin: 0; padding: 10px 12px 12px; display: grid; gap: 12px; min-width: 0; }
+legend { padding: 0 6px; font-weight: 700; font-size: .9rem; }
+.fgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px 14px; }
+.fld { display: grid; gap: 3px; min-width: 0; }
+.lbl { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: .82rem; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.hint { font-size: .8rem; color: var(--ink-soft); }
+
+/* Tabel */
+.tablewrap { overflow-x: auto; border: 1.5px solid var(--sketch); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: .84rem; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px dashed var(--line); vertical-align: middle; }
+thead th { background: var(--field-off); border-bottom: 1.5px solid var(--sketch); font-weight: 700; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr:hover td { background: color-mix(in srgb, var(--accent-soft) 45%, transparent); }
+td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.sorth { background: none; border: 0; padding: 0; font: inherit; font-weight: 700; color: var(--ink); cursor: pointer; display: inline-flex; gap: 4px; align-items: center; }
+.sorth:hover { color: var(--accent); }
+.sorth .arrow { font-size: .75rem; color: var(--accent); min-width: .8em; }
+.th-pin { display: inline-flex; gap: 4px; align-items: center; }
+.title-cell { min-width: 170px; }
+.fallback { display: block; font-size: .7rem; color: var(--ink-soft); }
+.settings { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; min-width: 120px; }
+.settings li { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.settings li::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex: none; }
+.settings .none { color: var(--ink-soft); }
+.settings .none::before { display: none; }
+.tr-ok { color: var(--ok); font-weight: 700; font-size: 1.05rem; }
+.tr-bad { color: var(--bad); font-weight: 700; font-size: 1.05rem; cursor: help; }
+.icons { display: flex; gap: 4px; }
+.ibtn { width: 28px; height: 26px; display: inline-grid; place-items: center; border: 1.5px solid var(--sketch); border-radius: 6px; background: var(--field); color: var(--ink); cursor: pointer; padding: 0; }
+.ibtn:hover { background: var(--accent-soft); }
+.ibtn.del:hover { background: color-mix(in srgb, var(--del) 20%, transparent); }
+.ibtn svg { width: 16px; height: 16px; }
+.flag svg { width: 26px; height: 17px; border: 1.5px solid var(--sketch); display: block; }
+.empty-row td { text-align: center; padding: 20px; color: var(--ink-soft); }
+
+.foot { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; }
+.total { font-size: .85rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.pager { display: flex; flex-wrap: wrap; gap: 0; }
+.pager button { font-family: var(--font-sketch); font-size: .85rem; border: 1.5px solid var(--sketch); margin-left: -1.5px; background: var(--field); color: var(--accent); padding: 2px 10px; cursor: pointer; }
+.pager button:first-child { border-radius: 6px 0 0 6px; margin-left: 0; }
+.pager button:last-child { border-radius: 0 6px 6px 0; }
+.pager button[aria-current="page"] { background: var(--accent); color: #fff; border-color: var(--sketch); }
+.pager button:disabled { color: var(--ink-soft); cursor: not-allowed; opacity: .6; }
+
+/* Alumine rida */
+.below { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; box-shadow: var(--shadow); display: grid; gap: 10px; min-width: 0; }
+.kv { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 12px; font-size: .86rem; margin: 0; }
+.kv dt { color: var(--ink-soft); }
+.kv dd { margin: 0; font-family: var(--font-mono); font-size: .8rem; overflow-wrap: anywhere; }
+
+.note { background: var(--note); color: var(--note-ink); border-radius: 2px; box-shadow: 0 1px 0 var(--note-edge), 0 6px 16px rgba(80, 60, 0, .18); padding: 12px 14px 14px; display: grid; gap: 8px; min-width: 0; }
+.note.flash { animation: noteflash 1.4s ease-out; }
+@keyframes noteflash { 0%, 30% { box-shadow: 0 0 0 4px var(--accent), 0 6px 16px rgba(80,60,0,.18); } 100% { box-shadow: 0 1px 0 var(--note-edge), 0 6px 16px rgba(80,60,0,.18); } }
+.note-head { display: flex; align-items: center; gap: 8px; }
+.note-head strong { font-size: .82rem; font-weight: 600; letter-spacing: .03em; }
+.note-head .copy { margin-left: auto; font: 500 .75rem var(--font-ui); background: rgba(255,255,255,.55); color: var(--note-ink); border: 1px solid var(--note-edge); border-radius: 4px; padding: 1px 8px; cursor: pointer; }
+.note-head .copy:hover { background: #fff; }
+.note pre { margin: 0; font: .78rem/1.45 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+.note .draft-tag { font-size: .72rem; background: rgba(255,255,255,.55); border-radius: 3px; padding: 0 6px; }
+
+.log { display: grid; gap: 6px; }
+.log-step { font-size: .85rem; color: var(--ink-soft); }
+.log-group { font-size: .74rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft); margin-top: 6px; }
+.req { border: 1px solid var(--line); border-radius: 6px; background: var(--field); overflow: hidden; }
+.req.done { border-color: var(--ok); }
+.req > button { width: 100%; display: flex; gap: 8px; align-items: center; text-align: left; background: none; border: 0; color: var(--ink); padding: 6px 10px; cursor: pointer; }
+.req > button:hover { background: var(--field-off); }
+.req .main { display: grid; gap: 1px; flex: 1; min-width: 0; }
+.req .when { display: block; font-size: .74rem; color: var(--ink-soft); }
+.req .ran { font: 600 .68rem var(--font-ui); color: var(--ok); border: 1px solid var(--ok); border-radius: 10px; padding: 0 6px; flex: none; }
+.req.idle .method { opacity: .75; }
+.method { font: 600 .7rem var(--font-mono); padding: 1px 6px; border-radius: 3px; color: #fff; flex: none; }
+.m-GET { background: var(--get); } .m-POST { background: var(--post); } .m-PUT { background: var(--put); } .m-DELETE { background: var(--del); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .method { color: #111; } }
+:root[data-theme="dark"] .method { color: #111; }
+.req .path { font-family: var(--font-mono); font-size: .76rem; overflow-wrap: anywhere; }
+.req .body { border-top: 1px dashed var(--line); padding: 8px 10px; display: grid; gap: 6px; }
+.req .body pre { margin: 0; font: .74rem/1.4 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; max-height: 280px; overflow: auto; }
+.req .body .sub { font-size: .75rem; color: var(--ink-soft); }
+.req .body .linkish { font-size: .8rem; justify-self: start; }
+
+.notes-section { display: grid; gap: 14px; }
+.notes-section > p { margin: 0; color: var(--ink-soft); max-width: 72ch; }
+.notes-grid { columns: 3 340px; column-gap: 18px; }
+.notes-grid .note { break-inside: avoid; margin-bottom: 18px; }
+
+.overlay { position: fixed; inset: 0; background: rgba(15, 20, 28, .45); display: grid; place-items: center; padding: 16px; z-index: 20; }
+.modal { background: var(--panel); color: var(--ink); border: 2px solid var(--sketch); border-radius: 10px; width: min(440px, 100%); padding: 16px 18px; display: grid; gap: 12px; font-family: var(--font-sketch); box-shadow: 4px 4px 0 var(--sketch); }
+.modal h2 { font-family: var(--font-sketch); font-weight: 700; }
+.modal .row { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--panel); padding: 8px 16px; border-radius: 6px; font-size: .9rem; z-index: 30; max-width: calc(100% - 32px); }
+
+@media (max-width: 1100px) { .below { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .below .note { grid-column: 1 / -1; } }
+@media (max-width: 700px) { .below { grid-template-columns: minmax(0, 1fr); } .page { padding-inline: 16px; } }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+/* TrainingsView lisad */
+.cols { display: grid; grid-template-columns: minmax(0, 200px) minmax(0, 1fr); gap: 18px; align-items: start; }
+.filters { display: grid; gap: 12px; border: 1.5px dashed var(--line); border-radius: 8px; padding: 10px; }
+.filters .todo { font-family: var(--font-ui); font-size: .7rem; background: var(--note); color: var(--note-ink); border-radius: 3px; padding: 1px 6px; justify-self: start; }
+.filters fieldset { gap: 4px; padding: 6px 8px 8px; }
+.filters label.radio { display: flex; gap: 6px; align-items: center; font-size: .85rem; cursor: pointer; }
+.searchrow { display: flex; gap: 8px; align-items: center; }
+.ig { display: flex; flex: 1; min-width: 0; }
+.ig input { flex: 1; min-width: 0; border-radius: 5px 0 0 5px; }
+.ig .x { border: 1.5px solid var(--sketch); border-left: 0; background: var(--field); color: var(--ink); padding: 0 8px; cursor: pointer; font-family: var(--font-sketch); }
+.ig .go { border: 1.5px solid var(--accent); background: var(--accent); color: #fff; border-radius: 0 5px 5px 0; padding: 0 14px; cursor: pointer; font-family: var(--font-sketch); }
+.results { font-size: .88rem; color: var(--ink-soft); margin: 0; }
+.results strong { color: var(--ink); }
+.tcards { display: grid; gap: 14px; }
+.tc { border: 1.5px solid var(--sketch); border-radius: 8px; background: var(--field); overflow: hidden; }
+.tc.promo { background: color-mix(in srgb, var(--note) 22%, var(--field)); }
+.tc-head { display: flex; gap: 10px; align-items: center; justify-content: space-between; padding: 8px 12px; border-bottom: 1.5px solid var(--sketch); font-size: 1.25rem; font-weight: 700; }
+.tc-head .icons { display: flex; gap: 6px; align-items: center; }
+.tc-head .star { font-size: 1.4rem; line-height: 1; }
+.tc-body { display: flex; gap: 14px; justify-content: space-between; padding: 10px 12px; }
+.tc-body .left { display: grid; gap: 6px; align-content: start; min-width: 0; }
+.tc-body .left p { margin: 0; }
+.tc-body .right { display: grid; gap: 8px; justify-items: center; align-content: start; flex: none; }
+.cat { border: 1.5px solid var(--sketch); border-radius: 6px; padding: 0 8px; justify-self: start; font-size: .85rem; background: var(--accent-soft); }
+.fund { display: flex; gap: 6px; align-items: center; color: var(--ok); font-size: .85rem; }
+.fund .eur { width: 18px; height: 18px; border-radius: 50%; background: var(--ok); color: #fff; display: inline-grid; place-items: center; font-size: .7rem; }
+.flagbox { display: grid; justify-items: center; font-size: .72rem; color: var(--ink-soft); }
+.flagbox svg { width: 34px; height: 22px; border: 1px solid var(--sketch); display: block; }
+.orderable { border: 1.5px solid var(--ok); color: var(--ok); border-radius: 8px; padding: 0 8px; font-size: .75rem; }
+.emptybox { border: 1.5px solid var(--line); border-radius: 8px; padding: 16px; text-align: center; display: grid; gap: 6px; justify-items: center; color: var(--ink-soft); }
+.emptybox strong { color: var(--ink); }
+.pager { justify-content: center; }
+.tip { position: relative; display: inline-flex; }
+@media (max-width: 760px) { .cols { grid-template-columns: minmax(0, 1fr); } .tc-body { flex-direction: column; } .tc-body .right { justify-items: start; } }
+.embed .sitenav { display: none; }
+/* CoursesView ja CourseView lisad */
+.modal.wide { width: min(600px, 100%); max-height: calc(100vh - 32px); overflow: auto; }
+.modal .ctx { font-size: .85rem; color: var(--ink-soft); margin: 0; }
+.modal .ctx strong { color: var(--ink); }
+.mgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 12px; }
+.mgrid .full { grid-column: 1 / -1; }
+.modal input[type="text"], .modal input[type="email"], .modal input[type="tel"] { font-family: var(--font-sketch); font-size: .9rem; color: var(--ink); background: var(--field); border: 1.5px solid var(--sketch); border-radius: 5px; padding: 4px 8px; width: 100%; }
+.modal textarea { font-family: var(--font-sketch); font-size: .9rem; color: var(--ink); background: var(--field); border: 1.5px solid var(--sketch); border-radius: 5px; padding: 6px 8px; width: 100%; min-height: 90px; resize: vertical; }
+.modal .counter { font-size: .75rem; color: var(--ink-soft); justify-self: end; }
+.modal .alert { border: 1.5px solid var(--del); background: color-mix(in srgb, var(--del) 14%, transparent); border-radius: 6px; padding: 6px 10px; font-size: .88rem; }
+.req-star { color: var(--del); }
+.ok-alert { border: 1.5px solid var(--ok); background: color-mix(in srgb, var(--ok) 14%, transparent); color: var(--ink); border-radius: 6px; padding: 6px 10px; font-size: .9rem; }
+@media (max-width: 560px) { .mgrid { grid-template-columns: minmax(0, 1fr); } }
+.cc-mid .star { font-size: 1.2rem; line-height: 1; color: var(--put); }
+.filters input[type="date"] { font-family: var(--font-sketch); font-size: .85rem; color: var(--ink); background: var(--field); border: 1.5px solid var(--sketch); border-radius: 5px; padding: 2px 4px; width: 100%; }
+.switch { display: inline-flex; gap: 8px; align-items: center; cursor: pointer; font-size: .88rem; }
+.switch input { appearance: none; width: 34px; height: 18px; border: 1.5px solid var(--sketch); border-radius: 10px; background: var(--field-off); position: relative; cursor: pointer; margin: 0; flex: none; }
+.switch input::after { content: ""; position: absolute; top: 2px; left: 2px; width: 11px; height: 11px; border-radius: 50%; background: var(--sketch); transition: left .12s; }
+.switch input:checked { background: var(--accent); border-color: var(--accent); }
+.switch input:checked::after { left: 18px; background: #fff; }
+.cc-body { display: grid; grid-template-columns: 110px minmax(0, 1fr) auto; gap: 14px; padding: 10px 12px; align-items: start; }
+.dateblock { border: 1.5px solid var(--sketch); border-radius: 8px; padding: 6px 4px; text-align: center; display: grid; gap: 2px; background: var(--panel); }
+.dateblock .d { font-weight: 700; font-size: 1rem; line-height: 1.2; }
+.dateblock .y { font-size: .75rem; color: var(--ink-soft); }
+.dateblock .len { font-size: .72rem; color: var(--ink-soft); border-top: 1px dashed var(--line); padding-top: 2px; }
+.cc-mid { display: grid; gap: 6px; min-width: 0; }
+.cc-mid h3 { font: 700 1.1rem var(--font-sketch); text-transform: none; letter-spacing: 0; color: var(--ink); margin: 0; display: flex; gap: 8px; align-items: center; }
+.cc-mid p { margin: 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.chip { border: 1.5px solid var(--line); border-radius: 10px; padding: 0 8px; font-size: .76rem; background: var(--field); }
+.lect { font-size: .82rem; color: var(--ink-soft); }
+.cc-right { display: grid; gap: 8px; justify-items: end; align-content: start; }
+.price { font-weight: 700; font-size: 1.15rem; }
+.badge { border: 1.5px solid var(--sketch); border-radius: 10px; padding: 0 8px; font-size: .75rem; white-space: nowrap; }
+.badge.full { background: color-mix(in srgb, var(--put) 22%, transparent); border-color: var(--put); }
+.badge.past { background: var(--field-off); border-color: var(--line); color: var(--ink-soft); }
+.clear-link { justify-self: start; }
+.pagecols { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+.pcard { border: 1.5px solid var(--sketch); border-radius: 8px; padding: 10px 12px 12px; display: grid; gap: 10px; background: var(--field); min-width: 0; }
+.pcard > .legend { font-weight: 700; font-size: 1rem; }
+.pcard .t1 { font-size: 1.4rem; font-weight: 700; display: flex; gap: 8px; align-items: center; justify-content: space-between; }
+.pcard .when { color: var(--ink-soft); }
+.dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 5px 14px; margin: 0; font-size: .88rem; }
+.dl dt { color: var(--ink-soft); }
+.dl dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.dl .flag svg, .dl dd svg { width: 26px; height: 17px; border: 1px solid var(--sketch); display: inline-block; vertical-align: middle; }
+button.lcard { width: 100%; text-align: left; background: none; font: inherit; color: inherit; cursor: pointer; }
+.lcard[data-lecturer]:hover, .lcard[data-lecturer]:focus-visible { border-color: var(--sketch); box-shadow: 0 2px 6px rgba(0,0,0,.12); }
+.lcard { display: flex; gap: 10px; align-items: center; border: 1.5px dashed var(--line); border-radius: 8px; padding: 8px; }
+.lcard .ph { width: 48px; height: 48px; border-radius: 50%; border: 1.5px solid var(--sketch); display: grid; place-items: center; font-weight: 700; background: var(--accent-soft); flex: none; }
+.lcard .nm { font-weight: 700; }
+.lcard .tt { font-size: .8rem; color: var(--ink-soft); }
+.dates { border: 1.5px solid var(--sketch); border-radius: 8px; padding: 10px 12px 12px; display: grid; gap: 8px; background: var(--field); }
+.dates .legend { font-weight: 700; font-size: 1rem; }
+.datebtns { display: grid; gap: 4px; }
+.leftcol { display: grid; gap: 14px; min-width: 0; }
+.datebtn { font-family: var(--font-sketch); font-size: .9rem; background: none; border: 0; padding: 0; color: var(--accent); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; text-align: left; display: inline-flex; gap: 6px; align-items: center; justify-self: start; }
+.datebtn:hover { text-decoration-thickness: 2px; }
+.datebtn[aria-current="true"] { color: var(--ink); font-weight: 700; text-decoration: none; cursor: default; }
+.datebtn .badge { color: var(--ink); }
+.fallback-note { font-size: .82rem; color: var(--ink-soft); margin: 0; }
+.errbox { display: grid; gap: 10px; justify-items: start; padding: 20px 0; }
+.sitenav .kmenu { position: relative; }
+.sitenav .kmenu > button { background: none; border: 1.5px solid transparent; border-radius: 6px; font: inherit; color: var(--ink); padding: 0 6px; cursor: pointer; }
+.sitenav .kmenu > button:hover, .sitenav .kmenu > button[aria-expanded="true"] { border-color: var(--sketch); }
+.sitenav .kmenu .menu { position: absolute; top: calc(100% + 4px); left: 0; z-index: 6; background: var(--panel); border: 1.5px solid var(--sketch); border-radius: 6px; box-shadow: 3px 3px 0 var(--sketch); display: grid; min-width: 180px; padding: 4px; }
+.sitenav .kmenu .menu button { background: none; border: 0; text-align: left; font: inherit; color: var(--ink); padding: 4px 8px; border-radius: 4px; cursor: pointer; white-space: nowrap; }
+.sitenav .kmenu .menu button:hover { background: var(--accent-soft); }
+.sitenav .kmenu .menu .cur { background: var(--accent-soft); font-weight: 700; }
+@media (max-width: 760px) { .cc-body { grid-template-columns: minmax(0, 1fr); } .cc-right { justify-items: start; } .pagecols { grid-template-columns: minmax(0, 1fr); } }
+/* hidden-atribuut peab peitma ka elemendid, millel on oma display (nt .menu { display: grid }) */
+[hidden] { display: none !important; }
+/* ---------- Avaleht (HomeView) ---------- */
+.hero { text-align: center; display: grid; gap: 8px; justify-items: center; padding: 18px 0 6px; }
+.hero h2 { font-size: 1.7rem; margin: 0; }
+.hero p { margin: 0; color: var(--ink-soft); }
+.hero .searchrow { width: min(100%, 560px); margin-top: 6px; }
+.navcards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.navcard { display: grid; gap: 6px; justify-items: start; text-align: left; border: 1.5px solid var(--sketch); border-radius: 10px; background: var(--field); padding: 16px 18px; cursor: pointer; font-family: var(--font-sketch); color: var(--ink); }
+.navcard:hover, .navcard:focus-visible { border-color: var(--accent); box-shadow: 0 3px 10px rgba(0,0,0,.12); }
+.navcard svg { width: 40px; height: 40px; color: var(--accent); }
+.navcard .t { font-size: 1.15rem; font-weight: 700; }
+.navcard .d { color: var(--ink-soft); font-size: .9rem; }
+.navcard .go { color: var(--accent); text-decoration: underline; font-size: .9rem; }
+.next-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.cta { text-align: center; display: grid; gap: 8px; justify-items: center; border-top: 1.5px dashed var(--line); padding-top: 14px; }
+.cta p { margin: 0; font-size: 1.05rem; }
+/* Suured sektsioonid on eraldatud joonega (HomeView.vue: border-top); otsing ja galerii on koos lehe päis */
+.navcards, .next-head, .testimonials { border-top: 1.5px dashed var(--line); padding-top: 14px; }
+.hidden-note { font-size: .82rem; color: var(--ink-soft); border: 1.5px dashed var(--line); border-radius: 8px; padding: 8px 10px; text-align: center; }
+/* HomeGallery.vue (tiimikaaslase karussell) ja HomeTestimonials.vue ("Kliendid meist") — olemas master'is */
+.gallery { position: relative; border: 1.5px solid var(--sketch); border-radius: 8px; height: 190px; background: var(--field-off); overflow: hidden; }
+.gallery .img { position: absolute; inset: 0; }
+.gallery .img::before, .gallery .img::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top right, transparent calc(50% - .75px), var(--line) 50%, transparent calc(50% + .75px)); }
+.gallery .img::after { transform: scaleX(-1); }
+.gallery .cap { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); background: var(--panel); border: 1.5px solid var(--sketch); border-radius: 6px; padding: 2px 10px; font-size: .85rem; white-space: nowrap; }
+.gallery .arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid var(--sketch); background: var(--panel); color: var(--ink); cursor: pointer; font-family: var(--font-sketch); font-size: 1.1rem; line-height: 1; }
+.gallery .arrow.prev { left: 10px; } .gallery .arrow.next { right: 10px; }
+.gallery .dots { position: absolute; bottom: 10px; left: 0; right: 0; display: flex; gap: 6px; justify-content: center; }
+.gallery .dots button { width: 22px; height: 5px; border: 0; border-radius: 3px; background: var(--line); cursor: pointer; padding: 0; }
+.gallery .dots button[aria-current="true"] { background: var(--sketch); }
+.existing { font-size: .72rem; color: var(--ink-soft); border: 1px dashed var(--line); border-radius: 10px; padding: 0 7px; margin-left: 6px; font-family: var(--font-ui); font-weight: 400; vertical-align: middle; }
+.testimonials { display: grid; gap: 12px; }
+.testimonials h2 { text-align: center; }
+.tgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.tcard { border: 1.5px solid var(--sketch); border-radius: 8px; background: var(--field); padding: 12px 14px; display: grid; gap: 8px; align-content: start; }
+.tcard .q { color: var(--accent); font-size: 1.6rem; line-height: 1; }
+.tcard p { margin: 0; font-style: italic; font-size: .88rem; }
+.tcard .who { font-weight: 700; font-size: .88rem; }
+.tcard .co { font-size: .8rem; color: var(--ink-soft); }
+@media (max-width: 760px) { .navcards, .tgrid { grid-template-columns: minmax(0, 1fr); } }
+</style>
+
+<div id="modal-root"></div>
+<div class="page">
+  <header class="intro">
+    <h1>Avaleht — läbimäng</h1>
+    <p>HomeView.vue (<code>/</code>), ülevalt alla: otsing, galerii (<code>HomeGallery.vue</code>, olemas), <strong>kaks suunavat kaarti</strong>, <strong>„Meie järgmised 5 koolitust“</strong> (<code>CourseCard.vue</code> nagu <code>/courses</code>), „Kliendid meist“ (<code>HomeTestimonials.vue</code>, olemas) ja <strong>lõpu turunduslause</strong>. Paksus kirjas osad on uued. Paremal all näed backendi päringut; kollased kastid on mockupi märkmed.</p>
+    <p>Andmed on seed-andmed (täna = 01/10/2026): avatud tulevased toimumiskorrad, <strong>täis jäetakse välja</strong>, esile tõstetud eespool. Uue teenuse <code>GET /api/next-courses</code> DTO on <strong>ettepanek</strong>.</p>
+    <p>Detailide ja vormide avamisel säilib lähtevaate URL <code>returnTo</code> parameetris; „← Tagasi“ taastab lähtekoha. <a href="../return-to-navigation-skeemid.md">Tagasitee skeemid ja kaardistus</a>.</p>
+    <div class="toolbar">
+      <span class="lbl-soft">Kasutajaliidese keel (navbar):</span>
+      <button class="tbtn" type="button" data-ui-lang="et">et</button>
+      <button class="tbtn" type="button" data-ui-lang="en">en</button>
+      <span class="sep" aria-hidden="true"></span>
+      <span class="lbl-soft">Roll:</span>
+      <button class="tbtn" type="button" data-role="public">Külastaja</button>
+      <button class="tbtn" type="button" data-role="admin">Admin (pliiats)</button>
+      <span class="sep" aria-hidden="true"></span>
+      <button class="tbtn" type="button" id="btn-empty" aria-pressed="false">Toimumiskordi pole</button>
+      <button class="tbtn" type="button" id="btn-reset">Alusta algusest</button>
+    </div>
+  </header>
+
+  <div class="browser" aria-label="Wireframe">
+    <div class="chrome">
+      <div class="dots" aria-hidden="true"><span></span><span></span><span></span></div>
+      <div class="urlbar" id="urlbar"></div>
+    </div>
+    <nav class="sitenav" aria-label="Navbar (wireframe)">
+      <span class="logo" aria-hidden="true"></span>
+      <span class="kmenu"><button type="button" id="b-kmenu" aria-expanded="false" aria-controls="k-menu">Koolitused ▾</button>
+        <span class="menu" id="k-menu" hidden><button type="button" data-nav="/trainings">Meie koolitused</button><button type="button" data-nav="/courses">Koolituste kalender</button></span></span>
+      <span>Meie koolitajad</span><span>Teenused</span><span>Ettevõttest</span><span>Kontakt</span>
+      <span class="out">Logi sisse</span>
+    </nav>
+    <div class="view" id="view"></div>
+  </div>
+
+  <div class="below">
+    <div class="card">
+      <h3>Vaate olek</h3>
+      <dl class="kv" id="statekv"></dl>
+    </div>
+    <div class="card">
+      <h3>Päringud</h3>
+      <div class="log" id="log"></div>
+    </div>
+    <div class="note" id="note-view">
+      <div class="note-head"><strong id="view-note-title">Vaate märkmed</strong><button class="copy" type="button" data-copy="view">Kopeeri</button></div>
+      <pre id="view-note-text"></pre>
+    </div>
+  </div>
+
+  <section class="notes-section">
+    <h2>API märkmed (<span id="notes-count"></span>)</h2>
+    <p>Iga backendi kutse kohta üks kast. Vajuta wireframe'il kollasele sildile või päringute logis päringule, et hüpata vastava märkme juurde.</p>
+    <div class="notes-grid" id="notes"></div>
+  </section>
+</div>
+
+<script src="../return-navigation.js"></script>
+<script>
+(function () {
+  "use strict";
+  /* ---------- Prototüübi kest (../index.html): embed-režiim ja vaadete vaheline navigeerimine ---------- */
+  var SHELL_Q = new URLSearchParams(location.search);
+  var EMBED = SHELL_Q.get("embed") === "1" && window.parent !== window;
+  if (EMBED) document.documentElement.classList.add("embed");
+  function goRoute(path, standaloneMessage, isBack) {
+    if (!isBack) path = window.BcsReturnNavigation.forward(path);
+    if (EMBED) { window.parent.postMessage({ type: "bcs-navigate", path: path }, "*"); return; }
+    toast(standaloneMessage || "router.push → " + path);
+  }
+
+  /* ---------- Andmed (seed-andmete ettepanek; täna = 2026-10-01) ---------- */
+  var TODAY = "2026-10-01";
+  var LANGS = [{ languageId: 1, languageName: "Eesti", flag: "fi-ee" }, { languageId: 2, languageName: "English", flag: "fi-gb" }, { languageId: 3, languageName: "Русский", flag: "fi-ru" }];
+  var CATEGORIES = { 1: { et: "Programmeerimine", en: "Programming" }, 2: { et: "Disain", en: "Design" }, 3: { et: "Juhtimine", en: "Management" } };
+  var FUNDING = { 1: { et: "Töötukassa", en: "Job Centre" }, 2: { et: "EL rahastus", en: "EU Funded" } };
+  var TRAININGS = {
+    1: { st: "P", cat: 1, lang: 1, fund: [1], et: [1, "Java algkursus", "Java programmeerimise alused algajatele.", "Kursusel õpitakse Java süntaksit, objektorienteeritud programmeerimist ja põhilisi andmestruktuure."], en: [2, "Java Basics", "Fundamentals of Java programming for beginners.", "The course covers Java syntax, object-oriented programming, and basic data structures."] },
+    2: { st: "P", cat: 3, lang: 1, fund: [], et: [3, "Projektijuhtimise põhitõed", "Sissejuhatus IT-projektijuhtimisse.", "Kursusel käsitletakse Scrumi, Kanbani ja projekti planeerimise põhimõtteid."], en: [4, "Project Management Fundamentals", "An introduction to IT project management.", "The course covers Scrum, Kanban, and the principles of project planning."] },
+    3: { st: "P", cat: 1, lang: 1, fund: [1, 2], et: [5, "Spring Boot veebiarendus", "REST API-de loomine Spring Booti abil.", "Kursusel ehitatakse Spring Booti, JPA ja PostgreSQL-i abil töötav REST API."], en: [6, "Spring Boot Web Development", "Building REST APIs with Spring Boot.", "The course builds a working REST API using Spring Boot, JPA and PostgreSQL."] },
+    4: { st: "P", cat: 1, lang: 2, fund: [2], et: [7, "Vue.js esmaspetsialist", "Kaasaegsete veebiliideste loomine Vue 3-ga.", "Kursusel õpitakse komponente, marsruutimist ja olekuhaldust Vue 3 ja Pinia abil."], en: [8, "Vue.js Essentials", "Building modern web interfaces with Vue 3.", "The course covers components, routing and state management with Vue 3 and Pinia."] },
+    5: { st: "P", cat: 2, lang: 1, fund: [1], et: [9, "UX disaini alused", "Kasutajakeskse disaini põhimõtted.", "Kursusel käsitletakse kasutajauuringuid, prototüüpimist ja kasutatavuse testimist."], en: [10, "UX Design Basics", "Principles of user-centred design.", "The course covers user research, prototyping and usability testing."] },
+    7: { st: "P", cat: 3, lang: 1, fund: [2], et: [13, "Agiilne meeskonnajuhtimine", "Scrumi meeskonna juhtimine praktikas.", "Kursusel õpitakse agiilsete meeskondade juhtimist, retrospektiive ja tagasiside andmist."], en: [14, "Agile Team Leadership", "Leading a Scrum team in practice.", "The course covers leading agile teams, retrospectives and giving feedback."] }
+  };
+  var LECTURERS = { 1: ["Rain Tüür", "Lektor/konsultant", "Lecturer/consultant"], 2: ["Merje Vaide", "Koolitaja", "Trainer"], 8: ["Meelis Teern", "Koolitaja", "Trainer"], 9: ["Tarmo Kallas", "Koolitaja", "Trainer"] };
+  var COURSES = [
+    { id: 1, t: 1, start: "2026-10-05", end: "2026-10-09", days: 5, hours: 40, price: 490, st: "O", promo: true, room: true, link: false, lect: [1, 8] },
+    { id: 2, t: 2, start: "2026-11-02", end: "2026-11-04", days: 3, hours: 24, price: 350, st: "O", promo: false, room: false, link: true, lect: [2] },
+    { id: 3, t: 1, start: "2026-09-07", end: "2026-09-11", days: 5, hours: 40, price: 490, st: "O", promo: false, room: true, link: false, lect: [1] },
+    { id: 4, t: 1, start: "2026-10-19", end: "2026-10-23", days: 5, hours: 40, price: 490, st: "X", promo: false, room: true, link: false, lect: [8] },
+    { id: 5, t: 1, start: "2026-11-16", end: "2026-11-20", days: 5, hours: 40, price: 520, st: "F", promo: false, room: false, link: true, lect: [1] },
+    { id: 6, t: 1, start: "2026-12-07", end: "2026-12-11", days: 5, hours: 40, price: 520, st: "U", promo: false, room: true, link: false, lect: [] },
+    { id: 7, t: 1, start: "2026-06-08", end: "2026-06-12", days: 5, hours: 40, price: 450, st: "O", promo: false, room: true, link: true, lect: [8] },
+    { id: 8, t: 1, start: "2026-11-30", end: "2026-12-04", days: 5, hours: 40, price: 490, st: "D", promo: false, room: true, link: false, lect: [1] },
+    { id: 9, t: 3, start: "2026-10-12", end: "2026-10-15", days: 4, hours: 32, price: 560, st: "O", promo: true, room: true, link: false, lect: [1] },
+    { id: 10, t: 4, start: "2026-10-26", end: "2026-10-28", days: 3, hours: 24, price: 420, st: "O", promo: false, room: false, link: true, lect: [8] },
+    { id: 11, t: 5, start: "2026-11-09", end: "2026-11-10", days: 2, hours: 16, price: 300, st: "O", promo: true, room: true, link: true, lect: [9] },
+    { id: 12, t: 7, start: "2026-09-14", end: "2026-09-15", days: 2, hours: 16, price: 280, st: "F", promo: false, room: true, link: false, lect: [2] },
+    { id: 13, t: 2, start: "2027-01-11", end: "2027-01-13", days: 3, hours: 24, price: 350, st: "U", promo: false, room: false, link: false, lect: [] }
+  ];
+
+  function j(o) { return JSON.stringify(o, null, 2); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c]; }); }
+  function dmy(iso) { var d = iso.split("-"); return d[2] + "/" + d[1] + "/" + d[0]; }
+  var MONTHS = { et: ["jaan", "veebr", "märts", "apr", "mai", "juuni", "juuli", "aug", "sept", "okt", "nov", "dets"], en: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] };
+  function rangeLabel(s, e) {
+    var a = s.split("-"), b = e.split("-"), m = MONTHS[ui.lang];
+    if (ui.lang === "en") return a[1] === b[1] ? [+a[2] + "–" + +b[2] + " " + m[+a[1] - 1], a[0]] : [+a[2] + " " + m[+a[1] - 1] + " – " + +b[2] + " " + m[+b[1] - 1], b[0]];
+    return a[1] === b[1] ? [a[2] + ".–" + b[2] + ". " + m[+a[1] - 1], a[0]] : [a[2] + ". " + m[+a[1] - 1] + " – " + b[2] + ". " + m[+b[1] - 1], b[0]];
+  }
+  function tr(c) { return TRAININGS[c.t][ui.lang]; }
+  function isPublic(c) { return TRAININGS[c.t].st === "P" && (c.st === "O" || c.st === "F"); }
+
+  /* ---------- Kaardi andmed (PublicCourseSummaryItemDto) ---------- */
+  function summary(c) {
+    var t = TRAININGS[c.t], x = tr(c), lg = LANGS[t.lang - 1];
+    return { courseId: c.id, trainingId: c.t, title: x[1], shortDescription: x[2], categoryName: CATEGORIES[t.cat][ui.lang], trainingLanguageFlagIconCode: lg.flag,
+      startDate: c.start, endDate: c.end, numberOfDays: c.days, numberOfAcademicHours: c.hours, price: c.price, status: c.st, isPromoted: c.promo, isOnSite: c.room, isOnline: c.link,
+      lecturerNames: c.lect.length ? c.lect.map(function (l) { return LECTURERS[l][0]; }).join(", ") : null,
+      fundingTypes: t.fund.map(function (f) { return { fundingTypeId: f, fundingTypeName: FUNDING[f][ui.lang] }; }) };
+  }
+
+  var toastTimer = null;
+  function toast(msg) {
+    var old = document.querySelector(".toast"); if (old) old.remove();
+    var el = document.createElement("div"); el.className = "toast"; el.setAttribute("role", "status"); el.textContent = msg;
+    document.body.appendChild(el);
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { el.remove(); }, 2400);
+  }
+
+  /* ---------- CourseCard.vue ---------- */
+  var FLAG_SVG = {
+    "fi-ee": '<svg viewBox="0 0 33 21" aria-hidden="true"><rect width="33" height="7" fill="#0072ce"/><rect y="7" width="33" height="7" fill="#000"/><rect y="14" width="33" height="7" fill="#fff"/></svg>',
+    "fi-gb": '<svg viewBox="0 0 60 30" aria-hidden="true"><rect width="60" height="30" fill="#012169"/><path d="M0,0 60,30M60,0 0,30" stroke="#fff" stroke-width="6"/><path d="M0,0 60,30M60,0 0,30" stroke="#c8102e" stroke-width="2.5"/><path d="M30,0v30M0,15h60" stroke="#fff" stroke-width="10"/><path d="M30,0v30M0,15h60" stroke="#c8102e" stroke-width="6"/></svg>',
+    "fi-ru": '<svg viewBox="0 0 33 21" aria-hidden="true"><rect width="33" height="7" fill="#fff"/><rect y="7" width="33" height="7" fill="#0039a6"/><rect y="14" width="33" height="7" fill="#d52b1e"/></svg>'
+  };
+  var PENCIL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>';
+  function pin(noteId, label) { return '<button type="button" class="api-pin" data-note="' + noteId + '">' + esc(label) + '</button>'; }
+  function attendanceChips(onSite, online) { return (onSite ? '<span class="chip">Kohapeal</span>' : "") + (online ? '<span class="chip">Veebis</span>' : ""); }
+  function renderCard(c) {
+    var r = rangeLabel(c.startDate, c.endDate), fund = c.fundingTypes.map(function (f) { return f.fundingTypeName; }).join(", ");
+    return '<article class="tc' + (c.isPromoted ? " promo" : "") + '"><div class="cc-body">' +
+      '<div class="dateblock"><span class="d">' + esc(r[0]) + '</span><span class="y">' + r[1] + '</span><span class="len">' + c.numberOfDays + ' päeva · ' + c.numberOfAcademicHours + ' t</span></div>' +
+      '<div class="cc-mid"><h3>' + (c.isPromoted ? '<span class="star" title="Esile tõstetud" aria-label="Esile tõstetud">☆</span>' : "") + esc(c.title) +
+      (ui.role === "admin" ? '<button type="button" class="ibtn" data-edit="' + c.courseId + '" title="Muuda toimumiskorda (ainult adminile)" aria-label="Muuda toimumiskorda">' + PENCIL + '</button>' : "") + '</h3>' +
+      '<p>' + esc(c.shortDescription) + '</p><div class="chips"><span class="cat">' + esc(c.categoryName) + '</span>' + attendanceChips(c.isOnSite, c.isOnline) + '</div>' +
+      (fund ? '<span class="fund"><span class="eur" aria-hidden="true">€</span>' + esc(fund) + '</span>' : "") +
+      (c.lecturerNames ? '<span class="lect">Koolitaja: ' + esc(c.lecturerNames) + '</span>' : "") + '</div>' +
+      '<div class="cc-right"><span class="flagbox">Koolituse keel' + FLAG_SVG[c.trainingLanguageFlagIconCode] + '</span><span class="price">' + c.price + ' €</span>' +
+      (c.status === "F" ? '<span class="badge full">Täis</span>' : "") +
+      '<button type="button" class="sbtn primary" data-view="' + c.courseId + '">Vaata lähemalt</button></div></div></article>';
+  }
+
+  /* ---------- Märkmed (sama sisu failis markmed/home-view-markmed.md) ---------- */
+  var VIEW_NOTE = { title: "HomeView.vue", text: "Roll: Kõik rollid (sh külastajad, sisselogimist ei nõuta; admin näeb kaartidel pliiatsit)\nFailinimi: HomeView.vue\nFrontend rada: /\n\nVaatega seotud lisainfo:\nJärjestus: pealkiri ja otsing → galerii (HomeGallery.vue) → kaks suunavat kaarti → \"Meie järgmised 5 koolitust\" → \"Kliendid meist\" (HomeTestimonials.vue) → turunduslause.\nOtsing nagu praegu (\"Otsi\"/Enter → /trainings?searchText=, × ja Esc tühjendavad). Galerii: Bootstrapi karussell (pildid kaustast src/assets/images/gallery/, nooled ja indikaatorid, automaatset kerimist pole).\nGalerii all kaks kõrvuti kaarti (kitsal ekraanil üksteise all), kogu kaart on link: \"Meie koolitused\" (raamatute ikoon, \"Vaata kõiki meie koolitusi ja nende sisu.\", \"Vaata koolitusi →\") → /trainings ja \"Koolituste kalender\" (kalendri ikoon, \"Vali sobiv toimumisaeg ja registreeru.\", \"Vaata kalendrit →\") → /courses.\nPealkiri \"Meie järgmised 5 koolitust\" ja kuni 5 kaarti CourseCard.vue (sama mis /courses; \"Vaata lähemalt\" → /course?courseId={id}). Ainult avatud (mitte täis) tulevased toimumiskorrad, esile tõstetud eespool, edasi alguse järgi; filtreid ja leheküljestust pole. Kui toimumiskordi pole (või päring ebaõnnestub), on see plokk peidetud.\nPärast \"Kliendid meist\" (kolm tagasiside kaarti, tekstid tõlkefailist) lõpus lause \"Leia endale sobiv koolitus — uusi toimumiskordi lisandub pidevalt.\" ja nupp \"Vaata kõiki toimuvaid koolitusi →\" → /courses. Keele vahetusel laaditakse toimumiskorrad uuesti." };
+  var NOTES = [{ id: "n-next", title: "GET /api/next-courses", text: "API: GET /api/next-courses\n\nQuery parameetrid:\ncontentLang: String — tõlgitud väljade keel (\"et\"/\"en\"), kohustuslik\nlimit: Integer — mitu toimumiskorda (1–20, vaikimisi 5)\n\nResponse (200):\nPublicCourseSummaryItemDto.java (massiiv)\n[\n  {\n    \"courseId\": 1,\n    \"trainingId\": 1,\n    \"title\": \"Java algkursus\",\n    \"shortDescription\": \"Java programmeerimise alused algajatele.\",\n    \"categoryName\": \"Programmeerimine\",\n    \"trainingLanguageFlagIconCode\": \"fi-ee\",\n    \"startDate\": \"2026-10-05\",\n    \"endDate\": \"2026-10-09\",\n    \"numberOfDays\": 5,\n    \"numberOfAcademicHours\": 40,\n    \"price\": 490,\n    \"status\": \"O\",\n    \"isPromoted\": true,\n    \"isOnSite\": true,\n    \"isOnline\": false,\n    \"lecturerNames\": \"Rain Tüür, Meelis Teern\",\n    \"fundingTypes\": [{ \"fundingTypeId\": 1, \"fundingTypeName\": \"Töötukassa\" }]\n  }\n]\n\nLoogika:\nView public_course_summary (publitseeritud koolitus, staatus O/F, algus täna või hiljem, ainult contentLang tõlkega), täis (F) välja jäetud. Järjestus is_promoted DESC, start_date, course_id; esimesed limit rida. Tühi massiiv, kui toimumiskordi pole.\n\nVead:\n400 INCORRECT_INPUT — contentLang puudub või limit väljaspool 1–20" }];
+
+  var LIMIT = 5;
+  // HomeGallery.vue: pildid kaustast src/assets/images/gallery/ (failinime järjekorras)
+  var SLIDES = ["AI Learning Content Image.jpg", "E-Learning IT Image.jpg", "it_crafters_logo_roh.svg"];
+  // HomeTestimonials.vue: tekstid tõlkefailist (homeView.testimonials.items)
+  var TESTIMONIALS = [
+    ["Enne Vali-IT! Tarkvaraarendaja koolitust ei olnud ma kunagi programmeerimisega kokku puutunud. Juba paari kuu pärast töötasin juuniorarendajana ja tunnen, et sain koolitusel tugeva vundamendi.", "Kaspar Tamm", ""],
+    ["Suur aitäh BCS Koolituste meeskonnale ning eriti Tarmole, kelle käe all õppisin UX disainist nii mõndagi uut ja huvitavat.", "Mari Kask", "IT Firma OÜ"],
+    ["Power BI koolitusel osalejad ütlesid, et see on olnud parim koolitus, kus nad kunagi käinud on. Aitäh!", "", "Näidis Firma OÜ"]
+  ];
+  var slide = 0;
+  var ui, logSteps = [], logTitle = "", openReq = -1;
+  function freshUi() {
+    return { lang: ui ? ui.lang : "et", role: ui ? ui.role : (SHELL_Q.get("role") === "admin" ? "admin" : "public"), empty: false, searchText: "", nextCourses: [] };
+  }
+
+  /* ---------- "Backend": GET /api/next-courses ---------- */
+  function loadNextCourses() {
+    var rows = ui.empty ? [] : COURSES.filter(function (c) { return isPublic(c) && c.st !== "F" && c.start >= TODAY && TRAININGS[c.t][ui.lang]; })
+      .sort(function (a, b) { return (b.promo - a.promo) || (a.start < b.start ? -1 : a.start > b.start ? 1 : a.id - b.id); })
+      .slice(0, LIMIT).map(summary);
+    ui.nextCourses = rows;
+    call("GET", "/api/next-courses?contentLang=" + ui.lang + "&limit=" + LIMIT, rows);
+  }
+  function call(method, path, res) { logSteps.push({ method: method, path: path, res: res }); }
+  function startStep(t) { logSteps = []; logTitle = t; openReq = -1; }
+  function open(t) { startStep(t); loadNextCourses(); renderAll(); }
+  function switchLang(code) { if (code === ui.lang) return; ui.lang = code; open("Keele vahetus navbaris → " + code); }
+
+  /* ---------- Renderdamine ---------- */
+  var BOOKS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="4" width="4" height="16" rx="1"/><rect x="8" y="4" width="4" height="16" rx="1"/><path d="M14 5.5l3.8-1 3.7 14.5-3.8 1z"/></svg>';
+  var CALENDAR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><circle cx="8" cy="14" r=".8" fill="currentColor"/><circle cx="12" cy="14" r=".8" fill="currentColor"/><circle cx="16" cy="14" r=".8" fill="currentColor"/><circle cx="8" cy="17.5" r=".8" fill="currentColor"/><circle cx="12" cy="17.5" r=".8" fill="currentColor"/></svg>';
+  function navCard(path, icon, title, text, go) {
+    return '<button type="button" class="navcard" data-nav="' + path + '">' + icon + '<span class="t">' + esc(title) + '</span><span class="d">' + esc(text) + '</span><span class="go">' + esc(go) + '</span></button>';
+  }
+  function renderGallery() {
+    return '<div class="gallery" role="region" aria-label="Galerii (HomeGallery.vue, olemas)"><div class="img"></div><span class="cap">' + esc(SLIDES[slide]) + '</span>' +
+      '<button type="button" class="arrow prev" id="b-prev" aria-label="Eelmine">‹</button><button type="button" class="arrow next" id="b-next" aria-label="Järgmine">›</button>' +
+      '<div class="dots">' + SLIDES.map(function (_, i) { return '<button type="button" data-slide="' + i + '" aria-label="Slaid ' + (i + 1) + '"' + (i === slide ? ' aria-current="true"' : "") + '></button>'; }).join("") + '</div></div>';
+  }
+  function renderTestimonials() {
+    return '<section class="testimonials"><h2>Kliendid meist<span class="existing">HomeTestimonials.vue, olemas</span></h2><div class="tgrid">' +
+      TESTIMONIALS.map(function (t) { return '<div class="tcard"><span class="q" aria-hidden="true">❝</span><p>' + esc(t[0]) + '</p><div><div class="who">' + esc(t[1]) + '</div><div class="co">' + esc(t[2]) + '</div></div></div>'; }).join("") + '</div></section>';
+  }
+  function renderView() {
+    var list = ui.nextCourses;
+    document.getElementById("view").innerHTML =
+      '<section class="hero"><h2>Leia üle 100 koolituse seast endale sobiv!</h2><p>Praktilised IT-, disaini- ja juhtimiskoolitused oma ala parimatelt</p>' +
+      '<div class="searchrow"><div class="ig"><input type="text" id="t-search" placeholder="Otsi koolitust" value="' + esc(ui.searchText) + '" aria-label="Otsi koolitust">' +
+      (ui.searchText ? '<button type="button" class="x" id="b-x" title="Tühjenda otsing" aria-label="Tühjenda otsing">×</button>' : "") +
+      '<button type="button" class="go" id="b-search">Otsi</button></div></div></section>' +
+      renderGallery() +
+      '<div class="navcards">' + navCard("/trainings", BOOKS, "Meie koolitused", "Vaata kõiki meie koolitusi ja nende sisu.", "Vaata koolitusi →") +
+      navCard("/courses", CALENDAR, "Koolituste kalender", "Vali sobiv toimumisaeg ja registreeru.", "Vaata kalendrit →") + '</div>' +
+      (list.length
+        ? '<div class="next-head"><h2>Meie järgmised 5 koolitust</h2>' + pin("n-next", "GET /api/next-courses") + '</div><div class="tcards">' + list.map(renderCard).join("") + '</div>'
+        : '<div class="hidden-note">Plokk „Meie järgmised 5 koolitust“ on peidetud — <code>GET /api/next-courses</code> tagastas tühja massiivi. ' + pin("n-next", "GET /api/next-courses") + '</div>') +
+      renderTestimonials() +
+      '<section class="cta"><p>Leia endale sobiv koolitus — uusi toimumiskordi lisandub pidevalt.</p><button type="button" class="sbtn primary" data-nav="/courses">Vaata kõiki toimuvaid koolitusi →</button></section>';
+  }
+  function renderKv() {
+    var rows = [["route", "HomeView"], ["contentLang", ui.lang], ["roll", ui.role], ["searchText", '"' + ui.searchText + '"'], ["nextCourses.length", String(ui.nextCourses.length)]];
+    document.getElementById("statekv").innerHTML = rows.map(function (r) { return "<dt>" + esc(r[0]) + "</dt><dd>" + esc(r[1]) + "</dd>"; }).join("");
+    document.getElementById("urlbar").textContent = "https://bcskoolitus.ee/";
+  }
+  function renderLog() {
+    var idx = logSteps.length ? 0 : -1, ran = idx !== -1, isOpen = ran && openReq === 0, body = "";
+    if (isOpen) body = '<div class="body"><span class="sub">Tegelik päring: <code>' + esc(logSteps[0].method + " " + logSteps[0].path) + '</code></span><span class="sub">Response (200)</span><pre>' + esc(j(logSteps[0].res)) + '</pre><button type="button" class="linkish" data-note="n-next">Ava API märge</button></div>';
+    var attr = ran ? 'data-req="0" aria-expanded="' + isOpen + '"' : 'data-note="n-next" title="Ava API märge"';
+    var html = '<div class="log-group">Avaleht (HomeView)</div><div class="req ' + (ran ? "done" : "idle") + '"><button type="button" ' + attr + '><span class="method m-GET">GET</span><span class="main"><span class="path">/api/next-courses?contentLang={UI keel}&amp;limit=5</span><span class="when">avamisel ja keele vahetusel</span></span>' + (ran ? '<span class="ran">käivitati</span>' : "") + '</button>' + body + '</div>';
+    if (logTitle) html += '<div class="log-step">Viimane samm: ' + esc(logTitle) + '. Rohelised päringud käivitati; klõpsa, et näha vastust.</div>';
+    document.getElementById("log").innerHTML = html;
+  }
+  function renderAll() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-ui-lang]"), function (b) { b.setAttribute("aria-pressed", String(b.dataset.uiLang === ui.lang)); });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-role]"), function (b) { b.setAttribute("aria-pressed", String(b.dataset.role === ui.role)); });
+    document.getElementById("btn-empty").setAttribute("aria-pressed", String(ui.empty));
+    renderView(); renderKv(); renderLog();
+    document.getElementById("view-note-title").textContent = "Vaate märkmed — " + VIEW_NOTE.title;
+    document.getElementById("view-note-text").textContent = VIEW_NOTE.text;
+    window.BcsReturnNavigation.render(goRoute);
+  }
+
+  /* ---------- Sündmused ---------- */
+  var viewEl = document.getElementById("view");
+  function doSearch() {
+    var s = ui.searchText.trim();
+    goRoute(s ? "/trainings?searchText=" + encodeURIComponent(s) : "/trainings", "„Otsi“ → /trainings" + (s ? "?searchText=" + s : ""));
+  }
+  function clearSearch() { ui.searchText = ""; renderView(); renderKv(); var s = document.getElementById("t-search"); s.focus(); }
+  viewEl.addEventListener("input", function (e) {
+    if (e.target.id === "t-search") { var had = !!ui.searchText; ui.searchText = e.target.value; if (had !== !!ui.searchText) { var pos = e.target.selectionStart; renderView(); var s = document.getElementById("t-search"); s.focus(); s.setSelectionRange(pos, pos); } renderKv(); }
+  });
+  viewEl.addEventListener("keydown", function (e) {
+    if (e.target.id === "t-search" && e.key === "Enter") doSearch();
+    if (e.target.id === "t-search" && e.key === "Escape") clearSearch();
+  });
+  viewEl.addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.note) { goNote(b.dataset.note); return; }
+    if (b.dataset.nav) { goRoute(b.dataset.nav); return; }
+    if (b.dataset.view) { goRoute("/course?courseId=" + b.dataset.view); return; }
+    if (b.dataset.edit) { goRoute("/course-form?courseId=" + b.dataset.edit); return; }
+    if (b.dataset.slide) { slide = +b.dataset.slide; renderView(); return; }
+    if (b.id === "b-prev" || b.id === "b-next") { slide = (slide + (b.id === "b-next" ? 1 : SLIDES.length - 1)) % SLIDES.length; renderView(); return; }
+    if (b.id === "b-search") doSearch();
+    if (b.id === "b-x") clearSearch();
+  });
+  document.getElementById("log").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.note) { goNote(b.dataset.note); return; }
+    openReq = openReq === 0 ? -1 : 0; renderLog();
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-ui-lang]"), function (b) { b.onclick = function () { switchLang(b.dataset.uiLang); }; });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-role]"), function (b) { b.onclick = function () { ui.role = b.dataset.role; renderAll(); }; });
+  document.getElementById("btn-empty").onclick = function () { ui.empty = !ui.empty; open(ui.empty ? "Tulevasi avatud toimumiskordi pole → tühi massiiv" : "Toimumiskorrad olemas"); };
+  document.getElementById("btn-reset").onclick = function () { ui = freshUi(); open("Algus: / (beforeMount)"); };
+  var kBtn = document.getElementById("b-kmenu"), kMenu = document.getElementById("k-menu");
+  function setKMenu(isOpen) { kMenu.hidden = !isOpen; kBtn.setAttribute("aria-expanded", String(isOpen)); }
+  kBtn.onclick = function (e) { e.stopPropagation(); setKMenu(kMenu.hidden); };
+  kMenu.onclick = function (e) { var b = e.target.closest("button"); if (!b) return; setKMenu(false); goRoute(b.dataset.nav); };
+  document.addEventListener("click", function (e) { if (!e.target.closest(".kmenu")) setKMenu(false); });
+
+  function goNote(id) {
+    var n = document.getElementById(id); if (!n) return;
+    n.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
+    n.classList.remove("flash"); void n.offsetWidth; n.classList.add("flash");
+  }
+  document.getElementById("notes-count").textContent = NOTES.length;
+  document.getElementById("notes").innerHTML = NOTES.map(function (n) {
+    return '<div class="note" id="' + n.id + '"><div class="note-head"><strong>' + esc(n.title) + '</strong><span class="draft-tag">' + (n.old ? "olemas" : "uus") + '</span><button class="copy" type="button" data-copy="' + n.id + '">Kopeeri</button></div><pre>' + esc(n.text) + '</pre></div>';
+  }).join("");
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-copy]"); if (!b) return;
+    var key = b.dataset.copy;
+    var text = key === "view" ? document.getElementById("view-note-text").textContent : NOTES.filter(function (n) { return n.id === key; })[0].text;
+    var done = function () { b.textContent = "Kopeeritud"; setTimeout(function () { b.textContent = "Kopeeri"; }, 1400); };
+    try { navigator.clipboard.writeText(text).then(done, function () { selectPre(b); }); } catch (err) { selectPre(b); }
+  });
+  function selectPre(b) {
+    var pre = b.closest(".note").querySelector("pre");
+    var r = document.createRange(); r.selectNodeContents(pre);
+    var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+  }
+
+  /* ---------- Algus ---------- */
+  ui = freshUi();
+  open("Algus: / (beforeMount)");
+})();
+</script>

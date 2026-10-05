@@ -5,6 +5,7 @@ import { useLanguageStore } from '@/stores/languageStore.js'
 import RoomService from '@/api-services/RoomService.js'
 import NavigationService from '@/services/NavigationService.js'
 import SessionStorageService from '@/services/SessionStorageService.js'
+import AdminTabs from '@/components/common/AdminTabs.vue'
 import InlineAlerts from '@/components/common/InlineAlerts.vue'
 import RoomDeleteButton from '@/components/common/RoomDeleteButton.vue'
 import RoomRestoreButton from '@/components/common/RoomRestoreButton.vue'
@@ -25,6 +26,7 @@ function padTwoDigits(number) {
 export default {
   name: 'AdminRoomsView',
   components: {
+    AdminTabs,
     PhPencilSimple,
     PhPlus,
     InlineAlerts,
@@ -169,6 +171,8 @@ export default {
 
 <template>
   <div class="container">
+    <AdminTabs />
+
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
       <h1 class="h3 mb-0">{{ $t('adminRooms.title') }}</h1>
       <button
@@ -246,7 +250,10 @@ export default {
             <td>
               <div v-if="room.status !== 'D'" class="d-flex gap-1">
                 <RouterLink
-                  :to="{ name: 'roomFormRoute', query: { roomId: room.roomId } }"
+                  :to="{
+                    name: 'roomFormRoute',
+                    query: { returnTo: $route.fullPath, roomId: room.roomId },
+                  }"
                   :title="$t('adminRooms.edit')"
                   :aria-label="$t('adminRooms.edit')"
                   class="btn btn-sm btn-outline-secondary d-inline-flex"

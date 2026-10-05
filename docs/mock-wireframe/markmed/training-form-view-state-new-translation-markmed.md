@@ -4,6 +4,7 @@
 
 ## Vaate märkmed
 
+AI tegevused on selles etapis ühendatud päris POST-teenustega AiTrainingController klassis; vastus on placeholder-objekt. AI päringu ajal on tekstide muutmine, faili vahetamine ja salvestamine keelatud; vea korral säilivad tekstid ja fail. Vaate vahetamisel vana AI tulemust ei rakendata.
 ```text
 Roll: Admin
 Failinimi: TrainingFormView.vue
@@ -14,6 +15,8 @@ state: "new-translation" — URL-is trainingId ja languageId (keel, mille tõlge
 Tõlke väljad eeltäidetakse salvestatud põhikeele (et) tõlkega, mida admin tõlgib. "Tee AI tõlge" tõlgib salvestatud põhikeele teksti ja täidab ainult vormi; salvestamata muudatuste korral küsitakse enne kinnitust.
 "Lisa tõlge" → POST /api/training/{trainingId}/training-translation. Vastuse trainingTranslationId järgi tehakse router.replace → state "update".
 Staatuse nupp ("Publitseeri" / "Liiguta mustandisse") nagu state "update" puhul.
+Nupp "Täida vorm PDF + AI abiga" ilmub valitud PDF-i kõrvale. Kasutab vormis valitud salvestamata faili ja POST /api/ai-training/pdf teenust nagu state "new-training". Vastus täidab uue tõlke pealkirja, lühikirjelduse ja kirjelduse; salvestamata tekstide ülekirjutamisel küsitakse kinnitust. Tooltip: "Valitud salvestamata PDF saadetakse backendile ja sealt Gemini AI-le. Vastus täidab uue tõlke tekstiväljad; midagi ei salvestata enne „Lisa tõlge“ vajutamist."
+Õppekava (PDF): väli on tühi — põhikeele faili ei kopeerita ja AI tõlge faili ei puuduta. Valitud fail salvestub koos "Lisa tõlge" nupuga (curriculumLabel tõlke keeles, nt "Curriculum").
 ```
 
 ## API märkmed — GET /api/languages
@@ -139,11 +142,13 @@ TrainingTranslationDto.java
   "languageCode": "et",
   "title": "Java algkursus",
   "shortDescription": "Java programmeerimise alused algajatele.",
-  "description": "Kursusel õpitakse Java süntaksit, objektorienteeritud programmeerimist ja põhilisi andmestruktuure."
+  "description": "Kursusel õpitakse Java süntaksit, objektorienteeritud programmeerimist ja põhilisi andmestruktuure.",
+  "curriculumFileName": "java-algkursus-oppekava.pdf",
+  "curriculumFileSize": 846213
 }
 
 API teenuse lisainfo:
-Laadib koolituse salvestatud põhikeele tõlke (training-translations vastusest isMainLanguage = true), millega eeltäidetakse uue tõlke väljad. Vastuse languageCode on põhikeel (et). Kui tõlke koolitus on kustutatud (status "D"), on tõlge nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.
+Laadib koolituse salvestatud põhikeele tõlke (training-translations vastusest isMainLanguage = true), millega eeltäidetakse uue tõlke väljad. Vastuse languageCode on põhikeel (et). Kui tõlke koolitus on kustutatud (status "D"), on tõlge nagu olematu: 404 PRIMARY_KEY_NOT_FOUND. curriculumFileName = õppekava failinimi (nt java-algkursus-oppekava.pdf), curriculumFileSize = suurus baitides; mõlemad null, kui õppekava pole. Faili ennast ei tagastata (GET /api/training-translation/{trainingTranslationId}/curriculum).
 
 Veateated:
 HTTP: 404
@@ -199,45 +204,27 @@ Tagastab kõik rahastustüübid contentLang keeles (funding_type_translation kau
 Veateated: —
 ```
 
-## API märkmed — GET /api/training/{trainingId}/ai-translation
+## API märkmed — POST /api/ai-training/translation/{trainingId}
 
 ```text
-API: GET /api/training/{trainingId}/ai-translation
+API: POST /api/ai-training/translation/{trainingId}
 
 Query parameetrid:
 languageId: Integer — sihtkeel, kuhu tõlgitakse
 
 Response (200):
-AiTranslationDto.java
+AiTrainingContentDto.java
 {
-  "title": "Power BI for Advanced Users",
-  "shortDescription": "Data models, DAX and interactive reports.",
-  "description": "The course builds a data model in Power BI, writes DAX formulas and creates interactive reports."
+  "title": "AI-ga tõlgitud pealkiri (TO BE IMPLEMENTED)",
+  "shortDescription": "AI-ga tõlgitud lühikirjeldus (TO BE IMPLEMENTED)",
+  "description": "AI-ga tõlgitud kirjeldus (TO BE IMPLEMENTED)"
 }
 
 API teenuse lisainfo:
+TO BE IMPLEMENTED: AiTrainingController tagastab praegu fikseeritud placeholder-objekti. Andmebaasi lugemist, Gemini kutset ega ärivigade kontrolli veel ei tehta. Järgnev andmevoog kirjeldab hilisemat AI teostust; planeeritud ärivead on backend taskis.
 Tõlgib alati andmebaasi salvestatud põhikeele (language.is_main_language = true) tõlke AI abil sihtkeelde — vormi sisu ei kasutata. Andmebaasi midagi ei salvestata. description HTML-märgendid säilitatakse. Vastusel päis Cache-Control: no-store. Kustutatud koolitus (status "D") on nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.
 
-Veateated:
-HTTP: 404
-errorCode: PRIMARY_KEY_NOT_FOUND
-message: "Ei leidnud primary keyd 'trainingId' väärtusega: 123"
-
-HTTP: 404
-errorCode: PRIMARY_KEY_NOT_FOUND
-message: "Ei leidnud primary keyd 'languageId' väärtusega: 123"
-
-HTTP: 403
-errorCode: MAIN_LANGUAGE_NOT_TRANSLATABLE
-message: "Põhikeelde ei saa AI tõlget teha"
-
-HTTP: 404
-errorCode: MAIN_TRANSLATION_NOT_FOUND
-message: "Koolitusel puudub põhikeele tõlge"
-
-HTTP: 503
-errorCode: AI_SERVICE_UNAVAILABLE
-message: "AI tõlketeenus ei ole hetkel kättesaadav"
+Veateated: —
 ```
 
 ## API märkmed — POST /api/training/{trainingId}/training-translation
@@ -251,7 +238,9 @@ TrainingTranslationCreateRequestDto.java
   "languageId": 2,
   "title": "Power BI for Advanced Users",
   "shortDescription": "Data models, DAX and interactive reports.",
-  "description": "The course builds a data model in Power BI, writes DAX formulas and creates interactive reports."
+  "description": "The course builds a data model in Power BI, writes DAX formulas and creates interactive reports.",
+  "curriculum": "JVBERi0xLjcKJeLjz9MK...",
+  "curriculumLabel": "Curriculum"
 }
 
 Response (200):
@@ -261,7 +250,7 @@ TrainingTranslationCreateResponseDto.java
 }
 
 API teenuse lisainfo:
-Lisab koolitusele uue keele tõlke. Ühes keeles saab koolitusel olla ainult üks tõlge (training_translation_uq). Kustutatud koolitus (status "D") on nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.
+Lisab koolitusele uue keele tõlke. Ühes keeles saab koolitusel olla ainult üks tõlge (training_translation_uq). Kustutatud koolitus (status "D") on nagu olematu: 404 PRIMARY_KEY_NOT_FOUND. Õppekava: curriculum = PDF Base64 (valikuline, null = õppekava pole), curriculumLabel = sõna "Õppekava" tõlke keeles (kohustuslik). Backend kontrollib faili (algus %PDF-, kuni 10 MB) ja lisab training_translation_curriculum rea; failinimi = puhastatud pealkiri + "-" + puhastatud curriculumLabel + ".pdf" (nt power-bi-for-advanced-users-curriculum.pdf). Vigane Base64 või puuduv curriculumLabel → 400 INCORRECT_INPUT.
 
 Veateated:
 HTTP: 404
@@ -275,6 +264,14 @@ message: "Ei leidnud primary keyd 'languageId' väärtusega: 123"
 HTTP: 403
 errorCode: TRANSLATION_EXISTS
 message: "Selles keeles tõlge on juba olemas"
+
+HTTP: 403
+errorCode: CURRICULUM_TYPE_NOT_ALLOWED
+message: "Lubatud on ainult PDF-fail"
+
+HTTP: 403
+errorCode: CURRICULUM_TOO_LARGE
+message: "Õppekava on liiga suur, lubatud kuni 10 MB"
 ```
 
 ## API märkmed — PUT /api/training/{trainingId}/publish
@@ -316,3 +313,31 @@ HTTP: 403
 errorCode: TRAINING_DELETED
 message: "Kustutatud koolituse staatust ei saa muuta, taasta see enne"
 ```
+
+## API märkmed — POST /api/ai-training/pdf (TO BE IMPLEMENTED)
+
+```text
+API: POST /api/ai-training/pdf
+
+Request: multipart/form-data
+curriculum: kohustuslik PDF-fail (kuni 10 MB)
+
+Response (200):
+AiTrainingContentDto.java
+{
+  "title": "PDF-ist genereeritud pealkiri (TO BE IMPLEMENTED)",
+  "shortDescription": "PDF-ist genereeritud lühikirjeldus (TO BE IMPLEMENTED)",
+  "description": "PDF-ist genereeritud kirjeldus (TO BE IMPLEMENTED)"
+}
+
+API teenuse lisainfo:
+TO BE IMPLEMENTED: controller tagastab praegu fikseeritud placeholder-väärtused; DB-d ei loeta ja Geminit ei kutsuta.
+Valitud salvestamata PDF saadetakse backendile, kus tulevikus töödeldakse see Gemini AI-ga. Vastus täidab uue tõlke tekstiväljad, kuid DB-sse midagi ei salvestata; admin kontrollib tulemust ja vajutab ise "Lisa tõlge". Praegu tagastab controller placeholder-väärtused. Sama vastuse DTO on mõeldud ka AI tõlkele.
+
+Veateated: —
+```
+
+
+## Tagasitee — täiendatud navigatsioon
+
+Vaade võtab vastu valikulise `returnTo` query parameetri ja kuvab lingi „← Tagasi“ (`BackLink.vue`). Avamislingid annavad kaasa lähtevaate täieliku URL-i. Tagasilingi puuduv, väline, tundmatu või iseendale osutav siht asendatakse vaate varusihtkohaga. Oleku- ja tõlkevahetus ei kaota tagasiteed. Eraldi nimega nimekirja-/kalendrinupud säilitavad oma sihtkoha. Täpne [kaardistus ja varusihtkohad](../../tasks/frontend/return-to-navigation.md) ning [skeemid](../loo-mock-vaade/return-to-navigation-skeemid.md).

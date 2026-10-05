@@ -300,6 +300,11 @@ tr.is-new td { font-weight: 700; }
 td .linkish { font-size: .84rem; }
 /* hidden-atribuut peab peitma ka elemendid, millel on oma display (nt .menu { display: grid }) */
 [hidden] { display: none !important; }
+/* Vahelehed (NavTabs.vue: AdminTabs / TrainingsTabs) — üks keritav rida */
+.vtabs { display: flex; gap: 2px; border-bottom: 1.5px solid var(--sketch); overflow-x: auto; font-family: var(--font-sketch); }
+.vtabs button { flex: none; white-space: nowrap; background: none; border: 1.5px solid transparent; border-bottom: 0; border-radius: 6px 6px 0 0; color: var(--accent); padding: 3px 12px; margin-bottom: -1.5px; cursor: pointer; font: inherit; font-size: .88rem; }
+.vtabs button:hover { border-color: var(--line); }
+.vtabs button[aria-current="page"] { color: var(--ink); font-weight: 700; background: var(--panel); border-color: var(--sketch); cursor: default; }
 </style>
 
 <div class="page">
@@ -307,6 +312,7 @@ td .linkish { font-size: .84rem; }
     <h1>Registreerumised — läbimäng</h1>
     <p>AdminRegistrationsView.vue (kõigi registreerumiste nimekiri) ja AdminRegistrationView.vue (üks registreerumine). Otsi, sorteeri veerge (1. klõps kasvav, 2. kahanev, 3. vaikimisi), lülita sisse loobunud ja toimunud, ava registreerumine, muuda staatust, tasumist, sülearvutit või admini märkmeid ja salvesta. Paremal all näed, mis päringud tehti ja mida backend vastas; kollased sildid viivad API märkmete juurde.</p>
     <p>Andmed on <code>3_import.sql</code>-ist (täna = 01/10/2026): 9 registreerumist, neist 1 loobunud (Mari Lepp) ja 1 toimunud toimumiskorral (Anna Saar, september). Uus veerg <code>admin_notes</code> ja uute teenuste DTO-d on <strong>ettepanek</strong> (skeemide fail, jaotis 1). Muudatused kehtivad ainult selles läbimängus — teised läbimängud kasutavad oma andmeid.</p>
+    <p>Detailide ja vormide avamisel säilib lähtevaate URL <code>returnTo</code> parameetris; „← Tagasi“ taastab lähtekoha. <a href="../return-to-navigation-skeemid.md">Tagasitee skeemid ja kaardistus</a>.</p>
     <div class="toolbar">
       <span class="lbl-soft">Kasutajaliidese keel (navbar):</span>
       <button class="tbtn" type="button" data-ui-lang="et">et</button>
@@ -325,7 +331,8 @@ td .linkish { font-size: .84rem; }
     <nav class="sitenav" aria-label="Navbar (wireframe)">
       <span class="logo" aria-hidden="true"></span><span>Koolitused</span><span>Teenused</span><span>Ettevõttest</span><span>Kontakt</span>
       <span class="admin"><button type="button" id="b-admin" aria-expanded="false" aria-controls="admin-menu">Admin ▾</button>
-        <span class="menu" id="admin-menu" hidden><button type="button" data-nav="/training-form">Lisa uus koolitus</button><button type="button" data-nav="/admin-trainings">Koolituste haldus</button><button type="button" data-nav="/admin-all-courses">Koolituste kalender</button><hr><button type="button" data-nav="/lecturer-form">Lisa uus koolitaja</button><button type="button" data-nav="/admin-lecturers">Koolitajad</button><hr><button type="button" data-nav="/admin-rooms">Koolitusruumid</button><hr><button type="button" data-nav="/admin-enquiries">Koolituste päringud</button><button type="button" data-nav="/admin-registrations" class="cur">Registreerumised</button></span></span>
+        <span class="menu" id="admin-menu" hidden><button type="button" data-nav="/admin-enquiries">Koolituste päringud</button><button type="button" class="cur" data-nav="/admin-registrations">Registreerumised</button><button type="button" data-nav="/admin-feedbacks">Tagasisided</button><hr><button type="button" data-nav="/admin-trainings">Koolitused</button><button type="button" data-nav="/admin-all-courses">Koolituste kalender</button><hr><button type="button" data-nav="/admin-lecturers">Koolitajad</button><button type="button" data-nav="/admin-rooms">Koolitusruumid</button><hr><button type="button" data-nav="/admin-users">Kontod</button></span></span>
+      <span class="out" title="Minu profiil ▾ — adminil ainult &quot;Parool&quot; (/change-password)">👤 ▾</span>
       <span class="out">Logi välja</span>
     </nav>
     <div class="view" id="view"></div>
@@ -355,6 +362,7 @@ td .linkish { font-size: .84rem; }
 
 <div id="modal-root"></div>
 
+<script src="../return-navigation.js"></script>
 <script>
 (function () {
   "use strict";
@@ -363,10 +371,22 @@ td .linkish { font-size: .84rem; }
   var SHELL_Q = new URLSearchParams(location.search);
   var EMBED = SHELL_Q.get("embed") === "1" && window.parent !== window;
   if (EMBED) document.documentElement.classList.add("embed");
-  function goRoute(path, standaloneMessage) {
+  function goRoute(path, standaloneMessage, isBack) {
+    if (!isBack) path = window.BcsReturnNavigation.forward(path);
     if (EMBED) { window.parent.postMessage({ type: "bcs-navigate", path: path }, "*"); return; }
     toast(standaloneMessage || "router.push → " + path);
   }
+
+  /* ---------- Vahelehed (NavTabs.vue) — samad lingid mis navbari menüüs ---------- */
+  var ADMIN_TABS = [["/admin-enquiries", "Koolituste päringud"], ["/admin-registrations", "Registreerumised"], ["/admin-feedbacks", "Tagasisided"], ["/admin-trainings", "Koolitused"], ["/admin-all-courses", "Koolituste kalender"], ["/admin-lecturers", "Koolitajad"], ["/admin-rooms", "Koolitusruumid"], ["/admin-users", "Kontod"]];
+  var TRAINING_TABS = [["/trainings", "Meie koolitused"], ["/courses", "Koolituste kalender"]];
+  function viewTabs(tabs, current) {
+    return '<nav class="vtabs" aria-label="Vahelehed">' + tabs.map(function (t) { return '<button type="button" data-vtab="' + t[0] + '"' + (t[0] === current ? ' aria-current="page"' : "") + '>' + t[1] + '</button>'; }).join("") + '</nav>';
+  }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-vtab]"); if (!b || b.getAttribute("aria-current")) return;
+    goRoute(b.dataset.vtab, "Vaheleht → " + b.dataset.vtab + " (teine läbimäng)");
+  });
   // NavigationService.isInternalPath: ainult sisemine rada (algab "/", mitte "//" ega "/\")
   function internalPath(r) { return r && r.charAt(0) === "/" && r.charAt(1) !== "/" && r.charAt(1) !== "\\" ? r : ""; }
 
@@ -378,6 +398,7 @@ td .linkish { font-size: .84rem; }
       "Frontend rada: /admin-registrations",
       "",
       "Vaatega seotud lisainfo:",
+      "Ülal vahelehed (AdminTabs.vue): Koolituste päringud | Registreerumised | Tagasisided | Koolitused | Koolituste kalender | Koolitajad | Koolitusruumid | Kontod — samad lingid ja järjekord mis menüüs \"Admin\", selle vaate vaheleht on aktiivne. Kitsal ekraanil on vahelehed ühel keritaval real, aktiivne keritakse keskele.",
       "Avaneb navbari menüüst \"Admin\" → \"Registreerumised\" (kohe \"Koolituste päringud\" järel). Pealkiri \"Registreerumised\". Tabelis Registreerus | Osaleja | E-post | Koolitus | Toimumisaeg | Tasunud ✓/✗ | Vajab sülearvutit ✓/✗ | Staatus (Registreerunud / Loobunud) | Tegevused. Koolituse nimi on kasutajaliidese keeles (puudumisel põhikeeles), keele vahetusel laaditakse nimekiri uuesti. Toimumisaeg on link → /admin-course?courseId={id}; toimunud toimumiskorral märgis \"Toimunud\". Loobunu rida on tuhmim.",
       "Lüliti \"Näita ka loobunud\" (vaikimisi väljas → ainult registreerunud) → includeCancelled=true; lüliti \"Näita ka toimunud\" (vaikimisi väljas → ainult toimumiskorrad, mille lõpp on täna või hiljem) → includePast=true; lüliti muutmisel laaditakse nimekiri uuesti. Otsinguväli filtreerib frontendis osaleja nime, e-posti ja koolituse nime järgi. Veerud Registreerus, Osaleja, Koolitus, Toimumisaeg, Tasunud, Vajab sülearvutit ja Staatus on sorteeritavad frontendis (1. klõps kasvav, 2. kahanev, 3. vaikimisi = registreerumise aeg, uusimad eespool). Leheküljestust pole. All \"Kokku N registreerumist\".",
       "Silma ikoon \"Vaata\" → /admin-registration?courseParticipantId={id}."
@@ -427,24 +448,107 @@ td .linkish { font-size: .84rem; }
 
   /* ---------- Andmed (3_import.sql + admin_notes ettepanek) ---------- */
   var TODAY = "2026-10-01";
-  var TRAININGS = { 1: { et: "Java algkursus", en: "Java Basics" }, 3: { et: "Spring Boot veebiarendus", en: "Spring Boot Web Development" }, 7: { et: "Agiilne meeskonnajuhtimine", en: "Agile Team Leadership" } };
-  var COURSES = { 1: { t: 1, start: "2026-10-05", end: "2026-10-09", st: "O" }, 3: { t: 1, start: "2026-09-07", end: "2026-09-11", st: "O" }, 5: { t: 1, start: "2026-11-16", end: "2026-11-20", st: "F" },
-    9: { t: 3, start: "2026-10-12", end: "2026-10-15", st: "O" }, 12: { t: 7, start: "2026-10-14", end: "2026-10-15", st: "F" } };
+  var TRAININGS = {
+    "1": {"et": "Java algkursus", "en": "Java Basics"},
+    "2": {"et": "Projektijuhtimise põhitõed", "en": "Project Management Fundamentals"},
+    "3": {"et": "Spring Boot veebiarendus", "en": "Spring Boot Web Development"},
+    "4": {"et": "Vue.js esmaspetsialist", "en": "Vue.js Essentials"},
+    "5": {"et": "UX disaini alused", "en": "UX Design Basics"},
+    "6": {"et": "Figma praktikum", "en": "Figma Workshop"},
+    "7": {"et": "Agiilne meeskonnajuhtimine", "en": "Agile Team Leadership"},
+    "8": {"et": "SQL ja andmebaasid", "en": "SQL and Databases"},
+    "9": {"et": "Exceli algkursus"},
+    "10": {"et": "Docker ja konteinerid"},
+    "11": {"et": "Git ja GitHub", "en": "Git and GitHub"},
+    "12": {"et": "Python andmeanalüüsiks", "en": "Python for Data Analysis"},
+    "13": {"et": "Tehisaru töövahendid arendajale"},
+    "14": {"et": "Photoshopi algkursus", "en": "Photoshop Basics"},
+    "15": {"et": "Vali-IT Noorem AI arendaja", "en": "Vali-IT Junior AI Developer"}
+  };
+  var COURSES = {
+    "1": {"t": 1, "start": "2026-10-05", "end": "2026-10-09", "st": "O"},
+    "2": {"t": 2, "start": "2026-11-02", "end": "2026-11-04", "st": "O"},
+    "3": {"t": 1, "start": "2026-09-07", "end": "2026-09-11", "st": "O"},
+    "4": {"t": 1, "start": "2026-10-19", "end": "2026-10-23", "st": "X"},
+    "5": {"t": 1, "start": "2026-11-16", "end": "2026-11-20", "st": "F"},
+    "6": {"t": 1, "start": "2026-12-07", "end": "2026-12-11", "st": "U"},
+    "7": {"t": 1, "start": "2026-06-08", "end": "2026-06-12", "st": "O"},
+    "8": {"t": 1, "start": "2026-11-30", "end": "2026-12-04", "st": "D"},
+    "9": {"t": 3, "start": "2026-10-12", "end": "2026-10-15", "st": "O"},
+    "10": {"t": 4, "start": "2026-10-26", "end": "2026-10-28", "st": "O"},
+    "11": {"t": 5, "start": "2026-11-09", "end": "2026-11-10", "st": "O"},
+    "12": {"t": 7, "start": "2026-09-14", "end": "2026-09-15", "st": "F"},
+    "13": {"t": 2, "start": "2027-01-11", "end": "2027-01-13", "st": "U"},
+    "14": {"t": 8, "start": "2026-09-21", "end": "2026-09-23", "st": "O"},
+    "15": {"t": 3, "start": "2026-09-28", "end": "2026-09-30", "st": "O"},
+    "16": {"t": 15, "start": "2026-08-10", "end": "2026-09-25", "st": "O"}
+  };
   // participant + profile + user.email (Anna Saare konto e-post erineb profiili omast)
-  var PEOPLE = { 1: ["Anna Saar", "anna.saar@example.com", "+37256789012", "kasutaja@vali-it.ee"], 2: ["Liis Kuusk", "liis.kuusk@example.com", "+37255001122", "liis.kuusk@example.com"],
-    3: ["Jaan Org", "jaan.org@example.com", "+37255003344", "jaan.org@example.com"], 4: ["Mari Lepp", "mari.lepp@example.com", "+37255005566", "mari.lepp@example.com"],
-    5: ["Toomas Rebane", "toomas.rebane@example.com", "+37255007788", "toomas.rebane@example.com"] };
+  var PEOPLE = {
+    "1": ["Anna Saar", "anna.saar@example.com", "+37256789012", "kasutaja@vali-it.ee"],
+    "2": ["Liis Kuusk", "liis.kuusk@example.com", "+37255001122", "kasutaja"],
+    "3": ["Jaan Org", "jaan.org@example.com", "+37255003344", "jaan.org@example.com"],
+    "4": ["Mari Lepp", "mari.lepp@example.com", "+37255005566", "mari.lepp@example.com"],
+    "5": ["Toomas Rebane", "toomas.rebane@example.com", "+37255007788", "toomas.rebane@example.com"],
+    "6": ["Kärt Kivi", "kart.kivi@example.com", "+37255100000", "kart.kivi@example.com"],
+    "7": ["Rasmus Vaher", "rasmus.vaher@example.com", "+37255100001", "rasmus.vaher@example.com"],
+    "8": ["Laura Põld", "laura.pold@example.com", "+37255100002", "laura.pold@example.com"],
+    "9": ["Kristjan Oja", "kristjan.oja@example.com", "+37255100003", "kristjan.oja@example.com"],
+    "10": ["Sandra Teder", "sandra.teder@example.com", "+37255100004", "sandra.teder@example.com"],
+    "11": ["Markus Lill", "markus.lill@example.com", "+37255100005", "markus.lill@example.com"],
+    "12": ["Helen Aas", "helen.aas@example.com", "+37255100006", "helen.aas@example.com"],
+    "13": ["Taavi Sild", "taavi.sild@example.com", "+37255100007", "taavi.sild@example.com"],
+    "14": ["Merle Ilves", "merle.ilves@example.com", "+37255100008", "merle.ilves@example.com"],
+    "15": ["Oliver Kangur", "oliver.kangur@example.com", "+37255100009", "oliver.kangur@example.com"],
+    "16": ["Eleri Salu", "eleri.salu@example.com", "+37255100010", "eleri.salu@example.com"],
+    "17": ["Siim Kalda", "siim.kalda@example.com", "+37255100011", "siim.kalda@example.com"],
+    "18": ["Diana Mägi", "diana.magi@example.com", "+37255100012", "diana.magi@example.com"]
+  };
   function freshDb() {
     return [
-      { id: 1, c: 1, p: 1, notes: "Registreerus veebilehe kaudu.", admin: null, paid: true, laptop: true, st: "R", created: "2026-09-10 12:00", updated: "2026-09-10 12:00" },
-      { id: 2, c: 3, p: 1, notes: "Osales septembris.", admin: null, paid: true, laptop: true, st: "R", created: "2026-09-01 12:00", updated: "2026-09-01 12:00" },
-      { id: 3, c: 1, p: 2, notes: "", admin: null, paid: false, laptop: false, st: "R", created: "2026-09-12 10:05", updated: "2026-09-12 10:05" },
-      { id: 4, c: 1, p: 3, notes: "Arve ettevõttele.", admin: "Arve saadetud 15.09.", paid: true, laptop: true, st: "R", created: "2026-09-14 15:35", updated: "2026-09-14 15:35" },
-      { id: 5, c: 1, p: 4, notes: "Loobus haiguse tõttu.", admin: "Teatas telefoni teel 25.09.", paid: false, laptop: true, st: "C", created: "2026-09-18 09:15", updated: "2026-09-25 11:00" },
-      { id: 6, c: 12, p: 2, notes: "", admin: null, paid: true, laptop: false, st: "R", created: "2026-09-20 08:00", updated: "2026-09-20 08:00" },
-      { id: 7, c: 12, p: 5, notes: "", admin: null, paid: false, laptop: false, st: "R", created: "2026-09-22 13:50", updated: "2026-09-22 13:50" },
-      { id: 8, c: 5, p: 3, notes: "", admin: null, paid: false, laptop: true, st: "R", created: "2026-09-26 17:00", updated: "2026-09-26 17:00" },
-      { id: 9, c: 9, p: 5, notes: "", admin: null, paid: true, laptop: true, st: "R", created: "2026-09-28 09:00", updated: "2026-09-28 09:00" }
+      {"id": 1, "c": 1, "p": 1, "notes": "Registreerus veebilehe kaudu.", "admin": null, "paid": true, "laptop": true, "st": "R", "created": "2026-09-10 12:00", "updated": "2026-09-10 12:00"},
+      {"id": 2, "c": 3, "p": 1, "notes": "Osales septembris.", "admin": null, "paid": true, "laptop": true, "st": "R", "created": "2026-09-01 12:00", "updated": "2026-09-01 12:00"},
+      {"id": 3, "c": 1, "p": 2, "notes": "", "admin": null, "paid": false, "laptop": false, "st": "R", "created": "2026-09-12 10:05", "updated": "2026-09-12 10:05"},
+      {"id": 4, "c": 1, "p": 3, "notes": "Arve ettevõttele.", "admin": "Arve saadetud 15.09.", "paid": true, "laptop": true, "st": "R", "created": "2026-09-14 15:35", "updated": "2026-09-14 15:35"},
+      {"id": 5, "c": 1, "p": 4, "notes": "Loobus haiguse tõttu.", "admin": "Teatas telefoni teel 25.09.", "paid": false, "laptop": true, "st": "C", "created": "2026-09-18 09:15", "updated": "2026-09-25 11:00"},
+      {"id": 6, "c": 12, "p": 2, "notes": "", "admin": null, "paid": true, "laptop": false, "st": "R", "created": "2026-09-12 10:10", "updated": "2026-09-12 10:10"},
+      {"id": 7, "c": 12, "p": 5, "notes": "", "admin": null, "paid": false, "laptop": false, "st": "R", "created": "2026-09-10 13:50", "updated": "2026-09-10 13:50"},
+      {"id": 8, "c": 5, "p": 3, "notes": "", "admin": null, "paid": false, "laptop": true, "st": "R", "created": "2026-09-26 17:00", "updated": "2026-09-26 17:00"},
+      {"id": 9, "c": 9, "p": 5, "notes": "", "admin": null, "paid": true, "laptop": true, "st": "R", "created": "2026-09-28 09:00", "updated": "2026-09-28 09:00"},
+      {"id": 10, "c": 7, "p": 1, "notes": "", "admin": null, "paid": true, "laptop": false, "st": "R", "created": "2026-05-20 10:00", "updated": "2026-05-20 10:00"},
+      {"id": 11, "c": 14, "p": 1, "notes": "", "admin": null, "paid": true, "laptop": true, "st": "R", "created": "2026-09-10 10:00", "updated": "2026-09-10 10:00"},
+      {"id": 12, "c": 14, "p": 2, "notes": "", "admin": null, "paid": true, "laptop": true, "st": "R", "created": "2026-09-12 10:15", "updated": "2026-09-12 10:15"},
+      {"id": 13, "c": 14, "p": 3, "notes": "", "admin": null, "paid": true, "laptop": true, "st": "R", "created": "2026-09-15 10:00", "updated": "2026-09-15 10:00"},
+      {"id": 14, "c": 14, "p": 4, "notes": "", "admin": null, "paid": true, "laptop": true, "st": "R", "created": "2026-09-18 10:00", "updated": "2026-09-18 10:00"},
+      {"id": 15, "c": 12, "p": 1, "notes": "", "admin": null, "paid": true, "laptop": false, "st": "R", "created": "2026-09-10 11:00", "updated": "2026-09-10 11:00"},
+      {"id": 16, "c": 12, "p": 3, "notes": "", "admin": null, "paid": true, "laptop": false, "st": "R", "created": "2026-09-14 15:40", "updated": "2026-09-14 15:40"},
+      {"id": 17, "c": 12, "p": 4, "notes": "Loobus enne koolituse algust.", "admin": null, "paid": false, "laptop": false, "st": "C", "created": "2026-09-11 11:00", "updated": "2026-09-13 09:00"},
+      {"id": 18, "c": 14, "p": 5, "notes": "Loobus enne koolituse algust.", "admin": null, "paid": false, "laptop": true, "st": "C", "created": "2026-09-16 11:00", "updated": "2026-09-20 09:00"},
+      {"id": 19, "c": 15, "p": 1, "notes": "", "admin": null, "paid": true, "laptop": true, "st": "R", "created": "2026-09-20 10:00", "updated": "2026-09-20 10:00"},
+      {"id": 20, "c": 15, "p": 2, "notes": "", "admin": null, "paid": true, "laptop": true, "st": "R", "created": "2026-09-20 10:05", "updated": "2026-09-20 10:05"},
+      {"id": 21, "c": 16, "p": 1, "notes": "Osales Vali-IT meeskonnaprojektis.", "admin": null, "paid": true, "laptop": false, "st": "R", "created": "2026-08-05 10:00", "updated": "2026-08-05 10:00"},
+      {"id": 22, "c": 16, "p": 2, "notes": "Osales Vali-IT meeskonnaprojektis.", "admin": null, "paid": true, "laptop": false, "st": "R", "created": "2026-08-05 10:01", "updated": "2026-08-05 10:01"},
+      {"id": 23, "c": 16, "p": 3, "notes": "Osales Vali-IT meeskonnaprojektis.", "admin": null, "paid": true, "laptop": false, "st": "R", "created": "2026-08-05 10:02", "updated": "2026-08-05 10:02"},
+      {"id": 24, "c": 16, "p": 4, "notes": "Osales Vali-IT meeskonnaprojektis.", "admin": null, "paid": true, "laptop": false, "st": "R", "created": "2026-08-05 10:03", "updated": "2026-08-05 10:03"},
+      {"id": 25, "c": 16, "p": 5, "notes": "Osales Vali-IT meeskonnaprojektis.", "admin": null, "paid": true, "laptop": false, "st": "R", "created": "2026-08-05 10:04", "updated": "2026-08-05 10:04"},
+      {"id": 26, "c": 16, "p": 6, "notes": "Osales Vali-IT meeskonnaprojektis.", "admin": null, "paid": true, "laptop": false, "st": "R", "created": "2026-08-05 10:05", "updated": "2026-08-05 10:05"},
+      {"id": 27, "c": 16, "p": 7, "notes": "Osales Vali-IT meeskonnaprojektis.", "admin": null, "paid": true, "laptop": false, "st": "R", "created": "2026-08-05 10:06", "updated": "2026-08-05 10:06"},
+      {"id": 28, "c": 16, "p": 8, "notes": "Osales Vali-IT meeskonnaprojektis.", "admin": null, "paid": true, "laptop": false, "st": "R", "created": "2026-08-05 10:07", "updated": "2026-08-05 10:07"},
+      {"id": 29, "c": 16, "p": 9, "notes": "Osales Vali-IT meeskonnaprojektis.", "admin": null, "paid": true, "laptop": false, "st": "R", "created": "2026-08-05 10:08", "updated": "2026-08-05 10:08"},
+      {"id": 30, "c": 16, "p": 10, "notes": "Osales Vali-IT meeskonnaprojektis.", "admin": null, "paid": true, "laptop": false, "st": "R", "created": "2026-08-05 10:09", "updated": "2026-08-05 10:09"},
+      {"id": 31, "c": 16, "p": 11, "notes": "Osales Vali-IT meeskonnaprojektis.", "admin": null, "paid": true, "laptop": false, "st": "R", "created": "2026-08-05 10:10", "updated": "2026-08-05 10:10"},
+      {"id": 32, "c": 16, "p": 12, "notes": "Osales Vali-IT meeskonnaprojektis.", "admin": null, "paid": true, "laptop": false, "st": "R", "created": "2026-08-05 10:11", "updated": "2026-08-05 10:11"},
+      {"id": 33, "c": 16, "p": 13, "notes": "Osales Vali-IT meeskonnaprojektis.", "admin": null, "paid": true, "laptop": false, "st": "R", "created": "2026-08-05 10:12", "updated": "2026-08-05 10:12"},
+      {"id": 34, "c": 16, "p": 14, "notes": "Osales Vali-IT meeskonnaprojektis.", "admin": null, "paid": true, "laptop": false, "st": "R", "created": "2026-08-05 10:13", "updated": "2026-08-05 10:13"},
+      {"id": 35, "c": 16, "p": 15, "notes": "Osales Vali-IT meeskonnaprojektis.", "admin": null, "paid": true, "laptop": false, "st": "R", "created": "2026-08-05 10:14", "updated": "2026-08-05 10:14"},
+      {"id": 36, "c": 16, "p": 16, "notes": "Osales Vali-IT meeskonnaprojektis.", "admin": null, "paid": true, "laptop": false, "st": "R", "created": "2026-08-05 10:15", "updated": "2026-08-05 10:15"},
+      {"id": 37, "c": 16, "p": 17, "notes": "Osales Vali-IT meeskonnaprojektis.", "admin": null, "paid": true, "laptop": false, "st": "R", "created": "2026-08-05 10:16", "updated": "2026-08-05 10:16"},
+      {"id": 38, "c": 16, "p": 18, "notes": "Osales Vali-IT meeskonnaprojektis.", "admin": null, "paid": true, "laptop": false, "st": "R", "created": "2026-08-05 10:17", "updated": "2026-08-05 10:17"},
+      {"id": 39, "c": 3, "p": 9, "notes": "Täiendav praktiline koolitus.", "admin": null, "paid": true, "laptop": false, "st": "R", "created": "2026-09-01 11:00", "updated": "2026-09-01 11:00"},
+      {"id": 40, "c": 3, "p": 10, "notes": "Täiendav praktiline koolitus.", "admin": null, "paid": true, "laptop": false, "st": "R", "created": "2026-09-01 11:00", "updated": "2026-09-01 11:00"},
+      {"id": 41, "c": 14, "p": 6, "notes": "Täiendav praktiline koolitus.", "admin": null, "paid": true, "laptop": false, "st": "R", "created": "2026-09-16 11:00", "updated": "2026-09-16 11:00"},
+      {"id": 42, "c": 14, "p": 7, "notes": "Täiendav praktiline koolitus.", "admin": null, "paid": true, "laptop": false, "st": "R", "created": "2026-09-16 11:00", "updated": "2026-09-16 11:00"},
+      {"id": 43, "c": 12, "p": 8, "notes": "Täiendav praktiline koolitus.", "admin": null, "paid": true, "laptop": false, "st": "R", "created": "2026-09-01 11:00", "updated": "2026-09-01 11:00"}
     ];
   }
   var db, ui, detail = null, logSteps = [], logTitle = "", openReq = -1;
@@ -576,7 +680,7 @@ td .linkish { font-size: .84rem; }
         '<td class="center">' + check(r.hasPaid) + '</td><td class="center">' + check(r.requiresLaptop) + '</td><td>' + badge(r.status) + '</td>' +
         '<td><button type="button" class="ibtn" data-open="' + r.courseParticipantId + '" title="Vaata" aria-label="Vaata">' + EYE + '</button></td></tr>';
     }).join("") : '<tr class="empty-row"><td colspan="9">Registreerumisi ei leitud</td></tr>';
-    return '<div class="viewhead"><h2>Registreerumised</h2></div>' +
+    return viewTabs(ADMIN_TABS, "/admin-registrations") + '<div class="viewhead"><h2>Registreerumised</h2></div>' +
       '<div class="searchrow"><input type="text" id="r-search" placeholder="Otsi osaleja nime, e-posti või koolituse järgi…" aria-label="Otsi" value="' + esc(ui.search) + '"></div>' +
       '<div class="togglerow"><label class="switch"><input type="checkbox" id="r-cancelled"' + (ui.includeCancelled ? " checked" : "") + '> Näita ka loobunud</label>' +
       '<label class="switch"><input type="checkbox" id="r-past"' + (ui.includePast ? " checked" : "") + '> Näita ka toimunud</label>' + pin("n-list", "GET /api/admin-registrations") + '</div>' +
@@ -659,6 +763,7 @@ td .linkish { font-size: .84rem; }
     var vn = VIEW_NOTES[ui.route === "list" ? "admin-registrations" : "admin-registration"];
     document.getElementById("view-note-title").textContent = "Vaate märkmed — " + vn.title;
     document.getElementById("view-note-text").textContent = vn.text;
+    window.BcsReturnNavigation.render(goRoute);
   }
 
   /* ---------- Sündmused ---------- */

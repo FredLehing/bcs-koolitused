@@ -7,7 +7,7 @@
 | `POST /api/training` | Implementeeritud | Lisada puhastus ja valideerimine |
 | `PUT /api/training/{trainingId}` | Task olemas (`PUT-api-training-trainingId.md`), implementeerimata | Rakendada sama muster implementeerimisel |
 | `POST /api/training/{trainingId}/training-translation` | Task olemas (`POST-api-training-trainingId-training-translation.md`), implementeerimata | Rakendada sama muster implementeerimisel |
-| `GET /api/training/{trainingId}/ai-translation` | Task olemas, implementeerimata | AI vastuse `description` puhastada enne tagastamist |
+| `POST /api/ai-training/translation/{trainingId}` | Task olemas, implementeerimata | AI vastuse `description` puhastada enne tagastamist |
 
 **Kasutav vaade:** `TrainingFormView.vue` — kirjelduse richtext editor (`docs/tasks/frontend/training-description-richtext.md`)
 
@@ -80,7 +80,7 @@ Annotatsioon lisada kõigi kolme request DTO `description` väljale (`TrainingCr
 
 - `TrainingService.createMainLanguageTrainingTranslation(...)` — pärast mapperit `trainingTranslation.setDescription(HtmlSanitizer.sanitizeDescription(...))`
 - PUT ja tõlke POST teenustes sama muster
-- AI tõlke teenuses: AI vastuse `description` puhastatakse enne `AiTranslationDto` tagastamist (AI väljund on samuti usaldamatu sisend)
+- AI tõlke teenuses: AI vastuse `description` puhastatakse enne `AiTrainingContentDto` tagastamist (AI väljund on samuti usaldamatu sisend)
 
 `title` ja `shortDescription` **ei ole HTML** — neid ei puhastata (frontend kuvab need `{{ }}`-ga, Vue escape'ib).
 

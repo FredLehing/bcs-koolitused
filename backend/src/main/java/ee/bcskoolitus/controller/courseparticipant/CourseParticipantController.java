@@ -6,6 +6,7 @@ import ee.bcskoolitus.controller.courseparticipant.dto.AdminRegistrationUpdateRe
 import ee.bcskoolitus.controller.courseparticipant.dto.CourseParticipantDto;
 import ee.bcskoolitus.controller.courseparticipant.dto.CourseParticipantStatusDto;
 import ee.bcskoolitus.controller.courseparticipant.dto.CourseRegistrationRequestDto;
+import ee.bcskoolitus.controller.courseparticipant.dto.MyRegistrationDto;
 import ee.bcskoolitus.infrastructure.error.ApiError;
 import ee.bcskoolitus.service.CourseParticipantService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -138,5 +139,42 @@ public class CourseParticipantController {
     })
     public void registerCourseParticipant(@PathVariable Integer courseId, @Valid @RequestBody CourseRegistrationRequestDto courseRegistrationRequestDto) {
         courseParticipantService.registerCourseParticipant(courseId, courseRegistrationRequestDto);
+    }
+
+    @GetMapping("/user/{userId}/registrations")
+    @Operation(summary = "Kasutaja oma registreerumised (Minu koolitused)",
+            description = "Ka loobunud (C) ja toimunud, alguse järgi kasvavalt; kustutatud toimumiskorrad välja. trainingTitle contentLang keeles, "
+                    + "puudumisel põhikeeles. canCancel = R, toimumiskord pole alanud ega tühistatud. canGiveFeedback = R, end_date <= täna, "
+                    + "toimumiskord pole tühistatud ega kustutatud. hasFeedback = registreerumisel on tagasiside. Osalejata kasutajal tühi list.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Olematu userId -> 'errorCode:' PRIMARY_KEY_NOT_FOUND",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            )
+    })
+    public List<MyRegistrationDto> findMyRegistrations(@PathVariable Integer userId, @RequestParam String contentLang) {
+        return courseParticipantService.findMyRegistrations(userId, contentLang);
+    }
+
+    @PutMapping("/user/{userId}/registration/{courseParticipantId}/cancel")
+    @Operation(summary = "Kasutaja loobub oma registreerumisest",
+            description = "status R → C, updated_at uueneb. Ainult enne toimumiskorra algust ja kui toimumiskord pole tühistatud.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Olematu userId / courseParticipantId -> PRIMARY_KEY_NOT_FOUND; registreerumine pole selle kasutaja oma -> REGISTRATION_NOT_FOUND",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Juba loobunud, toimumiskord alanud või tühistatud -> 'errorCode:' CANCEL_NOT_ALLOWED",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            )
+    })
+    public void cancelMyRegistration(@PathVariable Integer userId, @PathVariable Integer courseParticipantId) {
+        courseParticipantService.cancelMyRegistration(userId, courseParticipantId);
     }
 }

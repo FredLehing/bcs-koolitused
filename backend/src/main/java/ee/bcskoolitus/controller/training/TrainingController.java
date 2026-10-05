@@ -140,7 +140,7 @@ public class TrainingController {
 
     @PostMapping("/training")
     @Operation(summary = "Lisab uue koolituse koos põhikeele tõlkega",
-            description = "Loob training rea (status U = mustand), training_funding_type read, training_lecturer read (lecturerIds järjekorras) ja põhikeele (language.is_main_language) tõlke ühes transaktsioonis. Tagastab uue koolituse ja tõlke ID.")
+            description = "Loob training rea (status U = mustand), training_funding_type read, training_lecturer read (lecturerIds järjekorras) põhikeele (language.is_main_language) tõlke ja õppekava (curriculum, valikuline PDF Base64-na) ühes transaktsioonis. Õppekava failinimi = pealkiri + curriculumLabel. Tagastab uue koolituse ja tõlke ID.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(
@@ -149,8 +149,13 @@ public class TrainingController {
                     content = @Content(schema = @Schema(implementation = ApiError.class))
             ),
             @ApiResponse(
+                    responseCode = "403",
+                    description = "curriculum ei ole PDF -> 'errorCode:' CURRICULUM_TYPE_NOT_ALLOWED, curriculum on üle 10 MB -> 'errorCode:' CURRICULUM_TOO_LARGE",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            ),
+            @ApiResponse(
                     responseCode = "400",
-                    description = "Kohustuslik väli puudub, on liiga pikk või lecturerIds sisaldab korduvat ID-d -> 'errorCode:' INCORRECT_INPUT",
+                    description = "Kohustuslik väli (ka curriculumLabel) puudub, on liiga pikk, curriculum on vigane Base64 või lecturerIds sisaldab korduvat ID-d -> 'errorCode:' INCORRECT_INPUT",
                     content = @Content(schema = @Schema(implementation = ApiError.class))
             )
     })
@@ -160,7 +165,7 @@ public class TrainingController {
 
     @PutMapping("/training/{trainingId}")
     @Operation(summary = "Muudab koolituse andmeid ja avatud tõlke tekste",
-            description = "Uuendab training rea, kirjutab training_funding_type read fundingTypeIds järgi ja training_lecturer read lecturerIds järgi üle ning uuendab trainingTranslationId tõlke tekstid ühes transaktsioonis. Koolituse autor ja staatus ei muutu.")
+            description = "Uuendab training rea, kirjutab training_funding_type read fundingTypeIds järgi ja training_lecturer read lecturerIds järgi üle ning uuendab trainingTranslationId tõlke tekstid ja õppekava ühes transaktsioonis: curriculum = uus fail, isCurriculumRemoved = true eemaldab, muidu arvutatakse olemasoleva faili nimi uuesti (pealkiri + curriculumLabel). Koolituse autor ja staatus ei muutu.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(
@@ -169,8 +174,13 @@ public class TrainingController {
                     content = @Content(schema = @Schema(implementation = ApiError.class))
             ),
             @ApiResponse(
+                    responseCode = "403",
+                    description = "curriculum ei ole PDF -> 'errorCode:' CURRICULUM_TYPE_NOT_ALLOWED, curriculum on üle 10 MB -> 'errorCode:' CURRICULUM_TOO_LARGE",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))
+            ),
+            @ApiResponse(
                     responseCode = "400",
-                    description = "Kohustuslik väli puudub, on liiga pikk, kirjeldus on tühi või lecturerIds sisaldab korduvat ID-d -> 'errorCode:' INCORRECT_INPUT",
+                    description = "Kohustuslik väli (ka curriculumLabel) puudub, on liiga pikk, kirjeldus on tühi, curriculum on vigane Base64 või antud koos isCurriculumRemoved = true, lecturerIds sisaldab korduvat ID-d -> 'errorCode:' INCORRECT_INPUT",
                     content = @Content(schema = @Schema(implementation = ApiError.class))
             )
     })
@@ -181,7 +191,7 @@ public class TrainingController {
 
     @PostMapping("/training/{trainingId}/training-translation")
     @Operation(summary = "Lisab koolitusele tõlke uude keelde",
-            description = "Loob ühe training_translation rea. Koolituse andmeid ega staatust ei muudeta. Tagastab uue tõlke ID.")
+            description = "Loob ühe training_translation rea ja õppekava (curriculum, valikuline PDF Base64-na; failinimi = pealkiri + curriculumLabel). Koolituse andmeid ega staatust ei muudeta. Tagastab uue tõlke ID.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(
@@ -191,12 +201,12 @@ public class TrainingController {
             ),
             @ApiResponse(
                     responseCode = "403",
-                    description = "Koolitusel on selles keeles tõlge juba olemas -> 'errorCode:' TRANSLATION_EXISTS",
+                    description = "Koolitusel on selles keeles tõlge juba olemas -> 'errorCode:' TRANSLATION_EXISTS; curriculum ei ole PDF -> CURRICULUM_TYPE_NOT_ALLOWED; curriculum on üle 10 MB -> CURRICULUM_TOO_LARGE",
                     content = @Content(schema = @Schema(implementation = ApiError.class))
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Kohustuslik väli puudub, on liiga pikk või kirjeldus on tühi -> 'errorCode:' INCORRECT_INPUT",
+                    description = "Kohustuslik väli (ka curriculumLabel) puudub, on liiga pikk, kirjeldus on tühi või curriculum on vigane Base64 -> 'errorCode:' INCORRECT_INPUT",
                     content = @Content(schema = @Schema(implementation = ApiError.class))
             )
     })

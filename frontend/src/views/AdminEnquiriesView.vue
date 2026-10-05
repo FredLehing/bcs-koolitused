@@ -7,6 +7,7 @@ import NavigationService from '@/services/NavigationService.js'
 import SessionStorageService from '@/services/SessionStorageService.js'
 import FormatService from '@/services/FormatService.js'
 import SortableColumnHeader from '@/components/common/SortableColumnHeader.vue'
+import AdminTabs from '@/components/common/AdminTabs.vue'
 import EnquiryStatusBadge from '@/components/common/EnquiryStatusBadge.vue'
 
 // Staatuse kasvav järjekord sorteerimisel: Uus → Käsitletud
@@ -22,7 +23,7 @@ const SORT_VALUES = {
 
 export default {
   name: 'AdminEnquiriesView',
-  components: { PhEye, SortableColumnHeader, EnquiryStatusBadge },
+  components: { AdminTabs, PhEye, SortableColumnHeader, EnquiryStatusBadge },
   data() {
     return {
       searchText: '',
@@ -137,6 +138,8 @@ export default {
 
 <template>
   <div class="container">
+    <AdminTabs />
+
     <h1 class="h3 mb-3">{{ $t('adminEnquiries.title') }}</h1>
 
     <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
@@ -214,7 +217,10 @@ export default {
             <td><EnquiryStatusBadge :status="enquiry.status" /></td>
             <td>
               <RouterLink
-                :to="{ name: 'adminEnquiryRoute', query: { enquiryId: enquiry.enquiryId } }"
+                :to="{
+                  name: 'adminEnquiryRoute',
+                  query: { returnTo: $route.fullPath, enquiryId: enquiry.enquiryId },
+                }"
                 :title="$t('adminEnquiries.view')"
                 :aria-label="$t('adminEnquiries.view')"
                 class="btn btn-sm btn-outline-secondary d-inline-flex"

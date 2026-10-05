@@ -10,6 +10,7 @@ Failinimi: CoursesView.vue
 Frontend rada: /courses
 
 Vaatega seotud lisainfo:
+Ülal vahelehed (TrainingsTabs.vue): Meie koolitused | Koolituste kalender — samad lingid mis menüüs "Koolitused", selle vaate vaheleht on aktiivne.
 Avaneb navbari menüüst "Koolitused" → "Koolituste kalender" (menüüs ka "Meie koolitused" → /trainings). Pealkiri "Koolituste kalender". Näidatakse publitseeritud koolituste avatud ja täis toimumiskordi, mis algavad täna või hiljem.
 Vasakul filtrid (rakenduvad kohe, page = 0): Periood alates–kuni, Toimumisviis (Kõik/Kohapeal/Veebis), lüliti "Peida täis", Koolituse keel, Koolituse kategooria, Rahastus; link "Tühjenda filtrid", kui mõni filter on valitud. Valikud: GET /api/languages, GET /api/categories, GET /api/funding-types.
 Otsing nagu /trainings (pealkiri ja lühikirjeldus, "Otsi"/Enter, × tühjendab, tulemuste rida ja "Tühista otsing").

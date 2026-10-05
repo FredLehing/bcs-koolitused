@@ -1,4 +1,5 @@
 <script>
+import BackLink from '@/components/common/BackLink.vue'
 import RoomService from '@/api-services/RoomService.js'
 import NavigationService from '@/services/NavigationService.js'
 import SessionStorageService from '@/services/SessionStorageService.js'
@@ -7,7 +8,7 @@ import AlertDanger from '@/components/common/AlertDanger.vue'
 // Kaks olekut URL-ist: ilma roomId-ta uus ruum, roomId-ga muutmine
 export default {
   name: 'RoomFormView',
-  components: { AlertDanger },
+  components: { BackLink, AlertDanger },
   data() {
     return {
       errorMessage: '',
@@ -91,6 +92,7 @@ export default {
 
 <template>
   <div class="container">
+    <BackLink :fallback="{ name: 'adminRoomsRoute' }" />
     <div class="row justify-content-center">
       <div class="col-lg-8">
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">

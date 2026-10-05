@@ -1,4 +1,5 @@
 <script>
+import BackLink from '@/components/common/BackLink.vue'
 import { mapState } from 'pinia'
 import { useLanguageStore } from '@/stores/languageStore.js'
 import CourseParticipantService from '@/api-services/CourseParticipantService.js'
@@ -14,7 +15,7 @@ import ConfirmModal from '@/components/modals/ConfirmModal.vue'
 // staatus, tasumine, sülearvuti vajadus ja admini märkmed muudetavad
 export default {
   name: 'AdminRegistrationView',
-  components: { AlertDanger, AlertSuccess, CourseStatusBadge, ConfirmModal },
+  components: { BackLink, AlertDanger, AlertSuccess, CourseStatusBadge, ConfirmModal },
   data() {
     return {
       successMessage: '',
@@ -34,12 +35,6 @@ export default {
   },
   computed: {
     ...mapState(useLanguageStore, ['contentLang']),
-
-    // Tagasitee lehele, kust registreerumine avati (nt /admin-course?courseId=9); '' = nimekiri
-    returnTo() {
-      const returnTo = this.$route.query.returnTo
-      return NavigationService.isInternalPath(returnTo) ? returnTo : ''
-    },
 
     isStatusChanged() {
       return this.registrationForm.status !== this.registration.status
@@ -189,15 +184,9 @@ export default {
 
 <template>
   <div class="container">
+    <BackLink :fallback="{ name: 'adminRegistrationsRoute' }" />
     <div class="row justify-content-center">
       <div class="col-lg-8">
-        <RouterLink v-if="returnTo" :to="returnTo" class="d-inline-block mb-3">
-          ← {{ $t('adminRegistration.back') }}
-        </RouterLink>
-        <RouterLink v-else :to="{ name: 'adminRegistrationsRoute' }" class="d-inline-block mb-3">
-          ← {{ $t('adminRegistration.backToRegistrations') }}
-        </RouterLink>
-
         <template v-if="registration">
           <h1 class="mb-1">{{ $t('adminRegistration.title') }}</h1>
           <p class="text-secondary fs-5 mb-3">{{ registration.participantName }}</p>
@@ -252,7 +241,10 @@ export default {
               </dd>
             </dl>
             <RouterLink
-              :to="{ name: 'adminCourseRoute', query: { courseId: registration.courseId } }"
+              :to="{
+                name: 'adminCourseRoute',
+                query: { returnTo: $route.fullPath, courseId: registration.courseId },
+              }"
             >
               {{ $t('adminRegistration.openCourse') }}
             </RouterLink>

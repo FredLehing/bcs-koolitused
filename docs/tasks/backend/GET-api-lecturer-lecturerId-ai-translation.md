@@ -6,7 +6,7 @@
 
 > Mockupi pilt lisatakse hiljem. Seni vt läbimängu `docs/mock-wireframe/loo-mock-vaade/admin-lecturers-view/admin-lecturers-view-labimang.html` ja märkmeid `docs/mock-wireframe/markmed/lecturer-form-view-state-new-translation-markmed.md`.
 
-**Sama lahendus nagu `GET-api-training-trainingId-ai-translation.md`** (Spring AI + Google Gemini, veakäsitlus, `Cache-Control: no-store`). Tee see **pärast** koolituse AI tõlget ja kasuta sama AI tõlke teenust (ühine meetod, mis tõlgib välja-komplekti), mitte koopiat. Frontend võib seni kasutada mock-vastust.
+**Sama lahendus nagu `POST-api-ai-training-translation-trainingId.md`** (Spring AI + Google Gemini, veakäsitlus, `Cache-Control: no-store`). Tee see **pärast** koolituse AI tõlget ja kasuta sama AI tõlke teenust (ühine meetod, mis tõlgib välja-komplekti), mitte koopiat. Frontend võib seni kasutada mock-vastust.
 
 ## Sisend
 
@@ -26,7 +26,7 @@ Request body't pole.
 
 ## Väljund
 
-**Response (200 OK):** `LecturerAiTranslationDto` (ettepanek; samad väljad nagu koolituse `AiTranslationDto` — kaalu ühist DTO-d `controller/common/dto/`-s).
+**Response (200 OK):** `LecturerAiTranslationDto` (ettepanek; samad väljad nagu koolituse `AiTrainingContentDto` — kaalu ühist DTO-d `controller/common/dto/`-s).
 
 ```json
 {

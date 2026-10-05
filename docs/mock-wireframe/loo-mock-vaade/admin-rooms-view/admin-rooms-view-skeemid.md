@@ -6,6 +6,8 @@ Eeskuju: `docs/mock-wireframe/loo-mock-vaade/admin-lecturers-view/admin-lecturer
 
 ## Otsused
 
+- **Vahelehed** (2026-10-01): admini nimekirjavaadete ülaosas vahelehed kõigi admin-menüü linkidega (`AdminTabs.vue` / `NavTabs.vue`), selle vaate vaheleht aktiivne — vt `docs/tasks/frontend/view-tabs.md`.
+
 ### Üldine
 
 - **Termin kasutajaliideses on "koolitusruum"** (liitsõna; inglise keeles "Training room"). Lühidalt tabelis ja vormis "Ruum" / "Nimi". Koodis ja andmebaasis jääb `room`.
@@ -287,7 +289,8 @@ sequenceDiagram
 
 ```text
 Create a desktop wireframe of an admin page "Koolitusruumid" in a web app.
-Top: site navigation bar with logo and links (Koolitused, Teenused, Ettevõttest, Kontakt), an open dropdown "Admin ▾" with items "Lisa uus koolitus", "Koolituste haldus", a divider, "Lisa uus koolitaja", "Koolitajad", a divider and "Koolitusruumid" (highlighted), and "Logi välja" on the right.
+Top: site navigation bar with logo and links (Koolitused, Teenused, Ettevõttest, Kontakt), an open dropdown "Admin ▾" with items "Koolituste päringud", "Registreerumised", a divider, "Koolitused", "Koolituste kalender", a divider, "Koolitajad", "Koolitusruumid" (highlighted), a divider and "Kontod",, a user icon dropdown "👤 ▾" (Minu profiil) and "Logi välja" on the right.
+Below the navigation bar: a tab bar "Koolituste päringud | Registreerumised | Koolitused | Koolituste kalender | Koolitajad | Koolitusruumid | Kontod" with "Koolitusruumid" as the active tab.
 Header row: page title "Koolitusruumid" on the left and a primary button "+ Lisa uus ruum" on the right.
 Below the header: a search text input "Otsi nime järgi…" and a toggle switch "Näita kustutatud" (on).
 Main area: a data table with sortable columns "Nimi ▲", "Tulevasi toimumiskordi", "Toimumiskordi kokku", "Uuendatud" and a column "Tegevused".
@@ -304,9 +307,14 @@ Below the table: text "Kokku 6 ruumi".
 
 ```text
 Create a desktop wireframe of an admin form page "Muuda ruumi" in a web app.
-Top: site navigation bar with logo and links, a dropdown "Admin ▾" and "Logi välja" on the right.
+Top: site navigation bar with logo and links, a dropdown "Admin ▾", a user icon dropdown "👤 ▾" (Minu profiil) and "Logi välja" on the right.
 Header row: page title "Muuda ruumi" on the left and a secondary button "Koolitusruumid" on the right.
 One card titled "Ruumi andmed" with a single text input "Nimi *" with value "Hellemanni".
 Bottom: primary button "Salvesta".
 In the "new room" version the title is "Lisa uus ruum", the field is empty and the button is "Lisa".
 ```
+
+
+## Vaadetevaheline tagasitee
+
+Detailide ja vormide avamisel antakse kaasa lähtevaate täielik URL `returnTo` parameetrina. Ühine „← Tagasi“ link taastab selle URL-i; otselingi korral kasutatakse vaate varusihti. Peamenüü ja vahelehed tagasiteed ei loo. Oleku- ja tõlkevahetus säilitab senise tagasitee. Kõigi avamiskohtade, erandite ja varusihtide [ühine skeem](../return-to-navigation-skeemid.md).

@@ -6,9 +6,11 @@ Eeskuju: `TrainingsView.vue` (`docs/tasks/frontend/trainings-view.md`) — sama 
 
 ## Otsused
 
+- **Vahelehed** (2026-10-01): admini nimekirjavaadete ülaosas vahelehed kõigi admin-menüü linkidega (`AdminTabs.vue` / `NavTabs.vue`), selle vaate vaheleht aktiivne — vt `docs/tasks/frontend/view-tabs.md`.
+
 - Roll: Admin. Failinimi `AdminTrainingsView.vue`, rada `/admin-trainings`.
-- **Menüülink:** navbari menüüs "Admin" (nähtav ainult adminile, `App.vue`) tuleb "Lisa uus koolitus" alla uus link "Koolituste haldus" → `/admin-trainings` (i18n võti nt `navbar.manageTrainings`).
-- **Päis:** lehe pealkirja "Koolituste haldus" real paremal on nupp "Lisa uus koolitus" → `/training-form` (TrainingFormView, olek `new-training`). Kitsal ekraanil liigub nupp pealkirja alla.
+- **Menüülink:** navbari menüüs "Admin" (nähtav ainult adminile, `App.vue`) link "Koolitused" → `/admin-trainings` (i18n `navbar.manageTrainings`; algselt "Koolituste haldus"). (Admin-menüü uuendatud 2026-10-01: vt `docs/tasks/frontend/admin-menu.md`.)
+- **Päis:** lehe pealkirja "Koolitused" real paremal on nupp "Lisa uus koolitus" → `/training-form` (TrainingFormView, olek `new-training`). Kitsal ekraanil liigub nupp pealkirja alla.
 - **Tabeli rida = üks koolitus** (`training`), mitte üks tõlge.
 - **Vaikimisi kuvatakse ainult aktiivsed koolitused** (status `U` ja `P`). Kustutatud koolitused (`D`) tulevad nähtavale staatuse filtriga "Kustutatud".
 - **Nimi ja kategooria kuvatakse kasutajaliidese keeles** (store'i `contentLang`). Kui koolitusel selles keeles tõlget pole, kuvatakse põhikeele (`language.is_main_language`) pealkiri ja kategooria — nii ei kao ükski koolitus tabelist. Rea "Vaata" ja "Muuda" lingid avavad kuvatud tõlke (`trainingTranslationId`).
@@ -44,7 +46,7 @@ Eeskuju: `TrainingsView.vue` (`docs/tasks/frontend/trainings-view.md`) — sama 
   - Kustutatud koolitus kaob vaikimisi vaatest (filter "Aktiivsed"). Kui kustutamise järel jääb leht tühjaks, liigutakse eelmisele lehele.
   - Tulevikus võiks backend keelduda (`403`) koolituse kustutamisest, millel on tulevasi toimumiskordi (`course`). **Praegu seda kontrolli ei tehta.**
 - **Kustutatud koolitus on teistele teenustele nagu olematu** → `404 PRIMARY_KEY_NOT_FOUND` (sama message nagu olematu ID korral). Muudatus olemasolevatele teenustele:
-  - `GET /api/training/{trainingId}`, `GET /api/training/{trainingId}/training-translations`, `GET /api/training-translation/{trainingTranslationId}` (tõlke koolitus kustutatud), `PUT /api/training/{trainingId}`, `POST /api/training/{trainingId}/training-translation`, `GET /api/training/{trainingId}/ai-translation`.
+  - `GET /api/training/{trainingId}`, `GET /api/training/{trainingId}/training-translations`, `GET /api/training-translation/{trainingTranslationId}` (tõlke koolitus kustutatud), `PUT /api/training/{trainingId}`, `POST /api/training/{trainingId}/training-translation`, `POST /api/ai-training/translation/{trainingId}`.
   - Nii annavad `/training` ja `/training-form` kustutatud koolituse korral 404 ja frontend suunab üldisele veavaatele (nagu olematu ID korral).
   - Erandid, mis leiavad ka kustutatud koolituse: `publish` / `unpublish` (→ `403 TRAINING_DELETED`), `restore` (taastab) ja `DELETE` (kustutatud koolituse korral midagi ei muutu).
   - Backendis: `TrainingService`-isse lisaks olemasolevale `getValidTrainingBy` meetod, mis leiab ainult aktiivse koolituse (`status <> 'D'`), ja seda kasutavad ülal loetletud teenused.
@@ -273,7 +275,7 @@ Publitseerimine ja mustandisse liigutamine käib sama `TrainingStatusButton` kau
 | Komponent | Uus / olemas | Kirjeldus |
 |---|---|---|
 | `views/AdminTrainingsView.vue` | uus | vaade, hoiab olekut ja teeb laadimise päringud |
-| `App.vue` (navbar) | olemas, muudetakse | menüüsse "Admin" link "Koolituste haldus" ("Lisa uus koolitus" alla) |
+| `App.vue` (navbar) | olemas, muudetakse | menüüsse "Admin" link "Koolitused" |
 | `router/index.js` | olemas, muudetakse | rada `/admin-trainings` (nimi nt `adminTrainingsRoute`) |
 | `components/common/PaginationNav.vue` | uus, jagatud | propsid `page`, `totalPages`; emit `event-page-changed`. Kasutab ka `TrainingsView.vue` |
 | `components/common/TrainingStatusButton.vue` | uus, jagatud | propsid `trainingId`, `status`, `title`; `ConfirmModal` + API kutse (publish / unpublish / restore); emit `event-status-changed`. Kasutab ka `TrainingFormView.vue` |
@@ -295,9 +297,10 @@ Publitseerimine ja mustandisse liigutamine käib sama `TrainingStatusButton` kau
 ## 9. Balsamiq AI käsk
 
 ```text
-Create a desktop wireframe of an admin page "Koolituste haldus" in a web app.
-Top: site navigation bar with logo and links (Koolitused, Teenused, Ettevõttest, Kontakt), an open dropdown "Admin ▾" with items "Lisa uus koolitus" and "Koolituste haldus" (highlighted), and "Logi välja" on the right.
-Header row: page title "Koolituste haldus" on the left and a primary button "+ Lisa uus koolitus" on the right.
+Create a desktop wireframe of an admin page "Koolitused" in a web app.
+Top: site navigation bar with logo and links (Koolitused, Teenused, Ettevõttest, Kontakt), an open dropdown "Admin ▾" with items "Koolituste päringud", "Registreerumised", a divider, "Koolitused" (highlighted), "Koolituste kalender", a divider, "Koolitajad", "Koolitusruumid", a divider and "Kontod",, a user icon dropdown "👤 ▾" (Minu profiil) and "Logi välja" on the right.
+Below the navigation bar: a tab bar "Koolituste päringud | Registreerumised | Koolitused | Koolituste kalender | Koolitajad | Koolitusruumid | Kontod" with "Koolitused" as the active tab.
+Header row: page title "Koolitused" on the left and a primary button "+ Lisa uus koolitus" on the right.
 Below the header: a search row with a text input "Otsi koolituse nime järgi…" and a button "Otsi".
 Below the search row: a small text link with a down arrow "▾ Ava otsingu filtrid" and a small badge "2 filtrit aktiivne".
 Below the link: an expanded card titled "Otsingu filtrid" with dropdowns in a grid: "Kategooria", "Koolituse keel", "Rahastus", "Staatus", "Tellitav", "Esile tõstetud", "Tõlked". At the bottom of the card: primary button "Filtreeri" and secondary button "Tühjenda filtrid".
@@ -307,3 +310,8 @@ One row has status badge "Mustand", a red X in "Tõlked" and button "Publitseeri
 One greyed-out row has status badge "Kustutatud", no icons in "Tegevused" and button "Taasta".
 Below the table: text "Kokku 13 koolitust" on the left and pagination "Eelmine 1 2 Järgmine" in the center.
 ```
+
+
+## Vaadetevaheline tagasitee
+
+Detailide ja vormide avamisel antakse kaasa lähtevaate täielik URL `returnTo` parameetrina. Ühine „← Tagasi“ link taastab selle URL-i; otselingi korral kasutatakse vaate varusihti. Peamenüü ja vahelehed tagasiteed ei loo. Oleku- ja tõlkevahetus säilitab senise tagasitee. Kõigi avamiskohtade, erandite ja varusihtide [ühine skeem](../return-to-navigation-skeemid.md).

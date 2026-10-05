@@ -75,6 +75,8 @@ class TrainingServiceUpdateTest {
     private TrainingLecturerRepository trainingLecturerRepository;
     @Mock
     private TrainingTranslationService trainingTranslationService;
+    @Mock
+    private TrainingTranslationCurriculumService trainingTranslationCurriculumService;
     @Spy
     private TrainingMapper trainingMapper = new TrainingMapperImpl();
     @Spy
@@ -135,6 +137,13 @@ class TrainingServiceUpdateTest {
         assertSame(user, training.getUser());
         assertEquals(TrainingStatus.PUBLISHED.getCode(), training.getStatus());
         verify(trainingRepository).save(training);
+    }
+
+    @Test
+    void updateTraining_handlesCurriculumOfOpenTranslation() {
+        trainingService.updateTraining(TRAINING_ID, createTrainingUpdateRequestDto());
+
+        verify(trainingTranslationCurriculumService).handleUpdateCurriculum(trainingTranslation, null, true, "Curriculum");
     }
 
     @Test
@@ -260,7 +269,8 @@ class TrainingServiceUpdateTest {
         return new TrainingUpdateRequestDto(
                 3, 1, 2, List.of(), false, false, List.of(1, 2, 1),
                 TRAINING_TRANSLATION_ID, "Java Advanced", "Advanced Java topics.",
-                "<p onclick=\"alert(1)\">Streams and <strong>lambdas</strong></p><script>alert(1)</script>");
+                "<p onclick=\"alert(1)\">Streams and <strong>lambdas</strong></p><script>alert(1)</script>",
+                null, true, "Curriculum");
     }
 
     private static Category createCategory(Integer categoryId) {

@@ -10,6 +10,7 @@ Failinimi: AdminAllCoursesView.vue
 Frontend rada: /admin-all-courses
 
 Vaatega seotud lisainfo:
+Ülal vahelehed (AdminTabs.vue): Koolituste päringud | Registreerumised | Koolitused | Koolituste kalender | Koolitajad | Koolitusruumid | Kontod — samad lingid ja järjekord mis menüüs "Admin", selle vaate vaheleht on aktiivne. Kitsal ekraanil on vahelehed ühel keritaval real, aktiivne keritakse keskele.
 Avaneb navbari menüüst "Admin" → "Koolituste kalender". Kõigi koolituste toimumiskorrad ühes tabelis: Algus | Päevi | Koolitus | Hind | Staatus | Osalejad | Tasunud | Veebilink | Huvilisi | Tegevused. Koolituse nimi on kasutajaliidese keeles (puudumisel põhikeeles) ja viib koolituse kalendrisse /admin-training-courses?trainingId={id}; esile tõstetud toimumiskorral täht ☆. Tasunud = "tasunud / osalejad" (ainult registreerunud osalejad), kõik tasunud → roheline, 0 osalejat → "—". Huvilisi = kõik toimumiskorraga seotud päringud. Möödunud rida on tuhmim märgisega "Toimunud".
 Vaikimisi ainult tulevased toimumiskorrad; lüliti "Näita ka möödunud" → includePast=true. Kustutatud toimumiskordi ja kustutatud koolituste toimumiskordi ei kuvata.
 Otsing koolituse nimest ("Otsi"/Enter, iga sõna peab esinema, ettepanekud GET /api/training-titles). Kaart "Otsingu filtrid" (vaikimisi peidus): Periood alates–kuni, Kategooria, Koolituse keel, Staatus, Toimumisviis, Esile tõstetud; rakenduvad nupuga "Filtreeri", märk "N filtrit aktiivne", "Tühjenda filtrid".

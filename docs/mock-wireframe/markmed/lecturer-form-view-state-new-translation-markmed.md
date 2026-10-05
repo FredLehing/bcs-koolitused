@@ -131,7 +131,7 @@ LecturerAiTranslationDto.java
 }
 
 API teenuse lisainfo:
-Tõlgib alati andmebaasi salvestatud põhikeele tõlke (kõik kolm välja) AI abil sihtkeelde — vormi sisu ei kasutata. Andmebaasi midagi ei salvestata; tulemus täidab ainult vormi. description HTML-märgendid säilitatakse. Vastusel päis Cache-Control: no-store. Sama loogika nagu GET /api/training/{trainingId}/ai-translation; frontend võib alustada mock-vastusega. Kustutatud koolitaja (status "D") on nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.
+Tõlgib alati andmebaasi salvestatud põhikeele tõlke (kõik kolm välja) AI abil sihtkeelde — vormi sisu ei kasutata. Andmebaasi midagi ei salvestata; tulemus täidab ainult vormi. description HTML-märgendid säilitatakse. Vastusel päis Cache-Control: no-store. Sama loogika nagu POST /api/ai-training/translation/{trainingId}; frontend võib alustada mock-vastusega. Kustutatud koolitaja (status "D") on nagu olematu: 404 PRIMARY_KEY_NOT_FOUND.
 
 Veateated:
 HTTP: 404
@@ -187,3 +187,8 @@ HTTP: 403
 errorCode: TRANSLATION_EXISTS
 message: "Selles keeles tõlge on juba olemas"
 ```
+
+
+## Tagasitee — täiendatud navigatsioon
+
+Vaade võtab vastu valikulise `returnTo` query parameetri ja kuvab lingi „← Tagasi“ (`BackLink.vue`). Avamislingid annavad kaasa lähtevaate täieliku URL-i. Tagasilingi puuduv, väline, tundmatu või iseendale osutav siht asendatakse vaate varusihtkohaga. Oleku- ja tõlkevahetus ei kaota tagasiteed. Eraldi nimega nimekirja-/kalendrinupud säilitavad oma sihtkoha. Täpne [kaardistus ja varusihtkohad](../../tasks/frontend/return-to-navigation.md) ning [skeemid](../loo-mock-vaade/return-to-navigation-skeemid.md).

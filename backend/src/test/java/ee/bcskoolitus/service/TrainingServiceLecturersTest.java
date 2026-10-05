@@ -65,6 +65,8 @@ class TrainingServiceLecturersTest {
     private LocationService locationService;
     @Mock
     private LecturerService lecturerService;
+    @Mock
+    private TrainingTranslationCurriculumService trainingTranslationCurriculumService;
     @Spy
     private TrainingMapper trainingMapper = new TrainingMapperImpl();
     @Spy
@@ -135,7 +137,7 @@ class TrainingServiceLecturersTest {
 
     private static TrainingCreateRequestDto createTrainingCreateRequestDto(List<Integer> lecturerIds) {
         return new TrainingCreateRequestDto(1, 1, 1, 1, lecturerIds, true, false,
-                "Java algkursus", "Java alused.", "<p>Java alused.</p>", List.of());
+                "Java algkursus", "Java alused.", "<p>Java alused.</p>", List.of(), null, "Õppekava");
     }
 
     private static Lecturer createLecturer(Integer lecturerId, String fullName) {

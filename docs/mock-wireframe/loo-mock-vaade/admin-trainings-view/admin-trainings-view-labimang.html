@@ -95,6 +95,7 @@ button { font: inherit; }
 .sitenav .menu button { background: none; border: 0; text-align: left; font: inherit; color: var(--ink); padding: 4px 8px; border-radius: 4px; cursor: pointer; white-space: nowrap; }
 .sitenav .menu button:hover { background: var(--accent-soft); }
 .sitenav .menu .cur { background: var(--accent-soft); font-weight: 700; }
+.sitenav .menu hr { border: 0; border-top: 1.5px dashed var(--line); margin: 3px 4px; }
 .viewhead { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; justify-content: space-between; }
 .sitenav .out { margin-left: auto; border: 1.5px solid var(--sketch); border-radius: 10px; padding: 0 8px; font-size: .78rem; }
 
@@ -231,6 +232,11 @@ td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .embed .sitenav { display: none; }
 /* hidden-atribuut peab peitma ka elemendid, millel on oma display (nt .menu { display: grid }) */
 [hidden] { display: none !important; }
+/* Vahelehed (NavTabs.vue: AdminTabs / TrainingsTabs) — üks keritav rida */
+.vtabs { display: flex; gap: 2px; border-bottom: 1.5px solid var(--sketch); overflow-x: auto; font-family: var(--font-sketch); }
+.vtabs button { flex: none; white-space: nowrap; background: none; border: 1.5px solid transparent; border-bottom: 0; border-radius: 6px 6px 0 0; color: var(--accent); padding: 3px 12px; margin-bottom: -1.5px; cursor: pointer; font: inherit; font-size: .88rem; }
+.vtabs button:hover { border-color: var(--line); }
+.vtabs button[aria-current="page"] { color: var(--ink); font-weight: 700; background: var(--panel); border-color: var(--sketch); cursor: default; }
 </style>
 
 <div class="page">
@@ -238,6 +244,7 @@ td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
     <h1>AdminTrainingsView.vue — läbimäng</h1>
     <p>Otsi, ava filtrid, klõpsa veergude pealkirjadel, vaheta lehte, publitseeri või kustuta koolitusi nagu päris vaates. Paremal all näed, milline backendi päring iga tegevuse peale tehti. Kollased kastid on mockupi märkmed samas vormingus nagu <code>admin-trainings-view-markmed.md</code> ja neid saab otse Balsamiqi kopeerida.</p>
     <p>Andmed on samad mis andmebaasis (<code>3_import.sql</code>): 14 koolitust, sh mustandid (9, 10, 12), kustutatud koolitus (14, filtriga Staatus = „Kustutatud“), puuduvate tõlgetega koolitused (9, 10, 13) ja teine lehekülg. Kasutajaliidese keele vahetus näitab, kuidas puuduva tõlke korral kuvatakse põhikeele nimi. Uute teenuste DTO-d on <strong>ettepanek</strong>.</p>
+    <p>Detailide ja vormide avamisel säilib lähtevaate URL <code>returnTo</code> parameetris; „← Tagasi“ taastab lähtekoha. <a href="../return-to-navigation-skeemid.md">Tagasitee skeemid ja kaardistus</a>.</p>
     <div class="toolbar">
       <span class="lbl-soft">Kasutajaliidese keel (navbar):</span>
       <button class="tbtn" type="button" data-ui-lang="et">et</button>
@@ -255,7 +262,8 @@ td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
     <nav class="sitenav" aria-label="Navbar (wireframe)">
       <span class="logo" aria-hidden="true"></span><span>Koolitused</span><span>Teenused</span><span>Ettevõttest</span><span>Kontakt</span>
       <span class="admin"><button type="button" id="b-admin" aria-expanded="false" aria-controls="admin-menu">Admin ▾</button>
-        <span class="menu" id="admin-menu" hidden><button type="button" data-nav="/training-form">Lisa uus koolitus</button><button type="button" class="cur" data-nav="/admin-trainings" aria-current="page">Koolituste haldus</button></span></span>
+        <span class="menu" id="admin-menu" hidden><button type="button" data-nav="/admin-enquiries">Koolituste päringud</button><button type="button" data-nav="/admin-registrations">Registreerumised</button><button type="button" data-nav="/admin-feedbacks">Tagasisided</button><hr><button type="button" class="cur" data-nav="/admin-trainings" aria-current="page">Koolitused</button><button type="button" data-nav="/admin-all-courses">Koolituste kalender</button><hr><button type="button" data-nav="/admin-lecturers">Koolitajad</button><button type="button" data-nav="/admin-rooms">Koolitusruumid</button><hr><button type="button" data-nav="/admin-users">Kontod</button></span></span>
+      <span class="out" title="Minu profiil ▾ — adminil ainult &quot;Parool&quot; (/change-password)">👤 ▾</span>
       <span class="out">Logi välja</span>
     </nav>
     <div class="view" id="view"></div>
@@ -285,6 +293,7 @@ td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
 
 <div id="modal-root"></div>
 
+<script src="../return-navigation.js"></script>
 <script>
 (function () {
   "use strict";
@@ -299,10 +308,22 @@ td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
     if (window.ResizeObserver) new ResizeObserver(sendHeight).observe(document.body);
     window.addEventListener("load", sendHeight);
   }
-  function goRoute(path, standaloneMessage) {
+  function goRoute(path, standaloneMessage, isBack) {
+    if (!isBack) path = window.BcsReturnNavigation.forward(path);
     if (EMBED) { window.parent.postMessage({ type: "bcs-navigate", path: path }, "*"); return; }
     toast(standaloneMessage || "router.push → " + path);
   }
+
+  /* ---------- Vahelehed (NavTabs.vue) — samad lingid mis navbari menüüs ---------- */
+  var ADMIN_TABS = [["/admin-enquiries", "Koolituste päringud"], ["/admin-registrations", "Registreerumised"], ["/admin-feedbacks", "Tagasisided"], ["/admin-trainings", "Koolitused"], ["/admin-all-courses", "Koolituste kalender"], ["/admin-lecturers", "Koolitajad"], ["/admin-rooms", "Koolitusruumid"], ["/admin-users", "Kontod"]];
+  var TRAINING_TABS = [["/trainings", "Meie koolitused"], ["/courses", "Koolituste kalender"]];
+  function viewTabs(tabs, current) {
+    return '<nav class="vtabs" aria-label="Vahelehed">' + tabs.map(function (t) { return '<button type="button" data-vtab="' + t[0] + '"' + (t[0] === current ? ' aria-current="page"' : "") + '>' + t[1] + '</button>'; }).join("") + '</nav>';
+  }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-vtab]"); if (!b || b.getAttribute("aria-current")) return;
+    goRoute(b.dataset.vtab, "Vaheleht → " + b.dataset.vtab + " (teine läbimäng)");
+  });
 
   /* ---------- Andmed (3_import.sql) ---------- */
   var LANGUAGES = [
@@ -319,35 +340,21 @@ td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
   // tr: tõlked keelekoodi järgi { id, title, updatedAt }
   function freshDb() {
     return [
-      { id: 1, cat: 1, lang: 1, status: "P", ord: true, promo: true, fund: [1], created: "2026-08-01 09:00", updated: "2026-08-01 09:00",
-        tr: { et: { id: 1, title: "Java algkursus", updatedAt: "2026-09-29 10:15" }, en: { id: 2, title: "Java Basics", updatedAt: "2026-08-01 09:00" } } },
-      { id: 2, cat: 3, lang: 1, status: "P", ord: false, promo: false, fund: [], created: "2026-08-05 10:00", updated: "2026-08-05 10:00",
-        tr: { et: { id: 3, title: "Projektijuhtimise põhitõed", updatedAt: "2026-08-05 10:00" }, en: { id: 4, title: "Project Management Fundamentals", updatedAt: "2026-08-05 10:00" } } },
-      { id: 3, cat: 1, lang: 1, status: "P", ord: true, promo: false, fund: [1, 2], created: "2026-08-10 09:00", updated: "2026-09-21 14:30",
-        tr: { et: { id: 5, title: "Spring Boot veebiarendus", updatedAt: "2026-08-10 09:00" }, en: { id: 6, title: "Spring Boot Web Development", updatedAt: "2026-08-10 09:00" } } },
-      { id: 4, cat: 1, lang: 2, status: "P", ord: true, promo: true, fund: [2], created: "2026-08-12 09:00", updated: "2026-08-12 09:00",
-        tr: { et: { id: 7, title: "Vue.js esmaspetsialist", updatedAt: "2026-08-12 09:00" }, en: { id: 8, title: "Vue.js Essentials", updatedAt: "2026-08-12 09:00" } } },
-      { id: 5, cat: 2, lang: 1, status: "P", ord: true, promo: false, fund: [1], created: "2026-08-14 09:00", updated: "2026-08-14 09:00",
-        tr: { et: { id: 9, title: "UX disaini alused", updatedAt: "2026-08-14 09:00" }, en: { id: 10, title: "UX Design Basics", updatedAt: "2026-08-14 09:00" } } },
-      { id: 6, cat: 2, lang: 2, status: "P", ord: false, promo: false, fund: [], created: "2026-08-16 09:00", updated: "2026-08-16 09:00",
-        tr: { et: { id: 11, title: "Figma praktikum", updatedAt: "2026-08-16 09:00" }, en: { id: 12, title: "Figma Workshop", updatedAt: "2026-08-16 09:00" } } },
-      { id: 7, cat: 3, lang: 1, status: "P", ord: true, promo: false, fund: [2], created: "2026-08-18 09:00", updated: "2026-08-18 09:00",
-        tr: { et: { id: 13, title: "Agiilne meeskonnajuhtimine", updatedAt: "2026-08-18 09:00" }, en: { id: 14, title: "Agile Team Leadership", updatedAt: "2026-08-18 09:00" } } },
-      { id: 8, cat: 1, lang: 1, status: "P", ord: true, promo: false, fund: [1], created: "2026-08-20 09:00", updated: "2026-08-20 09:00",
-        tr: { et: { id: 15, title: "SQL ja andmebaasid", updatedAt: "2026-08-20 09:00" }, en: { id: 16, title: "SQL and Databases", updatedAt: "2026-08-20 09:00" } } },
-      // AdminTrainingsView näidised (3_import.sql)
-      { id: 9, cat: 1, lang: 3, status: "U", ord: true, promo: false, fund: [], created: "2026-09-02 11:00", updated: "2026-09-02 11:00",
-        tr: { et: { id: 17, title: "Exceli algkursus", updatedAt: "2026-09-02 11:00" } } },
-      { id: 10, cat: 1, lang: 1, status: "U", ord: true, promo: false, fund: [2], created: "2026-09-10 13:20", updated: "2026-09-10 13:20",
-        tr: { et: { id: 18, title: "Docker ja konteinerid", updatedAt: "2026-09-12 08:45" } } },
-      { id: 11, cat: 1, lang: 1, status: "P", ord: true, promo: false, fund: [1], created: "2026-09-14 09:30", updated: "2026-09-14 09:30",
-        tr: { et: { id: 19, title: "Git ja GitHub", updatedAt: "2026-09-14 09:30" }, en: { id: 20, title: "Git and GitHub", updatedAt: "2026-09-15 16:00" } } },
-      { id: 12, cat: 1, lang: 2, status: "U", ord: false, promo: false, fund: [], created: "2026-09-18 10:00", updated: "2026-09-18 10:00",
-        tr: { et: { id: 21, title: "Python andmeanalüüsiks", updatedAt: "2026-09-18 10:00" }, en: { id: 22, title: "Python for Data Analysis", updatedAt: "2026-09-18 10:00" } } },
-      { id: 13, cat: 1, lang: 1, status: "P", ord: true, promo: true, fund: [1, 2], created: "2026-09-25 15:10", updated: "2026-09-26 09:00",
-        tr: { et: { id: 23, title: "Tehisaru töövahendid arendajale", updatedAt: "2026-09-25 15:10" } } },
-      { id: 14, cat: 2, lang: 1, status: "D", ord: false, promo: false, fund: [], created: "2026-08-25 12:00", updated: "2026-09-08 17:40",
-        tr: { et: { id: 24, title: "Photoshopi algkursus", updatedAt: "2026-08-25 12:00" }, en: { id: 25, title: "Photoshop Basics", updatedAt: "2026-08-25 12:00" } } }
+      {"id": 1, "cat": 1, "lang": 1, "status": "P", "ord": true, "promo": true, "fund": [1], "created": "2026-05-10 09:00", "updated": "2026-05-10 09:00", "tr": {"et": {"id": 1, "title": "Java algkursus", "updatedAt": "2026-09-29 10:15"}, "en": {"id": 2, "title": "Java Basics", "updatedAt": "2026-05-10 09:00"}}},
+      {"id": 2, "cat": 3, "lang": 1, "status": "P", "ord": false, "promo": false, "fund": [], "created": "2026-08-05 10:00", "updated": "2026-08-05 10:00", "tr": {"et": {"id": 3, "title": "Projektijuhtimise põhitõed", "updatedAt": "2026-08-05 10:00"}, "en": {"id": 4, "title": "Project Management Fundamentals", "updatedAt": "2026-08-05 10:00"}}},
+      {"id": 3, "cat": 1, "lang": 1, "status": "P", "ord": true, "promo": false, "fund": [1, 2], "created": "2026-08-10 09:00", "updated": "2026-09-21 14:30", "tr": {"et": {"id": 5, "title": "Spring Boot veebiarendus", "updatedAt": "2026-08-10 09:00"}, "en": {"id": 6, "title": "Spring Boot Web Development", "updatedAt": "2026-08-10 09:00"}}},
+      {"id": 4, "cat": 1, "lang": 2, "status": "P", "ord": true, "promo": true, "fund": [2], "created": "2026-08-12 09:00", "updated": "2026-08-12 09:00", "tr": {"et": {"id": 7, "title": "Vue.js esmaspetsialist", "updatedAt": "2026-08-12 09:00"}, "en": {"id": 8, "title": "Vue.js Essentials", "updatedAt": "2026-08-12 09:00"}}},
+      {"id": 5, "cat": 2, "lang": 1, "status": "P", "ord": true, "promo": false, "fund": [1], "created": "2026-08-14 09:00", "updated": "2026-08-14 09:00", "tr": {"et": {"id": 9, "title": "UX disaini alused", "updatedAt": "2026-08-14 09:00"}, "en": {"id": 10, "title": "UX Design Basics", "updatedAt": "2026-08-14 09:00"}}},
+      {"id": 6, "cat": 2, "lang": 2, "status": "P", "ord": false, "promo": false, "fund": [], "created": "2026-08-16 09:00", "updated": "2026-08-16 09:00", "tr": {"et": {"id": 11, "title": "Figma praktikum", "updatedAt": "2026-08-16 09:00"}, "en": {"id": 12, "title": "Figma Workshop", "updatedAt": "2026-08-16 09:00"}}},
+      {"id": 7, "cat": 3, "lang": 1, "status": "P", "ord": true, "promo": false, "fund": [2], "created": "2026-08-18 09:00", "updated": "2026-08-18 09:00", "tr": {"et": {"id": 13, "title": "Agiilne meeskonnajuhtimine", "updatedAt": "2026-08-18 09:00"}, "en": {"id": 14, "title": "Agile Team Leadership", "updatedAt": "2026-08-18 09:00"}}},
+      {"id": 8, "cat": 1, "lang": 1, "status": "P", "ord": true, "promo": false, "fund": [1], "created": "2026-08-20 09:00", "updated": "2026-08-20 09:00", "tr": {"et": {"id": 15, "title": "SQL ja andmebaasid", "updatedAt": "2026-08-20 09:00"}, "en": {"id": 16, "title": "SQL and Databases", "updatedAt": "2026-08-20 09:00"}}},
+      {"id": 9, "cat": 1, "lang": 3, "status": "U", "ord": true, "promo": false, "fund": [], "created": "2026-09-02 11:00", "updated": "2026-09-02 11:00", "tr": {"et": {"id": 17, "title": "Exceli algkursus", "updatedAt": "2026-09-02 11:00"}}},
+      {"id": 10, "cat": 1, "lang": 1, "status": "U", "ord": true, "promo": false, "fund": [2], "created": "2026-09-10 13:20", "updated": "2026-09-10 13:20", "tr": {"et": {"id": 18, "title": "Docker ja konteinerid", "updatedAt": "2026-09-12 08:45"}}},
+      {"id": 11, "cat": 1, "lang": 1, "status": "P", "ord": true, "promo": false, "fund": [1], "created": "2026-09-14 09:30", "updated": "2026-09-14 09:30", "tr": {"et": {"id": 19, "title": "Git ja GitHub", "updatedAt": "2026-09-14 09:30"}, "en": {"id": 20, "title": "Git and GitHub", "updatedAt": "2026-09-15 16:00"}}},
+      {"id": 12, "cat": 1, "lang": 2, "status": "U", "ord": false, "promo": false, "fund": [], "created": "2026-09-18 10:00", "updated": "2026-09-18 10:00", "tr": {"et": {"id": 21, "title": "Python andmeanalüüsiks", "updatedAt": "2026-09-18 10:00"}, "en": {"id": 22, "title": "Python for Data Analysis", "updatedAt": "2026-09-18 10:00"}}},
+      {"id": 13, "cat": 1, "lang": 1, "status": "P", "ord": true, "promo": true, "fund": [1, 2], "created": "2026-09-25 15:10", "updated": "2026-09-26 09:00", "tr": {"et": {"id": 23, "title": "Tehisaru töövahendid arendajale", "updatedAt": "2026-09-25 15:10"}}},
+      {"id": 14, "cat": 2, "lang": 1, "status": "D", "ord": false, "promo": false, "fund": [], "created": "2026-08-25 12:00", "updated": "2026-09-08 17:40", "tr": {"et": {"id": 24, "title": "Photoshopi algkursus", "updatedAt": "2026-08-25 12:00"}, "en": {"id": 25, "title": "Photoshop Basics", "updatedAt": "2026-08-25 12:00"}}},
+      {"id": 15, "cat": 1, "lang": 1, "status": "P", "ord": true, "promo": false, "fund": [1], "created": "2026-07-20 09:00", "updated": "2026-07-20 09:00", "tr": {"et": {"id": 26, "title": "Vali-IT Noorem AI arendaja", "updatedAt": "2026-08-01 09:00"}, "en": {"id": 27, "title": "Vali-IT Junior AI Developer", "updatedAt": "2026-08-01 09:00"}}}
     ];
   }
 
@@ -652,7 +659,7 @@ td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
     var n = activeFilterCount();
     var titles = titlesDto();
     document.getElementById("view").innerHTML =
-      '<div class="viewhead"><h2>Koolituste haldus</h2><button type="button" class="sbtn primary" id="b-new">+ Lisa uus koolitus</button></div>' +
+      viewTabs(ADMIN_TABS, "/admin-trainings") + '<div class="viewhead"><h2>Koolitused</h2><button type="button" class="sbtn primary" id="b-new">+ Lisa uus koolitus</button></div>' +
       '<div class="searchrow"><input type="text" id="f-search" list="titles" placeholder="Otsi koolituse nime järgi…" value="' + esc(ui.searchInput) + '" autocomplete="off" aria-label="Otsi koolituse nime järgi">' +
       '<datalist id="titles">' + titles.map(function (t) { return '<option value="' + esc(t.title) + '"></option>'; }).join("") + '</datalist>' +
       '<button type="button" class="sbtn primary" id="b-search">Otsi</button>' +
@@ -741,6 +748,7 @@ td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
     Array.prototype.forEach.call(document.querySelectorAll("[data-ui-lang]"), function (b) { b.setAttribute("aria-pressed", String(b.dataset.uiLang === ui.lang)); });
     renderView(); renderKv(); renderLog();
     document.getElementById("view-note-text").textContent = VIEW_NOTE;
+    window.BcsReturnNavigation.render(goRoute);
   }
 
   /* ---------- Sündmused ---------- */
@@ -807,11 +815,12 @@ td.date { font-variant-numeric: tabular-nums; white-space: nowrap; }
     "Frontend rada: /admin-trainings",
     "",
     "Vaatega seotud lisainfo:",
+    "Ülal vahelehed (AdminTabs.vue): Koolituste päringud | Registreerumised | Tagasisided | Koolitused | Koolituste kalender | Koolitajad | Koolitusruumid | Kontod — samad lingid ja järjekord mis menüüs \"Admin\", selle vaate vaheleht on aktiivne. Kitsal ekraanil on vahelehed ühel keritaval real, aktiivne keritakse keskele.",
     "Tabeli rida = üks koolitus; vaikimisi ainult aktiivsed (status \"U\" ja \"P\"), kustutatud (\"D\") näeb staatuse filtriga \"Kustutatud\". Nimi ja kategooria kuvatakse kasutajaliidese keeles (store'i contentLang); kui selles keeles tõlget pole, kuvatakse põhikeele oma. Keele vahetamisel navbaris laaditakse tabel, kategooriad, rahastustüübid ja nimede ettepanekud uuesti; otsing, filtrid, sorteerimine ja leht jäävad alles.",
     "Otsinguväli otsib ainult koolituse nimest; trükkimise ajal pakub datalist nimesid (GET /api/training-titles). Otsing käivitub nupu \"Otsi\" või Enteri peale. Nupu kõrval on küsimärgi ikoon, mille tooltip selgitab: otsitakse nimest, iga sõna peab esinema, käändeid ei kohandata; nimede valikus on ainult aktiivsed koolitused — kustutatud koolituse leidmiseks vali filtrites Staatus \"Kustutatud\".",
     "Kaart \"Otsingu filtrid\" on vaikimisi peidus (link \"▾ Ava otsingu filtrid\" / \"▴ Peida otsingu filtrid\"). Filtrid rakenduvad nupuga \"Filtreeri\" ja jäävad kehtima ka peidetud kaardiga (märk \"N filtrit aktiivne\"); \"Tühjenda filtrid\" taastab vaikimisi väärtused.",
     "Veeru pealkirja klõps sorteerib backendis (ka Staatus: Mustand → Publitseeritud → Kustutatud ja Tõlked: puuduvad eespool): uus veerg → kasvav, sama veerg uuesti → suund vahetub. Vaikimisi Lisatud kahanevalt. Otsing, filtrid ja sorteerimine alustavad alati lehelt 0; leheküljestus (PaginationNav.vue) 10 rida lehel.",
-    "Vaade avaneb navbari menüüst \"Admin\" → \"Koolituste haldus\" (\"Lisa uus koolitus\" all). Pealkirja real paremal on nupp \"Lisa uus koolitus\" → /training-form.",
+    "Vaade avaneb navbari menüüst \"Admin\" → \"Koolitused\". Pealkiri \"Koolitused\". Pealkirja real paremal on nupp \"Lisa uus koolitus\" → /training-form.",
     "Kuupäevad kuvatakse kujul 30/09/2026. \"Vaata\" → /training?trainingId={id}&trainingTranslationId={id}, \"Muuda\" → /training-form?trainingId={id}&trainingTranslationId={id}. Staatuse nupp (TrainingStatusButton.vue: \"Publitseeri\" / \"Liiguta mustandisse\" / \"Taasta\") ja kustutamise ikoon (TrainingDeleteButton.vue) küsivad kinnitust modaliga, teevad API kutse ise ja annavad vaatele sündmusega teada; vaade laadib tabeli uuesti. Kustutatud real on ainult nupp \"Taasta\" (Vaata/Muuda/Kustuta on peidus)."
   ].join("\n");
 

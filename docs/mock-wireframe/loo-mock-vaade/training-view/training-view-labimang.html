@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="et">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Koolituse detail — läbimäng</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f5f7fa;color:#253344;font:16px system-ui,sans-serif}.wrap{max-width:1200px;margin:auto;padding:24px}header{margin-bottom:24px}.controls{display:flex;flex-wrap:wrap;gap:12px;align-items:center}button,select{font:inherit;padding:7px 10px;border:1px solid #b8c2cf;border-radius:5px;background:white}a{color:#0869dd}code{overflow-wrap:anywhere}.columns{display:grid;grid-template-columns:2fr 1fr;gap:24px}.card{background:white;border:1px solid #c6cdd5;border-radius:8px;padding:20px;margin-bottom:24px}.card h2{margin:0 0 16px;font-size:20px}.title{display:flex;align-items:center;gap:10px}h1{font-size:27px;margin:0}dt{font-weight:600}dd{margin:4px 0 14px}.badge{font-size:14px;border-radius:5px;padding:3px 8px;background:#eef2f5}.category{background:#0869dd;color:white}.full{background:#ffdf81}.muted{color:#6d7785}.lecturer{padding:12px;border:1px solid #d6dbe2;border-radius:6px;margin:10px 0;display:block;text-decoration:none}.courses{list-style:none;padding:0}.courses li{margin-bottom:12px}.error{background:#f8d7da;padding:16px;border-radius:6px}.embed header{display:none}.embed .wrap{padding:16px}#urlbar{display:block;margin:16px 0}#view>[data-context-back]{display:inline-block;margin-bottom:20px!important}.notes{margin-top:24px}.embed .notes{display:none}@media(max-width:800px){.columns{grid-template-columns:1fr}.wrap{padding:16px}}
+</style>
+</head>
+<body><div class="wrap">
+<header><h1>Koolituse detail — läbimäng</h1><p>Vasakul koolituse info ja valitud tõlke PDF; paremal andmed, koolitajad ja järgmised koolitused.</p><div class="controls">
+<label>Kasutajaliidese keel <select id="language"><option value="et">Eesti</option><option value="en">English</option><option value="ru">Puuduv tõlge (ru)</option></select></label>
+<label>Roll <select id="role"><option value="public">Külastaja</option><option value="admin">Admin</option></select></label>
+<label><input id="pdf" type="checkbox" checked> Valitud tõlkel PDF olemas</label>
+<label><input id="courses" type="checkbox" checked> Järgmised koolitused olemas</label>
+<button id="preview" type="button">Inglise tõlke eelvaade</button><button id="missing" type="button">Koolitust ei leitud</button>
+</div><p><a href="training-view-skeemid.md">Skeemid ja kuvamisreeglid</a> · <a href="../index.html?path=%2Ftraining%3FtrainingId%3D1">Ava prototüübi kestas</a></p></header>
+<code id="urlbar"></code><main id="view"></main>
+<section class="notes"><h2>Päringud</h2><pre id="requests"></pre><p>PDF-i allalaadimine kasutab olemasolevat teenust. Mock genereerib väikese näidis-PDF-i, et allalaadimist saaks läbi mängida.</p></section>
+</div>
+<script src="../return-navigation.js"></script>
+<script>
+(function () {
+  'use strict';
+  var query = new URLSearchParams(location.search);
+  var embed = query.get('embed') === '1' && window.parent !== window;
+  if (embed) document.documentElement.classList.add('embed');
+  var appPath = query.get('appPath') || '/training?trainingId=' + (query.get('trainingId') || '1');
+  if (!query.get('appPath') && query.get('trainingTranslationId')) appPath += '&trainingTranslationId=' + query.get('trainingTranslationId');
+  if (!query.get('appPath') && query.get('returnTo')) appPath += '&returnTo=' + encodeURIComponent(query.get('returnTo'));
+  var current = new URL(appPath, location.href);
+  var trainingId = current.searchParams.get('trainingId') || '1';
+  var requested = Number(current.searchParams.get('trainingTranslationId') || 0);
+  var role = query.get('role') || 'public';
+  document.getElementById('role').value = role;
+  var missing = false, pdfUrl = '';
+  var labels = {
+    et: {info:'Koolituse info',title:'Java algkursus',short:'Java programmeerimise alused algajatele.',description:'Koolitusel õpid Java süntaksit, objektorienteeritud programmeerimist ja rakenduse loomise aluseid.',pdf:'Õppekava (PDF)',data:'Koolituse andmed',language:'Koolituse keel',category:'Kategooria',funding:'Rahastus',location:'Asukoht',orderable:'Tellitav koolitus',yes:'Jah',lecturers:'Koolitajad',next:'Järgmised koolitused',empty:'Järgmisi koolitusi praegu ei ole.',calendar:'Kalender',all:'Vaata koolituste kalendrit',onSite:'Kohapeal',online:'Veebis',full:'Täis',categoryName:'Programmeerimine'},
+    en: {info:'Training information',title:'Java for beginners',short:'Learn the fundamentals of Java programming.',description:'Learn Java syntax, object-oriented programming and the basics of building an application.',pdf:'Curriculum (PDF)',data:'Training details',language:'Training language',category:'Category',funding:'Funding',location:'Location',orderable:'Available on request',yes:'Yes',lecturers:'Lecturers',next:'Upcoming courses',empty:'There are no upcoming courses at the moment.',calendar:'Calendar',all:'View the course calendar',onSite:'On site',online:'Online',full:'Full',categoryName:'Programming'}
+  };
+  function esc(value) { return String(value).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  // Järgmised koolitused avatakse ilma returnTo-ta; muud detaililingid säilitavad tagasitee.
+  function navigationPath(path) {
+    return new URL(path, location.href).pathname === '/course' ? path : window.BcsReturnNavigation.forward(path);
+  }
+  function goRoute(path, message, isBack) {
+    if (!isBack) path = navigationPath(path);
+    if (embed) window.parent.postMessage({type:'bcs-navigate',path:path},'*');
+    else location.href = '../index.html?path=' + encodeURIComponent(path);
+  }
+  function link(path,text) { var target=navigationPath(path); return '<a'+(path.startsWith('/lecturer?')?' class="lecturer"':'')+' href="../index.html?path='+encodeURIComponent(target)+'" data-route="'+esc(path)+'">'+text+'</a>'; }
+  function samplePdf(title) {
+    // Minimalistlik päris PDF (ASCII tekstiga), mitte rakenduse salvestatud õppekava.
+    var stream='BT /F1 18 Tf 50 750 Td ('+title+') Tj ET';
+    var objects=['<< /Type /Catalog /Pages 2 0 R >>','<< /Type /Pages /Kids [3 0 R] /Count 1 >>','<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>','<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>','<< /Length '+stream.length+' >>\nstream\n'+stream+'\nendstream'];
+    var output='%PDF-1.4\n', offsets=[0];
+    objects.forEach(function(obj,i){offsets.push(output.length);output+=(i+1)+' 0 obj\n'+obj+'\nendobj\n';});
+    var xref=output.length;output+='xref\n0 6\n0000000000 65535 f \n';offsets.slice(1).forEach(function(offset){output+=String(offset).padStart(10,'0')+' 00000 n \n';});output+='trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n'+xref+'\n%%EOF';
+    return URL.createObjectURL(new Blob([output],{type:'application/pdf'}));
+  }
+  function render() {
+    var lang=document.getElementById('language').value;
+    var displayed=requested===2?'en':requested===1?'et':lang==='en'?'en':'et';
+    var fallback=requested!==1 && requested!==2 && lang==='ru';
+    var text=labels[displayed], id=displayed==='en'?2:1;
+    // Kaardi tekstid ja foto versioonid on training-summary lecturers massiivi osa.
+    var lecturerSummaries = [
+      {lecturerId:1,fullName:'Rain Tüür',title:lang==='en'?'Java lecturer':'Java koolitaja',shortDescription:lang==='en'?'Software development.':'Tarkvaraarendus.',photoVersion:null},
+      {lecturerId:8,fullName:'Meelis Teern',title:lang==='en'?'Software developer':'Tarkvaraarendaja',shortDescription:lang==='en'?'Java and JavaScript.':'Java ja JavaScript.',photoVersion:null}
+    ];
+    current.searchParams.set('trainingId',trainingId);
+    if(requested)current.searchParams.set('trainingTranslationId',requested);else current.searchParams.delete('trainingTranslationId');
+    document.getElementById('urlbar').textContent='https://bcskoolitus.ee'+current.pathname+current.search;
+    window.BcsReturnNavigation.render(goRoute);
+    var fileName=(displayed==='en'?'Java-for-beginners_curriculum_en':'Java-algkursus_oppekava_et')+'.pdf';
+    if(pdfUrl)URL.revokeObjectURL(pdfUrl);
+    pdfUrl=samplePdf('Java training curriculum - '+displayed);
+    var hasPdf=document.getElementById('pdf').checked && !fallback;
+    var html='<div class="columns"><div><section class="card"><h2>'+text.info+'</h2>'+(fallback?'<p class="muted">Valitud keeles tõlge puudub — kuvatakse põhikeele tõlge.</p>':'')+'<div class="title"><h1>★ '+text.title+'</h1>'+(role==='admin'?link('/training-form?trainingId='+trainingId+'&trainingTranslationId='+id,'✎'):'')+'</div><p><strong>'+text.short+'</strong></p><p>'+text.description+'</p></section>';
+    if(hasPdf)html+='<section class="card"><h2>'+text.pdf+'</h2><a href="'+pdfUrl+'" download="'+fileName+'" id="download">↓ '+fileName+'</a> <span class="muted">(0,4 MB)</span></section>';
+    html+='</div><aside><section class="card"><h2>'+text.data+'</h2><dl><dt>'+text.language+'</dt><dd>🇪🇪</dd><dt>'+text.category+'</dt><dd><span class="badge category">'+text.categoryName+'</span></dd><dt>'+text.funding+'</dt><dd>€ Töötukassa</dd><dt>'+text.location+'</dt><dd>BCS Koolitus</dd><dt>'+text.orderable+'</dt><dd>'+text.yes+'</dd></dl></section><section class="card"><h2>'+text.lecturers+'</h2>'+lecturerSummaries.map(function(l){return link('/lecturer?lecturerId='+l.lecturerId,esc(l.fullName)+'<br><span class="muted">'+esc(l.title)+'</span><br>'+esc(l.shortDescription));}).join('')+'</section><section class="card"><h2>'+text.next+'</h2>';
+    html+=document.getElementById('courses').checked?'<ul class="courses"><li>'+link('/course?courseId=1','05/10/2026 – 09/10/2026 · '+text.onSite)+'</li><li>'+link('/course?courseId=2','19/10/2026 – 23/10/2026 · '+text.onSite+' + '+text.online)+' <span class="badge full">'+text.full+'</span></li></ul>':'<p class="muted">'+text.empty+'</p>';
+    html+='</section><section class="card"><h2>'+text.calendar+'</h2>'+link('/courses',text.all)+'</section></aside></div>';
+    document.getElementById('view').innerHTML=missing?'<p class="error">Koolitust ei õnnestunud laadida.</p>':html;
+    document.getElementById('requests').textContent='GET /api/training-summary/'+trainingId+'?contentLang='+lang+(requested?'&trainingTranslationId='+requested:'')+'\nKoondvastuse lecturers (eraldi JSON-päringuid pole):\n'+JSON.stringify(lecturerSummaries,null,2)+(hasPdf?'\nPDF-link: GET /api/training-translation/'+id+'/curriculum':'\nPDF-kaarti ei kuvata');
+    window.BcsReturnNavigation.render(goRoute);
+  }
+  document.addEventListener('click',function(e){var a=e.target.closest('[data-route]');if(!a || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey)return;e.preventDefault();goRoute(a.dataset.route);});
+  document.getElementById('language').onchange=function(){requested=0;missing=false;render();};
+  document.getElementById('role').onchange=function(){role=this.value;render();};
+  document.getElementById('pdf').onchange=render;document.getElementById('courses').onchange=render;
+  document.getElementById('preview').onclick=function(){requested=2;missing=false;render();};
+  document.getElementById('missing').onclick=function(){missing=!missing;render();};
+  render();
+})();
+</script>
+</body></html>

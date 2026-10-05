@@ -6,6 +6,8 @@ Eeskuju: `admin-rooms-view-skeemid.md` (nimekiri, otsing, frontendi sorteerimine
 
 ## Otsused
 
+- **Vahelehed** (2026-10-01): admini nimekirjavaadete ülaosas vahelehed kõigi admin-menüü linkidega (`AdminTabs.vue` / `NavTabs.vue`), selle vaate vaheleht aktiivne — vt `docs/tasks/frontend/view-tabs.md`.
+
 ### Üldine
 
 - **Päring** = huvilise saadetud päring koolituse kohta (tabel `enquiry` + kontaktandmed `profile`). Päringu **loomise** modal on avalikul toimumiskorra lehel (`/course`, vt `courses-view/courses-view-skeemid.md`).
@@ -188,7 +190,8 @@ sequenceDiagram
 
 ```text
 Create a desktop wireframe of an admin page "Koolituste päringud" in a web app.
-Top: site navigation bar with logo and links, an open dropdown "Admin ▾" with items "Lisa uus koolitus", "Koolituste haldus", a divider, "Lisa uus koolitaja", "Koolitajad", a divider, "Koolitusruumid", a divider and "Koolituste päringud" (highlighted), and "Logi välja" on the right.
+Top: site navigation bar with logo and links, an open dropdown "Admin ▾" with items "Koolituste päringud" (highlighted), "Registreerumised", a divider, "Koolitused", "Koolituste kalender", a divider, "Koolitajad", "Koolitusruumid", a divider and "Kontod",, a user icon dropdown "👤 ▾" (Minu profiil) and "Logi välja" on the right.
+Below the navigation bar: a tab bar "Koolituste päringud | Registreerumised | Koolitused | Koolituste kalender | Koolitajad | Koolitusruumid | Kontod" with "Koolituste päringud" as the active tab.
 Header: page title "Koolituste päringud".
 Below: a search input "Otsi nime, e-posti, ettevõtte või koolituse järgi…" and a toggle switch "Näita ka käsitletud" (on).
 Main area: a data table with columns "Saabunud ▼", "Nimi", "E-post", "Ettevõte", "Koolitus", "Toimumiskord", "Staatus", "Tegevused".
@@ -203,9 +206,14 @@ Below the table: text "Kokku 4 päringut".
 
 ```text
 Create a desktop wireframe of an admin page "Koolituse päring" in a web app.
-Top: site navigation bar with logo, links, a dropdown "Admin ▾" and "Logi välja".
+Top: site navigation bar with logo, links, a dropdown "Admin ▾", a user icon dropdown "👤 ▾" (Minu profiil) and "Logi välja".
 Header row: title "Koolituse päring" and a secondary button "Koolituste päringud" on the right.
 Card "Päring" as a two-column list: Saabunud 28/09/2026 16:40; Staatus badge Uus; Koolitus link "Java algkursus"; Toimumiskord 16/11/2026 – 20/11/2026; Ettevõte —; Sõnum "Kas veebis osalejad saavad hiljem ka salvestust vaadata?".
 Card "Kontakt": Nimi Martin Kask; E-post link martin.kask@example.com; Telefon link +37253344556.
 Bottom: primary button "Märgi käsitletuks".
 ```
+
+
+## Vaadetevaheline tagasitee
+
+Detailide ja vormide avamisel antakse kaasa lähtevaate täielik URL `returnTo` parameetrina. Ühine „← Tagasi“ link taastab selle URL-i; otselingi korral kasutatakse vaate varusihti. Peamenüü ja vahelehed tagasiteed ei loo. Oleku- ja tõlkevahetus säilitab senise tagasitee. Kõigi avamiskohtade, erandite ja varusihtide [ühine skeem](../return-to-navigation-skeemid.md).

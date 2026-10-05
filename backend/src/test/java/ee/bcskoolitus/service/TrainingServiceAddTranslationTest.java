@@ -29,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -40,6 +41,7 @@ class TrainingServiceAddTranslationTest {
 
     private static final Integer TRAINING_ID = 3;
     private static final Integer LANGUAGE_ID = 2;
+    private static final String CURRICULUM_BASE64 = "JVBERi0xLjcK";
 
     @Mock
     private TrainingRepository trainingRepository;
@@ -47,6 +49,8 @@ class TrainingServiceAddTranslationTest {
     private TrainingTranslationRepository trainingTranslationRepository;
     @Mock
     private LanguageService languageService;
+    @Mock
+    private TrainingTranslationCurriculumService trainingTranslationCurriculumService;
     @Spy
     private TrainingTranslationMapper trainingTranslationMapper = new TrainingTranslationMapperImpl();
 
@@ -90,6 +94,16 @@ class TrainingServiceAddTranslationTest {
         assertEquals("Power BI for Advanced Users", savedTrainingTranslation.getTitle());
         assertEquals("Data models, DAX and interactive reports.", savedTrainingTranslation.getShortDescription());
         assertEquals("<p>The course builds a <strong>data model</strong>.</p>", savedTrainingTranslation.getDescription());
+    }
+
+    @Test
+    void addTrainingTranslation_savesCurriculumForNewTranslation() {
+        trainingService.addTrainingTranslation(TRAINING_ID, createTrainingTranslationCreateRequestDto());
+
+        ArgumentCaptor<TrainingTranslation> trainingTranslationCaptor = ArgumentCaptor.forClass(TrainingTranslation.class);
+        verify(trainingTranslationCurriculumService)
+                .handleAddCurriculum(trainingTranslationCaptor.capture(), eq(CURRICULUM_BASE64), eq("Curriculum"));
+        assertEquals(6, trainingTranslationCaptor.getValue().getId());
     }
 
     @Test
@@ -140,6 +154,7 @@ class TrainingServiceAddTranslationTest {
     private TrainingTranslationCreateRequestDto createTrainingTranslationCreateRequestDto() {
         return new TrainingTranslationCreateRequestDto(
                 LANGUAGE_ID, "Power BI for Advanced Users", "Data models, DAX and interactive reports.",
-                "<p>The course builds a <strong>data model</strong>.</p><img src=x onerror=\"alert(1)\">");
+                "<p>The course builds a <strong>data model</strong>.</p><img src=x onerror=\"alert(1)\">",
+                CURRICULUM_BASE64, "Curriculum");
     }
 }

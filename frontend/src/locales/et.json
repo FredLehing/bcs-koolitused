@@ -1,10 +1,52 @@
 {
+  "navigation": {
+    "back": "Tagasi"
+  },
   "common": {
     "close": "Sulge"
   },
   "homeView": {
     "title": "Leia üle 100 koolituse seast endale sobiv!",
-    "subtitle": "Praktilised IT-, disaini- ja juhtimiskoolitused oma ala parimatelt"
+    "subtitle": "Praktilised IT-, disaini- ja juhtimiskoolitused oma ala parimatelt",
+    "gallery": {
+      "slide": "Slaid {number}",
+      "placeholder": "Pilt {number}",
+      "previous": "Eelmine",
+      "next": "Järgmine"
+    },
+    "testimonials": {
+      "title": "Kliendid meist",
+      "items": [
+        {
+          "text": "Enne Vali-IT! Tarkvaraarendaja koolitust ei olnud ma kunagi programmeerimisega kokku puutunud. Juba paari kuu pärast töötasin juuniorarendajana ja tunnen, et sain koolitusel tugeva vundamendi.",
+          "name": "Kaspar Tamm",
+          "company": ""
+        },
+        {
+          "text": "Suur aitäh BCS Koolituste meeskonnale ning eriti Tarmole, kelle käe all õppisin UX disainist nii mõndagi uut ja huvitavat.",
+          "name": "Mari Kask",
+          "company": "IT Firma OÜ"
+        },
+        {
+          "text": "Power BI koolitusel osalejad ütlesid, et see on olnud parim koolitus, kus nad kunagi käinud on. Aitäh!",
+          "name": "",
+          "company": "Näidis Firma OÜ"
+        }
+      ]
+    },
+    "trainingsCard": {
+      "title": "Meie koolitused",
+      "text": "Vaata kõiki meie koolitusi ja nende sisu.",
+      "link": "Vaata koolitusi →"
+    },
+    "coursesCard": {
+      "title": "Koolituste kalender",
+      "text": "Vali sobiv toimumisaeg ja registreeru.",
+      "link": "Vaata kalendrit →"
+    },
+    "nextCoursesTitle": "Meie järgmised 5 koolitust",
+    "marketingText": "Leia endale sobiv koolitus — uusi toimumiskordi lisandub pidevalt.",
+    "allCoursesLink": "Vaata kõiki toimuvaid koolitusi →"
   },
   "navbar": {
     "trainings": "Koolitused",
@@ -16,7 +58,7 @@
     "feedback": "Tagasiside",
     "admin": "Admin",
     "addTraining": "Lisa uus koolitus",
-    "manageTrainings": "Koolituste haldus",
+    "manageTrainings": "Koolitused",
     "addLecturer": "Lisa uus koolitaja",
     "manageLecturers": "Koolitajad",
     "manageRooms": "Koolitusruumid",
@@ -32,7 +74,14 @@
     "manageCourses": "Koolituste kalender",
     "ourTrainings": "Meie koolitused",
     "coursesCalendar": "Koolituste kalender",
-    "signup": "Loo konto"
+    "signup": "Loo konto",
+    "profile": "Minu profiil",
+    "participantDetails": "Minu andmed",
+    "participantCourses": "Minu koolitused",
+    "participantCertificates": "Tunnistused",
+    "changePassword": "Parool",
+    "manageUsers": "Kontod",
+    "manageFeedbacks": "Tagasisided"
   },
   "error": {
     "message": "Midagi läks valesti, proovi hiljem uuesti!",
@@ -66,7 +115,20 @@
     "noSearchResultsHint": "Proovi vähem või teisi sõnu. Sõnade käändeid ei arvestata, seega kasuta sõna algust (nt „kursus“, mitte „kursusele“).",
     "showAllTrainings": "Näita kõiki koolitusi",
     "noResults": "Valitud filtritele vastavaid koolitusi ei leitud.",
-    "searchHelp": "Otsitakse sõnade esinemist koolituse pealkirjast ja lühikirjeldusest. Parima tulemuse saad, kui sisestad mõned sõnad. Sõnade käändeid ei arvestata."
+    "searchHelp": "Otsitakse sõnade esinemist koolituse pealkirjast ja lühikirjeldusest. Parima tulemuse saad, kui sisestad mõned sõnad. Sõnade käändeid ei arvestata.",
+    "showAllLanguages": "Kuva kõik keeled",
+    "showAllCategories": "Näita kõiki kategooriaid",
+    "showAllFundingTypes": "Näita kõiki rahastustüüpe",
+    "filters": {
+      "title": "Filtrid",
+      "clear": "Tühjenda filtrid",
+      "trainingLanguage": "Koolituse keel",
+      "category": "Koolituse kategooria",
+      "fundingType": "Rahastus",
+      "allLanguages": "Kõik keeled",
+      "allCategories": "Kõik kategooriad",
+      "all": "Kõik"
+    }
   },
   "trainingCard": {
     "language": "Koolituse keel",
@@ -112,7 +174,23 @@
       "description": "Kirjeldus",
       "aiButton": "Tee AI tõlge",
       "aiLoading": "Tõlgin…",
-      "aiTooltip": "Tõlge tehakse salvestatud põhikeele ({mainLanguage}) tekstist, mitte vormi sisust. Tulemus kuvatakse ainult vormis — see salvestub alles siis, kui vajutad „{saveButton}“."
+      "aiTooltip": "Tõlge tehakse salvestatud põhikeele ({mainLanguage}) tekstist, mitte vormi sisust. Tulemus kuvatakse ainult vormis — see salvestub alles siis, kui vajutad „{saveButton}“.",
+      "curriculum": "Õppekava",
+      "curriculumField": "Õppekava (PDF)",
+      "curriculumSelect": "Vali fail",
+      "curriculumChange": "Vaheta",
+      "curriculumRemove": "Eemalda",
+      "curriculumUndo": "Tühista",
+      "curriculumHint": "PDF, kuni 10 MB",
+      "curriculumPending": "salvestatakse koos vormiga",
+      "curriculumRemoving": "eemaldatakse salvestamisel",
+      "curriculumInvalid": "Lubatud on PDF-fail kuni 10 MB",
+      "curriculumReadError": "Faili lugemine ebaõnnestus. Vali fail uuesti.",
+      "aiPdfButton": "Täida vorm PDF + AI abiga",
+      "aiPdfLoading": "PDF-i analüüsin…",
+      "aiPdfTooltipNewTraining": "Valitud salvestamata PDF saadetakse backendile ja sealt Gemini AI-le. Vastus täidab vormi väljad; midagi ei salvestata enne „Lisa“ vajutamist.",
+      "aiPdfTooltipNewTranslation": "Valitud salvestamata PDF saadetakse backendile ja sealt Gemini AI-le. Vastus täidab uue tõlke tekstiväljad; midagi ei salvestata enne „Lisa tõlge“ vajutamist.",
+      "aiPdfTooltipUpdate": "Uus vormis valitud PDF saadetakse backendile; selle puudumisel loetakse salvestatud õppekava andmebaasist. Gemini AI vastus täidab vormi väljad; midagi ei salvestata enne „Salvesta“ vajutamist."
     },
     "buttons": {
       "add": "Lisa",
@@ -146,7 +224,13 @@
       "translationAdded": "Tõlge ({language}) on lisatud",
       "published": "Koolitus on publitseeritud",
       "unpublished": "Koolitus on liigutatud mustandisse",
-      "aiDone": "AI tõlge on vormis — kontrolli teksti ja salvesta"
+      "aiDone": "AI tõlge on vormis — kontrolli teksti ja salvesta",
+      "aiPdfDone": "PDF + AI tulemus on vormis — kontrolli teksti ja salvesta",
+      "aiFailed": "AI päring ebaõnnestus. Proovi uuesti."
+    },
+    "aiPdfModal": {
+      "title": "Asenda vorm PDF-i põhjal loodud tekstiga?",
+      "message": "Vormis on salvestamata muudatusi. PDF + AI tulemus kirjutab pealkirja, lühikirjelduse ja kirjelduse üle."
     }
   },
   "richTextEditor": {
@@ -168,9 +252,16 @@
       "trainingData": "Koolituse andmed",
       "lecturers": "Koolitajad",
       "upcomingCourses": "Järgmised koolitused",
-      "calendar": "Kalender",
-      "placeholder": "Sisu lisandub peagi."
-    }
+      "calendar": "Kalender"
+    },
+    "location": "Asukoht",
+    "orderable": "Tellitav koolitus",
+    "yes": "Jah",
+    "no": "Ei",
+    "loading": "Laadin koolitust…",
+    "loadError": "Koolitust ei õnnestunud laadida.",
+    "noUpcomingCourses": "Järgmisi koolitusi praegu ei ole.",
+    "allCourses": "Vaata koolituste kalendrit"
   },
   "trainingStatusButton": {
     "buttons": {
@@ -202,7 +293,7 @@
     "confirm": "Kustuta"
   },
   "adminTrainings": {
-    "title": "Koolituste haldus",
+    "title": "Koolitused",
     "search": "Otsi",
     "searchPlaceholder": "Otsi koolituse nime järgi…",
     "searchHelp": "Otsitakse koolituse nimest. Iga sõna peab nimes esinema, käändeid ei kohandata. Nimede valikus on ainult aktiivsed koolitused — kustutatud koolituse leidmiseks vali filtrites Staatus „Kustutatud“.",
@@ -762,6 +853,187 @@
   },
   "lecturerCard": {
     "viewProfile": "Vaata koolitaja profiili: {name}"
+  },
+  "participantDetails": {
+    "edit": "Muuda",
+    "save": "Salvesta",
+    "cancel": "Tühista",
+    "emailHint": "Selle e-postiga logid ka sisse",
+    "messages": {
+      "saved": "Andmed salvestatud"
+    }
+  },
+  "participantCourses": {
+    "upcoming": "Tulevased",
+    "past": "Toimunud",
+    "noUpcoming": "Tulevasi koolitusi pole.",
+    "empty": "Sa pole veel ühelegi koolitusele registreerunud.",
+    "browseCourses": "Vaata koolitusi",
+    "paid": "Tasutud",
+    "notPaid": "Tasumata",
+    "cancel": "Loobu",
+    "cancelModal": {
+      "title": "Koolitusest loobumine",
+      "message": "Kas soovid koolitusest „{title}“ loobuda?",
+      "confirm": "Jah, loobu"
+    },
+    "messages": {
+      "cancelled": "Oled koolitusest loobunud"
+    },
+    "giveFeedback": "Anna tagasisidet",
+    "viewFeedback": "Vaata tagasisidet"
+  },
+  "participantCertificates": {
+    "comingSoon": "Tunnistused tulevad varsti — siia ilmuvad sinu läbitud koolituste tunnistused."
+  },
+  "changePassword": {
+    "currentPassword": "Praegune parool",
+    "newPassword": "Uus parool",
+    "newPasswordRepeat": "Korda uut parooli",
+    "save": "Salvesta",
+    "validation": {
+      "sameAsCurrent": "Uus parool ei tohi olla sama mis praegune"
+    },
+    "messages": {
+      "changed": "Parool muudetud"
+    }
+  },
+  "userStatus": {
+    "A": "Aktiivne",
+    "D": "Deaktiveeritud"
+  },
+  "roles": {
+    "admin": "Admin",
+    "participant": "Osaleja"
+  },
+  "userStatusButton": {
+    "deactivate": "Deaktiveeri",
+    "restore": "Taasta",
+    "deactivateTitle": "Deaktiveeri konto?",
+    "deactivateMessage": "„{name}“ ei saa enam sisse logida. Andmed ja registreerumised jäävad alles, konto saab hiljem taastada.",
+    "restoreTitle": "Taasta konto?",
+    "restoreMessage": "„{name}“ saab jälle sisse logida."
+  },
+  "adminUsers": {
+    "title": "Kontod",
+    "searchPlaceholder": "Otsi e-posti, nime või telefoni järgi…",
+    "allRoles": "Kõik rollid",
+    "participants": "Osalejad",
+    "admins": "Adminid",
+    "showDeleted": "Näita ka deaktiveeritud",
+    "noResults": "Kontosid ei leitud",
+    "totalCount": "Kokku {n} kontot | Kokku {n} konto | Kokku {n} kontot",
+    "me": "Sina",
+    "view": "Vaata",
+    "columns": {
+      "createdAt": "Loodud",
+      "email": "E-post",
+      "participantName": "Nimi",
+      "phone": "Telefon",
+      "roleName": "Roll",
+      "registrationCount": "Registreerumisi",
+      "status": "Staatus",
+      "actions": "Tegevused"
+    },
+    "messages": {
+      "deactivated": "Konto deaktiveeritud",
+      "restored": "Konto taastatud"
+    }
+  },
+  "adminUser": {
+    "backToUsers": "Kõik kontod",
+    "title": "Konto",
+    "accountLegend": "Konto",
+    "participantLegend": "Osaleja",
+    "registrationsLegend": "Registreerumised",
+    "noParticipant": "Kontol pole osaleja andmeid",
+    "noRegistrations": "Registreerumisi pole",
+    "ownAccountHint": "See on sinu konto — enda kontot deaktiveerida ei saa.",
+    "deactivate": "Deaktiveeri konto",
+    "restore": "Taasta konto",
+    "viewRegistration": "Vaata registreerumist",
+    "columns": {
+      "training": "Koolitus",
+      "dates": "Toimumisaeg",
+      "status": "Staatus",
+      "hasPaid": "Tasunud"
+    }
+  },
+  "participantFeedback": {
+    "title": "Tagasiside",
+    "back": "Tagasi minu koolituste juurde",
+    "submitted": "Esitatud {date}",
+    "updated": "Muudetud {date}",
+    "scaleHint": "Hinda iga väidet skaalal 1–10 (1 = ei nõustu üldse, 10 = nõustun täielikult)",
+    "addComment": "+ Lisa kommentaar",
+    "hideComment": "− Peida kommentaar",
+    "commentLabel": "Kommentaar",
+    "commentPlaceholder": "Täpsusta soovi korral oma hinnangut",
+    "add": "Lisa tagasiside",
+    "edit": "Muuda",
+    "save": "Salvesta",
+    "cancel": "Tühista",
+    "validation": {
+      "scoreAll": "Hinda kõiki kriteeriume"
+    },
+    "messages": {
+      "saved": "Tagasiside salvestatud"
+    }
+  },
+  "adminFeedbacks": {
+    "title": "Tagasisided",
+    "total": "Tagasisidede arv",
+    "needsReview": "Vajab ülevaatust",
+    "lowScores": "Madal hinne (≤ 5)",
+    "average": "Üldkeskmine",
+    "responseRate": "Vastanud / registreerunud",
+    "searchPlaceholder": "Otsi koolituse või osaleja nimest",
+    "search": "Otsi",
+    "showFilters": "Ava otsingu filtrid",
+    "hideFilters": "Peida otsingu filtrid",
+    "clearFilters": "Tühjenda filtrid",
+    "course": "Toimumiskord",
+    "all": "Kõik",
+    "withComments": "Sisaldab kommentaari",
+    "noComments": "Kommentaarid puuduvad",
+    "from": "Toimumine alates",
+    "until": "Toimumine kuni",
+    "low": "Vähemalt üks hinne ≤",
+    "filter": "Filtreeri",
+    "loading": "Laadin…",
+    "retry": "Proovi uuesti",
+    "criteriaAverages": "Kriteeriumide keskmised",
+    "answerCount": "Vastuseid: {count}",
+    "invalidDates": "Alguskuupäev ei tohi olla lõppkuupäevast hilisem.",
+    "reviewSuccess": "Tagasiside märgitud üle vaadatuks",
+    "loadError": "Andmete laadimine ebaõnnestus. Proovi uuesti.",
+    "statuses": {
+      "N": "Uus",
+      "U": "Muudetud",
+      "H": "Üle vaadatud"
+    },
+    "updatedHint": "Osaleja muutis vastuseid pärast admini ülevaatust",
+    "hideAnswers": "Peida vastused",
+    "openAnswers": "Ava vastused",
+    "review": "Märgi üle vaadatuks",
+    "reviewHint": "Ava ja loe kõigepealt vastused",
+    "answers": "vastused",
+    "criterion": "Kriteerium",
+    "score": "Hinne",
+    "comment": "Kommentaar",
+    "noAnswers": "Selle tagasiside vastused puuduvad.",
+    "noResults": "Tagasisidesid ei leitud. Muuda otsingut või tühjenda filtrid.",
+    "columns": {
+      "createdAt": "Esitatud",
+      "answersUpdatedAt": "Vastuseid muudetud",
+      "trainingTitle": "Koolitus / toimumine",
+      "participantName": "Osaleja",
+      "averageScore": "Keskmine",
+      "minimumScore": "Madalaim",
+      "commentCount": "Kommentaarid",
+      "status": "Staatus",
+      "actions": "Tegevused"
+    }
   },
   "chatbot": {
     "greeting": "Tere! Küsi minult BCS Koolituste kohta.",

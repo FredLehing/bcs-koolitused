@@ -2,13 +2,11 @@
 
 **Teenus:** `GET /api/lecturer-summary/{lecturerId}?contentLang={contentLang}`
 
-**Kasutav komponent:** `LecturerCard.vue` — vaates `TrainingView.vue` (`/training`, parem veerg "Koolitajad"; iga koolituse koolitaja kohta üks kaart). Admini kalender ja toimumiskorra vorm näitavad koolitajaid ainult nimedena.
-
-> Mockupi pilt lisatakse hiljem. `/training` läbimängu veel pole; kaardi välimus: `admin-lecturers-view-skeemid.md` (jaotis 10 "LecturerCard"), pildilahendus `lecturers-view-skeemid.md`.
-
-Eeldab taske `lecturer-db-changes.md` ja `lecturer-deleted-status.md`.
-
-> **Uuendus (2026-09-30):** pilte ei tagastata Base64-na — `photo` / `photoContentType` asenduvad väljaga **`photoVersion`** (`lecturer_photo.updated_at` epoch-sekundites, `null` = pilti pole); pilt tuleb `GET-api-lecturer-lecturerId-photo.md` teenusest. Allpool olevad Base64-näited on vananenud. Sama DTO kasutab `GET-api-lecturer-summaries.md`. Teenust kasutab ainult `LecturerCard` koolituse lehel (`/training`).
+**Seis:** olemasolev üksiku koolitaja koondteenus jääb alles. `/course` ja
+`/training` ei kutsu seda enam kaartide jaoks: `LecturerCard` saab andmed
+vaate koondvastuse `lecturers` massiivist. DTO `LecturerSummaryDto` asub
+jagatud `controller/common/dto` paketis. Pildid laaditakse eraldi olemasolevast
+`GET /api/lecturer/{lecturerId}/photo?v={photoVersion}` teenusest.
 
 ## Sisend
 
@@ -63,7 +61,7 @@ Näidisandmed: Rain Tüür (1) — pildiga, et + en; Merje Vaide (2) — pildita
 | `lecturerId` ei leidu või koolitaja on kustutatud | 404 Not Found | `{ "message": "Ei leidnud primary keyd 'lecturerId' väärtusega: 123", "errorCode": "PRIMARY_KEY_NOT_FOUND" }` |
 | Ootamatu serveripoolne viga | 500 Internal Server Error | Standardne vea response body (vastavalt projekti globaalsele error handler'ile) |
 
-404: `LecturerService.getValidActiveLecturerBy(lecturerId, "lecturerId")`. `LecturerCard` 404 korral kaarti ei kuva (üldisele veavaatele **ei** suunata).
+404: `LecturerService.getValidActiveLecturerBy(lecturerId, "lecturerId")`. Koondteenused filtreerivad kustutatud koolitajad enne kaardiandmete koostamist; kaart ise seda teenust ei kutsu.
 
 ## Vastuvõtu kriteeriumid
 
