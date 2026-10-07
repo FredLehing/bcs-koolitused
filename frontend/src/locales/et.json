@@ -1034,5 +1034,14 @@
       "status": "Staatus",
       "actions": "Tegevused"
     }
+  },
+  "chatbot": {
+    "greeting": "Tere! Küsi minult BCS Koolituste kohta.",
+    "placeholder": "Küsi koolituste kohta...",
+    "send": "Saada küsimus",
+    "open": "Ava vestlus",
+    "close": "Sulge vestlus",
+    "loading": "BCS Koolituste assistent otsib vastust...",
+    "error": "Vastuse saamine ebaõnnestus. Proovi hiljem uuesti."
   }
 }

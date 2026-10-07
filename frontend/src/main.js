@@ -2,6 +2,7 @@ import './assets/main.css'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import { MotionPlugin } from '@vueuse/motion'
 import axios from 'axios'
 
 import App from './App.vue'
@@ -27,6 +28,7 @@ const app = createApp(App)
 app.use(createPinia())
 app.use(router)
 app.use(i18n)
+app.use(MotionPlugin)
 
 // Axios globaalselt kättesaadavaks
 app.config.globalProperties.$axios = axios
