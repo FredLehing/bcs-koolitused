@@ -1,6 +1,11 @@
 # BCS Koolitused
 
-Vali-IT grupiprojekti toorik: Spring Boot backend + Vue 3 frontend.
+BCS Koolituse uue veebilehe prototüüp, valminud Vali-IT grupiprojektina.: Spring Boot backend + Vue 3 frontend.
+
+## Funktsionaalsus
+- Külastaja: koolituste ja kursuste sirvimine, koolitajad, päringu saatmine, registreerumine kursusele, konto loomine
+- Osaleja: minu kursused, tunnistused, tagasiside andmine, profiil ja parooli muutmine
+- Admin: koolituste, kursuste, koolitajate, ruumide, kasutajate, registreerimiste, päringute ja tagasiside haldus; tõlked
 
 ## Struktuur
 
