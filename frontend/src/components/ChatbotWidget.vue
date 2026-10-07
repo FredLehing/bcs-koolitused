@@ -1,8 +1,10 @@
 <script>
 import { PhChatCircleDots, PhX } from '@phosphor-icons/vue'
-import rainImage from '@/assets/1024x1024rain.png'
 import ChatbotService from '@/api-services/ChatbotService.js'
 import { useLanguageStore } from '@/stores/languageStore.js'
+
+const MAX_SESSION_HISTORY_MESSAGES = 18
+const MAX_HISTORY_MESSAGE_LENGTH = 4000
 
 export default {
   name: 'ChatbotWidget',
@@ -18,7 +20,7 @@ export default {
       isLoading: false,
       question: '',
       errorMessage: '',
-      rainImage,
+      conversationHistory: [],
       messages: [
         {
           role: 'assistant',
@@ -34,6 +36,7 @@ export default {
 
       if (this.isOpen) {
         this.scrollToBottom()
+        this.focusInput()
       }
     },
 
@@ -52,26 +55,64 @@ export default {
       this.question = ''
       this.errorMessage = ''
       this.isLoading = true
+
       this.scrollToBottom()
 
       try {
         const languageStore = useLanguageStore()
 
+        const previousMessages = this.conversationHistory.slice(-MAX_SESSION_HISTORY_MESSAGES)
+
         const response = await ChatbotService.sendQuestionRequest(
           question,
           languageStore.contentLang,
+          previousMessages,
         )
+
+        const answer = response.data.answer
+
+        if (response.data.sessionEnded) {
+          this.startNewSession(answer)
+          return
+        }
 
         this.messages.push({
           role: 'assistant',
-          text: response.data.answer,
+          text: answer,
         })
+
+        this.addToHistory('user', question)
+        this.addToHistory('assistant', answer)
       } catch (error) {
         this.errorMessage = error.response?.data?.message || this.$t('chatbot.error')
       } finally {
         this.isLoading = false
         this.scrollToBottom()
+        this.focusInput()
       }
+    },
+
+    startNewSession(handoffMessage) {
+      this.conversationHistory = []
+      this.question = ''
+
+      this.messages = [
+        {
+          role: 'assistant',
+          text: handoffMessage,
+        },
+        {
+          role: 'assistant',
+          text: this.$t('chatbot.greeting'),
+        },
+      ]
+    },
+
+    addToHistory(role, text) {
+      this.conversationHistory.push({
+        role,
+        text: text.slice(0, MAX_HISTORY_MESSAGE_LENGTH),
+      })
     },
 
     scrollToBottom() {
@@ -81,6 +122,12 @@ export default {
         if (messagesElement) {
           messagesElement.scrollTop = messagesElement.scrollHeight
         }
+      })
+    },
+
+    focusInput() {
+      this.$nextTick(() => {
+        this.$refs.questionInput?.focus()
       })
     },
   },
@@ -94,8 +141,8 @@ export default {
       v-motion
       :initial="{
         opacity: 0,
-        y: 70,
-        scale: 0.92,
+        y: 30,
+        scale: 0.96,
       }"
       :enter="{
         opacity: 1,
@@ -107,41 +154,61 @@ export default {
           damping: 22,
         },
       }"
-      class="rain-chatbot"
+      class="chatbot-panel shadow-lg"
     >
-      <img :src="rainImage" class="rain-image" alt="Rain" />
-
-      <div class="rain-monitor">
-        <div ref="messages" class="rain-messages">
-          <div
-            v-for="(message, index) in messages"
-            :key="index"
-            class="rain-message"
-            :class="message.role === 'user' ? 'rain-message-user' : 'rain-message-assistant'"
-          >
-            {{ message.text }}
+      <header class="chatbot-header">
+        <div class="chatbot-title">
+          <div class="chatbot-avatar">
+            <PhChatCircleDots :size="24" weight="fill" />
           </div>
 
-          <div v-if="isLoading" class="rain-loading">
-            {{ $t('chatbot.loading') }}
+          <div>
+            <div class="chatbot-name">Chatbot</div>
+
+            <div class="chatbot-status">BCS Koolitused</div>
           </div>
         </div>
 
-        <div v-if="errorMessage" class="rain-error">
-          {{ errorMessage }}
+        <button
+          type="button"
+          class="chatbot-close"
+          :aria-label="$t('chatbot.close')"
+          @click="toggleChat"
+        >
+          <PhX :size="20" />
+        </button>
+      </header>
+
+      <div ref="messages" class="chatbot-messages">
+        <div
+          v-for="(message, index) in messages"
+          :key="index"
+          class="chatbot-message"
+          :class="message.role === 'user' ? 'chatbot-message-user' : 'chatbot-message-assistant'"
+        >
+          {{ message.text }}
         </div>
 
-        <form class="rain-input" @submit.prevent="sendQuestion">
-          <input
-            v-model="question"
-            type="text"
-            maxlength="500"
-            :placeholder="$t('chatbot.placeholder')"
-            :disabled="isLoading"
-            autocomplete="off"
-          />
-        </form>
+        <div v-if="isLoading" class="chatbot-loading">
+          {{ $t('chatbot.loading') }}
+        </div>
       </div>
+
+      <div v-if="errorMessage" class="chatbot-error">
+        {{ errorMessage }}
+      </div>
+
+      <form class="chatbot-input" @submit.prevent="sendQuestion">
+        <input
+          ref="questionInput"
+          v-model="question"
+          type="text"
+          maxlength="500"
+          :placeholder="$t('chatbot.placeholder')"
+          :disabled="isLoading"
+          autocomplete="off"
+        />
+      </form>
     </div>
 
     <button
@@ -166,9 +233,9 @@ export default {
       :aria-label="isOpen ? $t('chatbot.close') : $t('chatbot.open')"
       @click="toggleChat"
     >
-      <PhX v-if="isOpen" :size="30" />
+      <PhX v-if="isOpen" :size="28" />
 
-      <PhChatCircleDots v-else :size="32" />
+      <PhChatCircleDots v-else :size="30" weight="fill" />
     </button>
   </div>
 </template>
@@ -177,192 +244,229 @@ export default {
 .chatbot-widget {
   position: fixed;
   right: 24px;
-  bottom: 0;
+  bottom: 16px;
   z-index: 1040;
 }
 
-/*
-  Rain oli enne 430 px.
-  645 px = umbes 1.5 × suurem.
-*/
-.rain-chatbot {
+.chatbot-panel {
   position: absolute;
-  right: 20px;
-  bottom: -18px;
-  width: min(645px, calc(100vw - 90px));
-  pointer-events: none;
-}
-
-.rain-image {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-/*
-  Monitori ala liigub koos pildiga,
-  kuna mõõdud on protsentides.
-*/
-.rain-monitor {
-  position: absolute;
-  top: 54%;
-  right: 21.5%;
-  bottom: 10.5%;
-  left: 15.5%;
+  right: 0;
+  bottom: 80px;
 
   display: flex;
   flex-direction: column;
 
+  width: min(390px, calc(100vw - 32px));
+  height: min(560px, calc(100vh - 120px));
+
   overflow: hidden;
-  border-radius: 4px;
 
+  border: 1px solid var(--bs-border-color);
+  border-radius: 16px;
+
+  background: var(--bs-body-bg);
   color: var(--bs-body-color);
-  pointer-events: auto;
 }
 
-/*
-  Vastused võivad endiselt scrollida,
-  kuid scrollbar ise ei ole nähtav.
-*/
-.rain-messages {
-  flex: 1;
-  min-height: 0;
+.chatbot-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 
-  overflow-y: auto;
-  overflow-x: hidden;
+  min-height: 68px;
+  padding: 12px 16px;
 
-  padding: 4% 5% 2%;
-
-  font-size: clamp(0.72rem, 1.25vw, 0.9rem);
-
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.rain-messages::-webkit-scrollbar {
-  display: none;
-}
-
-.rain-message {
-  width: fit-content;
-  max-width: 94%;
-
-  margin-bottom: 3%;
-  padding: 2.5% 3.5%;
-
-  border-radius: 9px;
-
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-}
-
-.rain-message-user {
-  margin-left: auto;
+  border-bottom: 1px solid var(--bs-border-color);
 
   background: var(--bs-primary);
   color: white;
 }
 
-.rain-message-assistant {
-  background: rgba(245, 240, 210, 0.92);
+.chatbot-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.rain-loading {
-  padding: 0 5% 2%;
+.chatbot-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-  font-size: clamp(0.66rem, 1.1vw, 0.82rem);
+  width: 40px;
+  height: 40px;
+
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.16);
 }
 
-.rain-error {
-  padding: 2% 5%;
-
-  color: var(--bs-danger);
-
-  font-size: clamp(0.64rem, 1vw, 0.8rem);
+.chatbot-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.2;
 }
 
-/*
-  Ainult väike sisestusväli.
-  Eraldi send-nuppu enam ei ole.
-*/
-.rain-input {
-  display: block;
+.chatbot-status {
+  margin-top: 2px;
 
-  padding: 2% 5% 3%;
+  font-size: 0.75rem;
+
+  opacity: 0.82;
+}
+
+.chatbot-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 34px;
+  height: 34px;
+
+  padding: 0;
+
+  border: 0;
+  border-radius: 50%;
 
   background: transparent;
+  color: inherit;
 }
 
-.rain-input input {
-  display: block;
+.chatbot-close:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
 
+.chatbot-messages {
+  flex: 1;
+
+  min-height: 0;
+  padding: 16px;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  background: var(--bs-tertiary-bg);
+
+  scrollbar-width: thin;
+}
+
+.chatbot-message {
+  width: fit-content;
+  max-width: 85%;
+
+  margin-bottom: 10px;
+  padding: 9px 12px;
+
+  border-radius: 14px;
+
+  font-size: 0.88rem;
+  line-height: 1.4;
+
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.chatbot-message-user {
+  margin-left: auto;
+
+  border-bottom-right-radius: 4px;
+
+  background: var(--bs-primary);
+  color: white;
+}
+
+.chatbot-message-assistant {
+  margin-right: auto;
+
+  border: 1px solid var(--bs-border-color);
+  border-bottom-left-radius: 4px;
+
+  background: var(--bs-body-bg);
+}
+
+.chatbot-loading {
+  padding: 4px 2px 12px;
+
+  font-size: 0.8rem;
+
+  color: var(--bs-secondary-color);
+}
+
+.chatbot-error {
+  padding: 8px 16px;
+
+  border-top: 1px solid var(--bs-border-color);
+
+  font-size: 0.8rem;
+
+  color: var(--bs-danger);
+}
+
+.chatbot-input {
+  padding: 12px;
+
+  border-top: 1px solid var(--bs-border-color);
+
+  background: var(--bs-body-bg);
+}
+
+.chatbot-input input {
   width: 100%;
-  height: 30px;
+  height: 40px;
 
-  border: 1px solid rgba(110, 105, 80, 0.28);
+  padding: 0 12px;
 
-  border-radius: 6px;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 10px;
 
-  padding: 0 10px;
-
-  background: rgba(255, 255, 255, 0.88);
-
+  background: var(--bs-body-bg);
   color: var(--bs-body-color);
 
-  font-size: clamp(0.64rem, 1vw, 0.8rem);
+  font-size: 0.88rem;
 
   outline: none;
 }
 
-.rain-input input:focus {
-  border-color: rgba(13, 110, 253, 0.55);
+.chatbot-input input:focus {
+  border-color: var(--bs-primary);
+
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.12);
 }
 
-.rain-input input:disabled {
-  opacity: 0.7;
+.chatbot-input input:disabled {
+  opacity: 0.65;
 }
 
-/*
-  Chatbot avamise/sulgemise nupp jääb alles.
-*/
 .chatbot-button {
-  position: relative;
-
-  z-index: 2;
-
-  width: 64px;
-  height: 64px;
-
-  margin-bottom: 16px;
-
-  border-radius: 50%;
-
   display: flex;
   align-items: center;
   justify-content: center;
+
+  width: 60px;
+  height: 60px;
+
+  padding: 0;
+
+  border-radius: 50%;
 }
 
-/*
-  Väiksel ekraanil ei saa Rain olla 645 px,
-  seega skaleerub viewporti järgi.
-*/
-@media (max-width: 700px) {
+@media (max-width: 576px) {
   .chatbot-widget {
     right: 12px;
-    bottom: 0;
+    bottom: 12px;
   }
 
-  .rain-chatbot {
-    right: 8px;
-    bottom: -10px;
+  .chatbot-panel {
+    right: 0;
+    bottom: 72px;
 
-    width: min(540px, calc(100vw - 40px));
+    width: calc(100vw - 24px);
+    height: min(520px, calc(100vh - 100px));
   }
 
   .chatbot-button {
-    width: 58px;
-    height: 58px;
-    margin-bottom: 12px;
+    width: 56px;
+    height: 56px;
   }
 }
 </style>

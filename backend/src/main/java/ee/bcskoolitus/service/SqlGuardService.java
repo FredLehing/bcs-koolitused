@@ -1,6 +1,7 @@
 package ee.bcskoolitus.service;
 
 import ee.bcskoolitus.infrastructure.exception.ChatbotException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -10,9 +11,15 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class SqlGuardService {
+
+    private static final Pattern READ_QUERY_START = Pattern.compile(
+            "(?i)^(SELECT|WITH)\\b"
+    );
 
     private static final Pattern FORBIDDEN_TOKENS = Pattern.compile(
             "(?i)\\b(INSERT|UPDATE|DELETE|MERGE|DROP|ALTER|CREATE|TRUNCATE|GRANT|REVOKE|COPY|CALL|DO|VACUUM|ANALYZE|REINDEX|COMMENT|SET|RESET|EXECUTE|PREPARE|DEALLOCATE|LISTEN|NOTIFY|UNLISTEN|LOCK|CLUSTER|REFRESH|SECURITY|PG_[A-Z_]+|NEXTVAL|SETVAL|LO_[A-Z_]+|DBLINK|PG_SLEEP|CURRENT_SETTING|SET_CONFIG)\\b"
@@ -30,33 +37,28 @@ public class SqlGuardService {
             "(?i)\\bFOR\\s+(UPDATE|NO\\s+KEY\\s+UPDATE|SHARE|KEY\\s+SHARE)\\b"
     );
 
-    private static final Set<String> EXCLUDED_TABLES = Set.of(
-            "user",
-            "profile",
-            "participant",
-            "course_participant",
-            "participant_certificate",
-            "enquiry",
-            "newsletter",
-            "feedback",
-            "lecturer_photo"
-    );
-
     @Value("${chatbot.database-schema}")
     private String databaseSchema;
 
     @Value("${chatbot.max-rows}")
     private int maxRows;
 
-    public String validateAndLimit(String candidateSql) {
+    public String validateAndLimit(
+            String candidateSql,
+            Set<String> allowedTables
+    ) {
+        Set<String> normalizedAllowedTables =
+                normalizeAllowedTables(allowedTables);
+
+        if (normalizedAllowedTables.isEmpty()) {
+            throw rejected("Lubatud tabelite loend on tühi");
+        }
+
         String normalizedSql = normalize(candidateSql);
         String upperCaseSql = normalizedSql.toUpperCase(Locale.ROOT);
 
-        if (!(upperCaseSql.startsWith("SELECT ")
-                || upperCaseSql.startsWith("SELECT\n")
-                || upperCaseSql.startsWith("WITH ")
-                || upperCaseSql.startsWith("WITH\n"))) {
-            throw rejected("Lubatud on ainult üks SELECT-päring");
+        if (!READ_QUERY_START.matcher(normalizedSql).find()) {
+            throw rejected("Päring ei alga SELECT või WITH võtmesõnaga");
         }
 
         if (normalizedSql.contains(";")
@@ -65,25 +67,36 @@ public class SqlGuardService {
                 || normalizedSql.contains("*/")
                 || upperCaseSql.contains("INFORMATION_SCHEMA")
                 || upperCaseSql.contains("PG_CATALOG")) {
-            throw rejected("SQL sisaldab keelatud süntaksit või süsteemiobjekti");
+
+            throw rejected(
+                    "Päring sisaldab keelatud süntaksit või süsteemiobjekti"
+            );
         }
 
         if (FORBIDDEN_TOKENS.matcher(normalizedSql).find()) {
-            throw rejected("SQL sisaldab keelatud käsku või funktsiooni");
+            throw rejected(
+                    "Päring sisaldab keelatud käsku või funktsiooni"
+            );
         }
 
         if (LOCKING_CLAUSE.matcher(normalizedSql).find()) {
-            throw rejected("Ridu lukustav SELECT ei ole lubatud");
+            throw rejected(
+                    "Päring sisaldab ridu lukustavat SELECT-lauset"
+            );
         }
 
-        validateTableReferences(normalizedSql);
+        validateTableReferences(
+                normalizedSql,
+                normalizedAllowedTables
+        );
 
         return applyRowLimit(normalizedSql);
     }
 
     private String normalize(String candidateSql) {
+
         if (candidateSql == null) {
-            throw rejected("Mudel ei tagastanud SQL-i");
+            throw rejected("Mudel ei tagastanud SQL-päringut");
         }
 
         String normalizedSql = candidateSql.trim();
@@ -106,67 +119,127 @@ public class SqlGuardService {
         }
 
         if (normalizedSql.isBlank()) {
-            throw rejected("Mudel ei tagastanud SQL-i");
+            throw rejected("Mudel tagastas tühja SQL-päringu");
         }
 
         return normalizedSql;
     }
 
-    private void validateTableReferences(String normalizedSql) {
-        Set<String> cteNames = new HashSet<>();
+    private void validateTableReferences(
+            String normalizedSql,
+            Set<String> allowedTables
+    ) {
+        Set<String> cteNames = findCteNames(normalizedSql);
 
-        Matcher cteMatcher = CTE_NAME.matcher(normalizedSql);
+        Matcher tableReferenceMatcher =
+                TABLE_REFERENCE.matcher(normalizedSql);
 
-        while (cteMatcher.find()) {
-            cteNames.add(
-                    cteMatcher.group(1).toLowerCase(Locale.ROOT)
-            );
-        }
+        boolean hasAllowedTableReference = false;
 
-        Matcher tableReferenceMatcher = TABLE_REFERENCE.matcher(normalizedSql);
+        String allowedSchemaPrefix =
+                databaseSchema.toLowerCase(Locale.ROOT) + ".";
 
         while (tableReferenceMatcher.find()) {
-            String tableReference = tableReferenceMatcher
-                    .group(1)
-                    .toLowerCase(Locale.ROOT);
+
+            String tableReference =
+                    tableReferenceMatcher
+                            .group(1)
+                            .toLowerCase(Locale.ROOT);
 
             if (cteNames.contains(tableReference)) {
                 continue;
             }
 
-            String allowedSchemaPrefix =
-                    databaseSchema.toLowerCase(Locale.ROOT) + ".";
-
             if (!tableReference.startsWith(allowedSchemaPrefix)) {
                 throw rejected(
-                        "Tabel peab kuuluma lubatud rakendusskeemi"
+                        "Tabel ei kuulu lubatud rakendusskeemi"
                 );
             }
 
             String tableName = tableReference.substring(
-                    tableReference.indexOf('.') + 1
+                    allowedSchemaPrefix.length()
             );
 
-            if (EXCLUDED_TABLES.contains(tableName)) {
+            if (!allowedTables.contains(tableName)) {
                 throw rejected(
-                        "Isikuandmeid sisaldavate tabelite pärimine ei ole lubatud"
+                        "Tabel ei kuulu chatbotile lubatud andmeulatusse"
                 );
             }
+
+            hasAllowedTableReference = true;
+        }
+
+        if (!hasAllowedTableReference) {
+            throw rejected(
+                    "Päring ei kasuta ühtegi chatbotile lubatud tabelit"
+            );
         }
     }
 
+    private Set<String> findCteNames(String normalizedSql) {
+
+        Set<String> cteNames = new HashSet<>();
+
+        Matcher cteMatcher =
+                CTE_NAME.matcher(normalizedSql);
+
+        while (cteMatcher.find()) {
+            cteNames.add(
+                    cteMatcher
+                            .group(1)
+                            .toLowerCase(Locale.ROOT)
+            );
+        }
+
+        return cteNames;
+    }
+
+    private Set<String> normalizeAllowedTables(
+            Set<String> allowedTables
+    ) {
+        if (allowedTables == null || allowedTables.isEmpty()) {
+            return Set.of();
+        }
+
+        String schemaPrefix =
+                databaseSchema.toLowerCase(Locale.ROOT) + ".";
+
+        return allowedTables.stream()
+                .filter(tableName ->
+                        tableName != null && !tableName.isBlank()
+                )
+                .map(tableName ->
+                        tableName.trim().toLowerCase(Locale.ROOT)
+                )
+                .map(tableName ->
+                        tableName.startsWith(schemaPrefix)
+                                ? tableName.substring(schemaPrefix.length())
+                                : tableName
+                )
+                .filter(tableName ->
+                        !tableName.contains(".")
+                )
+                .collect(Collectors.toUnmodifiableSet());
+    }
+
     private String applyRowLimit(String validatedSql) {
+
+        int safeMaxRows = Math.max(1, maxRows);
+
         return "SELECT * FROM ("
                 + validatedSql
                 + ") AS chatbot_result LIMIT "
-                + maxRows;
+                + safeMaxRows;
     }
 
-    private ChatbotException rejected(String message) {
+    private ChatbotException rejected(String reason) {
+
+        log.warn("Chatboti SQL-päring lükati tagasi: {}", reason);
+
         return new ChatbotException(
-                message,
+                "AI-chatboti teenus ei ole hetkel saadaval",
                 "CHATBOT_QUERY_REJECTED",
-                HttpStatus.BAD_REQUEST
+                HttpStatus.SERVICE_UNAVAILABLE
         );
     }
 }

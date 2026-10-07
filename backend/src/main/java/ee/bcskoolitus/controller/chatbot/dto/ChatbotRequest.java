@@ -1,8 +1,12 @@
 package ee.bcskoolitus.controller.chatbot.dto;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+
+import java.util.List;
 
 public record ChatbotRequest(
 
@@ -11,7 +15,9 @@ public record ChatbotRequest(
         String question,
 
         @NotBlank(message = "Keel on kohustuslik")
-        @Pattern(regexp = "[a-z]{2}", message = "Keel peab olema kahetäheline keelekood")
-        String language
+        @Pattern(regexp = "et|en", message = "Vastuse keel peab olema et või en")
+        String language,
+
+        List<@Valid @NotNull ChatbotHistoryMessage> previousMessages
 ) {
 }

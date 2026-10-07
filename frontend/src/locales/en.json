@@ -1041,7 +1041,7 @@
     "send": "Send question",
     "open": "Open chat",
     "close": "Close chat",
-    "loading": "Rain is finding an answer...",
+    "loading": "BCS Training assistant is finding an answer...",
     "error": "The answer could not be retrieved. Please try again later."
   }
 }

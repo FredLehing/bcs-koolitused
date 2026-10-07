@@ -1041,7 +1041,7 @@
     "send": "Saada küsimus",
     "open": "Ava vestlus",
     "close": "Sulge vestlus",
-    "loading": "Rain otsib vastust...",
+    "loading": "BCS Koolituste assistent otsib vastust...",
     "error": "Vastuse saamine ebaõnnestus. Proovi hiljem uuesti."
   }
 }
