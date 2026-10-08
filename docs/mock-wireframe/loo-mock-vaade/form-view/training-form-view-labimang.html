@@ -173,7 +173,16 @@ input:disabled, select:disabled, textarea:disabled { background: var(--field-off
 textarea { min-height: 88px; resize: vertical; }
 #f-desc { min-height: 150px; }
 .rt { border: 1.5px solid var(--sketch); border-radius: 5px; overflow: hidden; }
-.rt .rtbar { display: flex; gap: 10px; padding: 2px 8px; border-bottom: 1.5px solid var(--sketch); font-size: .8rem; background: var(--field-off); }
+.rt .rtbar { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; padding: 2px 4px; border-bottom: 1.5px solid var(--sketch); font-size: .8rem; background: var(--field-off); }
+.rtbar button { font-family: var(--font-sketch); font-size: .8rem; color: var(--ink); background: none; border: 1px solid transparent; border-radius: 4px; padding: 0 6px; min-width: 24px; cursor: pointer; line-height: 1.6; }
+.rtbar button:hover:not(:disabled) { border-color: var(--line); background: var(--field); }
+.rtbar button[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); }
+.rtbar button:disabled { opacity: .4; cursor: not-allowed; }
+.rtbar .rt-sep { width: 1px; align-self: stretch; margin: 2px 3px; background: var(--line); }
+.rt-view { display: inline-flex; margin-left: auto; border: 1px solid var(--sketch); border-radius: 5px; overflow: hidden; }
+.rt-view button { border: 0; border-radius: 0; padding: 0 8px; }
+.rt-view button + button { border-left: 1px solid var(--sketch); }
+.rt-view button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
 .rt textarea { border: 0; border-radius: 0; }
 .checks { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: .88rem; }
 .checks label, .switch { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
@@ -301,6 +310,21 @@ textarea { min-height: 88px; resize: vertical; }
 .embed .sitenav { display: none; }
 /* hidden-atribuut peab peitma ka elemendid, millel on oma display (nt .menu { display: grid }) */
 [hidden] { display: none !important; }
+/* Päris Gemini AI (ainult mock) */
+.ai-cfg p { margin: 0; }
+.ai-cfg .row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.ai-cfg input, .ai-cfg select { flex: 1 1 160px; width: auto; min-width: 0; }
+.ai-cfg input[type="password"] { font-family: var(--font-mono); font-size: .85rem; color: var(--ink); background: var(--field); border: 1.5px solid var(--sketch); border-radius: 5px; padding: 4px 8px; }
+.ai-cfg .ok { color: var(--ok); }
+.rt-edit { min-height: 150px; padding: 4px 10px 8px; font-size: .9rem; background: var(--field); color: var(--ink); overflow-wrap: anywhere; outline: none; }
+.rt:focus-within { outline: 2px solid var(--accent); outline-offset: 1px; }
+.rt-edit h3 { font-size: 1.05rem; margin: .7em 0 .25em; }
+.rt-edit h4 { font-size: .95rem; margin: .6em 0 .2em; }
+.rt-edit p { margin: .3em 0; }
+.rt-edit ul, .rt-edit ol { margin: .3em 0; padding-left: 1.4em; }
+.rt-edit li p { margin: 0; }
+.rt-edit a { color: var(--accent); }
+.rt-edit:empty::before { content: attr(data-placeholder); color: var(--ink-soft); }
 </style>
 
 <div class="page">
@@ -310,6 +334,7 @@ textarea { min-height: 88px; resize: vertical; }
     <p>Keeled tulevad päringust <code>GET /api/languages</code> (<code>language</code> tabel): <code>et</code> (põhikeel), <code>en</code> ja <code>ru</code>. Tõlkelipud on ainult keeltel, mille <code>requiresTranslation = true</code> (<code>et</code>, <code>en</code>). <code>ru</code> on ainult õppekeel („Koolituse keel“ rippmenüüs), sellesse koolituse sisu ei tõlgita. Näidisandmed: koolitus 1 „Java algkursus“ on andmebaasist (<code>3_import.sql</code>), sellel on et ja en tõlge. Koolitus 9 „Exceli algkursus“ (õppekeel ru, ainult et tõlge, mustand) on samuti andmebaasist ja sobib olekule C. „Power BI edasijõudnutele“ on mockupi lk 7 põhjal uus koolitus, mis saab ID <code>15</code>. DTO-de väljad on <strong>ettepanek</strong> — need kinnitatakse plaanifailis.</p>
     <p><strong>Õppekava (PDF, 2026-10-01):</strong> igal tõlkel võib olla üks PDF-fail (kuni 10 MB). Fail salvestub koos tõlkega, failinime teeb backend pealkirjast ja sõnast „Õppekava“ tõlke keeles (<code>curriculumLabel</code>). Java algkursuse <code>et</code> tõlkel on õppekava olemas, <code>en</code> tõlkel mitte. Proovi: vali fail (või „näidisfail“), muuda pealkirja ja vaata, kuidas failinimi kaasa muutub. Plaan: <code>training-curriculum-plaan.md</code>.</p>
     <p><strong>PDF + AI (TO BE IMPLEMENTED):</strong> olekutes <code>new-training</code> ja <code>new-translation</code> saadetakse valitud PDF backendile. Olekus <code>update</code> kasutatakse uut valitud faili, kui see on olemas; muidu backend loeb salvestatud õppekava. AI tulemus täidab vormi, kuid midagi ei salvestata enne „Lisa“, „Lisa tõlge“ või „Salvesta“ vajutamist.</p>
+    <p><strong>Päris Gemini AI (ainult mock, 2026-10-08):</strong> kui paremal kaardil „Päris Gemini AI“ on API võti sisestatud, saadab nupp „Täida vorm PDF + AI abiga“ päriselt valitud PDF-i otse Gemini API-le ja täidab vormi tegeliku vastusega. Juhis (prompt), JSON skeem, pikkuste kärpimine ja HTML puhastus on skriptis jaotises „Päris Gemini AI“ — need on eeskujuks backendi <code>AiTrainingService</code> teostusele. Päris rakenduses kutsub Geminit ainult backend ja võti on ainult serveris (<code>GEMINI_API_KEY</code>). Ilma võtmeta, „näidisfailiga“ või salvestatud õppekavaga (mockis pole faili sisu) töötab nupp endiselt simulatsioonina. Kirjelduse editoril on lüliti „Vormindatud | HTML“: vormindatud vaade on muudetav nagu päris TipTap editor ja tööriistariba nupud töötavad, HTML-vaates näed ja muudad täpselt seda HTML-i, mis backendile saadetakse. Võtmega teeb ka „Tee AI tõlge“ (en tõlke vormis) päris Gemini tõlke: tõlgitakse <strong>salvestatud</strong> põhikeele (et) tekst, HTML-vormindus säilib. Läbimäng: A → PDF + AI → „Lisa“ → lipp „en“ → „Tee AI tõlge“ → „Lisa tõlge“. Plaan: <code>docs/tasks/backend/ai-training-pdf-teostusplaan.md</code>.</p>
     <p>Detailide ja vormide avamisel säilib lähtevaate URL <code>returnTo</code> parameetris; „← Tagasi“ taastab lähtekoha. <a href="../return-to-navigation-skeemid.md">Tagasitee skeemid ja kaardistus</a>.</p>
     <div class="toolbar">
       <button class="tbtn" id="btn-a" type="button" data-mode="A"><span>A. Alusta uue koolitusega</span><span class="tstate">state: "new-training"</span></button>
@@ -339,6 +364,13 @@ textarea { min-height: 88px; resize: vertical; }
         <div class="store"><span class="sub">GET /api/languages → requiresTranslation = true</span><pre id="store"></pre></div>
         <h3>Praegune olek</h3>
         <dl class="kv" id="statekv"></dl>
+      </div>
+      <div class="card ai-cfg">
+        <h3>Päris Gemini AI (ainult mock)</h3>
+        <p class="hint">Võtmega saadab „Täida vorm PDF + AI abiga“ valitud PDF-i otse Gemini API-le. Võti salvestub ainult selle brauseri localStorage'isse — ära pane seda faili ega gitti. Ilma võtmeta töötab nupp simulatsioonina.</p>
+        <div class="fld"><label class="lbl" for="ai-key">Gemini API võti</label><span class="row"><input type="password" id="ai-key" autocomplete="off" spellcheck="false"><button type="button" class="tbtn" id="ai-key-save">Salvesta</button><button type="button" class="tbtn" id="ai-key-clear">Eemalda</button></span></div>
+        <div class="fld"><label class="lbl" for="ai-model">Mudel</label><span class="row"><select id="ai-model"></select><button type="button" class="tbtn" id="ai-models-load">Laadi mudelid</button></span></div>
+        <span class="hint" id="ai-cfg-status" role="status"></span>
       </div>
       <div class="card">
         <h3 id="log-title">Võimalikud päringud</h3>
@@ -609,6 +641,7 @@ textarea { min-height: 88px; resize: vertical; }
     var srcTr = main ? db.translations[main.trainingTranslationId] : null;
     var targetId = langByCode(st.langCode).languageId;
     var known = srcTr && AI_RESULTS[srcTr.title] && AI_RESULTS[srcTr.title][st.langCode];
+    if (aiKey() && srcTr) { runRealAiTranslation(srcTr, targetId); return; }
     var res = known || { title: "[AI " + st.langCode + "] " + srcTr.title, shortDescription: "[AI " + st.langCode + "] " + srcTr.shortDescription, description: "[AI " + st.langCode + "] " + srcTr.description };
     st.aiLoading = true; renderForm();
     setTimeout(function () {
@@ -616,8 +649,35 @@ textarea { min-height: 88px; resize: vertical; }
       st.aiLoading = false;
       st.form.title = res.title; st.form.shortDescription = res.shortDescription; st.form.description = res.description; st.error = null;
       renderForm(); renderLog();
-      toast("AI tõlge vormis — kontrolli ja salvesta");
+      toast("Simulatsioon (API võti puudub) — AI tõlge vormis, kontrolli ja salvesta");
     }, 1200);
+  }
+  var aiTranslationSeq = 0;
+  function runRealAiTranslation(srcTr, targetId) {
+    var seq = ++aiTranslationSeq, startedIn = st, t0 = Date.now();
+    var path = "/api/ai-training/translation/" + st.trainingId + "?languageId=" + targetId;
+    function isCurrent() { return seq === aiTranslationSeq && st === startedIn; }
+    st.aiLoading = true; st.error = null;
+    renderForm();
+    translateTrainingContent(srcTr, lang(srcTr.languageId).languageCode, lang(targetId).languageCode).then(function (result) {
+      if (!isCurrent()) return;
+      call("POST", path, null, result.dto);
+      st.aiLoading = false;
+      st.form.title = result.dto.title;
+      st.form.shortDescription = result.dto.shortDescription;
+      st.form.description = result.dto.description;
+      st.error = null;
+      renderForm(); renderLog();
+      console.info("[AI tõlge] mudel=" + result.model + ", prompt v" + PROMPT_VERSION + ", " + (Date.now() - t0) + " ms, tokenid:", result.usage);
+      toast("Gemini tõlge on vormis (" + Math.round((Date.now() - t0) / 1000) + " s) — kontrolli ja salvesta ise");
+    }, function (e) {
+      if (!isCurrent()) return;
+      if (!(e instanceof AiError)) e = aiUnavailable(e && e.message);
+      call("POST", path, null, { message: e.message, errorCode: e.code, "detail (ainult mock)": e.detail }, e.status);
+      st.aiLoading = false;
+      st.error = e.message + (e.detail ? " — " + e.detail : "");
+      renderForm(); renderLog();
+    });
   }
   function doStatus() {
     var toP = st.status === "U";
@@ -691,7 +751,7 @@ textarea { min-height: 88px; resize: vertical; }
     var isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name);
     if (!isPdf) st.cur.error = "Lubatud on ainult PDF-fail";
     else if (file.size > CURRICULUM_MAX_BYTES) st.cur.error = "Fail on liiga suur, lubatud kuni 10 MB";
-    else { st.cur.error = null; st.cur.pending = { name: file.name, size: file.size }; st.cur.removed = false; }
+    else { st.cur.error = null; st.cur.pending = { name: file.name, size: file.size, file: file instanceof Blob ? file : null }; st.cur.removed = false; }
     renderForm();
   }
   function doAiPdfToTraining() {
@@ -709,6 +769,8 @@ textarea { min-height: 88px; resize: vertical; }
       ? "/api/ai-training/pdf"
       : "/api/ai-training/pdf/" + st.trainingTranslationId;
     var body = pending ? { curriculum: "PDF (" + pending.name + ", " + fmtSize(pending.size) + ")" } : null;
+    if (aiKey() && pending && pending.file) { runRealAiPdf(path, body, pending.file); return; }
+    var simReason = !aiKey() ? "API võti puudub" : pending ? "näidisfailil pole sisu" : "salvestatud õppekava sisu mockis pole, vali uus PDF";
     var result = {
       title: "PDF-ist genereeritud pealkiri (TO BE IMPLEMENTED)",
       shortDescription: "PDF-ist genereeritud lühikirjeldus (TO BE IMPLEMENTED)",
@@ -725,9 +787,300 @@ textarea { min-height: 88px; resize: vertical; }
       st.form.description = result.description;
       st.error = null;
       renderAll(false);
-      toast("PDF + AI tulemus on vormis — kontrolli ja salvesta ise");
+      toast("Simulatsioon (" + simReason + ") — kontrolli ja salvesta ise");
     }, 900);
   }
+  var aiPdfSeq = 0;
+  function runRealAiPdf(path, body, file) {
+    var seq = ++aiPdfSeq, startedIn = st, t0 = Date.now();
+    // vastus kehtib ainult siis, kui kasutaja pole vahepeal teise olekusse liikunud (vale järjekorras vastuste kaitse)
+    function isCurrent() { return seq === aiPdfSeq && st === startedIn; }
+    startStep("„Täida vorm PDF + AI abiga“ → POST (päris Gemini, andmebaasi ei salvestata)");
+    st.aiPdfLoading = true; st.error = null;
+    renderForm();
+    readFileBytes(file).then(function (bytes) {
+      if (bytes.length > CURRICULUM_MAX_BYTES) throw new AiError(413, "CURRICULUM_TOO_LARGE", "Fail on liiga suur, lubatud kuni 10 MB");
+      if (!isPdfSignature(bytes)) throw new AiError(400, "CURRICULUM_TYPE_NOT_ALLOWED", "Lubatud on ainult PDF-fail");
+      return createContentFromPdf(bytes);
+    }).then(function (result) {
+      if (!isCurrent()) return;
+      call("POST", path, body, result.dto);
+      st.aiPdfLoading = false;
+      st.form.title = result.dto.title;
+      st.form.shortDescription = result.dto.shortDescription;
+      st.form.description = result.dto.description;
+      st.error = null;
+      renderAll(false);
+      // teostusplaan: logisse mudel ja tokenid, mitte PDF-i sisu
+      console.info("[AI PDF] mudel=" + result.model + ", prompt v" + PROMPT_VERSION + ", " + (Date.now() - t0) + " ms, tokenid:", result.usage);
+      toast("Gemini tulemus on vormis (" + Math.round((Date.now() - t0) / 1000) + " s) — kontrolli ja salvesta ise");
+    }, function (e) {
+      if (!isCurrent()) return;
+      if (!(e instanceof AiError)) e = aiUnavailable(e && e.message);
+      call("POST", path, body, { message: e.message, errorCode: e.code, "detail (ainult mock)": e.detail }, e.status);
+      st.aiPdfLoading = false;
+      st.error = e.message + (e.detail ? " — " + e.detail : "");
+      renderForm(); renderLog();
+    });
+  }
+
+  /* ---------- Päris Gemini AI: PDF → vormi väljad (ainult mock) ---------- */
+  // Eeskuju backendi teostusele (AiTrainingService.createContentFromPdf): sama juhis, JSON skeem,
+  // isCurriculum kontroll, pikkuste kärpimine ja HTML puhastus. Päris rakenduses teeb seda backend ja
+  // API võti on ainult serveris — mock kutsub Geminit otse brauserist ainult demo ja katsetamise jaoks.
+  var AI_KEY_STORAGE = "bcs-mock-gemini-api-key";
+  var AI_MODEL_STORAGE = "bcs-mock-gemini-model";
+  var AI_DEFAULT_MODEL = "gemini-3.1-flash-lite"; // sama mis application.properties; teostusplaan soovitab sellele päringule Flash mudelit
+  var AI_API_BASE = "https://generativelanguage.googleapis.com/v1beta";
+  var AI_TIMEOUT_MS = 60000;
+  var AI_TEMPERATURE = 0.2;
+  var AI_MAX_OUTPUT_TOKENS = 8192;
+  var AI_FIELD_MAX = 255; // training_translation.title ja short_description on varchar(255)
+  var PROMPT_VERSION = 1;
+  // Juhis on inglise keeles (mudelid järgivad seda kõige täpsemalt), väljund tuleb PDF-i keeles
+  var AI_PDF_PROMPT = [
+    "You prepare the admin form of a training company's website (BCS Koolitus) from a training curriculum PDF.",
+    "Read the attached PDF and return JSON with the fields isCurriculum, title, shortDescription and description.",
+    "",
+    "Rules:",
+    "- If the PDF is not a training curriculum or course description (e.g. an invoice, contract, CV or article), return isCurriculum=false and empty strings for the other fields.",
+    "- Write all texts in the same language as the PDF.",
+    "- Use only information found in the PDF. Never invent dates, prices, lecturers, durations, locations or any other details. Leave out sections the PDF has no information for.",
+    "- title: the name of the course, at most 100 characters, no quotation marks.",
+    "- shortDescription: one plain-text sentence about who the course is for and what they will learn, at most 200 characters.",
+    "- description: the full course description as HTML.",
+    "  - Allowed tags only: p, br, strong, em, u, h3, h4, ul, ol, li, a (href only). No other tags or attributes, no Markdown, no code fences.",
+    "  - Put list item text inside p, like the rich text editor does: <li><p>text</p></li>.",
+    "  - Structure: an introductory paragraph, then h3 sections in this order when the PDF has the information: target audience, prerequisites, learning outcomes, modules/topics, duration and format, assessment or certificate.",
+    "  - List the modules with ul or ol; put sub-topics of a module in a nested list. Use h4 for subheadings inside a section.",
+    "  - Write the section headings in the language of the PDF."
+  ].join("\n");
+  var AI_PDF_SCHEMA = {
+    type: "OBJECT",
+    properties: {
+      isCurriculum: { type: "BOOLEAN" },
+      title: { type: "STRING" },
+      shortDescription: { type: "STRING" },
+      description: { type: "STRING" }
+    },
+    required: ["isCurriculum", "title", "shortDescription", "description"],
+    propertyOrdering: ["isCurriculum", "title", "shortDescription", "description"]
+  };
+
+  function storageGet(k) { try { return localStorage.getItem(k) || ""; } catch (e) { return ""; } }
+  function storageSet(k, v) { try { if (v) localStorage.setItem(k, v); else localStorage.removeItem(k); } catch (e) { /* privaatne aken vms */ } }
+  function aiKey() { return storageGet(AI_KEY_STORAGE).trim(); }
+  function aiModel() { return storageGet(AI_MODEL_STORAGE).trim() || AI_DEFAULT_MODEL; }
+
+  // Teostusplaani veaolukorrad: HTTP staatus + veakood (ApiError.errorCode) + kasutajale näidatav tekst
+  function AiError(status, code, message, detail) { this.status = status; this.code = code; this.message = message; this.detail = detail || null; }
+  function aiUnavailable(detail) { return new AiError(503, "AI_SERVICE_UNAVAILABLE", "AI teenus pole praegu saadaval, proovi hiljem uuesti", detail); }
+
+  function readFileBytes(file) {
+    return new Promise(function (resolve, reject) {
+      var r = new FileReader();
+      r.onload = function () { resolve(new Uint8Array(r.result)); };
+      r.onerror = function () { reject(r.error); };
+      r.readAsArrayBuffer(file);
+    });
+  }
+  // sama kontroll mis TrainingTranslationCurriculumService'is: fail algab "%PDF-"
+  function isPdfSignature(bytes) { return bytes.length >= 5 && String.fromCharCode.apply(null, bytes.subarray(0, 5)) === "%PDF-"; }
+  function toBase64(bytes) {
+    var s = "";
+    for (var i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+    return btoa(s);
+  }
+
+  function geminiFetch(path, options) {
+    var ctrl = new AbortController();
+    var timer = setTimeout(function () { ctrl.abort(); }, AI_TIMEOUT_MS);
+    options.signal = ctrl.signal;
+    options.headers = assign({ "x-goog-api-key": aiKey() }, options.headers || {});
+    return fetch(AI_API_BASE + path, options)
+      .then(function (resp) {
+        return resp.json().catch(function () { return null; }).then(function (data) {
+          if (resp.ok) return data;
+          var msg = data && data.error && data.error.message ? data.error.message : "HTTP " + resp.status;
+          throw aiUnavailable("Gemini vastas " + resp.status + ": " + msg);
+        });
+      }, function (e) {
+        throw aiUnavailable(e && e.name === "AbortError" ? "ajapiirang " + AI_TIMEOUT_MS / 1000 + " s ületati" : "võrguviga: " + (e && e.message));
+      })
+      .finally(function () { clearTimeout(timer); });
+  }
+
+  // Üks Gemini päring JSON-vastusega; temperature, maxOutputTokens ja mudel ainult selle päringu jaoks
+  function generateJson(systemPrompt, parts, schema) {
+    var request = {
+      systemInstruction: { parts: [{ text: systemPrompt }] },
+      contents: [{ role: "user", parts: parts }],
+      generationConfig: {
+        temperature: AI_TEMPERATURE,
+        maxOutputTokens: AI_MAX_OUTPUT_TOKENS,
+        responseMimeType: "application/json",
+        responseSchema: schema
+      }
+    };
+    return geminiFetch("/models/" + encodeURIComponent(aiModel()) + ":generateContent", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(request)
+    });
+  }
+
+  // Backendis: ChatClient + Media(application/pdf)
+  function createContentFromPdf(bytes) {
+    return generateJson(AI_PDF_PROMPT, [
+      { inlineData: { mimeType: "application/pdf", data: toBase64(bytes) } },
+      { text: "Create the training form fields from this PDF." }
+    ], AI_PDF_SCHEMA).then(function (resp) {
+      var data = geminiJsonData(resp);
+      if (typeof data.isCurriculum !== "boolean") throw aiUnavailable("JSON-is puudub isCurriculum");
+      if (!data.isCurriculum) throw new AiError(422, "PDF_NOT_CURRICULUM", "PDF ei paista olevat koolituse õppekava");
+      return toAiTrainingContent(resp, data);
+    });
+  }
+
+  // AI tõlge (POST /api/ai-training/translation/{trainingId}?languageId=): sisend on salvestatud põhikeele tõlge, mitte vormi sisu
+  var AI_LANGUAGE_NAMES = { et: "Estonian", en: "English", ru: "Russian" };
+  var AI_TRANSLATION_PROMPT = [
+    "You translate the texts of a training course on a training company's website (BCS Koolitus).",
+    "The user message is JSON with sourceLanguage, targetLanguage, title, shortDescription and description. Return JSON with the translated title, shortDescription and description.",
+    "",
+    "Rules:",
+    "- Translate faithfully into the target language. Do not add, remove or summarize content.",
+    "- Keep product names, technologies and proper names unchanged (e.g. Java, Spring Boot, Power BI, DAX, Excel), as well as numbers, dates and URLs.",
+    "- Use natural, professional language suitable for a course catalogue.",
+    "- description is HTML: keep every tag and its structure exactly as it is and translate only the text between the tags. Do not translate href values.",
+    "- title: at most 100 characters. shortDescription: at most 200 characters.",
+    "- If a field is empty, return it empty."
+  ].join("\n");
+  var AI_TRANSLATION_SCHEMA = {
+    type: "OBJECT",
+    properties: { title: { type: "STRING" }, shortDescription: { type: "STRING" }, description: { type: "STRING" } },
+    required: ["title", "shortDescription", "description"],
+    propertyOrdering: ["title", "shortDescription", "description"]
+  };
+  function translateTrainingContent(src, sourceCode, targetCode) {
+    var input = {
+      sourceLanguage: (AI_LANGUAGE_NAMES[sourceCode] || sourceCode) + " (" + sourceCode + ")",
+      targetLanguage: (AI_LANGUAGE_NAMES[targetCode] || targetCode) + " (" + targetCode + ")",
+      title: src.title || "",
+      shortDescription: src.shortDescription || "",
+      description: src.description || ""
+    };
+    return generateJson(AI_TRANSLATION_PROMPT, [{ text: JSON.stringify(input) }], AI_TRANSLATION_SCHEMA)
+      .then(function (resp) { return toAiTrainingContent(resp, geminiJsonData(resp)); });
+  }
+
+  // Gemini vastuse tekst → JSON objekt
+  function geminiJsonData(resp) {
+    var cand = resp && resp.candidates && resp.candidates[0];
+    if (!cand) {
+      var blocked = resp && resp.promptFeedback && resp.promptFeedback.blockReason;
+      throw aiUnavailable("vastuses pole tulemust" + (blocked ? " (blokeeritud: " + blocked + ")" : ""));
+    }
+    if (cand.finishReason === "MAX_TOKENS") throw aiUnavailable("vastus lõigati katki, maxOutputTokens " + AI_MAX_OUTPUT_TOKENS + " sai täis");
+    var text = ((cand.content && cand.content.parts) || [])
+      .filter(function (p) { return !p.thought && typeof p.text === "string"; })
+      .map(function (p) { return p.text; }).join("");
+    var data;
+    try { data = JSON.parse(text); } catch (e) { throw aiUnavailable("vastus ei ole korrektne JSON"); }
+    if (!data || typeof data !== "object") throw aiUnavailable("vastus ei ole JSON objekt");
+    return data;
+  }
+
+  // JSON → AiTrainingContentDto (sama DTO PDF-i ja tõlke jaoks); isCurriculum jääb backendi sisemiseks väljaks
+  function toAiTrainingContent(resp, data) {
+    var dto = {
+      title: truncateAtWord(String(data.title || ""), AI_FIELD_MAX),
+      shortDescription: truncateAtWord(String(data.shortDescription || ""), AI_FIELD_MAX),
+      description: sanitizeDescription(String(data.description || ""))
+    };
+    if (!dto.title) throw aiUnavailable("AI vastuses puudub pealkiri");
+    return { dto: dto, model: resp.modelVersion || aiModel(), usage: resp.usageMetadata || null };
+  }
+
+  // Turvavõrk varchar(255) jaoks: lõikab sõna piirilt, et admin ei saaks AI tõttu valideerimisviga
+  function truncateAtWord(s, max) {
+    s = s.replace(/\s+/g, " ").trim();
+    if (s.length <= max) return s;
+    var cut = s.slice(0, max);
+    var space = cut.lastIndexOf(" ");
+    return (space > max / 2 ? cut.slice(0, space) : cut).replace(/[\s,;:.\u2013-]+$/, "");
+  }
+
+  // HtmlSanitizer.sanitizeDescription (jsoup safelist) peegeldus: lubatud ainult editori märgendid,
+  // keelatud märgendi tekst jääb alles, skriptid ja stiilid kaovad koos sisuga
+  var SAFE_TAGS = { P: 1, BR: 1, STRONG: 1, EM: 1, U: 1, H3: 1, H4: 1, UL: 1, OL: 1, LI: 1, A: 1 };
+  var DROP_TAGS = { SCRIPT: 1, STYLE: 1, TEMPLATE: 1, NOSCRIPT: 1, IFRAME: 1, OBJECT: 1, EMBED: 1, SVG: 1, MATH: 1, TITLE: 1 };
+  function sanitizeDescription(html) {
+    var src = new DOMParser().parseFromString(html, "text/html").body;
+    var out = document.createElement("div");
+    (function copy(from, to) {
+      Array.prototype.forEach.call(from.childNodes, function (n) {
+        if (n.nodeType === 3) { to.appendChild(document.createTextNode(n.nodeValue)); return; }
+        if (n.nodeType !== 1) return;
+        var name = n.nodeName.toUpperCase();
+        if (DROP_TAGS[name]) return;
+        if (!SAFE_TAGS[name]) { copy(n, to); return; }
+        var el = document.createElement(name.toLowerCase());
+        if (name === "A") {
+          var href = (n.getAttribute("href") || "").trim();
+          if (/^(https?:|mailto:)/i.test(href)) el.setAttribute("href", href);
+          el.setAttribute("target", "_blank");
+          el.setAttribute("rel", "noopener noreferrer nofollow");
+        }
+        copy(n, el);
+        to.appendChild(el);
+      });
+    })(src, out);
+    return out.innerHTML;
+  }
+
+  /* ---------- Gemini seadistuse kaart ---------- */
+  function setAiCfgStatus(msg, isError) {
+    var el = document.getElementById("ai-cfg-status");
+    el.textContent = msg;
+    el.className = isError ? "err" : "hint";
+  }
+  function renderAiCfg(models) {
+    var key = aiKey(), model = aiModel();
+    var keyInput = document.getElementById("ai-key");
+    keyInput.value = "";
+    keyInput.placeholder = key ? "salvestatud (…" + key.slice(-4) + ")" : "kleebi võti (AIza…)";
+    var names = (models || []).slice();
+    if (names.indexOf(model) === -1) names.unshift(model);
+    document.getElementById("ai-model").innerHTML = names.map(function (n) {
+      return '<option value="' + esc(n) + '"' + (n === model ? " selected" : "") + '>' + esc(n) + '</option>';
+    }).join("");
+    if (!models) setAiCfgStatus(key ? "Režiim: päris Gemini (" + model + ")" : "Režiim: simulatsioon (API võti puudub)");
+  }
+  function loadAiModels() {
+    if (!aiKey()) { setAiCfgStatus("Salvesta enne API võti", true); return; }
+    setAiCfgStatus("Laadin mudeleid…");
+    geminiFetch("/models?pageSize=200", { method: "GET" }).then(function (data) {
+      var names = ((data && data.models) || [])
+        .filter(function (m) { return /gemini/i.test(m.name) && (m.supportedGenerationMethods || []).indexOf("generateContent") !== -1; })
+        .map(function (m) { return m.name.replace(/^models\//, ""); })
+        .sort();
+      renderAiCfg(names);
+      setAiCfgStatus(names.length + " mudelit — vali rippmenüüst (plaan soovitab Flash, mitte Flash-Lite)");
+    }, function (e) { setAiCfgStatus(e.detail || e.message, true); });
+  }
+  document.getElementById("ai-key-save").onclick = function () {
+    var v = document.getElementById("ai-key").value.trim();
+    if (!v) { setAiCfgStatus("Kleebi võti väljale", true); return; }
+    storageSet(AI_KEY_STORAGE, v);
+    if (!aiKey()) { setAiCfgStatus("Brauser ei luba localStorage'it (privaatne aken?)", true); return; }
+    renderAiCfg();
+  };
+  document.getElementById("ai-key-clear").onclick = function () { storageSet(AI_KEY_STORAGE, ""); renderAiCfg(); };
+  document.getElementById("ai-models-load").onclick = loadAiModels;
+  document.getElementById("ai-model").onchange = function (e) {
+    storageSet(AI_MODEL_STORAGE, e.target.value);
+    setAiCfgStatus((aiKey() ? "Režiim: päris Gemini (" : "Mudel valitud: ") + aiModel() + (aiKey() ? ")" : ""));
+  };
+  renderAiCfg();
   function downloadCurriculum() {
     startStep("Klikk õppekava failinimel → allalaadimine");
     var tr = db.translations[st.trainingTranslationId];
@@ -855,13 +1208,140 @@ textarea { min-height: 88px; resize: vertical; }
           aiBtn +
           '<div class="fld"><span class="lbl">Pealkiri' + (st.mode === "B" ? " " + pin("n-get-translation", "GET /api/training-translation/{id}") : "") + '</span><input type="text" id="f-title" value="' + esc(f.title) + '" placeholder="Pealkiri ' + code + ' keeles"></div>' +
           '<div class="fld"><span class="lbl">Lühikirjeldus</span><input type="text" id="f-short" value="' + esc(f.shortDescription) + '"></div>' +
-          '<div class="fld"><span class="lbl">Kirjeldus (richtext)</span><div class="rt"><div class="rtbar" aria-hidden="true"><b>B</b><i>I</i><span>• loend</span><span>link</span></div><textarea id="f-desc">' + esc(f.description) + '</textarea></div></div>' +
+          richTextField(f.description) +
           curriculumField() +
           (st.error ? '<span class="err">' + esc(st.error) + '</span>' : "") + fill +
         '</fieldset>' +
       '</div>' +
       '<div class="actions">' + primary + primaryPin + statusBtn + '</div>';
   }
+
+  /* ---------- Kirjelduse editor (RichTextEditor.vue / TipTap jäljendus) ---------- */
+  // Vormindatud vaade on contenteditable; tööriistariba nupud = HtmlSanitizer'i lubatud vormingud.
+  // Vormi väärtus (st.form.description) on alati korrastatud HTML — sama, mis päris editor backendile saadaks.
+  var DESC_VIEW_STORAGE = "bcs-mock-description-view";
+  var descView = storageGet(DESC_VIEW_STORAGE) === "html" ? "html" : "rich";
+  var RT_BUTTONS = [
+    { cmd: "bold", label: "B", title: "Paks (Ctrl+B)", style: "font-weight:700" },
+    { cmd: "italic", label: "I", title: "Kaldkiri (Ctrl+I)", style: "font-style:italic" },
+    { cmd: "underline", label: "U", title: "Allajoonitud (Ctrl+U)", style: "text-decoration:underline" },
+    { sep: true },
+    { cmd: "h3", label: "H3", title: "Pealkiri" },
+    { cmd: "h4", label: "H4", title: "Alampealkiri" },
+    { sep: true },
+    { cmd: "ul", label: "• loend", title: "Täppidega loend" },
+    { cmd: "ol", label: "1. loend", title: "Nummerdatud loend" },
+    { cmd: "link", label: "link", title: "Lisa või eemalda link" }
+  ];
+  function richTextField(html) {
+    var rich = descView === "rich";
+    var bar = RT_BUTTONS.map(function (b) {
+      if (b.sep) return '<span class="rt-sep" aria-hidden="true"></span>';
+      return '<button type="button" data-rt="' + b.cmd + '" title="' + esc(b.title) + '" aria-label="' + esc(b.title) + '"' + (b.cmd === "link" ? "" : ' aria-pressed="false"') + (b.style ? ' style="' + b.style + '"' : "") + (rich ? "" : " disabled") + '>' + esc(b.label) + '</button>';
+    }).join("") +
+      '<span class="rt-view" role="group" aria-label="Editori vaade"><button type="button" data-desc-view="rich" aria-pressed="' + rich + '">Vormindatud</button><button type="button" data-desc-view="html" aria-pressed="' + !rich + '">HTML</button></span>';
+    var body = rich
+      ? '<div id="f-desc-rt" class="rt-edit" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Kirjeldus" data-placeholder="Kirjeldus…">' + sanitizeDescription(html) + '</div>'
+      : '<textarea id="f-desc" aria-label="Kirjeldus (HTML)" spellcheck="false">' + esc(html) + '</textarea>';
+    return '<div class="fld"><span class="lbl">Kirjeldus (richtext)</span><div class="rt"><div class="rtbar">' + bar + '</div>' + body + '</div></div>';
+  }
+  function setDescView(view) {
+    if (view === descView) return;
+    descView = view;
+    storageSet(DESC_VIEW_STORAGE, view === "html" ? "html" : "");
+    renderForm();
+    var el = document.getElementById(view === "html" ? "f-desc" : "f-desc-rt"); if (el) el.focus();
+  }
+
+  // Brauseri contenteditable HTML → TipTapi kuju: b→strong, i→em, div→p, h1/h2→h3, h5/h6→h4,
+  // puhastus lubatud märgendite järgi, vabad tekstiread <p> sisse ja loendi punkti tekst <li><p>…</p></li>
+  var RT_RENAME = { B: "strong", I: "em", DIV: "p", H1: "h3", H2: "h3", H5: "h4", H6: "h4" };
+  var RT_BLOCKS = { P: 1, H3: 1, H4: 1, UL: 1, OL: 1 };
+  function normalizeEditorHtml(html) {
+    var doc = new DOMParser().parseFromString(html, "text/html");
+    Object.keys(RT_RENAME).forEach(function (tag) {
+      Array.prototype.forEach.call(doc.body.querySelectorAll(tag), function (el) {
+        var n = doc.createElement(RT_RENAME[tag]);
+        while (el.firstChild) n.appendChild(el.firstChild);
+        el.parentNode.replaceChild(n, el);
+      });
+    });
+    var box = document.createElement("div");
+    box.innerHTML = sanitizeDescription(doc.body.innerHTML);
+    wrapInlineRuns(box, RT_BLOCKS);
+    Array.prototype.forEach.call(box.querySelectorAll("li"), function (li) { wrapInlineRuns(li, { P: 1, UL: 1, OL: 1 }); });
+    // contenteditable jätab lõppu tühje ridu (<p><br></p>) — neid ei salvestata
+    while (box.lastChild && box.lastChild.nodeName === "P" && !box.lastChild.textContent.trim() && !box.lastChild.querySelector(":not(br)")) box.removeChild(box.lastChild);
+    return box.textContent.trim() ? box.innerHTML : "";
+  }
+  // Koondab järjestikused tekstisõlmed ja inline-märgendid <p> sisse; ainult tühikutest koosnev jada visatakse ära
+  function wrapInlineRuns(parent, blocks) {
+    var run = [];
+    function flush(before) {
+      var hasText = run.some(function (n) { return n.nodeType !== 3 || n.nodeValue.trim(); });
+      if (hasText && !(run.length === 1 && run[0].nodeName === "BR")) {
+        var p = document.createElement("p");
+        parent.insertBefore(p, before);
+        run.forEach(function (n) { p.appendChild(n); });
+      } else {
+        run.forEach(function (n) { parent.removeChild(n); });
+      }
+      run = [];
+    }
+    Array.prototype.slice.call(parent.childNodes).forEach(function (n) {
+      if (n.nodeType === 1 && blocks[n.nodeName]) { if (run.length) flush(n); }
+      else run.push(n);
+    });
+    if (run.length) flush(null);
+  }
+
+  function syncRichText() {
+    var el = document.getElementById("f-desc-rt");
+    if (el) st.form.description = normalizeEditorHtml(el.innerHTML);
+  }
+  function currentBlock() {
+    var v = String(document.queryCommandValue("formatBlock") || "").toLowerCase();
+    return v.replace(/[<>]/g, "");
+  }
+  function richTextCommand(cmd) {
+    var el = document.getElementById("f-desc-rt"); if (!el) return;
+    el.focus();
+    try { document.execCommand("styleWithCSS", false, false); document.execCommand("defaultParagraphSeparator", false, "p"); } catch (e) { /* vanem brauser */ }
+    if (cmd === "bold" || cmd === "italic" || cmd === "underline") document.execCommand(cmd);
+    else if (cmd === "h3" || cmd === "h4") document.execCommand("formatBlock", false, currentBlock() === cmd ? "<p>" : "<" + cmd + ">");
+    else if (cmd === "ul") document.execCommand("insertUnorderedList");
+    else if (cmd === "ol") document.execCommand("insertOrderedList");
+    else if (cmd === "link") {
+      var sel = window.getSelection();
+      var a = sel.anchorNode && (sel.anchorNode.nodeType === 1 ? sel.anchorNode : sel.anchorNode.parentNode).closest("a");
+      var url = window.prompt("Lingi aadress (tühjaks jättes link eemaldatakse)", a ? a.getAttribute("href") || "" : "https://");
+      if (url === null) return;
+      url = url.trim();
+      if (!url || url === "https://") { if (a) { var r = document.createRange(); r.selectNodeContents(a); sel.removeAllRanges(); sel.addRange(r); } document.execCommand("unlink"); }
+      else if (!/^(https?:|mailto:)/i.test(url)) { toast("Lubatud on ainult http(s):// või mailto: lingid"); return; }
+      else if (sel.isCollapsed && !a) document.execCommand("insertHTML", false, '<a href="' + esc(url) + '">' + esc(url) + '</a>');
+      else document.execCommand("createLink", false, url);
+    }
+    syncRichText();
+    updateRichTextToolbar();
+  }
+  // Tööriistariba nuppude olek kursori asukoha järgi (nagu TipTapi isActive)
+  function updateRichTextToolbar() {
+    var el = document.getElementById("f-desc-rt"); if (!el) return;
+    var sel = window.getSelection();
+    var inside = sel.rangeCount && el.contains(sel.anchorNode);
+    var block = inside ? currentBlock() : "";
+    Array.prototype.forEach.call(document.querySelectorAll(".rtbar [data-rt]"), function (b) {
+      if (!b.hasAttribute("aria-pressed")) return;
+      var c = b.dataset.rt, on = false;
+      if (inside) {
+        if (c === "h3" || c === "h4") on = block === c;
+        else on = document.queryCommandState({ bold: "bold", italic: "italic", underline: "underline", ul: "insertUnorderedList", ol: "insertOrderedList" }[c]);
+      }
+      b.setAttribute("aria-pressed", String(!!on));
+    });
+  }
+  document.addEventListener("selectionchange", updateRichTextToolbar);
 
   function renderStateKv() {
     var rows = [
@@ -1017,6 +1497,19 @@ textarea { min-height: 88px; resize: vertical; }
     }
     else if (id === "f-short") f.shortDescription = e.target.value;
     else if (id === "f-desc") f.description = e.target.value;
+    else if (id === "f-desc-rt") syncRichText();
+  });
+  // Tööriistariba nupp ei tohi editorilt fookust ega valikut ära võtta
+  formEl.addEventListener("mousedown", function (e) { if (e.target.closest("[data-rt]")) e.preventDefault(); });
+  // Kleepimine: Wordist/veebist tulnud HTML puhastatakse samade reeglite järgi
+  formEl.addEventListener("paste", function (e) {
+    if (e.target.closest && !e.target.closest("#f-desc-rt")) return;
+    var cd = e.clipboardData; if (!cd) return;
+    e.preventDefault();
+    var html = cd.getData("text/html");
+    if (html) document.execCommand("insertHTML", false, normalizeEditorHtml(html));
+    else document.execCommand("insertText", false, cd.getData("text/plain"));
+    syncRichText();
   });
   formEl.addEventListener("change", function (e) {
     var t = e.target, f = st.form;
@@ -1038,6 +1531,8 @@ textarea { min-height: 88px; resize: vertical; }
     var b = e.target.closest("button"); if (!b) return;
     if (b.dataset.note) { goNote(b.dataset.note); return; }
     if (b.dataset.flag) { flagClick(b.dataset.flag); return; }
+    if (b.dataset.rt) { richTextCommand(b.dataset.rt); return; }
+    if (b.dataset.descView) { setDescView(b.dataset.descView); return; }
     if (b.id === "b-create") doCreate();
     else if (b.id === "b-addtr") doAddTranslation();
     else if (b.id === "b-save") doSave();
