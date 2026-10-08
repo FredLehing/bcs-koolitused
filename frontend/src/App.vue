@@ -160,6 +160,8 @@
 
     <RouterView />
 
+    <ChatbotWidget />
+
     <FooterComponent />
   </div>
 </template>
@@ -175,6 +177,7 @@ import FlagIcon from '@/components/common/FlagIcon.vue'
 import NavigationService from '@/services/NavigationService.js'
 import SessionStorageService from '@/services/SessionStorageService.js'
 import { useLanguageStore } from '@/stores/languageStore.js'
+import ChatbotWidget from '@/components/ChatbotWidget.vue'
 
 const route = useRoute()
 const languageStore = useLanguageStore()

@@ -1,6 +1,7 @@
 package ee.bcskoolitus.infrastructure;
 
 import ee.bcskoolitus.infrastructure.error.ApiError;
+import ee.bcskoolitus.infrastructure.exception.ChatbotException;
 import ee.bcskoolitus.infrastructure.exception.ConflictException;
 import ee.bcskoolitus.infrastructure.exception.IncorrectInputException;
 import ee.bcskoolitus.infrastructure.exception.DataNotFoundException;
@@ -18,6 +19,14 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 @ControllerAdvice
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
+
+    @ExceptionHandler
+    public ResponseEntity<ApiError> handleChatbotException(ChatbotException exception) {
+        ApiError apiError = new ApiError();
+        apiError.setMessage(exception.getMessage());
+        apiError.setErrorCode(exception.getErrorCode());
+        return new ResponseEntity<>(apiError, exception.getHttpStatus());
+    }
 
     @ExceptionHandler
     public ResponseEntity<ApiError> handleConflictException(ConflictException exception) {
