@@ -1,6 +1,13 @@
 # BCS Koolitused
+- Mis rakendus see on: BCS Koolituste koolituste ja kursuste haldamise ning nendele registreerumise veebirakenduse prototüüp.
+- Kelle jaoks see on: külastaja, osaleja ja administraator.
+- Valmis Vali-IT! raames grupiprojektina.
 
-Vali-IT grupiprojekti toorik: Spring Boot backend + Vue 3 frontend.
+## Funktsionaalsus 
+- Külastaja: koolituste ja kursuste sirvimine, lektorid, päringu saatmine, registreerumine.
+- Osaleja: oma kursused, tagasiside vorm, tunnistused, parooli muutmine.
+- Administraator: koolituste, kursuste, lektorite, ruumide, kasutajate, päringute, registreerimiste ja tagasiside haldus. Siia sobib ka AI-koolituse funktsioon (aitraining).
+- Mitmekeelsus: kasutajaliides on eesti ja inglise keeles, sisu tõlgitakse andmebaasi keelte põhjal.
 
 ## Struktuur
 
