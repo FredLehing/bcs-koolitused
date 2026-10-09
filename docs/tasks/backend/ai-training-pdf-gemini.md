@@ -63,11 +63,11 @@ Iga samm lõpeb töötava seisuga — võid peatuda ja commit'ida pärast iga sa
 
 ### Samm 2 — prompt ja teenuse skelett (≈ 1 h)
 
-- [ ] Kopeeri mocki `AI_PDF_PROMPT` faili `backend/src/main/resources/prompts/training-pdf-system.st` (inglise keeles, nagu mockis).
-- [ ] (Valikuline) lisa promptile few-shot näide `docs/JSON/training-description-sample.html` põhjal (vt `ai-gemini-promptid-ja-skillid.md`).
-- [ ] Loo `service/AiTrainingService.java` meetodiga `AiTrainingContentDto createContentFromPdf(byte[] pdf)` — esialgu tagastab veel placeholder'i.
-- [ ] Konstant `PROMPT_VERSION = 1`.
-- [ ] Ühenda controller teenusega (`curriculum.getBytes()` → teenus). Controlleris ainult delegeerimine, loogika teenuses.
+- [x] Kopeeri mocki `AI_PDF_PROMPT` faili `backend/src/main/resources/prompts/training-pdf-system.st` (inglise keeles, nagu mockis).
+- [ ] *(Edasi lükatud — tagasi pärast Samm 3 käsitsi katsetamist, kui kirjeldused vajavad parandamist)* (Valikuline) lisa promptile few-shot näide `docs/JSON/training-description-sample.html` põhjal (vt `ai-gemini-promptid-ja-skillid.md`).
+- [x] Loo `service/AiTrainingService.java` meetodiga `AiTrainingContentDto createContentFromPdf(byte[] pdf)` — esialgu tagastab veel placeholder'i.
+- [x] Konstant `PROMPT_VERSION = 1`.
+- [x] Ühenda controller teenusega (`curriculum.getBytes()` → teenus). Controlleris ainult delegeerimine, loogika teenuses.
 
 **Valmis, kui:** `./gradlew test` on roheline (`AiTrainingControllerTest` võib vajada teenuse mocki).
 
