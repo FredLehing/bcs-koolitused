@@ -73,12 +73,18 @@ Iga samm lõpeb töötava seisuga — võid peatuda ja commit'ida pärast iga sa
 
 ### Samm 3 — Gemini kutse, `/pdf` otsast lõpuni (≈ 3–4 h, peamine töö)
 
-- [ ] `ChatClient` (`ChatClient.Builder` süstitakse nagu `ChatbotModelService`-is):
-  - `.system(...)` — prompt failist (`ClassPathResource`, vt `ChatbotModelService.readResource`);
+- [x] `ChatClient` (`ChatClient.Builder` süstitakse nagu `ChatbotModelService`-is):
+  - `.system(...)` — prompt failist: `@Value("classpath:prompts/training-pdf-system.st") Resource trainingPdfSystemPrompt` → `.system(trainingPdfSystemPrompt)` (Spring AI loeb faili ise);
   - `.user(u -> u.text("Create the training form fields from this PDF.").media(<application/pdf>, new ByteArrayResource(pdf)))` — Gemini loeb PDF-i natiivselt, PDFBox-i pole vaja;
-  - **ainult selle päringu** valikud: mudel (Flash), `temperature` 0.2, `maxOutputTokens` 8192, vastus JSON-ina. Klass on Spring AI Google GenAI moodulis (`GoogleGenAiChatOptions` vms — kontrolli `build.gradle` sõltuvuse järgi täpset nime);
-  - `.call().entity(AiPdfResult.class)` — sisemine record `AiPdfResult(Boolean isCurriculum, String title, String shortDescription, String description)`.
+  - **ainult selle päringu** valikud `GoogleGenAiChatOptions`: `temperature` 0.2, `maxOutputTokens` 8192. Mudel tuleb globaalsest seadest (`gemini-3.5-flash-lite`); vastus JSON-ina samuti globaalsest `response-mime-type`-ist;
+  - `.call().entity(AiTrainingPdfResult.class)` — sisemine record `AiTrainingPdfResult(Boolean isCurriculum, String title, String shortDescription, String description)`.
 - [ ] Logi mudeli nimi, `PROMPT_VERSION`, kestus ja tokenid (**mitte** PDF-i sisu).
+  - Otsus: logimine on eraldi advisoris `infrastructure/ai/AiMetricsAdvisor` (`CallAdvisor`), et sama logimist saaks hiljem kasutada ka `/translation` päring. Logib kestuse, sisend-/väljundtokenid ja hinnangulise hinna.
+  - Teadlik risk (demo projekt): tokenite arvu `null` väärtust ei käsitleta — Spring AI annab puuduva info puhul üldjuhul `0`.
+  - [x] Advisor ühendatud päringuga (`.advisors(advisorSpec -> advisorSpec.advisors(aiMetricsAdvisor))`); `./gradlew test` roheline.
+  - [ ] Käsitsi kontroll: backendi restart → PDF päring → konsoolis `[AiMetrics] latencyMs=... in=... out=...` rida.
+  - [ ] `PROMPT_VERSION` advisorile kaasa: service'is `advisorSpec.param("promptVersion", PROMPT_VERSION)`, advisoris `chatClientRequest.context().get("promptVersion")`.
+  - [ ] Mudeli nimi logisse: `chatResponse.getMetadata().getModel()`.
 
 **Valmis, kui:** Swaggerist / vormist päris PDF-iga saad vormi päris pealkirja, lühikirjelduse ja vormindatud kirjelduse, mis näeb TipTap editoris hea välja.
 

@@ -1,6 +1,7 @@
 package ee.bcskoolitus.service;
 
 import ee.bcskoolitus.controller.common.dto.AiTrainingContentDto;
+import ee.bcskoolitus.infrastructure.ai.AiMetricsAdvisor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.google.genai.GoogleGenAiChatOptions;
@@ -16,6 +17,7 @@ public class AiTrainingService {
     private static final int PROMPT_VERSION = 1;
 
     private final ChatClient.Builder chatClientBuilder;
+    private final AiMetricsAdvisor aiMetricsAdvisor;
 
     @Value("classpath:prompts/training-pdf-system.st")
     private Resource trainingPdfSystemPrompt;
@@ -27,6 +29,7 @@ public class AiTrainingService {
                 .system(trainingPdfSystemPrompt)
                 .user(promptUserSpec -> promptUserSpec.text("Create the training form fields from this PDF.")
                         .media(MediaType.APPLICATION_PDF, new ByteArrayResource(pdf)))
+                .advisors(advisorSpec -> advisorSpec.advisors(aiMetricsAdvisor))
                 .options(GoogleGenAiChatOptions.builder()
                         .temperature(0.2)
                         .maxOutputTokens(8192)
