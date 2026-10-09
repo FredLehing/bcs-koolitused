@@ -34,7 +34,7 @@ Enne koodi tuleb paika panna kaks asja, ilma milleta ei saa päris PDF-iga katse
 
 **3. Katseta mockis.** Sisesta mocki oma API võti ja proovi 2–3 päris õppekava PDF-iga ning ühe mitte-õppekava PDF-iga (nt arve). Nii tead, milline hea tulemus välja näeb, enne kui backendis midagi kirjutad.
 
-> **Kontrolli:** Kas keskkonnamuutuja `GEMINI_API_KEY` on IntelliJ käivituskonfiguratsioonis olemas? Chatbot kasutab sama võtit.
+> **Kontrolli:** Kas keskkonnamuutuja `GOOGLE_API_KEY` on IntelliJ käivituskonfiguratsioonis olemas? `application.properties` viitab sellele; chatbot kasutab sama võtit.
 
 ---
 

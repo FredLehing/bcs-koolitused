@@ -2,6 +2,7 @@ package ee.bcskoolitus.controller.aitraining;
 
 import ee.bcskoolitus.controller.common.dto.AiTrainingContentDto;
 import ee.bcskoolitus.infrastructure.error.ApiError;
+import ee.bcskoolitus.service.AiTrainingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -10,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,10 +22,15 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+
 @RestController
 @RequestMapping("/api/ai-training")
 @Tag(name = "AI koolituse tekstid", description = "TO BE IMPLEMENTED: PDF-ist koostatud tekstid ja AI tõlked; tulemusi ei salvestata")
+@RequiredArgsConstructor
 public class AiTrainingController {
+
+    private final AiTrainingService aiTrainingService;
 
     @PostMapping(value = "/pdf", consumes = "multipart/form-data")
     @Operation(summary = "TO BE IMPLEMENTED: loob PDF-ist koolituse väljade ettepaneku",
@@ -42,8 +49,8 @@ public class AiTrainingController {
     })
     public AiTrainingContentDto createTrainingContentFromPdf(
             @Parameter(description = "Salvestamata PDF-fail, millest koolituse väljad luuakse", required = true)
-            @RequestPart("curriculum") MultipartFile curriculum) {
-        return getAiTrainingContentPlaceholder();
+            @RequestPart("curriculum") MultipartFile curriculum) throws IOException {
+        return aiTrainingService.createContentFromPdf(curriculum.getBytes());
     }
 
     @PostMapping(value = "/pdf/{trainingTranslationId}", consumes = "multipart/form-data")

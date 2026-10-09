@@ -54,10 +54,10 @@ Iga samm lõpeb töötava seisuga — võid peatuda ja commit'ida pärast iga sa
 
 ### Samm 1 — ettevalmistus (≈ 30 min)
 
-- [ ] `application.properties`: `spring.servlet.multipart.max-file-size=10MB` ja `spring.servlet.multipart.max-request-size=11MB` (vaikimisi 1 MB → üle 1 MB PDF annaks 413).
-- [ ] Kontrolli, et `GEMINI_API_KEY` on keskkonnas olemas (sama, mida kasutab chatbot).
-- [ ] Vali mudel: **Gemini Flash** (mitte Flash-Lite) — täpne ID Google'i mudelite nimekirjast (mockis nupp „Laadi mudelid“). Globaalne `gemini-3.1-flash-lite` jääb muutmata.
-- [ ] Katseta mockis oma API võtmega 2–3 päris õppekava PDF-i ja ühe mitte-õppekava PDF-iga (nt arve). Kui vaja, häälesta mockis `AI_PDF_PROMPT`-i.
+- [x] `application.properties`: `spring.servlet.multipart.max-file-size=10MB` ja `spring.servlet.multipart.max-request-size=11MB` (vaikimisi 1 MB → üle 1 MB PDF annaks 413).
+- [x] API võti on keskkonnamuutujas `GOOGLE_API_KEY` (IntelliJ käivituskonfiguratsioon; `application.properties` viitab sellele, varem `GEMINI_API_KEY`).
+- [x] Vali mudel: globaalne mudel muudetud → `gemini-3.5-flash-lite` (kehtib ka chatbotile; branch masterisse ei lähe). Kas PDF päring saab eraldi mudeli, otsustatakse Samm 3-s.
+- [x] Katseta mockis oma API võtmega 2–3 päris õppekava PDF-i ja ühe mitte-õppekava PDF-iga (nt arve). *(katsetatud: õppekava PDF täidab vormi, mitte-õppekava PDF → `PDF_NOT_CURRICULUM`)* Kui vaja, häälesta mockis `AI_PDF_PROMPT`-i.
 
 **Valmis, kui:** tead mudeli ID-d ja prompt annab mockis hea tulemuse.
 
