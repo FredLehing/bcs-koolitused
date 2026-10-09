@@ -1,7 +1,7 @@
 # AI: koolituse vormi täitmine õppekava PDF-ist — ülevaade ja teostusplaan
 
 **Seis:** arutelu ja otsused tehtud, teostus alustamata. Dokument on mõeldud lektoriga ülevaatamiseks.
-**Seotud taskid:** [`POST-api-ai-training-pdf.md`](POST-api-ai-training-pdf.md), [`POST-api-ai-training-pdf-trainingTranslationId.md`](POST-api-ai-training-pdf-trainingTranslationId.md), [`training-description-html-sanitize.md`](training-description-html-sanitize.md)
+**Seotud taskid:** [`ai-training-pdf-gemini.md`](ai-training-pdf-gemini.md) (teostuse task), [`POST-api-ai-training-pdf.md`](POST-api-ai-training-pdf.md), [`POST-api-ai-training-pdf-trainingTranslationId.md`](POST-api-ai-training-pdf-trainingTranslationId.md), [`training-description-html-sanitize.md`](training-description-html-sanitize.md)
 
 ## Eesmärk
 
