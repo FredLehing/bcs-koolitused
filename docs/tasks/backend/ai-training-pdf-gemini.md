@@ -78,13 +78,12 @@ Iga samm lõpeb töötava seisuga — võid peatuda ja commit'ida pärast iga sa
   - `.user(u -> u.text("Create the training form fields from this PDF.").media(<application/pdf>, new ByteArrayResource(pdf)))` — Gemini loeb PDF-i natiivselt, PDFBox-i pole vaja;
   - **ainult selle päringu** valikud `GoogleGenAiChatOptions`: `temperature` 0.2, `maxOutputTokens` 8192. Mudel tuleb globaalsest seadest (`gemini-3.5-flash-lite`); vastus JSON-ina samuti globaalsest `response-mime-type`-ist;
   - `.call().entity(AiTrainingPdfResult.class)` — sisemine record `AiTrainingPdfResult(Boolean isCurriculum, String title, String shortDescription, String description)`.
-- [ ] Logi mudeli nimi, `PROMPT_VERSION`, kestus ja tokenid (**mitte** PDF-i sisu).
+- [ ] Logi `PROMPT_VERSION`, kestus ja tokenid (**mitte** PDF-i sisu). Mudeli nime ei logita.
   - Otsus: logimine on eraldi advisoris `infrastructure/ai/AiMetricsAdvisor` (`CallAdvisor`), et sama logimist saaks hiljem kasutada ka `/translation` päring. Logib kestuse, sisend-/väljundtokenid ja hinnangulise hinna.
   - Teadlik risk (demo projekt): tokenite arvu `null` väärtust ei käsitleta — Spring AI annab puuduva info puhul üldjuhul `0`.
   - [x] Advisor ühendatud päringuga (`.advisors(advisorSpec -> advisorSpec.advisors(aiMetricsAdvisor))`); `./gradlew test` roheline.
-  - [ ] Käsitsi kontroll: backendi restart → PDF päring → konsoolis `[AiMetrics] latencyMs=... in=... out=...` rida.
+  - [x] Käsitsi kontroll: backendi restart → PDF päring → konsoolis `[AiMetrics] latencyMs=... in=... out=...` rida.
   - [ ] `PROMPT_VERSION` advisorile kaasa: service'is `advisorSpec.param("promptVersion", PROMPT_VERSION)`, advisoris `chatClientRequest.context().get("promptVersion")`.
-  - [ ] Mudeli nimi logisse: `chatResponse.getMetadata().getModel()`.
 
 **Valmis, kui:** Swaggerist / vormist päris PDF-iga saad vormi päris pealkirja, lühikirjelduse ja vormindatud kirjelduse, mis näeb TipTap editoris hea välja.
 
@@ -92,14 +91,15 @@ Iga samm lõpeb töötava seisuga — võid peatuda ja commit'ida pärast iga sa
 
 Eeskuju: mocki funktsioonid `createContentFromPdf`, `geminiJsonData`, `toAiTrainingContent`, `truncateAtWord`.
 
-- [ ] Enne Geminit: suuruse (≤ 10 MB) ja `%PDF-` signatuuri kontroll — **taaskasuta** `TrainingTranslationCurriculumService` loogikat (`MAX_CURRICULUM_BYTES`, `PDF_SIGNATURE`); vajadusel tõsta kontroll eraldi avalikuks meetodiks, ära kopeeri.
-- [ ] `isCurriculum == null` → 503; `isCurriculum == false` → `PDF_NOT_CURRICULUM`.
-- [ ] `title` ja `shortDescription`: tühikud normaliseerida, kärpida 255 märgini **sõna piirilt** (turvavõrk `varchar(255)` jaoks).
-- [ ] `description` → `HtmlSanitizer.sanitizeDescription(...)`.
-- [ ] Tühi pealkiri pärast töötlust → 503.
-- [ ] Iga Gemini viga (erind, vigane JSON, katkine vastus) → 503 `AI_SERVICE_UNAVAILABLE`. **Kordust pole.**
-- [ ] Ajapiirang ~60 s → 503.
-- [ ] Lisa `Error` enumi `PDF_NOT_CURRICULUM` ja `AI_SERVICE_UNAVAILABLE` eestikeelsete sõnumitega.
+- [x] Enne Geminit: suuruse (≤ 10 MB) ja `%PDF-` signatuuri kontroll — **taaskasuta** `TrainingTranslationCurriculumService` loogikat (`MAX_CURRICULUM_BYTES`, `PDF_SIGNATURE`); vajadusel tõsta kontroll eraldi avalikuks meetodiks, ära kopeeri.
+- [x] `isCurriculum == null` → 503; `isCurriculum == false` → `PDF_NOT_CURRICULUM`.
+- [x] `title` ja `shortDescription`: kärpida 255 märgini (turvavõrk `varchar(255)` jaoks).
+  - Otsus (demo projekt): lihtne lõikamine 255. märgi pealt (`substring`), **mitte** sõna piirilt ega tühikute normaliseerimisega. Prompt piirab pikkuse niigi ~100 / ~200 märgini, kärpimine on ainult turvavõrk.
+- [x] `description` → `HtmlSanitizer.sanitizeDescription(...)`.
+- [ ] ~~Tühi pealkiri pärast töötlust → 503.~~ *(Demo jaoks vahele jäetud: `isCurriculum: true` korral täidab Gemini väljad praktiliselt alati; `null` kirjeldus annaks 500.)*
+- [ ] ~~Iga Gemini viga (erind, vigane JSON, katkine vastus) → 503 `AI_SERVICE_UNAVAILABLE`. **Kordust pole.**~~ *(Demo jaoks vahele jäetud: Gemini erind annab praegu 500.)*
+- [ ] ~~Ajapiirang ~60 s → 503.~~ *(Demo jaoks vahele jäetud — eeldab Gemini erindite püüdmist.)*
+- [x] Lisa `Error` enumi `PDF_NOT_CURRICULUM` ja `AI_SERVICE_UNAVAILABLE` eestikeelsete sõnumitega.
 
 **Valmis, kui:** arve-PDF annab vea ja vorm jääb puutumata; liiga suur või mitte-PDF fail annab vea enne Gemini kutset.
 
@@ -116,7 +116,7 @@ Eeskuju: mocki funktsioonid `createContentFromPdf`, `geminiJsonData`, `toAiTrain
 - [ ] Unit testid mockitud `ChatClient`-iga (**päris AI API-t testides ei kutsuta**):
   - vigane JSON / erind → 503;
   - `isCurriculum: false` → `PDF_NOT_CURRICULUM`;
-  - liiga pikk pealkiri kärbitakse sõna piirilt ≤ 255;
+  - liiga pikk pealkiri kärbitakse ≤ 255 märgini;
   - `<script>` ja keelatud märgendid eemaldatakse kirjeldusest;
   - `/pdf/{id}` ilma failita loeb salvestatud õppekava; selle puudumisel 404.
 - [ ] Swagger: eemalda `TO BE IMPLEMENTED` kahelt PDF teenuselt ja kirjeldusest placeholder-laused; lisa uued veakoodid (422/503, vajadusel 429).

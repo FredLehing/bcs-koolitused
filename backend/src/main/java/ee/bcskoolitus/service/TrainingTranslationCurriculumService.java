@@ -60,6 +60,17 @@ public class TrainingTranslationCurriculumService {
         }
     }
 
+    // Suurus → tüüp (faili algus %PDF-)
+    public static void validateCurriculum(byte[] curriculumBytes) {
+        if (curriculumBytes.length > MAX_CURRICULUM_BYTES) {
+            throw new ForbiddenException(CURRICULUM_TOO_LARGE.getMessage(), CURRICULUM_TOO_LARGE.name());
+        }
+        if (curriculumBytes.length < PDF_SIGNATURE.length
+                || !Arrays.equals(curriculumBytes, 0, PDF_SIGNATURE.length, PDF_SIGNATURE, 0, PDF_SIGNATURE.length)) {
+            throw new ForbiddenException(CURRICULUM_TYPE_NOT_ALLOWED.getMessage(), CURRICULUM_TYPE_NOT_ALLOWED.name());
+        }
+    }
+
     // Lisab või asendab faili; Base64 õigsust kontrollib DTO (@ValidBase64)
     private void saveCurriculum(TrainingTranslation trainingTranslation, String curriculumBase64, String curriculumLabel) {
         byte[] curriculumBytes = createValidCurriculum(curriculumBase64);
@@ -93,16 +104,10 @@ public class TrainingTranslationCurriculumService {
                 trainingTranslation.getTraining().getId());
     }
 
-    // Suurus → tüüp (faili algus %PDF-); fail salvestatakse muutmata kujul
+
     static byte[] createValidCurriculum(String curriculumBase64) {
         byte[] curriculumBytes = Base64.getDecoder().decode(curriculumBase64);
-        if (curriculumBytes.length > MAX_CURRICULUM_BYTES) {
-            throw new ForbiddenException(CURRICULUM_TOO_LARGE.getMessage(), CURRICULUM_TOO_LARGE.name());
-        }
-        if (curriculumBytes.length < PDF_SIGNATURE.length
-                || !Arrays.equals(curriculumBytes, 0, PDF_SIGNATURE.length, PDF_SIGNATURE, 0, PDF_SIGNATURE.length)) {
-            throw new ForbiddenException(CURRICULUM_TYPE_NOT_ALLOWED.getMessage(), CURRICULUM_TYPE_NOT_ALLOWED.name());
-        }
+        validateCurriculum(curriculumBytes);
         return curriculumBytes;
     }
 }

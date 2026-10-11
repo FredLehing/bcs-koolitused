@@ -8,7 +8,7 @@ Rules:
 - title: the name of the course, at most 100 characters, no quotation marks.
 - shortDescription: one plain-text sentence about who the course is for and what they will learn, at most 200 characters.
 - description: the full course description as HTML.
-  - Allowed tags only: p, br, strong, em, u, h3, h4, ul, ol, li, a (href only). No other tags or attributes, no Markdown, no code fences.
+  - Allowed tags only: p, br, strong, em, u, h3, h4, ul, ol, li. No other tags, no attributes, no links, no Markdown, no code fences.
   - Put list item text inside p, like the rich text editor does: <li><p>text</p></li>.
   - Structure: an introductory paragraph, then h3 sections in this order when the PDF has the information: target audience, prerequisites, learning outcomes, modules/topics, duration and format, assessment or certificate.
   - List the modules with ul or ol; put sub-topics of a module in a nested list. Use h4 for subheadings inside a section.

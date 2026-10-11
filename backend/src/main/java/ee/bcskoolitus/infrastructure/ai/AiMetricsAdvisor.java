@@ -21,16 +21,19 @@ public class AiMetricsAdvisor implements CallAdvisor {
     public ChatClientResponse adviseCall(ChatClientRequest chatClientRequest, CallAdvisorChain callAdvisorChain) {
         long start = System.currentTimeMillis();
         ChatClientResponse response = callAdvisorChain.nextCall(chatClientRequest);
+        Object promptVersion = chatClientRequest.context().get("promptVersion");
         ChatResponse chatResponse = response.chatResponse();
         Usage usage = chatResponse.getMetadata().getUsage();
         Integer inputTokens = chatResponse.getMetadata().getUsage().getPromptTokens();
         Integer outputTokens = chatResponse.getMetadata().getUsage().getCompletionTokens();
-        log.info("[AiMetrics] latencyMs={} in={} out={} inputCost={} outputCost={}",
+        log.info("[AiMetrics] latencyMs={} in={} out={} inputCost={} outputCost={} promptVersion={}",
                 System.currentTimeMillis() - start,
                 usage.getPromptTokens(),
                 usage.getCompletionTokens(),
                 INPUT_TOKEN_COST.multiply(new BigDecimal(inputTokens)),
-                OUTPUT_TOKEN_COST.multiply(new BigDecimal(outputTokens)));
+                OUTPUT_TOKEN_COST.multiply(new BigDecimal(outputTokens)),
+                promptVersion
+        );
 
         return response;
     }
