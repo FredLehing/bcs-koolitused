@@ -5,6 +5,7 @@ import ee.bcskoolitus.infrastructure.ai.AiMetricsAdvisor;
 import ee.bcskoolitus.infrastructure.exception.ChatbotException;
 import ee.bcskoolitus.infrastructure.exception.ForbiddenException;
 import ee.bcskoolitus.infrastructure.util.HtmlSanitizer;
+import ee.bcskoolitus.persistance.training.translation.curriculum.TrainingTranslationCurriculum;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.google.genai.GoogleGenAiChatOptions;
@@ -14,6 +15,9 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 import static ee.bcskoolitus.Error.AI_SERVICE_UNAVAILABLE;
 import static ee.bcskoolitus.Error.PDF_NOT_CURRICULUM;
@@ -26,6 +30,7 @@ public class AiTrainingService {
 
     private final ChatClient.Builder chatClientBuilder;
     private final AiMetricsAdvisor aiMetricsAdvisor;
+    private final TrainingTranslationCurriculumService trainingTranslationCurriculumService;
 
     @Value("classpath:prompts/training-pdf-system.st")
     private Resource trainingPdfSystemPrompt;
@@ -57,6 +62,16 @@ public class AiTrainingService {
                 truncate(aiTrainingPdfResult.title()),
                 truncate(aiTrainingPdfResult.shortDescription()),
                 HtmlSanitizer.sanitizeDescription(aiTrainingPdfResult.description()));
+    }
+
+    public AiTrainingContentDto createContentFromTranslationCurriculum(Integer trainingTranslationId, MultipartFile curriculum)
+            throws IOException {
+        if (curriculum != null && !curriculum.isEmpty()) {
+            return createContentFromPdf(curriculum.getBytes());
+        }
+        TrainingTranslationCurriculum trainingTranslationCurriculum = trainingTranslationCurriculumService
+                .getValidTrainingTranslationCurriculumBy(trainingTranslationId);
+        return createContentFromPdf(trainingTranslationCurriculum.getFile());
     }
 
     private static String truncate(String text) {

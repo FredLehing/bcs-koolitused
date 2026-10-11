@@ -73,8 +73,8 @@ public class AiTrainingController {
     public AiTrainingContentDto createTrainingContentFromTranslationCurriculum(
             @Parameter(description = "Avatud tõlke ID", required = true) @PathVariable Integer trainingTranslationId,
             @Parameter(description = "Valikuline uus PDF. Puudumisel kasutatakse andmebaasis salvestatud õppekava")
-            @RequestPart(value = "curriculum", required = false) MultipartFile curriculum) {
-        return getAiTrainingContentPlaceholder();
+            @RequestPart(value = "curriculum", required = false) MultipartFile curriculum) throws IOException {
+        return aiTrainingService.createContentFromTranslationCurriculum(trainingTranslationId, curriculum);
     }
 
     @PostMapping("/translation/{trainingId}")
@@ -114,12 +114,5 @@ public class AiTrainingController {
                 "AI-ga tõlgitud lühikirjeldus (TO BE IMPLEMENTED)",
                 "AI-ga tõlgitud kirjeldus (TO BE IMPLEMENTED)");
         return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(aiTrainingContentDto);
-    }
-
-    private AiTrainingContentDto getAiTrainingContentPlaceholder() {
-        return new AiTrainingContentDto(
-                "PDF-ist genereeritud pealkiri (TO BE IMPLEMENTED)",
-                "PDF-ist genereeritud lühikirjeldus (TO BE IMPLEMENTED)",
-                "PDF-ist genereeritud kirjeldus (TO BE IMPLEMENTED)");
     }
 }

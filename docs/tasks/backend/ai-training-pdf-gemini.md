@@ -105,9 +105,9 @@ Eeskuju: mocki funktsioonid `createContentFromPdf`, `geminiJsonData`, `toAiTrain
 
 ### Samm 5 — `/pdf/{trainingTranslationId}` (≈ 1–2 h)
 
-- [ ] Kui päringus on `curriculum` → kasuta seda.
-- [ ] Muidu loe salvestatud fail: `TrainingTranslationCurriculumService.getValidTrainingTranslationCurriculumBy(id).getFile()` (puudumisel 404).
-- [ ] Mõlemad harud kutsuvad **sama** `createContentFromPdf(byte[])`.
+- [x] Kui päringus on `curriculum` → kasuta seda.
+- [x] Muidu loe salvestatud fail: `TrainingTranslationCurriculumService.getValidTrainingTranslationCurriculumBy(id).getFile()` (puudumisel 404).
+- [x] Mõlemad harud kutsuvad **sama** `createContentFromPdf(byte[])`.
 
 **Valmis, kui:** olekus `update` töötab nupp nii uue valitud failiga kui ilma (salvestatud õppekavaga).
 
