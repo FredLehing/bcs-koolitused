@@ -11,5 +11,6 @@ Rules:
   - Allowed tags only: p, br, strong, em, u, h3, h4, ul, ol, li. No other tags, no attributes, no links, no Markdown, no code fences.
   - Put list item text inside p, like the rich text editor does: <li><p>text</p></li>.
   - Structure: an introductory paragraph, then h3 sections in this order when the PDF has the information: target audience, prerequisites, learning outcomes, modules/topics, duration and format, assessment or certificate.
-  - List the modules with ul or ol; put sub-topics of a module in a nested list. Use h4 for subheadings inside a section.
+  - Use ol when the PDF numbers the items (modules, days, steps) and ul otherwise; put sub-topics of a module in a nested list. Use h4 for subheadings inside a section.
+  - Never write numbers, letters or bullet characters (such as "1.", "a)", "-", "•") at the start of list item text — the list itself shows them.
   - Write the section headings in the language of the PDF.
