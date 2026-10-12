@@ -89,80 +89,82 @@ export default {
 </script>
 
 <template>
-  <div class="container">
-    <div class="row g-4 text-start mb-5" :class="{ 'justify-content-center': userIsAdmin }">
-      <div v-if="!userIsAdmin" class="col-lg-3">
-        <ProfileMenu />
-      </div>
+  <div class="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 sm:py-10">
+    <div
+      :class="
+        userIsAdmin
+          ? 'mx-auto max-w-lg'
+          : 'lg:grid lg:grid-cols-[14rem_1fr] lg:items-start lg:gap-8'
+      "
+    >
+      <ProfileMenu v-if="!userIsAdmin" />
 
-      <div :class="userIsAdmin ? 'col-md-8 col-lg-5' : 'col-lg-9'">
-        <fieldset class="border rounded bg-body p-3">
-          <legend class="float-none w-auto px-2 fs-5">{{ $t('navbar.changePassword') }}</legend>
+      <section class="rounded-2xl border border-line bg-white p-5 sm:p-6">
+        <h1 class="mb-4 text-xl sm:text-2xl">{{ $t('navbar.changePassword') }}</h1>
 
-          <div class="d-flex flex-column gap-3" :class="{ 'col-lg-7': !userIsAdmin }">
-            <div>
-              <label class="form-label" for="current-password">
-                {{ $t('changePassword.currentPassword') }} *
-              </label>
-              <input
-                v-model="passwordForm.currentPassword"
-                id="current-password"
-                class="form-control"
-                type="password"
-                maxlength="255"
-                autocomplete="current-password"
-              />
-            </div>
-            <div>
-              <label class="form-label" for="new-password">
-                {{ $t('changePassword.newPassword') }} *
-              </label>
-              <input
-                v-model="passwordForm.newPassword"
-                id="new-password"
-                class="form-control"
-                type="password"
-                maxlength="255"
-                autocomplete="new-password"
-              />
-              <div class="form-text">
-                {{ $t('signup.passwordHint', { length: passwordMinLength }) }}
-              </div>
-            </div>
-            <div>
-              <label class="form-label" for="new-password-repeat">
-                {{ $t('changePassword.newPasswordRepeat') }} *
-              </label>
-              <input
-                v-model="passwordForm.newPasswordRepeat"
-                id="new-password-repeat"
-                class="form-control"
-                type="password"
-                maxlength="255"
-                autocomplete="new-password"
-                @keyup.enter="updatePassword"
-              />
-            </div>
-          </div>
-
-          <div class="d-flex flex-wrap align-items-center gap-2 mt-3">
-            <button
-              @click="updatePassword"
-              :disabled="isSending"
-              class="btn btn-success"
-              type="button"
-            >
-              {{ $t('changePassword.save') }}
-            </button>
-            <InlineAlerts
-              :success-message="successMessage"
-              :error-message="errorMessage"
-              @event-success-message-closed="successMessage = ''"
-              @event-error-message-closed="errorMessage = ''"
+        <div class="flex max-w-md flex-col gap-4">
+          <div>
+            <label class="form-label" for="current-password">
+              {{ $t('changePassword.currentPassword') }} *
+            </label>
+            <input
+              v-model="passwordForm.currentPassword"
+              id="current-password"
+              class="form-control"
+              type="password"
+              maxlength="255"
+              autocomplete="current-password"
             />
           </div>
-        </fieldset>
-      </div>
+          <div>
+            <label class="form-label" for="new-password">
+              {{ $t('changePassword.newPassword') }} *
+            </label>
+            <input
+              v-model="passwordForm.newPassword"
+              id="new-password"
+              class="form-control"
+              type="password"
+              maxlength="255"
+              autocomplete="new-password"
+            />
+            <div class="form-text">
+              {{ $t('signup.passwordHint', { length: passwordMinLength }) }}
+            </div>
+          </div>
+          <div>
+            <label class="form-label" for="new-password-repeat">
+              {{ $t('changePassword.newPasswordRepeat') }} *
+            </label>
+            <input
+              v-model="passwordForm.newPasswordRepeat"
+              id="new-password-repeat"
+              class="form-control"
+              type="password"
+              maxlength="255"
+              autocomplete="new-password"
+              @keyup.enter="updatePassword"
+            />
+          </div>
+        </div>
+
+        <div class="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+          <button
+            @click="updatePassword"
+            :disabled="isSending"
+            class="btn btn-success w-full sm:w-auto"
+            type="button"
+          >
+            {{ $t('changePassword.save') }}
+          </button>
+          <InlineAlerts
+            :success-message="successMessage"
+            :error-message="errorMessage"
+            @event-success-message-closed="successMessage = ''"
+            @event-error-message-closed="errorMessage = ''"
+          />
+        </div>
+      </section>
     </div>
   </div>
 </template>

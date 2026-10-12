@@ -75,7 +75,7 @@ export default {
 </script>
 
 <template>
-  <div class="d-flex align-items-center gap-3">
+  <div class="flex items-center gap-4">
     <LecturerAvatar
       :lecturer-id="lecturerId"
       :photo-version="shownPhotoVersion"
@@ -83,13 +83,15 @@ export default {
       :size="80"
     />
     <div v-if="!isReadonly">
-      <div class="d-flex flex-wrap gap-2 mb-1">
-        <label class="btn btn-sm btn-outline-primary mb-0">
+      <div class="mb-1 flex flex-wrap gap-2">
+        <label
+          class="btn btn-outline-primary btn-sm focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-brand-600"
+        >
           {{ $t('photoUpload.select') }}
           <input
             @change="handleFileSelected"
             accept="image/png,image/jpeg,image/webp"
-            class="d-none"
+            class="sr-only"
             type="file"
           />
         </label>

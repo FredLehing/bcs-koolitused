@@ -1,5 +1,6 @@
 <script>
 import { mapState } from 'pinia'
+import { PhFunnel, PhMagnifyingGlass } from '@phosphor-icons/vue'
 import { useLanguageStore } from '@/stores/languageStore.js'
 import AdminFeedbackService from '@/api-services/AdminFeedbackService.js'
 import SessionStorageService from '@/services/SessionStorageService.js'
@@ -21,7 +22,14 @@ const emptyFilters = () => ({
 
 export default {
   name: 'AdminFeedbacksView',
-  components: { AdminTabs, PaginationNav, SortableColumnHeader, InlineAlerts },
+  components: {
+    AdminTabs,
+    PaginationNav,
+    SortableColumnHeader,
+    InlineAlerts,
+    PhFunnel,
+    PhMagnifyingGlass,
+  },
   data() {
     return {
       searchText: '',
@@ -76,10 +84,19 @@ export default {
       const data = this.pageData
       const rate = data.courseResponseRate
       return [
-        { label: this.$t('adminFeedbacks.total'), value: data.totalElements },
-        { label: this.$t('adminFeedbacks.needsReview'), value: data.needsReviewCount },
-        { label: this.$t('adminFeedbacks.lowScores'), value: data.lowScoreFeedbackCount },
+        { label: this.$t('adminFeedbacks.total'), value: data.totalElements, tone: 'text-navy' },
         {
+          label: this.$t('adminFeedbacks.needsReview'),
+          value: data.needsReviewCount,
+          tone: 'text-amber-700',
+        },
+        {
+          label: this.$t('adminFeedbacks.lowScores'),
+          value: data.lowScoreFeedbackCount,
+          tone: 'text-red-700',
+        },
+        {
+          tone: 'text-brand-700',
           label: this.$t(rate ? 'adminFeedbacks.responseRate' : 'adminFeedbacks.average'),
           value: rate
             ? `${rate.respondedCount} / ${rate.registeredCount}`
@@ -102,6 +119,15 @@ export default {
     },
   },
   methods: {
+    statusBadgeClass(status) {
+      return { H: 'text-bg-success', U: 'text-bg-warning' }[status] ?? 'text-bg-primary'
+    },
+
+    // Kriteeriumi keskmise riba laius (hinded 1–10)
+    scoreBarWidth(averageScore) {
+      return `${Math.max(0, Math.min(10, averageScore ?? 0)) * 10}%`
+    },
+
     parameters() {
       const parameters = {
         contentLang: this.contentLang,
@@ -314,50 +340,65 @@ export default {
 </script>
 
 <template>
-  <div class="container pb-4">
+  <div class="mx-auto w-full max-w-7xl px-6 py-8">
     <AdminTabs />
-    <h1 class="h3 mb-3">{{ $t('adminFeedbacks.title') }}</h1>
-    <InlineAlerts
-      :success-message="successMessage"
-      :error-message="errorMessage"
-      @event-success-message-closed="successMessage = ''"
-      @event-error-message-closed="errorMessage = ''"
-    />
-    <div v-if="pageData" class="row g-3 my-2">
-      <div v-for="card in summaryCards" :key="card.label" class="col-sm-6 col-lg-3">
-        <div class="card h-100">
-          <div class="card-body">
-            <div class="text-secondary">{{ card.label }}</div>
-            <div class="fs-3 fw-semibold">{{ card.value }}</div>
-            <small v-if="card.extra" class="text-secondary">{{ card.extra }}</small>
-          </div>
+    <div class="mb-6 flex items-end justify-between gap-4">
+      <h1 class="text-3xl font-extrabold tracking-tight">{{ $t('adminFeedbacks.title') }}</h1>
+      <InlineAlerts
+        :success-message="successMessage"
+        :error-message="errorMessage"
+        @event-success-message-closed="successMessage = ''"
+        @event-error-message-closed="errorMessage = ''"
+      />
+    </div>
+
+    <div v-if="pageData" class="mb-6 grid grid-cols-4 gap-4">
+      <div
+        v-for="card in summaryCards"
+        :key="card.label"
+        class="rounded-2xl border border-line bg-white px-5 py-4"
+      >
+        <div class="text-sm font-semibold text-muted">{{ card.label }}</div>
+        <div class="mt-1 flex items-baseline gap-2">
+          <span :class="card.tone" class="font-display text-3xl font-extrabold tabular-nums">
+            {{ card.value }}
+          </span>
+          <span v-if="card.extra" class="text-sm text-muted">{{ card.extra }}</span>
         </div>
       </div>
     </div>
-    <form class="d-flex flex-wrap gap-2 my-3" @submit.prevent="applySearch">
-      <input
-        v-model="searchText"
-        :placeholder="$t('adminFeedbacks.searchPlaceholder')"
-        :aria-label="$t('adminFeedbacks.searchPlaceholder')"
-        :disabled="reviewing"
-        type="search"
-        class="form-control search-input"
-      />
+
+    <form class="mb-4 flex items-center gap-2" @submit.prevent="applySearch">
+      <div
+        class="flex min-h-11 max-w-xl flex-1 items-center gap-2 rounded-lg border border-brand-200 bg-white px-3 focus-within:border-brand-600 focus-within:ring-3 focus-within:ring-brand-600/15"
+      >
+        <PhMagnifyingGlass :size="18" class="shrink-0 text-muted" />
+        <input
+          v-model="searchText"
+          :placeholder="$t('adminFeedbacks.searchPlaceholder')"
+          :aria-label="$t('adminFeedbacks.searchPlaceholder')"
+          :disabled="reviewing"
+          type="search"
+          class="min-w-0 flex-1 bg-transparent outline-none"
+        />
+      </div>
       <button class="btn btn-primary" :disabled="reviewing" type="submit">
         {{ $t('adminFeedbacks.search') }}
       </button>
       <button
+        :class="{ 'border-brand-600 bg-brand-50': showFilters }"
         class="btn btn-outline-secondary"
         type="button"
         :aria-expanded="showFilters"
         aria-controls="feedback-filters"
         @click="showFilters = !showFilters"
       >
+        <PhFunnel :size="18" />
         {{ $t(showFilters ? 'adminFeedbacks.hideFilters' : 'adminFeedbacks.showFilters') }}
       </button>
       <button
         v-if="hasFilters"
-        class="btn btn-link"
+        class="btn btn-link btn-sm"
         type="button"
         :disabled="reviewing"
         @click="clearFilters"
@@ -365,16 +406,17 @@ export default {
         {{ $t('adminFeedbacks.clearFilters') }}
       </button>
     </form>
+
     <form
       v-show="showFilters"
       id="feedback-filters"
-      class="card mb-3"
+      class="card mb-4"
       @submit.prevent="applyFilters"
     >
       <fieldset :disabled="reviewing" class="card-body">
         <legend class="visually-hidden">{{ $t('adminFeedbacks.showFilters') }}</legend>
-        <div class="row g-3">
-          <div class="col-lg-6">
+        <div class="grid grid-cols-6 gap-4">
+          <div class="col-span-3">
             <label for="feedback-course" class="form-label">{{
               $t('adminFeedbacks.course')
             }}</label>
@@ -389,37 +431,41 @@ export default {
                 {{ course.trainingTitle }} — {{ dateRange(course) }}
               </option>
             </select>
-            <small v-if="coursesLoading" role="status">{{ $t('adminFeedbacks.loading') }}</small>
-            <div v-if="courseError" class="text-danger" role="alert">
+            <small v-if="coursesLoading" class="form-text block" role="status">
+              {{ $t('adminFeedbacks.loading') }}
+            </small>
+            <div v-if="courseError" class="mt-1 text-sm text-red-700" role="alert">
               {{ courseError }}
               <button class="btn btn-link btn-sm" type="button" @click="loadCourses">
                 {{ $t('adminFeedbacks.retry') }}
               </button>
             </div>
           </div>
-          <div class="col-sm-6 col-lg-3">
-            <label for="feedback-status" class="form-label">{{
-              $t('adminFeedbacks.columns.status')
-            }}</label>
-            <select id="feedback-status" v-model="draftFilters.status" class="form-select">
-              <option value="">{{ $t('adminFeedbacks.all') }}</option>
-              <option value="pending">{{ $t('adminFeedbacks.needsReview') }}</option>
-              <option v-for="status in ['N', 'U', 'H']" :key="status" :value="status">
-                {{ statusLabel(status) }}
-              </option>
-            </select>
+          <div class="col-span-3 grid grid-cols-2 gap-4">
+            <div>
+              <label for="feedback-status" class="form-label">
+                {{ $t('adminFeedbacks.columns.status') }}
+              </label>
+              <select id="feedback-status" v-model="draftFilters.status" class="form-select">
+                <option value="">{{ $t('adminFeedbacks.all') }}</option>
+                <option value="pending">{{ $t('adminFeedbacks.needsReview') }}</option>
+                <option v-for="status in ['N', 'U', 'H']" :key="status" :value="status">
+                  {{ statusLabel(status) }}
+                </option>
+              </select>
+            </div>
+            <div>
+              <label for="feedback-comments" class="form-label">
+                {{ $t('adminFeedbacks.columns.commentCount') }}
+              </label>
+              <select id="feedback-comments" v-model="draftFilters.comments" class="form-select">
+                <option value="">{{ $t('adminFeedbacks.all') }}</option>
+                <option value="yes">{{ $t('adminFeedbacks.withComments') }}</option>
+                <option value="no">{{ $t('adminFeedbacks.noComments') }}</option>
+              </select>
+            </div>
           </div>
-          <div class="col-sm-6 col-lg-3">
-            <label for="feedback-comments" class="form-label">{{
-              $t('adminFeedbacks.columns.commentCount')
-            }}</label>
-            <select id="feedback-comments" v-model="draftFilters.comments" class="form-select">
-              <option value="">{{ $t('adminFeedbacks.all') }}</option>
-              <option value="yes">{{ $t('adminFeedbacks.withComments') }}</option>
-              <option value="no">{{ $t('adminFeedbacks.noComments') }}</option>
-            </select>
-          </div>
-          <div class="col-sm-4">
+          <div class="col-span-2">
             <label for="feedback-from" class="form-label">{{ $t('adminFeedbacks.from') }}</label>
             <input
               id="feedback-from"
@@ -430,7 +476,7 @@ export default {
               aria-describedby="feedback-date-error"
             />
           </div>
-          <div class="col-sm-4">
+          <div class="col-span-2">
             <label for="feedback-until" class="form-label">{{ $t('adminFeedbacks.until') }}</label>
             <input
               id="feedback-until"
@@ -441,7 +487,7 @@ export default {
               aria-describedby="feedback-date-error"
             />
           </div>
-          <div class="col-sm-4">
+          <div class="col-span-2">
             <label for="feedback-low" class="form-label">{{ $t('adminFeedbacks.low') }}</label>
             <select id="feedback-low" v-model="draftFilters.low" class="form-select">
               <option value="">{{ $t('adminFeedbacks.all') }}</option>
@@ -449,241 +495,264 @@ export default {
             </select>
           </div>
         </div>
-        <div id="feedback-date-error" class="text-danger" role="alert">{{ validationMessage }}</div>
+        <div id="feedback-date-error" class="mt-2 text-sm text-red-700" role="alert">
+          {{ validationMessage }}
+        </div>
         <button class="btn btn-primary mt-3" type="submit">
           {{ $t('adminFeedbacks.filter') }}
         </button>
       </fieldset>
     </form>
-    <p v-if="loading" class="text-secondary" role="status">{{ $t('adminFeedbacks.loading') }}</p>
+
+    <p v-if="loading" class="py-6 text-muted" role="status">{{ $t('adminFeedbacks.loading') }}</p>
     <button
       v-if="!loading && !pageData"
-      class="btn btn-outline-secondary mb-3"
+      class="btn btn-outline-secondary mb-4"
       type="button"
       @click="loadPage()"
     >
       {{ $t('adminFeedbacks.retry') }}
     </button>
+
     <template v-if="pageData && !loading">
-      <section class="card mb-3" aria-labelledby="criteria-heading">
-        <div class="card-body">
-          <h2 id="criteria-heading" class="h5">{{ $t('adminFeedbacks.criteriaAverages') }}</h2>
-          <div class="row g-3">
-            <div
-              v-for="criterion in pageData.criteriaAverages"
-              :key="criterion.feedbackCriteriaId"
-              class="col-sm-6 col-lg"
-            >
-              <div>{{ criterion.title }}</div>
-              <strong>{{ number(criterion.averageScore) }}</strong>
-              <small class="text-secondary ms-2">{{
-                $t('adminFeedbacks.answerCount', { count: criterion.answerCount })
-              }}</small>
+      <section
+        class="mb-6 rounded-2xl border border-line bg-white p-5"
+        aria-labelledby="criteria-heading"
+      >
+        <h2 id="criteria-heading" class="mb-4 text-lg font-bold">
+          {{ $t('adminFeedbacks.criteriaAverages') }}
+        </h2>
+        <div class="grid grid-cols-3 gap-x-8 gap-y-4">
+          <div v-for="criterion in pageData.criteriaAverages" :key="criterion.feedbackCriteriaId">
+            <div class="mb-1.5 flex items-baseline justify-between gap-2">
+              <span class="truncate text-[15px] font-semibold" :title="criterion.title">
+                {{ criterion.title }}
+              </span>
+              <span class="shrink-0 font-display font-extrabold text-navy tabular-nums">
+                {{ number(criterion.averageScore) }}
+              </span>
+            </div>
+            <div class="h-2 overflow-hidden rounded-full bg-brand-100">
+              <div
+                :style="{ width: scoreBarWidth(criterion.averageScore) }"
+                :class="
+                  criterion.averageScore != null && criterion.averageScore <= 5
+                    ? 'bg-red-500'
+                    : 'bg-brand-600'
+                "
+                class="h-full rounded-full"
+              ></div>
+            </div>
+            <div class="mt-1 text-xs text-muted">
+              {{ $t('adminFeedbacks.answerCount', { count: criterion.answerCount }) }}
             </div>
           </div>
         </div>
       </section>
-      <div class="table-responsive" :aria-busy="reviewing">
-        <table class="table table-hover align-middle">
-          <caption class="visually-hidden">
-            {{
-              $t('adminFeedbacks.title')
-            }}
-          </caption>
-          <thead>
-            <tr>
-              <SortableColumnHeader
-                v-for="column in sortableColumns"
-                :key="column"
-                :label="$t(`adminFeedbacks.columns.${column}`)"
-                :sort-key="column"
-                :sort-by="sortBy"
-                :sort-direction="sortDirection"
-                @event-sort-clicked="sort"
-              />
-              <th>{{ $t('adminFeedbacks.columns.commentCount') }}</th>
-              <SortableColumnHeader
-                :label="$t('adminFeedbacks.columns.status')"
-                sort-key="status"
-                :sort-by="sortBy"
-                :sort-direction="sortDirection"
-                @event-sort-clicked="sort"
-              />
-              <th>{{ $t('adminFeedbacks.columns.actions') }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <template v-for="row in pageData.content" :key="row.feedbackId">
+
+      <div class="overflow-hidden rounded-2xl border border-line bg-white" :aria-busy="reviewing">
+        <div class="overflow-x-auto">
+          <table class="table table-hover">
+            <caption class="visually-hidden">
+              {{
+                $t('adminFeedbacks.title')
+              }}
+            </caption>
+            <thead class="bg-surface">
               <tr>
-                <td class="text-nowrap">{{ dateTime(row.createdAt) }}</td>
-                <td class="text-nowrap">{{ dateTime(row.answersUpdatedAt) }}</td>
-                <td>
-                  <RouterLink
-                    :to="{
-                      name: 'adminCourseRoute',
-                      query: { courseId: row.courseId, returnTo: '/admin-feedbacks' },
-                    }"
-                    >{{ row.trainingTitle }}</RouterLink
-                  ><small class="d-block text-secondary text-nowrap">{{ dateRange(row) }}</small>
-                </td>
-                <td>
-                  <RouterLink
-                    :to="{
-                      name: 'adminRegistrationRoute',
-                      query: {
-                        courseParticipantId: row.courseParticipantId,
-                        returnTo: '/admin-feedbacks',
-                      },
-                    }"
-                    >{{ row.participantName }}</RouterLink
-                  >
-                </td>
-                <td>{{ number(row.averageScore) }}</td>
-                <td
-                  :class="{
-                    'text-danger fw-bold': row.minimumScore != null && row.minimumScore <= 5,
-                  }"
-                >
-                  {{ row.minimumScore ?? '—'
-                  }}<span
-                    v-if="row.minimumScore != null && row.minimumScore <= 5"
-                    class="visually-hidden"
-                  >
-                    — {{ $t('adminFeedbacks.lowScores') }}</span
-                  >
-                </td>
-                <td>{{ row.commentCount }}</td>
-                <td>
-                  <span
-                    class="badge"
-                    :class="
-                      rowStatus(row) === 'H'
-                        ? 'text-bg-success'
-                        : rowStatus(row) === 'U'
-                          ? 'text-bg-warning'
-                          : 'text-bg-primary'
-                    "
-                    :title="
-                      rowStatus(row) === 'U'
-                        ? $t('adminFeedbacks.updatedHint')
-                        : statusLabel(rowStatus(row))
-                    "
-                    >{{ statusLabel(rowStatus(row)) }}</span
-                  >
-                </td>
-                <td>
-                  <div class="d-flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      class="btn btn-sm btn-outline-secondary"
-                      :disabled="reviewing"
-                      :aria-expanded="openFeedbackId === row.feedbackId"
-                      :aria-controls="`feedback-detail-${row.feedbackId}`"
-                      @click="toggleDetail(row.feedbackId)"
+                <SortableColumnHeader
+                  v-for="column in sortableColumns"
+                  :key="column"
+                  :label="$t(`adminFeedbacks.columns.${column}`)"
+                  :sort-key="column"
+                  :sort-by="sortBy"
+                  :sort-direction="sortDirection"
+                  @event-sort-clicked="sort"
+                />
+                <th>{{ $t('adminFeedbacks.columns.commentCount') }}</th>
+                <SortableColumnHeader
+                  :label="$t('adminFeedbacks.columns.status')"
+                  sort-key="status"
+                  :sort-by="sortBy"
+                  :sort-direction="sortDirection"
+                  @event-sort-clicked="sort"
+                />
+                <th class="text-right">{{ $t('adminFeedbacks.columns.actions') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template v-for="row in pageData.content" :key="row.feedbackId">
+                <tr :class="{ 'bg-brand-50/60': openFeedbackId === row.feedbackId }">
+                  <td class="whitespace-nowrap tabular-nums">{{ dateTime(row.createdAt) }}</td>
+                  <td class="whitespace-nowrap text-muted tabular-nums">
+                    {{ dateTime(row.answersUpdatedAt) }}
+                  </td>
+                  <td>
+                    <RouterLink
+                      :to="{
+                        name: 'adminCourseRoute',
+                        query: { courseId: row.courseId, returnTo: '/admin-feedbacks' },
+                      }"
+                      class="font-semibold"
+                      >{{ row.trainingTitle }}</RouterLink
+                    ><small class="block text-sm whitespace-nowrap text-muted">{{
+                      dateRange(row)
+                    }}</small>
+                  </td>
+                  <td>
+                    <RouterLink
+                      :to="{
+                        name: 'adminRegistrationRoute',
+                        query: {
+                          courseParticipantId: row.courseParticipantId,
+                          returnTo: '/admin-feedbacks',
+                        },
+                      }"
+                      >{{ row.participantName }}</RouterLink
                     >
-                      {{
-                        $t(
-                          openFeedbackId === row.feedbackId
-                            ? 'adminFeedbacks.hideAnswers'
-                            : 'adminFeedbacks.openAnswers',
-                        )
-                      }}
-                    </button>
-                    <button
-                      v-if="rowStatus(row) !== 'H'"
-                      type="button"
-                      class="btn btn-sm btn-outline-success"
-                      :disabled="!canReview(row)"
-                      :title="$t('adminFeedbacks.reviewHint')"
-                      @click="review(row)"
+                  </td>
+                  <td class="font-semibold tabular-nums">{{ number(row.averageScore) }}</td>
+                  <td class="tabular-nums">
+                    <span
+                      v-if="row.minimumScore != null && row.minimumScore <= 5"
+                      class="inline-flex min-w-7 justify-center rounded-md bg-red-100 px-1.5 font-bold text-red-800"
+                      >{{ row.minimumScore
+                      }}<span class="visually-hidden">
+                        — {{ $t('adminFeedbacks.lowScores') }}</span
+                      ></span
                     >
-                      {{ $t('adminFeedbacks.review') }}
-                    </button>
-                  </div>
+                    <template v-else>{{ row.minimumScore ?? '—' }}</template>
+                  </td>
+                  <td class="tabular-nums">{{ row.commentCount }}</td>
+                  <td>
+                    <span
+                      class="badge"
+                      :class="statusBadgeClass(rowStatus(row))"
+                      :title="
+                        rowStatus(row) === 'U'
+                          ? $t('adminFeedbacks.updatedHint')
+                          : statusLabel(rowStatus(row))
+                      "
+                      >{{ statusLabel(rowStatus(row)) }}</span
+                    >
+                  </td>
+                  <td>
+                    <div class="flex justify-end gap-2">
+                      <button
+                        type="button"
+                        class="btn btn-outline-secondary btn-sm"
+                        :disabled="reviewing"
+                        :aria-expanded="openFeedbackId === row.feedbackId"
+                        :aria-controls="`feedback-detail-${row.feedbackId}`"
+                        @click="toggleDetail(row.feedbackId)"
+                      >
+                        {{
+                          $t(
+                            openFeedbackId === row.feedbackId
+                              ? 'adminFeedbacks.hideAnswers'
+                              : 'adminFeedbacks.openAnswers',
+                          )
+                        }}
+                      </button>
+                      <button
+                        v-if="rowStatus(row) !== 'H'"
+                        type="button"
+                        class="btn btn-outline-success btn-sm"
+                        :disabled="!canReview(row)"
+                        :title="$t('adminFeedbacks.reviewHint')"
+                        @click="review(row)"
+                      >
+                        {{ $t('adminFeedbacks.review') }}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr v-if="openFeedbackId === row.feedbackId">
+                  <td
+                    :id="`feedback-detail-${row.feedbackId}`"
+                    colspan="9"
+                    class="bg-brand-50/60 px-6 py-5"
+                  >
+                    <p v-if="detailLoading" class="text-muted" role="status">
+                      {{ $t('adminFeedbacks.loading') }}
+                    </p>
+                    <div v-else-if="detailError" class="text-red-700" role="alert">
+                      {{ detailError }}
+                      <button
+                        class="btn btn-link btn-sm"
+                        type="button"
+                        @click="loadDetail(row.feedbackId)"
+                      >
+                        {{ $t('adminFeedbacks.retry') }}
+                      </button>
+                    </div>
+                    <template v-else-if="detail">
+                      <h2 class="mb-3 text-base font-bold">
+                        {{ row.participantName }} — {{ $t('adminFeedbacks.answers') }}
+                      </h2>
+                      <div class="overflow-hidden rounded-xl border border-line bg-white">
+                        <table class="table feedback-answers">
+                          <thead class="bg-surface">
+                            <tr>
+                              <th class="feedback-criterion">
+                                {{ $t('adminFeedbacks.criterion') }}
+                              </th>
+                              <th class="feedback-score">{{ $t('adminFeedbacks.score') }}</th>
+                              <th>{{ $t('adminFeedbacks.comment') }}</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr v-for="answer in detail.criteria" :key="answer.feedbackCriteriaId">
+                              <td class="feedback-criterion font-semibold">{{ answer.title }}</td>
+                              <td
+                                class="feedback-score whitespace-nowrap tabular-nums"
+                                :class="{ 'font-bold text-red-700': answer.score <= 5 }"
+                              >
+                                {{ answer.score }} / 10
+                              </td>
+                              <td class="feedback-comment">
+                                {{ answer.feedbackText?.trim() ? answer.feedbackText : '—' }}
+                              </td>
+                            </tr>
+                            <tr v-if="detail.criteria.length === 0">
+                              <td colspan="3">{{ $t('adminFeedbacks.noAnswers') }}</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </template>
+                  </td>
+                </tr>
+              </template>
+              <tr v-if="pageData.content.length === 0">
+                <td colspan="9" class="py-10 text-center text-muted">
+                  {{ $t('adminFeedbacks.noResults') }}
                 </td>
               </tr>
-              <tr v-if="openFeedbackId === row.feedbackId">
-                <td
-                  :id="`feedback-detail-${row.feedbackId}`"
-                  colspan="9"
-                  class="bg-body-tertiary p-3"
-                >
-                  <p v-if="detailLoading" role="status">{{ $t('adminFeedbacks.loading') }}</p>
-                  <div v-else-if="detailError" class="text-danger" role="alert">
-                    {{ detailError }}
-                    <button
-                      class="btn btn-link btn-sm"
-                      type="button"
-                      @click="loadDetail(row.feedbackId)"
-                    >
-                      {{ $t('adminFeedbacks.retry') }}
-                    </button>
-                  </div>
-                  <template v-else-if="detail"
-                    ><h2 class="h6">
-                      {{ row.participantName }} — {{ $t('adminFeedbacks.answers') }}
-                    </h2>
-                    <table class="table table-sm mb-0 feedback-answers">
-                      <thead>
-                        <tr>
-                          <th class="feedback-criterion">{{ $t('adminFeedbacks.criterion') }}</th>
-                          <th class="feedback-score">{{ $t('adminFeedbacks.score') }}</th>
-                          <th>{{ $t('adminFeedbacks.comment') }}</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr v-for="answer in detail.criteria" :key="answer.feedbackCriteriaId">
-                          <td class="feedback-criterion">{{ answer.title }}</td>
-                          <td
-                            class="text-nowrap feedback-score"
-                            :class="{ 'text-danger fw-bold': answer.score <= 5 }"
-                          >
-                            {{ answer.score }} / 10
-                          </td>
-                          <td class="feedback-comment">
-                            {{ answer.feedbackText?.trim() ? answer.feedbackText : '—' }}
-                          </td>
-                        </tr>
-                        <tr v-if="detail.criteria.length === 0">
-                          <td colspan="3">{{ $t('adminFeedbacks.noAnswers') }}</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </template>
-                </td>
-              </tr>
-            </template>
-            <tr v-if="pageData.content.length === 0">
-              <td colspan="9" class="text-center text-secondary py-4">
-                {{ $t('adminFeedbacks.noResults') }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
+            </tbody>
+          </table>
+        </div>
       </div>
       <PaginationNav
         :page="page"
         :total-pages="pageData.totalPages"
         @event-page-changed="changePage"
+        class="mt-6"
       />
     </template>
   </div>
 </template>
 
 <style scoped>
-.search-input {
-  max-width: 30rem;
-}
 .feedback-answers {
   table-layout: fixed;
-  width: 100%;
 }
 .feedback-criterion {
-  width: 12rem;
+  width: 14rem;
   overflow-wrap: anywhere;
 }
 .feedback-score {
-  width: 5rem;
+  width: 6rem;
 }
 .feedback-comment {
   white-space: pre-wrap;

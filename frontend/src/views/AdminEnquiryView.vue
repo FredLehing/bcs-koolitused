@@ -92,12 +92,12 @@ export default {
 </script>
 
 <template>
-  <div class="container">
+  <div class="mx-auto w-full max-w-7xl px-6 py-8">
     <BackLink :fallback="{ name: 'adminEnquiriesRoute' }" />
-    <div class="row justify-content-center">
-      <div class="col-lg-8">
-        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
-          <h1 class="mb-0">{{ $t('adminEnquiry.title') }}</h1>
+    <div class="flex justify-center">
+      <div class="w-full max-w-4xl">
+        <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+          <h1 class="text-3xl font-extrabold tracking-tight">{{ $t('adminEnquiry.title') }}</h1>
           <button
             @click="navigateToAdminEnquiriesView"
             class="btn btn-outline-secondary"
@@ -107,22 +107,22 @@ export default {
           </button>
         </div>
 
-        <AlertSuccess :success-message="successMessage" />
+        <AlertSuccess :success-message="successMessage" class="mb-4" />
 
         <template v-if="enquiry">
-          <fieldset class="border rounded bg-body p-3 mb-4 text-start">
-            <legend class="float-none w-auto px-2 fs-5">
+          <section class="mb-6 rounded-2xl border border-line bg-white p-5 sm:p-6">
+            <h2 class="mb-4 text-lg font-bold">
               {{ $t('adminEnquiry.enquiryLegend') }}
-            </legend>
-            <dl class="row mb-0">
-              <dt class="col-sm-4">{{ $t('adminEnquiry.createdAt') }}</dt>
-              <dd class="col-sm-8">{{ formatDateTime(enquiry.createdAt) }}</dd>
+            </h2>
+            <dl class="grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-[12rem_1fr]">
+              <dt class="text-muted">{{ $t('adminEnquiry.createdAt') }}</dt>
+              <dd>{{ formatDateTime(enquiry.createdAt) }}</dd>
 
-              <dt class="col-sm-4">{{ $t('adminEnquiry.status') }}</dt>
-              <dd class="col-sm-8"><EnquiryStatusBadge :status="enquiry.status" /></dd>
+              <dt class="text-muted">{{ $t('adminEnquiry.status') }}</dt>
+              <dd><EnquiryStatusBadge :status="enquiry.status" /></dd>
 
-              <dt class="col-sm-4">{{ $t('adminEnquiry.training') }}</dt>
-              <dd class="col-sm-8">
+              <dt class="text-muted">{{ $t('adminEnquiry.training') }}</dt>
+              <dd>
                 <RouterLink
                   :to="{
                     name: 'trainingRoute',
@@ -137,43 +137,43 @@ export default {
                 </RouterLink>
               </dd>
 
-              <dt class="col-sm-4">{{ $t('adminEnquiry.course') }}</dt>
-              <dd class="col-sm-8">
+              <dt class="text-muted">{{ $t('adminEnquiry.course') }}</dt>
+              <dd>
                 <template v-if="enquiry.courseStartDate">
                   {{ formatDateRange(enquiry.courseStartDate, enquiry.courseEndDate) }}
                 </template>
-                <span v-else class="text-secondary">{{ $t('adminEnquiry.noCourse') }}</span>
+                <span v-else class="text-muted">{{ $t('adminEnquiry.noCourse') }}</span>
               </dd>
 
-              <dt class="col-sm-4">{{ $t('adminEnquiry.companyName') }}</dt>
-              <dd class="col-sm-8">{{ enquiry.companyName ?? '—' }}</dd>
+              <dt class="text-muted">{{ $t('adminEnquiry.companyName') }}</dt>
+              <dd>{{ enquiry.companyName ?? '—' }}</dd>
 
-              <dt class="col-sm-4">{{ $t('adminEnquiry.message') }}</dt>
-              <dd class="col-sm-8 mb-0 message">{{ enquiry.message }}</dd>
+              <dt class="text-muted">{{ $t('adminEnquiry.message') }}</dt>
+              <dd class="whitespace-pre-wrap">{{ enquiry.message }}</dd>
             </dl>
-          </fieldset>
+          </section>
 
-          <fieldset class="border rounded bg-body p-3 mb-4 text-start">
-            <legend class="float-none w-auto px-2 fs-5">
+          <section class="mb-6 rounded-2xl border border-line bg-white p-5 sm:p-6">
+            <h2 class="mb-4 text-lg font-bold">
               {{ $t('adminEnquiry.contactLegend') }}
-            </legend>
-            <dl class="row mb-0">
-              <dt class="col-sm-4">{{ $t('adminEnquiry.fullName') }}</dt>
-              <dd class="col-sm-8">{{ enquiry.fullName }}</dd>
+            </h2>
+            <dl class="grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-[12rem_1fr]">
+              <dt class="text-muted">{{ $t('adminEnquiry.fullName') }}</dt>
+              <dd>{{ enquiry.fullName }}</dd>
 
-              <dt class="col-sm-4">{{ $t('adminEnquiry.email') }}</dt>
-              <dd class="col-sm-8">
+              <dt class="text-muted">{{ $t('adminEnquiry.email') }}</dt>
+              <dd>
                 <a :href="`mailto:${enquiry.email}`">{{ enquiry.email }}</a>
               </dd>
 
-              <dt class="col-sm-4">{{ $t('adminEnquiry.phone') }}</dt>
-              <dd class="col-sm-8 mb-0">
+              <dt class="text-muted">{{ $t('adminEnquiry.phone') }}</dt>
+              <dd>
                 <a :href="`tel:${enquiry.phone}`">{{ enquiry.phone }}</a>
               </dd>
             </dl>
-          </fieldset>
+          </section>
 
-          <div class="mb-5">
+          <div class="mb-6">
             <button
               @click="changeStatus"
               :disabled="isSending"
@@ -189,10 +189,3 @@ export default {
     </div>
   </div>
 </template>
-
-<style scoped>
-/* Sõnumi reavahetused säilivad */
-.message {
-  white-space: pre-wrap;
-}
-</style>

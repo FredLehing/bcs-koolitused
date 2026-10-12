@@ -1,6 +1,5 @@
 <script>
-import { Tooltip } from 'bootstrap'
-import { PhQuestion } from '@phosphor-icons/vue'
+import HelpTip from '@/components/common/HelpTip.vue'
 
 const SCORES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 const FEEDBACK_TEXT_MAX_LENGTH = 10000
@@ -9,7 +8,7 @@ const FEEDBACK_TEXT_MAX_LENGTH = 10000
 // Kommentaari kast on vaikimisi peidus; olemasoleva kommentaariga kohe lahti. Peitmine teksti ei kustuta.
 export default {
   name: 'FeedbackCriteriaItem',
-  components: { PhQuestion },
+  components: { HelpTip },
   props: {
     criteria: Object,
     answer: Object,
@@ -20,7 +19,6 @@ export default {
   data() {
     return {
       isCommentOpen: this.answer.feedbackText !== '',
-      descriptionTooltip: null,
     }
   },
   computed: {
@@ -48,55 +46,33 @@ export default {
         this.isCommentOpen = true
       }
     },
-
-    'criteria.description'() {
-      this.$nextTick(() => this.updateDescriptionTooltip())
-    },
   },
   methods: {
     toggleComment() {
       this.isCommentOpen = !this.isCommentOpen
     },
-
-    // Bootstrap tooltip loeb teksti ainult loomisel, keele vahetusel tuleb see uuendada
-    updateDescriptionTooltip() {
-      this.descriptionTooltip.setContent({ '.tooltip-inner': this.criteria.description })
-    },
-  },
-  mounted() {
-    this.descriptionTooltip = new Tooltip(this.$refs.descriptionHelp)
-  },
-  beforeUnmount() {
-    this.descriptionTooltip.dispose()
   },
 }
 </script>
 
 <template>
-  <div class="border rounded p-3" :class="{ 'border-danger': isInvalid }">
-    <div class="d-flex align-items-center gap-2 mb-2">
-      <span :id="`feedback-criteria-${criteria.feedbackCriteriaId}`" class="fw-semibold">
+  <div class="rounded-xl border p-4" :class="isInvalid ? 'border-red-500' : 'border-line'">
+    <div class="mb-3 flex items-center justify-between gap-2">
+      <span
+        :id="`feedback-criteria-${criteria.feedbackCriteriaId}`"
+        class="font-semibold text-navy"
+      >
         {{ criteria.title }}
       </span>
-      <span
-        ref="descriptionHelp"
-        class="text-secondary"
-        role="img"
-        tabindex="0"
-        data-bs-toggle="tooltip"
-        :data-bs-title="criteria.description"
-        :aria-label="criteria.description"
-      >
-        <PhQuestion :size="18" />
-      </span>
+      <HelpTip :text="criteria.description" class="shrink-0" />
     </div>
 
     <div
-      class="d-flex flex-wrap gap-3"
+      class="grid grid-cols-5 gap-2 sm:grid-cols-10"
       role="radiogroup"
       :aria-labelledby="`feedback-criteria-${criteria.feedbackCriteriaId}`"
     >
-      <div v-for="score in scores" :key="score" class="form-check form-check-inline m-0">
+      <div v-for="score in scores" :key="score" class="relative">
         <input
           :id="`feedback-score-${criteria.feedbackCriteriaId}-${score}`"
           :name="`feedback-score-${criteria.feedbackCriteriaId}`"
@@ -104,13 +80,13 @@ export default {
           :checked="answer.score === score"
           :disabled="isReadOnly"
           @change="$emit('event-score-changed', score)"
-          class="form-check-input"
-          :class="{ 'is-invalid': isInvalid }"
+          class="peer sr-only"
           type="radio"
         />
         <label
-          class="form-check-label"
           :for="`feedback-score-${criteria.feedbackCriteriaId}-${score}`"
+          :class="isInvalid ? 'border-red-500' : 'border-brand-200'"
+          class="flex min-h-11 cursor-pointer items-center justify-center rounded-lg border bg-white font-semibold text-ink tabular-nums select-none hover:bg-brand-50 peer-checked:border-brand-600 peer-checked:bg-brand-600 peer-checked:text-white peer-focus-visible:ring-3 peer-focus-visible:ring-brand-600/30 peer-disabled:cursor-default peer-disabled:opacity-70"
         >
           {{ score }}
         </label>
@@ -121,7 +97,7 @@ export default {
       v-if="isCommentToggleVisible"
       @click="toggleComment"
       :aria-expanded="isCommentOpen"
-      class="btn btn-link btn-sm px-0 mt-2"
+      class="btn btn-link btn-sm mt-2 px-0"
       type="button"
     >
       {{
@@ -130,7 +106,7 @@ export default {
     </button>
 
     <div v-if="isCommentVisible" class="mt-2">
-      <label class="visually-hidden" :for="`feedback-text-${criteria.feedbackCriteriaId}`">
+      <label class="sr-only" :for="`feedback-text-${criteria.feedbackCriteriaId}`">
         {{ $t('participantFeedback.commentLabel') }}: {{ criteria.title }}
       </label>
       <textarea
@@ -143,7 +119,7 @@ export default {
         class="form-control"
         rows="3"
       ></textarea>
-      <div class="form-text text-end">
+      <div class="form-text text-right">
         {{ answer.feedbackText.length }} / {{ feedbackTextMaxLength }}
       </div>
     </div>

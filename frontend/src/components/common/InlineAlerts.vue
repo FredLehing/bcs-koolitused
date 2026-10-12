@@ -1,10 +1,13 @@
 <script>
+import { PhX } from '@phosphor-icons/vue'
+
 // Kompaktsed teated vormi nuppude kõrval — ilmuvad animatsiooniga sinna, kus kasutaja just klikkis.
 // Eduteade hääbub ise, veateade jääb, kuni kasutaja selle sulgeb või vaade selle tühjendab.
 const SUCCESS_MESSAGE_TIMEOUT_MS = 4000
 
 export default {
   name: 'InlineAlerts',
+  components: { PhX },
   props: {
     successMessage: String,
     errorMessage: String,
@@ -33,11 +36,11 @@ export default {
 </script>
 
 <template>
-  <div class="d-flex flex-wrap gap-2">
+  <div class="flex flex-wrap gap-2">
     <Transition name="inline-alert">
       <div
         v-if="successMessage !== ''"
-        class="alert alert-success alert-dismissible py-2 mb-0"
+        class="alert alert-success flex items-center gap-3 py-2"
         role="status"
         aria-live="polite"
       >
@@ -45,24 +48,28 @@ export default {
         <button
           @click="$emit('event-success-message-closed')"
           :aria-label="$t('common.close')"
-          class="btn-close py-2"
+          class="cursor-pointer rounded p-1 opacity-70 hover:opacity-100"
           type="button"
-        ></button>
+        >
+          <PhX :size="16" />
+        </button>
       </div>
     </Transition>
     <Transition name="inline-alert">
       <div
         v-if="errorMessage !== ''"
-        class="alert alert-danger alert-dismissible py-2 mb-0"
+        class="alert alert-danger flex items-center gap-3 py-2"
         role="alert"
       >
         {{ errorMessage }}
         <button
           @click="$emit('event-error-message-closed')"
           :aria-label="$t('common.close')"
-          class="btn-close py-2"
+          class="cursor-pointer rounded p-1 opacity-70 hover:opacity-100"
           type="button"
-        ></button>
+        >
+          <PhX :size="16" />
+        </button>
       </div>
     </Transition>
   </div>

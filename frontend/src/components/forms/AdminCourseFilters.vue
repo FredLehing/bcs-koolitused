@@ -33,11 +33,11 @@ export default {
 </script>
 
 <template>
-  <div id="admin-course-filters" class="card mb-3">
+  <div id="admin-course-filters" class="card mb-4">
     <div class="card-body">
-      <h2 class="h5 card-title mb-3">{{ $t('adminAllCourses.filters.title') }}</h2>
-      <div class="row g-3">
-        <div class="col-md-6 col-lg-3">
+      <h2 class="mb-4 text-lg font-bold">{{ $t('adminAllCourses.filters.title') }}</h2>
+      <div class="grid grid-cols-4 gap-4">
+        <div>
           <label class="form-label" for="filter-start-date-from">
             {{ $t('adminAllCourses.filters.startDateFrom') }}
           </label>
@@ -47,7 +47,7 @@ export default {
             @event-new-date-input="$emit('event-filter-changed', 'startDateFrom', $event)"
           />
         </div>
-        <div class="col-md-6 col-lg-3">
+        <div>
           <label class="form-label" for="filter-start-date-to">
             {{ $t('adminAllCourses.filters.startDateTo') }}
           </label>
@@ -57,18 +57,24 @@ export default {
             @event-new-date-input="$emit('event-filter-changed', 'startDateTo', $event)"
           />
         </div>
-        <div class="col-md-6 col-lg-3">
-          <label class="form-label">{{ $t('adminAllCourses.filters.category') }}</label>
+        <div>
+          <label class="form-label" for="filter-category">
+            {{ $t('adminAllCourses.filters.category') }}
+          </label>
           <CategoriesDropdown
+            id="filter-category"
             :category-id="filters.categoryId"
             :categories="categories"
             :first-option-label="$t('adminAllCourses.filters.all')"
             @event-new-category-selected="$emit('event-filter-changed', 'categoryId', $event)"
           />
         </div>
-        <div class="col-md-6 col-lg-3">
-          <label class="form-label">{{ $t('adminAllCourses.filters.trainingLanguage') }}</label>
+        <div>
+          <label class="form-label" for="filter-training-language">
+            {{ $t('adminAllCourses.filters.trainingLanguage') }}
+          </label>
           <LanguagesDropdown
+            id="filter-training-language"
             :language-id="filters.trainingLanguageId"
             :languages="languages"
             :first-option-label="$t('adminAllCourses.filters.all')"
@@ -77,7 +83,7 @@ export default {
             "
           />
         </div>
-        <div class="col-md-4">
+        <div>
           <label for="filter-course-status" class="form-label">
             {{ $t('adminAllCourses.filters.status') }}
           </label>
@@ -93,7 +99,7 @@ export default {
             </option>
           </select>
         </div>
-        <div class="col-md-4">
+        <div>
           <label for="filter-attendance" class="form-label">
             {{ $t('adminAllCourses.filters.attendance') }}
           </label>
@@ -108,7 +114,7 @@ export default {
             <option value="ONLINE">{{ $t('adminAllCourses.filters.online') }}</option>
           </select>
         </div>
-        <div class="col-md-4">
+        <div>
           <label for="filter-course-promoted" class="form-label">
             {{ $t('adminAllCourses.filters.promoted') }}
           </label>
@@ -124,7 +130,7 @@ export default {
           </select>
         </div>
       </div>
-      <div class="d-flex flex-wrap gap-2 mt-3">
+      <div class="mt-5 flex flex-wrap gap-2">
         <button @click="$emit('event-filter-clicked')" class="btn btn-primary" type="button">
           {{ $t('adminAllCourses.filters.filter') }}
         </button>

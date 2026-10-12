@@ -16,14 +16,12 @@
   "dependencies": {
     "@bopen/leaflet-area-selection": "^0.7.0",
     "@phosphor-icons/vue": "^2.2.1",
-    "@popperjs/core": "^2.11.8",
     "@tiptap/pm": "^3.31.3",
     "@tiptap/starter-kit": "^3.31.3",
     "@tiptap/vue-3": "^3.31.3",
     "@vue-leaflet/vue-leaflet": "^0.10.1",
     "@vueuse/motion": "^3.0.3",
     "axios": "1.15.2",
-    "bootstrap": "^5.3.8",
     "dompurify": "^3.4.16",
     "flag-icons": "^7.5.0",
     "leaflet": "^1.9.4",
@@ -35,6 +33,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@tailwindcss/vite": "^4.3.3",
     "@vitejs/plugin-vue": "^6.0.5",
     "eslint": "^10.1.0",
     "eslint-config-prettier": "^10.1.8",
@@ -44,6 +43,7 @@
     "npm-run-all2": "^8.0.4",
     "oxlint": "~1.57.0",
     "prettier": "3.8.1",
+    "tailwindcss": "^4.3.3",
     "vite": "8.0.5",
     "vite-plugin-vue-devtools": "^8.1.1"
   },

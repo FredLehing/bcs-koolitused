@@ -1,4 +1,4 @@
-  <script>
+<script>
 import { PhProhibit } from '@phosphor-icons/vue'
 import NavigationService from '@/services/NavigationService.js'
 
@@ -18,11 +18,13 @@ export default {
 </script>
 
 <template>
-  <div class="container text-center">
-    <PhProhibit class="text-danger mb-3" :size="64" />
-    <h1>{{ $t('notAuthorized.title') }}</h1>
-    <p>{{ $t('notAuthorized.message') }}</p>
-    <div class="d-flex justify-content-center gap-3 mt-3">
+  <div
+    class="mx-auto flex w-full max-w-xl flex-1 flex-col items-center justify-center px-4 py-16 text-center"
+  >
+    <PhProhibit class="mb-4 text-red-600" :size="64" />
+    <h1 class="mb-2 text-3xl font-extrabold tracking-tight">{{ $t('notAuthorized.title') }}</h1>
+    <p class="text-lg text-muted">{{ $t('notAuthorized.message') }}</p>
+    <div class="mt-6 flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
       <button @click="pushToLoginView" type="button" class="btn btn-primary">
         {{ $t('notAuthorized.login') }}
       </button>

@@ -166,26 +166,32 @@ export default {
 </script>
 
 <template>
-  <div class="rich-text-editor">
-    <div v-if="editor" class="btn-toolbar gap-1 p-1 border-bottom">
+  <div
+    :class="isDisabled ? 'bg-slate-100 text-muted' : 'bg-white'"
+    class="overflow-hidden rounded-lg border border-brand-200 focus-within:border-brand-600 focus-within:ring-3 focus-within:ring-brand-600/15"
+  >
+    <div v-if="editor" class="flex flex-wrap gap-1 border-b border-line bg-surface p-1.5">
       <button
         v-for="button in toolbarButtons"
         :key="button.name"
         @click="button.run"
-        :class="isButtonActive(button) ? 'btn-secondary' : 'btn-outline-secondary'"
+        :class="{ 'border-brand-600 bg-brand-50 text-brand-700': isButtonActive(button) }"
         :title="$t('richTextEditor.' + button.name)"
-        class="btn btn-sm"
+        :aria-label="$t('richTextEditor.' + button.name)"
+        :aria-pressed="isButtonActive(button)"
+        class="btn btn-outline-secondary btn-sm btn-icon"
         type="button"
         :disabled="isDisabled"
       >
         <component :is="button.icon" v-if="button.icon" :size="16" weight="bold" />
-        <span v-else class="fw-bold">{{ button.text }}</span>
+        <span v-else class="font-bold">{{ button.text }}</span>
       </button>
       <button
         @click="handleLinkClick"
-        :class="editor.isActive('link') ? 'btn-secondary' : 'btn-outline-secondary'"
+        :class="{ 'border-brand-600 bg-brand-50 text-brand-700': editor.isActive('link') }"
         :title="$t(editor.isActive('link') ? 'richTextEditor.unlink' : 'richTextEditor.link')"
-        class="btn btn-sm"
+        :aria-label="$t(editor.isActive('link') ? 'richTextEditor.unlink' : 'richTextEditor.link')"
+        class="btn btn-outline-secondary btn-sm btn-icon"
         type="button"
         :disabled="isDisabled"
       >
@@ -198,37 +204,55 @@ export default {
 </template>
 
 <style scoped>
-.rich-text-editor {
-  border: var(--bs-border-width) solid var(--bs-border-color);
-  border-radius: var(--bs-border-radius);
-  background-color: var(--bs-body-bg);
-}
-
-.rich-text-editor:focus-within {
-  border-color: #86b7fe;
-  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-}
-
-.rich-text-editor :deep(.rich-text-editor-content) {
+/* Redaktori sisu (.ProseMirror) luuakse TipTapi poolt — seega :deep(). Tailwindi baasstiil eemaldab
+   vahed ja loendimärgid; need on samad mis kuvamisel (RichTextContent.vue), et sisu näeks välja nagu lehel. */
+:deep(.rich-text-editor-content) {
   min-height: 200px;
-  padding: 0.375rem 0.75rem;
+  padding: 0.625rem 0.75rem;
+  line-height: 1.65;
   outline: none;
 }
 
-/* TipTap paneb iga loendi elemendi sisse <p> — Bootstrapi margin teeks loendisse suured vahed */
-.rich-text-editor :deep(li > p) {
+:deep(.rich-text-editor-content p),
+:deep(.rich-text-editor-content ul),
+:deep(.rich-text-editor-content ol) {
+  margin-bottom: 0.875rem;
+}
+
+:deep(.rich-text-editor-content ul) {
+  list-style: disc;
+  padding-left: 1.4rem;
+}
+
+:deep(.rich-text-editor-content ol) {
+  list-style: decimal;
+  padding-left: 1.4rem;
+}
+
+/* TipTap paneb iga loendi elemendi sisse <p> */
+:deep(.rich-text-editor-content li > p) {
   margin-bottom: 0;
 }
 
-/* Kirjelduse alapealkirjad, mitte lehe pealkirjad */
-.rich-text-editor :deep(h3) {
-  font-size: 1.25rem;
-  margin-top: 0.75rem;
+:deep(.rich-text-editor-content a) {
+  color: var(--color-brand-600);
+  text-decoration: underline;
 }
 
-.rich-text-editor :deep(h4) {
+/* Kirjelduse alapealkirjad, mitte lehe pealkirjad */
+:deep(.rich-text-editor-content h3) {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 1.25rem 0 0.5rem;
+}
+
+:deep(.rich-text-editor-content h4) {
   font-size: 1rem;
-  font-weight: bold;
-  margin-top: 0.75rem;
+  font-weight: 700;
+  margin: 1rem 0 0.375rem;
+}
+
+:deep(.rich-text-editor-content > :first-child) {
+  margin-top: 0;
 }
 </style>

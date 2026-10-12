@@ -183,57 +183,59 @@ export default {
 </script>
 
 <template>
-  <div class="container">
+  <div class="mx-auto w-full max-w-7xl px-6 py-8">
     <BackLink :fallback="{ name: 'adminRegistrationsRoute' }" />
-    <div class="row justify-content-center">
-      <div class="col-lg-8">
+    <div class="flex justify-center">
+      <div class="w-full max-w-4xl">
         <template v-if="registration">
-          <h1 class="mb-1">{{ $t('adminRegistration.title') }}</h1>
-          <p class="text-secondary fs-5 mb-3">{{ registration.participantName }}</p>
+          <h1 class="text-3xl font-extrabold tracking-tight">
+            {{ $t('adminRegistration.title') }}
+          </h1>
+          <p class="mb-6 mt-1 text-lg text-muted">{{ registration.participantName }}</p>
 
-          <AlertSuccess :success-message="successMessage" />
+          <AlertSuccess :success-message="successMessage" class="mb-4" />
 
-          <fieldset class="border rounded bg-body p-3 mb-4 text-start">
-            <legend class="float-none w-auto px-2 fs-5">
+          <section class="mb-6 rounded-2xl border border-line bg-white p-5 sm:p-6">
+            <h2 class="mb-4 text-lg font-bold">
               {{ $t('adminRegistration.participantLegend') }}
-            </legend>
-            <dl class="row mb-0">
-              <dt class="col-sm-4">{{ $t('adminRegistration.participantName') }}</dt>
-              <dd class="col-sm-8">{{ registration.participantName }}</dd>
+            </h2>
+            <dl class="grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-[12rem_1fr]">
+              <dt class="text-muted">{{ $t('adminRegistration.participantName') }}</dt>
+              <dd>{{ registration.participantName }}</dd>
 
-              <dt class="col-sm-4">{{ $t('adminRegistration.email') }}</dt>
-              <dd class="col-sm-8">
+              <dt class="text-muted">{{ $t('adminRegistration.email') }}</dt>
+              <dd>
                 <a :href="`mailto:${registration.email}`">{{ registration.email }}</a>
               </dd>
 
-              <dt class="col-sm-4">{{ $t('adminRegistration.phone') }}</dt>
-              <dd class="col-sm-8" :class="{ 'mb-0': !showAccountEmail }">
+              <dt class="text-muted">{{ $t('adminRegistration.phone') }}</dt>
+              <dd>
                 <a :href="`tel:${registration.phone}`">{{ registration.phone }}</a>
               </dd>
 
               <template v-if="showAccountEmail">
-                <dt class="col-sm-4">{{ $t('adminRegistration.accountEmail') }}</dt>
-                <dd class="col-sm-8 mb-0">{{ registration.accountEmail }}</dd>
+                <dt class="text-muted">{{ $t('adminRegistration.accountEmail') }}</dt>
+                <dd>{{ registration.accountEmail }}</dd>
               </template>
             </dl>
-            <p class="form-text mb-0 mt-2">{{ $t('adminRegistration.participantHint') }}</p>
-          </fieldset>
+            <p class="form-text mt-3">{{ $t('adminRegistration.participantHint') }}</p>
+          </section>
 
-          <fieldset class="border rounded bg-body p-3 mb-4 text-start">
-            <legend class="float-none w-auto px-2 fs-5">
+          <section class="mb-6 rounded-2xl border border-line bg-white p-5 sm:p-6">
+            <h2 class="mb-4 text-lg font-bold">
               {{ $t('adminRegistration.courseLegend') }}
-            </legend>
-            <dl class="row">
-              <dt class="col-sm-4">{{ $t('adminRegistration.training') }}</dt>
-              <dd class="col-sm-8">{{ registration.trainingTitle }}</dd>
+            </h2>
+            <dl class="grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-[12rem_1fr]">
+              <dt class="text-muted">{{ $t('adminRegistration.training') }}</dt>
+              <dd>{{ registration.trainingTitle }}</dd>
 
-              <dt class="col-sm-4">{{ $t('adminRegistration.courseDates') }}</dt>
-              <dd class="col-sm-8">
+              <dt class="text-muted">{{ $t('adminRegistration.courseDates') }}</dt>
+              <dd>
                 {{ formatDateRange(registration.courseStartDate, registration.courseEndDate) }}
               </dd>
 
-              <dt class="col-sm-4">{{ $t('adminRegistration.courseStatus') }}</dt>
-              <dd class="col-sm-8">
+              <dt class="text-muted">{{ $t('adminRegistration.courseStatus') }}</dt>
+              <dd>
                 <CourseStatusBadge
                   :status="registration.courseStatus"
                   :is-past="registration.isPast"
@@ -248,38 +250,40 @@ export default {
             >
               {{ $t('adminRegistration.openCourse') }}
             </RouterLink>
-          </fieldset>
+          </section>
 
-          <fieldset class="border rounded bg-body p-3 mb-4 text-start">
-            <legend class="float-none w-auto px-2 fs-5">
+          <section class="mb-6 rounded-2xl border border-line bg-white p-5 sm:p-6">
+            <h2 class="mb-4 text-lg font-bold">
               {{ $t('adminRegistration.registrationLegend') }}
-            </legend>
+            </h2>
 
-            <div class="mb-3">
+            <div class="mb-4">
               <div class="form-label">{{ $t('adminRegistration.status') }}</div>
-              <div class="form-check form-check-inline">
-                <input
-                  v-model="registrationForm.status"
-                  id="statusRegistered"
-                  class="form-check-input"
-                  type="radio"
-                  value="R"
-                />
-                <label class="form-check-label" for="statusRegistered">
-                  {{ $t('courseParticipantStatus.R') }}
-                </label>
-              </div>
-              <div class="form-check form-check-inline">
-                <input
-                  v-model="registrationForm.status"
-                  id="statusCancelled"
-                  class="form-check-input"
-                  type="radio"
-                  value="C"
-                />
-                <label class="form-check-label" for="statusCancelled">
-                  {{ $t('courseParticipantStatus.C') }}
-                </label>
+              <div class="flex flex-wrap gap-x-6 gap-y-2">
+                <div class="form-check">
+                  <input
+                    v-model="registrationForm.status"
+                    id="statusRegistered"
+                    class="form-check-input"
+                    type="radio"
+                    value="R"
+                  />
+                  <label class="form-check-label" for="statusRegistered">
+                    {{ $t('courseParticipantStatus.R') }}
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input
+                    v-model="registrationForm.status"
+                    id="statusCancelled"
+                    class="form-check-input"
+                    type="radio"
+                    value="C"
+                  />
+                  <label class="form-check-label" for="statusCancelled">
+                    {{ $t('courseParticipantStatus.C') }}
+                  </label>
+                </div>
               </div>
             </div>
 
@@ -295,7 +299,7 @@ export default {
                 {{ $t('adminRegistration.hasPaid') }}
               </label>
             </div>
-            <div class="form-check form-switch mb-3">
+            <div class="form-check form-switch mb-4">
               <input
                 v-model="registrationForm.requiresLaptop"
                 id="requiresLaptop"
@@ -308,12 +312,12 @@ export default {
               </label>
             </div>
 
-            <div class="mb-3">
+            <div class="mb-4">
               <div class="form-label">{{ $t('adminRegistration.notes') }}</div>
-              <div class="notes text-body-secondary">{{ registration.notes || '—' }}</div>
+              <div class="whitespace-pre-wrap text-muted">{{ registration.notes || '—' }}</div>
             </div>
 
-            <div class="mb-3">
+            <div class="mb-4">
               <label class="form-label" for="adminNotes">
                 {{ $t('adminRegistration.adminNotes') }}
               </label>
@@ -325,18 +329,20 @@ export default {
               ></textarea>
             </div>
 
-            <dl class="row small text-secondary mb-0">
-              <dt class="col-sm-4 fw-normal">{{ $t('adminRegistration.registeredAt') }}</dt>
-              <dd class="col-sm-8">{{ formatDateTime(registration.createdAt) }}</dd>
+            <dl
+              class="grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-[12rem_1fr] mt-4 text-sm text-muted"
+            >
+              <dt class="text-muted">{{ $t('adminRegistration.registeredAt') }}</dt>
+              <dd>{{ formatDateTime(registration.createdAt) }}</dd>
 
-              <dt class="col-sm-4 fw-normal">{{ $t('adminRegistration.updatedAt') }}</dt>
-              <dd class="col-sm-8 mb-0">{{ formatDateTime(registration.updatedAt) }}</dd>
+              <dt class="text-muted">{{ $t('adminRegistration.updatedAt') }}</dt>
+              <dd>{{ formatDateTime(registration.updatedAt) }}</dd>
             </dl>
-          </fieldset>
+          </section>
 
-          <AlertDanger :error-message="errorMessage" />
+          <AlertDanger :error-message="errorMessage" class="mb-4" />
 
-          <div class="d-flex gap-2 mb-5">
+          <div class="mb-6 flex gap-2">
             <button
               @click="handleSaveClick"
               :disabled="isSending"
@@ -368,10 +374,3 @@ export default {
     />
   </div>
 </template>
-
-<style scoped>
-/* Osaleja lisainfo reavahetused säilivad */
-.notes {
-  white-space: pre-wrap;
-}
-</style>

@@ -172,11 +172,11 @@ export default {
 </script>
 
 <template>
-  <div class="container">
+  <div class="mx-auto w-full max-w-7xl px-6 py-8">
     <BackLink :fallback="{ name: 'adminTrainingsRoute' }" />
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-      <h1 class="h3 mb-0">{{ $t('adminTrainingCourses.title') }}</h1>
-      <div class="d-flex flex-wrap gap-2">
+    <div class="mb-6 flex flex-wrap items-center justify-between gap-2">
+      <h1 class="text-3xl font-extrabold tracking-tight">{{ $t('adminTrainingCourses.title') }}</h1>
+      <div class="flex flex-wrap gap-2">
         <button
           @click="navigateToAdminTrainingsView"
           class="btn btn-outline-secondary"
@@ -184,11 +184,7 @@ export default {
         >
           {{ $t('navbar.manageTrainings') }}
         </button>
-        <button
-          @click="navigateToNewCourseForm"
-          class="btn btn-primary d-inline-flex align-items-center gap-1"
-          type="button"
-        >
+        <button @click="navigateToNewCourseForm" class="btn btn-primary" type="button">
           <PhPlus :size="18" />
           {{ $t('adminTrainingCourses.addCourse') }}
         </button>
@@ -207,7 +203,7 @@ export default {
                 trainingTranslationId: training.trainingTranslationId,
               },
             }"
-            class="btn btn-sm btn-outline-secondary"
+            class="btn btn-outline-secondary btn-sm"
           >
             {{ $t('trainingForm.buttons.view') }}
           </RouterLink>
@@ -220,7 +216,7 @@ export default {
                 trainingTranslationId: training.trainingTranslationId,
               },
             }"
-            class="btn btn-sm btn-outline-secondary"
+            class="btn btn-outline-secondary btn-sm"
           >
             {{ $t('trainingCard.edit') }}
           </RouterLink>
@@ -238,117 +234,119 @@ export default {
       </CollapsibleCard>
     </template>
 
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
-      <div class="form-check form-switch mb-0">
-        <input
-          v-model="includePast"
-          id="includePast"
-          class="form-check-input"
-          type="checkbox"
-          role="switch"
+    <div class="overflow-hidden rounded-2xl border border-line bg-white">
+      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-line px-4 py-3">
+        <div class="form-check form-switch">
+          <input
+            v-model="includePast"
+            id="includePast"
+            class="form-check-input"
+            type="checkbox"
+            role="switch"
+          />
+          <label class="form-check-label" for="includePast">
+            {{ $t('adminTrainingCourses.includePast') }}
+          </label>
+        </div>
+        <InlineAlerts
+          :success-message="successMessage"
+          :error-message="errorMessage"
+          @event-success-message-closed="successMessage = ''"
+          @event-error-message-closed="errorMessage = ''"
         />
-        <label class="form-check-label" for="includePast">
-          {{ $t('adminTrainingCourses.includePast') }}
-        </label>
       </div>
-      <InlineAlerts
-        :success-message="successMessage"
-        :error-message="errorMessage"
-        @event-success-message-closed="successMessage = ''"
-        @event-error-message-closed="errorMessage = ''"
-      />
+
+      <div class="overflow-x-auto">
+        <table class="table table-hover">
+          <thead class="bg-surface">
+            <tr>
+              <SortableColumnHeader
+                :label="sortableColumns.startDate"
+                sort-key="startDate"
+                :sort-by="sortBy"
+                :sort-direction="sortDirection"
+                @event-sort-clicked="handleSortClick"
+              />
+              <th>{{ $t('adminTrainingCourses.columns.endDate') }}</th>
+              <th>{{ $t('adminTrainingCourses.columns.numberOfDays') }}</th>
+              <th>{{ $t('adminTrainingCourses.columns.numberOfAcademicHours') }}</th>
+              <SortableColumnHeader
+                :label="sortableColumns.price"
+                sort-key="price"
+                :sort-by="sortBy"
+                :sort-direction="sortDirection"
+                @event-sort-clicked="handleSortClick"
+              />
+              <th>{{ $t('adminTrainingCourses.columns.lecturers') }}</th>
+              <th>{{ $t('adminTrainingCourses.columns.room') }}</th>
+              <SortableColumnHeader
+                :label="sortableColumns.status"
+                sort-key="status"
+                :sort-by="sortBy"
+                :sort-direction="sortDirection"
+                @event-sort-clicked="handleSortClick"
+              />
+              <SortableColumnHeader
+                :label="sortableColumns.participantCount"
+                sort-key="participantCount"
+                :sort-by="sortBy"
+                :sort-direction="sortDirection"
+                @event-sort-clicked="handleSortClick"
+              />
+              <th>{{ $t('adminTrainingCourses.columns.notes') }}</th>
+              <th>{{ $t('adminTrainingCourses.columns.meetingLink') }}</th>
+              <th>{{ $t('adminTrainingCourses.columns.actions') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="course in sortedCourses"
+              :key="course.courseId"
+              :class="{ 'past-row': course.isPast }"
+            >
+              <td class="whitespace-nowrap">{{ formatLocalDate(course.startDate) }}</td>
+              <td class="whitespace-nowrap">{{ formatLocalDate(course.endDate) }}</td>
+              <td>{{ course.numberOfDays }}</td>
+              <td>{{ course.numberOfAcademicHours }}</td>
+              <td class="whitespace-nowrap">{{ formatPrice(course.price) }}</td>
+              <td>{{ course.lecturerNames ?? '—' }}</td>
+              <td>{{ course.roomName ?? '—' }}</td>
+              <td><CourseStatusBadge :status="course.status" :is-past="course.isPast" /></td>
+              <td>{{ course.participantCount }}</td>
+              <td><CheckMark :value="course.hasNotes" /></td>
+              <td><CheckMark :value="course.hasMeetingLink" /></td>
+              <td>
+                <div class="flex gap-1">
+                  <RouterLink
+                    :to="{
+                      name: 'courseFormRoute',
+                      query: { returnTo: $route.fullPath, courseId: course.courseId },
+                    }"
+                    :title="$t('adminTrainingCourses.edit')"
+                    :aria-label="$t('adminTrainingCourses.edit')"
+                    class="btn btn-outline-secondary btn-sm btn-icon"
+                  >
+                    <PhPencilSimple :size="20" />
+                  </RouterLink>
+                  <CourseDeleteButton
+                    :course-id="course.courseId"
+                    :start-date="course.startDate"
+                    :end-date="course.endDate"
+                    :participant-count="course.participantCount"
+                    @event-course-deleted="handleCourseDeleted"
+                  />
+                </div>
+              </td>
+            </tr>
+            <tr v-if="courses.length === 0">
+              <td colspan="12" class="py-4 text-center text-muted">{{ emptyTableText }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
-    <div class="table-responsive">
-      <table class="table table-hover align-middle">
-        <thead>
-          <tr>
-            <SortableColumnHeader
-              :label="sortableColumns.startDate"
-              sort-key="startDate"
-              :sort-by="sortBy"
-              :sort-direction="sortDirection"
-              @event-sort-clicked="handleSortClick"
-            />
-            <th>{{ $t('adminTrainingCourses.columns.endDate') }}</th>
-            <th>{{ $t('adminTrainingCourses.columns.numberOfDays') }}</th>
-            <th>{{ $t('adminTrainingCourses.columns.numberOfAcademicHours') }}</th>
-            <SortableColumnHeader
-              :label="sortableColumns.price"
-              sort-key="price"
-              :sort-by="sortBy"
-              :sort-direction="sortDirection"
-              @event-sort-clicked="handleSortClick"
-            />
-            <th>{{ $t('adminTrainingCourses.columns.lecturers') }}</th>
-            <th>{{ $t('adminTrainingCourses.columns.room') }}</th>
-            <SortableColumnHeader
-              :label="sortableColumns.status"
-              sort-key="status"
-              :sort-by="sortBy"
-              :sort-direction="sortDirection"
-              @event-sort-clicked="handleSortClick"
-            />
-            <SortableColumnHeader
-              :label="sortableColumns.participantCount"
-              sort-key="participantCount"
-              :sort-by="sortBy"
-              :sort-direction="sortDirection"
-              @event-sort-clicked="handleSortClick"
-            />
-            <th>{{ $t('adminTrainingCourses.columns.notes') }}</th>
-            <th>{{ $t('adminTrainingCourses.columns.meetingLink') }}</th>
-            <th>{{ $t('adminTrainingCourses.columns.actions') }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="course in sortedCourses"
-            :key="course.courseId"
-            :class="{ 'past-row': course.isPast }"
-          >
-            <td class="text-nowrap">{{ formatLocalDate(course.startDate) }}</td>
-            <td class="text-nowrap">{{ formatLocalDate(course.endDate) }}</td>
-            <td>{{ course.numberOfDays }}</td>
-            <td>{{ course.numberOfAcademicHours }}</td>
-            <td class="text-nowrap">{{ formatPrice(course.price) }}</td>
-            <td>{{ course.lecturerNames ?? '—' }}</td>
-            <td>{{ course.roomName ?? '—' }}</td>
-            <td><CourseStatusBadge :status="course.status" :is-past="course.isPast" /></td>
-            <td>{{ course.participantCount }}</td>
-            <td><CheckMark :value="course.hasNotes" /></td>
-            <td><CheckMark :value="course.hasMeetingLink" /></td>
-            <td>
-              <div class="d-flex gap-1">
-                <RouterLink
-                  :to="{
-                    name: 'courseFormRoute',
-                    query: { returnTo: $route.fullPath, courseId: course.courseId },
-                  }"
-                  :title="$t('adminTrainingCourses.edit')"
-                  :aria-label="$t('adminTrainingCourses.edit')"
-                  class="btn btn-sm btn-outline-secondary d-inline-flex"
-                >
-                  <PhPencilSimple :size="20" />
-                </RouterLink>
-                <CourseDeleteButton
-                  :course-id="course.courseId"
-                  :start-date="course.startDate"
-                  :end-date="course.endDate"
-                  :participant-count="course.participantCount"
-                  @event-course-deleted="handleCourseDeleted"
-                />
-              </div>
-            </td>
-          </tr>
-          <tr v-if="courses.length === 0">
-            <td colspan="12" class="text-center text-secondary py-4">{{ emptyTableText }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <p class="text-secondary mb-4">
+    <p class="mt-3 text-muted">
       {{ $t('adminTrainingCourses.totalCount', courses.length) }}
     </p>
   </div>
@@ -357,6 +355,6 @@ export default {
 <style scoped>
 /* Toimunud toimumiskord: tuhmim rida */
 .past-row td {
-  color: var(--bs-secondary-color);
+  color: var(--color-muted);
 }
 </style>

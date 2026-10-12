@@ -28,7 +28,7 @@ export default {
 </script>
 
 <template>
-  <div class="d-flex gap-2 align-items-center">
+  <div class="flex items-center gap-2">
     <button
       v-for="translationLanguage in translationLanguages"
       :key="translationLanguage.languageCode"
@@ -36,9 +36,9 @@ export default {
       :title="flagTitle(translationLanguage.languageCode)"
       :class="{
         'translation-missing': !translationExists(translationLanguage.languageCode),
-        'border-primary': translationLanguage.languageCode === currentLanguageCode,
+        'border-brand-600': translationLanguage.languageCode === currentLanguageCode,
       }"
-      class="btn btn-sm btn-light border"
+      class="btn btn-sm btn-light"
       type="button"
     >
       <FlagIcon :flag-icon-code="translationLanguage.flagIconCode" />

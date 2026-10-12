@@ -39,7 +39,7 @@ export default {
     :disabled="isSending"
     :title="$t('trainingDeleteButton.label')"
     :aria-label="$t('trainingDeleteButton.label')"
-    class="btn btn-sm btn-outline-danger d-inline-flex"
+    class="btn btn-sm btn-icon btn-outline-danger"
     type="button"
   >
     <PhTrash :size="20" />

@@ -1,6 +1,6 @@
 <script>
 import { mapState } from 'pinia'
-import { PhCheck, PhPencilSimple, PhPlus, PhX } from '@phosphor-icons/vue'
+import { PhCheck, PhPencilSimple, PhPlus, PhX, PhMagnifyingGlass } from '@phosphor-icons/vue'
 import { useLanguageStore } from '@/stores/languageStore.js'
 import LecturerService from '@/api-services/LecturerService.js'
 import NavigationService from '@/services/NavigationService.js'
@@ -32,6 +32,7 @@ export default {
     PhCheck,
     PhPencilSimple,
     PhPlus,
+    PhMagnifyingGlass,
     PhX,
     InlineAlerts,
     LecturerDeleteButton,
@@ -189,30 +190,36 @@ export default {
 </script>
 
 <template>
-  <div class="container">
+  <div class="mx-auto w-full max-w-7xl px-6 py-8">
     <AdminTabs />
 
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-      <h1 class="h3 mb-0">{{ $t('adminLecturers.title') }}</h1>
-      <button
-        @click="navigateToNewLecturerForm"
-        class="btn btn-primary d-inline-flex align-items-center gap-1"
-        type="button"
-      >
-        <PhPlus :size="18" />
-        {{ $t('navbar.addLecturer') }}
-      </button>
+    <div class="mb-6 flex items-end justify-between gap-4">
+      <h1 class="text-3xl font-extrabold tracking-tight">{{ $t('adminLecturers.title') }}</h1>
+      <div class="flex items-center gap-4">
+        <span class="text-muted">{{
+          $t('adminLecturers.totalCount', filteredLecturers.length)
+        }}</span>
+        <button @click="navigateToNewLecturerForm" class="btn btn-primary" type="button">
+          <PhPlus :size="18" />
+          {{ $t('navbar.addLecturer') }}
+        </button>
+      </div>
     </div>
 
-    <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
-      <input
-        v-model="searchText"
-        :placeholder="$t('adminLecturers.searchPlaceholder')"
-        :aria-label="$t('adminLecturers.searchPlaceholder')"
-        class="form-control search-input"
-        type="search"
-      />
-      <div class="form-check form-switch mb-0">
+    <div class="mb-4 flex flex-wrap items-center gap-x-6 gap-y-3">
+      <div
+        class="flex min-h-11 max-w-xl flex-1 items-center gap-2 rounded-lg border border-brand-200 bg-white px-3 focus-within:border-brand-600 focus-within:ring-3 focus-within:ring-brand-600/15"
+      >
+        <PhMagnifyingGlass :size="18" class="shrink-0 text-muted" />
+        <input
+          v-model="searchText"
+          :placeholder="$t('adminLecturers.searchPlaceholder')"
+          :aria-label="$t('adminLecturers.searchPlaceholder')"
+          class="min-w-0 flex-1 bg-transparent outline-none"
+          type="search"
+        />
+      </div>
+      <div class="form-check form-switch">
         <input
           v-model="includeDeleted"
           id="includeDeleted"
@@ -226,7 +233,7 @@ export default {
       </div>
     </div>
 
-    <div class="mb-2">
+    <div class="mb-3">
       <InlineAlerts
         :success-message="successMessage"
         :error-message="errorMessage"
@@ -235,110 +242,104 @@ export default {
       />
     </div>
 
-    <div class="table-responsive">
-      <table class="table table-hover align-middle">
-        <thead>
-          <tr>
-            <SortableColumnHeader
-              v-for="sortableColumn in sortableColumns"
-              :key="sortableColumn.sortKey"
-              :label="sortableColumn.label"
-              :sort-key="sortableColumn.sortKey"
-              :sort-by="sortBy"
-              :sort-direction="sortDirection"
-              @event-sort-clicked="handleSortClick"
-            />
-            <th>{{ $t('adminLecturers.columns.actions') }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="lecturer in sortedLecturers"
-            :key="lecturer.lecturerId"
-            :class="{ 'deleted-row': lecturer.status === 'D' }"
-          >
-            <td>
-              {{ lecturer.fullName }}
-              <span v-if="lecturer.status === 'D'" class="badge text-bg-danger ms-1">
-                {{ $t('adminLecturers.deleted') }}
-              </span>
-            </td>
-            <td>{{ lecturer.title }}</td>
-            <td>
-              <PhCheck
-                v-if="lecturer.hasAllTranslations"
-                :size="20"
-                weight="bold"
-                class="text-success"
-                :aria-label="$t('adminTrainings.translationsComplete')"
+    <div class="overflow-hidden rounded-2xl border border-line bg-white">
+      <div class="overflow-x-auto">
+        <table class="table table-hover">
+          <thead class="bg-surface">
+            <tr>
+              <SortableColumnHeader
+                v-for="sortableColumn in sortableColumns"
+                :key="sortableColumn.sortKey"
+                :label="sortableColumn.label"
+                :sort-key="sortableColumn.sortKey"
+                :sort-by="sortBy"
+                :sort-direction="sortDirection"
+                @event-sort-clicked="handleSortClick"
               />
-              <span
-                v-else
-                :title="missingTranslationsText(lecturer)"
-                :aria-label="missingTranslationsText(lecturer)"
-                role="img"
-              >
-                <PhX :size="20" weight="bold" class="text-danger" />
-              </span>
-            </td>
-            <td>{{ lecturer.trainingCount }}</td>
-            <td>{{ lecturer.upcomingCourseCount }}</td>
-            <td class="text-nowrap">{{ formatDate(lecturer.updatedAt) }}</td>
-            <td>
-              <div v-if="lecturer.status !== 'D'" class="d-flex gap-1">
-                <RouterLink
-                  :to="{
-                    name: 'lecturerFormRoute',
-                    query: {
-                      returnTo: $route.fullPath,
-                      lecturerId: lecturer.lecturerId,
-                      lecturerTranslationId: lecturer.lecturerTranslationId,
-                    },
-                  }"
-                  :title="$t('adminLecturers.edit')"
-                  :aria-label="$t('adminLecturers.edit')"
-                  class="btn btn-sm btn-outline-secondary d-inline-flex"
+              <th class="text-right">{{ $t('adminLecturers.columns.actions') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="lecturer in sortedLecturers"
+              :key="lecturer.lecturerId"
+              :class="{ 'deleted-row': lecturer.status === 'D' }"
+            >
+              <td>
+                {{ lecturer.fullName }}
+                <span v-if="lecturer.status === 'D'" class="badge text-bg-danger ml-1">
+                  {{ $t('adminLecturers.deleted') }}
+                </span>
+              </td>
+              <td>{{ lecturer.title }}</td>
+              <td>
+                <PhCheck
+                  v-if="lecturer.hasAllTranslations"
+                  :size="20"
+                  weight="bold"
+                  class="text-emerald-600"
+                  :aria-label="$t('adminTrainings.translationsComplete')"
+                />
+                <span
+                  v-else
+                  :title="missingTranslationsText(lecturer)"
+                  :aria-label="missingTranslationsText(lecturer)"
+                  role="img"
                 >
-                  <PhPencilSimple :size="20" />
-                </RouterLink>
-                <LecturerDeleteButton
+                  <PhX :size="20" weight="bold" class="text-red-600" />
+                </span>
+              </td>
+              <td>{{ lecturer.trainingCount }}</td>
+              <td>{{ lecturer.upcomingCourseCount }}</td>
+              <td class="whitespace-nowrap">{{ formatDate(lecturer.updatedAt) }}</td>
+              <td class="text-right">
+                <div v-if="lecturer.status !== 'D'" class="inline-flex gap-2">
+                  <RouterLink
+                    :to="{
+                      name: 'lecturerFormRoute',
+                      query: {
+                        returnTo: $route.fullPath,
+                        lecturerId: lecturer.lecturerId,
+                        lecturerTranslationId: lecturer.lecturerTranslationId,
+                      },
+                    }"
+                    :title="$t('adminLecturers.edit')"
+                    :aria-label="$t('adminLecturers.edit')"
+                    class="btn btn-sm btn-icon btn-outline-secondary"
+                  >
+                    <PhPencilSimple :size="20" />
+                  </RouterLink>
+                  <LecturerDeleteButton
+                    :lecturer-id="lecturer.lecturerId"
+                    :full-name="lecturer.fullName"
+                    :upcoming-course-count="lecturer.upcomingCourseCount"
+                    @event-lecturer-deleted="handleLecturerDeleted"
+                    @event-delete-error="handleDeleteError"
+                  />
+                </div>
+                <LecturerRestoreButton
+                  v-else
                   :lecturer-id="lecturer.lecturerId"
                   :full-name="lecturer.fullName"
-                  :upcoming-course-count="lecturer.upcomingCourseCount"
-                  @event-lecturer-deleted="handleLecturerDeleted"
-                  @event-delete-error="handleDeleteError"
+                  @event-lecturer-restored="handleLecturerRestored"
                 />
-              </div>
-              <LecturerRestoreButton
-                v-else
-                :lecturer-id="lecturer.lecturerId"
-                :full-name="lecturer.fullName"
-                @event-lecturer-restored="handleLecturerRestored"
-              />
-            </td>
-          </tr>
-          <tr v-if="filteredLecturers.length === 0">
-            <td colspan="7" class="text-center text-secondary py-4">
-              {{ $t('adminLecturers.noResults') }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+              </td>
+            </tr>
+            <tr v-if="filteredLecturers.length === 0">
+              <td colspan="7" class="py-10 text-center text-muted">
+                {{ $t('adminLecturers.noResults') }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-
-    <p class="text-secondary mb-4">
-      {{ $t('adminLecturers.totalCount', filteredLecturers.length) }}
-    </p>
   </div>
 </template>
 
 <style scoped>
-.search-input {
-  max-width: 24rem;
-}
-
-/* Kustutatud koolitaja: tuhmim rida, ainult "Taasta" nupp */
+/* Tuhmim rida */
 .deleted-row td {
-  color: var(--bs-secondary-color);
+  color: var(--color-muted);
 }
 </style>

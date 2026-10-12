@@ -32,7 +32,7 @@ export default {
     }"
     :title="$t('trainingCard.edit')"
     :aria-label="$t('trainingCard.edit')"
-    class="btn btn-sm btn-outline-secondary d-inline-flex"
+    class="btn btn-outline-secondary btn-sm btn-icon"
   >
     <PhPencilSimple :size="20" />
   </RouterLink>

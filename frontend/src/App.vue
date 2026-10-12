@@ -1,153 +1,256 @@
 <template>
-  <div class="d-flex flex-column min-vh-100">
-    <nav class="navbar navbar-expand-lg navbar-light navbar-glass mb-3 shadow sticky-top">
-      <div class="container">
-        <RouterLink class="navbar-brand" to="/">
-          <img src="@/assets/bcs-koolitus.svg" alt="BCS koolituse logo" height="68" />
+  <div class="flex min-h-screen flex-col">
+    <header class="sticky top-0 z-30 border-b border-line bg-white/95 backdrop-blur">
+      <div class="mx-auto flex w-full max-w-6xl items-center gap-6 px-4 py-3 sm:px-6">
+        <RouterLink to="/" class="flex shrink-0 items-center">
+          <img src="@/assets/bcs-koolitus.svg" alt="BCS Koolitus" class="h-10 w-auto sm:h-12" />
         </RouterLink>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navMenu"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navMenu">
-          <div class="navbar-nav gap-4 mx-auto bg-bcs-primary rounded-pill px-3">
-            <div class="dropdown">
-              <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                {{ $t('navbar.trainings') }}
-              </a>
-              <div @click="closeNavbarDropdowns" class="dropdown-menu bg-bcs-primary">
-                <RouterLink class="nav-link" :to="{ name: 'trainingsRoute' }">
-                  {{ $t('navbar.ourTrainings') }}
-                </RouterLink>
-                <RouterLink class="nav-link" :to="{ name: 'coursesRoute' }">
-                  {{ $t('navbar.coursesCalendar') }}
-                </RouterLink>
-              </div>
+
+        <!-- Desktop menüü -->
+        <nav class="hidden flex-1 items-center gap-1 lg:flex" :aria-label="$t('navbar.menu')">
+          <!-- Koolitused: rippmenüü (meie koolitused ja kalender) -->
+          <div ref="trainingsMenu" class="relative">
+            <button
+              @click="toggleMenu('trainings')"
+              :aria-expanded="openMenu === 'trainings'"
+              :class="{ 'bg-brand-50 text-brand-700!': isTrainingsRouteActive }"
+              class="inline-flex cursor-pointer items-center gap-1 rounded-lg px-3 py-2 font-medium text-ink hover:bg-brand-50 hover:text-brand-700"
+              type="button"
+            >
+              {{ $t('navbar.trainings') }}
+              <PhCaretDown :size="14" weight="bold" />
+            </button>
+            <div
+              v-if="openMenu === 'trainings'"
+              class="absolute left-0 mt-2 w-60 overflow-hidden rounded-xl border border-line bg-white py-2 shadow-xl shadow-navy/10"
+            >
+              <RouterLink
+                v-for="navLink in trainingsNavLinks"
+                :key="navLink.label"
+                :to="navLink.to"
+                class="block px-4 py-2.5 text-ink hover:bg-brand-50 hover:text-brand-700"
+              >
+                {{ navLink.label }}
+              </RouterLink>
             </div>
-            <RouterLink class="nav-link" :to="{ name: 'lecturersRoute' }">
-              {{ $t('navbar.ourLecturers') }}
-            </RouterLink>
-            <a class="nav-link" href="#">{{ $t('navbar.services') }}</a>
+          </div>
+          <RouterLink
+            v-for="navLink in publicNavLinks"
+            :key="navLink.label"
+            :to="navLink.to"
+            class="rounded-lg px-3 py-2 font-medium text-ink hover:bg-brand-50 hover:text-brand-700"
+            active-class="bg-brand-50 text-brand-700!"
+          >
+            {{ navLink.label }}
+          </RouterLink>
+          <!-- Sisuta lingid ainult väga laial ekraanil, et menüü mahuks ühele reale -->
+          <a
+            v-for="placeholderLabel in placeholderNavLabels"
+            :key="placeholderLabel"
+            href="#"
+            class="hidden rounded-lg px-3 py-2 font-medium text-ink hover:bg-brand-50 hover:text-brand-700 xl:block"
+          >
+            {{ placeholderLabel }}
+          </a>
 
-            <a class="nav-link" href="#">{{ $t('navbar.company') }}</a>
-
-            <a class="nav-link" href="#">{{ $t('navbar.blog') }}</a>
-            <a class="nav-link" href="#">{{ $t('navbar.contact') }}</a>
-            <a class="nav-link" href="#">{{ $t('navbar.feedback') }}</a>
-
-            <div v-if="userIsAdmin" class="dropdown">
-              <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                {{ $t('navbar.admin') }}
-              </a>
-              <div @click="closeNavbarDropdowns" class="dropdown-menu bg-bcs-primary">
-                <!-- Rühmad: igapäevane töö (päringud, registreerumised) | koolitused | koolitajad ja ruumid | kontod.
-                     "Lisa uus" nupud on nimekirja vaadetes -->
-                <RouterLink class="nav-link" :to="{ name: 'adminEnquiriesRoute' }">
-                  {{ $t('navbar.manageEnquiries') }}
-                </RouterLink>
-                <RouterLink class="nav-link" :to="{ name: 'adminRegistrationsRoute' }">
-                  {{ $t('navbar.manageRegistrations') }}
-                </RouterLink>
-                <RouterLink class="nav-link" :to="{ name: 'adminFeedbacksRoute' }">
-                  {{ $t('navbar.manageFeedbacks') }}
-                </RouterLink>
-                <hr class="dropdown-divider" />
-                <RouterLink class="nav-link" :to="{ name: 'adminTrainingsRoute' }">
-                  {{ $t('navbar.manageTrainings') }}
-                </RouterLink>
-                <RouterLink class="nav-link" :to="{ name: 'adminAllCoursesRoute' }">
-                  {{ $t('navbar.manageCourses') }}
-                </RouterLink>
-                <hr class="dropdown-divider" />
-                <RouterLink class="nav-link" :to="{ name: 'adminLecturersRoute' }">
-                  {{ $t('navbar.manageLecturers') }}
-                </RouterLink>
-                <RouterLink class="nav-link" :to="{ name: 'adminRoomsRoute' }">
-                  {{ $t('navbar.manageRooms') }}
-                </RouterLink>
-                <hr class="dropdown-divider" />
-                <RouterLink class="nav-link" :to="{ name: 'adminUsersRoute' }">
-                  {{ $t('navbar.manageUsers') }}
+          <div v-if="userIsAdmin" ref="adminMenu" class="relative">
+            <button
+              @click="toggleMenu('admin')"
+              :aria-expanded="openMenu === 'admin'"
+              class="inline-flex items-center gap-1 rounded-lg px-3 py-2 font-medium text-ink hover:bg-brand-50 hover:text-brand-700"
+              type="button"
+            >
+              {{ $t('navbar.admin') }}
+              <PhCaretDown :size="14" weight="bold" />
+            </button>
+            <div
+              v-if="openMenu === 'admin'"
+              class="absolute left-0 mt-2 w-64 overflow-hidden rounded-xl border border-line bg-white py-2 shadow-xl shadow-navy/10"
+            >
+              <!-- Rühmad: igapäevane töö | koolitused | koolitajad ja ruumid | kontod -->
+              <div
+                v-for="(navGroup, navGroupIndex) in adminNavGroups"
+                :key="navGroupIndex"
+                :class="{ 'mt-2 border-t border-line pt-2': navGroupIndex > 0 }"
+              >
+                <RouterLink
+                  v-for="navLink in navGroup"
+                  :key="navLink.label"
+                  :to="navLink.to"
+                  class="block px-4 py-2.5 text-ink hover:bg-brand-50 hover:text-brand-700"
+                >
+                  {{ navLink.label }}
                 </RouterLink>
               </div>
             </div>
           </div>
+        </nav>
 
-          <div class="d-flex align-items-center gap-3">
-            <!-- Keelevalik: kasutajaliidese keeled tulevad store'ist (uiLanguages) -->
-            <div class="d-flex align-items-center gap-1">
-              <button
-                v-for="uiLanguage in languageStore.uiLanguages"
-                :key="uiLanguage.languageCode"
-                @click="languageStore.setContentLang(uiLanguage.languageCode)"
-                :class="{
-                  'border-primary': languageStore.contentLang === uiLanguage.languageCode,
-                }"
-                :title="uiLanguage.languageCode.toUpperCase()"
-                class="btn btn-sm btn-light border"
-                type="button"
-              >
-                <FlagIcon :flag-icon-code="uiLanguage.flagIconCode" />
-              </button>
-            </div>
-            <!-- Minu profiil: osalejal neli vaadet, adminil ainult parool -->
-            <div v-if="userIsLoggedIn" class="dropdown">
-              <!-- Ainult ikoon (nimi title/aria-label-is), et navbar ei läheks kitsaks -->
-              <button
-                :class="{ 'border-primary': isProfileRouteActive }"
-                :title="$t('navbar.profile')"
-                :aria-label="$t('navbar.profile')"
-                class="btn btn-light border btn-sm dropdown-toggle d-inline-flex align-items-center gap-1"
-                type="button"
-                data-bs-toggle="dropdown"
-              >
-                <PhUserCircle :size="20" />
-              </button>
-              <div @click="closeNavbarDropdowns" class="dropdown-menu dropdown-menu-end">
-                <h6 class="dropdown-header">{{ $t('navbar.profile') }}</h6>
-                <template v-if="!userIsAdmin">
-                  <RouterLink class="dropdown-item" :to="{ name: 'participantDetailsRoute' }">
-                    {{ $t('navbar.participantDetails') }}
-                  </RouterLink>
-                  <RouterLink class="dropdown-item" :to="{ name: 'participantCoursesRoute' }">
-                    {{ $t('navbar.participantCourses') }}
-                  </RouterLink>
-                  <RouterLink class="dropdown-item" :to="{ name: 'participantCertificatesRoute' }">
-                    {{ $t('navbar.participantCertificates') }}
-                  </RouterLink>
-                </template>
-                <RouterLink class="dropdown-item" :to="{ name: 'changePasswordRoute' }">
-                  {{ $t('navbar.changePassword') }}
-                </RouterLink>
-              </div>
-            </div>
-            <!-- Läbipaistmatu taust (btn-light): klaasja navbari all võib olla tume pilt -->
+        <div class="ml-auto flex items-center gap-2">
+          <!-- Keelevalik: kasutajaliidese keeled tulevad store'ist (uiLanguages) -->
+          <div class="flex overflow-hidden rounded-lg border border-line">
             <button
-              v-if="userIsLoggedIn"
-              @click="isLogoutModalOpen = true"
-              class="btn btn-light border btn-sm"
+              v-for="uiLanguage in languageStore.uiLanguages"
+              :key="uiLanguage.languageCode"
+              @click="languageStore.setContentLang(uiLanguage.languageCode)"
+              :aria-pressed="languageStore.contentLang === uiLanguage.languageCode"
+              :class="
+                languageStore.contentLang === uiLanguage.languageCode
+                  ? 'bg-navy text-white'
+                  : 'bg-white text-muted hover:bg-brand-50'
+              "
+              class="min-h-9 cursor-pointer px-2.5 text-sm font-bold uppercase"
               type="button"
             >
-              {{ $t('navbar.logout') }}
+              {{ uiLanguage.languageCode }}
             </button>
-            <RouterLink v-else class="btn btn-light border btn-sm" to="/login">
+          </div>
+          <!-- Minu profiil: osalejal neli vaadet, adminil ainult parool -->
+          <div v-if="userIsLoggedIn" ref="profileMenu" class="relative hidden sm:block">
+            <button
+              @click="toggleMenu('profile')"
+              :aria-expanded="openMenu === 'profile'"
+              :title="$t('navbar.profile')"
+              :aria-label="$t('navbar.profile')"
+              :class="{ 'border-brand-600 bg-brand-50': isProfileRouteActive }"
+              class="btn btn-outline-secondary btn-sm"
+              type="button"
+            >
+              <PhUserCircle :size="20" />
+              <PhCaretDown :size="12" weight="bold" />
+            </button>
+            <div
+              v-if="openMenu === 'profile'"
+              class="absolute right-0 mt-2 w-60 overflow-hidden rounded-xl border border-line bg-white py-2 shadow-xl shadow-navy/10"
+            >
+              <div class="px-4 pt-1 pb-2 text-xs font-bold tracking-wide text-muted uppercase">
+                {{ $t('navbar.profile') }}
+              </div>
+              <RouterLink
+                v-for="navLink in profileNavLinks"
+                :key="navLink.label"
+                :to="navLink.to"
+                class="block px-4 py-2.5 text-ink hover:bg-brand-50 hover:text-brand-700"
+              >
+                {{ navLink.label }}
+              </RouterLink>
+              <div class="mt-2 border-t border-line pt-2">
+                <button
+                  @click="isLogoutModalOpen = true"
+                  class="block w-full cursor-pointer px-4 py-2.5 text-left text-ink hover:bg-brand-50 hover:text-brand-700"
+                  type="button"
+                >
+                  {{ $t('navbar.logout') }}
+                </button>
+              </div>
+            </div>
+          </div>
+          <template v-else>
+            <RouterLink to="/login" class="btn btn-outline-primary btn-sm hidden sm:inline-flex">
               {{ $t('navbar.login') }}
             </RouterLink>
             <RouterLink
-              v-if="!userIsLoggedIn"
-              class="btn btn-light border btn-sm"
               :to="{ name: 'signupRoute' }"
+              class="btn btn-primary btn-sm hidden sm:inline-flex"
             >
               {{ $t('navbar.signup') }}
             </RouterLink>
-          </div>
+          </template>
+
+          <!-- Mobiilimenüü nupp -->
+          <button
+            @click="toggleMenu('mobile')"
+            :aria-expanded="openMenu === 'mobile'"
+            :aria-label="$t('navbar.menu')"
+            class="btn btn-outline-secondary btn-sm btn-icon lg:hidden"
+            type="button"
+          >
+            <PhX v-if="openMenu === 'mobile'" :size="20" />
+            <PhList v-else :size="20" />
+          </button>
         </div>
       </div>
-    </nav>
+
+      <!-- Mobiilimenüü paneel -->
+      <nav
+        v-if="openMenu === 'mobile'"
+        class="border-t border-line bg-white px-4 pt-2 pb-4 lg:hidden"
+        :aria-label="$t('navbar.menu')"
+      >
+        <div class="px-3 pt-2 pb-1 text-xs font-bold tracking-wide text-muted uppercase">
+          {{ $t('navbar.trainings') }}
+        </div>
+        <RouterLink
+          v-for="navLink in trainingsNavLinks"
+          :key="navLink.label"
+          :to="navLink.to"
+          class="flex min-h-12 items-center rounded-lg px-3 font-medium text-ink hover:bg-brand-50"
+        >
+          {{ navLink.label }}
+        </RouterLink>
+        <div class="my-2 border-t border-line"></div>
+        <RouterLink
+          v-for="navLink in publicNavLinks"
+          :key="navLink.label"
+          :to="navLink.to"
+          class="flex min-h-12 items-center rounded-lg px-3 font-medium text-ink hover:bg-brand-50"
+        >
+          {{ navLink.label }}
+        </RouterLink>
+        <a
+          v-for="placeholderLabel in placeholderNavLabels"
+          :key="placeholderLabel"
+          href="#"
+          class="flex min-h-12 items-center rounded-lg px-3 font-medium text-ink hover:bg-brand-50"
+        >
+          {{ placeholderLabel }}
+        </a>
+        <template v-if="userIsAdmin">
+          <div class="mt-2 px-3 pt-3 pb-1 text-xs font-bold tracking-wide text-muted uppercase">
+            {{ $t('navbar.admin') }}
+          </div>
+          <RouterLink
+            v-for="navLink in adminNavGroups.flat()"
+            :key="navLink.label"
+            :to="navLink.to"
+            class="flex min-h-12 items-center rounded-lg px-3 font-medium text-ink hover:bg-brand-50"
+          >
+            {{ navLink.label }}
+          </RouterLink>
+        </template>
+        <template v-if="userIsLoggedIn">
+          <div class="mt-2 px-3 pt-3 pb-1 text-xs font-bold tracking-wide text-muted uppercase">
+            {{ $t('navbar.profile') }}
+          </div>
+          <RouterLink
+            v-for="navLink in profileNavLinks"
+            :key="navLink.label"
+            :to="navLink.to"
+            class="flex min-h-12 items-center rounded-lg px-3 font-medium text-ink hover:bg-brand-50"
+          >
+            {{ navLink.label }}
+          </RouterLink>
+        </template>
+        <div class="mt-3 flex flex-col gap-2 border-t border-line pt-3">
+          <button
+            v-if="userIsLoggedIn"
+            @click="isLogoutModalOpen = true"
+            class="btn btn-outline-secondary w-full"
+            type="button"
+          >
+            {{ $t('navbar.logout') }}
+          </button>
+          <template v-else>
+            <RouterLink to="/login" class="btn btn-primary w-full">
+              {{ $t('navbar.login') }}
+            </RouterLink>
+            <RouterLink :to="{ name: 'signupRoute' }" class="btn btn-outline-primary w-full">
+              {{ $t('navbar.signup') }}
+            </RouterLink>
+          </template>
+        </div>
+      </nav>
+    </header>
 
     <ConfirmModal
       :is-open="isLogoutModalOpen"
@@ -158,7 +261,9 @@
       @event-modal-closed="isLogoutModalOpen = false"
     />
 
-    <RouterView />
+    <main class="flex flex-1 flex-col">
+      <RouterView />
+    </main>
 
     <ChatbotWidget />
 
@@ -167,24 +272,29 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
-import { PhUserCircle } from '@phosphor-icons/vue'
-import { Dropdown } from 'bootstrap'
+import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { PhCaretDown, PhList, PhUserCircle, PhX } from '@phosphor-icons/vue'
 import { useRoute } from 'vue-router'
 import FooterComponent from '@/components/FooterComponent.vue'
 import ConfirmModal from '@/components/modals/ConfirmModal.vue'
-import FlagIcon from '@/components/common/FlagIcon.vue'
 import NavigationService from '@/services/NavigationService.js'
 import SessionStorageService from '@/services/SessionStorageService.js'
 import { useLanguageStore } from '@/stores/languageStore.js'
 import ChatbotWidget from '@/components/ChatbotWidget.vue'
 
 const route = useRoute()
+const { t } = useI18n()
 const languageStore = useLanguageStore()
 
 const userIsLoggedIn = ref(false)
 const userIsAdmin = ref(false)
 const isLogoutModalOpen = ref(false)
+// Avatud menüü: 'trainings', 'admin' ja 'profile' (desktopi rippmenüüd), 'mobile' (mobiilimenüü paneel) või null
+const openMenu = ref(null)
+const trainingsMenu = useTemplateRef('trainingsMenu')
+const adminMenu = useTemplateRef('adminMenu')
+const profileMenu = useTemplateRef('profileMenu')
 
 const PROFILE_ROUTE_NAMES = [
   'participantDetailsRoute',
@@ -194,6 +304,50 @@ const PROFILE_ROUTE_NAMES = [
 ]
 const isProfileRouteActive = computed(() => PROFILE_ROUTE_NAMES.includes(route.name))
 
+const trainingsNavLinks = computed(() => [
+  { label: t('navbar.ourTrainings'), to: { name: 'trainingsRoute' } },
+  { label: t('navbar.coursesCalendar'), to: { name: 'coursesRoute' } },
+])
+const isTrainingsRouteActive = computed(() =>
+  ['trainingsRoute', 'coursesRoute'].includes(route.name),
+)
+const publicNavLinks = computed(() => [
+  { label: t('navbar.ourLecturers'), to: { name: 'lecturersRoute' } },
+])
+const placeholderNavLabels = computed(() => [t('navbar.services'), t('navbar.contact')])
+// "Lisa uus" nupud on nimekirja vaadetes
+const adminNavGroups = computed(() => [
+  [
+    { label: t('navbar.manageEnquiries'), to: { name: 'adminEnquiriesRoute' } },
+    { label: t('navbar.manageRegistrations'), to: { name: 'adminRegistrationsRoute' } },
+    { label: t('navbar.manageFeedbacks'), to: { name: 'adminFeedbacksRoute' } },
+  ],
+  [
+    { label: t('navbar.manageTrainings'), to: { name: 'adminTrainingsRoute' } },
+    { label: t('navbar.manageCourses'), to: { name: 'adminAllCoursesRoute' } },
+  ],
+  [
+    { label: t('navbar.manageLecturers'), to: { name: 'adminLecturersRoute' } },
+    { label: t('navbar.manageRooms'), to: { name: 'adminRoomsRoute' } },
+  ],
+  [{ label: t('navbar.manageUsers'), to: { name: 'adminUsersRoute' } }],
+])
+const profileNavLinks = computed(() => {
+  const changePasswordLink = {
+    label: t('navbar.changePassword'),
+    to: { name: 'changePasswordRoute' },
+  }
+  if (userIsAdmin.value) {
+    return [changePasswordLink]
+  }
+  return [
+    { label: t('navbar.participantDetails'), to: { name: 'participantDetailsRoute' } },
+    { label: t('navbar.participantCourses'), to: { name: 'participantCoursesRoute' } },
+    { label: t('navbar.participantCertificates'), to: { name: 'participantCertificatesRoute' } },
+    changePasswordLink,
+  ]
+})
+
 // sessionStorage ei ole reaktiivne — seisund loetakse uuesti iga marsruudi muutusel
 // (nt pärast sisselogimist) ja väljalogimisel (avalehel olles marsruut ei pruugi muutuda)
 function refreshSessionState() {
@@ -201,27 +355,50 @@ function refreshSessionState() {
   userIsAdmin.value = SessionStorageService.userIsAdmin()
 }
 
-// Navbari rippmenüü suletakse ise: menüüpunktile klõpsates (ka siis, kui see on juba avatud leht)
-// ja igal marsruudi muutusel. Bootstrapi enda sulgemine sõltub nupu .show klassist, mille Vue
-// :class-iga üle kirjutab; hide() vaatab menüü enda .show klassi.
-function closeNavbarDropdowns() {
-  document.querySelectorAll('.navbar .dropdown-menu.show').forEach((dropdownMenu) => {
-    const dropdownToggle = dropdownMenu.parentElement.querySelector('[data-bs-toggle="dropdown"]')
-    Dropdown.getOrCreateInstance(dropdownToggle).hide()
-  })
+function toggleMenu(menuName) {
+  openMenu.value = openMenu.value === menuName ? null : menuName
+}
+
+// Rippmenüü sulgub klikiga väljaspool seda
+function handleDocumentClick(event) {
+  const openDropdown = {
+    trainings: trainingsMenu.value,
+    admin: adminMenu.value,
+    profile: profileMenu.value,
+  }[openMenu.value]
+  if (openDropdown && !openDropdown.contains(event.target)) {
+    openMenu.value = null
+  }
+}
+
+function handleKeydown(event) {
+  if (event.key === 'Escape') {
+    openMenu.value = null
+  }
 }
 
 watch(
   () => route.fullPath,
   () => {
     refreshSessionState()
-    closeNavbarDropdowns()
+    openMenu.value = null
   },
   { immediate: true },
 )
 
+onMounted(() => {
+  document.addEventListener('click', handleDocumentClick)
+  document.addEventListener('keydown', handleKeydown)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleDocumentClick)
+  document.removeEventListener('keydown', handleKeydown)
+})
+
 function logout() {
   isLogoutModalOpen.value = false
+  openMenu.value = null
   SessionStorageService.clearSession()
   refreshSessionState()
   NavigationService.navigateToHomeView()

@@ -24,16 +24,29 @@ export default {
 </script>
 
 <template>
-  <nav class="nav nav-pills flex-row flex-lg-column gap-1 border rounded bg-body p-2">
-    <RouterLink
-      v-for="profileMenuItem in profileMenuItems"
-      :key="profileMenuItem.routeName"
-      :to="{ name: profileMenuItem.routeName }"
-      active-class="active"
-      :class="{ active: profileMenuItem.activeRouteNames?.includes($route.name) }"
-      class="nav-link text-start"
+  <nav :aria-label="$t('navbar.participantDetails')">
+    <ul
+      class="mb-6 flex gap-6 overflow-x-auto border-b border-line [scrollbar-width:thin] lg:mb-0 lg:flex-col lg:gap-1 lg:border-b-0"
     >
-      {{ $t(profileMenuItem.labelKey) }}
-    </RouterLink>
+      <li
+        v-for="profileMenuItem in profileMenuItems"
+        :key="profileMenuItem.routeName"
+        class="shrink-0"
+      >
+        <RouterLink
+          :to="{ name: profileMenuItem.routeName }"
+          :class="
+            $route.name === profileMenuItem.routeName ||
+            profileMenuItem.activeRouteNames?.includes($route.name)
+              ? 'active border-brand-600 text-brand-600 lg:bg-brand-50'
+              : 'border-transparent text-muted hover:text-ink lg:hover:bg-surface'
+          "
+          :aria-current="$route.name === profileMenuItem.routeName ? 'page' : undefined"
+          class="-mb-px block min-h-11 border-b-[3px] px-0.5 pt-2 pb-3 font-semibold whitespace-nowrap lg:mb-0 lg:rounded-lg lg:border-b-0 lg:border-l-[3px] lg:px-3 lg:py-2.5"
+        >
+          {{ $t(profileMenuItem.labelKey) }}
+        </RouterLink>
+      </li>
+    </ul>
   </nav>
 </template>

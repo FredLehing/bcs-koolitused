@@ -33,11 +33,11 @@ export default {
 </script>
 
 <template>
-  <div id="admin-training-filters" class="card mb-3">
+  <div id="admin-training-filters" class="card mb-4">
     <div class="card-body">
-      <h2 class="h5 card-title mb-3">{{ $t('adminTrainings.filters.title') }}</h2>
-      <div class="row g-3">
-        <div class="col-md-6 col-lg-4">
+      <h2 class="mb-4 text-lg font-bold">{{ $t('adminTrainings.filters.title') }}</h2>
+      <div class="grid grid-cols-12 gap-4">
+        <div class="col-span-4">
           <label class="form-label">{{ $t('adminTrainings.filters.category') }}</label>
           <CategoriesDropdown
             :category-id="filters.categoryId"
@@ -46,7 +46,7 @@ export default {
             @event-new-category-selected="$emit('event-filter-changed', 'categoryId', $event)"
           />
         </div>
-        <div class="col-md-6 col-lg-4">
+        <div class="col-span-4">
           <label class="form-label">{{ $t('adminTrainings.filters.trainingLanguage') }}</label>
           <LanguagesDropdown
             :language-id="filters.trainingLanguageId"
@@ -57,7 +57,7 @@ export default {
             "
           />
         </div>
-        <div class="col-md-6 col-lg-4">
+        <div class="col-span-4">
           <label for="filter-funding-type" class="form-label">
             {{ $t('adminTrainings.filters.fundingType') }}
           </label>
@@ -77,7 +77,7 @@ export default {
             </option>
           </select>
         </div>
-        <div class="col-md-6 col-lg-3">
+        <div class="col-span-3">
           <label for="filter-status" class="form-label">
             {{ $t('adminTrainings.filters.status') }}
           </label>
@@ -93,7 +93,7 @@ export default {
             <option value="D">{{ $t('adminTrainings.status.D') }}</option>
           </select>
         </div>
-        <div class="col-md-4 col-lg-3">
+        <div class="col-span-3">
           <label for="filter-orderable" class="form-label">
             {{ $t('adminTrainings.filters.orderable') }}
           </label>
@@ -108,7 +108,7 @@ export default {
             <option value="false">{{ $t('adminTrainings.filters.no') }}</option>
           </select>
         </div>
-        <div class="col-md-4 col-lg-3">
+        <div class="col-span-3">
           <label for="filter-promoted" class="form-label">
             {{ $t('adminTrainings.filters.promoted') }}
           </label>
@@ -123,7 +123,7 @@ export default {
             <option value="false">{{ $t('adminTrainings.filters.no') }}</option>
           </select>
         </div>
-        <div class="col-md-4 col-lg-3">
+        <div class="col-span-3">
           <label for="filter-translations" class="form-label">
             {{ $t('adminTrainings.filters.translations') }}
           </label>
@@ -139,7 +139,7 @@ export default {
           </select>
         </div>
       </div>
-      <div class="d-flex flex-wrap gap-2 mt-3">
+      <div class="mt-4 flex flex-wrap gap-2">
         <button @click="$emit('event-filter-clicked')" class="btn btn-primary" type="button">
           {{ $t('adminTrainings.filters.filter') }}
         </button>

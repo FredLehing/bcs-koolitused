@@ -47,7 +47,7 @@ export default {
     },
 
     shapeClass() {
-      return this.shape === 'rounded' ? 'rounded-3' : 'rounded-circle'
+      return this.shape === 'rounded' ? 'rounded-xl' : 'rounded-full'
     },
   },
 }
@@ -60,14 +60,14 @@ export default {
     :alt="alt"
     :style="sizeStyle"
     :class="shapeClass"
-    class="lecturer-avatar flex-shrink-0"
+    class="lecturer-avatar shrink-0"
     loading="lazy"
   />
   <div
     v-else
     :style="sizeStyle"
     :class="shapeClass"
-    class="lecturer-avatar-placeholder flex-shrink-0 d-flex align-items-center justify-content-center bg-body-secondary text-secondary"
+    class="flex shrink-0 items-center justify-center bg-brand-100 text-brand-600"
     role="img"
     :aria-label="alt"
   >

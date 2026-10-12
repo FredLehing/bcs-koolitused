@@ -5,14 +5,14 @@ import TrainingService from '@/api-services/TrainingService.js'
 import NavigationService from '@/services/NavigationService.js'
 import TrainingCard from '@/components/TrainingCard.vue'
 import PaginationNav from '@/components/common/PaginationNav.vue'
-import { PhQuestion, PhX } from '@phosphor-icons/vue'
-import { Tooltip } from 'bootstrap'
+import { PhFunnel, PhMagnifyingGlass, PhX } from '@phosphor-icons/vue'
 import LanguageService from '@/api-services/LanguageService.js'
 import CategoryService from '@/api-services/CategoryService.js'
 import FundingTypeService from '@/api-services/FundingTypeService.js'
 import LanguagesDropdown from '@/components/forms/LanguagesDropdown.vue'
 import CategoriesDropdown from '@/components/forms/CategoriesDropdown.vue'
 import FundingTypesRadio from '@/components/forms/FundingTypesRadio.vue'
+import HelpTip from '@/components/common/HelpTip.vue'
 import TrainingsTabs from '@/components/common/TrainingsTabs.vue'
 
 export default {
@@ -21,11 +21,13 @@ export default {
     FundingTypesRadio,
     TrainingCard,
     PaginationNav,
-    PhQuestion,
+    HelpTip,
+    TrainingsTabs,
+    PhFunnel,
+    PhMagnifyingGlass,
     PhX,
     LanguagesDropdown,
     CategoriesDropdown,
-    TrainingsTabs,
   },
   data() {
     return {
@@ -45,20 +47,25 @@ export default {
       categories: [],
       languages: [],
       fundingTypes: [],
+      // Kitsal ekraanil on filtrid peidetud paneelis
+      isFilterPanelOpen: false,
     }
   },
   computed: {
     // Kasutajaliidese keel (navbaris valitud) — sellega küsitakse koolituste tõlgitud väljad
     ...mapState(useLanguageStore, ['contentLang']),
     hasActiveFilters() {
-      return this.trainingLanguageId !== 0 || this.categoryId !== 0 || this.fundingTypeId !== 0
+      return this.activeFilterCount > 0
+    },
+    activeFilterCount() {
+      return [this.trainingLanguageId, this.categoryId, this.fundingTypeId].filter((id) => id !== 0)
+        .length
     },
   },
   watch: {
     // Keele vahetus navbaris → laadi koolitused uues keeles (filtrid ja lehekülg jäävad alles)
     contentLang() {
       this.getTrainings()
-      this.$nextTick(() => this.updateSearchHelpTooltip())
       this.getCategories()
       this.getFundingTypes()
     },
@@ -126,10 +133,6 @@ export default {
       this.searchText = ''
       this.$refs.searchInput.focus()
     },
-    // Bootstrap tooltip loeb teksti ainult loomisel, keele vahetusel tuleb see uuendada
-    updateSearchHelpTooltip() {
-      this.searchHelpTooltip?.setContent({ '.tooltip-inner': this.$t('trainings.searchHelp') })
-    },
     handlePageChanged(newPage) {
       this.page = newPage
       this.getTrainings()
@@ -188,116 +191,131 @@ export default {
     this.getCategories()
     this.getFundingTypes()
   },
-  mounted() {
-    this.searchHelpTooltip = new Tooltip(this.$refs.searchHelp)
-  },
   beforeUnmount() {
     this.trainingsRequestId++
-    this.searchHelpTooltip.dispose()
   },
 }
 </script>
 
 <template>
-  <div class="container d-flex flex-grow-1 flex-column">
+  <div class="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 py-8 sm:px-6 sm:py-10">
     <TrainingsTabs />
+    <h1 class="mb-6 text-3xl font-extrabold tracking-tight sm:text-4xl">
+      {{ $t('navbar.ourTrainings') }}
+    </h1>
 
-    <div class="row flex-grow-1">
-      <div class="col-md-4 col-lg-3">
-        <aside class="d-flex flex-column gap-3 mb-4" :aria-label="$t('trainings.filters.title')">
-          <div>
-            <label class="form-label fw-semibold" for="training-filter-language">
-              {{ $t('trainings.filters.trainingLanguage') }}
-            </label>
-            <LanguagesDropdown
-              id="training-filter-language"
-              :languages="languages"
-              :language-id="trainingLanguageId"
-              @event-new-language-selected="handleNewLanguageSelected"
-              :first-option-label="$t('trainings.filters.allLanguages')"
-            />
+    <div class="flex flex-1 flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
+      <!-- Filtrid: kitsal ekraanil nupp + avatav paneel, laial ekraanil külgriba -->
+      <aside
+        class="lg:sticky lg:top-24 lg:w-72 lg:shrink-0"
+        :aria-label="$t('trainings.filters.title')"
+      >
+        <button
+          @click="isFilterPanelOpen = !isFilterPanelOpen"
+          :aria-expanded="isFilterPanelOpen"
+          aria-controls="training-filter-panel"
+          class="btn btn-outline-secondary w-full lg:hidden"
+          type="button"
+        >
+          <PhFunnel :size="18" />
+          {{ $t('trainings.filters.title') }}
+          <span v-if="activeFilterCount > 0" class="badge text-bg-primary">
+            {{ activeFilterCount }}
+          </span>
+        </button>
+        <div
+          id="training-filter-panel"
+          :class="isFilterPanelOpen ? 'block' : 'hidden'"
+          class="mt-3 rounded-2xl border border-line bg-white p-5 lg:mt-0 lg:block"
+        >
+          <div class="flex flex-col gap-5">
+            <div>
+              <label class="form-label" for="training-filter-language">
+                {{ $t('trainings.filters.trainingLanguage') }}
+              </label>
+              <LanguagesDropdown
+                id="training-filter-language"
+                :languages="languages"
+                :language-id="trainingLanguageId"
+                @event-new-language-selected="handleNewLanguageSelected"
+                :first-option-label="$t('trainings.filters.allLanguages')"
+              />
+            </div>
+            <div>
+              <label class="form-label" for="training-filter-category">
+                {{ $t('trainings.filters.category') }}
+              </label>
+              <CategoriesDropdown
+                id="training-filter-category"
+                :categories="categories"
+                :category-id="categoryId"
+                @event-new-category-selected="handleNewCategorySelected"
+                :first-option-label="$t('trainings.filters.allCategories')"
+              />
+            </div>
+            <fieldset>
+              <legend class="form-label">
+                {{ $t('trainings.filters.fundingType') }}
+              </legend>
+              <FundingTypesRadio
+                :funding-types="fundingTypes"
+                :funding-type-id="fundingTypeId"
+                @event-new-fundingtype-selected="handleNewFundingTypeSelected"
+                :first-option-label="$t('trainings.filters.all')"
+              />
+            </fieldset>
+            <button
+              v-if="hasActiveFilters"
+              @click="handleClearFiltersClick"
+              class="btn btn-link self-start"
+              type="button"
+            >
+              {{ $t('trainings.filters.clear') }}
+            </button>
           </div>
-          <div>
-            <label class="form-label fw-semibold" for="training-filter-category">
-              {{ $t('trainings.filters.category') }}
-            </label>
-            <CategoriesDropdown
-              id="training-filter-category"
-              :categories="categories"
-              :category-id="categoryId"
-              @event-new-category-selected="handleNewCategorySelected"
-              :first-option-label="$t('trainings.filters.allCategories')"
-            />
-          </div>
-          <fieldset>
-            <legend class="form-label fw-semibold fs-6">
-              {{ $t('trainings.filters.fundingType') }}
-            </legend>
-            <FundingTypesRadio
-              :funding-types="fundingTypes"
-              :funding-type-id="fundingTypeId"
-              @event-new-fundingtype-selected="handleNewFundingTypeSelected"
-              :first-option-label="$t('trainings.filters.all')"
-            />
-          </fieldset>
-          <button
-            v-if="hasActiveFilters"
-            @click="handleClearFiltersClick"
-            class="btn btn-link p-0 align-self-start"
-            type="button"
+        </div>
+      </aside>
+
+      <div class="flex min-w-0 flex-1 flex-col gap-4">
+        <form class="flex items-center gap-2" @submit.prevent="handleSearchClick">
+          <div
+            class="flex min-h-12 flex-1 items-center gap-2 rounded-xl border border-brand-200 bg-white px-3 focus-within:border-brand-600 focus-within:ring-3 focus-within:ring-brand-600/15"
           >
-            {{ $t('trainings.filters.clear') }}
-          </button>
-        </aside>
-      </div>
-      <div class="col-md-8 col-lg-9 d-flex flex-column">
-        <div class="d-flex align-items-center gap-2 mb-3">
-          <div class="input-group">
+            <PhMagnifyingGlass :size="20" class="shrink-0 text-muted" />
             <input
               ref="searchInput"
               v-model="searchText"
               type="text"
-              class="form-control"
+              class="min-w-0 flex-1 bg-transparent outline-none"
               :placeholder="$t('trainings.searchPlaceholder')"
               :aria-label="$t('trainings.searchPlaceholder')"
-              @keyup.enter="handleSearchClick"
               @keyup.esc="handleClearSearch"
             />
             <button
               v-if="searchText"
               type="button"
-              class="btn btn-outline-secondary"
+              class="btn btn-link btn-sm text-muted"
               :title="$t('trainings.clearSearch')"
               :aria-label="$t('trainings.clearSearch')"
               @click="handleClearSearch"
             >
               <PhX :size="16" />
             </button>
-            <button type="button" class="btn btn-primary" @click="handleSearchClick">
-              {{ $t('trainings.search') }}
-            </button>
           </div>
-          <span
-            ref="searchHelp"
-            class="text-secondary"
-            role="img"
-            tabindex="0"
-            data-bs-toggle="tooltip"
-            data-bs-placement="left"
-            :data-bs-title="$t('trainings.searchHelp')"
-            :aria-label="$t('trainings.searchHelp')"
-          >
-            <PhQuestion :size="22" />
-          </span>
-        </div>
-        <p v-if="appliedSearchText" class="text-secondary mb-3">
+          <button type="submit" class="btn btn-primary min-h-12">
+            {{ $t('trainings.search') }}
+          </button>
+          <HelpTip :text="$t('trainings.searchHelp')" />
+        </form>
+        <p v-if="appliedSearchText" class="text-muted">
           {{ $t('trainings.searchResults', { query: appliedSearchText }) }}
-          <strong>{{ $t('trainings.resultCount', totalElements) }}</strong>
+          <strong class="text-ink">{{ $t('trainings.resultCount', totalElements) }}</strong>
           ·
-          <button type="button" class="btn btn-link p-0 align-baseline" @click="handleClearSearch">
+          <button type="button" class="btn btn-link" @click="handleClearSearch">
             {{ $t('trainings.cancelSearch') }}
           </button>
         </p>
+
         <TrainingCard
           v-for="training in trainings"
           :key="training.trainingId"
@@ -305,24 +323,24 @@ export default {
         />
         <div
           v-if="!isLoadingTrainings && trainings.length === 0"
-          class="text-center text-secondary border rounded py-4 px-3 mb-3"
+          class="rounded-2xl border border-dashed border-brand-200 bg-white px-4 py-10 text-center text-muted"
         >
           <template v-if="appliedSearchText">
-            <p class="fw-semibold mb-1">
+            <p class="mb-1 font-semibold text-ink">
               {{ $t('trainings.noSearchResults', { query: appliedSearchText }) }}
             </p>
-            <p class="mb-3">{{ $t('trainings.noSearchResultsHint') }}</p>
+            <p class="mb-4">{{ $t('trainings.noSearchResultsHint') }}</p>
             <button type="button" class="btn btn-outline-primary" @click="handleClearSearch">
               {{ $t('trainings.showAllTrainings') }}
             </button>
           </template>
-          <p v-else class="mb-0">{{ $t('trainings.noResults') }}</p>
+          <p v-else>{{ $t('trainings.noResults') }}</p>
         </div>
         <PaginationNav
           :page="page"
           :total-pages="totalPages"
           @event-page-changed="handlePageChanged"
-          class="mb-3 mt-auto"
+          class="mt-auto pt-4"
         />
       </div>
     </div>

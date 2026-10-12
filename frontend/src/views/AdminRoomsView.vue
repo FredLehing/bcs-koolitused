@@ -1,6 +1,6 @@
 <script>
 import { mapState } from 'pinia'
-import { PhPencilSimple, PhPlus } from '@phosphor-icons/vue'
+import { PhPencilSimple, PhPlus, PhMagnifyingGlass } from '@phosphor-icons/vue'
 import { useLanguageStore } from '@/stores/languageStore.js'
 import RoomService from '@/api-services/RoomService.js'
 import NavigationService from '@/services/NavigationService.js'
@@ -29,6 +29,7 @@ export default {
     AdminTabs,
     PhPencilSimple,
     PhPlus,
+    PhMagnifyingGlass,
     InlineAlerts,
     RoomDeleteButton,
     RoomRestoreButton,
@@ -170,30 +171,34 @@ export default {
 </script>
 
 <template>
-  <div class="container">
+  <div class="mx-auto w-full max-w-7xl px-6 py-8">
     <AdminTabs />
 
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-      <h1 class="h3 mb-0">{{ $t('adminRooms.title') }}</h1>
-      <button
-        @click="navigateToNewRoomForm"
-        class="btn btn-primary d-inline-flex align-items-center gap-1"
-        type="button"
-      >
-        <PhPlus :size="18" />
-        {{ $t('adminRooms.addRoom') }}
-      </button>
+    <div class="mb-6 flex items-end justify-between gap-4">
+      <h1 class="text-3xl font-extrabold tracking-tight">{{ $t('adminRooms.title') }}</h1>
+      <div class="flex items-center gap-4">
+        <span class="text-muted">{{ $t('adminRooms.totalCount', filteredRooms.length) }}</span>
+        <button @click="navigateToNewRoomForm" class="btn btn-primary" type="button">
+          <PhPlus :size="18" />
+          {{ $t('adminRooms.addRoom') }}
+        </button>
+      </div>
     </div>
 
-    <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
-      <input
-        v-model="searchText"
-        :placeholder="$t('adminRooms.searchPlaceholder')"
-        :aria-label="$t('adminRooms.searchPlaceholder')"
-        class="form-control search-input"
-        type="search"
-      />
-      <div class="form-check form-switch mb-0">
+    <div class="mb-4 flex flex-wrap items-center gap-x-6 gap-y-3">
+      <div
+        class="flex min-h-11 max-w-xl flex-1 items-center gap-2 rounded-lg border border-brand-200 bg-white px-3 focus-within:border-brand-600 focus-within:ring-3 focus-within:ring-brand-600/15"
+      >
+        <PhMagnifyingGlass :size="18" class="shrink-0 text-muted" />
+        <input
+          v-model="searchText"
+          :placeholder="$t('adminRooms.searchPlaceholder')"
+          :aria-label="$t('adminRooms.searchPlaceholder')"
+          class="min-w-0 flex-1 bg-transparent outline-none"
+          type="search"
+        />
+      </div>
+      <div class="form-check form-switch">
         <input
           v-model="includeDeleted"
           id="includeDeleted"
@@ -207,7 +212,7 @@ export default {
       </div>
     </div>
 
-    <div class="mb-2">
+    <div class="mb-3">
       <InlineAlerts
         :success-message="successMessage"
         :error-message="errorMessage"
@@ -216,88 +221,82 @@ export default {
       />
     </div>
 
-    <div class="table-responsive">
-      <table class="table table-hover align-middle">
-        <thead>
-          <tr>
-            <SortableColumnHeader
-              v-for="sortableColumn in sortableColumns"
-              :key="sortableColumn.sortKey"
-              :label="sortableColumn.label"
-              :sort-key="sortableColumn.sortKey"
-              :sort-by="sortBy"
-              :sort-direction="sortDirection"
-              @event-sort-clicked="handleSortClick"
-            />
-            <th>{{ $t('adminRooms.columns.actions') }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="room in sortedRooms"
-            :key="room.roomId"
-            :class="{ 'deleted-row': room.status === 'D' }"
-          >
-            <td>
-              {{ room.roomName }}
-              <span v-if="room.status === 'D'" class="badge text-bg-danger ms-1">
-                {{ $t('adminRooms.deleted') }}
-              </span>
-            </td>
-            <td>{{ room.upcomingCourseCount }}</td>
-            <td>{{ room.courseCount }}</td>
-            <td class="text-nowrap">{{ formatDate(room.updatedAt) }}</td>
-            <td>
-              <div v-if="room.status !== 'D'" class="d-flex gap-1">
-                <RouterLink
-                  :to="{
-                    name: 'roomFormRoute',
-                    query: { returnTo: $route.fullPath, roomId: room.roomId },
-                  }"
-                  :title="$t('adminRooms.edit')"
-                  :aria-label="$t('adminRooms.edit')"
-                  class="btn btn-sm btn-outline-secondary d-inline-flex"
-                >
-                  <PhPencilSimple :size="20" />
-                </RouterLink>
-                <RoomDeleteButton
+    <div class="overflow-hidden rounded-2xl border border-line bg-white">
+      <div class="overflow-x-auto">
+        <table class="table table-hover">
+          <thead class="bg-surface">
+            <tr>
+              <SortableColumnHeader
+                v-for="sortableColumn in sortableColumns"
+                :key="sortableColumn.sortKey"
+                :label="sortableColumn.label"
+                :sort-key="sortableColumn.sortKey"
+                :sort-by="sortBy"
+                :sort-direction="sortDirection"
+                @event-sort-clicked="handleSortClick"
+              />
+              <th class="text-right">{{ $t('adminRooms.columns.actions') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="room in sortedRooms"
+              :key="room.roomId"
+              :class="{ 'deleted-row': room.status === 'D' }"
+            >
+              <td>
+                {{ room.roomName }}
+                <span v-if="room.status === 'D'" class="badge text-bg-danger ml-1">
+                  {{ $t('adminRooms.deleted') }}
+                </span>
+              </td>
+              <td>{{ room.upcomingCourseCount }}</td>
+              <td>{{ room.courseCount }}</td>
+              <td class="whitespace-nowrap">{{ formatDate(room.updatedAt) }}</td>
+              <td class="text-right">
+                <div v-if="room.status !== 'D'" class="inline-flex gap-2">
+                  <RouterLink
+                    :to="{
+                      name: 'roomFormRoute',
+                      query: { returnTo: $route.fullPath, roomId: room.roomId },
+                    }"
+                    :title="$t('adminRooms.edit')"
+                    :aria-label="$t('adminRooms.edit')"
+                    class="btn btn-sm btn-icon btn-outline-secondary"
+                  >
+                    <PhPencilSimple :size="20" />
+                  </RouterLink>
+                  <RoomDeleteButton
+                    :room-id="room.roomId"
+                    :room-name="room.roomName"
+                    :upcoming-course-count="room.upcomingCourseCount"
+                    @event-room-deleted="handleRoomDeleted"
+                    @event-delete-error="handleDeleteError"
+                  />
+                </div>
+                <RoomRestoreButton
+                  v-else
                   :room-id="room.roomId"
                   :room-name="room.roomName"
-                  :upcoming-course-count="room.upcomingCourseCount"
-                  @event-room-deleted="handleRoomDeleted"
-                  @event-delete-error="handleDeleteError"
+                  @event-room-restored="handleRoomRestored"
                 />
-              </div>
-              <RoomRestoreButton
-                v-else
-                :room-id="room.roomId"
-                :room-name="room.roomName"
-                @event-room-restored="handleRoomRestored"
-              />
-            </td>
-          </tr>
-          <tr v-if="filteredRooms.length === 0">
-            <td colspan="5" class="text-center text-secondary py-4">
-              {{ $t('adminRooms.noResults') }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+              </td>
+            </tr>
+            <tr v-if="filteredRooms.length === 0">
+              <td colspan="5" class="py-10 text-center text-muted">
+                {{ $t('adminRooms.noResults') }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-
-    <p class="text-secondary mb-4">
-      {{ $t('adminRooms.totalCount', filteredRooms.length) }}
-    </p>
   </div>
 </template>
 
 <style scoped>
-.search-input {
-  max-width: 24rem;
-}
-
-/* Kustutatud ruum: tuhmim rida, ainult "Taasta" nupp */
+/* Tuhmim rida */
 .deleted-row td {
-  color: var(--bs-secondary-color);
+  color: var(--color-muted);
 }
 </style>

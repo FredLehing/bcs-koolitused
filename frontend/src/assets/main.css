@@ -1,47 +1,207 @@
-/*body {*/
-/*  background-image: radial-gradient(#95B1DD80 1.5px, transparent 1.5px);*/
-/*  background-size: 24px 24px;*/
-/*}*/
-.navbar-glass {
-  background: linear-gradient(rgba(255, 255, 255, 0.55), rgba(149, 177, 221, 0.25));
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.7);
-}
-.navbar-glass .nav-link {
-  font-weight: 600;
-}
-/* Läbipaistmatu vaste Bootstrapi bg-primary bg-opacity-50 värvile valgel taustal.
-   !important nagu Bootstrapi bg-* utiliitidel, sest main.css laetakse enne Bootstrapi
-   ja muidu kirjutab nt .dropdown-menu taustavärvi üle. */
-.bg-bcs-primary {
-  background-color: #86B7FE !important;
-}
-.footer-bcs{
-  background-color: #86B7FE;
-  color: #0b0e13;
-}
+@import 'tailwindcss';
 
-#app {
-  font-weight: normal;
+/* BCS Koolitus kujundus (Tailwind CSS v4). Värvid tulevad logost: põhisinine brand-600, helesinine brand-300.
+   Stiilireeglid ja mustrid: docs/structure/frontend-tailwind-stiilijuhend.md */
+
+@theme {
+  --font-sans: 'Source Sans 3', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+
+  --color-brand-50: #f2f7fc;
+  --color-brand-100: #eaf2fb;
+  --color-brand-200: #c9d7ea;
+  --color-brand-300: #96b3df;
+  --color-brand-600: #0b6bb0;
+  --color-brand-700: #08548c;
+  --color-navy: #0a2540;
+  --color-ink: #13233a;
+  --color-muted: #4a5b70;
+  --color-line: #e1e8f1;
+  --color-surface: #f6f8fb;
 }
 
-a,
-.green {
-  text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
-  transition: 0.4s;
-  padding: 3px;
+/* Laiem lehe raam koos külgveeristega (ka ümber kujundamata vaadetes, mis kasutavad .container klassi) */
+@utility container {
+  margin-inline: auto;
+  padding-inline: 1rem;
 }
 
+@layer base {
+  body {
+    @apply bg-surface font-sans text-ink antialiased;
+  }
 
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display text-navy;
+  }
 
-.pointer {
-  cursor: pointer;
+  a {
+    @apply text-brand-600 hover:text-brand-700;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-600;
+  }
 }
 
-.text-pointer-underlined:hover {
-  text-decoration: underline;
+/* Korduvad põhielemendid. Nimed on samad mis Bootstrapis, et ka ümber kujundamata vaated (nupud, väljad,
+   tabelid, märgised, teated) näeksid uues stiilis välja. Uutes vaadetes kasuta neid koos Tailwindi utiliitidega. */
+@layer components {
+  .btn {
+    @apply inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-lg border border-transparent px-5 font-display text-[15px] font-semibold whitespace-nowrap no-underline transition-colors select-none disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-sm {
+    @apply min-h-9 px-3 text-sm;
+  }
+  .btn-lg {
+    @apply min-h-13 px-7 text-base;
+  }
+  .btn-icon {
+    @apply min-w-9 px-0;
+  }
+  .btn-primary {
+    @apply bg-brand-600 text-white hover:bg-brand-700 hover:text-white;
+  }
+  .btn-success {
+    @apply bg-emerald-700 text-white hover:bg-emerald-800 hover:text-white;
+  }
+  .btn-danger {
+    @apply bg-red-700 text-white hover:bg-red-800 hover:text-white;
+  }
+  .btn-secondary {
+    @apply bg-slate-100 text-ink hover:bg-slate-200 hover:text-ink;
+  }
+  .btn-white {
+    @apply bg-white text-navy hover:bg-brand-100 hover:text-navy;
+  }
+  .btn-outline-primary {
+    @apply border-brand-200 bg-white text-brand-600 hover:border-brand-600 hover:text-brand-700;
+  }
+  .btn-outline-secondary,
+  .btn-light {
+    @apply border-line bg-white text-ink hover:border-brand-300 hover:bg-brand-50 hover:text-ink;
+  }
+  .btn-outline-danger {
+    @apply border-red-200 bg-white text-red-700 hover:border-red-600 hover:bg-red-50 hover:text-red-800;
+  }
+  .btn-outline-success {
+    @apply border-emerald-200 bg-white text-emerald-800 hover:border-emerald-600 hover:bg-emerald-50 hover:text-emerald-900;
+  }
+  .btn-link {
+    @apply min-h-0 border-0 bg-transparent px-0 font-sans text-base text-brand-600 hover:text-brand-700 hover:underline;
+  }
+
+  .form-label {
+    @apply mb-1.5 block text-sm font-semibold text-ink;
+  }
+  .form-control,
+  .form-select {
+    @apply block min-h-11 w-full rounded-lg border border-brand-200 bg-white px-3 text-base text-ink placeholder:text-slate-400 focus:border-brand-600 focus:ring-3 focus:ring-brand-600/15 focus:outline-none disabled:bg-slate-100 disabled:text-muted;
+  }
+  textarea.form-control {
+    @apply py-2.5;
+  }
+  .form-text {
+    @apply mt-1 text-sm text-muted;
+  }
+  .form-check {
+    @apply flex min-h-10 items-center gap-2.5;
+  }
+  .form-check-input {
+    @apply m-0 size-[18px] shrink-0 cursor-pointer accent-brand-600;
+  }
+  .form-check-label {
+    @apply cursor-pointer;
+  }
+
+  .card {
+    @apply rounded-2xl border border-line bg-white;
+  }
+  .card-body {
+    @apply p-5 sm:p-6;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold whitespace-nowrap;
+  }
+  .text-bg-primary {
+    @apply bg-brand-600 text-white;
+  }
+  .text-bg-success {
+    @apply bg-emerald-100 text-emerald-800;
+  }
+  .text-bg-warning {
+    @apply bg-amber-100 text-amber-900;
+  }
+  .text-bg-danger {
+    @apply bg-red-100 text-red-800;
+  }
+  .text-bg-secondary {
+    @apply bg-slate-200 text-slate-700;
+  }
+  .text-bg-light {
+    @apply border border-line bg-white text-muted;
+  }
+
+  .alert {
+    @apply rounded-xl border px-4 py-3 text-[15px];
+  }
+  .alert-success {
+    @apply border-emerald-200 bg-emerald-50 text-emerald-900;
+  }
+  .alert-danger {
+    @apply border-red-200 bg-red-50 text-red-900;
+  }
+  .alert-info {
+    @apply border-brand-200 bg-brand-50 text-navy;
+  }
+
+  .table {
+    @apply w-full border-collapse text-[15px];
+  }
+  .table th {
+    @apply border-b border-line px-3 py-3 text-left text-xs font-bold tracking-wide whitespace-nowrap text-muted uppercase;
+  }
+  .table td {
+    @apply border-b border-line px-3 py-3 align-middle;
+  }
+  .table-hover > tbody > tr:hover > td {
+    @apply bg-brand-50;
+  }
+
+  .visually-hidden {
+    @apply sr-only;
+  }
 }
 
-
-
+/* Lüliti (form-switch): märkeruut liuguri kujul */
+.form-switch .form-check-input {
+  appearance: none;
+  position: relative;
+  width: 2.5rem;
+  height: 1.5rem;
+  border-radius: 9999px;
+  background: #cbd5e1;
+  transition: background-color 0.15s;
+}
+.form-switch .form-check-input::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 1.125rem;
+  height: 1.125rem;
+  border-radius: 9999px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.25);
+  transition: transform 0.15s;
+}
+.form-switch .form-check-input:checked {
+  background: var(--color-brand-600);
+}
+.form-switch .form-check-input:checked::before {
+  transform: translateX(1rem);
+}

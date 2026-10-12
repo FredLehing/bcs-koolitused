@@ -506,120 +506,127 @@ export default {
 </script>
 
 <template>
-  <div class="container">
+  <div class="mx-auto w-full max-w-6xl px-6 py-8">
     <BackLink :fallback="{ name: 'adminLecturersRoute' }" />
-    <div class="row justify-content-center">
-      <div class="col-lg-10">
-        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
-          <h1 class="mb-0">
-            {{ pageTitle }}
-            <span v-if="!isNewLecturer && lecturer.fullName" class="text-secondary fs-4">
-              — {{ lecturer.fullName }}
-            </span>
-          </h1>
-          <button
-            @click="navigateToAdminLecturersView"
-            class="btn btn-outline-secondary"
-            type="button"
-          >
-            {{ $t('navbar.manageLecturers') }}
-          </button>
-        </div>
+    <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+      <h1 class="text-3xl font-extrabold tracking-tight">
+        {{ pageTitle }}
+        <span v-if="!isNewLecturer && lecturer.fullName" class="text-2xl font-semibold text-muted">
+          — {{ lecturer.fullName }}
+        </span>
+      </h1>
+      <button @click="navigateToAdminLecturersView" class="btn btn-outline-secondary" type="button">
+        {{ $t('navbar.manageLecturers') }}
+      </button>
+    </div>
 
-        <fieldset v-if="!isNewLecturer" class="border rounded p-3 mb-4">
-          <legend class="float-none w-auto px-2 fs-5">
-            {{ $t('lecturerForm.translations.legend') }}
-          </legend>
-          <TranslationFlags
-            :translation-languages="translationLanguages"
-            :existing-translations="lecturerTranslations"
-            :current-language-code="translation.languageCode"
-            @event-translation-flag-clicked="handleTranslationFlagClicked"
-          />
-        </fieldset>
-
-        <fieldset class="border rounded p-3 mb-4">
-          <legend class="float-none w-auto px-2 fs-5">{{ $t('lecturerForm.data.legend') }}</legend>
-          <div class="row g-3 text-start">
-            <div class="col-md-6">
-              <label class="form-label" for="fullName"
-                >{{ $t('lecturerForm.data.fullName') }} *</label
-              >
-              <input
-                v-model="lecturer.fullName"
-                :readonly="isNewTranslation"
-                id="fullName"
-                class="form-control"
-                type="text"
-                maxlength="255"
-              />
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">{{ $t('lecturerForm.data.photo') }}</label>
-              <PhotoUpload
-                :lecturer-id="lecturer.lecturerId"
-                :photo-version="lecturer.photoVersion"
-                :new-photo="newPhoto"
-                :is-photo-removed="isPhotoRemoved"
-                :is-readonly="isNewTranslation"
-                @event-photo-selected="handlePhotoSelected"
-                @event-photo-removed="handlePhotoRemoved"
-                @event-photo-error="handlePhotoError"
-              />
-            </div>
-          </div>
-        </fieldset>
-
-        <LecturerTranslationForm
-          :translation="translation"
-          :language-name="translationLanguageName"
-          :flag-icon-code="translationLanguage ? translationLanguage.flagIconCode : ''"
-          :show-ai-button="showAiButton"
-          :is-ai-loading="isAiLoading"
-          :show-prefilled-hint="isNewTranslation"
-          :main-language-code="mainLanguageCode"
-          @event-new-title-input="translation.title = $event"
-          @event-new-short-description-input="translation.shortDescription = $event"
-          @event-new-description-input="translation.description = $event"
-          @event-ai-translation-clicked="handleAiTranslationClicked"
+    <div class="flex flex-col gap-6">
+      <section
+        v-if="!isNewLecturer"
+        class="rounded-2xl border border-line bg-white p-6"
+        aria-labelledby="lecturer-translations-heading"
+      >
+        <h2 id="lecturer-translations-heading" class="mb-4 text-lg font-bold">
+          {{ $t('lecturerForm.translations.legend') }}
+        </h2>
+        <TranslationFlags
+          :translation-languages="translationLanguages"
+          :existing-translations="lecturerTranslations"
+          :current-language-code="translation.languageCode"
+          @event-translation-flag-clicked="handleTranslationFlagClicked"
         />
+      </section>
 
-        <div class="d-flex flex-wrap align-items-center gap-3 mb-5">
-          <button
-            v-if="isNewLecturer"
-            @click="addLecturer"
-            :disabled="isSending"
-            class="btn btn-success"
-            type="button"
-          >
-            {{ $t('trainingForm.buttons.add') }}
-          </button>
-          <button
-            v-if="isUpdate"
-            @click="updateLecturer"
-            :disabled="isSending"
-            class="btn btn-success"
-            type="button"
-          >
-            {{ $t('trainingForm.buttons.save') }}
-          </button>
-          <button
-            v-if="isNewTranslation"
-            @click="addLecturerTranslation"
-            :disabled="isSending"
-            class="btn btn-success"
-            type="button"
-          >
-            {{ $t('trainingForm.buttons.addTranslation') }}
-          </button>
-          <InlineAlerts
-            :success-message="successMessage"
-            :error-message="errorMessage"
-            @event-success-message-closed="successMessage = ''"
-            @event-error-message-closed="errorMessage = ''"
-          />
+      <section
+        class="rounded-2xl border border-line bg-white p-6"
+        aria-labelledby="lecturer-data-heading"
+      >
+        <h2 id="lecturer-data-heading" class="mb-4 text-lg font-bold">
+          {{ $t('lecturerForm.data.legend') }}
+        </h2>
+        <div class="grid gap-4 md:grid-cols-2">
+          <div>
+            <label class="form-label" for="fullName"
+              >{{ $t('lecturerForm.data.fullName') }} *</label
+            >
+            <input
+              v-model="lecturer.fullName"
+              :readonly="isNewTranslation"
+              :class="{ 'bg-slate-100 text-muted': isNewTranslation }"
+              id="fullName"
+              class="form-control"
+              type="text"
+              maxlength="255"
+            />
+          </div>
+          <div>
+            <h3 class="form-label">{{ $t('lecturerForm.data.photo') }}</h3>
+            <PhotoUpload
+              :lecturer-id="lecturer.lecturerId"
+              :photo-version="lecturer.photoVersion"
+              :new-photo="newPhoto"
+              :is-photo-removed="isPhotoRemoved"
+              :is-readonly="isNewTranslation"
+              @event-photo-selected="handlePhotoSelected"
+              @event-photo-removed="handlePhotoRemoved"
+              @event-photo-error="handlePhotoError"
+            />
+          </div>
         </div>
-      </div>
+      </section>
+
+      <LecturerTranslationForm
+        :translation="translation"
+        :language-name="translationLanguageName"
+        :flag-icon-code="translationLanguage ? translationLanguage.flagIconCode : ''"
+        :show-ai-button="showAiButton"
+        :is-ai-loading="isAiLoading"
+        :show-prefilled-hint="isNewTranslation"
+        :main-language-code="mainLanguageCode"
+        @event-new-title-input="translation.title = $event"
+        @event-new-short-description-input="translation.shortDescription = $event"
+        @event-new-description-input="translation.description = $event"
+        @event-ai-translation-clicked="handleAiTranslationClicked"
+      />
+    </div>
+
+    <!-- Kleepuv nupurida: salvestamine on pika vormi juures alati käeulatuses -->
+    <div
+      class="sticky bottom-0 z-10 -mx-6 mt-6 flex flex-wrap items-center gap-3 border-t border-line bg-surface/95 px-6 py-4 backdrop-blur"
+    >
+      <button
+        v-if="isNewLecturer"
+        @click="addLecturer"
+        :disabled="isSending"
+        class="btn btn-primary"
+        type="button"
+      >
+        {{ $t('trainingForm.buttons.add') }}
+      </button>
+      <button
+        v-if="isUpdate"
+        @click="updateLecturer"
+        :disabled="isSending"
+        class="btn btn-primary"
+        type="button"
+      >
+        {{ $t('trainingForm.buttons.save') }}
+      </button>
+      <button
+        v-if="isNewTranslation"
+        @click="addLecturerTranslation"
+        :disabled="isSending"
+        class="btn btn-primary"
+        type="button"
+      >
+        {{ $t('trainingForm.buttons.addTranslation') }}
+      </button>
+      <InlineAlerts
+        :success-message="successMessage"
+        :error-message="errorMessage"
+        @event-success-message-closed="successMessage = ''"
+        @event-error-message-closed="errorMessage = ''"
+      />
     </div>
 
     <ConfirmModal

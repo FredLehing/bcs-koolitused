@@ -1,7 +1,14 @@
 <script>
 import { mapState } from 'pinia'
-import { Tooltip } from 'bootstrap'
-import { PhCalendarBlank, PhCheck, PhEye, PhPlus, PhQuestion, PhX } from '@phosphor-icons/vue'
+import {
+  PhCalendarBlank,
+  PhCheck,
+  PhEye,
+  PhFunnel,
+  PhMagnifyingGlass,
+  PhPlus,
+  PhX,
+} from '@phosphor-icons/vue'
 import { useLanguageStore } from '@/stores/languageStore.js'
 import TrainingService from '@/api-services/TrainingService.js'
 import LanguageService from '@/api-services/LanguageService.js'
@@ -10,6 +17,7 @@ import FundingTypeService from '@/api-services/FundingTypeService.js'
 import NavigationService from '@/services/NavigationService.js'
 import SessionStorageService from '@/services/SessionStorageService.js'
 import AdminTabs from '@/components/common/AdminTabs.vue'
+import HelpTip from '@/components/common/HelpTip.vue'
 import FlagIcon from '@/components/common/FlagIcon.vue'
 import InlineAlerts from '@/components/common/InlineAlerts.vue'
 import EditTrainingLink from '@/components/common/EditTrainingLink.vue'
@@ -47,8 +55,10 @@ export default {
     PhCalendarBlank,
     PhCheck,
     PhEye,
+    PhFunnel,
+    PhMagnifyingGlass,
     PhPlus,
-    PhQuestion,
+    HelpTip,
     PhX,
     FlagIcon,
     InlineAlerts,
@@ -140,7 +150,6 @@ export default {
       this.getFundingTypes()
       this.getTrainingTitles()
       this.getAdminTrainings()
-      this.$nextTick(() => this.updateSearchHelpTooltip())
     },
   },
   methods: {
@@ -326,11 +335,6 @@ export default {
         languages: adminTrainingSummary.missingTranslationLanguageCodes.join(', '),
       })
     },
-
-    // Bootstrap tooltip loeb teksti ainult loomisel, keele vahetusel tuleb see uuendada
-    updateSearchHelpTooltip() {
-      this.searchHelpTooltip.setContent({ '.tooltip-inner': this.$t('adminTrainings.searchHelp') })
-    },
   },
   beforeMount() {
     if (SessionStorageService.userIsAdmin()) {
@@ -343,89 +347,77 @@ export default {
       NavigationService.navigateToNotAuthorizedView()
     }
   },
-  mounted() {
-    this.searchHelpTooltip = new Tooltip(this.$refs.searchHelp)
-  },
-  beforeUnmount() {
-    this.searchHelpTooltip.dispose()
-  },
 }
 </script>
 
 <template>
-  <div class="container">
+  <div class="mx-auto w-full max-w-7xl px-6 py-8">
     <AdminTabs />
 
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-      <h1 class="h3 mb-0">{{ $t('adminTrainings.title') }}</h1>
-      <button
-        @click="navigateToNewTrainingForm"
-        class="btn btn-primary d-inline-flex align-items-center gap-1"
-        type="button"
-      >
-        <PhPlus :size="18" />
-        {{ $t('navbar.addTraining') }}
-      </button>
-    </div>
-
-    <div class="d-flex align-items-center gap-2 mb-2">
-      <div class="input-group">
-        <input
-          v-model="searchText"
-          @keyup.enter="handleSearchClick"
-          :placeholder="$t('adminTrainings.searchPlaceholder')"
-          :aria-label="$t('adminTrainings.searchPlaceholder')"
-          list="admin-training-titles"
-          autocomplete="off"
-          class="form-control"
-          type="text"
-        />
-        <button @click="handleSearchClick" class="btn btn-primary" type="button">
-          {{ $t('adminTrainings.search') }}
+    <div class="mb-6 flex items-end justify-between gap-4">
+      <h1 class="text-3xl font-extrabold tracking-tight">{{ $t('adminTrainings.title') }}</h1>
+      <div class="flex items-center gap-4">
+        <span class="text-muted">{{ $t('adminTrainings.totalCount', totalElements) }}</span>
+        <button @click="navigateToNewTrainingForm" class="btn btn-primary" type="button">
+          <PhPlus :size="18" />
+          {{ $t('navbar.addTraining') }}
         </button>
       </div>
-      <datalist id="admin-training-titles">
-        <option
-          v-for="trainingTitle in trainingTitles"
-          :key="trainingTitle.trainingId"
-          :value="trainingTitle.title"
-        ></option>
-      </datalist>
-      <span
-        ref="searchHelp"
-        class="text-secondary"
-        role="img"
-        tabindex="0"
-        data-bs-toggle="tooltip"
-        data-bs-placement="left"
-        :data-bs-title="$t('adminTrainings.searchHelp')"
-        :aria-label="$t('adminTrainings.searchHelp')"
-      >
-        <PhQuestion :size="22" />
-      </span>
     </div>
 
-    <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+    <div class="mb-4 flex items-center gap-2">
+      <form class="flex flex-1 gap-2" @submit.prevent="handleSearchClick">
+        <div
+          class="flex min-h-11 flex-1 items-center gap-2 rounded-lg border border-brand-200 bg-white px-3 focus-within:border-brand-600 focus-within:ring-3 focus-within:ring-brand-600/15"
+        >
+          <PhMagnifyingGlass :size="18" class="shrink-0 text-muted" />
+          <input
+            v-model="searchText"
+            :placeholder="$t('adminTrainings.searchPlaceholder')"
+            :aria-label="$t('adminTrainings.searchPlaceholder')"
+            list="admin-training-titles"
+            autocomplete="off"
+            class="min-w-0 flex-1 bg-transparent outline-none"
+            type="text"
+          />
+        </div>
+        <button class="btn btn-primary" type="submit">
+          {{ $t('adminTrainings.search') }}
+        </button>
+        <HelpTip :text="$t('adminTrainings.searchHelp')" />
+      </form>
       <button
         @click="isFilterCardOpen = !isFilterCardOpen"
         :aria-expanded="isFilterCardOpen"
         aria-controls="admin-training-filters"
-        class="btn btn-link p-0"
+        :class="{ 'border-brand-600 bg-brand-50': isFilterCardOpen }"
+        class="btn btn-outline-secondary"
         type="button"
       >
+        <PhFunnel :size="18" />
         {{
           isFilterCardOpen ? $t('adminTrainings.filters.hide') : $t('adminTrainings.filters.show')
         }}
-      </button>
-      <template v-if="activeFilterCount > 0">
-        <span class="badge text-bg-primary">
-          {{ $t('adminTrainings.filters.activeCount', activeFilterCount) }}
+        <span v-if="activeFilterCount > 0" class="badge text-bg-primary">
+          {{ activeFilterCount }}
         </span>
-        <button @click="handleClearFiltersClick" class="btn btn-link btn-sm p-0" type="button">
-          {{ $t('adminTrainings.filters.clear') }}
-        </button>
-      </template>
+      </button>
+      <button
+        v-if="activeFilterCount > 0"
+        @click="handleClearFiltersClick"
+        class="btn btn-link btn-sm"
+        type="button"
+      >
+        {{ $t('adminTrainings.filters.clear') }}
+      </button>
     </div>
+    <datalist id="admin-training-titles">
+      <option
+        v-for="trainingTitle in trainingTitles"
+        :key="trainingTitle.trainingId"
+        :value="trainingTitle.title"
+      ></option>
+    </datalist>
 
     <AdminTrainingFilters
       v-if="isFilterCardOpen"
@@ -438,7 +430,7 @@ export default {
       @event-clear-clicked="handleClearFiltersClick"
     />
 
-    <div class="mb-2">
+    <div class="mb-3">
       <InlineAlerts
         :success-message="successMessage"
         :error-message="errorMessage"
@@ -447,148 +439,148 @@ export default {
       />
     </div>
 
-    <div class="table-responsive">
-      <table class="table table-hover align-middle">
-        <thead>
-          <tr>
-            <SortableColumnHeader
-              v-for="sortableColumn in sortableColumns"
-              :key="sortableColumn.sortKey"
-              :label="sortableColumn.label"
-              :sort-key="sortableColumn.sortKey"
-              :sort-by="sortBy"
-              :sort-direction="sortDirection"
-              @event-sort-clicked="handleSortClick"
-            />
-            <th>{{ $t('adminTrainings.columns.settings') }}</th>
-            <th>{{ $t('adminTrainings.columns.actions') }}</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="adminTrainingSummary in adminTrainingSummaries"
-            :key="adminTrainingSummary.trainingId"
-            :class="{ 'deleted-row': adminTrainingSummary.status === 'D' }"
-          >
-            <td class="text-nowrap" :title="formatDateTime(adminTrainingSummary.createdAt)">
-              {{ formatDate(adminTrainingSummary.createdAt) }}
-            </td>
-            <td class="text-nowrap" :title="formatDateTime(adminTrainingSummary.updatedAt)">
-              {{ formatDate(adminTrainingSummary.updatedAt) }}
-            </td>
-            <td>{{ adminTrainingSummary.title }}</td>
-            <td>{{ adminTrainingSummary.categoryName }}</td>
-            <td>
-              <FlagIcon
-                :flag-icon-code="adminTrainingSummary.trainingLanguageFlagIconCode"
-                :title="adminTrainingSummary.trainingLanguageCode"
-                class="fs-5"
+    <div class="overflow-hidden rounded-2xl border border-line bg-white">
+      <div class="overflow-x-auto">
+        <table class="table table-hover">
+          <thead class="bg-surface">
+            <tr>
+              <SortableColumnHeader
+                v-for="sortableColumn in sortableColumns"
+                :key="sortableColumn.sortKey"
+                :label="sortableColumn.label"
+                :sort-key="sortableColumn.sortKey"
+                :sort-by="sortBy"
+                :sort-direction="sortDirection"
+                @event-sort-clicked="handleSortClick"
               />
-            </td>
-            <td>
-              <span class="badge" :class="statusBadgeClass(adminTrainingSummary.status)">
-                {{ $t(`adminTrainings.status.${adminTrainingSummary.status}`) }}
-              </span>
-            </td>
-            <td>
-              <PhCheck
-                v-if="adminTrainingSummary.hasAllTranslations"
-                :size="20"
-                weight="bold"
-                class="text-success"
-                :aria-label="$t('adminTrainings.translationsComplete')"
-              />
-              <span
-                v-else
-                :title="missingTranslationsText(adminTrainingSummary)"
-                :aria-label="missingTranslationsText(adminTrainingSummary)"
-                role="img"
-              >
-                <PhX :size="20" weight="bold" class="text-danger" />
-              </span>
-            </td>
-            <td>
-              <ul class="settings-list list-unstyled mb-0 small">
-                <li
-                  v-for="setting in trainingSettings(adminTrainingSummary)"
-                  :key="setting"
-                  class="text-nowrap"
-                >
-                  {{ setting }}
-                </li>
-                <li v-if="trainingSettings(adminTrainingSummary).length === 0" class="no-settings">
-                  —
-                </li>
-              </ul>
-            </td>
-            <td>
-              <div v-if="adminTrainingSummary.status !== 'D'" class="d-flex gap-1">
-                <button
-                  @click="navigateToTrainingView(adminTrainingSummary)"
-                  :title="$t('adminTrainings.view')"
-                  :aria-label="$t('adminTrainings.view')"
-                  class="btn btn-sm btn-outline-secondary d-inline-flex"
-                  type="button"
-                >
-                  <PhEye :size="20" />
-                </button>
-                <EditTrainingLink
-                  :training-id="adminTrainingSummary.trainingId"
-                  :training-translation-id="adminTrainingSummary.trainingTranslationId"
+              <th>{{ $t('adminTrainings.columns.settings') }}</th>
+              <th class="text-right">{{ $t('adminTrainings.columns.actions') }}</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="adminTrainingSummary in adminTrainingSummaries"
+              :key="adminTrainingSummary.trainingId"
+              :class="{ 'deleted-row': adminTrainingSummary.status === 'D' }"
+            >
+              <td class="whitespace-nowrap" :title="formatDateTime(adminTrainingSummary.createdAt)">
+                {{ formatDate(adminTrainingSummary.createdAt) }}
+              </td>
+              <td class="whitespace-nowrap" :title="formatDateTime(adminTrainingSummary.updatedAt)">
+                {{ formatDate(adminTrainingSummary.updatedAt) }}
+              </td>
+              <td>{{ adminTrainingSummary.title }}</td>
+              <td>{{ adminTrainingSummary.categoryName }}</td>
+              <td>
+                <FlagIcon
+                  :flag-icon-code="adminTrainingSummary.trainingLanguageFlagIconCode"
+                  :title="adminTrainingSummary.trainingLanguageCode"
+                  class="text-xl"
                 />
-                <RouterLink
-                  :to="{
-                    name: 'adminTrainingCoursesRoute',
-                    query: {
-                      returnTo: $route.fullPath,
-                      trainingId: adminTrainingSummary.trainingId,
-                    },
-                  }"
-                  :title="$t('adminTrainings.calendar')"
-                  :aria-label="$t('adminTrainings.calendar')"
-                  class="btn btn-sm btn-outline-secondary d-inline-flex"
+              </td>
+              <td>
+                <span class="badge" :class="statusBadgeClass(adminTrainingSummary.status)">
+                  {{ $t(`adminTrainings.status.${adminTrainingSummary.status}`) }}
+                </span>
+              </td>
+              <td>
+                <PhCheck
+                  v-if="adminTrainingSummary.hasAllTranslations"
+                  :size="20"
+                  weight="bold"
+                  class="text-emerald-600"
+                  :aria-label="$t('adminTrainings.translationsComplete')"
+                />
+                <span
+                  v-else
+                  :title="missingTranslationsText(adminTrainingSummary)"
+                  :aria-label="missingTranslationsText(adminTrainingSummary)"
+                  role="img"
                 >
-                  <PhCalendarBlank :size="20" />
-                </RouterLink>
-                <TrainingDeleteButton
+                  <PhX :size="20" weight="bold" class="text-red-600" />
+                </span>
+              </td>
+              <td>
+                <ul class="settings-list m-0 list-none p-0 text-sm">
+                  <li
+                    v-for="setting in trainingSettings(adminTrainingSummary)"
+                    :key="setting"
+                    class="whitespace-nowrap"
+                  >
+                    {{ setting }}
+                  </li>
+                  <li
+                    v-if="trainingSettings(adminTrainingSummary).length === 0"
+                    class="no-settings"
+                  >
+                    —
+                  </li>
+                </ul>
+              </td>
+              <td>
+                <div v-if="adminTrainingSummary.status !== 'D'" class="flex justify-end gap-2">
+                  <button
+                    @click="navigateToTrainingView(adminTrainingSummary)"
+                    :title="$t('adminTrainings.view')"
+                    :aria-label="$t('adminTrainings.view')"
+                    class="btn btn-sm btn-icon btn-outline-secondary"
+                    type="button"
+                  >
+                    <PhEye :size="20" />
+                  </button>
+                  <EditTrainingLink
+                    :training-id="adminTrainingSummary.trainingId"
+                    :training-translation-id="adminTrainingSummary.trainingTranslationId"
+                  />
+                  <RouterLink
+                    :to="{
+                      name: 'adminTrainingCoursesRoute',
+                      query: {
+                        returnTo: $route.fullPath,
+                        trainingId: adminTrainingSummary.trainingId,
+                      },
+                    }"
+                    :title="$t('adminTrainings.calendar')"
+                    :aria-label="$t('adminTrainings.calendar')"
+                    class="btn btn-sm btn-icon btn-outline-secondary"
+                  >
+                    <PhCalendarBlank :size="20" />
+                  </RouterLink>
+                  <TrainingDeleteButton
+                    :training-id="adminTrainingSummary.trainingId"
+                    :title="adminTrainingSummary.title"
+                    @event-training-deleted="handleTrainingDeleted"
+                  />
+                </div>
+              </td>
+              <td class="whitespace-nowrap">
+                <TrainingStatusButton
                   :training-id="adminTrainingSummary.trainingId"
+                  :status="adminTrainingSummary.status"
                   :title="adminTrainingSummary.title"
-                  @event-training-deleted="handleTrainingDeleted"
+                  button-class="btn btn-sm btn-outline-primary"
+                  @event-status-changed="handleStatusChanged(adminTrainingSummary, $event)"
+                  @event-status-error="handleStatusError"
                 />
-              </div>
-            </td>
-            <td class="text-nowrap">
-              <TrainingStatusButton
-                :training-id="adminTrainingSummary.trainingId"
-                :status="adminTrainingSummary.status"
-                :title="adminTrainingSummary.title"
-                button-class="btn btn-sm btn-outline-primary"
-                @event-status-changed="handleStatusChanged(adminTrainingSummary, $event)"
-                @event-status-error="handleStatusError"
-              />
-            </td>
-          </tr>
-          <tr v-if="adminTrainingSummaries.length === 0">
-            <td colspan="10" class="text-center text-secondary py-4">
-              {{ $t('adminTrainings.noResults') }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+              </td>
+            </tr>
+            <tr v-if="adminTrainingSummaries.length === 0">
+              <td colspan="10" class="py-10 text-center text-muted">
+                {{ $t('adminTrainings.noResults') }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
-      <span class="text-secondary">
-        {{ $t('adminTrainings.totalCount', totalElements) }}
-      </span>
-      <PaginationNav
-        :page="page"
-        :total-pages="totalPages"
-        @event-page-changed="handlePageChanged"
-      />
-      <span></span>
-    </div>
+    <PaginationNav
+      :page="page"
+      :total-pages="totalPages"
+      @event-page-changed="handlePageChanged"
+      class="mt-6"
+    />
   </div>
 </template>
 
@@ -601,7 +593,7 @@ export default {
   height: 0.45rem;
   margin-right: 0.4rem;
   border-radius: 50%;
-  background-color: var(--bs-primary);
+  background-color: var(--color-brand-600);
   vertical-align: middle;
 }
 
@@ -611,7 +603,7 @@ export default {
 
 /* Kustutatud koolitus: tuhmim rida, ainult "Taasta" nupp */
 .deleted-row td {
-  color: var(--bs-secondary-color);
+  color: var(--color-muted);
 }
 
 .deleted-row td :deep(.fi),

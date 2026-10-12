@@ -1,7 +1,7 @@
 <script>
 import BackLink from '@/components/common/BackLink.vue'
 import { mapState } from 'pinia'
-import { PhCheckCircle, PhPencilSimple } from '@phosphor-icons/vue'
+import { PhCalendarBlank, PhCaretRight, PhCheckCircle, PhPencilSimple } from '@phosphor-icons/vue'
 import { useLanguageStore } from '@/stores/languageStore.js'
 import CourseService from '@/api-services/CourseService.js'
 import FormatService from '@/services/FormatService.js'
@@ -18,6 +18,8 @@ export default {
   name: 'CourseView',
   components: {
     BackLink,
+    PhCalendarBlank,
+    PhCaretRight,
     PhCheckCircle,
     PhPencilSimple,
     AlertSuccess,
@@ -153,43 +155,183 @@ export default {
 </script>
 
 <template>
-  <div class="container">
-    <BackLink :fallback="{ name: 'coursesRoute' }" />
-    <AlertSuccess :success-message="successMessage" />
+  <div class="flex flex-1 flex-col">
+    <div v-if="coursePage" class="border-b border-line bg-white">
+      <div class="mx-auto flex w-full max-w-6xl flex-col px-4 pt-4 pb-8 sm:px-6 sm:pb-10">
+        <BackLink :fallback="{ name: 'coursesRoute' }" />
+        <p v-if="coursePage.isMainLanguageFallback" class="mb-2 text-sm text-muted">
+          {{ $t('trainingView.mainLanguageFallback') }}
+        </p>
+        <div class="mb-3 flex flex-wrap items-center gap-2">
+          <span
+            v-if="coursePage.categoryName"
+            class="rounded-md bg-brand-100 px-2.5 py-0.5 text-sm font-semibold text-brand-700"
+          >
+            {{ coursePage.categoryName }}
+          </span>
+          <span v-if="isFull" class="badge text-bg-warning">{{ $t('courseStatus.F') }}</span>
+          <span v-if="coursePage.isPast" class="badge text-bg-light">
+            {{ $t('courseStatus.past') }}
+          </span>
+        </div>
+        <div class="flex items-start justify-between gap-3">
+          <h1 class="text-3xl leading-tight font-extrabold tracking-tight sm:text-5xl">
+            {{ coursePage.title }}
+          </h1>
+          <RouterLink
+            v-if="userIsAdmin"
+            :to="{
+              name: 'courseFormRoute',
+              query: { returnTo: $route.fullPath, courseId: coursePage.courseId },
+            }"
+            :title="$t('courses.editCourse')"
+            :aria-label="$t('courses.editCourse')"
+            class="btn btn-outline-secondary btn-icon shrink-0"
+          >
+            <PhPencilSimple :size="20" />
+          </RouterLink>
+        </div>
+        <p class="mt-3 max-w-3xl text-lg text-muted sm:text-xl">
+          {{ coursePage.shortDescription }}
+        </p>
+        <p class="mt-4 inline-flex items-center gap-2 font-semibold text-navy">
+          <PhCalendarBlank :size="20" class="text-brand-600" />
+          {{ formatDateRange(coursePage.startDate, coursePage.endDate) }}
+        </p>
+      </div>
+    </div>
 
-    <div v-if="coursePage" class="row text-start">
-      <!-- Vasak veerg: koolituse sisu -->
-      <div class="col-lg-8">
-        <fieldset class="border rounded bg-body p-3 mb-4">
-          <legend class="float-none w-auto px-2 fs-5">{{ $t('trainingView.legend') }}</legend>
+    <div class="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
+      <BackLink v-if="!coursePage" :fallback="{ name: 'coursesRoute' }" />
+      <AlertSuccess :success-message="successMessage" class="mb-6" />
 
-          <p v-if="coursePage.isMainLanguageFallback" class="small text-muted">
-            {{ $t('trainingView.mainLanguageFallback') }}
-          </p>
+      <div v-if="coursePage" class="flex flex-col gap-6 lg:flex-row lg:items-start">
+        <!-- Parem veerg on kitsal ekraanil esimene: andmed ja registreerumine kohe nähtaval -->
+        <aside class="flex flex-col gap-6 lg:order-2 lg:w-96 lg:shrink-0">
+          <section class="rounded-2xl border border-line bg-white p-5 sm:p-6">
+            <h2 class="mb-4 text-lg font-bold">{{ $t('courseView.course') }}</h2>
+            <div class="mb-5 flex items-baseline justify-between gap-3">
+              <span class="font-display text-3xl font-extrabold text-navy">
+                {{ formatPrice(coursePage.price) }} €
+              </span>
+              <FlagIcon
+                :flag-icon-code="coursePage.trainingLanguageFlagIconCode"
+                :title="$t('trainingCard.language')"
+                class="text-2xl"
+              />
+            </div>
+            <dl class="grid grid-cols-2 gap-x-4 gap-y-3 text-[15px]">
+              <dt class="text-muted">{{ $t('adminCourse.fields.dates') }}</dt>
+              <dd class="font-semibold">
+                {{ formatDateRange(coursePage.startDate, coursePage.endDate) }}
+              </dd>
+              <dt class="text-muted">{{ $t('adminTrainingCourses.columns.numberOfDays') }}</dt>
+              <dd class="font-semibold">{{ coursePage.numberOfDays }}</dd>
+              <dt class="text-muted">
+                {{ $t('adminTrainingCourses.columns.numberOfAcademicHours') }}
+              </dt>
+              <dd class="font-semibold">{{ coursePage.numberOfAcademicHours }}</dd>
+              <dt class="text-muted">{{ $t('courses.filters.attendance') }}</dt>
+              <dd class="font-semibold">{{ attendanceText(coursePage) }}</dd>
+              <dt class="text-muted">{{ $t('courses.filters.fundingType') }}</dt>
+              <dd class="font-semibold">{{ fundingTypeNames || '—' }}</dd>
+            </dl>
 
-          <div class="d-flex justify-content-between align-items-center gap-2 mb-1">
-            <div class="fs-4 fw-semibold">{{ coursePage.title }}</div>
-            <RouterLink
-              v-if="userIsAdmin"
-              :to="{
-                name: 'courseFormRoute',
-                query: { returnTo: $route.fullPath, courseId: coursePage.courseId },
-              }"
-              :title="$t('courses.editCourse')"
-              :aria-label="$t('courses.editCourse')"
-              class="btn btn-sm btn-outline-secondary d-inline-flex"
-            >
-              <PhPencilSimple :size="20" />
-            </RouterLink>
-          </div>
-          <div class="d-flex flex-wrap align-items-center gap-2 text-secondary mb-3">
-            {{ formatDateRange(coursePage.startDate, coursePage.endDate) }}
-            <span v-if="coursePage.isPast" class="badge text-bg-light border">
-              {{ $t('courseStatus.past') }}
-            </span>
-          </div>
-          <p class="fw-semibold">{{ coursePage.shortDescription }}</p>
-          <RichTextContent :html="coursePage.description" />
+            <div v-if="!userIsAdmin" class="mt-6 flex flex-col gap-2">
+              <div v-if="isRegistered" class="alert alert-success flex items-center gap-2">
+                <PhCheckCircle :size="20" />
+                {{ $t('courseView.registered') }}
+              </div>
+              <button
+                v-else
+                @click="handleRegisterClick"
+                :disabled="coursePage.isPast || isFull"
+                class="btn btn-primary btn-lg"
+                type="button"
+              >
+                {{ isFull ? $t('courseView.full') : $t('courseView.register') }}
+              </button>
+              <button
+                @click="isEnquiryModalOpen = true"
+                :disabled="coursePage.isPast"
+                class="btn btn-outline-primary"
+                type="button"
+              >
+                {{ $t('enquiryModal.title') }}
+              </button>
+            </div>
+          </section>
+
+          <section
+            v-if="hasOtherCourses"
+            class="rounded-2xl border border-line bg-white p-5 sm:p-6"
+          >
+            <h2 class="mb-2 text-lg font-bold">{{ $t('courseView.courses') }}</h2>
+            <ul class="flex flex-col">
+              <li
+                v-for="upcomingCourse in coursePage.upcomingCourses"
+                :key="upcomingCourse.courseId"
+                class="border-b border-line last:border-0"
+              >
+                <div
+                  v-if="upcomingCourse.courseId === courseId"
+                  class="-mx-2 flex items-center justify-between gap-3 rounded-lg bg-brand-50 px-2 py-3"
+                  aria-current="true"
+                >
+                  <span class="flex flex-col">
+                    <span class="font-semibold text-navy">
+                      {{ formatDateRange(upcomingCourse.startDate, upcomingCourse.endDate) }}
+                    </span>
+                    <span class="text-sm text-muted">{{ attendanceText(upcomingCourse) }}</span>
+                  </span>
+                  <span v-if="upcomingCourse.status === 'F'" class="badge text-bg-warning">
+                    {{ $t('courseStatus.F') }}
+                  </span>
+                </div>
+                <RouterLink
+                  v-else
+                  :to="{
+                    name: 'courseRoute',
+                    query: { courseId: upcomingCourse.courseId },
+                  }"
+                  replace
+                  class="-mx-2 flex items-center justify-between gap-3 rounded-lg px-2 py-3 text-ink hover:bg-brand-50 hover:text-ink"
+                >
+                  <span class="flex flex-col">
+                    <span class="font-semibold">
+                      {{ formatDateRange(upcomingCourse.startDate, upcomingCourse.endDate) }}
+                    </span>
+                    <span class="text-sm text-muted">{{ attendanceText(upcomingCourse) }}</span>
+                  </span>
+                  <span v-if="upcomingCourse.status === 'F'" class="badge text-bg-warning">
+                    {{ $t('courseStatus.F') }}
+                  </span>
+                  <PhCaretRight v-else :size="18" class="text-brand-600" />
+                </RouterLink>
+              </li>
+            </ul>
+          </section>
+
+          <section
+            v-if="hasVisibleLecturers"
+            class="rounded-2xl border border-line bg-white p-5 sm:p-6"
+          >
+            <h2 class="mb-3 text-lg font-bold">{{ $t('trainingView.sidebar.lecturers') }}</h2>
+            <div class="flex flex-col gap-3">
+              <LecturerCard
+                v-for="lecturer in coursePage.lecturers"
+                :key="lecturer.lecturerId"
+                :lecturer-summary="lecturer"
+              />
+            </div>
+          </section>
+        </aside>
+
+        <article
+          class="min-w-0 flex-1 rounded-2xl border border-line bg-white p-5 sm:p-8 lg:order-1"
+        >
+          <h2 class="mb-4 text-xl font-bold">{{ $t('trainingView.legend') }}</h2>
+          <RichTextContent :html="coursePage.description" class="max-w-prose" />
           <RouterLink
             :to="{
               name: 'trainingRoute',
@@ -199,110 +341,15 @@ export default {
                 trainingTranslationId: coursePage.trainingTranslationId,
               },
             }"
+            class="mt-4 inline-flex items-center gap-1 font-semibold"
           >
-            {{ $t('courseView.allTrainingCourses') }}
+            {{ $t('courseView.allTrainingCourses') }} →
           </RouterLink>
-        </fieldset>
-      </div>
-
-      <!-- Parem veerg: toimumiskorrad, andmed, tegevused, koolitajad -->
-      <div class="col-lg-4">
-        <fieldset v-if="hasOtherCourses" class="border rounded bg-body p-3 mb-4">
-          <legend class="float-none w-auto px-2 fs-5">{{ $t('courseView.courses') }}</legend>
-          <ul class="list-unstyled mb-0">
-            <li
-              v-for="upcomingCourse in coursePage.upcomingCourses"
-              :key="upcomingCourse.courseId"
-              class="mb-1"
-            >
-              <strong v-if="upcomingCourse.courseId === courseId">
-                ▸ {{ formatDateRange(upcomingCourse.startDate, upcomingCourse.endDate) }} ·
-                {{ attendanceText(upcomingCourse) }}
-              </strong>
-              <RouterLink
-                v-else
-                :to="{
-                  name: 'courseRoute',
-                  query: { courseId: upcomingCourse.courseId },
-                }"
-                replace
-              >
-                {{ formatDateRange(upcomingCourse.startDate, upcomingCourse.endDate) }} ·
-                {{ attendanceText(upcomingCourse) }}
-              </RouterLink>
-              <span v-if="upcomingCourse.status === 'F'" class="badge text-bg-warning ms-2">
-                {{ $t('courseStatus.F') }}
-              </span>
-            </li>
-          </ul>
-        </fieldset>
-
-        <fieldset class="border rounded bg-body p-3 mb-4">
-          <legend class="float-none w-auto px-2 fs-5">{{ $t('courseView.course') }}</legend>
-          <dl class="mb-3">
-            <dt>{{ $t('adminCourse.fields.dates') }}</dt>
-            <dd>{{ formatDateRange(coursePage.startDate, coursePage.endDate) }}</dd>
-            <dt>{{ $t('adminTrainingCourses.columns.numberOfDays') }}</dt>
-            <dd>{{ coursePage.numberOfDays }}</dd>
-            <dt>{{ $t('adminTrainingCourses.columns.numberOfAcademicHours') }}</dt>
-            <dd>{{ coursePage.numberOfAcademicHours }}</dd>
-            <dt>{{ $t('adminTrainingCourses.columns.price') }}</dt>
-            <dd>{{ formatPrice(coursePage.price) }}</dd>
-            <dt>{{ $t('courses.filters.attendance') }}</dt>
-            <dd>{{ attendanceText(coursePage) }}</dd>
-            <dt>{{ $t('trainingCard.language') }}</dt>
-            <dd>
-              <FlagIcon :flag-icon-code="coursePage.trainingLanguageFlagIconCode" class="fs-5" />
-            </dd>
-            <dt>{{ $t('courses.filters.category') }}</dt>
-            <dd>{{ coursePage.categoryName ?? '—' }}</dd>
-            <dt>{{ $t('courses.filters.fundingType') }}</dt>
-            <dd>{{ fundingTypeNames || '—' }}</dd>
-          </dl>
-          <span v-if="isFull" class="badge text-bg-warning mb-3">{{ $t('courseStatus.F') }}</span>
-
-          <div v-if="!userIsAdmin" class="d-grid gap-2">
-            <div
-              v-if="isRegistered"
-              class="alert alert-success d-flex align-items-center gap-2 mb-0"
-            >
-              <PhCheckCircle :size="20" />
-              {{ $t('courseView.registered') }}
-            </div>
-            <button
-              v-else
-              @click="handleRegisterClick"
-              :disabled="coursePage.isPast || isFull"
-              class="btn btn-success"
-              type="button"
-            >
-              {{ isFull ? $t('courseView.full') : $t('courseView.register') }}
-            </button>
-            <button
-              @click="isEnquiryModalOpen = true"
-              :disabled="coursePage.isPast"
-              class="btn btn-outline-primary"
-              type="button"
-            >
-              {{ $t('enquiryModal.title') }}
-            </button>
-          </div>
-        </fieldset>
-
-        <fieldset v-if="hasVisibleLecturers" class="border rounded bg-body p-3 mb-4">
-          <legend class="float-none w-auto px-2 fs-5">
-            {{ $t('trainingView.sidebar.lecturers') }}
-          </legend>
-          <LecturerCard
-            v-for="lecturer in coursePage.lecturers"
-            :key="lecturer.lecturerId"
-            :lecturer-summary="lecturer"
-            class="lecturer-card"
-          />
-        </fieldset>
+        </article>
       </div>
 
       <EnquiryModal
+        v-if="coursePage"
         :is-open="isEnquiryModalOpen"
         :training-id="coursePage.trainingId"
         :course-id="coursePage.courseId"
@@ -315,10 +362,3 @@ export default {
     </div>
   </div>
 </template>
-
-<style scoped>
-/* Mitme koolitaja kaardid üksteise all */
-.lecturer-card + .lecturer-card {
-  margin-top: 1rem;
-}
-</style>

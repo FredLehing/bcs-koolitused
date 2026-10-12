@@ -16,8 +16,8 @@ export default {
 </script>
 
 <template>
-  <span :title="title" :aria-label="title" role="img" class="d-inline-flex">
-    <PhCheck v-if="value" :size="20" weight="bold" class="text-success" />
-    <PhX v-else :size="20" weight="bold" class="text-danger" />
+  <span :title="title" :aria-label="title" role="img" class="inline-flex">
+    <PhCheck v-if="value" :size="20" weight="bold" class="text-emerald-700" />
+    <PhX v-else :size="20" weight="bold" class="text-red-600" />
   </span>
 </template>

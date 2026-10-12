@@ -33,34 +33,38 @@ export default {
   <BaseModal :is-open="isOpen" @event-modal-closed="$emit('event-modal-closed')">
     <template #title>{{ $t('trainingForm.lecturerModal.title') }}</template>
     <template #body>
-      <div class="input-group mb-3">
+      <div class="mb-4 flex">
         <input
           v-model="search"
           @keyup.enter="$emit('event-lecturer-search', search)"
           type="text"
-          class="form-control"
+          class="form-control rounded-r-none"
+          :aria-label="$t('trainingForm.lecturerModal.searchPlaceholder')"
           :placeholder="$t('trainingForm.lecturerModal.searchPlaceholder')"
         />
         <button
           @click="$emit('event-lecturer-search', search)"
-          class="btn btn-outline-secondary"
+          class="btn btn-outline-secondary -ml-px rounded-l-none border-brand-200"
           type="button"
         >
           {{ $t('trainingForm.lecturerModal.search') }}
         </button>
       </div>
-      <div class="list-group">
+      <div
+        v-if="selectableLecturers.length > 0"
+        class="divide-y divide-line overflow-hidden rounded-xl border border-line"
+      >
         <button
           v-for="lecturer in selectableLecturers"
           :key="lecturer.lecturerId"
           @click="$emit('event-lecturer-selected', lecturer)"
-          class="list-group-item list-group-item-action"
+          class="block min-h-11 w-full cursor-pointer px-4 py-2.5 text-left hover:bg-brand-50 hover:text-brand-700"
           type="button"
         >
           {{ lecturer.lecturerName }}
         </button>
       </div>
-      <p v-if="selectableLecturers.length === 0" class="text-muted mb-0">
+      <p v-else class="text-muted">
         {{ $t('trainingForm.lecturerModal.notFound') }}
       </p>
     </template>

@@ -63,12 +63,12 @@ export default {
 
 <template>
   <!-- Keelatud nupu tooltip ei tööta, seega title on ümbritseval span'il -->
-  <span :title="buttonTitle" class="d-inline-flex">
+  <span :title="buttonTitle" class="inline-flex">
     <button
       @click="isModalOpen = true"
       :disabled="isSending || hasUpcomingCourses"
       :aria-label="buttonTitle"
-      class="btn btn-sm btn-outline-danger d-inline-flex"
+      class="btn btn-sm btn-icon btn-outline-danger"
       type="button"
     >
       <PhTrash :size="20" />

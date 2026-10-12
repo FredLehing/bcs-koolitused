@@ -45,35 +45,37 @@ export default {
 </script>
 
 <template>
-  <div class="card mb-3">
-    <div class="card-body">
-      <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-        <div class="d-flex flex-wrap align-items-center gap-2">
-          <h2 class="h4 mb-0">{{ training.title }}</h2>
+  <div class="mb-4 rounded-2xl border border-line bg-white p-5 sm:p-6">
+    <div>
+      <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+        <div class="flex flex-wrap items-center gap-2">
+          <h2 class="text-xl font-bold">{{ training.title }}</h2>
           <span class="badge" :class="statusBadgeClass">
             {{ $t(`adminTrainings.status.${training.status}`) }}
           </span>
         </div>
-        <div class="d-flex gap-2">
+        <div class="flex gap-2">
           <slot name="actions"></slot>
         </div>
       </div>
-      <dl class="row mb-0 small">
-        <dt class="col-sm-4 col-lg-2">{{ $t('trainingSummaryCard.category') }}</dt>
-        <dd class="col-sm-8 col-lg-4">{{ training.categoryName }}</dd>
-        <dt class="col-sm-4 col-lg-2">{{ $t('trainingSummaryCard.trainingLanguage') }}</dt>
-        <dd class="col-sm-8 col-lg-4">
-          <FlagIcon :flag-icon-code="training.trainingLanguageFlagIconCode" />
+      <dl
+        class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-[15px] lg:grid-cols-[auto_1fr_auto_1fr]"
+      >
+        <dt class="text-muted">{{ $t('trainingSummaryCard.category') }}</dt>
+        <dd class="font-semibold">{{ training.categoryName }}</dd>
+        <dt class="text-muted">{{ $t('trainingSummaryCard.trainingLanguage') }}</dt>
+        <dd class="font-semibold">
+          <FlagIcon :flag-icon-code="training.trainingLanguageFlagIconCode" class="mr-1" />
           {{ training.trainingLanguageCode }}
         </dd>
-        <dt class="col-sm-4 col-lg-2">{{ $t('trainingSummaryCard.location') }}</dt>
-        <dd class="col-sm-8 col-lg-4">{{ training.locationName }}</dd>
-        <dt class="col-sm-4 col-lg-2">{{ $t('trainingSummaryCard.lecturers') }}</dt>
-        <dd class="col-sm-8 col-lg-4">{{ lecturerNames }}</dd>
-        <dt class="col-sm-4 col-lg-2">{{ $t('trainingSummaryCard.funding') }}</dt>
-        <dd class="col-sm-8 col-lg-4">{{ fundingTypeNames }}</dd>
-        <dt class="col-sm-4 col-lg-2">{{ $t('trainingSummaryCard.settings') }}</dt>
-        <dd class="col-sm-8 col-lg-4 mb-0">{{ settings }}</dd>
+        <dt class="text-muted">{{ $t('trainingSummaryCard.location') }}</dt>
+        <dd class="font-semibold">{{ training.locationName }}</dd>
+        <dt class="text-muted">{{ $t('trainingSummaryCard.lecturers') }}</dt>
+        <dd class="font-semibold">{{ lecturerNames }}</dd>
+        <dt class="text-muted">{{ $t('trainingSummaryCard.funding') }}</dt>
+        <dd class="font-semibold">{{ fundingTypeNames }}</dd>
+        <dt class="text-muted">{{ $t('trainingSummaryCard.settings') }}</dt>
+        <dd class="font-semibold">{{ settings }}</dd>
       </dl>
     </div>
   </div>

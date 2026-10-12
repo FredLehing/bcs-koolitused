@@ -89,9 +89,9 @@ export default {
 
 <template>
   <div>
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
-      <h2 class="h4 mb-0">{{ $t('adminCourse.participants.title') }}</h2>
-      <div class="form-check form-switch mb-0">
+    <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+      <h2 class="text-lg font-bold">{{ $t('adminCourse.participants.title') }}</h2>
+      <div class="form-check form-switch">
         <input
           v-model="includeCancelled"
           id="includeCancelled"
@@ -105,9 +105,9 @@ export default {
       </div>
     </div>
 
-    <div class="table-responsive">
-      <table class="table table-hover align-middle">
-        <thead>
+    <div class="overflow-x-auto rounded-2xl border border-line bg-white">
+      <table class="table table-hover">
+        <thead class="bg-surface">
           <tr>
             <SortableColumnHeader
               v-for="sortableColumn in sortableColumns"
@@ -130,12 +130,12 @@ export default {
           >
             <td>{{ courseParticipant.participantName }}</td>
             <td>{{ courseParticipant.email }}</td>
-            <td class="text-nowrap">{{ courseParticipant.phone }}</td>
-            <td class="text-nowrap">{{ formatDateTime(courseParticipant.registeredAt) }}</td>
+            <td class="whitespace-nowrap">{{ courseParticipant.phone }}</td>
+            <td class="whitespace-nowrap">{{ formatDateTime(courseParticipant.registeredAt) }}</td>
             <td><CheckMark :value="courseParticipant.hasPaid" /></td>
             <td><CheckMark :value="courseParticipant.requiresLaptop" /></td>
             <td><CourseParticipantStatusBadge :status="courseParticipant.status" /></td>
-            <td class="notes">{{ courseParticipant.notes || '—' }}</td>
+            <td class="whitespace-pre-wrap">{{ courseParticipant.notes || '—' }}</td>
             <td>
               <RouterLink
                 :to="{
@@ -147,14 +147,14 @@ export default {
                 }"
                 :title="$t('adminCourse.participants.view')"
                 :aria-label="$t('adminCourse.participants.view')"
-                class="btn btn-sm btn-outline-secondary d-inline-flex"
+                class="btn btn-outline-secondary btn-sm btn-icon"
               >
                 <PhEye :size="20" />
               </RouterLink>
             </td>
           </tr>
           <tr v-if="visibleCourseParticipants.length === 0">
-            <td colspan="9" class="text-center text-secondary py-4">
+            <td colspan="9" class="py-4 text-center text-muted">
               {{ $t('adminCourse.participants.empty') }}
             </td>
           </tr>
@@ -162,7 +162,7 @@ export default {
       </table>
     </div>
 
-    <p class="text-secondary">
+    <p class="mt-3 text-muted">
       {{
         $t('adminCourse.participants.summary', {
           count: registeredParticipants.length,
@@ -176,10 +176,6 @@ export default {
 <style scoped>
 /* Loobunud osaleja: tuhmim rida */
 .cancelled-row td {
-  color: var(--bs-secondary-color);
-}
-
-.notes {
-  white-space: pre-wrap;
+  color: var(--color-muted);
 }
 </style>

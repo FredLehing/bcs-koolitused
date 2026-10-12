@@ -12,8 +12,16 @@ function isInternalPath(path) {
     typeof path === 'string' &&
     path.startsWith('/') &&
     !path.startsWith('//') &&
-    !/[\\\u0000-\u001f\u007f]/.test(path)
+    !hasBackslashOrControlCharacter(path)
   )
+}
+
+// Kurakaldkriips või kontrollmärk (U+0000–U+001F, U+007F) võib brauseris raja välisaadressiks muuta
+function hasBackslashOrControlCharacter(path) {
+  return [...path].some((character) => {
+    const characterCode = character.charCodeAt(0)
+    return character === '\\' || characterCode <= 0x1f || characterCode === 0x7f
+  })
 }
 
 function getReturnTo(returnTo, currentPath = router.currentRoute.value.fullPath) {

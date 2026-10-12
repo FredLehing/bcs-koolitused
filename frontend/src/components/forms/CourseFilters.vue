@@ -36,30 +36,32 @@ export default {
 </script>
 
 <template>
-  <div class="d-flex flex-column gap-3 mb-4">
-    <div>
-      <label class="form-label fw-semibold" for="course-filter-start-date-from">
-        {{ $t('courses.filters.startDateFrom') }}
-      </label>
-      <DateInput
-        :date="filters.startDateFrom"
-        input-id="course-filter-start-date-from"
-        @event-new-date-input="$emit('event-filter-changed', 'startDateFrom', $event)"
-      />
-    </div>
-    <div>
-      <label class="form-label fw-semibold" for="course-filter-start-date-to">
-        {{ $t('courses.filters.startDateTo') }}
-      </label>
-      <DateInput
-        :date="filters.startDateTo"
-        input-id="course-filter-start-date-to"
-        @event-new-date-input="$emit('event-filter-changed', 'startDateTo', $event)"
-      />
+  <div class="flex flex-col gap-5">
+    <div class="grid grid-cols-2 gap-3 lg:grid-cols-1">
+      <div>
+        <label class="form-label" for="course-filter-start-date-from">
+          {{ $t('courses.filters.startDateFrom') }}
+        </label>
+        <DateInput
+          :date="filters.startDateFrom"
+          input-id="course-filter-start-date-from"
+          @event-new-date-input="$emit('event-filter-changed', 'startDateFrom', $event)"
+        />
+      </div>
+      <div>
+        <label class="form-label" for="course-filter-start-date-to">
+          {{ $t('courses.filters.startDateTo') }}
+        </label>
+        <DateInput
+          :date="filters.startDateTo"
+          input-id="course-filter-start-date-to"
+          @event-new-date-input="$emit('event-filter-changed', 'startDateTo', $event)"
+        />
+      </div>
     </div>
 
     <fieldset>
-      <legend class="form-label fw-semibold fs-6">{{ $t('courses.filters.attendance') }}</legend>
+      <legend class="form-label">{{ $t('courses.filters.attendance') }}</legend>
       <div
         v-for="attendanceOption in attendanceOptions"
         :key="attendanceOption.label"
@@ -97,8 +99,11 @@ export default {
     </div>
 
     <div>
-      <label class="form-label fw-semibold">{{ $t('courses.filters.trainingLanguage') }}</label>
+      <label class="form-label" for="course-filter-language">
+        {{ $t('courses.filters.trainingLanguage') }}
+      </label>
       <LanguagesDropdown
+        id="course-filter-language"
         :language-id="filters.trainingLanguageId"
         :languages="languages"
         :first-option-label="$t('courses.filters.all')"
@@ -106,8 +111,11 @@ export default {
       />
     </div>
     <div>
-      <label class="form-label fw-semibold">{{ $t('courses.filters.category') }}</label>
+      <label class="form-label" for="course-filter-category">
+        {{ $t('courses.filters.category') }}
+      </label>
       <CategoriesDropdown
+        id="course-filter-category"
         :category-id="filters.categoryId"
         :categories="categories"
         :first-option-label="$t('courses.filters.all')"
@@ -116,7 +124,7 @@ export default {
     </div>
 
     <fieldset>
-      <legend class="form-label fw-semibold fs-6">{{ $t('courses.filters.fundingType') }}</legend>
+      <legend class="form-label">{{ $t('courses.filters.fundingType') }}</legend>
       <div
         v-for="fundingType in fundingTypeOptions"
         :key="fundingType.fundingTypeId"
@@ -142,7 +150,7 @@ export default {
     <button
       v-if="hasActiveFilters"
       @click="$emit('event-clear-clicked')"
-      class="btn btn-link p-0 align-self-start"
+      class="btn btn-link self-start"
       type="button"
     >
       {{ $t('courses.filters.clear') }}

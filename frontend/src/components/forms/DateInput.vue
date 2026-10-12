@@ -68,13 +68,13 @@ export default {
 </script>
 
 <template>
-  <div class="input-group position-relative">
+  <div class="relative flex">
     <input
       :value="text"
       @input="handleTextInput($event.target.value)"
       :id="inputId"
       :placeholder="$t('dateInput.placeholder')"
-      class="form-control"
+      class="form-control rounded-r-none"
       type="text"
       inputmode="numeric"
       autocomplete="off"
@@ -83,7 +83,7 @@ export default {
       @click="openPicker"
       :title="$t('dateInput.openCalendar')"
       :aria-label="$t('dateInput.openCalendar')"
-      class="btn btn-outline-secondary d-inline-flex align-items-center"
+      class="btn btn-outline-secondary -ml-px rounded-l-none border-brand-200 px-3"
       type="button"
     >
       <PhCalendarBlank :size="18" />

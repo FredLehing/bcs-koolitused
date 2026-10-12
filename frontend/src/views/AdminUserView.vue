@@ -116,61 +116,64 @@ export default {
 </script>
 
 <template>
-  <div class="container">
+  <div class="mx-auto w-full max-w-7xl px-6 py-8">
     <BackLink :fallback="{ name: 'adminUsersRoute' }" />
-    <div class="row justify-content-center">
-      <div class="col-lg-9 text-start">
+    <div class="flex justify-center">
+      <div class="w-full max-w-5xl">
         <template v-if="user">
-          <h1 class="mb-1">{{ $t('adminUser.title') }}</h1>
-          <p class="text-secondary fs-5 mb-3">
+          <h1 class="text-3xl font-extrabold tracking-tight">{{ $t('adminUser.title') }}</h1>
+          <p class="mb-6 mt-1 text-lg text-muted">
             {{ user.email }}
-            <UserStatusBadge v-if="isDeleted" :status="user.status" class="fs-6 ms-1" />
+            <UserStatusBadge v-if="isDeleted" :status="user.status" class="ml-1 text-base" />
           </p>
 
-          <fieldset class="border rounded bg-body p-3 mb-4">
-            <legend class="float-none w-auto px-2 fs-5">{{ $t('adminUser.accountLegend') }}</legend>
-            <dl class="row mb-0">
-              <dt class="col-sm-4">{{ $t('adminUsers.columns.email') }}</dt>
-              <dd class="col-sm-8">{{ user.email }}</dd>
-              <dt class="col-sm-4">{{ $t('adminUsers.columns.roleName') }}</dt>
-              <dd class="col-sm-8">{{ $t(`roles.${user.roleName}`) }}</dd>
-              <dt class="col-sm-4">{{ $t('adminUsers.columns.status') }}</dt>
-              <dd class="col-sm-8"><UserStatusBadge :status="user.status" /></dd>
-              <dt class="col-sm-4">{{ $t('adminUsers.columns.createdAt') }}</dt>
-              <dd class="col-sm-8 mb-0">{{ formatDateTime(user.createdAt) }}</dd>
+          <section class="mb-6 rounded-2xl border border-line bg-white p-5 sm:p-6">
+            <h2 class="mb-4 text-lg font-bold">{{ $t('adminUser.accountLegend') }}</h2>
+            <dl class="grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-[12rem_1fr]">
+              <dt class="text-muted">{{ $t('adminUsers.columns.email') }}</dt>
+              <dd>{{ user.email }}</dd>
+              <dt class="text-muted">{{ $t('adminUsers.columns.roleName') }}</dt>
+              <dd>{{ $t(`roles.${user.roleName}`) }}</dd>
+              <dt class="text-muted">{{ $t('adminUsers.columns.status') }}</dt>
+              <dd><UserStatusBadge :status="user.status" /></dd>
+              <dt class="text-muted">{{ $t('adminUsers.columns.createdAt') }}</dt>
+              <dd>{{ formatDateTime(user.createdAt) }}</dd>
             </dl>
-          </fieldset>
+          </section>
 
-          <fieldset class="border rounded bg-body p-3 mb-4">
-            <legend class="float-none w-auto px-2 fs-5">
+          <section class="mb-6 rounded-2xl border border-line bg-white p-5 sm:p-6">
+            <h2 class="mb-4 text-lg font-bold">
               {{ $t('adminUser.participantLegend') }}
-            </legend>
-            <dl v-if="hasParticipant" class="row mb-0">
-              <dt class="col-sm-4">{{ $t('adminUsers.columns.participantName') }}</dt>
-              <dd class="col-sm-8">{{ user.participantName }}</dd>
+            </h2>
+            <dl
+              v-if="hasParticipant"
+              class="grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-[12rem_1fr]"
+            >
+              <dt class="text-muted">{{ $t('adminUsers.columns.participantName') }}</dt>
+              <dd>{{ user.participantName }}</dd>
               <template v-if="showProfileEmail">
-                <dt class="col-sm-4">{{ $t('adminUsers.columns.email') }}</dt>
-                <dd class="col-sm-8">
+                <dt class="text-muted">{{ $t('adminUsers.columns.email') }}</dt>
+                <dd>
                   <a :href="`mailto:${user.profileEmail}`">{{ user.profileEmail }}</a>
                 </dd>
               </template>
-              <dt class="col-sm-4">{{ $t('adminUsers.columns.phone') }}</dt>
-              <dd class="col-sm-8 mb-0">
+              <dt class="text-muted">{{ $t('adminUsers.columns.phone') }}</dt>
+              <dd>
                 <a :href="`tel:${user.phone}`">{{ user.phone }}</a>
               </dd>
             </dl>
-            <p v-else class="text-secondary mb-0">{{ $t('adminUser.noParticipant') }}</p>
-          </fieldset>
+            <p v-else class="text-muted">{{ $t('adminUser.noParticipant') }}</p>
+          </section>
 
-          <fieldset class="border rounded bg-body p-3 mb-4">
-            <legend class="float-none w-auto px-2 fs-5">
+          <section class="mb-6 rounded-2xl border border-line bg-white p-5 sm:p-6">
+            <h2 class="mb-4 text-lg font-bold">
               {{ $t('adminUser.registrationsLegend') }}
-            </legend>
-            <p v-if="user.registrations.length === 0" class="text-secondary mb-0">
+            </h2>
+            <p v-if="user.registrations.length === 0" class="text-muted">
               {{ $t('adminUser.noRegistrations') }}
             </p>
-            <div v-else class="table-responsive">
-              <table class="table table-hover align-middle mb-0">
+            <div v-else class="overflow-x-auto">
+              <table class="table table-hover">
                 <thead>
                   <tr>
                     <th>{{ $t('adminUser.columns.training') }}</th>
@@ -186,7 +189,7 @@ export default {
                     :key="registration.courseParticipantId"
                   >
                     <td>{{ registration.trainingTitle }}</td>
-                    <td class="text-nowrap">
+                    <td class="whitespace-nowrap">
                       <RouterLink
                         :to="{
                           name: 'adminCourseRoute',
@@ -195,7 +198,7 @@ export default {
                       >
                         {{ formatDateRange(registration.startDate, registration.endDate) }}
                       </RouterLink>
-                      <span v-if="registration.isPast" class="badge text-bg-light border ms-1">
+                      <span v-if="registration.isPast" class="badge text-bg-light ml-1">
                         {{ $t('courseStatus.past') }}
                       </span>
                     </td>
@@ -212,7 +215,7 @@ export default {
                         }"
                         :title="$t('adminUser.viewRegistration')"
                         :aria-label="$t('adminUser.viewRegistration')"
-                        class="btn btn-sm btn-outline-secondary d-inline-flex"
+                        class="btn btn-outline-secondary btn-sm btn-icon"
                       >
                         <PhEye :size="20" />
                       </RouterLink>
@@ -221,10 +224,10 @@ export default {
                 </tbody>
               </table>
             </div>
-          </fieldset>
+          </section>
 
-          <div class="d-flex flex-wrap align-items-center gap-2 mb-5">
-            <p v-if="isOwnAccount" class="text-secondary mb-0">
+          <div class="mb-6 flex flex-wrap items-center gap-2">
+            <p v-if="isOwnAccount" class="text-muted">
               {{ $t('adminUser.ownAccountHint') }}
             </p>
             <UserStatusButton

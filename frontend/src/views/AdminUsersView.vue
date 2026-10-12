@@ -1,6 +1,6 @@
 <script>
 import { mapState } from 'pinia'
-import { PhEye } from '@phosphor-icons/vue'
+import { PhEye, PhMagnifyingGlass } from '@phosphor-icons/vue'
 import { useLanguageStore } from '@/stores/languageStore.js'
 import UserService from '@/api-services/UserService.js'
 import FormatService from '@/services/FormatService.js'
@@ -23,6 +23,7 @@ export default {
   name: 'AdminUsersView',
   components: {
     PhEye,
+    PhMagnifyingGlass,
     AdminTabs,
     InlineAlerts,
     PaginationNav,
@@ -186,19 +187,27 @@ export default {
 </script>
 
 <template>
-  <div class="container">
+  <div class="mx-auto w-full max-w-7xl px-6 py-8">
     <AdminTabs />
 
-    <h1 class="h3 mb-3">{{ $t('adminUsers.title') }}</h1>
+    <div class="mb-6 flex items-end justify-between gap-4">
+      <h1 class="text-3xl font-extrabold tracking-tight">{{ $t('adminUsers.title') }}</h1>
+      <span class="text-muted">{{ $t('adminUsers.totalCount', filteredUsers.length) }}</span>
+    </div>
 
-    <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
-      <input
-        v-model="searchText"
-        :placeholder="$t('adminUsers.searchPlaceholder')"
-        :aria-label="$t('adminUsers.searchPlaceholder')"
-        class="form-control search-input"
-        type="search"
-      />
+    <div class="mb-4 flex flex-wrap items-center gap-x-6 gap-y-3">
+      <div
+        class="flex min-h-11 max-w-xl flex-1 items-center gap-2 rounded-lg border border-brand-200 bg-white px-3 focus-within:border-brand-600 focus-within:ring-3 focus-within:ring-brand-600/15"
+      >
+        <PhMagnifyingGlass :size="18" class="shrink-0 text-muted" />
+        <input
+          v-model="searchText"
+          :placeholder="$t('adminUsers.searchPlaceholder')"
+          :aria-label="$t('adminUsers.searchPlaceholder')"
+          class="min-w-0 flex-1 bg-transparent outline-none"
+          type="search"
+        />
+      </div>
       <select
         v-model="roleName"
         :aria-label="$t('adminUsers.columns.roleName')"
@@ -208,7 +217,7 @@ export default {
         <option value="participant">{{ $t('adminUsers.participants') }}</option>
         <option value="admin">{{ $t('adminUsers.admins') }}</option>
       </select>
-      <div class="form-check form-switch mb-0">
+      <div class="form-check form-switch">
         <input
           v-model="includeDeleted"
           id="includeDeleted"
@@ -222,7 +231,7 @@ export default {
       </div>
     </div>
 
-    <div class="mb-2">
+    <div class="mb-3">
       <InlineAlerts
         :success-message="successMessage"
         :error-message="errorMessage"
@@ -231,105 +240,98 @@ export default {
       />
     </div>
 
-    <div class="table-responsive">
-      <table class="table table-hover align-middle">
-        <thead>
-          <tr>
-            <SortableColumnHeader
-              v-for="sortableColumn in sortableColumns"
-              :key="sortableColumn.sortKey"
-              :label="sortableColumn.label"
-              :sort-key="sortableColumn.sortKey"
-              :sort-by="sortBy"
-              :sort-direction="sortDirection"
-              @event-sort-clicked="handleSortClick"
-            />
-            <th>{{ $t('adminUsers.columns.phone') }}</th>
-            <SortableColumnHeader
-              v-for="sortableColumn in sortableColumnsAfterPhone"
-              :key="sortableColumn.sortKey"
-              :label="sortableColumn.label"
-              :sort-key="sortableColumn.sortKey"
-              :sort-by="sortBy"
-              :sort-direction="sortDirection"
-              @event-sort-clicked="handleSortClick"
-            />
-            <th>{{ $t('adminUsers.columns.actions') }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="user in pagedUsers"
-            :key="user.userId"
-            :class="{ 'deleted-row': isDeleted(user) }"
-          >
-            <td class="text-nowrap">{{ formatDateTime(user.createdAt) }}</td>
-            <td>
-              {{ user.email }}
-              <span v-if="user.userId === currentUserId" class="badge text-bg-primary ms-1">
-                {{ $t('adminUsers.me') }}
-              </span>
-            </td>
-            <td>{{ user.participantName ?? '—' }}</td>
-            <td class="text-nowrap">{{ user.phone ?? '—' }}</td>
-            <td>{{ $t(`roles.${user.roleName}`) }}</td>
-            <td>{{ user.registrationCount }}</td>
-            <td><UserStatusBadge :status="user.status" /></td>
-            <td>
-              <div class="d-flex gap-1">
-                <RouterLink
-                  :to="{
-                    name: 'adminUserRoute',
-                    query: { returnTo: $route.fullPath, userId: user.userId },
-                  }"
-                  :title="$t('adminUsers.view')"
-                  :aria-label="$t('adminUsers.view')"
-                  class="btn btn-sm btn-outline-secondary d-inline-flex"
-                >
-                  <PhEye :size="20" />
-                </RouterLink>
-                <UserStatusButton
-                  v-if="user.userId !== currentUserId"
-                  :user-id="user.userId"
-                  :user-label="userLabel(user)"
-                  :status="user.status"
-                  @event-user-deactivated="handleUserDeactivated"
-                  @event-user-restored="handleUserRestored"
-                  @event-status-error="handleStatusError"
-                />
-              </div>
-            </td>
-          </tr>
-          <tr v-if="filteredUsers.length === 0">
-            <td colspan="8" class="text-center text-secondary py-4">
-              {{ $t('adminUsers.noResults') }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="overflow-hidden rounded-2xl border border-line bg-white">
+      <div class="overflow-x-auto">
+        <table class="table table-hover">
+          <thead class="bg-surface">
+            <tr>
+              <SortableColumnHeader
+                v-for="sortableColumn in sortableColumns"
+                :key="sortableColumn.sortKey"
+                :label="sortableColumn.label"
+                :sort-key="sortableColumn.sortKey"
+                :sort-by="sortBy"
+                :sort-direction="sortDirection"
+                @event-sort-clicked="handleSortClick"
+              />
+              <th>{{ $t('adminUsers.columns.phone') }}</th>
+              <SortableColumnHeader
+                v-for="sortableColumn in sortableColumnsAfterPhone"
+                :key="sortableColumn.sortKey"
+                :label="sortableColumn.label"
+                :sort-key="sortableColumn.sortKey"
+                :sort-by="sortBy"
+                :sort-direction="sortDirection"
+                @event-sort-clicked="handleSortClick"
+              />
+              <th class="text-right">{{ $t('adminUsers.columns.actions') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="user in pagedUsers"
+              :key="user.userId"
+              :class="{ 'deleted-row': isDeleted(user) }"
+            >
+              <td class="whitespace-nowrap">{{ formatDateTime(user.createdAt) }}</td>
+              <td>
+                {{ user.email }}
+                <span v-if="user.userId === currentUserId" class="badge text-bg-primary ml-1">
+                  {{ $t('adminUsers.me') }}
+                </span>
+              </td>
+              <td>{{ user.participantName ?? '—' }}</td>
+              <td class="whitespace-nowrap">{{ user.phone ?? '—' }}</td>
+              <td>{{ $t(`roles.${user.roleName}`) }}</td>
+              <td>{{ user.registrationCount }}</td>
+              <td><UserStatusBadge :status="user.status" /></td>
+              <td class="text-right">
+                <div class="inline-flex gap-2">
+                  <RouterLink
+                    :to="{
+                      name: 'adminUserRoute',
+                      query: { returnTo: $route.fullPath, userId: user.userId },
+                    }"
+                    :title="$t('adminUsers.view')"
+                    :aria-label="$t('adminUsers.view')"
+                    class="btn btn-sm btn-icon btn-outline-secondary"
+                  >
+                    <PhEye :size="20" />
+                  </RouterLink>
+                  <UserStatusButton
+                    v-if="user.userId !== currentUserId"
+                    :user-id="user.userId"
+                    :user-label="userLabel(user)"
+                    :status="user.status"
+                    @event-user-deactivated="handleUserDeactivated"
+                    @event-user-restored="handleUserRestored"
+                    @event-status-error="handleStatusError"
+                  />
+                </div>
+              </td>
+            </tr>
+            <tr v-if="filteredUsers.length === 0">
+              <td colspan="8" class="py-10 text-center text-muted">
+                {{ $t('adminUsers.noResults') }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
-      <span class="text-secondary">
-        {{ $t('adminUsers.totalCount', filteredUsers.length) }}
-      </span>
-      <PaginationNav
-        :page="page"
-        :total-pages="totalPages"
-        @event-page-changed="handlePageChanged"
-      />
-      <span></span>
-    </div>
+    <PaginationNav
+      :page="page"
+      :total-pages="totalPages"
+      @event-page-changed="handlePageChanged"
+      class="mt-6"
+    />
   </div>
 </template>
 
 <style scoped>
-.search-input {
-  max-width: 24rem;
-}
-
-/* Deaktiveeritud konto: tuhmim rida */
+/* Tuhmim rida */
 .deleted-row td {
-  color: var(--bs-secondary-color);
+  color: var(--color-muted);
 }
 </style>

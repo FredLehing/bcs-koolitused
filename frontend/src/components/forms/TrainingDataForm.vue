@@ -38,12 +38,21 @@ export default {
 </script>
 
 <template>
-  <fieldset class="border rounded bg-body p-3 mb-4">
-    <legend class="float-none w-auto px-2 fs-5">{{ $t('trainingForm.data.legend') }}</legend>
-    <div class="row g-3 text-start">
-      <div class="col-md-4">
-        <label class="form-label">{{ $t('trainingForm.data.category') }}</label>
+  <section
+    class="rounded-2xl border border-line bg-white p-6"
+    aria-labelledby="training-data-heading"
+  >
+    <h2 id="training-data-heading" class="mb-4 text-lg font-bold">
+      {{ $t('trainingForm.data.legend') }}
+    </h2>
+    <div class="grid gap-4 md:grid-cols-3">
+      <div>
+        <label class="form-label" for="training-category">
+          {{ $t('trainingForm.data.category') }}
+        </label>
+        <!-- id läheb läbi komponendi <select>-ile -->
         <CategoriesDropdown
+          id="training-category"
           :category-id="training.categoryId"
           :categories="categories"
           :first-option-label="$t('trainingForm.data.selectCategory')"
@@ -51,9 +60,12 @@ export default {
           @event-new-category-selected="$emit('event-new-category-selected', $event)"
         />
       </div>
-      <div class="col-md-4">
-        <label class="form-label">{{ $t('trainingForm.data.trainingLanguage') }}</label>
+      <div>
+        <label class="form-label" for="training-language">
+          {{ $t('trainingForm.data.trainingLanguage') }}
+        </label>
         <LanguagesDropdown
+          id="training-language"
           :language-id="training.trainingLanguageId"
           :languages="languages"
           :first-option-label="$t('trainingForm.data.selectLanguage')"
@@ -61,9 +73,12 @@ export default {
           @event-new-language-selected="$emit('event-new-training-language-selected', $event)"
         />
       </div>
-      <div class="col-md-4">
-        <label class="form-label">{{ $t('trainingForm.data.location') }}</label>
+      <div>
+        <label class="form-label" for="training-location">
+          {{ $t('trainingForm.data.location') }}
+        </label>
         <LocationsDropdown
+          id="training-location"
           :location-id="training.locationId"
           :locations="locations"
           :first-option-label="$t('trainingForm.data.selectLocation')"
@@ -71,8 +86,8 @@ export default {
           @event-new-location-selected="$emit('event-new-location-selected', $event)"
         />
       </div>
-      <div class="col-12">
-        <label class="form-label fw-bold">{{ $t('trainingForm.data.funding') }}</label>
+      <fieldset class="md:col-span-3">
+        <legend class="form-label">{{ $t('trainingForm.data.funding') }}</legend>
         <FundingTypesCheckbox
           :funding-types="fundingTypes"
           :selected-funding-type-ids="training.fundingTypeIds"
@@ -81,8 +96,8 @@ export default {
             $emit('event-funding-type-checkbox-updated', $event)
           "
         />
-      </div>
-      <div class="col-12 d-flex gap-4">
+      </fieldset>
+      <div class="flex flex-wrap gap-x-8 gap-y-1 md:col-span-3">
         <div class="form-check form-switch">
           <input
             @change="$emit('event-is-orderable-changed', $event.target.checked)"
@@ -112,8 +127,10 @@ export default {
           }}</label>
         </div>
       </div>
-      <div class="col-md-6">
-        <label class="form-label fw-bold">{{ $t('trainingForm.data.lecturers') }}</label>
+      <div class="md:col-span-2">
+        <h3 class="form-label">
+          {{ $t('trainingForm.data.lecturers') }}
+        </h3>
         <LecturersPicker
           :lecturers="training.lecturers"
           :is-disabled="isDisabled"
@@ -121,5 +138,5 @@ export default {
         />
       </div>
     </div>
-  </fieldset>
+  </section>
 </template>

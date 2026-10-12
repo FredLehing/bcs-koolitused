@@ -327,154 +327,157 @@ export default {
 </script>
 
 <template>
-  <div class="container">
+  <div class="mx-auto w-full max-w-6xl px-6 py-8">
     <BackLink :fallback="{ name: 'adminTrainingCoursesRoute', query: { trainingId } }" />
-    <div class="row justify-content-center">
-      <div class="col-lg-10">
-        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-1">
-          <h1 class="mb-0">
-            {{ isNew ? $t('courseForm.title.new') : $t('courseForm.title.update') }}
-          </h1>
-          <button
-            @click="navigateToAdminTrainingCoursesView"
-            class="btn btn-outline-secondary"
-            type="button"
-          >
-            {{ $t('trainingForm.buttons.calendar') }}
-          </button>
-        </div>
-        <p class="fs-5 text-secondary mb-4">{{ trainingTitle }}</p>
+    <div class="mb-1 flex flex-wrap items-center justify-between gap-3">
+      <h1 class="text-3xl font-extrabold tracking-tight">
+        {{ isNew ? $t('courseForm.title.new') : $t('courseForm.title.update') }}
+      </h1>
+      <button
+        @click="navigateToAdminTrainingCoursesView"
+        class="btn btn-outline-secondary"
+        type="button"
+      >
+        {{ $t('trainingForm.buttons.calendar') }}
+      </button>
+    </div>
+    <p class="mb-6 text-lg text-muted">{{ trainingTitle }}</p>
 
-        <fieldset class="border rounded p-3 mb-4">
-          <legend class="float-none w-auto px-2 fs-5">{{ $t('courseForm.legend') }}</legend>
-          <div class="row g-3 text-start">
-            <div class="col-md-4">
-              <label class="form-label" for="startDate">{{ $t('courseForm.startDate') }} *</label>
-              <DateInput
-                :date="course.startDate"
-                input-id="startDate"
-                @event-new-date-input="course.startDate = $event"
-              />
-            </div>
-            <div class="col-md-4">
-              <label class="form-label" for="endDate">{{ $t('courseForm.endDate') }} *</label>
-              <DateInput
-                :date="course.endDate"
-                input-id="endDate"
-                @event-new-date-input="course.endDate = $event"
-              />
-            </div>
-            <div class="col-md-4">
-              <label class="form-label" for="numberOfDays"
-                >{{ $t('courseForm.numberOfDays') }} *</label
-              >
-              <input
-                :value="course.numberOfDays"
-                @input="handleNumberOfDaysInput($event.target.value)"
-                id="numberOfDays"
-                class="form-control"
-                type="number"
-                min="1"
-              />
-              <div class="form-text">{{ $t('courseForm.numberOfDaysHint') }}</div>
-            </div>
-            <div class="col-md-4">
-              <label class="form-label" for="numberOfAcademicHours"
-                >{{ $t('courseForm.numberOfAcademicHours') }} *</label
-              >
-              <input
-                v-model.number="course.numberOfAcademicHours"
-                id="numberOfAcademicHours"
-                class="form-control"
-                type="number"
-                min="1"
-              />
-            </div>
-            <div class="col-md-4">
-              <label class="form-label" for="price">{{ $t('courseForm.price') }} *</label>
-              <input
-                v-model="course.price"
-                id="price"
-                class="form-control"
-                type="number"
-                min="0"
-                step="0.01"
-              />
-            </div>
-            <div class="col-md-4">
-              <label class="form-label" for="status">{{ $t('courseForm.status') }} *</label>
-              <select v-model="course.status" id="status" class="form-select">
-                <option
-                  v-for="courseStatus in courseStatuses"
-                  :key="courseStatus"
-                  :value="courseStatus"
-                >
-                  {{ $t(`courseStatus.${courseStatus}`) }}
-                </option>
-              </select>
-              <div class="form-check form-switch mt-2">
-                <input
-                  v-model="course.isPromoted"
-                  id="isPromoted"
-                  class="form-check-input"
-                  type="checkbox"
-                  role="switch"
-                />
-                <label class="form-check-label" for="isPromoted">{{
-                  $t('courseForm.isPromoted')
-                }}</label>
-              </div>
-              <div class="form-text">{{ $t('courseForm.isPromotedHint') }}</div>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label fw-bold">{{ $t('trainingForm.data.lecturers') }}</label>
-              <LecturersPicker
-                :lecturers="course.lecturers"
-                @event-lecturers-changed="course.lecturers = $event"
-              />
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">{{ $t('courseForm.room') }}</label>
-              <RoomsDropdown
-                :room-id="course.roomId"
-                :rooms="roomOptions"
-                @event-new-room-selected="course.roomId = $event"
-              />
-              <label class="form-label mt-3" for="meetingLink">{{
-                $t('courseForm.meetingLink')
-              }}</label>
-              <input
-                v-model="course.meetingLink"
-                id="meetingLink"
-                class="form-control"
-                type="url"
-                maxlength="255"
-              />
-            </div>
-            <div class="col-12">
-              <label class="form-label" for="notes">{{ $t('courseForm.notes') }}</label>
-              <textarea v-model="course.notes" id="notes" class="form-control" rows="3"></textarea>
-            </div>
-          </div>
-        </fieldset>
-
-        <AlertDanger :error-message="errorMessage" />
-
-        <div class="d-flex flex-wrap align-items-center gap-3 mb-5">
-          <button @click="saveCourse" :disabled="isSending" class="btn btn-success" type="button">
-            {{ $t('trainingForm.buttons.save') }}
-          </button>
-          <button @click="navigateBack" class="btn btn-outline-secondary" type="button">
-            {{ $t('courseForm.back') }}
-          </button>
-          <CourseDeleteButton
-            v-if="!isNew"
-            :course-id="courseId"
-            :start-date="course.startDate"
-            :end-date="course.endDate"
-            @event-course-deleted="handleCourseDeleted"
+    <section class="rounded-2xl border border-line bg-white p-6" aria-labelledby="course-heading">
+      <h2 id="course-heading" class="mb-4 text-lg font-bold">{{ $t('courseForm.legend') }}</h2>
+      <div class="grid gap-4 md:grid-cols-3">
+        <div>
+          <label class="form-label" for="startDate">{{ $t('courseForm.startDate') }} *</label>
+          <DateInput
+            :date="course.startDate"
+            input-id="startDate"
+            @event-new-date-input="course.startDate = $event"
           />
         </div>
+        <div>
+          <label class="form-label" for="endDate">{{ $t('courseForm.endDate') }} *</label>
+          <DateInput
+            :date="course.endDate"
+            input-id="endDate"
+            @event-new-date-input="course.endDate = $event"
+          />
+        </div>
+        <div>
+          <label class="form-label" for="numberOfDays">{{ $t('courseForm.numberOfDays') }} *</label>
+          <input
+            :value="course.numberOfDays"
+            @input="handleNumberOfDaysInput($event.target.value)"
+            id="numberOfDays"
+            class="form-control"
+            type="number"
+            min="1"
+          />
+          <div class="form-text">{{ $t('courseForm.numberOfDaysHint') }}</div>
+        </div>
+        <div>
+          <label class="form-label" for="numberOfAcademicHours"
+            >{{ $t('courseForm.numberOfAcademicHours') }} *</label
+          >
+          <input
+            v-model.number="course.numberOfAcademicHours"
+            id="numberOfAcademicHours"
+            class="form-control"
+            type="number"
+            min="1"
+          />
+        </div>
+        <div>
+          <label class="form-label" for="price">{{ $t('courseForm.price') }} *</label>
+          <input
+            v-model="course.price"
+            id="price"
+            class="form-control"
+            type="number"
+            min="0"
+            step="0.01"
+          />
+        </div>
+        <div>
+          <label class="form-label" for="status">{{ $t('courseForm.status') }} *</label>
+          <select v-model="course.status" id="status" class="form-select">
+            <option
+              v-for="courseStatus in courseStatuses"
+              :key="courseStatus"
+              :value="courseStatus"
+            >
+              {{ $t(`courseStatus.${courseStatus}`) }}
+            </option>
+          </select>
+          <div class="form-check form-switch mt-2">
+            <input
+              v-model="course.isPromoted"
+              id="isPromoted"
+              class="form-check-input"
+              type="checkbox"
+              role="switch"
+            />
+            <label class="form-check-label" for="isPromoted">{{
+              $t('courseForm.isPromoted')
+            }}</label>
+          </div>
+          <div class="form-text">{{ $t('courseForm.isPromotedHint') }}</div>
+        </div>
+      </div>
+
+      <div class="mt-6 grid gap-4 border-t border-line pt-6 md:grid-cols-2">
+        <div>
+          <h3 class="form-label">{{ $t('trainingForm.data.lecturers') }}</h3>
+          <LecturersPicker
+            :lecturers="course.lecturers"
+            @event-lecturers-changed="course.lecturers = $event"
+          />
+        </div>
+        <div class="flex flex-col gap-4">
+          <div>
+            <label class="form-label" for="roomId">{{ $t('courseForm.room') }}</label>
+            <!-- id läheb läbi komponendi <select>-ile -->
+            <RoomsDropdown
+              id="roomId"
+              :room-id="course.roomId"
+              :rooms="roomOptions"
+              @event-new-room-selected="course.roomId = $event"
+            />
+          </div>
+          <div>
+            <label class="form-label" for="meetingLink">{{ $t('courseForm.meetingLink') }}</label>
+            <input
+              v-model="course.meetingLink"
+              id="meetingLink"
+              class="form-control"
+              type="url"
+              maxlength="255"
+            />
+          </div>
+        </div>
+        <div class="md:col-span-2">
+          <label class="form-label" for="notes">{{ $t('courseForm.notes') }}</label>
+          <textarea v-model="course.notes" id="notes" class="form-control" rows="3"></textarea>
+        </div>
+      </div>
+    </section>
+
+    <AlertDanger :error-message="errorMessage" class="mt-6" />
+
+    <div class="mt-6 flex flex-wrap items-center gap-3">
+      <button @click="saveCourse" :disabled="isSending" class="btn btn-primary" type="button">
+        {{ $t('trainingForm.buttons.save') }}
+      </button>
+      <button @click="navigateBack" class="btn btn-outline-secondary" type="button">
+        {{ $t('courseForm.back') }}
+      </button>
+      <!-- CourseDeleteButton'il on mitu juurelementi, seega paigutus ümbrisega -->
+      <div v-if="!isNew" class="ml-auto">
+        <CourseDeleteButton
+          :course-id="courseId"
+          :start-date="course.startDate"
+          :end-date="course.endDate"
+          @event-course-deleted="handleCourseDeleted"
+        />
       </div>
     </div>
   </div>

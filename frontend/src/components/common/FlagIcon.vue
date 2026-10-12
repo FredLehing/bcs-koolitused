@@ -1,6 +1,6 @@
 <script>
 // Keele lipp (flag-icons, https://flagicons.lipis.dev/). Raam hoiab valged lipuosad heledal
-// taustal nähtavana. Suuruse saab anda väljast klassiga (nt class="fs-3").
+// taustal nähtavana. Suuruse saab anda väljast teksti suuruse klassiga (nt class="text-2xl").
 export default {
   name: 'FlagIcon',
   props: {
@@ -10,5 +10,5 @@ export default {
 </script>
 
 <template>
-  <span class="fi border border-secondary-subtle" :class="flagIconCode"></span>
+  <span class="fi rounded-[3px] ring-1 ring-slate-300" :class="flagIconCode"></span>
 </template>

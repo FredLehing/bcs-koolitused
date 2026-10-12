@@ -44,24 +44,24 @@ export default {
 </script>
 
 <template>
-  <li class="list-group-item d-flex flex-wrap align-items-center gap-3">
-    <div class="flex-grow-1">
+  <li class="flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
+    <div class="min-w-0 flex-1">
       <RouterLink
         v-if="isCoursePublic"
         :to="{
           name: 'courseRoute',
           query: { returnTo: $route.fullPath, courseId: registration.courseId },
         }"
-        class="fw-semibold"
+        class="font-semibold"
       >
         {{ registration.trainingTitle }}
       </RouterLink>
-      <span v-else class="fw-semibold">{{ registration.trainingTitle }}</span>
-      <div class="small text-secondary">
+      <span v-else class="font-semibold text-navy">{{ registration.trainingTitle }}</span>
+      <div class="text-sm text-muted">
         {{ dateRangeText }}
         <template v-if="attendanceText"> · {{ attendanceText }}</template>
       </div>
-      <div class="d-flex flex-wrap gap-1 mt-1">
+      <div class="mt-2 flex flex-wrap gap-1">
         <CourseParticipantStatusBadge :status="registration.status" />
         <span v-if="isCourseCancelled" class="badge text-bg-danger">
           {{ $t('courseStatus.X') }}
@@ -82,7 +82,7 @@ export default {
         name: 'participantFeedbackFormRoute',
         query: { courseParticipantId: registration.courseParticipantId },
       }"
-      class="btn btn-sm"
+      class="btn w-full sm:w-auto"
       :class="registration.hasFeedback ? 'btn-outline-primary' : 'btn-primary'"
     >
       {{
@@ -95,7 +95,7 @@ export default {
       v-if="registration.canCancel"
       @click="$emit('event-cancel-clicked', registration)"
       :disabled="isSending"
-      class="btn btn-outline-danger btn-sm"
+      class="btn btn-outline-danger w-full sm:w-auto"
       type="button"
     >
       {{ $t('participantCourses.cancel') }}

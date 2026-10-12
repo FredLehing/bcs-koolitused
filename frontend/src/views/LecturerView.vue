@@ -1,4 +1,5 @@
 <script>
+import { PhCaretRight } from '@phosphor-icons/vue'
 import BackLink from '@/components/common/BackLink.vue'
 import { mapState } from 'pinia'
 import { useLanguageStore } from '@/stores/languageStore.js'
@@ -9,7 +10,7 @@ import RichTextContent from '@/components/common/RichTextContent.vue'
 
 export default {
   name: 'LecturerView',
-  components: { BackLink, LecturerAvatar, RichTextContent },
+  components: { BackLink, LecturerAvatar, PhCaretRight, RichTextContent },
   data() {
     return {
       lecturerId: 0,
@@ -52,30 +53,34 @@ export default {
 </script>
 
 <template>
-  <div class="container">
+  <div class="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
     <BackLink :fallback="{ name: 'lecturersRoute' }" />
 
-    <div v-if="lecturerProfile" class="row g-4 mb-5 text-start">
-      <div class="col-md-4 col-lg-3">
-        <LecturerAvatar
-          :lecturer-id="lecturerProfile.lecturerId"
-          :photo-version="lecturerProfile.photoVersion"
-          :alt="lecturerProfile.fullName"
-          :size="240"
-          shape="rounded"
-          class="lecturer-photo"
-        />
-      </div>
-      <div class="col-md-8 col-lg-9">
-        <h1 class="mb-1">{{ lecturerProfile.fullName }}</h1>
-        <p class="text-secondary fs-5">{{ lecturerProfile.title }}</p>
-        <p class="lead">{{ lecturerProfile.shortDescription }}</p>
-        <RichTextContent :html="lecturerProfile.description" />
+    <div v-if="lecturerProfile" class="flex flex-col gap-6 md:flex-row md:items-start md:gap-8">
+      <LecturerAvatar
+        :lecturer-id="lecturerProfile.lecturerId"
+        :photo-version="lecturerProfile.photoVersion"
+        :alt="lecturerProfile.fullName"
+        :size="240"
+        shape="rounded"
+        class="aspect-square h-auto! max-w-full md:shrink-0"
+      />
+      <div class="min-w-0 flex-1 rounded-2xl border border-line bg-white p-5 sm:p-8">
+        <h1 class="mb-1 text-3xl font-extrabold tracking-tight sm:text-4xl">
+          {{ lecturerProfile.fullName }}
+        </h1>
+        <p class="mb-4 text-lg text-muted">{{ lecturerProfile.title }}</p>
+        <p class="mb-4 text-lg font-semibold text-navy">{{ lecturerProfile.shortDescription }}</p>
+        <RichTextContent :html="lecturerProfile.description" class="max-w-prose" />
 
         <template v-if="lecturerProfile.trainings.length > 0">
-          <h2 class="h4 mt-4">{{ $t('lecturer.trainings') }}</h2>
-          <ul>
-            <li v-for="training in lecturerProfile.trainings" :key="training.trainingId">
+          <h2 class="mt-8 mb-2 text-xl font-bold">{{ $t('lecturer.trainings') }}</h2>
+          <ul class="flex flex-col">
+            <li
+              v-for="training in lecturerProfile.trainings"
+              :key="training.trainingId"
+              class="border-b border-line last:border-0"
+            >
               <RouterLink
                 :to="{
                   name: 'trainingRoute',
@@ -85,8 +90,10 @@ export default {
                     trainingTranslationId: training.trainingTranslationId,
                   },
                 }"
+                class="flex min-h-11 items-center justify-between gap-3 py-2 font-semibold"
               >
                 {{ training.title }}
+                <PhCaretRight :size="18" class="shrink-0 text-brand-600" />
               </RouterLink>
             </li>
           </ul>
@@ -95,12 +102,3 @@ export default {
     </div>
   </div>
 </template>
-
-<style scoped>
-/* Suur pilt kitsal ekraanil ei tohi veerust välja minna */
-.lecturer-photo {
-  max-width: 100%;
-  height: auto !important;
-  aspect-ratio: 1;
-}
-</style>
