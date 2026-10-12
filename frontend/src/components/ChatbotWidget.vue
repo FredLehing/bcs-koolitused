@@ -261,11 +261,11 @@ export default {
 
   overflow: hidden;
 
-  border: 1px solid var(--bs-border-color);
+  border: 1px solid var(--color-line);
   border-radius: 16px;
 
-  background: var(--bs-body-bg);
-  color: var(--bs-body-color);
+  background: var(--color-white);
+  color: var(--color-ink);
 }
 
 .chatbot-header {
@@ -276,9 +276,9 @@ export default {
   min-height: 68px;
   padding: 12px 16px;
 
-  border-bottom: 1px solid var(--bs-border-color);
+  border-bottom: 1px solid var(--color-line);
 
-  background: var(--bs-primary);
+  background: var(--color-brand-600);
   color: white;
 }
 
@@ -345,7 +345,7 @@ export default {
   overflow-y: auto;
   overflow-x: hidden;
 
-  background: var(--bs-tertiary-bg);
+  background: var(--color-surface);
 
   scrollbar-width: thin;
 }
@@ -371,17 +371,17 @@ export default {
 
   border-bottom-right-radius: 4px;
 
-  background: var(--bs-primary);
+  background: var(--color-brand-600);
   color: white;
 }
 
 .chatbot-message-assistant {
   margin-right: auto;
 
-  border: 1px solid var(--bs-border-color);
+  border: 1px solid var(--color-line);
   border-bottom-left-radius: 4px;
 
-  background: var(--bs-body-bg);
+  background: var(--color-white);
 }
 
 .chatbot-loading {
@@ -389,25 +389,25 @@ export default {
 
   font-size: 0.8rem;
 
-  color: var(--bs-secondary-color);
+  color: var(--color-muted);
 }
 
 .chatbot-error {
   padding: 8px 16px;
 
-  border-top: 1px solid var(--bs-border-color);
+  border-top: 1px solid var(--color-line);
 
   font-size: 0.8rem;
 
-  color: var(--bs-danger);
+  color: var(--color-red-700);
 }
 
 .chatbot-input {
   padding: 12px;
 
-  border-top: 1px solid var(--bs-border-color);
+  border-top: 1px solid var(--color-line);
 
-  background: var(--bs-body-bg);
+  background: var(--color-white);
 }
 
 .chatbot-input input {
@@ -416,11 +416,11 @@ export default {
 
   padding: 0 12px;
 
-  border: 1px solid var(--bs-border-color);
+  border: 1px solid var(--color-line);
   border-radius: 10px;
 
-  background: var(--bs-body-bg);
-  color: var(--bs-body-color);
+  background: var(--color-white);
+  color: var(--color-ink);
 
   font-size: 0.88rem;
 
@@ -428,7 +428,7 @@ export default {
 }
 
 .chatbot-input input:focus {
-  border-color: var(--bs-primary);
+  border-color: var(--color-brand-600);
 
   box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.12);
 }
