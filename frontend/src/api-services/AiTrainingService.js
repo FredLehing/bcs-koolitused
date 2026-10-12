@@ -13,11 +13,8 @@ export default {
     return axios.post('/api/ai-training/pdf', createCurriculumFormData(curriculumFile))
   },
 
-  sendPostTranslationPdfRequest(trainingTranslationId, curriculumFile) {
-    return axios.post(
-      `/api/ai-training/pdf/${trainingTranslationId}`,
-      createCurriculumFormData(curriculumFile),
-    )
+  sendPostSavedCurriculumRequest(trainingTranslationId) {
+    return axios.post(`/api/ai-training/pdf/${trainingTranslationId}`)
   },
 
   sendPostTranslationRequest(trainingId, languageId) {

@@ -1,5 +1,7 @@
 package ee.bcskoolitus.controller.aitraining;
 
+import ee.bcskoolitus.controller.common.dto.AiTrainingContentDto;
+import ee.bcskoolitus.service.AiTrainingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
@@ -8,6 +10,9 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.nio.charset.StandardCharsets;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -19,14 +24,21 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
 class AiTrainingControllerTest {
 
     private MockMvc mockMvc;
+    private AiTrainingService aiTrainingService;
 
     @BeforeEach
     void setUp() {
-        mockMvc = standaloneSetup(new AiTrainingController()).build();
+        aiTrainingService = mock(AiTrainingService.class);
+        mockMvc = standaloneSetup(new AiTrainingController(aiTrainingService)).build();
     }
 
     @Test
     void selectedPdfReturnsTrainingContentWithoutSavedTraining() throws Exception {
+        when(aiTrainingService.createContentFromPdf(any())).thenReturn(new AiTrainingContentDto(
+                "PDF-ist genereeritud pealkiri (TO BE IMPLEMENTED)",
+                "PDF-ist genereeritud lühikirjeldus (TO BE IMPLEMENTED)",
+                "PDF-ist genereeritud kirjeldus (TO BE IMPLEMENTED)"));
+
         mockMvc.perform(multipart("/api/ai-training/pdf").file(getCurriculumFile()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("PDF-ist genereeritud pealkiri (TO BE IMPLEMENTED)"))
@@ -41,17 +53,15 @@ class AiTrainingControllerTest {
     }
 
     @Test
-    void updateAcceptsReplacementPdf() throws Exception {
-        mockMvc.perform(multipart("/api/ai-training/pdf/123").file(getCurriculumFile()))
+    void savedCurriculumReturnsTrainingContentWithoutRequestBody() throws Exception {
+        when(aiTrainingService.createContentFromSavedCurriculum(123)).thenReturn(new AiTrainingContentDto(
+                "PDF-ist genereeritud pealkiri (TO BE IMPLEMENTED)",
+                "PDF-ist genereeritud lühikirjeldus (TO BE IMPLEMENTED)",
+                "PDF-ist genereeritud kirjeldus (TO BE IMPLEMENTED)"));
+
+        mockMvc.perform(post("/api/ai-training/pdf/123"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.description").value("PDF-ist genereeritud kirjeldus (TO BE IMPLEMENTED)"));
-    }
-
-    @Test
-    void updateAcceptsMultipartWithoutReplacementFile() throws Exception {
-        mockMvc.perform(multipart("/api/ai-training/pdf/123"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.title").isString());
     }
 
     @Test

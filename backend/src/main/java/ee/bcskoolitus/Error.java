@@ -12,6 +12,8 @@ public enum Error {
     PHOTO_TOO_LARGE("Pilt on liiga suur, lubatud kuni 2 MB"),
     CURRICULUM_TYPE_NOT_ALLOWED("Lubatud on ainult PDF-fail"),
     CURRICULUM_TOO_LARGE("Õppekava on liiga suur, lubatud kuni 10 MB"),
+    PDF_NOT_CURRICULUM("PDF-fail peab olema õppekava"),
+    AI_SERVICE_UNAVAILABLE("AI teenus ei ole hetkel kättesaadav, proovi hiljem uuesti"),
     LECTURER_HAS_UPCOMING_COURSES("Koolitajal on tulevasi toimumiskordi, vali neile enne teine koolitaja"),
 
     COURSE_END_BEFORE_START("Lõppkuupäev ei saa olla varasem kui alguskuupäev"),
