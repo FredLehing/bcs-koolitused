@@ -26,25 +26,29 @@ import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/ai-training")
-@Tag(name = "AI koolituse tekstid", description = "TO BE IMPLEMENTED: PDF-ist koostatud tekstid ja AI tõlked; tulemusi ei salvestata")
+@Tag(name = "AI koolituse tekstid", description = "PDF-ist koostatud tekstid ja AI tõlked; tulemusi ei salvestata")
 @RequiredArgsConstructor
 public class AiTrainingController {
 
     private final AiTrainingService aiTrainingService;
 
     @PostMapping(value = "/pdf", consumes = "multipart/form-data")
-    @Operation(summary = "TO BE IMPLEMENTED: loob PDF-ist koolituse väljade ettepaneku",
+    @Operation(summary = "loob PDF-ist koolituse väljade ettepaneku",
             description = "Kasutatakse olekutes new-training ja new-translation; sisend on vormis valitud salvestamata PDF. "
-                    + "Saadab valitud PDF-i tulevikus Gemini AI-le ning tagastab pealkirja, lühikirjelduse ja kirjelduse. "
-                    + "Vorm täidetakse vastusega, kuid andmebaasi midagi ei salvestata. Praegu tagastab meetod fikseeritud placeholder-väärtused; PDF-i ei töödelda, andmebaasi ei loeta ega Gemini AI-d kutsuta. Dokumenteeritud ärivead lisatakse tegeliku teostusega.")
+                    + "PDF saadetakse Gemini AI-le, mis kontrollib, kas tegu on õppekavaga, ning tagastab pealkirja, "
+                    + "lühikirjelduse ja kirjelduse. Pealkiri ja lühikirjeldus lõigatakse 255 märgini, kirjelduse HTML puhastatakse. "
+                    + "Vorm täidetakse vastusega, kuid andmebaasi midagi ei salvestata.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "PDF-ist loodud koolituse väljade ettepanek",
                     content = @Content(schema = @Schema(implementation = AiTrainingContentDto.class))),
-            @ApiResponse(responseCode = "400", description = "Fail puudub või ei ole PDF",
+            @ApiResponse(responseCode = "400", description = "Päringus puudub curriculum osa",
                     content = @Content(schema = @Schema(implementation = ApiError.class))),
-            @ApiResponse(responseCode = "413", description = "PDF ületab lubatud suuruse",
+            @ApiResponse(responseCode = "403", description = "Fail ei ole PDF (CURRICULUM_TYPE_NOT_ALLOWED), "
+                    + "on üle 10 MB (CURRICULUM_TOO_LARGE) või ei ole õppekava (PDF_NOT_CURRICULUM)",
                     content = @Content(schema = @Schema(implementation = ApiError.class))),
-            @ApiResponse(responseCode = "503", description = "AI teenus pole saadaval",
+            @ApiResponse(responseCode = "413", description = "Päring ületab multipart üleslaadimise piiri (10 MB)",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))),
+            @ApiResponse(responseCode = "503", description = "AI teenus pole saadaval (AI_SERVICE_UNAVAILABLE)",
                     content = @Content(schema = @Schema(implementation = ApiError.class)))
     })
     public AiTrainingContentDto createTrainingContentFromPdf(
@@ -53,28 +57,26 @@ public class AiTrainingController {
         return aiTrainingService.createContentFromPdf(curriculum.getBytes());
     }
 
-    @PostMapping(value = "/pdf/{trainingTranslationId}", consumes = "multipart/form-data")
-    @Operation(summary = "TO BE IMPLEMENTED: loob õppekava PDF-ist koolituse väljade ettepaneku",
-            description = "Kui päringus on PDF, kasutatakse seda (sh vormis valitud salvestamata asendusfaili). "
-                    + "Kui PDF puudub, loetakse tõlke salvestatud õppekava. Gemini AI vastus täidab vormi; andmebaasi midagi ei salvestata. "
-                    + "Praegu tagastab meetod fikseeritud placeholder-väärtused; PDF-i ei töödelda, andmebaasi ei loeta ega Gemini AI-d kutsuta. Dokumenteeritud ärivead lisatakse tegeliku teostusega.")
+    @PostMapping("/pdf/{trainingTranslationId}")
+    @Operation(summary = "loob tõlke salvestatud õppekavast koolituse väljade ettepaneku",
+            description = "Kasutatakse olemasoleva tõlke muutmisel, kui vormis pole uut PDF-i valitud "
+                    + "(uue faili korral kasutab frontend POST /api/ai-training/pdf). Loeb tõlke andmebaasi salvestatud õppekava "
+                    + "ja saadab selle Gemini AI-le, mis kontrollib, kas tegu on õppekavaga, ning tagastab pealkirja, "
+                    + "lühikirjelduse ja kirjelduse. Pealkiri ja lühikirjeldus lõigatakse 255 märgini, kirjelduse HTML puhastatakse. "
+                    + "Vorm täidetakse vastusega, kuid andmebaasi midagi ei salvestata.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "PDF-ist loodud koolituse väljade ettepanek",
+            @ApiResponse(responseCode = "200", description = "Salvestatud õppekavast loodud koolituse väljade ettepanek",
                     content = @Content(schema = @Schema(implementation = AiTrainingContentDto.class))),
-            @ApiResponse(responseCode = "404", description = "Tõlget või salvestatud õppekava ei leitud",
+            @ApiResponse(responseCode = "403", description = "Salvestatud fail ei ole õppekava (PDF_NOT_CURRICULUM)",
                     content = @Content(schema = @Schema(implementation = ApiError.class))),
-            @ApiResponse(responseCode = "400", description = "Lisatud fail ei ole PDF",
+            @ApiResponse(responseCode = "404", description = "Tõlkel pole salvestatud õppekava",
                     content = @Content(schema = @Schema(implementation = ApiError.class))),
-            @ApiResponse(responseCode = "413", description = "PDF ületab lubatud suuruse",
-                    content = @Content(schema = @Schema(implementation = ApiError.class))),
-            @ApiResponse(responseCode = "503", description = "AI teenus pole saadaval",
+            @ApiResponse(responseCode = "503", description = "AI teenus pole saadaval (AI_SERVICE_UNAVAILABLE)",
                     content = @Content(schema = @Schema(implementation = ApiError.class)))
     })
-    public AiTrainingContentDto createTrainingContentFromTranslationCurriculum(
-            @Parameter(description = "Avatud tõlke ID", required = true) @PathVariable Integer trainingTranslationId,
-            @Parameter(description = "Valikuline uus PDF. Puudumisel kasutatakse andmebaasis salvestatud õppekava")
-            @RequestPart(value = "curriculum", required = false) MultipartFile curriculum) throws IOException {
-        return aiTrainingService.createContentFromTranslationCurriculum(trainingTranslationId, curriculum);
+    public AiTrainingContentDto createTrainingContentFromSavedCurriculum(
+            @Parameter(description = "Avatud tõlke ID", required = true) @PathVariable Integer trainingTranslationId) {
+        return aiTrainingService.createContentFromSavedCurriculum(trainingTranslationId);
     }
 
     @PostMapping("/translation/{trainingId}")

@@ -15,9 +15,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
 
 import static ee.bcskoolitus.Error.AI_SERVICE_UNAVAILABLE;
 import static ee.bcskoolitus.Error.PDF_NOT_CURRICULUM;
@@ -50,6 +47,7 @@ public class AiTrainingService {
                         .build())
                 .call()
                 .entity(AiTrainingPdfResult.class);
+
         Boolean isCurriculum = aiTrainingPdfResult.isCurriculum();
         if (isCurriculum == null) {
             throw new ChatbotException(AI_SERVICE_UNAVAILABLE.getMessage(), AI_SERVICE_UNAVAILABLE.name(),
@@ -64,11 +62,7 @@ public class AiTrainingService {
                 HtmlSanitizer.sanitizeDescription(aiTrainingPdfResult.description()));
     }
 
-    public AiTrainingContentDto createContentFromTranslationCurriculum(Integer trainingTranslationId, MultipartFile curriculum)
-            throws IOException {
-        if (curriculum != null && !curriculum.isEmpty()) {
-            return createContentFromPdf(curriculum.getBytes());
-        }
+    public AiTrainingContentDto createContentFromSavedCurriculum(Integer trainingTranslationId) {
         TrainingTranslationCurriculum trainingTranslationCurriculum = trainingTranslationCurriculumService
                 .getValidTrainingTranslationCurriculumBy(trainingTranslationId);
         return createContentFromPdf(trainingTranslationCurriculum.getFile());

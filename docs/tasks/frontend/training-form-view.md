@@ -247,7 +247,7 @@ Selle täienduse sisend on interaktiivne läbimäng, kolm oleku märkmete faili 
 ### Käitumine ja valideerimine
 
 1. `CurriculumUpload` säilitab valitud `File` objekti koos olemasoleva Base64 väärtusega. Base64 on tavapäraseks salvestamiseks, originaalfail saadetakse AI-le multipart-kujul.
-2. new-training ja new-translation kasutavad `/api/ai-training/pdf`; update kasutab `/api/ai-training/pdf/{trainingTranslationId}`. Uus valitud fail on update olekus eelistatud, selle puudumisel saadetakse multipart-päring ilma `curriculum` osata. Eemaldamiseks märgitud failiga nuppu ei näidata.
+2. new-training ja new-translation kasutavad `/api/ai-training/pdf`; update olekus kasutatakse uue valitud faili korral samuti `/api/ai-training/pdf`; uue failita kutsutakse `/api/ai-training/pdf/{trainingTranslationId}` (päringu kehata), mis loeb tõlke salvestatud õppekava. Eemaldamiseks märgitud failiga nuppu ei näidata.
 3. Frontend kontrollib olemasoleva failivalija kaudu PDF tüüpi ja kuni 10 MB suurust. AI päring ei salvesta faili ega tekste. Salvestamata tekste ei kirjutata üle ilma modali kinnitamiseta.
 4. Vastus täidab ainult `title`, `shortDescription`, `description`; valitud fail, tõlke keel ja koolituse muud väljad säilivad. PDF + AI ei käivita teist AI-tõlke päringut.
 5. Üheaegne PDF + AI ja AI-tõlge on välistatud. Vaate või avatud tõlke vahetamise järel ei tohi vana AI vastus täita uue vormi tekste.
@@ -260,7 +260,7 @@ Selle täienduse sisend on interaktiivne läbimäng, kolm oleku märkmete faili 
 | Teenus | Frontendi meetod | Backend task |
 |---|---|---|
 | `POST /api/ai-training/pdf` | `AiTrainingService.sendPostPdfRequest(file)` | `POST-api-ai-training-pdf.md` |
-| `POST /api/ai-training/pdf/{trainingTranslationId}` | `AiTrainingService.sendPostTranslationPdfRequest(id, file)` | `POST-api-ai-training-pdf-trainingTranslationId.md` |
+| `POST /api/ai-training/pdf/{trainingTranslationId}` | `AiTrainingService.sendPostSavedCurriculumRequest(trainingTranslationId)` | `POST-api-ai-training-pdf-trainingTranslationId.md` |
 | `POST /api/ai-training/translation/{trainingId}?languageId=` | `AiTrainingService.sendPostTranslationRequest(trainingId, languageId)` | `POST-api-ai-training-translation-trainingId.md` |
 
 PDF-päringute request: `multipart/form-data`, osa `curriculum` = PDF binaarfail. Update olekus on osa valikuline. Brauser määrab multipart boundary; käsitsi Content-Type päist ei seata. Tõlkepäringul body puudub ning `languageId` on kohustuslik query parameeter.

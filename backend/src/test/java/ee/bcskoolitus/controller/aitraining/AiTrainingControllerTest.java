@@ -53,21 +53,15 @@ class AiTrainingControllerTest {
     }
 
     @Test
-    void updateAcceptsReplacementPdf() throws Exception {
-        mockTranslationCurriculumContent();
+    void savedCurriculumReturnsTrainingContentWithoutRequestBody() throws Exception {
+        when(aiTrainingService.createContentFromSavedCurriculum(123)).thenReturn(new AiTrainingContentDto(
+                "PDF-ist genereeritud pealkiri (TO BE IMPLEMENTED)",
+                "PDF-ist genereeritud lühikirjeldus (TO BE IMPLEMENTED)",
+                "PDF-ist genereeritud kirjeldus (TO BE IMPLEMENTED)"));
 
-        mockMvc.perform(multipart("/api/ai-training/pdf/123").file(getCurriculumFile()))
+        mockMvc.perform(post("/api/ai-training/pdf/123"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.description").value("PDF-ist genereeritud kirjeldus (TO BE IMPLEMENTED)"));
-    }
-
-    @Test
-    void updateAcceptsMultipartWithoutReplacementFile() throws Exception {
-        mockTranslationCurriculumContent();
-
-        mockMvc.perform(multipart("/api/ai-training/pdf/123"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.title").isString());
     }
 
     @Test
@@ -84,13 +78,6 @@ class AiTrainingControllerTest {
     void translationRequiresTargetLanguageQuery() throws Exception {
         mockMvc.perform(post("/api/ai-training/translation/123"))
                 .andExpect(status().isBadRequest());
-    }
-
-    private void mockTranslationCurriculumContent() throws Exception {
-        when(aiTrainingService.createContentFromTranslationCurriculum(any(), any())).thenReturn(new AiTrainingContentDto(
-                "PDF-ist genereeritud pealkiri (TO BE IMPLEMENTED)",
-                "PDF-ist genereeritud lühikirjeldus (TO BE IMPLEMENTED)",
-                "PDF-ist genereeritud kirjeldus (TO BE IMPLEMENTED)"));
     }
 
     private MockMultipartFile getCurriculumFile() {

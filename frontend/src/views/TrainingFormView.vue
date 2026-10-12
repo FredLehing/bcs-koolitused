@@ -581,12 +581,11 @@ export default {
       this.isAiPdfLoading = true
       const aiRequestId = ++this.aiRequestId
       const curriculumFile = this.newCurriculum?.file
-      const aiTrainingRequest = this.isUpdate
-        ? AiTrainingService.sendPostTranslationPdfRequest(
-            this.trainingTranslationId,
-            curriculumFile,
-          )
-        : AiTrainingService.sendPostPdfRequest(curriculumFile)
+      // Uus valitud fail saadetakse kaasa; update olekus ilma uue failita loeb backend salvestatud õppekava
+      const aiTrainingRequest =
+        this.isUpdate && !curriculumFile
+          ? AiTrainingService.sendPostSavedCurriculumRequest(this.trainingTranslationId)
+          : AiTrainingService.sendPostPdfRequest(curriculumFile)
       return this.handleAiTrainingRequest(aiTrainingRequest, aiRequestId, 'aiPdfDone')
     },
 
