@@ -9,6 +9,7 @@ import ee.bcskoolitus.persistance.training.translation.curriculum.TrainingTransl
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.google.genai.GoogleGenAiChatOptions;
+import org.springframework.ai.google.genai.common.GoogleGenAiThinkingLevel;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -22,14 +23,14 @@ import static ee.bcskoolitus.Error.PDF_NOT_CURRICULUM;
 @Service
 @RequiredArgsConstructor
 public class AiTrainingService {
-    private static final int PROMPT_VERSION = 2;
+    private static final int PROMPT_VERSION = 3;
     private static final int MAX_TEXT_LENGTH = 255;
 
     private final ChatClient.Builder chatClientBuilder;
     private final AiMetricsAdvisor aiMetricsAdvisor;
     private final TrainingTranslationCurriculumService trainingTranslationCurriculumService;
 
-    @Value("classpath:prompts/training-pdf-system.st")
+    @Value("classpath:prompts/training-pdf-system.md")
     private Resource trainingPdfSystemPrompt;
 
 
@@ -44,6 +45,7 @@ public class AiTrainingService {
                 .options(GoogleGenAiChatOptions.builder()
                         .temperature(0.2)
                         .maxOutputTokens(8192)
+                        .thinkingLevel(GoogleGenAiThinkingLevel.LOW)
                         .build())
                 .call()
                 .entity(AiTrainingPdfResult.class);

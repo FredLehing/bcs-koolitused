@@ -102,7 +102,7 @@ Nüüd liigud service klassi. Enne Gemini kutset on vaja **juhist (system prompt
 
 ### Prompt eraldi failina
 
-Taski otsus: prompt ei ole Java string, vaid eraldi fail `backend/src/main/resources/prompts/training-pdf-system.st`. Sisu võta mocki konstandist `AI_PDF_PROMPT` (see on inglise keeles — mudelid järgivad nii kõige täpsemalt).
+Taski otsus: prompt ei ole Java string, vaid eraldi fail `../../../../backend/src/main/resources/prompts/training-pdf-system.md`. Sisu võta mocki konstandist `AI_PDF_PROMPT` (see on inglise keeles — mudelid järgivad nii kõige täpsemalt).
 
 > **Vaata projektist:** Kuidas `ChatbotModelService` loeb oma juhiseid failist? Otsi meetodit, mis kasutab `ClassPathResource`-i. Sama muster sobib ka siia.
 
