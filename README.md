@@ -6,7 +6,8 @@
 ## Funktsionaalsus 
 - Külastaja: koolituste ja kursuste sirvimine, lektorid, päringu saatmine, registreerumine.
 - Osaleja: oma kursused, tagasiside vorm, tunnistused, parooli muutmine.
-- Administraator: koolituste, kursuste, lektorite, ruumide, kasutajate, päringute, registreerimiste ja tagasiside haldus. Siia sobib ka AI-koolituse funktsioon (aitraining).
+- Administraator: koolituste, kursuste, lektorite, ruumide, kasutajate, päringute, registreerimiste ja tagasiside haldus.
+- AI funktsionaalsus - õppekava PDF'st info eraldamine ning vastavate väljade täitmine.
 - Mitmekeelsus: kasutajaliides on eesti ja inglise keeles, sisu tõlgitakse andmebaasi keelte põhjal.
 
 ## Struktuur
