@@ -69,13 +69,13 @@ public class AiTrainingController {
                     content = @Content(schema = @Schema(implementation = AiTrainingContentDto.class))),
             @ApiResponse(responseCode = "403", description = "Salvestatud fail ei ole õppekava (PDF_NOT_CURRICULUM)",
                     content = @Content(schema = @Schema(implementation = ApiError.class))),
-            @ApiResponse(responseCode = "404", description = "Tõlkel pole salvestatud õppekava",
+            @ApiResponse(responseCode = "404", description = "Tõlge puudub või õppekava pole salvestatud (PRIMARY_KEY_NOT_FOUND)",
                     content = @Content(schema = @Schema(implementation = ApiError.class))),
             @ApiResponse(responseCode = "503", description = "AI teenus pole saadaval (AI_SERVICE_UNAVAILABLE)",
                     content = @Content(schema = @Schema(implementation = ApiError.class)))
     })
     public AiTrainingContentDto createTrainingContentFromSavedCurriculum(
-            @Parameter(description = "Avatud tõlke ID", required = true) @PathVariable Integer trainingTranslationId) {
+            @Parameter(description = "Salvestatud tõlke ID, mille õppekavast tagastatakse koolituse väljad", required = true) @PathVariable Integer trainingTranslationId) {
         return aiTrainingService.createContentFromSavedCurriculum(trainingTranslationId);
     }
 
